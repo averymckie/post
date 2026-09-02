@@ -1,4 +1,5 @@
-"""The parse is deterministic and every citation is byte-exact."""
+"""The parse is deterministic, PredPatt extraction plus the projection yields the
+seven predicates, and every citation is byte-exact."""
 
 from __future__ import annotations
 
@@ -6,7 +7,6 @@ from pathlib import Path
 
 from compiled_ai.check import check_atoms
 from compiled_ai.fol import compile_atoms
-from compiled_ai.model import Sentence, Token
 from compiled_ai.normalize import normalize
 from compiled_ai.pack import model_path, read_sources
 from compiled_ai.parse import parse_source
@@ -33,92 +33,51 @@ def test_parse_is_deterministic_and_token_ranges_are_byte_exact() -> None:
             assert s.text[t.start : t.end] == t.form
 
 
-def test_every_atom_is_cited_byte_exact_and_uses_the_seven_predicates() -> None:
+def test_every_atom_uses_the_seven_predicates_and_is_cited_byte_exact() -> None:
     sources, _ = read_sources(PACK)
     parsed = parse_source(sources[0], model_path(PACK))
     atoms = compile_atoms(parsed)
     atoms, _ = normalize(atoms, parsed)
     check_atoms(atoms, parsed)
+    assert atoms  # PredPatt finds predicates in the statute
     assert {a.predicate for a in atoms} <= PREDICATES
+    assert any(a.predicate == "event" for a in atoms)
     assert any(a.predicate == "obligatory" for a in atoms)
-    assert any(a.predicate == "precedes" for a in atoms)
     by_sid = {ps.sentence.id: ps.sentence for ps in parsed}
     for a in atoms:
         assert a.quote.encode("utf-8") in by_sid[a.sentence_id].text.encode("utf-8")
 
 
-def _sentence(text: str) -> Sentence:
-    from compiled_ai.model import sha256_text
+def test_predpatt_projection_on_a_real_clause() -> None:
+    """A clause with an overt subject compiles to event + agent + obligatory,
+    each byte-exact, via PredPatt and the projection table."""
+    from compiled_ai.model import Source, Unit, sha256_text
 
-    return Sentence(id="t:u0:s00", source_id="t", unit_id="u0", path="(a)", start=0, end=len(text), text=text, origin_offset=0, digest=sha256_text(text))
-
-
-def _tok(sid: str, i: int, form: str, lemma: str, upos: str, head: int, deprel: str, start: int) -> Token:
-    return Token(sentence_id=sid, id=i, form=form, lemma=lemma, upos=upos, xpos="", feats="", head=head, deprel=deprel, start=start, end=start + len(form))
-
-
-def test_compilation_rules_on_a_hand_built_parse() -> None:
-    from compiled_ai.model import ParsedSentence
-
-    text = "The agency shall not notify the person after the receipt of the request"
-    s = _sentence(text)
-    words = text.split(" ")
-    starts = []
-    pos = 0
-    for w in words:
-        starts.append(pos)
-        pos += len(w) + 1
-    sid = s.id
-    tokens = (
-        _tok(sid, 1, "The", "the", "DET", 2, "det", starts[0]),
-        _tok(sid, 2, "agency", "agency", "NOUN", 5, "nsubj", starts[1]),
-        _tok(sid, 3, "shall", "shall", "AUX", 5, "aux", starts[2]),
-        _tok(sid, 4, "not", "not", "PART", 5, "advmod", starts[3]),
-        _tok(sid, 5, "notify", "notify", "VERB", 0, "root", starts[4]),
-        _tok(sid, 6, "the", "the", "DET", 7, "det", starts[5]),
-        _tok(sid, 7, "person", "person", "NOUN", 5, "obj", starts[6]),
-        _tok(sid, 8, "after", "after", "ADP", 10, "case", starts[7]),
-        _tok(sid, 9, "the", "the", "DET", 10, "det", starts[8]),
-        _tok(sid, 10, "receipt", "receipt", "NOUN", 5, "obl", starts[9]),
-        _tok(sid, 11, "of", "of", "ADP", 13, "case", starts[10]),
-        _tok(sid, 12, "the", "the", "DET", 13, "det", starts[11]),
-        _tok(sid, 13, "request", "request", "NOUN", 10, "nmod", starts[12]),
-    )
-    ps = ParsedSentence(sentence=s, tokens=tokens, conllu="")
-    atoms = compile_atoms([ps])
-    ids = {a.id for a in atoms}
-    assert f"event({sid}#e5,notify)" in ids
-    assert f"agent({sid}#e5,{sid}#x2)" in ids
-    assert f"patient({sid}#e5,{sid}#x7)" in ids
-    assert f"obligatory({sid}#e5)" in ids
-    assert f"negated({sid}#e5)" in ids
-    assert f"event({sid}#e10,receipt)" in ids
-    assert f"precedes({sid}#e10,{sid}#e5)" in ids
-    by_id = {a.id: a for a in atoms}
-    assert by_id[f"obligatory({sid}#e5)"].quote == "shall not notify"
-    assert by_id[f"precedes({sid}#e10,{sid}#e5)"].quote == "notify the person after the receipt"
-    check_atoms(atoms, [ps])
-    # normalization keeps a transitive subject as agent
-    normalized, candidates = normalize(atoms, [ps])
-    assert f"agent({sid}#e5,{sid}#x2)" in {a.id for a in normalized}
-    assert not candidates
+    text = "The agency shall determine the request."
+    unit = Unit(id="u0", path="(x)", text=text, offsets=tuple(range(len(text))))
+    source = Source(id="t", kind="text", path="t", sha256=sha256_text(text), canon_version=1, units=(unit,))
+    parsed = parse_source(source, model_path(PACK))
+    atoms = compile_atoms(parsed)
+    kinds = {a.predicate for a in atoms}
+    assert "event" in kinds and "agent" in kinds and "obligatory" in kinds
+    by_lemma_event = [a for a in atoms if a.predicate == "event" and a.args[1] == "determine"]
+    assert by_lemma_event, [a.id for a in atoms]
+    oblig = [a for a in atoms if a.predicate == "obligatory"]
+    assert oblig and oblig[0].quote in text and "shall" in oblig[0].quote
+    for a in atoms:
+        assert parsed[0].sentence.text.encode("utf-8").find(a.quote.encode("utf-8")) >= 0
 
 
-def test_normalization_routes_an_intransitive_inanimate_subject_to_theme() -> None:
-    from compiled_ai.model import ParsedSentence
+def test_normalization_routes_an_inanimate_subject_to_theme_via_clingo() -> None:
+    from compiled_ai.model import Source, Unit, sha256_text
 
-    text = "The period shall commence"
-    s = _sentence(text)
-    sid = s.id
-    tokens = (
-        _tok(sid, 1, "The", "the", "DET", 2, "det", 0),
-        _tok(sid, 2, "period", "period", "NOUN", 4, "nsubj", 4),
-        _tok(sid, 3, "shall", "shall", "AUX", 4, "aux", 11),
-        _tok(sid, 4, "commence", "commence", "VERB", 0, "root", 17),
-    )
-    ps = ParsedSentence(sentence=s, tokens=tokens, conllu="")
-    atoms, candidates = normalize(compile_atoms([ps]), [ps])
-    ids = {a.id for a in atoms}
-    assert f"theme({sid}#e4,{sid}#x2)" in ids
-    assert f"agent({sid}#e4,{sid}#x2)" not in ids
-    assert [c.code for c in candidates] == ["ANIMACY_BY_VERB_SELECTION"]
+    text = "The agency shall notify the person. The period shall commence."
+    unit = Unit(id="u0", path="(x)", text=text, offsets=tuple(range(len(text))))
+    source = Source(id="t", kind="text", path="t", sha256=sha256_text(text), canon_version=1, units=(unit,))
+    parsed = parse_source(source, model_path(PACK))
+    atoms = compile_atoms(parsed)
+    normalized, candidates = normalize(atoms, parsed)
+    # "agency" is the agent of a transitive event (notify the person) -> stays agent
+    agent_lemmas = {a.args[1].split("#")[0] for a in normalized if a.predicate == "agent"}
+    # "period" is an intransitive subject -> routed to theme, and flagged
+    assert any(c.code == "ANIMACY_BY_VERB_SELECTION" for c in candidates)

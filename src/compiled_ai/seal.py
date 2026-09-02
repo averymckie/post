@@ -15,7 +15,7 @@ from typing import Any
 from .canon import CANON_VERSION
 from .model import Atom, AtomSeal, Manifest, Ordering, ParsedSentence, Reconciliation, Source, sha256_text
 
-PINNED = ("pydantic", "ufal.udpipe", "z3-solver", "networkx", "pdfplumber")
+PINNED = ("pydantic", "ufal.udpipe", "z3-solver", "networkx", "pdfplumber", "clingo", "clorm", "predpatt")
 
 
 def toolchain(model_path: Path) -> dict[str, str]:
