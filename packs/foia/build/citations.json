@@ -1,0 +1,3272 @@
+{
+  "usc5-552-doj:u0000:s00": {
+    "digest": "f8bf310263c1ac3ecd39fadaf73ef233d3a1e7f423e02afd8da0d4e8e38264af",
+    "end": 1,
+    "origin_offset": 542,
+    "path": "",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "§",
+    "unit_id": "u0000"
+  },
+  "usc5-552-doj:u0000:s01": {
+    "digest": "47c5240ea5e8f4345b9bcb1e45b88a892b371883d9196f1f70e461e9be48a5b7",
+    "end": 6,
+    "origin_offset": 544,
+    "path": "",
+    "source_id": "usc5-552-doj",
+    "start": 2,
+    "text": "552.",
+    "unit_id": "u0000"
+  },
+  "usc5-552-doj:u0000:s02": {
+    "digest": "d5f0c77469606defbd36208fe5f70bf2b2758a5856b20487cef48da50530b0fb",
+    "end": 83,
+    "origin_offset": 549,
+    "path": "",
+    "source_id": "usc5-552-doj",
+    "start": 7,
+    "text": "Public information; agency rules, opinions, orders, records, and proceedings",
+    "unit_id": "u0000"
+  },
+  "usc5-552-doj:u0001:s00": {
+    "digest": "1f991f23f55636528f0afca0529432ee933aa0c9e3bc27e615213f3a09751397",
+    "end": 74,
+    "origin_offset": 634,
+    "path": "(a)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(a) Each agency shall make available to the public information as follows:",
+    "unit_id": "u0001"
+  },
+  "usc5-552-doj:u0002:s00": {
+    "digest": "fd0ad9026eee596b7072a762941f60bef57e760a230edd450b3a634825685c2a",
+    "end": 3,
+    "origin_offset": 766,
+    "path": "(a)(1)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(1)",
+    "unit_id": "u0002"
+  },
+  "usc5-552-doj:u0002:s01": {
+    "digest": "8f5030fa58fbf5566937cc529ca9ec3a4e9aac9ce6e73effad37884aa78c8767",
+    "end": 116,
+    "origin_offset": 770,
+    "path": "(a)(1)",
+    "source_id": "usc5-552-doj",
+    "start": 4,
+    "text": "Each agency shall separately state and currently publish in the Federal Register for the guidance of the public—",
+    "unit_id": "u0002"
+  },
+  "usc5-552-doj:u0003:s00": {
+    "digest": "7e2bf180093f516bcdb2c6cc1f5f52649b9cf1522ca5f42fc7d59e11be3b1f65",
+    "end": 280,
+    "origin_offset": 945,
+    "path": "(a)(1)(A)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(A) descriptions of its central and field organization and the established places at which, the employees (and in the case of a uniformed service, the members) from whom, and the methods whereby, the public may obtain information, make submittals or requests, or obtain decisions;",
+    "unit_id": "u0003"
+  },
+  "usc5-552-doj:u0004:s00": {
+    "digest": "76bf03260a7aa5864240b58a8ecd588a9af32f95b77ff5fb577e30abee4e2b93",
+    "end": 187,
+    "origin_offset": 1239,
+    "path": "(a)(1)(B)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(B) statements of the general course and method by which its functions are channeled and determined, including the nature and requirements of all formal and informal procedures available;",
+    "unit_id": "u0004"
+  },
+  "usc5-552-doj:u0005:s00": {
+    "digest": "ec85970611c8f609ffd4b63822ef773567fdb9fa179a888de2ab30df666c1b91",
+    "end": 188,
+    "origin_offset": 1440,
+    "path": "(a)(1)(C)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(C) rules of procedure, descriptions of forms available or the places at which forms may be obtained, and instructions as to the scope and contents of all papers, reports, or examinations;",
+    "unit_id": "u0005"
+  },
+  "usc5-552-doj:u0006:s00": {
+    "digest": "90ba0a6bb1eebccad720065a9354fc9b5a0a0321e307ec38b75fe3c24461053a",
+    "end": 195,
+    "origin_offset": 1642,
+    "path": "(a)(1)(D)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(D) substantive rules of general applicability adopted as authorized by law, and statements of general policy or interpretations of general applicability formulated and adopted by the agency; and",
+    "unit_id": "u0006"
+  },
+  "usc5-552-doj:u0007:s00": {
+    "digest": "a3f325a72ddf756e770c9b3a98014cc0d2a1f5f6da85fe8e95bb8e0efd739176",
+    "end": 57,
+    "origin_offset": 1851,
+    "path": "(a)(1)(E)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(E) each amendment, revision, or repeal of the foregoing.",
+    "unit_id": "u0007"
+  },
+  "usc5-552-doj:u0008:s00": {
+    "digest": "ed58105c81ff6b021e345effb91f8c9fc39c77832f3de7748f332f6e02e4ef3f",
+    "end": 251,
+    "origin_offset": 1928,
+    "path": "(a)(1)(E)+",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "Except to the extent that a person has actual and timely notice of the terms thereof, a person may not in any manner be required to resort to, or be adversely affected by, a matter required to be published in the Federal Register and not so published.",
+    "unit_id": "u0008"
+  },
+  "usc5-552-doj:u0008:s01": {
+    "digest": "b11991e8fe7bba21f780c6d1cf2f65458cc908dfe5239bc06d4d506f9d905859",
+    "end": 497,
+    "origin_offset": 2180,
+    "path": "(a)(1)(E)+",
+    "source_id": "usc5-552-doj",
+    "start": 252,
+    "text": "For the purpose of this paragraph, matter reasonably available to the class of persons affected thereby is deemed published in the Federal Register when incorporated by reference therein with the approval of the Director of the Federal Register.",
+    "unit_id": "u0008"
+  },
+  "usc5-552-doj:u0009:s00": {
+    "digest": "d665b56a1f02cc61103a97005500b7c688d815a948976ce613a01a0bbae8c80a",
+    "end": 119,
+    "origin_offset": 2437,
+    "path": "(a)(2)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(2) Each agency, in accordance with published rules, shall make available for public inspection in an electronic format",
+    "unit_id": "u0009"
+  },
+  "usc5-552-doj:u0010:s00": {
+    "digest": "d13cba1f3c2289d9d674f587f07b1bb100026a68a6a454300a258751035c50dc",
+    "end": 119,
+    "origin_offset": 2677,
+    "path": "(a)(2)(A)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(A) final opinions, including concurring and dissenting opinions, as well as orders, made in the adjudication of cases;",
+    "unit_id": "u0010"
+  },
+  "usc5-552-doj:u0011:s00": {
+    "digest": "8edf6846f613bb723975c4c1646482cd2dd433b36ab31ae0e5cf32e83ca13617",
+    "end": 135,
+    "origin_offset": 2810,
+    "path": "(a)(2)(B)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(B) those statements of policy and interpretations which have been adopted by the agency and are not published in the Federal Register;",
+    "unit_id": "u0011"
+  },
+  "usc5-552-doj:u0012:s00": {
+    "digest": "a3af62ddcff3eb6ac6bb42f0e82e16a3cf4743fc6fd763ef73b5793209978cc9",
+    "end": 94,
+    "origin_offset": 2959,
+    "path": "(a)(2)(C)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(C) administrative staff manuals and instructions to staff that affect a member of the public;",
+    "unit_id": "u0012"
+  },
+  "usc5-552-doj:u0013:s00": {
+    "digest": "6032b7a5405efd0350807e283e821e4eb11ce85516ffd4e43eaa77eb696439c7",
+    "end": 57,
+    "origin_offset": 3067,
+    "path": "(a)(2)(D)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(D) copies of all records, regardless of form or format –",
+    "unit_id": "u0013"
+  },
+  "usc5-552-doj:u0014:s00": {
+    "digest": "f1563d18ca9457f05019d57277a38d36d29b9dc7e2482d92cab191e565c71ab6",
+    "end": 66,
+    "origin_offset": 3526,
+    "path": "(a)(2)(D)(i)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(i) that have been released to any person under paragraph (3); and",
+    "unit_id": "u0014"
+  },
+  "usc5-552-doj:u0015:s00": {
+    "digest": "eacb11dfd72fe91856217194905aa1763b0255bc248e49fb8fd7ff480b2a900a",
+    "end": 191,
+    "origin_offset": 3625,
+    "path": "(a)(2)(D)(ii)(I)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(ii)(I) that because of the nature of their subject matter, the agency determines have become or are likely to become the subject of subsequent requests for substantially the same records; or",
+    "unit_id": "u0015"
+  },
+  "usc5-552-doj:u0016:s00": {
+    "digest": "a2ce76933d26e0fe78fe49f3d01e00cee37000dfabfc226c30f34330896af273",
+    "end": 50,
+    "origin_offset": 3904,
+    "path": "(a)(2)(D)(ii)(II)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(II) that have been requested 3 or more times; and",
+    "unit_id": "u0016"
+  },
+  "usc5-552-doj:u0017:s00": {
+    "digest": "871bc08b71678f033b725ea7221109bb693e7c56464364017a5c5c6f9993ef75",
+    "end": 70,
+    "origin_offset": 3999,
+    "path": "(a)(2)(E)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(E) a general index of the records referred to under subparagraph (D);",
+    "unit_id": "u0017"
+  },
+  "usc5-552-doj:u0018:s00": {
+    "digest": "49ef1103786dda8938e60a54c79fa68867990b96fdca654856d5896496824511",
+    "end": 72,
+    "origin_offset": 4089,
+    "path": "(a)(2)(E)+",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "unless the materials are promptly published and copies offered for sale.",
+    "unit_id": "u0018"
+  },
+  "usc5-552-doj:u0018:s01": {
+    "digest": "82575f5936a0799853c9f77f15c7656b87ecb10672113b9be280ef5a27a27db3",
+    "end": 352,
+    "origin_offset": 4162,
+    "path": "(a)(2)(E)+",
+    "source_id": "usc5-552-doj",
+    "start": 73,
+    "text": "For records created on or after November 1, 1996, within one year after such date, each agency shall make such records available, including by computer telecommunications or, if computer telecommunications means have not been established by the agency, by other electronic means.",
+    "unit_id": "u0018"
+  },
+  "usc5-552-doj:u0018:s02": {
+    "digest": "e0e779a64c3ab1823df09d8913c3e7751c526fe902daaac737ffaf0bc018d5e8",
+    "end": 646,
+    "origin_offset": 4442,
+    "path": "(a)(2)(E)+",
+    "source_id": "usc5-552-doj",
+    "start": 353,
+    "text": "To the extent required to prevent a clearly unwarranted invasion of personal privacy, an agency may delete identifying details when it makes available or publishes an opinion, statement of policy, interpretation, staff manual, instruction, or copies of records referred to in subparagraph (D).",
+    "unit_id": "u0018"
+  },
+  "usc5-552-doj:u0018:s03": {
+    "digest": "bae11f9acf38254ef71fbbabbbe58e6468e7eb35368795f42b7cf12a576ba443",
+    "end": 993,
+    "origin_offset": 4736,
+    "path": "(a)(2)(E)+",
+    "source_id": "usc5-552-doj",
+    "start": 647,
+    "text": "However, in each case the justification for the deletion shall be explained fully in writing, and the extent of such deletion shall be indicated on the portion of the record which is made available or published, unless including that indication would harm an interest protected by the exemption in subsection (b) under which the deletion is made.",
+    "unit_id": "u0018"
+  },
+  "usc5-552-doj:u0018:s04": {
+    "digest": "9498c8e4f9aab67ba3c90de6d102e08359f40cf8e1e5a0a5fc8184e4c759fe15",
+    "end": 1120,
+    "origin_offset": 5083,
+    "path": "(a)(2)(E)+",
+    "source_id": "usc5-552-doj",
+    "start": 994,
+    "text": "If technically feasible, the extent of the deletion shall be indicated at the place in the record where the deletion was made.",
+    "unit_id": "u0018"
+  },
+  "usc5-552-doj:u0018:s05": {
+    "digest": "b35b19549b4a98fd71675667db133eda27c9dd80147624ac0294eb0e2a7ab7be",
+    "end": 1417,
+    "origin_offset": 5210,
+    "path": "(a)(2)(E)+",
+    "source_id": "usc5-552-doj",
+    "start": 1121,
+    "text": "Each agency shall also maintain and make available for public inspection in an electronic format current indexes providing identifying information for the public as to any matter issued, adopted, or promulgated after July 4, 1967, and required by this paragraph to be made available or published.",
+    "unit_id": "u0018"
+  },
+  "usc5-552-doj:u0018:s06": {
+    "digest": "260a71cd625a19a9caf7057eae835655032e3c3dae75a9a2ab867ef6ec8724ae",
+    "end": 1827,
+    "origin_offset": 5569,
+    "path": "(a)(2)(E)+",
+    "source_id": "usc5-552-doj",
+    "start": 1418,
+    "text": "Each agency shall promptly publish, quarterly or more frequently, and distribute (by sale or otherwise) copies of each index or supplements thereto unless it determines by order published in the Federal Register that the publication would be unnecessary and impracticable, in which case the agency shall nonetheless provide copies of an index on request at a cost not to exceed the direct cost of duplication.",
+    "unit_id": "u0018"
+  },
+  "usc5-552-doj:u0018:s07": {
+    "digest": "aa12b505f6e83b3fdfae8de12bcf17914a39192a71e1fd88fea4817128821cea",
+    "end": 1955,
+    "origin_offset": 5979,
+    "path": "(a)(2)(E)+",
+    "source_id": "usc5-552-doj",
+    "start": 1828,
+    "text": "Each agency shall make the index referred to in subparagraph (E) available by computer telecommunications by December 31, 1999.",
+    "unit_id": "u0018"
+  },
+  "usc5-552-doj:u0018:s08": {
+    "digest": "aafab0534b481e7050466282a8606c2d97fe611fede545779dd6e66a0b2c8886",
+    "end": 2188,
+    "origin_offset": 6107,
+    "path": "(a)(2)(E)+",
+    "source_id": "usc5-552-doj",
+    "start": 1956,
+    "text": "A final order, opinion, statement of policy, interpretation, or staff manual or instruction that affects a member of the public may be relied on, used, or cited as precedent by an agency against a party other than an agency only if—",
+    "unit_id": "u0018"
+  },
+  "usc5-552-doj:u0019:s00": {
+    "digest": "85ce75f7ab115882a79539f3e54fa5f8736794d513307b293318e0be18bb17d9",
+    "end": 96,
+    "origin_offset": 6402,
+    "path": "(a)(2)(E)(i)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(i) it has been indexed and either made available or published as provided by this paragraph; or",
+    "unit_id": "u0019"
+  },
+  "usc5-552-doj:u0020:s00": {
+    "digest": "8aaa0e3f03eabfa93562a3ef816ac2eed54d57916150abdd9e59c3b66be7e4fc",
+    "end": 65,
+    "origin_offset": 6512,
+    "path": "(a)(2)(E)(ii)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(ii) the party has actual and timely notice of the terms thereof.",
+    "unit_id": "u0020"
+  },
+  "usc5-552-doj:u0021:s00": {
+    "digest": "5397e8c813e42e323362d5f80310f90cbc54786ca3a5e94df91a681946f301af",
+    "end": 415,
+    "origin_offset": 6597,
+    "path": "(a)(3)(A)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(3)(A) Except with respect to the records made available under paragraphs (1) and (2) of this subsection, and except as provided in subparagraph (E), each agency, upon any request for records which (i) reasonably describes such records and (ii) is made in accordance with published rules stating the time, place, fees (if any), and procedures to be followed, shall make the records promptly available to any person.",
+    "unit_id": "u0021"
+  },
+  "usc5-552-doj:u0022:s00": {
+    "digest": "79398e2d8cadfc05f0152f92591166a1f81ebeeb0156179ef1a0f6c55ebc9af9",
+    "end": 3,
+    "origin_offset": 7080,
+    "path": "(a)(3)(B)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(B)",
+    "unit_id": "u0022"
+  },
+  "usc5-552-doj:u0022:s01": {
+    "digest": "c8e6ac742ddb0c3309a5d78da7943b664ecff79e3a85769dd01b2703ffb88c33",
+    "end": 225,
+    "origin_offset": 7084,
+    "path": "(a)(3)(B)",
+    "source_id": "usc5-552-doj",
+    "start": 4,
+    "text": "In making any record available to a person under this paragraph, an agency shall provide the record in any form or format requested by the person if the record is readily reproducible by the agency in that form or format.",
+    "unit_id": "u0022"
+  },
+  "usc5-552-doj:u0022:s02": {
+    "digest": "9dea0402213e220135dd8bd7fc4020346009f24a2faa61573810d56b3b406a2f",
+    "end": 363,
+    "origin_offset": 7306,
+    "path": "(a)(3)(B)",
+    "source_id": "usc5-552-doj",
+    "start": 226,
+    "text": "Each agency shall make reasonable efforts to maintain its records in forms or formats that are reproducible for purposes of this section.",
+    "unit_id": "u0022"
+  },
+  "usc5-552-doj:u0023:s00": {
+    "digest": "ab0531c9d89473e8c5af60d4621a5d5bfaa6a5b1f1ebf3cc69e20814fee801cc",
+    "end": 3,
+    "origin_offset": 7457,
+    "path": "(a)(3)(C)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(C)",
+    "unit_id": "u0023"
+  },
+  "usc5-552-doj:u0023:s01": {
+    "digest": "050114e01ac0d29dba21e916d16963df127fa14d577e66a1f0d7b8b9c24e7aa5",
+    "end": 280,
+    "origin_offset": 7461,
+    "path": "(a)(3)(C)",
+    "source_id": "usc5-552-doj",
+    "start": 4,
+    "text": "In responding under this paragraph to a request for records, an agency shall make reasonable efforts to search for the records in electronic form or format, except when such efforts would significantly interfere with the operation of the agency's automated information system.",
+    "unit_id": "u0023"
+  },
+  "usc5-552-doj:u0024:s00": {
+    "digest": "bf97bdceb17f2739335afb287573b4a3d50f25b57916b12cab5829ee8cd768c1",
+    "end": 3,
+    "origin_offset": 7751,
+    "path": "(a)(3)(D)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(D)",
+    "unit_id": "u0024"
+  },
+  "usc5-552-doj:u0024:s01": {
+    "digest": "49d08b8f65ef2e7617df96ea34e6310ae8410a98e263ab5579991d9d68ed4daf",
+    "end": 194,
+    "origin_offset": 7755,
+    "path": "(a)(3)(D)",
+    "source_id": "usc5-552-doj",
+    "start": 4,
+    "text": "For purposes of this paragraph, the term \"search\" means to review, manually or by automated means, agency records for the purpose of locating those records which are responsive to a request.",
+    "unit_id": "u0024"
+  },
+  "usc5-552-doj:u0025:s00": {
+    "digest": "503ecda8b252e18e7274d1ad7060a0f942daaf35f8e78d7ab065f4b096fb4181",
+    "end": 245,
+    "origin_offset": 7959,
+    "path": "(a)(3)(E)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(E) An agency, or part of an agency, that is an element of the intelligence community (as that term is defined in section 3(4) of the National Security Act of 1947 (50 U.S.C. 401a(4))) shall not make any record available under this paragraph to—",
+    "unit_id": "u0025"
+  },
+  "usc5-552-doj:u0026:s00": {
+    "digest": "be49f9e29cc88a77fc9341a0c22aec14b233e965c838f1a8d1c27a49cd8c93e5",
+    "end": 136,
+    "origin_offset": 8271,
+    "path": "(a)(3)(E)(i)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(i) any government entity, other than a State, territory, commonwealth, or district of the United States, or any subdivision thereof; or",
+    "unit_id": "u0026"
+  },
+  "usc5-552-doj:u0027:s00": {
+    "digest": "4c5ec02e624bc1a4c9adb05738a0e277b0d1b1ebf1c1f8309a9e037e2085bcd9",
+    "end": 69,
+    "origin_offset": 8423,
+    "path": "(a)(3)(E)(ii)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(ii) a representative of a government entity described in clause (i).",
+    "unit_id": "u0027"
+  },
+  "usc5-552-doj:u0028:s00": {
+    "digest": "56161628614444a379bded2edcb9bf84bbeef5df5a94576a44096188f998e2f7",
+    "end": 350,
+    "origin_offset": 8522,
+    "path": "(a)(4)(A)(i)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(4)(A)(i) In order to carry out the provisions of this section, each agency shall promulgate regulations, pursuant to notice and receipt of public comment, specifying the schedule of fees applicable to the processing of requests under this section and establishing procedures and guidelines for determining when such fees should be waived or reduced.",
+    "unit_id": "u0028"
+  },
+  "usc5-552-doj:u0028:s01": {
+    "digest": "f8f01f917411a70ac93cbed84578fc37b3c69842bd4618f72bd7f901719c6d90",
+    "end": 602,
+    "origin_offset": 8873,
+    "path": "(a)(4)(A)(i)",
+    "source_id": "usc5-552-doj",
+    "start": 351,
+    "text": "Such schedule shall conform to the guidelines which shall be promulgated, pursuant to notice and receipt of public comment, by the Director of the Office of Management and Budget and which shall provide for a uniform schedule of fees for all agencies.",
+    "unit_id": "u0028"
+  },
+  "usc5-552-doj:u0029:s00": {
+    "digest": "d1c60203a6a2f5cf5c444d9cebe5d9b7ab9a762aadcd8d8e9ac31a2ca74fb3c0",
+    "end": 48,
+    "origin_offset": 9240,
+    "path": "(a)(4)(A)(ii)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(ii) Such agency regulations shall provide that—",
+    "unit_id": "u0029"
+  },
+  "usc5-552-doj:u0030:s00": {
+    "digest": "7007c7df72c7b635a918ddd5d1b806b6808ae3dc3ed2f25a306664cae296744f",
+    "end": 149,
+    "origin_offset": 9359,
+    "path": "(a)(4)(A)(ii)(I)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(I) fees shall be limited to reasonable standard charges for document search, duplication, and review, when records are requested for commercial use;",
+    "unit_id": "u0030"
+  },
+  "usc5-552-doj:u0031:s00": {
+    "digest": "cea6ab4e95acfe142ad8ab3f78be379ad37c3473fa09195ffbbf19dacdd091af",
+    "end": 306,
+    "origin_offset": 9526,
+    "path": "(a)(4)(A)(ii)(II)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(II) fees shall be limited to reasonable standard charges for document duplication when records are not sought for commercial use and the request is made by an educational or noncommercial scientific institution, whose purpose is scholarly or scientific research; or a representative of the news media; and",
+    "unit_id": "u0031"
+  },
+  "usc5-552-doj:u0032:s00": {
+    "digest": "59a37df789a230549a46c038c365a3cdc387ac89963e4982031bae2352522ed9",
+    "end": 141,
+    "origin_offset": 9850,
+    "path": "(a)(4)(A)(ii)(III)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(III) for any request not described in (I) or (II), fees shall be limited to reasonable standard charges for document search and duplication.",
+    "unit_id": "u0032"
+  },
+  "usc5-552-doj:u0033:s00": {
+    "digest": "4424b16721e2c1fc52aab375444f62a04570233ef6c76762c22feff6a8ff0ea8",
+    "end": 279,
+    "origin_offset": 10019,
+    "path": "(a)(4)(A)(ii)(III)+",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "In this clause, the term ‘a representative of the news media’ means any person or entity that gathers information of potential interest to a segment of the public, uses its editorial skills to turn the raw materials into a distinct work, and distributes that work to an audience.",
+    "unit_id": "u0033"
+  },
+  "usc5-552-doj:u0033:s01": {
+    "digest": "8c8310dce5583c0d754b8a59940412510c71dfc6562352afc2daef87ad01c096",
+    "end": 410,
+    "origin_offset": 10299,
+    "path": "(a)(4)(A)(ii)(III)+",
+    "source_id": "usc5-552-doj",
+    "start": 280,
+    "text": "In this clause, the term ‘news’ means information that is about current events or that would be of current interest to the public.",
+    "unit_id": "u0033"
+  },
+  "usc5-552-doj:u0033:s02": {
+    "digest": "120515134b5d06a9a6fbad6c6d55760f3fe13f2790dda327d1079bb70cd7a077",
+    "end": 717,
+    "origin_offset": 10430,
+    "path": "(a)(4)(A)(ii)(III)+",
+    "source_id": "usc5-552-doj",
+    "start": 411,
+    "text": "Examples of news-media entities are television or radio stations broadcasting to the public at large and publishers of periodicals (but only if such entities qualify as disseminators of ‘news’) who make their products available for purchase by or subscription by or free distribution to the general public.",
+    "unit_id": "u0033"
+  },
+  "usc5-552-doj:u0033:s03": {
+    "digest": "b6e288a900956bed0f3a211605c242c51b39212c715a30bb9d479b361ab75ff1",
+    "end": 755,
+    "origin_offset": 10737,
+    "path": "(a)(4)(A)(ii)(III)+",
+    "source_id": "usc5-552-doj",
+    "start": 718,
+    "text": "These examples are not all-inclusive.",
+    "unit_id": "u0033"
+  },
+  "usc5-552-doj:u0033:s04": {
+    "digest": "83647cd20806fd0c876ccc527093af5a2e59205bb75120d45b414c427207adb8",
+    "end": 981,
+    "origin_offset": 10775,
+    "path": "(a)(4)(A)(ii)(III)+",
+    "source_id": "usc5-552-doj",
+    "start": 756,
+    "text": "Moreover, as methods of news delivery evolve (for example, the adoption of the electronic dissemination of newspapers through telecommunications services), such alternative media shall be considered to be news-media entities.",
+    "unit_id": "u0033"
+  },
+  "usc5-552-doj:u0033:s05": {
+    "digest": "f3f194593e15410f7a77fea69952b5f553a1372e9389c204ed5f5aac17fff0c8",
+    "end": 1218,
+    "origin_offset": 11001,
+    "path": "(a)(4)(A)(ii)(III)+",
+    "source_id": "usc5-552-doj",
+    "start": 982,
+    "text": "A freelance journalist shall be regarded as working for a news-media entity if the journalist can demonstrate a solid basis for expecting publication through that entity, whether or not the journalist is actually employed by the entity.",
+    "unit_id": "u0033"
+  },
+  "usc5-552-doj:u0033:s06": {
+    "digest": "1dbc95eb721e26ac9457870744218618cfabfd208a6816e4264ca28cba7e31a1",
+    "end": 1404,
+    "origin_offset": 11238,
+    "path": "(a)(4)(A)(ii)(III)+",
+    "source_id": "usc5-552-doj",
+    "start": 1219,
+    "text": "A publication contract would present a solid basis for such an expectation; the Government may also consider the past publication record of the requester in making such a determination.",
+    "unit_id": "u0033"
+  },
+  "usc5-552-doj:u0034:s00": {
+    "digest": "766d2420d63e77247a1e149707621bdabb6179050e46a8322c99d4026dc902ea",
+    "end": 369,
+    "origin_offset": 11439,
+    "path": "(a)(4)(A)(iii)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(iii) Documents shall be furnished without any charge or at a charge reduced below the fees established under clause (ii) if disclosure of the information is in the public interest because it is likely to contribute significantly to public understanding of the operations or activities of the government and is not primarily in the commercial interest of the requester.",
+    "unit_id": "u0034"
+  },
+  "usc5-552-doj:u0035:s00": {
+    "digest": "d491b3ac0efaecfdcc13842daf17f062393ef2a9a5ccc9b1fb5797014587bcd8",
+    "end": 4,
+    "origin_offset": 11824,
+    "path": "(a)(4)(A)(iv)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(iv)",
+    "unit_id": "u0035"
+  },
+  "usc5-552-doj:u0035:s01": {
+    "digest": "b3ba617f1a9d4c68c34efc7760bf40af5d2f7f4a0a75f7ab71dd8586a5aed3d8",
+    "end": 109,
+    "origin_offset": 11829,
+    "path": "(a)(4)(A)(iv)",
+    "source_id": "usc5-552-doj",
+    "start": 5,
+    "text": "Fee schedules shall provide for the recovery of only the direct costs of search, duplication, or review.",
+    "unit_id": "u0035"
+  },
+  "usc5-552-doj:u0035:s02": {
+    "digest": "eca31f4d66f66a05195ede56898024e9a12282292e8086867ec74465aada1fe8",
+    "end": 395,
+    "origin_offset": 11934,
+    "path": "(a)(4)(A)(iv)",
+    "source_id": "usc5-552-doj",
+    "start": 110,
+    "text": "Review costs shall include only the direct costs incurred during the initial examination of a document for the purposes of determining whether the documents must be disclosed under this section and for the purposes of withholding any portions exempt from disclosure under this section.",
+    "unit_id": "u0035"
+  },
+  "usc5-552-doj:u0035:s03": {
+    "digest": "ba22b0ac6e5765f7d9887978310436a8fc18bc38539c972521da76b442f6ec62",
+    "end": 557,
+    "origin_offset": 12220,
+    "path": "(a)(4)(A)(iv)",
+    "source_id": "usc5-552-doj",
+    "start": 396,
+    "text": "Review costs may not include any costs incurred in resolving issues of law or policy that may be raised in the course of processing a request under this section.",
+    "unit_id": "u0035"
+  },
+  "usc5-552-doj:u0035:s04": {
+    "digest": "c4fd7990ec8d237734aad7435c899a28f0933fa232e1919308bc560fe0012fed",
+    "end": 613,
+    "origin_offset": 12382,
+    "path": "(a)(4)(A)(iv)",
+    "source_id": "usc5-552-doj",
+    "start": 558,
+    "text": "No fee may be charged by any agency under this section—",
+    "unit_id": "u0035"
+  },
+  "usc5-552-doj:u0036:s00": {
+    "digest": "8d74eaea5de15a8e99df88e223b6f9563aa0388943ce0b03e8636f5c4cc10032",
+    "end": 120,
+    "origin_offset": 12508,
+    "path": "(a)(4)(A)(iv)(I)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(I) if the costs of routine collection and processing of the fee are likely to equal or exceed the amount of the fee; or",
+    "unit_id": "u0036"
+  },
+  "usc5-552-doj:u0037:s00": {
+    "digest": "2f5d4a6708d1dc3d9812f419223801f840997bac7a579fad6807cf283cd4492b",
+    "end": 169,
+    "origin_offset": 12646,
+    "path": "(a)(4)(A)(iv)(II)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(II) for any request described in clause (ii)(II) or (III) of this subparagraph for the first two hours of search time or for the first one hundred pages of duplication.",
+    "unit_id": "u0037"
+  },
+  "usc5-552-doj:u0038:s00": {
+    "digest": "1923870be921b2900f38ccb30bb2f2739971f5325fdf3811052401693e53d1de",
+    "end": 3,
+    "origin_offset": 12843,
+    "path": "(a)(4)(A)(v)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(v)",
+    "unit_id": "u0038"
+  },
+  "usc5-552-doj:u0038:s01": {
+    "digest": "6dcabaa25da6758b0986f0f43a49631663f706a1157c8440cf4ec8de1f288cf9",
+    "end": 188,
+    "origin_offset": 12847,
+    "path": "(a)(4)(A)(v)",
+    "source_id": "usc5-552-doj",
+    "start": 4,
+    "text": "No agency may require advance payment of any fee unless the requester has previously failed to pay fees in a timely fashion, or the agency has determined that the fee will exceed $250.",
+    "unit_id": "u0038"
+  },
+  "usc5-552-doj:u0039:s00": {
+    "digest": "e9e52d5be6a08977ec9fef28573553509bc95fd8a839facc83f50c90d4a047b7",
+    "end": 167,
+    "origin_offset": 13047,
+    "path": "(a)(4)(A)(vi)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(vi) Nothing in this subparagraph shall supersede fees chargeable under a statute specifically providing for setting the level of fees for particular types of records.",
+    "unit_id": "u0039"
+  },
+  "usc5-552-doj:u0040:s00": {
+    "digest": "1f35374763df6ea4397bc1ba2128cacc29c7765ffdc8d418f132d040700a12ff",
+    "end": 5,
+    "origin_offset": 13230,
+    "path": "(a)(4)(A)(vii)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(vii)",
+    "unit_id": "u0040"
+  },
+  "usc5-552-doj:u0040:s01": {
+    "digest": "8a0c83741ee4d8215b1900407a38f9b7e8126de304061a4b0b66c8029a04c43d",
+    "end": 227,
+    "origin_offset": 13236,
+    "path": "(a)(4)(A)(vii)",
+    "source_id": "usc5-552-doj",
+    "start": 6,
+    "text": "In any action by a requester regarding the waiver of fees under this section, the court shall determine the matter de novo: Provided, That the court's review of the matter shall be limited to the record before the agency.",
+    "unit_id": "u0040"
+  },
+  "usc5-552-doj:u0041:s00": {
+    "digest": "1b06cdbbcf744e3624ae8d0869b1ed10b690d2d12536bad64401a486163a55c2",
+    "end": 294,
+    "origin_offset": 13473,
+    "path": "(a)(4)(A)(viii)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(viii) (I) Except as provided in subclause (II), an agency shall not assess any search fees (or in the case of a requester described under clause (ii)(II) of this subparagraph, duplication fees) under this subparagraph if the agency has failed to comply with any time limit under paragraph (6).",
+    "unit_id": "u0041"
+  },
+  "usc5-552-doj:u0042:s00": {
+    "digest": "d4e928727dce6b7b3124ed8e397732a59ba6e70354af1dc723df70aa7bc43ed9",
+    "end": 8,
+    "origin_offset": 14260,
+    "path": "(a)(4)(A)(viii)(II)(aa)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(II)(aa)",
+    "unit_id": "u0042"
+  },
+  "usc5-552-doj:u0042:s01": {
+    "digest": "61fdc3f8d63ad270aeec64a033594ca347d4c17e301b11844b3eff4da415ddc7",
+    "end": 291,
+    "origin_offset": 14269,
+    "path": "(a)(4)(A)(viii)(II)(aa)",
+    "source_id": "usc5-552-doj",
+    "start": 9,
+    "text": "If an agency has determined that unusual circumstances apply (as the term is defined in paragraph (6)(B)) and the agency provided a timely written notice to the requester in accordance with paragraph (6)(B), a failure described in subclause (I) is excused for an additional 10 days.",
+    "unit_id": "u0042"
+  },
+  "usc5-552-doj:u0042:s02": {
+    "digest": "a01aad85f4a3089ba9b91edb21beffe6b34b1785502dc4b18da56d0ec6ad97ff",
+    "end": 500,
+    "origin_offset": 14552,
+    "path": "(a)(4)(A)(viii)(II)(aa)",
+    "source_id": "usc5-552-doj",
+    "start": 292,
+    "text": "If the agency fails to comply with the extended time limit, the agency may not assess any search fees (or in the case of a requester is described under clause (ii)(II) of this subparagraph, duplication fees).",
+    "unit_id": "u0042"
+  },
+  "usc5-552-doj:u0043:s00": {
+    "digest": "c5478b3dfffc89d4e46fe7b9d30d801ae51cb9feb649ef1e9b6069d028c85051",
+    "end": 630,
+    "origin_offset": 14795,
+    "path": "(a)(4)(A)(viii)(II)(bb)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(bb) If an agency has determined that unusual circumstances apply and more than 5,000 pages are necessary to respond to the request, an agency may charge search fees (or in the case of a requester described under clause (ii) (II) of this subparagraph, duplication fees) if the agency has provided a timely written notice to the requester in accordance with paragraph 6(B) and the agency has discussed with the requester via written mail, electronic mail, or telephone (or made not less than 3 good-faith attempts to do so) how the requester could effectively limit the scope of the request in accordance with paragraph (6)(B)(ii).",
+    "unit_id": "u0043"
+  },
+  "usc5-552-doj:u0044:s00": {
+    "digest": "27d99fb6ab21e6e18b8358d9502ee0c682f0e9b546c91d3e0d33196eed641683",
+    "end": 220,
+    "origin_offset": 15467,
+    "path": "(a)(4)(A)(viii)(II)(cc)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(cc) If a court has determined that exceptional circumstances exist (as that term is defined in paragraph (6)(C)), a failure described in subclause (I) shall be excused for the length of time provided by the court order.",
+    "unit_id": "u0044"
+  },
+  "usc5-552-doj:u0045:s00": {
+    "digest": "79398e2d8cadfc05f0152f92591166a1f81ebeeb0156179ef1a0f6c55ebc9af9",
+    "end": 3,
+    "origin_offset": 15732,
+    "path": "(a)(4)(B)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(B)",
+    "unit_id": "u0045"
+  },
+  "usc5-552-doj:u0045:s01": {
+    "digest": "9d79b2f24def86a6db0872353991ebd45434b76364ff46b93d7b585bb2456609",
+    "end": 386,
+    "origin_offset": 15736,
+    "path": "(a)(4)(B)",
+    "source_id": "usc5-552-doj",
+    "start": 4,
+    "text": "On complaint, the district court of the United States in the district in which the complainant resides, or has his principal place of business, or in which the agency records are situated, or in the District of Columbia, has jurisdiction to enjoin the agency from withholding agency records and to order the production of any agency records improperly withheld from the complainant.",
+    "unit_id": "u0045"
+  },
+  "usc5-552-doj:u0045:s02": {
+    "digest": "146df0f879da382e6b55cf4c786657848455182e5652173a98a8f90f7efb852c",
+    "end": 709,
+    "origin_offset": 16119,
+    "path": "(a)(4)(B)",
+    "source_id": "usc5-552-doj",
+    "start": 387,
+    "text": "In such a case the court shall determine the matter de novo, and may examine the contents of such agency records in camera to determine whether such records or any part thereof shall be withheld under any of the exemptions set forth in subsection (b) of this section, and the burden is on the agency to sustain its action.",
+    "unit_id": "u0045"
+  },
+  "usc5-552-doj:u0045:s03": {
+    "digest": "23c3f4f69c0cef836ef6001a77279b184ae66080d556a3ca0de269735e5ad493",
+    "end": 1008,
+    "origin_offset": 16442,
+    "path": "(a)(4)(B)",
+    "source_id": "usc5-552-doj",
+    "start": 710,
+    "text": "In addition to any other matters to which a court accords substantial weight, a court shall accord substantial weight to an affidavit of an agency concerning the agency's determination as to technical feasibility under paragraph (2)(C) and subsection (b) and reproducibility under paragraph (3)(B).",
+    "unit_id": "u0045"
+  },
+  "usc5-552-doj:u0046:s00": {
+    "digest": "ab0531c9d89473e8c5af60d4621a5d5bfaa6a5b1f1ebf3cc69e20814fee801cc",
+    "end": 3,
+    "origin_offset": 16754,
+    "path": "(a)(4)(C)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(C)",
+    "unit_id": "u0046"
+  },
+  "usc5-552-doj:u0046:s01": {
+    "digest": "a4f896ba1ae4cc6e3203f7b0575f1ef8db2627a0d9f883eda355df0e3356eedd",
+    "end": 307,
+    "origin_offset": 16758,
+    "path": "(a)(4)(C)",
+    "source_id": "usc5-552-doj",
+    "start": 4,
+    "text": "Notwithstanding any other provision of law, the defendant shall serve an answer or otherwise plead to any complaint made under this subsection within thirty days after service upon the defendant of the pleading in which such complaint is made, unless the court otherwise directs for good cause is shown.",
+    "unit_id": "u0046"
+  },
+  "usc5-552-doj:u0047:s00": {
+    "digest": "ab42f4bbcedb753acaa1335dd8aba8a6b86a81036f8edb8db60218b16e2a939a",
+    "end": 14,
+    "origin_offset": 17075,
+    "path": "(a)(4)(C)+",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "[(D) Repealed.",
+    "unit_id": "u0047"
+  },
+  "usc5-552-doj:u0047:s01": {
+    "digest": "e29e1ff288ec8913ecfb2d770ec9a36e143179166767603a522ab0ae79aad6d2",
+    "end": 83,
+    "origin_offset": 17090,
+    "path": "(a)(4)(C)+",
+    "source_id": "usc5-552-doj",
+    "start": 15,
+    "text": "Pub. L. 98-620, title IV, Sec. 402(2), Nov. 8, 1984, 98 Stat. 3357.]",
+    "unit_id": "u0047"
+  },
+  "usc5-552-doj:u0048:s00": {
+    "digest": "9b4916e2149b9c311d317048f8cddaf0940a4572fa2d5204246f8c0ce6a7461b",
+    "end": 6,
+    "origin_offset": 17172,
+    "path": "(a)(4)(E)(i)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(E)(i)",
+    "unit_id": "u0048"
+  },
+  "usc5-552-doj:u0048:s01": {
+    "digest": "166d5132fa9a56c277000e545f08a3dd527003a24db63c10b210a6d0cd1bb1d1",
+    "end": 210,
+    "origin_offset": 17179,
+    "path": "(a)(4)(E)(i)",
+    "source_id": "usc5-552-doj",
+    "start": 7,
+    "text": "The court may assess against the United States reasonable attorney fees and other litigation costs reasonably incurred in any case under this section in which the complainant has substantially prevailed.",
+    "unit_id": "u0048"
+  },
+  "usc5-552-doj:u0049:s00": {
+    "digest": "18e46062c2ae326d8cec8711300981d0312f68b824ce2504ae671634d7be02e0",
+    "end": 4,
+    "origin_offset": 17449,
+    "path": "(a)(4)(E)(ii)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(ii)",
+    "unit_id": "u0049"
+  },
+  "usc5-552-doj:u0049:s01": {
+    "digest": "76d40346ccf24665641c820009285d14390d51bc26b32606a6be107316ea8f36",
+    "end": 136,
+    "origin_offset": 17454,
+    "path": "(a)(4)(E)(ii)",
+    "source_id": "usc5-552-doj",
+    "start": 5,
+    "text": "For purposes of this subparagraph, a complainant has substantially prevailed if the complainant has obtained relief through either—",
+    "unit_id": "u0049"
+  },
+  "usc5-552-doj:u0050:s00": {
+    "digest": "171222197deeba689ee527975e1e4226f88f07000606ae799148ad144d087167",
+    "end": 79,
+    "origin_offset": 17656,
+    "path": "(a)(4)(E)(ii)(I)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(I) a judicial order, or an enforceable written agreement or consent decree; or",
+    "unit_id": "u0050"
+  },
+  "usc5-552-doj:u0051:s00": {
+    "digest": "364136ac7ee99596a0cc33cb1c8b0fe028facc2889168137c9ecdef56839f25b",
+    "end": 113,
+    "origin_offset": 17753,
+    "path": "(a)(4)(E)(ii)(II)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(II) a voluntary or unilateral change in position by the agency, if the complainant’s claim is not insubstantial.",
+    "unit_id": "u0051"
+  },
+  "usc5-552-doj:u0052:s00": {
+    "digest": "6bb1fe0b673a04b05c9ab2a2884bf3be1175299a1633b1dfcad8e8470c725242",
+    "end": 6,
+    "origin_offset": 17902,
+    "path": "(a)(4)(F)(i)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(F)(i)",
+    "unit_id": "u0052"
+  },
+  "usc5-552-doj:u0052:s01": {
+    "digest": "dee2e5976726ddc0d59fb7908fc0ded1c0e649c0169451d211eefb977c3e7843",
+    "end": 607,
+    "origin_offset": 17909,
+    "path": "(a)(4)(F)(i)",
+    "source_id": "usc5-552-doj",
+    "start": 7,
+    "text": "Whenever the court orders the production of any agency records improperly withheld from the complainant and assesses against the United States reasonable attorney fees and other litigation costs, and the court additionally issues a written finding that the circumstances surrounding the withholding raise questions whether agency personnel acted arbitrarily or capriciously with respect to the withholding, the Special Counsel shall promptly initiate a proceeding to determine whether disciplinary action is warranted against the officer or employee who was primarily responsible for the withholding.",
+    "unit_id": "u0052"
+  },
+  "usc5-552-doj:u0052:s02": {
+    "digest": "195e5ca7f3a8300041b63b09b567c025fa10a2f88448856011ca070d3b953bd5",
+    "end": 903,
+    "origin_offset": 18515,
+    "path": "(a)(4)(F)(i)",
+    "source_id": "usc5-552-doj",
+    "start": 608,
+    "text": "The Special Counsel, after investigation and consideration of the evidence submitted, shall submit his findings and recommendations to the administrative authority of the agency concerned and shall send copies of the findings and recommendations to the officer or employee or his representative.",
+    "unit_id": "u0052"
+  },
+  "usc5-552-doj:u0052:s03": {
+    "digest": "34c18b1eb81b7a6caa5a065c31e1087b0186fe8f10ad1ba47c6f24c374ebd436",
+    "end": 1002,
+    "origin_offset": 18811,
+    "path": "(a)(4)(F)(i)",
+    "source_id": "usc5-552-doj",
+    "start": 904,
+    "text": "The administrative authority shall take the corrective action that the Special Counsel recommends.",
+    "unit_id": "u0052"
+  },
+  "usc5-552-doj:u0053:s00": {
+    "digest": "67a99168ee128ca70278be4e23877ffe87e5c5253913312a8ad65a30877a5379",
+    "end": 32,
+    "origin_offset": 18976,
+    "path": "(a)(4)(F)(ii)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(ii) The Attorney General shall—",
+    "unit_id": "u0053"
+  },
+  "usc5-552-doj:u0054:s00": {
+    "digest": "369b91c509bee061d23466c747117deca66a1ec79d69987fc58414dd82150529",
+    "end": 105,
+    "origin_offset": 19079,
+    "path": "(a)(4)(F)(ii)(I)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(I) notify the Special Counsel of each civil action described under the first sentence of clause (i); and",
+    "unit_id": "u0054"
+  },
+  "usc5-552-doj:u0055:s00": {
+    "digest": "b17eca96902c44bb2b3ee87824576cb89a8182adb8e353844ac7cce10b17e729",
+    "end": 100,
+    "origin_offset": 19202,
+    "path": "(a)(4)(F)(ii)(II)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(II) annually submit a report to Congress on the number of such civil actions in the preceding year.",
+    "unit_id": "u0055"
+  },
+  "usc5-552-doj:u0056:s00": {
+    "digest": "212f475431511ade540bfb8b1a7a8cb99ce5a08041826f7fc3c6551a87e904f2",
+    "end": 5,
+    "origin_offset": 19330,
+    "path": "(a)(4)(F)(iii)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(iii)",
+    "unit_id": "u0056"
+  },
+  "usc5-552-doj:u0056:s01": {
+    "digest": "a721435f38179c4e443ac5a057e9bebe7e8a97fa02bd2fb8daf4f4022fc55062",
+    "end": 130,
+    "origin_offset": 19336,
+    "path": "(a)(4)(F)(iii)",
+    "source_id": "usc5-552-doj",
+    "start": 6,
+    "text": "The Special Counsel shall annually submit a report to Congress on the actions taken by the Special Counsel under clause (i).",
+    "unit_id": "u0056"
+  },
+  "usc5-552-doj:u0057:s00": {
+    "digest": "8ab8154a7f41be6d36e584c84697e0154e3ac1019eca1e92977c6b4e690d3f9b",
+    "end": 3,
+    "origin_offset": 19484,
+    "path": "(a)(4)(G)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(G)",
+    "unit_id": "u0057"
+  },
+  "usc5-552-doj:u0057:s01": {
+    "digest": "c23f7c13023c61b142d11899e9baa82800ad318287cedaf323f95d938db3330d",
+    "end": 195,
+    "origin_offset": 19488,
+    "path": "(a)(4)(G)",
+    "source_id": "usc5-552-doj",
+    "start": 4,
+    "text": "In the event of noncompliance with the order of the court, the district court may punish for contempt the responsible employee, and in the case of a uniformed service, the responsible member.",
+    "unit_id": "u0057"
+  },
+  "usc5-552-doj:u0058:s00": {
+    "digest": "97ce6126f9bad63aac5ddf4679f0612cefe3e29045a0c685838526b952c8150d",
+    "end": 3,
+    "origin_offset": 19699,
+    "path": "(a)(5)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(5)",
+    "unit_id": "u0058"
+  },
+  "usc5-552-doj:u0058:s01": {
+    "digest": "cd5688cca06cc12f50e6d6a333dcde1e0e1d72be55d6f35f4a47470c782cb1d3",
+    "end": 170,
+    "origin_offset": 19703,
+    "path": "(a)(5)",
+    "source_id": "usc5-552-doj",
+    "start": 4,
+    "text": "Each agency having more than one member shall maintain and make available for public inspection a record of the final votes of each member in every agency proceeding.",
+    "unit_id": "u0058"
+  },
+  "usc5-552-doj:u0059:s00": {
+    "digest": "3f3e47872e4c565dee3621ac6b6a23ae71a4389affe57e70f0b379d75310d54c",
+    "end": 113,
+    "origin_offset": 19881,
+    "path": "(a)(6)(A)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(6)(A) Each agency, upon any request for records made under paragraph (1), (2), or (3) of this subsection, shall—",
+    "unit_id": "u0059"
+  },
+  "usc5-552-doj:u0060:s00": {
+    "digest": "994ce953c600bbc24c81ac31cfabf26e4eb141edc4c364f3e940dba06ca18f0c",
+    "end": 227,
+    "origin_offset": 20110,
+    "path": "(a)(6)(A)(i)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(i) determine within 20 days (excepting Saturdays, Sundays, and legal public holidays) after the receipt of any such request whether to comply with such request and shall immediately notify the person making such a request of –",
+    "unit_id": "u0060"
+  },
+  "usc5-552-doj:u0061:s00": {
+    "digest": "dbdd33e9464956d64c48092732261577f81cffbd39f4a7d244c88bcbcd824826",
+    "end": 48,
+    "origin_offset": 20603,
+    "path": "(a)(6)(A)(i)(I)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(I) such determination and the reasons therefor;",
+    "unit_id": "u0061"
+  },
+  "usc5-552-doj:u0062:s00": {
+    "digest": "07dc0e9beccc8af047534299322835197b485cbbeaf4295429b6bae08dc2e476",
+    "end": 96,
+    "origin_offset": 20686,
+    "path": "(a)(6)(A)(i)(II)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(II) the right of such person to seek assistance from the FOIA Public Liaison of the agency; and",
+    "unit_id": "u0062"
+  },
+  "usc5-552-doj:u0063:s00": {
+    "digest": "5b98369bcfeef8fecfeb67a70b929ad457284e6adb609f3a89115b69f3900481",
+    "end": 47,
+    "origin_offset": 20817,
+    "path": "(a)(6)(A)(i)(III)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(III) in the case of an adverse determination –",
+    "unit_id": "u0063"
+  },
+  "usc5-552-doj:u0064:s00": {
+    "digest": "cc11370794155bd09628d79a162655108e0e7a694ea04440019dc2344458beb1",
+    "end": 199,
+    "origin_offset": 20899,
+    "path": "(a)(6)(A)(i)(III)(aa)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(aa) the right of such person to appeal to the head of the agency, within a period determined by the head of the agency that is not less than 90 days after the date of such adverse determination; and",
+    "unit_id": "u0064"
+  },
+  "usc5-552-doj:u0065:s00": {
+    "digest": "fca89abcc7743330c071ef2b2c045622bc76eb2edc6125161a5ba7f913ae8c5d",
+    "end": 162,
+    "origin_offset": 21133,
+    "path": "(a)(6)(A)(i)(III)(bb)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(bb) the right of such person to seek dispute resolution services from the FOIA Public Liaison of the agency or the Office of Government Information Services; and",
+    "unit_id": "u0065"
+  },
+  "usc5-552-doj:u0066:s00": {
+    "digest": "5fbb00947329106b05edd4daacf8cb08d9b2d42df939cdbd34261f232100eeff",
+    "end": 163,
+    "origin_offset": 21349,
+    "path": "(a)(6)(A)(ii)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(ii) make a determination with respect to any appeal within twenty days (excepting Saturdays, Sundays, and legal public holidays) after the receipt of such appeal.",
+    "unit_id": "u0066"
+  },
+  "usc5-552-doj:u0066:s01": {
+    "digest": "ebbfae4c61c3055d0d02c3a5cb8f404291914761648fc09a13d537c6cfc47c2b",
+    "end": 400,
+    "origin_offset": 21513,
+    "path": "(a)(6)(A)(ii)",
+    "source_id": "usc5-552-doj",
+    "start": 164,
+    "text": "If on appeal the denial of the request for records is in whole or in part upheld, the agency shall notify the person making such request of the provisions for judicial review of that determination under paragraph (4) of this subsection.",
+    "unit_id": "u0066"
+  },
+  "usc5-552-doj:u0067:s00": {
+    "digest": "b0ceb1530f9b01d59016e217b50d51029df6c3d650791ab335e0d2993389c733",
+    "end": 358,
+    "origin_offset": 21765,
+    "path": "(a)(6)(A)(ii)+",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "The 20-day period under clause (i) shall commence on the date on which the request is first received by the appropriate component of the agency, but in any event not later than ten days after the request is first received by any component of the agency that is designated in the agency’s regulations under this section to receive requests under this section.",
+    "unit_id": "u0067"
+  },
+  "usc5-552-doj:u0067:s01": {
+    "digest": "3ba1534e5e4cdfd0b97e9201801a3d5bac3756c8bb4092b1af54169c645f8250",
+    "end": 418,
+    "origin_offset": 22124,
+    "path": "(a)(6)(A)(ii)+",
+    "source_id": "usc5-552-doj",
+    "start": 359,
+    "text": "The 20-day period shall not be tolled by the agency except—",
+    "unit_id": "u0067"
+  },
+  "usc5-552-doj:u0068:s00": {
+    "digest": "f770fd061078a82c991f1c9c2a5f09e8273a58e68ecc57c467bb53b01c78eb51",
+    "end": 213,
+    "origin_offset": 22254,
+    "path": "(a)(6)(A)(ii)(I)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(I) that the agency may make one request to the requester for information and toll the 20-day period while it is awaiting such information that it has reasonably requested from the requester under this section; or",
+    "unit_id": "u0068"
+  },
+  "usc5-552-doj:u0069:s00": {
+    "digest": "34532e6074c73551c5a0cfd8fa67265ea6f46c9e514d0ed8ebe7bb96dc1848c6",
+    "end": 80,
+    "origin_offset": 22485,
+    "path": "(a)(6)(A)(ii)(II)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(II) if necessary to clarify with the requester issues regarding fee assessment.",
+    "unit_id": "u0069"
+  },
+  "usc5-552-doj:u0069:s01": {
+    "digest": "d135a9da8334f37b60f8a7082a401998d1ef6f6935c8643bcf61151a245c7020",
+    "end": 227,
+    "origin_offset": 22566,
+    "path": "(a)(6)(A)(ii)(II)",
+    "source_id": "usc5-552-doj",
+    "start": 81,
+    "text": "In either case, the agency’s receipt of the requester’s response to the agency’s request for information or clarification ends the tolling period.",
+    "unit_id": "u0069"
+  },
+  "usc5-552-doj:u0070:s00": {
+    "digest": "3f709c4f417ea79791e194ba7551910820542b7903c3a1f4678404647f37461d",
+    "end": 6,
+    "origin_offset": 22748,
+    "path": "(a)(6)(B)(i)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(B)(i)",
+    "unit_id": "u0070"
+  },
+  "usc5-552-doj:u0070:s01": {
+    "digest": "147c00f49a3c2467008c36055cd4edb08f37b089702c542c5fb1e82198f24eb1",
+    "end": 344,
+    "origin_offset": 22755,
+    "path": "(a)(6)(B)(i)",
+    "source_id": "usc5-552-doj",
+    "start": 7,
+    "text": "In unusual circumstances as specified in this subparagraph, the time limits prescribed in either clause (i) or clause (ii) of subparagraph (A) may be extended by written notice to the person making such request setting forth the unusual circumstances for such extension and the date on which a determination is expected to be dispatched.",
+    "unit_id": "u0070"
+  },
+  "usc5-552-doj:u0070:s02": {
+    "digest": "030f73fde94839ddb0ffbe2f7470a98984d2d6c97677ed30ba6600c558257345",
+    "end": 502,
+    "origin_offset": 23093,
+    "path": "(a)(6)(B)(i)",
+    "source_id": "usc5-552-doj",
+    "start": 345,
+    "text": "No such notice shall specify a date that would result in an extension for more than ten working days, except as provided in clause (ii) of this subparagraph.",
+    "unit_id": "u0070"
+  },
+  "usc5-552-doj:u0071:s00": {
+    "digest": "c9777c48dc60659a08dbeca63a6b4fa9333024e6639171844147ed028ad97176",
+    "end": 533,
+    "origin_offset": 23317,
+    "path": "(a)(6)(B)(ii)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(ii) With respect to a request for which a written notice under clause (i) extends the time limits prescribed under clause (i) of subparagraph (A), the agency shall notify the person making the request if the request cannot be processed within the time limit specified in that clause and shall provide the person an opportunity to limit the scope of the request so that it may be processed within that time limit or an opportunity to arrange with the agency an alternative time frame for processing the request or a modified request.",
+    "unit_id": "u0071"
+  },
+  "usc5-552-doj:u0071:s01": {
+    "digest": "3239671151dae34e6ce97197b0865dcd1aa554bfd7c74c93c626ed1cad5eb2d6",
+    "end": 845,
+    "origin_offset": 23851,
+    "path": "(a)(6)(B)(ii)",
+    "source_id": "usc5-552-doj",
+    "start": 534,
+    "text": "To aid the requester, each agency shall make available its FOIA Public Liaison, who shall assist in the resolution of any disputes between the requester and the agency, and notify the requester of the right of the requester to seek dispute resolution services from the Office of Government Information Services.",
+    "unit_id": "u0071"
+  },
+  "usc5-552-doj:u0071:s02": {
+    "digest": "79a380d17e71e7fb6d0f1320ba5ceb26fae13cfcafc4a3d80ea0232ef75221bd",
+    "end": 1063,
+    "origin_offset": 24198,
+    "path": "(a)(6)(B)(ii)",
+    "source_id": "usc5-552-doj",
+    "start": 846,
+    "text": "Refusal by the person to reasonably modify the request or arrange such an alternative time frame shall be considered as a factor in determining whether exceptional circumstances exist for purposes of subparagraph (C).",
+    "unit_id": "u0071"
+  },
+  "usc5-552-doj:u0072:s00": {
+    "digest": "212f475431511ade540bfb8b1a7a8cb99ce5a08041826f7fc3c6551a87e904f2",
+    "end": 5,
+    "origin_offset": 24431,
+    "path": "(a)(6)(B)(iii)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(iii)",
+    "unit_id": "u0072"
+  },
+  "usc5-552-doj:u0072:s01": {
+    "digest": "12aa41dae17cb0f9bda1989953a7f377f463efadc519f3d3986c671c8d66375f",
+    "end": 163,
+    "origin_offset": 24437,
+    "path": "(a)(6)(B)(iii)",
+    "source_id": "usc5-552-doj",
+    "start": 6,
+    "text": "As used in this subparagraph, \"unusual circumstances\" means, but only to the extent reasonably necessary to the proper processing of the particular requests—",
+    "unit_id": "u0072"
+  },
+  "usc5-552-doj:u0073:s00": {
+    "digest": "79f785e0be8b0d97788ea91284e556178f248cce4480ebffae914f1ce4f1304b",
+    "end": 164,
+    "origin_offset": 24665,
+    "path": "(a)(6)(B)(iii)(I)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(I) the need to search for and collect the requested records from field facilities or other establishments that are separate from the office processing the request;",
+    "unit_id": "u0073"
+  },
+  "usc5-552-doj:u0074:s00": {
+    "digest": "b32359513d97d2a3439908a75cdbc8408511144f18dd4bd1181fc9b2cbff74b0",
+    "end": 159,
+    "origin_offset": 24847,
+    "path": "(a)(6)(B)(iii)(II)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(II) the need to search for, collect, and appropriately examine a voluminous amount of separate and distinct records which are demanded in a single request; or",
+    "unit_id": "u0074"
+  },
+  "usc5-552-doj:u0075:s00": {
+    "digest": "26f4ceb4dcce3d93d3f8b2a898ab4b507a6b01063a5b82a5121cd274aadd39a6",
+    "end": 269,
+    "origin_offset": 25024,
+    "path": "(a)(6)(B)(iii)(III)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(III) the need for consultation, which shall be conducted with all practicable speed, with another agency having a substantial interest in the determination of the request or among two or more components of the agency having substantial subject-matter interest therein.",
+    "unit_id": "u0075"
+  },
+  "usc5-552-doj:u0076:s00": {
+    "digest": "d491b3ac0efaecfdcc13842daf17f062393ef2a9a5ccc9b1fb5797014587bcd8",
+    "end": 4,
+    "origin_offset": 25321,
+    "path": "(a)(6)(B)(iv)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(iv)",
+    "unit_id": "u0076"
+  },
+  "usc5-552-doj:u0076:s01": {
+    "digest": "5f28567bb1b5fb9e8c6d348276dc02eb01b356ffedd15cac2044de8178f47f93",
+    "end": 443,
+    "origin_offset": 25326,
+    "path": "(a)(6)(B)(iv)",
+    "source_id": "usc5-552-doj",
+    "start": 5,
+    "text": "Each agency may promulgate regulations, pursuant to notice and receipt of public comment, providing for the aggregation of certain requests by the same requestor, or by a group of requestors acting in concert, if the agency reasonably believes that such requests actually constitute a single request, which would otherwise satisfy the unusual circumstances specified in this subparagraph, and the requests involve clearly related matters.",
+    "unit_id": "u0076"
+  },
+  "usc5-552-doj:u0076:s02": {
+    "digest": "0adeca1989ad03a2bda7dcd0377f53bef83fc1c1b8f9099b04d1c1d49f41de5e",
+    "end": 514,
+    "origin_offset": 25765,
+    "path": "(a)(6)(B)(iv)",
+    "source_id": "usc5-552-doj",
+    "start": 444,
+    "text": "Multiple requests involving unrelated matters shall not be aggregated.",
+    "unit_id": "u0076"
+  },
+  "usc5-552-doj:u0077:s00": {
+    "digest": "5473c4be1d5e3a4dbe3162216a44c97ce493049c7836e3ebaf7bb33e4048676d",
+    "end": 6,
+    "origin_offset": 25859,
+    "path": "(a)(6)(C)(i)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(C)(i)",
+    "unit_id": "u0077"
+  },
+  "usc5-552-doj:u0077:s01": {
+    "digest": "018d4cca768025087e3526ba374a36a26f434a158b44fe3de499b3bd0977feb8",
+    "end": 294,
+    "origin_offset": 25866,
+    "path": "(a)(6)(C)(i)",
+    "source_id": "usc5-552-doj",
+    "start": 7,
+    "text": "Any person making a request to any agency for records under paragraph (1), (2), or (3) of this subsection shall be deemed to have exhausted his administrative remedies with respect to such request if the agency fails to comply with the applicable time limit provisions of this paragraph.",
+    "unit_id": "u0077"
+  },
+  "usc5-552-doj:u0077:s02": {
+    "digest": "c36e12c75f377f2ab29c56ffed8b337408954b3b8a5f7c9d32b6041997536a34",
+    "end": 541,
+    "origin_offset": 26154,
+    "path": "(a)(6)(C)(i)",
+    "source_id": "usc5-552-doj",
+    "start": 295,
+    "text": "If the Government can show exceptional circumstances exist and that the agency is exercising due diligence in responding to the request, the court may retain jurisdiction and allow the agency additional time to complete its review of the records.",
+    "unit_id": "u0077"
+  },
+  "usc5-552-doj:u0077:s03": {
+    "digest": "3df4e96d47e95de9b6b895c46b40286a3e5389b2c0a9f31a8c215d7bbb2477b6",
+    "end": 696,
+    "origin_offset": 26401,
+    "path": "(a)(6)(C)(i)",
+    "source_id": "usc5-552-doj",
+    "start": 542,
+    "text": "Upon any determination by an agency to comply with a request for records, the records shall be made promptly available to such person making such request.",
+    "unit_id": "u0077"
+  },
+  "usc5-552-doj:u0077:s04": {
+    "digest": "aad3f2c1a72f2581fd635ceef693e3efb8b3be784a4e62db2381b5805857132a",
+    "end": 881,
+    "origin_offset": 26556,
+    "path": "(a)(6)(C)(i)",
+    "source_id": "usc5-552-doj",
+    "start": 697,
+    "text": "Any notification of denial of any request for records under this subsection shall set forth the names and titles or positions of each person responsible for the denial of such request.",
+    "unit_id": "u0077"
+  },
+  "usc5-552-doj:u0078:s00": {
+    "digest": "18e46062c2ae326d8cec8711300981d0312f68b824ce2504ae671634d7be02e0",
+    "end": 4,
+    "origin_offset": 26807,
+    "path": "(a)(6)(C)(ii)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(ii)",
+    "unit_id": "u0078"
+  },
+  "usc5-552-doj:u0078:s01": {
+    "digest": "1461343cfbf463dadf57bd1726fcf0806dde8c0528fd62fb974c08a7856783c7",
+    "end": 277,
+    "origin_offset": 26812,
+    "path": "(a)(6)(C)(ii)",
+    "source_id": "usc5-552-doj",
+    "start": 5,
+    "text": "For purposes of this subparagraph, the term \"exceptional circumstances\" does not include a delay that results from a predictable agency workload of requests under this section, unless the agency demonstrates reasonable progress in reducing its backlog of pending requests.",
+    "unit_id": "u0078"
+  },
+  "usc5-552-doj:u0079:s00": {
+    "digest": "212f475431511ade540bfb8b1a7a8cb99ce5a08041826f7fc3c6551a87e904f2",
+    "end": 5,
+    "origin_offset": 27100,
+    "path": "(a)(6)(C)(iii)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(iii)",
+    "unit_id": "u0079"
+  },
+  "usc5-552-doj:u0079:s01": {
+    "digest": "172f3037c5492ebacbf5ee0fc337011183b2d7eaf2eaf7b6fc4ef8be053ffc44",
+    "end": 387,
+    "origin_offset": 27106,
+    "path": "(a)(6)(C)(iii)",
+    "source_id": "usc5-552-doj",
+    "start": 6,
+    "text": "Refusal by a person to reasonably modify the scope of a request or arrange an alternative time frame for processing a request (or a modified request) under clause (ii) after being given an opportunity to do so by the agency to whom the person made the request shall be considered as a factor in determining whether exceptional circumstances exist for purposes of this subparagraph.",
+    "unit_id": "u0079"
+  },
+  "usc5-552-doj:u0080:s00": {
+    "digest": "2729f53756557e5c7ca0b71946fe175bd4b09a94187de2a405918e6a4e88cdde",
+    "end": 6,
+    "origin_offset": 27511,
+    "path": "(a)(6)(D)(i)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(D)(i)",
+    "unit_id": "u0080"
+  },
+  "usc5-552-doj:u0080:s01": {
+    "digest": "d75c98bd3f3730fbd6f0aa63bd0faa1329759e4bbd0173ba2a44ba548199ff0f",
+    "end": 235,
+    "origin_offset": 27518,
+    "path": "(a)(6)(D)(i)",
+    "source_id": "usc5-552-doj",
+    "start": 7,
+    "text": "Each agency may promulgate regulations, pursuant to notice and receipt of public comment, providing for multitrack processing of requests for records based on the amount of work or time (or both) involved in processing requests.",
+    "unit_id": "u0080"
+  },
+  "usc5-552-doj:u0081:s00": {
+    "digest": "91e789ffd69920a503253327913ca15191fda3194dff99bc15097306286288e9",
+    "end": 230,
+    "origin_offset": 27813,
+    "path": "(a)(6)(D)(ii)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(ii) Regulations under this subparagraph may provide a person making a request that does not qualify for the fastest multitrack processing an opportunity to limit the scope of the request in order to qualify for faster processing.",
+    "unit_id": "u0081"
+  },
+  "usc5-552-doj:u0082:s00": {
+    "digest": "212f475431511ade540bfb8b1a7a8cb99ce5a08041826f7fc3c6551a87e904f2",
+    "end": 5,
+    "origin_offset": 28059,
+    "path": "(a)(6)(D)(iii)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(iii)",
+    "unit_id": "u0082"
+  },
+  "usc5-552-doj:u0082:s01": {
+    "digest": "e1c10a6deca6b7f70cc92d6385b2b4ec11fe5bf42e8deffe2d3c2b687764f203",
+    "end": 123,
+    "origin_offset": 28065,
+    "path": "(a)(6)(D)(iii)",
+    "source_id": "usc5-552-doj",
+    "start": 6,
+    "text": "This subparagraph shall not be considered to affect the requirement under subparagraph (C) to exercise due diligence.",
+    "unit_id": "u0082"
+  },
+  "usc5-552-doj:u0083:s00": {
+    "digest": "9b4916e2149b9c311d317048f8cddaf0940a4572fa2d5204246f8c0ce6a7461b",
+    "end": 6,
+    "origin_offset": 28206,
+    "path": "(a)(6)(E)(i)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(E)(i)",
+    "unit_id": "u0083"
+  },
+  "usc5-552-doj:u0083:s01": {
+    "digest": "670aaccb70f3b982c5681ea91cd40cf84121d7c1a7f983064c40a31776927785",
+    "end": 158,
+    "origin_offset": 28213,
+    "path": "(a)(6)(E)(i)",
+    "source_id": "usc5-552-doj",
+    "start": 7,
+    "text": "Each agency shall promulgate regulations, pursuant to notice and receipt of public comment, providing for expedited processing of requests for records—",
+    "unit_id": "u0083"
+  },
+  "usc5-552-doj:u0084:s00": {
+    "digest": "d28590a69c86b304a3a7a3c79765e6b3c95d36f015e322e70572142526004530",
+    "end": 91,
+    "origin_offset": 28486,
+    "path": "(a)(6)(E)(i)(I)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(I) in cases in which the person requesting the records demonstrates a compelling need; and",
+    "unit_id": "u0084"
+  },
+  "usc5-552-doj:u0085:s00": {
+    "digest": "b95d85020a9c936dcc25464198f4864b6d02771954d8c4fd6a171551e80ce131",
+    "end": 45,
+    "origin_offset": 28595,
+    "path": "(a)(6)(E)(i)(II)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(II) in other cases determined by the agency.",
+    "unit_id": "u0085"
+  },
+  "usc5-552-doj:u0086:s00": {
+    "digest": "7569ae918384ef975222123be7a97b8ef59f3307ee7b84573051dedf35c06181",
+    "end": 81,
+    "origin_offset": 28668,
+    "path": "(a)(6)(E)(ii)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(ii) Notwithstanding clause (i), regulations under this subparagraph must ensure—",
+    "unit_id": "u0086"
+  },
+  "usc5-552-doj:u0087:s00": {
+    "digest": "cd19060a99c353e35f166a359e12f0036c4b6612f609d41fefd2b10b1947de5d",
+    "end": 216,
+    "origin_offset": 28820,
+    "path": "(a)(6)(E)(ii)(I)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(I) that a determination of whether to provide expedited processing shall be made, and notice of the determination shall be provided to the person making the request, within 10 days after the date of the request; and",
+    "unit_id": "u0087"
+  },
+  "usc5-552-doj:u0088:s00": {
+    "digest": "eb6ae0dc6bdf359c3b5d760326e74c0371eb85192a8955618066ef8607bb7213",
+    "end": 123,
+    "origin_offset": 29054,
+    "path": "(a)(6)(E)(ii)(II)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(II) expeditious consideration of administrative appeals of such determinations of whether to provide expedited processing.",
+    "unit_id": "u0088"
+  },
+  "usc5-552-doj:u0089:s00": {
+    "digest": "212f475431511ade540bfb8b1a7a8cb99ce5a08041826f7fc3c6551a87e904f2",
+    "end": 5,
+    "origin_offset": 29205,
+    "path": "(a)(6)(E)(iii)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(iii)",
+    "unit_id": "u0089"
+  },
+  "usc5-552-doj:u0089:s01": {
+    "digest": "02a6659e63e513c351b3ce92bb502a3f6bb028493f2504fe0bbbba65f9cc74ba",
+    "end": 154,
+    "origin_offset": 29211,
+    "path": "(a)(6)(E)(iii)",
+    "source_id": "usc5-552-doj",
+    "start": 6,
+    "text": "An agency shall process as soon as practicable any request for records to which the agency has granted expedited processing under this subparagraph.",
+    "unit_id": "u0089"
+  },
+  "usc5-552-doj:u0089:s02": {
+    "digest": "604a87308937f537c9adcb1171e9979a66f174d595d22feeb2cf8293dd107e0a",
+    "end": 505,
+    "origin_offset": 29360,
+    "path": "(a)(6)(E)(iii)",
+    "source_id": "usc5-552-doj",
+    "start": 155,
+    "text": "Agency action to deny or affirm denial of a request for expedited processing pursuant to this subparagraph, and failure by an agency to respond in a timely manner to such a request shall be subject to judicial review under paragraph (4), except that the judicial review shall be based on the record before the agency at the time of the determination.",
+    "unit_id": "u0089"
+  },
+  "usc5-552-doj:u0090:s00": {
+    "digest": "d491b3ac0efaecfdcc13842daf17f062393ef2a9a5ccc9b1fb5797014587bcd8",
+    "end": 4,
+    "origin_offset": 29726,
+    "path": "(a)(6)(E)(iv)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(iv)",
+    "unit_id": "u0090"
+  },
+  "usc5-552-doj:u0090:s01": {
+    "digest": "22c9f5c90590d6f04c3459952da82e46c2754e6e5e3cc9ab213e392699f3ffc2",
+    "end": 212,
+    "origin_offset": 29731,
+    "path": "(a)(6)(E)(iv)",
+    "source_id": "usc5-552-doj",
+    "start": 5,
+    "text": "A district court of the United States shall not have jurisdiction to review an agency denial of expedited processing of a request for records after the agency has provided a complete response to the request.",
+    "unit_id": "u0090"
+  },
+  "usc5-552-doj:u0091:s00": {
+    "digest": "1923870be921b2900f38ccb30bb2f2739971f5325fdf3811052401693e53d1de",
+    "end": 3,
+    "origin_offset": 29954,
+    "path": "(a)(6)(E)(v)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(v)",
+    "unit_id": "u0091"
+  },
+  "usc5-552-doj:u0091:s01": {
+    "digest": "38bfaf095524746515ba2816e364e2c22bf551b74e1fd229614b6424887b9d45",
+    "end": 72,
+    "origin_offset": 29958,
+    "path": "(a)(6)(E)(v)",
+    "source_id": "usc5-552-doj",
+    "start": 4,
+    "text": "For purposes of this subparagraph, the term \"compelling need\" means—",
+    "unit_id": "u0091"
+  },
+  "usc5-552-doj:u0092:s00": {
+    "digest": "1295fef1fb4a831b69cfaec7f28bdfba2e9403f9d173f56f426c8c647189130c",
+    "end": 197,
+    "origin_offset": 30097,
+    "path": "(a)(6)(E)(v)(I)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(I) that a failure to obtain requested records on an expedited basis under this paragraph could reasonably be expected to pose an imminent threat to the life or physical safety of an individual; or",
+    "unit_id": "u0092"
+  },
+  "usc5-552-doj:u0093:s00": {
+    "digest": "72f44aca43637290a922211167260f6473f3211d51dab7254f59e3bdeb660ed1",
+    "end": 182,
+    "origin_offset": 30312,
+    "path": "(a)(6)(E)(v)(II)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(II) with respect to a request made by a person primarily engaged in disseminating information, urgency to inform the public concerning actual or alleged Federal Government activity.",
+    "unit_id": "u0093"
+  },
+  "usc5-552-doj:u0094:s00": {
+    "digest": "9162a1a7d800a87fff1800b90e67906019471e0572dc59eeeec54eaf235d1158",
+    "end": 223,
+    "origin_offset": 30522,
+    "path": "(a)(6)(E)(vi)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(vi) A demonstration of a compelling need by a person making a request for expedited processing shall be made by a statement certified by such person to be true and correct to the best of such person's knowledge and belief.",
+    "unit_id": "u0094"
+  },
+  "usc5-552-doj:u0095:s00": {
+    "digest": "3c0d63d2582a6c4eb98d1f6c2698fee9cdafbeb301483dd9ef5d053c93b48dff",
+    "end": 3,
+    "origin_offset": 30769,
+    "path": "(a)(6)(F)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(F)",
+    "unit_id": "u0095"
+  },
+  "usc5-552-doj:u0095:s01": {
+    "digest": "0019dea2229bcfccce98a766f95f113760950c9d2a132263949e909fb5670f8c",
+    "end": 387,
+    "origin_offset": 30773,
+    "path": "(a)(6)(F)",
+    "source_id": "usc5-552-doj",
+    "start": 4,
+    "text": "In denying a request for records, in whole or in part, an agency shall make a reasonable effort to estimate the volume of any requested matter the provision of which is denied, and shall provide any such estimate to the person making the request, unless providing such estimate would harm an interest protected by the exemption in subsection (b) pursuant to which the denial is made.",
+    "unit_id": "u0095"
+  },
+  "usc5-552-doj:u0096:s00": {
+    "digest": "47c0e010a4b9d7883200df662a2d688ad4c13c09efee52aa01a5f2e8bf216535",
+    "end": 22,
+    "origin_offset": 31176,
+    "path": "(a)(7)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(7) Each agency shall—",
+    "unit_id": "u0096"
+  },
+  "usc5-552-doj:u0097:s00": {
+    "digest": "1c9f8cd2d587f9f5d2c2500a79687fedb0869383c94e8a32a099d71812a87ee3",
+    "end": 232,
+    "origin_offset": 31261,
+    "path": "(a)(7)(A)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(A) establish a system to assign an individualized tracking number for each request received that will take longer than ten days to process and provide to each person making a request the tracking number assigned to the request; and",
+    "unit_id": "u0097"
+  },
+  "usc5-552-doj:u0098:s00": {
+    "digest": "7a9d98c0379f2709d9ddc742de551e81b4accc334b9eb28dae8e6510c19acf26",
+    "end": 186,
+    "origin_offset": 31507,
+    "path": "(a)(7)(B)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(B) establish a telephone line or Internet service that provides information about the status of a request to the person making the request using the assigned tracking number, including—",
+    "unit_id": "u0098"
+  },
+  "usc5-552-doj:u0099:s00": {
+    "digest": "427023b2bc827d41b63bdd320ae6c4b2a7df7e6e95e40a5291843d9e1b865704",
+    "end": 69,
+    "origin_offset": 31760,
+    "path": "(a)(7)(B)(i)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(i) the date on which the agency originally received the request; and",
+    "unit_id": "u0099"
+  },
+  "usc5-552-doj:u0100:s00": {
+    "digest": "fa81c3345bb0340cc78555283194203feeda363f99c4dba9f7b4b027a425755e",
+    "end": 79,
+    "origin_offset": 31845,
+    "path": "(a)(7)(B)(ii)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(ii) an estimated date on which the agency will complete action on the request.",
+    "unit_id": "u0100"
+  },
+  "usc5-552-doj:u0101:s00": {
+    "digest": "b59fa160619437f0c1075b1b75bdcb5a882837a7add22aa6cf833365a8789c77",
+    "end": 24,
+    "origin_offset": 31962,
+    "path": "(a)(8)(A)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(8)(A) An agency shall –",
+    "unit_id": "u0101"
+  },
+  "usc5-552-doj:u0102:s00": {
+    "digest": "67fd20c66bd8d88db52df67ad06c1c378773e61f5420118a32a17092660f607f",
+    "end": 53,
+    "origin_offset": 32119,
+    "path": "(a)(8)(A)(i)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(i) withhold information under this section only if –",
+    "unit_id": "u0102"
+  },
+  "usc5-552-doj:u0103:s00": {
+    "digest": "bb2f13545f3ca654d57d673b341aeb8d869ecc3d76c5f499e60f8ad0d770943a",
+    "end": 131,
+    "origin_offset": 32261,
+    "path": "(a)(8)(A)(i)(I)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(I) the agency reasonably foresees that disclosure would harm an interest protected by an exemption described in subsection (b); or",
+    "unit_id": "u0103"
+  },
+  "usc5-552-doj:u0104:s00": {
+    "digest": "833b3dec7157c71141f093c13d793a40966da2dc445d7266a310439de5d30b39",
+    "end": 41,
+    "origin_offset": 32427,
+    "path": "(a)(8)(A)(i)(II)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(II) disclosure is prohibited by law; and",
+    "unit_id": "u0104"
+  },
+  "usc5-552-doj:u0105:s00": {
+    "digest": "a293919ef478d277d52266ccf01621c50c524842064309ca1bb8df43ada0234d",
+    "end": 167,
+    "origin_offset": 32513,
+    "path": "(a)(8)(A)(ii)(I)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(ii)(I) consider whether partial disclosure of information is possible whenever the agency determines that a full disclosure of a requested record is not possible; and",
+    "unit_id": "u0105"
+  },
+  "usc5-552-doj:u0106:s00": {
+    "digest": "6a944755a431121a64ed593fb590b73e5ef923302392fcc62e4ff1af6a91c8ed",
+    "end": 88,
+    "origin_offset": 32768,
+    "path": "(a)(8)(A)(ii)(II)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(II) take reasonable steps necessary to segregate and release nonexempt information; and",
+    "unit_id": "u0106"
+  },
+  "usc5-552-doj:u0107:s00": {
+    "digest": "79398e2d8cadfc05f0152f92591166a1f81ebeeb0156179ef1a0f6c55ebc9af9",
+    "end": 3,
+    "origin_offset": 32909,
+    "path": "(a)(8)(B)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(B)",
+    "unit_id": "u0107"
+  },
+  "usc5-552-doj:u0107:s01": {
+    "digest": "e6aadc143db6f75724fc29f6d75b1d427bbc41a8735c45e534f1883cea9af661",
+    "end": 180,
+    "origin_offset": 32913,
+    "path": "(a)(8)(B)",
+    "source_id": "usc5-552-doj",
+    "start": 4,
+    "text": "Nothing in this paragraph requires disclosure of information that is otherwise prohibited from disclosure by law, or otherwise exempted from disclosure under subsection (b)(3).",
+    "unit_id": "u0107"
+  },
+  "usc5-552-doj:u0108:s00": {
+    "digest": "563d88553314f1ab10c8ccc77efbd1872ca31ad8ccdfe0b9de5d0143c986dc91",
+    "end": 52,
+    "origin_offset": 33122,
+    "path": "(b)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(b) This section does not apply to matters that are—",
+    "unit_id": "u0108"
+  },
+  "usc5-552-doj:u0109:s00": {
+    "digest": "2625b3ad1d0e13c26061d0d4ed72ecdd6c4ccbc0609faed3fa776fc947bccd89",
+    "end": 225,
+    "origin_offset": 33232,
+    "path": "(b)(1)(A)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(1)(A) specifically authorized under criteria established by an Executive order to be kept secret in the interest of national defense or foreign policy and (B) are in fact properly classified pursuant to such Executive order;",
+    "unit_id": "u0109"
+  },
+  "usc5-552-doj:u0110:s00": {
+    "digest": "830c8039c1f08ea0ffdfb5814f575e48b1d2469c0ae3b54bf8bf3628af0c633b",
+    "end": 78,
+    "origin_offset": 33469,
+    "path": "(b)(2)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(2) related solely to the internal personnel rules and practices of an agency;",
+    "unit_id": "u0110"
+  },
+  "usc5-552-doj:u0111:s00": {
+    "digest": "5c0d1c2832eea64aba4140229fec370a631c116129cf4510730e9dac02792b5d",
+    "end": 111,
+    "origin_offset": 33559,
+    "path": "(b)(3)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(3) specifically exempted from disclosure by statute (other than section 552b of this title), if that statute--",
+    "unit_id": "u0111"
+  },
+  "usc5-552-doj:u0112:s00": {
+    "digest": "1da23c5b79f84fd1c7823b9780490349d29c9a4bf661424e06d644b60aefc998",
+    "end": 120,
+    "origin_offset": 33733,
+    "path": "(b)(3)(A)(i)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(A)(i) requires that the matters be withheld from the public in such a manner as to leave no discretion on the issue; or",
+    "unit_id": "u0112"
+  },
+  "usc5-552-doj:u0113:s00": {
+    "digest": "14558f88eb579594775bbd8f740da3b08fc9c305b0b710d2dfca43a60914f654",
+    "end": 113,
+    "origin_offset": 33920,
+    "path": "(b)(3)(A)(ii)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(ii) establishes particular criteria for withholding or refers to particular types of matters to be withheld; and",
+    "unit_id": "u0113"
+  },
+  "usc5-552-doj:u0114:s00": {
+    "digest": "e9ca14512c1135d336655149fb5f59ac6155a341c26f624561a03e450ae7159d",
+    "end": 110,
+    "origin_offset": 34057,
+    "path": "(b)(3)(B)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(B) if enacted after the date of enactment of the OPEN FOIA Act of 2009, specifically cites to this paragraph.",
+    "unit_id": "u0114"
+  },
+  "usc5-552-doj:u0115:s00": {
+    "digest": "3d508093d40d5de79f4bdf92f1ef4a63e48398f73e115441b5ec806d3a8537f3",
+    "end": 112,
+    "origin_offset": 34187,
+    "path": "(b)(4)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(4) trade secrets and commercial or financial information obtained from a person and privileged or confidential;",
+    "unit_id": "u0115"
+  },
+  "usc5-552-doj:u0116:s00": {
+    "digest": "cbbb3c80c49c57c373595390b85a59794815d4ecddde0f4fd3560230efb5df13",
+    "end": 307,
+    "origin_offset": 34311,
+    "path": "(b)(5)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(5) inter-agency or intra-agency memorandums or letters that would not be available by law to a party other than an agency in litigation with the agency, provided that the deliberative process privilege shall not apply to records created 25 years or more before the date on which the records were requested;",
+    "unit_id": "u0116"
+  },
+  "usc5-552-doj:u0117:s00": {
+    "digest": "1c3e85c6e61e3b6edf70ec96cf3528c4d9288c8d2359743cfb9f4fa75b398ba7",
+    "end": 142,
+    "origin_offset": 34677,
+    "path": "(b)(6)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(6) personnel and medical files and similar files the disclosure of which would constitute a clearly unwarranted invasion of personal privacy;",
+    "unit_id": "u0117"
+  },
+  "usc5-552-doj:u0118:s00": {
+    "digest": "96d3a7072c4a10c0edcfa549555625c47847c93c44bd9bfd7499724e27901999",
+    "end": 1247,
+    "origin_offset": 34831,
+    "path": "(b)(7)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(7) records or information compiled for law enforcement purposes, but only to the extent that the production of such law enforcement records or information (A) could reasonably be expected to interfere with enforcement proceedings, (B) would deprive a person of a right to a fair trial or an impartial adjudication, (C) could reasonably be expected to constitute an unwarranted invasion of personal privacy, (D) could reasonably be expected to disclose the identity of a confidential source, including a State, local, or foreign agency or authority or any private institution which furnished information on a confidential basis, and, in the case of a record or information compiled by a criminal law enforcement authority in the course of a criminal investigation or by an agency conducting a lawful national security intelligence investigation, information furnished by a confidential source, (E) would disclose techniques and procedures for law enforcement investigations or prosecutions, or would disclose guidelines for law enforcement investigations or prosecutions if such disclosure could reasonably be expected to risk circumvention of the law, or (F) could reasonably be expected to endanger the life or physical safety of any individual;",
+    "unit_id": "u0118"
+  },
+  "usc5-552-doj:u0119:s00": {
+    "digest": "bc4eab405fd5e4d56db086fb879ced965c64097a28776174204d4cd3054e52ad",
+    "end": 206,
+    "origin_offset": 36090,
+    "path": "(b)(8)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(8) contained in or related to examination, operating, or condition reports prepared by, on behalf of, or for the use of an agency responsible for the regulation or supervision of financial institutions; or",
+    "unit_id": "u0119"
+  },
+  "usc5-552-doj:u0120:s00": {
+    "digest": "88d4bb486bed5acaa66a934e4abc8353e2bedba7610d9e251653191aaf5c9a54",
+    "end": 86,
+    "origin_offset": 36308,
+    "path": "(b)(9)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(9) geological and geophysical information and data, including maps, concerning wells.",
+    "unit_id": "u0120"
+  },
+  "usc5-552-doj:u0121:s00": {
+    "digest": "5bfa3475672721bb87c69c4dc8e4d186dea3976db148f4f1a4be7ab138760109",
+    "end": 171,
+    "origin_offset": 36406,
+    "path": "(b)(9)+",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "Any reasonably segregable portion of a record shall be provided to any person requesting such record after deletion of the portions which are exempt under this subsection.",
+    "unit_id": "u0121"
+  },
+  "usc5-552-doj:u0121:s01": {
+    "digest": "82fdbefc166206d7adcf49a807a931a88b11ba488471617763d0fd2f5fa708c0",
+    "end": 452,
+    "origin_offset": 36578,
+    "path": "(b)(9)+",
+    "source_id": "usc5-552-doj",
+    "start": 172,
+    "text": "The amount of information deleted, and the exemption under which the deletion is made, shall be indicated on the released portion of the record, unless including that indication would harm an interest protected by the exemption in this subsection under which the deletion is made.",
+    "unit_id": "u0121"
+  },
+  "usc5-552-doj:u0121:s02": {
+    "digest": "ffc6195c4bb06c8fe9bdde0d099a3cae978021f2b6acad01b808bceed1c3090a",
+    "end": 643,
+    "origin_offset": 36859,
+    "path": "(b)(9)+",
+    "source_id": "usc5-552-doj",
+    "start": 453,
+    "text": "If technically feasible, the amount of the information deleted, and the exemption under which the deletion is made, shall be indicated at the place in the record where such deletion is made.",
+    "unit_id": "u0121"
+  },
+  "usc5-552-doj:u0122:s00": {
+    "digest": "78f5863ecac50bac0e821c1ca4b6a880ee0021b929072a84d60c228d1a900879",
+    "end": 6,
+    "origin_offset": 37066,
+    "path": "(c)(1)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(c)(1)",
+    "unit_id": "u0122"
+  },
+  "usc5-552-doj:u0122:s01": {
+    "digest": "2f4012a2990938724561662807dad2eb7cb2176658ae9875bbb0abac9c919a20",
+    "end": 105,
+    "origin_offset": 37073,
+    "path": "(c)(1)",
+    "source_id": "usc5-552-doj",
+    "start": 7,
+    "text": "Whenever a request is made which involves access to records described in subsection (b)(7)(A) and—",
+    "unit_id": "u0122"
+  },
+  "usc5-552-doj:u0123:s00": {
+    "digest": "4cc3475fac8ce6f99befdee2cba694e197d56258e95159214837bfde682a96a2",
+    "end": 86,
+    "origin_offset": 37280,
+    "path": "(c)(1)(A)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(A) the investigation or proceeding involves a possible violation of criminal law; and",
+    "unit_id": "u0123"
+  },
+  "usc5-552-doj:u0124:s00": {
+    "digest": "35043b7f73cc01f340b4961de0b6eabb0c7c2416a6e1280e59a04d19a463c72f",
+    "end": 380,
+    "origin_offset": 37380,
+    "path": "(c)(1)(B)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(B) there is reason to believe that (i) the subject of the investigation or proceeding is not aware of its pendency, and (ii) disclosure of the existence of the records could reasonably be expected to interfere with enforcement proceedings, the agency may, during only such time as that circumstance continues, treat the records as not subject to the requirements of this section.",
+    "unit_id": "u0124"
+  },
+  "usc5-552-doj:u0125:s00": {
+    "digest": "d9ef07860ac92d2652411b68caf79459432fd3f045f553b195d00b1c1383ecd8",
+    "end": 377,
+    "origin_offset": 37780,
+    "path": "(c)(2)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(2) Whenever informant records maintained by a criminal law enforcement agency under an informant's name or personal identifier are requested by a third party according to the informant's name or personal identifier, the agency may treat the records as not subject to the requirements of this section unless the informant's status as an informant has been officially confirmed.",
+    "unit_id": "u0125"
+  },
+  "usc5-552-doj:u0126:s00": {
+    "digest": "69bf78fb3acb1947fe36a930fc750350363e825aaec92ce056cb1d320d00e74c",
+    "end": 451,
+    "origin_offset": 38169,
+    "path": "(c)(3)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(3) Whenever a request is made which involves access to records maintained by the Federal Bureau of Investigation pertaining to foreign intelligence or counterintelligence, or international terrorism, and the existence of the records is classified information as provided in subsection (b)(1), the Bureau may, as long as the existence of the records remains classified information, treat the records as not subject to the requirements of this section.",
+    "unit_id": "u0126"
+  },
+  "usc5-552-doj:u0127:s00": {
+    "digest": "fcde7f0fe1ea5559a1676007340d839da06b388de5f9c9e7300e32d381c7d82a",
+    "end": 165,
+    "origin_offset": 38636,
+    "path": "(d)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(d) This section does not authorize the withholding of information or limit the availability of records to the public, except as specifically stated in this section.",
+    "unit_id": "u0127"
+  },
+  "usc5-552-doj:u0127:s01": {
+    "digest": "aa0633687774f4383f660a9addd58c1463f14fc9429724c6a8e1d5ed5b553196",
+    "end": 234,
+    "origin_offset": 38802,
+    "path": "(d)",
+    "source_id": "usc5-552-doj",
+    "start": 166,
+    "text": "This section is not authority to withhold information from Congress.",
+    "unit_id": "u0127"
+  },
+  "usc5-552-doj:u0128:s00": {
+    "digest": "e2c3ff0e12691d7e7b5f213a9f44e4cdc5cdf752392877698bd0f6e2abe50652",
+    "end": 6,
+    "origin_offset": 38879,
+    "path": "(e)(1)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(e)(1)",
+    "unit_id": "u0128"
+  },
+  "usc5-552-doj:u0128:s01": {
+    "digest": "ab6e94ce63144b782f0190be2cb415884975de69118142c8280a674f2810ea25",
+    "end": 261,
+    "origin_offset": 38886,
+    "path": "(e)(1)",
+    "source_id": "usc5-552-doj",
+    "start": 7,
+    "text": "On or before February 1 of each year, each agency shall submit to the Attorney General of the United States and to the Director of the Office of Government Information Services a report which shall cover the preceding fiscal year and which shall include—",
+    "unit_id": "u0128"
+  },
+  "usc5-552-doj:u0129:s00": {
+    "digest": "684998ced570caf1759e1689d7f2d3fc62e8058a6fcc2a3878b5134492c29ef9",
+    "end": 177,
+    "origin_offset": 39266,
+    "path": "(e)(1)(A)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(A) the number of determinations made by the agency not to comply with requests for records made to such agency under subsection (a) and the reasons for each such determination;",
+    "unit_id": "u0129"
+  },
+  "usc5-552-doj:u0130:s00": {
+    "digest": "bcf5ac5b84f6d79f0e51cdeba66f94e493c19845508734e4134fd03e69c5925b",
+    "end": 189,
+    "origin_offset": 39457,
+    "path": "(e)(1)(B)(i)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(B)(i) the number of appeals made by persons under subsection (a)(6), the result of such appeals, and the reason for the action upon each appeal that results in a denial of information; and",
+    "unit_id": "u0130"
+  },
+  "usc5-552-doj:u0131:s00": {
+    "digest": "04fe75b8b7035093d7796a46715b104300d23e81d0c429308cc59e81f3598d0c",
+    "end": 388,
+    "origin_offset": 39713,
+    "path": "(e)(1)(B)(ii)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(ii) a complete list of all statutes that the agency relies upon to authorize the agency to withhold information under subsection (b)(3), the number of occasions on which each statute was relied upon, a description of whether a court has upheld the decision of the agency to withhold information under each such statute, and a concise description of the scope of any information withheld;",
+    "unit_id": "u0131"
+  },
+  "usc5-552-doj:u0132:s00": {
+    "digest": "a06ecced1d889e1e0339de719439e69acc1751157988abd149214ff6bc7b1a0c",
+    "end": 219,
+    "origin_offset": 40125,
+    "path": "(e)(1)(C)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(C) the number of requests for records pending before the agency as of September 30 of the preceding year, and the median and average number of days that such requests had been pending before the agency as of that date;",
+    "unit_id": "u0132"
+  },
+  "usc5-552-doj:u0133:s00": {
+    "digest": "14fc572ae9ac7ee5655eb6bf6e9afc962c3de246d45066b3a69ab2daf056f00e",
+    "end": 116,
+    "origin_offset": 40358,
+    "path": "(e)(1)(D)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(D) the number of requests for records received by the agency and the number of requests which the agency processed;",
+    "unit_id": "u0133"
+  },
+  "usc5-552-doj:u0134:s00": {
+    "digest": "c1fabc68d030c2e939887f6615a523eeb71c87b4c04edac0cf2f673feb8a6d91",
+    "end": 158,
+    "origin_offset": 40488,
+    "path": "(e)(1)(E)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(E) the median number of days taken by the agency to process different types of requests, based on the date on which the requests were received by the agency;",
+    "unit_id": "u0134"
+  },
+  "usc5-552-doj:u0135:s00": {
+    "digest": "bc7835f522875a6a77cd921a7bd60fad1e886a075c9b81a26b8bba05be4c6320",
+    "end": 286,
+    "origin_offset": 40660,
+    "path": "(e)(1)(F)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(F) the average number of days for the agency to respond to a request beginning on the date on which the request was received by the agency, the median number of days for the agency to respond to such requests, and the range in number of days for the agency to respond to such requests;",
+    "unit_id": "u0135"
+  },
+  "usc5-552-doj:u0136:s00": {
+    "digest": "1e720c96a6fae48abdb616b44e8162bd578b99dfdefaba6afcb85cb8e0a9d0a3",
+    "end": 116,
+    "origin_offset": 40960,
+    "path": "(e)(1)(G)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(G) based on the number of business days that have elapsed since each request was originally received by the agency—",
+    "unit_id": "u0136"
+  },
+  "usc5-552-doj:u0137:s00": {
+    "digest": "7789e8a840ae2cfd09bc4c703e2d1ff0bee6e06b63029944ddd590ad1d8d8fc7",
+    "end": 193,
+    "origin_offset": 41143,
+    "path": "(e)(1)(G)(i)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(i) the number of requests for records to which the agency has responded with a determination within a period up to and including 20 days, and in 20-day increments up to and including 200 days;",
+    "unit_id": "u0137"
+  },
+  "usc5-552-doj:u0138:s00": {
+    "digest": "a57e828e29fbdf8e8a476e2213969139dc24c18c5df0cf841bc5321c2d1b6d22",
+    "end": 156,
+    "origin_offset": 41352,
+    "path": "(e)(1)(G)(ii)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(ii) the number of requests for records to which the agency has responded with a determination within a period greater than 200 days and less than 301 days;",
+    "unit_id": "u0138"
+  },
+  "usc5-552-doj:u0139:s00": {
+    "digest": "b0db14e26aa22baf90e1f433608e242b48dd1b364ccdcd5fbc090eb2c905885f",
+    "end": 161,
+    "origin_offset": 41524,
+    "path": "(e)(1)(G)(iii)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(iii) the number of requests for records to which the agency has responded with a determination within a period greater than 300 days and less than 401 days; and",
+    "unit_id": "u0139"
+  },
+  "usc5-552-doj:u0140:s00": {
+    "digest": "4ddc3a141b3ba8f2667a94f3b3e25f43b5c418760cd173c35ea9e1016883dfa9",
+    "end": 133,
+    "origin_offset": 41701,
+    "path": "(e)(1)(G)(iv)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(iv) the number of requests for records to which the agency has responded with a determination within a period greater than 400 days;",
+    "unit_id": "u0140"
+  },
+  "usc5-552-doj:u0141:s00": {
+    "digest": "baa0089837dccf122329fdc0565bf5b50aa3550f6d745a7304f958b23e07912f",
+    "end": 305,
+    "origin_offset": 41858,
+    "path": "(e)(1)(H)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(H) the average number of days for the agency to provide the granted information beginning on the date on which the request was originally filed, the median number of days for the agency to provide the granted information, and the range in number of days for the agency to provide the granted information;",
+    "unit_id": "u0141"
+  },
+  "usc5-552-doj:u0142:s00": {
+    "digest": "b17a26c8aaa146fdb4f140fecdd55d962cdab5d96ac8329bef26ab4916219206",
+    "end": 367,
+    "origin_offset": 42177,
+    "path": "(e)(1)(I)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(I) the median and average number of days for the agency to respond to administrative appeals based on the date on which the appeals originally were received by the agency, the highest number of business days taken by the agency to respond to an administrative appeal, and the lowest number of business days taken by the agency to respond to an administrative appeal;",
+    "unit_id": "u0142"
+  },
+  "usc5-552-doj:u0143:s00": {
+    "digest": "5dffc3f156c82629a75df27d03dd2bd644cef1fac60cfe9bdca8717145e1586d",
+    "end": 193,
+    "origin_offset": 42558,
+    "path": "(e)(1)(J)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(J) data on the 10 active requests with the earliest filing dates pending at each agency, including the amount of time that has elapsed since each request was originally received by the agency;",
+    "unit_id": "u0143"
+  },
+  "usc5-552-doj:u0144:s00": {
+    "digest": "42746336dc270f9d04d5bac92dcf9f7c2b504b10d633f90533c279023d0c6e18",
+    "end": 262,
+    "origin_offset": 42765,
+    "path": "(e)(1)(K)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(K) data on the 10 active administrative appeals with the earliest filing dates pending before the agency as of September 30 of the preceding year, including the number of business days that have elapsed since the requests were originally received by the agency;",
+    "unit_id": "u0144"
+  },
+  "usc5-552-doj:u0145:s00": {
+    "digest": "15b9f4456aaabde866ce92771f56b6b07374360f19ea9a70c917eed0ce55eefc",
+    "end": 210,
+    "origin_offset": 43041,
+    "path": "(e)(1)(L)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(L) the number of expedited review requests that are granted and denied, the average and median number of days for adjudicating expedited review requests, and the number adjudicated within the required 10 days;",
+    "unit_id": "u0145"
+  },
+  "usc5-552-doj:u0146:s00": {
+    "digest": "a4ff141e99c9ac148b78a3db0cf129c4b5ad9b3d9ea57f2890a03cf50cc93a18",
+    "end": 152,
+    "origin_offset": 43265,
+    "path": "(e)(1)(M)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(M) the number of fee waiver requests that are granted and denied, and the average and median number of days for adjudicating fee waiver determinations;",
+    "unit_id": "u0146"
+  },
+  "usc5-552-doj:u0147:s00": {
+    "digest": "d02b046122388bf5be590adc2963de3a23ae33e14aeed2206487c4c1430a6eee",
+    "end": 77,
+    "origin_offset": 43431,
+    "path": "(e)(1)(N)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(N) the total amount of fees collected by the agency for processing requests;",
+    "unit_id": "u0147"
+  },
+  "usc5-552-doj:u0148:s00": {
+    "digest": "e27e9c82f80df5bf1d252d13eefc2233046203616a4a0f8e9d24e6d81f6d3278",
+    "end": 184,
+    "origin_offset": 43533,
+    "path": "(e)(1)(O)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(O) the number of full-time staff of the agency devoted to processing requests for records under this section, and the total amount expended by the agency for processing such requests;",
+    "unit_id": "u0148"
+  },
+  "usc5-552-doj:u0149:s00": {
+    "digest": "88fd217d13e35c86be285efedeb7ca96d974c9a0595dedaea3384086a729f412",
+    "end": 89,
+    "origin_offset": 43739,
+    "path": "(e)(1)(P)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(P) the number of times the agency denied a request for records under subsection (c); and",
+    "unit_id": "u0149"
+  },
+  "usc5-552-doj:u0150:s00": {
+    "digest": "b412e106b6510918722e3f2806272d82f7c94055d6f842a0af36ee3ea9a636a5",
+    "end": 121,
+    "origin_offset": 43859,
+    "path": "(e)(1)(Q)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(Q) the number of records that were made available for public inspection in an electronic format under subsection (a)(2).",
+    "unit_id": "u0150"
+  },
+  "usc5-552-doj:u0151:s00": {
+    "digest": "96cf3ca5a535c98986a078a1016cfe543cc0c207629a0180cd4dc601cee4649c",
+    "end": 158,
+    "origin_offset": 44009,
+    "path": "(e)(2)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(2) Information in each report submitted under paragraph (1) shall be expressed in terms of each principal component of the agency and for the agency overall.",
+    "unit_id": "u0151"
+  },
+  "usc5-552-doj:u0152:s00": {
+    "digest": "d6cf67d2bad532f46afdaec73fb2111ae19b1a7e99c3512d42cd91391e3058d1",
+    "end": 100,
+    "origin_offset": 44179,
+    "path": "(e)(3)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(3) Each agency shall make each such report available for public inspection in an electronic format.",
+    "unit_id": "u0152"
+  },
+  "usc5-552-doj:u0152:s01": {
+    "digest": "8cc851336385cb0524fa96cc53e0fecb1484a827c743b9304a4904b2499be7e2",
+    "end": 284,
+    "origin_offset": 44643,
+    "path": "(e)(3)",
+    "source_id": "usc5-552-doj",
+    "start": 101,
+    "text": "In addition, each agency shall make the raw statistical data used in each report available in a timely manner for public inspection in an electronic format, which shall be available –",
+    "unit_id": "u0152"
+  },
+  "usc5-552-doj:u0153:s00": {
+    "digest": "733c7e2366c51e6d3ca7b1b8cfe1bb3ffbbfddece3887b8355c2870af61ebb7c",
+    "end": 57,
+    "origin_offset": 44907,
+    "path": "(e)(3)(A)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(A) without charge, license, or registration requirement;",
+    "unit_id": "u0153"
+  },
+  "usc5-552-doj:u0154:s00": {
+    "digest": "a8a21eb80f1b50bf6ec2e26128f0da629aa16085bebe5da238bfcd257af1e265",
+    "end": 44,
+    "origin_offset": 44995,
+    "path": "(e)(3)(B)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(B) in an aggregated, searchable format; and",
+    "unit_id": "u0154"
+  },
+  "usc5-552-doj:u0155:s00": {
+    "digest": "1c930c6d9554741584355878023011de13a501f034cd133a2f4964db0dc3540a",
+    "end": 47,
+    "origin_offset": 45070,
+    "path": "(e)(3)(C)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(C) in a format that may be downloaded in bulk.",
+    "unit_id": "u0155"
+  },
+  "usc5-552-doj:u0156:s00": {
+    "digest": "94e6319d76a21cd011fe14be0d86bed4c6ee4caa953ddade28b401db4b93beae",
+    "end": 165,
+    "origin_offset": 45146,
+    "path": "(e)(4)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(4) The Attorney General of the United States shall make each report which has been made available by electronic means available at a single electronic access point.",
+    "unit_id": "u0156"
+  },
+  "usc5-552-doj:u0156:s01": {
+    "digest": "91cdff6ad437037b5a2d5b680c199f01856d792060aa071f4b7de5dd74d7a4a7",
+    "end": 611,
+    "origin_offset": 45312,
+    "path": "(e)(4)",
+    "source_id": "usc5-552-doj",
+    "start": 166,
+    "text": "The Attorney General of the United States shall notify the Chairman and ranking minority member of the Committee on Oversight and Government Reform of the House of Representatives and the Chairman and ranking minority member of the Committees on Homeland Security and Governmental Affairs and the Judiciary of the Senate, no later than March 1 of the year in which each such report is issued, that such reports are available by electronic means.",
+    "unit_id": "u0156"
+  },
+  "usc5-552-doj:u0157:s00": {
+    "digest": "7f99452ebd819429fac778f9e2605ad3d126926d0cd09bcaade88cd0d159de0f",
+    "end": 355,
+    "origin_offset": 45872,
+    "path": "(e)(5)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(5) The Attorney General of the United States, in consultation with the Director of the Office of Management and Budget, shall develop reporting and performance guidelines in connection with reports required by this subsection by October 1, 1997, and may establish additional requirements for such reports as the Attorney General determines may be useful.",
+    "unit_id": "u0157"
+  },
+  "usc5-552-doj:u0158:s00": {
+    "digest": "1c075d0bdd144c7df6db89232cd7b669100d8f0ba2a6c367962a3b8d805fe92b",
+    "end": 314,
+    "origin_offset": 46239,
+    "path": "(e)(6)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(6) (A) The Attorney General of the United States shall submit to the Committee on Oversight and Government Reform of the House of Representatives, the Committee on the Judiciary of the Senate, and the President a report on or before March 1 of each calendar year, which shall include for the prior calendar year –",
+    "unit_id": "u0158"
+  },
+  "usc5-552-doj:u0159:s00": {
+    "digest": "3578e146177ecba77be2c511fef99cbc9c8799764bd9716e305cea30b2967318",
+    "end": 64,
+    "origin_offset": 47262,
+    "path": "(i)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(i) a listing of the number of cases arising under this section;",
+    "unit_id": "u0159"
+  },
+  "usc5-552-doj:u0160:s00": {
+    "digest": "0f297232574013cdad87b0322e502d2059355c0c3f65c19d6def90c30f69d0f3",
+    "end": 19,
+    "origin_offset": 47359,
+    "path": "(i)(ii)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(ii) a listing of –",
+    "unit_id": "u0160"
+  },
+  "usc5-552-doj:u0161:s00": {
+    "digest": "0a9a493fff8f5a2b3260110270db4501e6e6cfda219010bb50ef099aecbda462",
+    "end": 104,
+    "origin_offset": 47466,
+    "path": "(i)(ii)(I)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(I) each subsection, and any exemption, if applicable, involved in each case arising under this section;",
+    "unit_id": "u0161"
+  },
+  "usc5-552-doj:u0162:s00": {
+    "digest": "fa71ec743b0111e6b5cc583a8aa548e64c09e6ff195291183034e319c6f48578",
+    "end": 65,
+    "origin_offset": 47605,
+    "path": "(i)(ii)(II)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(II) the disposition of each case arising under this section; and",
+    "unit_id": "u0162"
+  },
+  "usc5-552-doj:u0163:s00": {
+    "digest": "7c436708a04a97df2d66238024358b1c07abc6e9a87a7ff047ba9f202bac2246",
+    "end": 108,
+    "origin_offset": 47705,
+    "path": "(i)(ii)(III)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(III) the cost, fees, and penalties assessed under subparagraphs (E), (F), and (G) of subsection (a)(4); and",
+    "unit_id": "u0163"
+  },
+  "usc5-552-doj:u0164:s00": {
+    "digest": "96ca94e667a0852ea686ec1a4ee8f29d9c9758d9b39772bc6f8c84c1853bca2f",
+    "end": 124,
+    "origin_offset": 47858,
+    "path": "(i)(ii)(III)(iii)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(iii) a description of the efforts undertaken by the Department of Justice to encourage agency compliance with this section.",
+    "unit_id": "u0164"
+  },
+  "usc5-552-doj:u0165:s00": {
+    "digest": "d5a47fdbba1f13782ecdd007b54725e647250a8efd9d2597837c804bc7af6942",
+    "end": 58,
+    "origin_offset": 48023,
+    "path": "(i)(ii)(B)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(B) The Attorney General of the United States shall make –",
+    "unit_id": "u0165"
+  },
+  "usc5-552-doj:u0166:s00": {
+    "digest": "35db9fabc14aa57676bcfe966cb7dfb2e17cf8243faa8527562f2e70c20f1d3b",
+    "end": 109,
+    "origin_offset": 48164,
+    "path": "(i)(ii)(B)(i)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(i) each report submitted under subparagraph (A) available for public inspection in an electronic format; and",
+    "unit_id": "u0166"
+  },
+  "usc5-552-doj:u0167:s00": {
+    "digest": "a250f122382617f390cfd60e3f431e13577d15534c6bd254e4eccb808ded801b",
+    "end": 171,
+    "origin_offset": 48306,
+    "path": "(i)(ii)(B)(ii)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(ii) the raw statistical data used in each report submitted under subparagraph (A) available for public inspection in an electronic format, which shall be made available –",
+    "unit_id": "u0167"
+  },
+  "usc5-552-doj:u0168:s00": {
+    "digest": "63f0788c7014f165975c1782947dfac969496e2c467a8eb520905c8fd88b9e5f",
+    "end": 57,
+    "origin_offset": 48565,
+    "path": "(i)(ii)(B)(ii)(I)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(I) without charge, license, or registration requirement;",
+    "unit_id": "u0168"
+  },
+  "usc5-552-doj:u0169:s00": {
+    "digest": "b3f9aca5554dfc50cfd02e9d048491b2911fa874ca4251becd20fe799b9e5be6",
+    "end": 45,
+    "origin_offset": 48657,
+    "path": "(i)(ii)(B)(ii)(II)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(II) in an aggregated, searchable format; and",
+    "unit_id": "u0169"
+  },
+  "usc5-552-doj:u0170:s00": {
+    "digest": "ab1ffe568b7b10480091900bb5cc8bf7d18e7be723ca54573ec3aff1a3e9b764",
+    "end": 49,
+    "origin_offset": 48737,
+    "path": "(i)(ii)(B)(ii)(III)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(III) in a format that may be downloaded in bulk;",
+    "unit_id": "u0170"
+  },
+  "usc5-552-doj:u0171:s00": {
+    "digest": "e3eebb9cbb21b92eaffcf8faf408795f57b313b14a32b4dda25eb3552851a042",
+    "end": 3,
+    "origin_offset": 48841,
+    "path": "(f)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(f)",
+    "unit_id": "u0171"
+  },
+  "usc5-552-doj:u0171:s01": {
+    "digest": "1164514df94fe240f148f5bafc74ad8def096733a125deb154b1d5a864efdd6d",
+    "end": 43,
+    "origin_offset": 48845,
+    "path": "(f)",
+    "source_id": "usc5-552-doj",
+    "start": 4,
+    "text": "For purposes of this section, the term—",
+    "unit_id": "u0171"
+  },
+  "usc5-552-doj:u0172:s00": {
+    "digest": "d07c4e9f95407c84e253e6434b6eb0b62483690b56b44c9c87d71ef2cf886583",
+    "end": 328,
+    "origin_offset": 48942,
+    "path": "(f)(1)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(1) \"agency\" as defined in section 551(1) of this title includes any executive department, military department, Government corporation, Government controlled corporation, or other establishment in the executive branch of the Government (including the Executive Office of the President), or any independent regulatory agency; and",
+    "unit_id": "u0172"
+  },
+  "usc5-552-doj:u0173:s00": {
+    "digest": "8e0366127d7630a5bc1b128b10402a1b860c6ffa5784b5b8d1dcbf65e6847209",
+    "end": 90,
+    "origin_offset": 49282,
+    "path": "(f)(2)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(2) ‘record’ and any other term used in this section in reference to information includes—",
+    "unit_id": "u0173"
+  },
+  "usc5-552-doj:u0174:s00": {
+    "digest": "0fb1ee13e84e16d4f0d6a9f81cd11c7459b20bd6efeabb4edb2128cde783f8d8",
+    "end": 174,
+    "origin_offset": 49435,
+    "path": "(f)(2)(A)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(A) any information that would be an agency record subject to the requirements of this section when maintained by an agency in any format, including an electronic format; and",
+    "unit_id": "u0174"
+  },
+  "usc5-552-doj:u0175:s00": {
+    "digest": "5509da3c797ea63bdd1cbaf59fbc307187d44328b99b6bb07f5a0bf41efc65ae",
+    "end": 165,
+    "origin_offset": 49623,
+    "path": "(f)(2)(B)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(B) any information described under subparagraph (A) that is maintained for an agency by an entity under Government contract, for the purposes of records management.",
+    "unit_id": "u0175"
+  },
+  "usc5-552-doj:u0176:s00": {
+    "digest": "58f29afaf55e768fd8a1180e2764b9c064d0ffa617529f87b0d193d912764c1c",
+    "end": 248,
+    "origin_offset": 49812,
+    "path": "(g)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(g) The head of each agency shall prepare and make available for public inspection in an electronic format, reference material or a guide for requesting records or information from the agency, subject to the exemptions in subsection (b), including—",
+    "unit_id": "u0176"
+  },
+  "usc5-552-doj:u0177:s00": {
+    "digest": "132c3dfacff7e0a21fd9b137bef3c117c929522416cc2392fdbed7c2a1f341d8",
+    "end": 60,
+    "origin_offset": 50174,
+    "path": "(g)(1)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(1) an index of all major information systems of the agency;",
+    "unit_id": "u0177"
+  },
+  "usc5-552-doj:u0178:s00": {
+    "digest": "a62f5989fd57fff4979b6d50cf25d69029a67c86b25254296e418c00e0a77071",
+    "end": 95,
+    "origin_offset": 50246,
+    "path": "(g)(2)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(2) a description of major information and record locator systems maintained by the agency; and",
+    "unit_id": "u0178"
+  },
+  "usc5-552-doj:u0179:s00": {
+    "digest": "7cc936669ec16e7863e4293e85c317487ccdbf301db0b5663b2b186b6706c4c6",
+    "end": 155,
+    "origin_offset": 50353,
+    "path": "(g)(3)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(3) a handbook for obtaining various types and categories of public information from the agency pursuant to chapter 35 of title 44, and under this section.",
+    "unit_id": "u0179"
+  },
+  "usc5-552-doj:u0180:s00": {
+    "digest": "7139af32f17aadddea2461deec331b5c7620462a5d1cca2310ee3967367d87d3",
+    "end": 6,
+    "origin_offset": 50527,
+    "path": "(h)(1)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(h)(1)",
+    "unit_id": "u0180"
+  },
+  "usc5-552-doj:u0180:s01": {
+    "digest": "46e1470cf1f2d32613d75cb609cba5a2a830aa367f9bdc97862f5fc336182525",
+    "end": 130,
+    "origin_offset": 50534,
+    "path": "(h)(1)",
+    "source_id": "usc5-552-doj",
+    "start": 7,
+    "text": "There is established the Office of Government Information Services within the National Archives and Records Administration.",
+    "unit_id": "u0180"
+  },
+  "usc5-552-doj:u0180:s02": {
+    "digest": "50fa2d9a2eef0ae590eec118a0503d9997e8195fbab49cf2d432037db51dd9f5",
+    "end": 225,
+    "origin_offset": 50666,
+    "path": "(h)(1)",
+    "source_id": "usc5-552-doj",
+    "start": 131,
+    "text": "The head of the Office shall be the Director of the Office of Government Information Services.",
+    "unit_id": "u0180"
+  },
+  "usc5-552-doj:u0181:s00": {
+    "digest": "d977817b947e51bafc8a0d13645b2b0440eb87e1ff8faed694bcd0a253f789ac",
+    "end": 56,
+    "origin_offset": 50827,
+    "path": "(h)(2)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(2) The Office of Government Information Services shall—",
+    "unit_id": "u0181"
+  },
+  "usc5-552-doj:u0182:s00": {
+    "digest": "73acf7e304608ac4e45a62140187ebb5d2414305f937b0ff405ce0514efeea81",
+    "end": 81,
+    "origin_offset": 50946,
+    "path": "(h)(2)(A)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(A) review policies and procedures of administrative agencies under this section;",
+    "unit_id": "u0182"
+  },
+  "usc5-552-doj:u0183:s00": {
+    "digest": "b2c787fa0fa31ba0e5982a51b12b8a3723dfadf75934036cf463e01401180d90",
+    "end": 71,
+    "origin_offset": 51041,
+    "path": "(h)(2)(B)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(B) review compliance with this section by administrative agencies; and",
+    "unit_id": "u0183"
+  },
+  "usc5-552-doj:u0184:s00": {
+    "digest": "aeffbd57e13915e7c6ebaf4126995d1e56e61a2e6c980e295caac9e51f2502e1",
+    "end": 80,
+    "origin_offset": 51126,
+    "path": "(h)(2)(C)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(C) identify procedures and methods for improving compliance under this section.",
+    "unit_id": "u0184"
+  },
+  "usc5-552-doj:u0185:s00": {
+    "digest": "476c0776eac2108fdb17985195e1eb613f88a84853a0542b3789330027ecca92",
+    "end": 330,
+    "origin_offset": 51352,
+    "path": "(h)(3)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(3) The Office of Government Information Services shall offer mediation services to resolve disputes between persons making requests under this section and administrative agencies as a nonexclusive alternative to litigation and may issue advisory opinions at the discretion of the Office or upon request of any party to a dispute.",
+    "unit_id": "u0185"
+  },
+  "usc5-552-doj:u0186:s00": {
+    "digest": "c8bd63a1001d402665496515cd484dc688a9dce20c65c47dc1437ee188736062",
+    "end": 267,
+    "origin_offset": 52056,
+    "path": "(h)(4)(A)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(4)(A) Not less frequently than annually, the Director of the Office of Government Information Services shall submit to the Committee on Oversight and Government Reform of the House of Representatives, the Committee on the Judiciary of the Senate, and the President –",
+    "unit_id": "u0186"
+  },
+  "usc5-552-doj:u0187:s00": {
+    "digest": "bbede73e1beaa4279a7dc5126ef91399f07380dd0b8088478aae5850b27ca295",
+    "end": 92,
+    "origin_offset": 52457,
+    "path": "(h)(4)(A)(i)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(i) A report on the findings of the information reviewed and identified under paragraph (2);",
+    "unit_id": "u0187"
+  },
+  "usc5-552-doj:u0188:s00": {
+    "digest": "d7582485e4da520aefac62ca9901972a58e8d855723d1aeb51f1bef0154c2c01",
+    "end": 114,
+    "origin_offset": 52582,
+    "path": "(h)(4)(A)(ii)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(ii) A summary of the activities of the Office of Government Information Services under paragraph (3), including –",
+    "unit_id": "u0188"
+  },
+  "usc5-552-doj:u0189:s00": {
+    "digest": "0723e9501d449dde3626adaef9e513d19d6eb43e3da131a145008c0da404a206",
+    "end": 37,
+    "origin_offset": 52784,
+    "path": "(h)(4)(A)(ii)(I)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(I) any advisory opinions issued; and",
+    "unit_id": "u0189"
+  },
+  "usc5-552-doj:u0190:s00": {
+    "digest": "653cf5075fc5ddc57d6b62448bbfb9d30ed37e37ad5708a6a20ee9e8f2501996",
+    "end": 167,
+    "origin_offset": 52856,
+    "path": "(h)(4)(A)(ii)(II)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(II) the number of times each agency engaged in dispute resolution with the assistance of the Office of Government Information Services or the FOIA Public Liaison; and",
+    "unit_id": "u0190"
+  },
+  "usc5-552-doj:u0191:s00": {
+    "digest": "212f475431511ade540bfb8b1a7a8cb99ce5a08041826f7fc3c6551a87e904f2",
+    "end": 5,
+    "origin_offset": 53068,
+    "path": "(h)(4)(A)(iii)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(iii)",
+    "unit_id": "u0191"
+  },
+  "usc5-552-doj:u0191:s01": {
+    "digest": "b19aa65537ca40a40f13be4c5af7e9b90d40e1f04d7e9d9e67ac2fe7ff39bc76",
+    "end": 104,
+    "origin_offset": 53074,
+    "path": "(h)(4)(A)(iii)",
+    "source_id": "usc5-552-doj",
+    "start": 6,
+    "text": "Legislative and regulatory recommendations, if any, to improve the administration of this section.",
+    "unit_id": "u0191"
+  },
+  "usc5-552-doj:u0192:s00": {
+    "digest": "eb4aecc7a90c17e806157581d1addb76d778405113aab2f4ccd3eb534adbb386",
+    "end": 178,
+    "origin_offset": 53213,
+    "path": "(h)(4)(B)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(B) The Director of the Office of Government Information Services shall make each report submitted under subparagraph (A) available for public inspection in an electronic format.",
+    "unit_id": "u0192"
+  },
+  "usc5-552-doj:u0193:s00": {
+    "digest": "e27896595744c52c694072ce3542667744b7503b5c29431d1feee0a293320d18",
+    "end": 593,
+    "origin_offset": 53422,
+    "path": "(h)(4)(C)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(C) The Director of the Office of Government Information Services shall not be required to obtain the prior approval, comment, or review of any officer or agency of the United States, including the Department of Justice, the Archivist of the United States, or the Office of Management and Budget before submitting to Congress, or any committee or subcommittee thereof, any reports, recommendations, testimony, or comments, if such submissions include a statement indicating that the views expressed therein are those of the Director and do not necessarily represent the views of the President.",
+    "unit_id": "u0193"
+  },
+  "usc5-552-doj:u0194:s00": {
+    "digest": "f7226da771b36d1240d48e7ead984618f738f73778c7ff3c4630fa7b9acb6b69",
+    "end": 184,
+    "origin_offset": 54052,
+    "path": "(h)(5)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(5) The Director of the Office of Government Information Services may directly submit additional information to Congress and the President as the Director determines to be appropriate.",
+    "unit_id": "u0194"
+  },
+  "usc5-552-doj:u0195:s00": {
+    "digest": "7882382c6443536433e0e1efc5d7139004c61769ced02425c8e6a7e128c58839",
+    "end": 275,
+    "origin_offset": 54265,
+    "path": "(h)(6)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(6) Not less frequently than annually, the Office of Government Information Services shall conduct a meeting that is open to the public on the review and reports by the Office and shall allow interested persons to appear and present oral or written statements at the meeting.",
+    "unit_id": "u0195"
+  },
+  "usc5-552-doj:u0196:s00": {
+    "digest": "52bd12766b06bc6c221db36bf91afb8f58075c18849ec7bf99795084f28dbc1c",
+    "end": 182,
+    "origin_offset": 54565,
+    "path": "(i)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(i) The Government Accountability Office shall conduct audits of administrative agencies on the implementation of this section and issue reports detailing the results of such audits.",
+    "unit_id": "u0196"
+  },
+  "usc5-552-doj:u0197:s00": {
+    "digest": "7ed702af6f5cb957212a03a22d0ab2248c9a1d4070f0cf1d9df991445b899b04",
+    "end": 151,
+    "origin_offset": 56222,
+    "path": "(j)(1)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(j)(1) Each agency shall designate a Chief FOIA Officer who shall be a senior official of such agency (at the Assistant Secretary or equivalent level).",
+    "unit_id": "u0197"
+  },
+  "usc5-552-doj:u0198:s00": {
+    "digest": "8a059f5c79a35e4b5a6c3ca91a5fa20d9f92ec585b9d6186c5744f7f43ca6f0a",
+    "end": 101,
+    "origin_offset": 56448,
+    "path": "(j)(2)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(2) The Chief FOIA Officer of each agency shall, subject to the authority of the head of the agency –",
+    "unit_id": "u0198"
+  },
+  "usc5-552-doj:u0199:s00": {
+    "digest": "f67042fabe33e3805915085a29f48f7ceff54b4861eb2242ec28fc305e256a67",
+    "end": 95,
+    "origin_offset": 56630,
+    "path": "(j)(2)(A)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(A) have agency-wide responsibility for efficient and appropriate compliance with this section;",
+    "unit_id": "u0199"
+  },
+  "usc5-552-doj:u0200:s00": {
+    "digest": "7b4f25bb3f886bac54c370aee199c7dd53d445d999edfcaadd3fe754c1bafab0",
+    "end": 242,
+    "origin_offset": 56756,
+    "path": "(j)(2)(B)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(B) monitor implementation of this section throughout the agency and keep the head of the agency, the chief legal officer of the agency, and the Attorney General appropriately informed of the agency’s performance in implementing this section;",
+    "unit_id": "u0200"
+  },
+  "usc5-552-doj:u0201:s00": {
+    "digest": "225491777457b901baef1195171a422bda8b1a2a39bc6011e5b1d157de2f7fc2",
+    "end": 177,
+    "origin_offset": 57029,
+    "path": "(j)(2)(C)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(C) recommend to the head of the agency such adjustments to agency practices, policies, personnel, and funding as may be necessary to improve its implementation of this section;",
+    "unit_id": "u0201"
+  },
+  "usc5-552-doj:u0202:s00": {
+    "digest": "7dc90808f6fafeee2a6b03e35bdd6bcec8ac61d7b547591a68893847caed4f71",
+    "end": 206,
+    "origin_offset": 57237,
+    "path": "(j)(2)(D)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(D) review and report to the Attorney General, through the head of the agency, at such times and in such formats as the Attorney General may direct, on the agency’s performance in implementing this section;",
+    "unit_id": "u0202"
+  },
+  "usc5-552-doj:u0203:s00": {
+    "digest": "ff22ca4b7e8f749c61a2ab64667493f8b97a454d8ec8e215842689a4d23526e1",
+    "end": 384,
+    "origin_offset": 57474,
+    "path": "(j)(2)(E)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(E) facilitate public understanding of the purposes of the statutory exemptions of this section by including concise descriptions of the exemptions in both the agency’s handbook issued under subsection (g), and the agency’s annual report on this section, and by providing an overview, where appropriate, of certain general categories of agency records to which those exemptions apply;",
+    "unit_id": "u0203"
+  },
+  "usc5-552-doj:u0204:s00": {
+    "digest": "35a33cfe82c0ad4ee0f843d424467e588981edd3de06c157742ad58669b65404",
+    "end": 87,
+    "origin_offset": 57889,
+    "path": "(j)(2)(F)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(F) offer training to agency staff regarding their responsibilities under this section;",
+    "unit_id": "u0204"
+  },
+  "usc5-552-doj:u0205:s00": {
+    "digest": "407f3755667e3fcef92045bf02427740d83ec904a510287d46a5b8e6ec3a5e86",
+    "end": 132,
+    "origin_offset": 58007,
+    "path": "(j)(2)(G)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(G) serve as the primary agency liaison with the Office of Government Information Services and the Office of Information Policy; and",
+    "unit_id": "u0205"
+  },
+  "usc5-552-doj:u0206:s00": {
+    "digest": "3c443769a468610c7d06ce574cd2fcec6367c511061f56cad47ca1cdb7c0174f",
+    "end": 45,
+    "origin_offset": 58170,
+    "path": "(j)(2)(H)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(H) designate 1 or more FOIA Public Liaisons.",
+    "unit_id": "u0206"
+  },
+  "usc5-552-doj:u0207:s00": {
+    "digest": "98a0a43492daf81c133ca2f76ac286ab4c4e33b465f2b9633e414351ed8b190b",
+    "end": 226,
+    "origin_offset": 58252,
+    "path": "(j)(3)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(3) The Chief FOIA Officer of each agency shall review, not less frequently than annually, all aspects of the administration of this section by the agency to ensure compliance with the requirements of this section, including –",
+    "unit_id": "u0207"
+  },
+  "usc5-552-doj:u0208:s00": {
+    "digest": "2e1e228d97db73d02e79a5cdd001653a0ccc8bd9b414e20c5d87e387a501af5e",
+    "end": 23,
+    "origin_offset": 58558,
+    "path": "(j)(3)(A)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(A) agency regulations;",
+    "unit_id": "u0208"
+  },
+  "usc5-552-doj:u0209:s00": {
+    "digest": "8be6762aafb34e42c0b4e4a613006561713e0b359e9406948e02623092c24dba",
+    "end": 82,
+    "origin_offset": 58613,
+    "path": "(j)(3)(B)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(B) disclosure of records required under paragraphs (2) and (8) of subsection (a);",
+    "unit_id": "u0209"
+  },
+  "usc5-552-doj:u0210:s00": {
+    "digest": "b7a615a9e0bb074ae0481eb15f801b41c008a8c922ffe81bd80ecba18006a570",
+    "end": 72,
+    "origin_offset": 58726,
+    "path": "(j)(3)(C)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(C) assessment of fees and determination of eligibility for fee waivers;",
+    "unit_id": "u0210"
+  },
+  "usc5-552-doj:u0211:s00": {
+    "digest": "c9e3d23568cc2848b98ca281a8f835c4b89b3c6513c91067dc2b90a5ce77b18f",
+    "end": 73,
+    "origin_offset": 58829,
+    "path": "(j)(3)(D)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(D) the timely processing of requests for information under this section;",
+    "unit_id": "u0211"
+  },
+  "usc5-552-doj:u0212:s00": {
+    "digest": "6239e647694fa84127ff4bf0446bbf1305813e903277397c2c6f44496f04edb0",
+    "end": 51,
+    "origin_offset": 58933,
+    "path": "(j)(3)(E)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(E) the use of exemptions under subsection (b); and",
+    "unit_id": "u0212"
+  },
+  "usc5-552-doj:u0213:s00": {
+    "digest": "0a0b6d5c1a43a8e6546720006f4a3c8306b9bf526d2c52a494128098bd75d2fa",
+    "end": 128,
+    "origin_offset": 59015,
+    "path": "(j)(3)(F)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(F) dispute resolution services with the assistance of the Office of Government Information Services or the FOIA Public Liaison.",
+    "unit_id": "u0213"
+  },
+  "usc5-552-doj:u0214:s00": {
+    "digest": "f69672474b8c69650c63fe81771c68736788ff4aaf9a143404f527128a3b51fc",
+    "end": 6,
+    "origin_offset": 59184,
+    "path": "(k)(1)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(k)(1)",
+    "unit_id": "u0214"
+  },
+  "usc5-552-doj:u0214:s01": {
+    "digest": "a71a2026d66236db6520dc328e90b2abbae442aae2ac4c2913bd4d7b33d15fa6",
+    "end": 134,
+    "origin_offset": 59191,
+    "path": "(k)(1)",
+    "source_id": "usc5-552-doj",
+    "start": 7,
+    "text": "There is established in the executive branch the Chief FOIA Officers Council (referred to in this subsection as the ‘Council’).",
+    "unit_id": "u0214"
+  },
+  "usc5-552-doj:u0215:s00": {
+    "digest": "dd9854b5e0ce4b5f822bf7303dffb327256ebe36ef81680fd38b80535d535b7d",
+    "end": 60,
+    "origin_offset": 59393,
+    "path": "(k)(2)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(2) The Council shall be comprised of the following members:",
+    "unit_id": "u0215"
+  },
+  "usc5-552-doj:u0216:s00": {
+    "digest": "aa94e7c3a898f4caff28b327534d5efecb8ef2fc648e708aaa25053fbf11f09d",
+    "end": 78,
+    "origin_offset": 59533,
+    "path": "(k)(2)(A)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(A) The Deputy Director for Management of the Office of Management and Budget.",
+    "unit_id": "u0216"
+  },
+  "usc5-552-doj:u0217:s00": {
+    "digest": "259581be4088d8a770e1e7daf7a18b474889004086159b417fe61d07940f0326",
+    "end": 82,
+    "origin_offset": 59642,
+    "path": "(k)(2)(B)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(B) The Director of the Office of Information Policy at the Department of Justice.",
+    "unit_id": "u0217"
+  },
+  "usc5-552-doj:u0218:s00": {
+    "digest": "1ce4251320ba5d38df5c25bd25a7d92eeb82745b1bced140099250d9dd14a334",
+    "end": 66,
+    "origin_offset": 59755,
+    "path": "(k)(2)(C)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(C) The Director of the Office of Government Information Services.",
+    "unit_id": "u0218"
+  },
+  "usc5-552-doj:u0219:s00": {
+    "digest": "2a113c8be4c27cc0d489afc48d42659615976c510578cba73f6597ba740fce63",
+    "end": 42,
+    "origin_offset": 59852,
+    "path": "(k)(2)(D)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(D) The Chief FOIA Officer of each agency.",
+    "unit_id": "u0219"
+  },
+  "usc5-552-doj:u0220:s00": {
+    "digest": "cf725bc17907cc5e0c950fd9c2fca1042dc19a8f4b54be5de5cb545244fdd32c",
+    "end": 3,
+    "origin_offset": 59925,
+    "path": "(k)(2)(E)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(E)",
+    "unit_id": "u0220"
+  },
+  "usc5-552-doj:u0220:s01": {
+    "digest": "6b4ba2e2ed017203b764e21b2cc23a982ffdb81e67302fcf5dc68e67a0be1485",
+    "end": 86,
+    "origin_offset": 59929,
+    "path": "(k)(2)(E)",
+    "source_id": "usc5-552-doj",
+    "start": 4,
+    "text": "Any other officer or employee of the United States as designated by the Co-Chairs.",
+    "unit_id": "u0220"
+  },
+  "usc5-552-doj:u0221:s00": {
+    "digest": "5aff837481e4034f133533b500ac21aca5e66c9092b9d9c80613adc27eeb829f",
+    "end": 186,
+    "origin_offset": 60048,
+    "path": "(k)(3)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(3) The Director of the Office of Information Policy at the Department of Justice and the Director of the Office of Government Information Services shall be the Co-Chairs of the Council.",
+    "unit_id": "u0221"
+  },
+  "usc5-552-doj:u0222:s00": {
+    "digest": "04e95b184ef63cb398c5e12925c761031f5177a0cf86e39eb5770edf14998f3d",
+    "end": 105,
+    "origin_offset": 60263,
+    "path": "(k)(4)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(4) The Administrator of General Services shall provide administrative and other support for the Council.",
+    "unit_id": "u0222"
+  },
+  "usc5-552-doj:u0223:s00": {
+    "digest": "860d56748c5645a60db9b3b77d49da9c22c2cfa3a2e4a30ff30f99977c3f2e17",
+    "end": 61,
+    "origin_offset": 60397,
+    "path": "(k)(5)(A)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(5)(A) The duties of the Council shall include the following:",
+    "unit_id": "u0223"
+  },
+  "usc5-552-doj:u0224:s00": {
+    "digest": "3b1f5a682342cc35102ebc3347cbe75e43499d9dfde639d81e8df4fbc5d5db52",
+    "end": 88,
+    "origin_offset": 60591,
+    "path": "(k)(5)(A)(i)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(i) Develop recommendations for increasing compliance and efficiency under this section.",
+    "unit_id": "u0224"
+  },
+  "usc5-552-doj:u0225:s00": {
+    "digest": "02ae1392f0293bac020c3c4f44fea5e13be6b2592cbfcc030f215e8b6e7cf2d9",
+    "end": 128,
+    "origin_offset": 60712,
+    "path": "(k)(5)(A)(ii)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(ii) Disseminate information about agency experiences, ideas, best practices, and innovative approaches related to this section.",
+    "unit_id": "u0225"
+  },
+  "usc5-552-doj:u0226:s00": {
+    "digest": "52b5ca53688250d839eb66740bf855aa60e0ff2700b51c00c3fb15eb141281da",
+    "end": 110,
+    "origin_offset": 60873,
+    "path": "(k)(5)(A)(iii)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(iii) Identify, develop, and coordinate initiatives to increase transparency and compliance with this section.",
+    "unit_id": "u0226"
+  },
+  "usc5-552-doj:u0227:s00": {
+    "digest": "d491b3ac0efaecfdcc13842daf17f062393ef2a9a5ccc9b1fb5797014587bcd8",
+    "end": 4,
+    "origin_offset": 61016,
+    "path": "(k)(5)(A)(iv)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(iv)",
+    "unit_id": "u0227"
+  },
+  "usc5-552-doj:u0227:s01": {
+    "digest": "21fac4824f4d5b5f8aeb27ac6724650df3d496c5d416458225b2a3d6231821e8",
+    "end": 108,
+    "origin_offset": 61021,
+    "path": "(k)(5)(A)(iv)",
+    "source_id": "usc5-552-doj",
+    "start": 5,
+    "text": "Promote the development and use of common performance measures for agency compliance with this section.",
+    "unit_id": "u0227"
+  },
+  "usc5-552-doj:u0228:s00": {
+    "digest": "79398e2d8cadfc05f0152f92591166a1f81ebeeb0156179ef1a0f6c55ebc9af9",
+    "end": 3,
+    "origin_offset": 61165,
+    "path": "(k)(5)(B)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(B)",
+    "unit_id": "u0228"
+  },
+  "usc5-552-doj:u0228:s01": {
+    "digest": "e4c1e70e90b75692adebc3153cd7f2e6872ee3e44d0e1113dc69ec5fe96e2a86",
+    "end": 169,
+    "origin_offset": 61169,
+    "path": "(k)(5)(B)",
+    "source_id": "usc5-552-doj",
+    "start": 4,
+    "text": "In performing the duties described in subparagraph (A), the Council shall consult on a regular basis with members of the public who make requests under this section.",
+    "unit_id": "u0228"
+  },
+  "usc5-552-doj:u0229:s00": {
+    "digest": "00c49a31960c3dc3d4a357bf048ce37a004f002a88d3312b051bb230d74d0426",
+    "end": 224,
+    "origin_offset": 61371,
+    "path": "(k)(6)(A)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(6)(A) The Council shall meet regularly and such meetings shall be open to the public unless the Council determines to close the meeting for reasons of national security or to discuss information exempt under subsection (b).",
+    "unit_id": "u0229"
+  },
+  "usc5-552-doj:u0230:s00": {
+    "digest": "6ad86e3258e214fa84741b5566334283f34e4734977a5923b97ca99152d4a483",
+    "end": 200,
+    "origin_offset": 61675,
+    "path": "(k)(6)(B)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(B) Not less frequently than annually, the Council shall hold a meeting that shall be open to the public and permit interested persons to appear and present oral and written statements to the Council.",
+    "unit_id": "u0230"
+  },
+  "usc5-552-doj:u0231:s00": {
+    "digest": "ae7759cd4018d0a3729fc36f2d48e0cb52175a79acf326009685793e88bf6843",
+    "end": 135,
+    "origin_offset": 61907,
+    "path": "(k)(6)(C)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(C) Not later than 10 business days before a meeting of the Council, notice of such meeting shall be published in the Federal Register.",
+    "unit_id": "u0231"
+  },
+  "usc5-552-doj:u0232:s00": {
+    "digest": "bf97bdceb17f2739335afb287573b4a3d50f25b57916b12cab5829ee8cd768c1",
+    "end": 3,
+    "origin_offset": 62073,
+    "path": "(k)(6)(D)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(D)",
+    "unit_id": "u0232"
+  },
+  "usc5-552-doj:u0232:s01": {
+    "digest": "e9f9138e3abd1263392f6b85672b5f696eefac646f80e2cedb26c07d699a7355",
+    "end": 253,
+    "origin_offset": 62077,
+    "path": "(k)(6)(D)",
+    "source_id": "usc5-552-doj",
+    "start": 4,
+    "text": "Except as provided in subsection (b), the records, reports, transcripts, minutes, appendices, working papers, drafts, studies, agenda, or other documents that were made available to or prepared for or by the Council shall be made publicly available.",
+    "unit_id": "u0232"
+  },
+  "usc5-552-doj:u0233:s00": {
+    "digest": "ae31500124f83e23524c1ef7e6dee243f6061cb51f795f63e1e8cfae90ddd81d",
+    "end": 270,
+    "origin_offset": 62357,
+    "path": "(k)(6)(E)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(E) Detailed minutes of each meeting of the Council shall be kept and shall contain a record of the persons present, a complete and accurate description of matters discussed and conclusions reached, and copies of all reports received, issued, or approved by the Council.",
+    "unit_id": "u0233"
+  },
+  "usc5-552-doj:u0233:s01": {
+    "digest": "b74e411aab2cda85019334ce556485620ac7b6f3d3187ba3ca3698c0a668cc07",
+    "end": 342,
+    "origin_offset": 62634,
+    "path": "(k)(6)(E)",
+    "source_id": "usc5-552-doj",
+    "start": 271,
+    "text": "The minutes shall be redacted as necessary and made publicly available.",
+    "unit_id": "u0233"
+  },
+  "usc5-552-doj:u0234:s00": {
+    "digest": "cda49b7df8de40c273584736884064f08c5c6d5ab095651c1d302ff5d6e0373e",
+    "end": 314,
+    "origin_offset": 62738,
+    "path": "(l)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(l) FOIA Public Liaisons shall report to the agency Chief FOIA Officer and shall serve as supervisory officials to whom a requester under this section can raise concerns about the service the requester has received from the FOIA Requester Center, following an initial response from the FOIA Requester Center Staff.",
+    "unit_id": "u0234"
+  },
+  "usc5-552-doj:u0234:s01": {
+    "digest": "bb8acb85df1c18a3f45def7610bf2f0e9731a867084c262123cadce01bf76292",
+    "end": 504,
+    "origin_offset": 63053,
+    "path": "(l)",
+    "source_id": "usc5-552-doj",
+    "start": 315,
+    "text": "FOIA Public Liaisons shall be responsible for assisting in reducing delays, increasing transparency and understanding of the status of requests, and assisting in the resolution of disputes.",
+    "unit_id": "u0234"
+  },
+  "usc5-552-doj:u0235:s00": {
+    "digest": "d74a19ec49f2bd4150845241f6e285c8abb3ca786e6f574f310d3e9115d47db7",
+    "end": 6,
+    "origin_offset": 63259,
+    "path": "(m)(1)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(m)(1)",
+    "unit_id": "u0235"
+  },
+  "usc5-552-doj:u0235:s01": {
+    "digest": "2e20eccee64d65c78aa31d4267b59e8416fa10a5012bc3f9166ec11a535eac66",
+    "end": 293,
+    "origin_offset": 63266,
+    "path": "(m)(1)",
+    "source_id": "usc5-552-doj",
+    "start": 7,
+    "text": "The Director of the Office of Management and Budget, in consultation with the Attorney General shall ensure the operation of a consolidated online request portal that allows a member of the public to submit a request for records under subsection (a) to any agency from a single website.",
+    "unit_id": "u0235"
+  },
+  "usc5-552-doj:u0235:s02": {
+    "digest": "99e86bfb0101de32c2910af15fb2b2d59465ad104f55161609322053853dacaa",
+    "end": 444,
+    "origin_offset": 63553,
+    "path": "(m)(1)",
+    "source_id": "usc5-552-doj",
+    "start": 294,
+    "text": "The portal may include any additional tools the Director of the Office of Management and Budget finds will improve the implementation of this section.",
+    "unit_id": "u0235"
+  },
+  "usc5-552-doj:u0236:s00": {
+    "digest": "99420e3d8f17f25264aef1928307f7e65d72e5ef1d4e2dda58b6eb0202aba738",
+    "end": 196,
+    "origin_offset": 63778,
+    "path": "(m)(2)",
+    "source_id": "usc5-552-doj",
+    "start": 0,
+    "text": "(2) This subsection shall not be construed to alter the power of any other agency to create or maintain an independent online portal for the submission of a request for records under this section.",
+    "unit_id": "u0236"
+  },
+  "usc5-552-doj:u0236:s01": {
+    "digest": "5782e3e2941d6c922fd287f173b40e731c7e1a5435e05d411bf43613120680d2",
+    "end": 423,
+    "origin_offset": 63975,
+    "path": "(m)(2)",
+    "source_id": "usc5-552-doj",
+    "start": 197,
+    "text": "The Director of the Office of Management and Budget shall establish standards for interoperability between the portal required under paragraph (1) and other request processing software used by agencies subject to this section.",
+    "unit_id": "u0236"
+  }
+}

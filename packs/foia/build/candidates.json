@@ -1,0 +1,2050 @@
+[
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0000:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0000:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0000:s02"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0002:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'descriptions' is NOUN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0003:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0003:s00#e44,usc5-552-doj:u0003:s00#x16)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 16 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0003:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0003:s00#e44,usc5-552-doj:u0003:s00#x34)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'whom' at token 34 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0003:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'statements' is NOUN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0004:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0004:s00#e16,usc5-552-doj:u0004:s00#x12)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 12 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0004:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'D' is PROPN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0006:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0007:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'extent' is NOUN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0008:s00"
+  },
+  {
+    "atom_ids": [
+      "patient(usc5-552-doj:u0008:s00#e8,usc5-552-doj:u0008:s00#x5)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 5 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0008:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'opinions' is NOUN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0010:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'statements' is NOUN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0011:s00"
+  },
+  {
+    "atom_ids": [
+      "patient(usc5-552-doj:u0011:s00#e13,usc5-552-doj:u0011:s00#x10)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 10 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0011:s00"
+  },
+  {
+    "atom_ids": [
+      "patient(usc5-552-doj:u0011:s00#e20,usc5-552-doj:u0011:s00#x10)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 10 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0011:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'manuals' is NOUN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0012:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(usc5-552-doj:u0012:s00#e12,usc5-552-doj:u0012:s00#x11)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 11 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0012:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0013:s00"
+  },
+  {
+    "atom_ids": [
+      "patient(usc5-552-doj:u0014:s00#e7,usc5-552-doj:u0014:s00#x4)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 4 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0014:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'nature' is NOUN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0015:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'and' is CCONJ, not a predicate",
+    "sentence_id": "usc5-552-doj:u0016:s00"
+  },
+  {
+    "atom_ids": [
+      "patient(usc5-552-doj:u0016:s00#e7,usc5-552-doj:u0016:s00#x4)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 4 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0016:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'E' is PROPN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0017:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0018:s02#e23,usc5-552-doj:u0018:s02#x20)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'detail' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0018:s02"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0018:s02#e26,usc5-552-doj:u0018:s02#x20)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'detail' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0018:s02"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0018:s06#e29,usc5-552-doj:u0018:s05#x44)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'paragraph' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0018:s06"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0018:s06#e42,usc5-552-doj:u0018:s06#x39)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'publication' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0018:s06"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0018:s08#e19,usc5-552-doj:u0018:s08#x17)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'instruction' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0018:s08"
+  },
+  {
+    "atom_ids": [
+      "patient(usc5-552-doj:u0019:s00#e7,usc5-552-doj:u0019:s00#x4)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'it' at token 4 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0019:s00"
+  },
+  {
+    "atom_ids": [
+      "patient(usc5-552-doj:u0019:s00#e10,usc5-552-doj:u0019:s00#x4)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'it' at token 4 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0019:s00"
+  },
+  {
+    "atom_ids": [
+      "patient(usc5-552-doj:u0019:s00#e13,usc5-552-doj:u0019:s00#x4)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'it' at token 4 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0019:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(usc5-552-doj:u0021:s00#e51,usc5-552-doj:u0021:s00#x48)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'i' at token 48 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0021:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0022:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0022:s02#e17,usc5-552-doj:u0022:s02#x6)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'effort' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0022:s02"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0023:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0023:s01#e35,usc5-552-doj:u0023:s01#x32)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'effort' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0023:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0024:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0024:s01#e12,usc5-552-doj:u0024:s01#x10)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'search' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0024:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0024:s01#e14,usc5-552-doj:u0024:s01#x10)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'search' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0024:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0024:s01#e33,usc5-552-doj:u0024:s01#x10)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'search' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0024:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'E' is PROPN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0025:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(usc5-552-doj:u0025:s00#e16,usc5-552-doj:u0025:s00#x13)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 13 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0025:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0026:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'ii' is X, not a predicate",
+    "sentence_id": "usc5-552-doj:u0027:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0028:s01#e35,usc5-552-doj:u0028:s01#x7)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'guideline' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0028:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0028:s01#e4,usc5-552-doj:u0028:s01#x2)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'schedule' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0028:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0028:s01#e15,usc5-552-doj:u0028:s01#x2)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'schedule' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0028:s01"
+  },
+  {
+    "atom_ids": [
+      "patient(usc5-552-doj:u0029:s00#e8,usc5-552-doj:u0029:s00#x9)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 9 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0029:s00"
+  },
+  {
+    "atom_ids": [
+      "patient(usc5-552-doj:u0030:s00#e7,usc5-552-doj:u0030:s00#x2)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'I' at token 2 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0030:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0031:s00#e39,usc5-552-doj:u0031:s00#x37)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'purpose' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0031:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'III' is X, not a predicate",
+    "sentence_id": "usc5-552-doj:u0032:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0032:s00#e8,usc5-552-doj:u0032:s00#x11)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'I' at token 11 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0032:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0033:s00#e21,usc5-552-doj:u0033:s00#x19)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'entity' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0033:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0033:s00#e50,usc5-552-doj:u0033:s00#x45)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'work' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0033:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0033:s01#e16,usc5-552-doj:u0033:s01#x3)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'clause' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0033:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0033:s01#e23,usc5-552-doj:u0033:s01#x3)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'clause' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0033:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0033:s02#e8,usc5-552-doj:u0033:s02#x1)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'example' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0033:s02"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0033:s03#e7,usc5-552-doj:u0033:s03#x2)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'example' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0033:s03"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0035:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0035:s01#e4,usc5-552-doj:u0035:s01#x2)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'schedule' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0035:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0035:s03#e2,usc5-552-doj:u0035:s03#x1)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'review' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0035:s03"
+  },
+  {
+    "atom_ids": [
+      "agent(usc5-552-doj:u0036:s00#e16,usc5-552-doj:u0036:s00#x2)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'I' at token 2 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0036:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'request' is NOUN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0037:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0038:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'vi' is X, not a predicate",
+    "sentence_id": "usc5-552-doj:u0039:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(usc5-552-doj:u0039:s00#e9,usc5-552-doj:u0039:s00#x4)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'Nothing' at token 4 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0039:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0040:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(usc5-552-doj:u0041:s00#e20,usc5-552-doj:u0041:s00#x5)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'I' at token 5 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0041:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0042:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0043:s00#e105,usc5-552-doj:u0043:s00#x103)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'attempt' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0043:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'cc' is X, not a predicate",
+    "sentence_id": "usc5-552-doj:u0044:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0045:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0045:s02#e59,usc5-552-doj:u0045:s02#x55)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'burden' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0045:s02"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0046:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0047:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0048:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0049:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'I' is PRON, not a predicate",
+    "sentence_id": "usc5-552-doj:u0050:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0051:s00#e22,usc5-552-doj:u0051:s00#x19)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'claim' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0051:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'voluntary' is NOUN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0051:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0052:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0052:s01#e49,usc5-552-doj:u0052:s01#x48)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'personnel' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0052:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0053:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(usc5-552-doj:u0054:s00#e4,usc5-552-doj:u0054:s00#x2)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'I' at token 2 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0054:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0056:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0057:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0058:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'A' is PROPN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0059:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0061:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'right' is NOUN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0062:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0063:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0064:s00#e37,usc5-552-doj:u0064:s00#x24)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'head' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0064:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'aa' is DET, not a predicate",
+    "sentence_id": "usc5-552-doj:u0064:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'right' is NOUN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0065:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0066:s01#e13,usc5-552-doj:u0066:s01#x5)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'denial' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0066:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0067:s00#e12,usc5-552-doj:u0067:s00#x5)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'period' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0067:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0067:s00#e45,usc5-552-doj:u0067:s00#x5)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'period' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0067:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0068:s00#e26,usc5-552-doj:u0068:s00#x22)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'period' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0068:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0068:s00#e33,usc5-552-doj:u0068:s00#x22)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'period' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0068:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'I' is PRON, not a predicate",
+    "sentence_id": "usc5-552-doj:u0068:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'necessary' is ADJ, not a predicate",
+    "sentence_id": "usc5-552-doj:u0069:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0070:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0070:s02#e10,usc5-552-doj:u0070:s02#x7)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'date' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0070:s02"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0072:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'circumstances' is NOUN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0072:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0073:s00#e22,usc5-552-doj:u0073:s00#x16)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'facility' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0073:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'need' is NOUN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0073:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'need' is NOUN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0074:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'III' is X, not a predicate",
+    "sentence_id": "usc5-552-doj:u0075:s00"
+  },
+  {
+    "atom_ids": [
+      "patient(usc5-552-doj:u0075:s00#e12,usc5-552-doj:u0075:s00#x9)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 9 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0075:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0076:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0076:s01#e55,usc5-552-doj:u0076:s01#x36)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'concert' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0076:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0077:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0078:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0079:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0080:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(usc5-552-doj:u0081:s00#e18,usc5-552-doj:u0081:s00#x15)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 15 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0081:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0082:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0083:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'cases' is NOUN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0084:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0084:s00#e13,usc5-552-doj:u0084:s00#x7)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 7 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0084:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'cases' is NOUN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0085:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'and' is CCONJ, not a predicate",
+    "sentence_id": "usc5-552-doj:u0087:s00"
+  },
+  {
+    "atom_ids": [
+      "patient(usc5-552-doj:u0087:s00#e15,usc5-552-doj:u0087:s00#x4)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 4 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0087:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'consideration' is NOUN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0088:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0089:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0089:s01#e18,usc5-552-doj:u0089:s01#x14)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 14 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0089:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0089:s02#e36,usc5-552-doj:u0089:s02#x2)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'action' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0089:s02"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0090:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0091:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0091:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'or' is CCONJ, not a predicate",
+    "sentence_id": "usc5-552-doj:u0092:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0092:s00#e21,usc5-552-doj:u0092:s00#x4)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 4 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0092:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'II' is X, not a predicate",
+    "sentence_id": "usc5-552-doj:u0093:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0095:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0096:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0097:s00#e19,usc5-552-doj:u0097:s00#x12)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'number' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0097:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0098:s00#e12,usc5-552-doj:u0098:s00#x10)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'service' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0098:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'date' is NOUN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0099:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0099:s00#e11,usc5-552-doj:u0099:s00#x7)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 7 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0099:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'date' is NOUN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0100:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0100:s00#e12,usc5-552-doj:u0100:s00#x8)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 8 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0100:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0101:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0102:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(usc5-552-doj:u0103:s00#e7,usc5-552-doj:u0103:s00#x2)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'I' at token 2 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0103:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(usc5-552-doj:u0105:s00#e7,usc5-552-doj:u0105:s00#x5)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'I' at token 5 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0105:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0107:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(usc5-552-doj:u0107:s01#e5,usc5-552-doj:u0107:s01#x1)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'Nothing' at token 1 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0107:s01"
+  },
+  {
+    "atom_ids": [
+      "patient(usc5-552-doj:u0107:s01#e12,usc5-552-doj:u0107:s01#x9)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 9 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0107:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0108:s00#e12,usc5-552-doj:u0108:s00#x10)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'matter' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0108:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'A' is PROPN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0109:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0112:s00#e7,usc5-552-doj:u0112:s00#x2)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'a' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0112:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'or' is CCONJ, not a predicate",
+    "sentence_id": "usc5-552-doj:u0112:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'secrets' is NOUN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0115:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0116:s00#e31,usc5-552-doj:u0116:s00#x10)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'letter' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0116:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0116:s00#e15,usc5-552-doj:u0116:s00#x10)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'letter' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0116:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0116:s00#e31,usc5-552-doj:u0116:s00#x8)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'memorandum' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0116:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0116:s00#e39,usc5-552-doj:u0116:s00#x36)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'privilege' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0116:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'personnel' is NOUN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0117:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0118:s00#e108,usc5-552-doj:u0118:s00#x86)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'identity' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0118:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'information' is NOUN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0120:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'amount' is NOUN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0121:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0121:s02#e10,usc5-552-doj:u0121:s02#x6)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'amount' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0121:s02"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0122:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(usc5-552-doj:u0122:s01#e7,usc5-552-doj:u0122:s01#x6)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 6 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0122:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0124:s00#e5,usc5-552-doj:u0124:s00#x6)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'reason' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0124:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0124:s00#e41,usc5-552-doj:u0124:s00#x6)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'reason' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0124:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0124:s00#e22,usc5-552-doj:u0124:s00#x14)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'subject' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0124:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0126:s00#e40,usc5-552-doj:u0126:s00#x34)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'existence' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0126:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0126:s00#e64,usc5-552-doj:u0126:s00#x60)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'existence' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0126:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(usc5-552-doj:u0126:s00#e10,usc5-552-doj:u0126:s00#x9)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 9 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0126:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0128:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0128:s01#e45,usc5-552-doj:u0128:s01#x41)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'year' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0128:s01"
+  },
+  {
+    "atom_ids": [
+      "agent(usc5-552-doj:u0128:s01#e37,usc5-552-doj:u0128:s01#x35)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 35 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0128:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'A' is X, not a predicate",
+    "sentence_id": "usc5-552-doj:u0129:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'i' is X, not a predicate",
+    "sentence_id": "usc5-552-doj:u0130:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'ii' is X, not a predicate",
+    "sentence_id": "usc5-552-doj:u0131:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0131:s00#e40,usc5-552-doj:u0131:s00#x36)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 36 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0131:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'C' is X, not a predicate",
+    "sentence_id": "usc5-552-doj:u0132:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'D' is PROPN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0133:s00"
+  },
+  {
+    "atom_ids": [
+      "patient(usc5-552-doj:u0133:s00#e22,usc5-552-doj:u0133:s00#x19)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 19 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0133:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'E' is PROPN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0134:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'F' is PROPN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0135:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0136:s00#e13,usc5-552-doj:u0136:s00#x2)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'g' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0136:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'number' is NOUN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0137:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0137:s00#e15,usc5-552-doj:u0137:s00#x11)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 11 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0137:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'ii' is X, not a predicate",
+    "sentence_id": "usc5-552-doj:u0138:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0138:s00#e15,usc5-552-doj:u0138:s00#x11)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 11 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0138:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'and' is CCONJ, not a predicate",
+    "sentence_id": "usc5-552-doj:u0139:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0139:s00#e15,usc5-552-doj:u0139:s00#x11)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 11 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0139:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'iv' is X, not a predicate",
+    "sentence_id": "usc5-552-doj:u0140:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0140:s00#e15,usc5-552-doj:u0140:s00#x11)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 11 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0140:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'number' is NOUN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0141:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'number' is NOUN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0142:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'requests' is NOUN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0143:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(usc5-552-doj:u0143:s00#e27,usc5-552-doj:u0143:s00#x25)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 25 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0143:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'data' is NOUN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0144:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(usc5-552-doj:u0144:s00#e37,usc5-552-doj:u0144:s00#x35)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 35 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0144:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'L' is PROPN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0145:s00"
+  },
+  {
+    "atom_ids": [
+      "patient(usc5-552-doj:u0145:s00#e12,usc5-552-doj:u0145:s00#x10)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 10 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0145:s00"
+  },
+  {
+    "atom_ids": [
+      "patient(usc5-552-doj:u0145:s00#e14,usc5-552-doj:u0145:s00#x10)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 10 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0145:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'M' is X, not a predicate",
+    "sentence_id": "usc5-552-doj:u0146:s00"
+  },
+  {
+    "atom_ids": [
+      "patient(usc5-552-doj:u0146:s00#e12,usc5-552-doj:u0146:s00#x10)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 10 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0146:s00"
+  },
+  {
+    "atom_ids": [
+      "patient(usc5-552-doj:u0146:s00#e14,usc5-552-doj:u0146:s00#x10)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 10 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0146:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'N' is PROPN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0147:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'number' is NOUN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0148:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'P' is X, not a predicate",
+    "sentence_id": "usc5-552-doj:u0149:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'Q' is PROPN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0150:s00"
+  },
+  {
+    "atom_ids": [
+      "patient(usc5-552-doj:u0150:s00#e10,usc5-552-doj:u0150:s00#x8)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 8 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0150:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0152:s01#e32,usc5-552-doj:u0152:s01#x23)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'inspection' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0152:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0153:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0154:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'C' is X, not a predicate",
+    "sentence_id": "usc5-552-doj:u0155:s00"
+  },
+  {
+    "atom_ids": [
+      "patient(usc5-552-doj:u0155:s00#e10,usc5-552-doj:u0155:s00#x7)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 7 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0155:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0156:s01#e72,usc5-552-doj:u0156:s01#x70)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'report' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0156:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0158:s00#e56,usc5-552-doj:u0158:s00#x18)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'committee' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0158:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'A' is PROPN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0158:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'listing' is NOUN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0159:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0160:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'subsection' is NOUN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0161:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'and' is CCONJ, not a predicate",
+    "sentence_id": "usc5-552-doj:u0162:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'cost' is NOUN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0163:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'iii' is X, not a predicate",
+    "sentence_id": "usc5-552-doj:u0164:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0166:s00#e6,usc5-552-doj:u0166:s00#x5)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'report' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0166:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'ii' is X, not a predicate",
+    "sentence_id": "usc5-552-doj:u0167:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0168:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0169:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'III' is X, not a predicate",
+    "sentence_id": "usc5-552-doj:u0170:s00"
+  },
+  {
+    "atom_ids": [
+      "patient(usc5-552-doj:u0170:s00#e10,usc5-552-doj:u0170:s00#x7)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 7 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0170:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0171:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0171:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'record' is NOUN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0173:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'information' is NOUN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0174:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(usc5-552-doj:u0174:s00#e12,usc5-552-doj:u0174:s00#x6)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 6 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0174:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'B' is X, not a predicate",
+    "sentence_id": "usc5-552-doj:u0175:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0176:s00#e10,usc5-552-doj:u0176:s00#x5)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'head' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0176:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0176:s00#e12,usc5-552-doj:u0176:s00#x5)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'head' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0176:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0176:s00#e46,usc5-552-doj:u0176:s00#x5)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'head' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0176:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0177:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'and' is CCONJ, not a predicate",
+    "sentence_id": "usc5-552-doj:u0178:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0180:s00"
+  },
+  {
+    "atom_ids": [
+      "patient(usc5-552-doj:u0180:s01#e3,usc5-552-doj:u0180:s01#x1)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'There' at token 1 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0180:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0180:s02#e9,usc5-552-doj:u0180:s02#x2)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'head' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0180:s02"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0181:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0182:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0183:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0186:s00#e23,usc5-552-doj:u0186:s00#x5)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'a' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0186:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'i' is X, not a predicate",
+    "sentence_id": "usc5-552-doj:u0187:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'summary' is NOUN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0188:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'and' is CCONJ, not a predicate",
+    "sentence_id": "usc5-552-doj:u0189:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'and' is CCONJ, not a predicate",
+    "sentence_id": "usc5-552-doj:u0190:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0191:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0193:s00#e89,usc5-552-doj:u0193:s00#x88)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'views' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0193:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0194:s00#e26,usc5-552-doj:u0194:s00#x22)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'President' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0194:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0194:s00#e29,usc5-552-doj:u0194:s00#x22)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'President' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0194:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0195:s00#e22,usc5-552-doj:u0195:s00#x19)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'meeting' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0195:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'j' is PROPN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0197:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0198:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0200:s00#e33,usc5-552-doj:u0200:s00#x5)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'implementation' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0200:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0201:s00#e26,usc5-552-doj:u0201:s00#x12)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'adjustment' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0201:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'D' is PROPN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0202:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0203:s00#e67,usc5-552-doj:u0203:s00#x66)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'exemption' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0203:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'E' is PROPN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0203:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0205:s00#e4,usc5-552-doj:u0205:s00#x2)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'g' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0205:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0207:s00#e12,usc5-552-doj:u0207:s00#x7)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'Officer' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0207:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0208:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'disclosure' is NOUN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0209:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0210:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0211:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0212:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0213:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0214:s00"
+  },
+  {
+    "atom_ids": [
+      "patient(usc5-552-doj:u0214:s01#e3,usc5-552-doj:u0214:s01#x1)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'There' at token 1 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0214:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0216:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0217:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0218:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0219:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0220:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'officer' is NOUN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0220:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'A' is PROPN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0223:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'recommendations' is NOUN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0224:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0225:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0226:s00#e6,usc5-552-doj:u0226:s00#x4)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'identify' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0226:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0227:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0228:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0229:s00#e17,usc5-552-doj:u0229:s00#x14)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'meeting' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0229:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'A' is PROPN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0229:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0230:s00#e19,usc5-552-doj:u0230:s00#x15)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'meeting' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0230:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0232:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0233:s00#e4,usc5-552-doj:u0233:s00#x2)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'e' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0233:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0234:s01#e6,usc5-552-doj:u0234:s01#x3)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'Liaisons' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0234:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0234:s01#e24,usc5-552-doj:u0234:s01#x3)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'Liaisons' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0234:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "usc5-552-doj:u0235:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0235:s01#e28,usc5-552-doj:u0235:s01#x20)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'operation' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0235:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0235:s02#e4,usc5-552-doj:u0235:s02#x2)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'portal' is not the agent of any transitive event in the corpus; routed to theme",
+    "sentence_id": "usc5-552-doj:u0235:s02"
+  }
+]

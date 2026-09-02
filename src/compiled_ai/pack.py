@@ -1,56 +1,31 @@
-"""A pack: one industry's sources, record, proposals, checklist, rules, invariants.
+"""A pack: sources with provenance, and the build over them.
 
-Layout of a pack directory:
-
-    sources.yaml      the sources with URL, edition, retrieval date, SHA-256, license
-    sources/          the source files (public-domain ones are committed)
-    reserved.yaml     roles the source names and decisions it reserves, each with
-                      a byte-exact quote
-    record.py         the typed case record (a pydantic model named `Record`)
-    rules.py          the rule functions, registered with @rule
-    fixtures/proposals/*.json   recorded proposals per sentence digest
-    checklist.yaml    the reviewer's answers
-    build/            the sealed manifest and the build report (generated)
-
-`compile_pack` runs steps 1 to 10 except prove, which is a separate command
-because it runs mypy and pytest.
+    sources.yaml       the sources: file, URL, retrieval, SHA-256, license
+    sources/           the source files
+    rejections.yaml    optional; atoms an analyst rejected against their sentences
+    build/             generated: tokens.tsv, citations.json, parses.conllu,
+                       atoms.jsonl, candidates.json, reconciliation.json,
+                       ordering.json, manifest.json
 """
 
 from __future__ import annotations
 
-import importlib
-import sys
+import json
 from pathlib import Path
-from types import ModuleType
-from typing import Any
 
 import yaml
-from pydantic import BaseModel
 
-from .check import check_all, defined_terms_from
-from .confirm import confirmed_statements, load_checklist
-from .cut import cut
-from .generate import GenerateReport, match_rules
-from .model import Confirmation, Manifest, Sentence, Source, Statement, Strict
-from .order import Ordering, edges_from, order
-from .propose import Proposer, ReplayProposer, records_to_proposals
+from .adjudicate import apply_rejections, load_rejections
+from .check import check_atoms, fragment_candidates
+from .fol import compile_atoms
+from .model import Atom, Candidate, Manifest, Ordering, ParsedSentence, Reconciliation, Source, Strict
+from .normalize import normalize
+from .order import order
+from .parse import parse_source
 from .read import read_html, read_pdf, read_text
-from .reconcile import Reconciliation, constraints_from, reconcile
-from .registry import RuleDef, RuleFn, collect_rules
-from .seal import manifest_json, rule_specs, seal
-
-
-class RoleSpec(Strict):
-    name: str
-    path: str
-    quote: str
-
-
-class DecisionSpec(Strict):
-    decision: str
-    role: str
-    path: str
-    quote: str
+from .reconcile import reconcile
+from .seal import manifest_json, seal
+from .tables import write_tables
 
 
 class BuildError(Strict):
@@ -61,10 +36,9 @@ class BuildError(Strict):
 class Build(Strict):
     pack: str
     sources: tuple[Source, ...]
-    sentences: tuple[Sentence, ...]
-    statements: tuple[Statement, ...]
-    confirmed: tuple[tuple[Statement, Confirmation], ...]
-    generate: GenerateReport
+    parsed: tuple[ParsedSentence, ...]
+    atoms: tuple[Atom, ...]
+    candidates: tuple[Candidate, ...]
     reconciliation: Reconciliation | None
     ordering: Ordering | None
     manifest: Manifest | None
@@ -75,37 +49,26 @@ class Build(Strict):
         return not self.errors and self.manifest is not None
 
 
-def _load_module(pack_dir: Path, name: str) -> ModuleType:
-    """Import `<packs>.<pack>.<name>` with the packs' parent directory on sys.path,
-    so a pack's modules can import each other as a package."""
-    pack_dir = pack_dir.resolve()
-    root = pack_dir.parent.parent
-    if str(root) not in sys.path:
-        sys.path.insert(0, str(root))
-    return importlib.import_module(f"{pack_dir.parent.name}.{pack_dir.name}.{name}")
+def repo_root(pack_dir: Path) -> Path:
+    for p in [pack_dir.resolve(), *pack_dir.resolve().parents]:
+        if (p / "pyproject.toml").exists():
+            return p
+    return pack_dir.resolve().parent.parent
 
 
-def load_record_type(pack_dir: Path) -> type[BaseModel]:
-    mod = _load_module(pack_dir, "record")
-    rec = getattr(mod, "Record")
-    if not (isinstance(rec, type) and issubclass(rec, BaseModel)):
-        raise TypeError("record.py must define a pydantic model named Record")
-    return rec
+def model_path(pack_dir: Path) -> Path:
+    data = yaml.safe_load((repo_root(pack_dir) / "models" / "sources.yaml").read_text(encoding="utf-8"))
+    entry = data["models"][0]
+    return repo_root(pack_dir) / "models" / str(entry["file"])
 
 
-def load_rules(pack_dir: Path) -> list[tuple[RuleDef, RuleFn]]:
-    mod = _load_module(pack_dir, "rules")
-    return collect_rules(mod)
-
-
-def read_sources(pack_dir: Path) -> tuple[list[Source], dict[str, str], list[BuildError]]:
+def read_sources(pack_dir: Path) -> tuple[list[Source], list[BuildError]]:
     data = yaml.safe_load((pack_dir / "sources.yaml").read_text(encoding="utf-8"))
     sources: list[Source] = []
     errors: list[BuildError] = []
-    scope_of: dict[str, str] = {}
     for entry in data.get("sources", []):
         if not entry.get("file"):
-            continue  # cited, not compiled
+            continue
         path = pack_dir / entry["file"]
         kind = entry.get("kind", "text")
         sid = entry["id"]
@@ -119,94 +82,48 @@ def read_sources(pack_dir: Path) -> tuple[list[Source], dict[str, str], list[Bui
         if expected and expected != src.sha256:
             errors.append(BuildError(code="SOURCE_HASH_MISMATCH", detail=f"{sid}: sources.yaml says {expected}, file is {src.sha256}"))
         sources.append(src)
-        scope_of[sid] = entry.get("scope", sid)
-    return sources, scope_of, errors
+    return sources, errors
 
 
-def load_reserved(pack_dir: Path, sentences: list[Sentence]) -> tuple[list[RoleSpec], list[DecisionSpec], list[BuildError]]:
-    path = pack_dir / "reserved.yaml"
-    if not path.exists():
-        return [], [], []
-    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-    by_path: dict[str, list[Sentence]] = {}
-    for s in sentences:
-        by_path.setdefault(s.path, []).append(s)
-    errors: list[BuildError] = []
-    roles = [RoleSpec.model_validate(r) for r in data.get("roles", [])]
-    decisions = [DecisionSpec.model_validate(d) for d in data.get("decisions", [])]
-    for r in roles:
-        if not any(r.quote.encode("utf-8") in s.text.encode("utf-8") for s in by_path.get(r.path, [])):
-            errors.append(BuildError(code="ROLE_QUOTE_NOT_BYTE_EXACT", detail=f"role {r.name!r}: quote not found byte-exact at {r.path}"))
-    role_names = {r.name for r in roles}
-    for d in decisions:
-        if not any(d.quote.encode("utf-8") in s.text.encode("utf-8") for s in by_path.get(d.path, [])):
-            errors.append(BuildError(code="DECISION_QUOTE_NOT_BYTE_EXACT", detail=f"decision {d.decision!r}: quote not found byte-exact at {d.path}"))
-        if d.role not in role_names:
-            errors.append(BuildError(code="DECISION_ROLE_UNKNOWN", detail=f"decision {d.decision!r} names role {d.role!r}, which is not listed"))
-    return roles, decisions, errors
-
-
-def compile_pack(pack_dir: Path, proposer: Proposer | None = None) -> Build:
+def compile_pack(pack_dir: Path) -> Build:
     pack_dir = pack_dir.resolve()
     name = pack_dir.name
     errors: list[BuildError] = []
-
-    sources, scope_of, src_errors = read_sources(pack_dir)
+    sources, src_errors = read_sources(pack_dir)
     errors.extend(src_errors)
+    mp = model_path(pack_dir)
 
-    sentences: list[Sentence] = []
+    parsed: list[ParsedSentence] = []
     for src in sources:
-        sentences.extend(cut(src))
+        parsed.extend(parse_source(src, mp))
 
-    proposer = proposer or ReplayProposer(pack_dir / "fixtures" / "proposals")
-    records = {}
-    for s in sentences:
-        rec = proposer.propose(s)
-        if rec is not None:
-            records[s.digest] = rec
-    proposals = records_to_proposals(records)
+    atoms = compile_atoms(parsed)
+    atoms, candidates = normalize(atoms, parsed)
+    check_atoms(atoms, parsed)
+    candidates = sorted(candidates + fragment_candidates(atoms, parsed), key=lambda c: (c.sentence_id, c.code, c.detail))
+    atoms = apply_rejections(atoms, load_rejections(pack_dir / "rejections.yaml"))
 
-    roles, decisions, reserved_errors = load_reserved(pack_dir, sentences)
-    errors.extend(reserved_errors)
-    role_names = [r.name for r in roles]
-
-    # Two passes: definitions accepted in the first pass define terms for the second.
-    first = check_all(sentences, proposals, defined_terms=(), roles=role_names)
-    terms = defined_terms_from(first)
-    statements = check_all(sentences, proposals, defined_terms=terms, roles=role_names)
-
-    checklist = load_checklist(pack_dir / "checklist.yaml") if (pack_dir / "checklist.yaml").exists() else []
-    confirmed = confirmed_statements(statements, checklist)
-
-    rules = load_rules(pack_dir) if (pack_dir / "rules.py").exists() else []
-    gen = match_rules(confirmed, [r for r, _ in rules])
-    for e in gen.errors:
-        errors.append(BuildError(code=e.code, detail=e.detail))
-
-    reconciliation: Reconciliation | None = None
+    rec: Reconciliation | None = None
     ordering: Ordering | None = None
     manifest: Manifest | None = None
     if not errors:
-        confirmed_statements_only = [st for st, _ in confirmed]
-        reconciliation = reconcile(constraints_from(confirmed_statements_only, scope_of))
-        if not reconciliation.consistent:
-            for core in reconciliation.contradictions:
-                errors.append(BuildError(code="CONTRADICTION", detail=", ".join(core)))
-        ordering = order(edges_from(confirmed_statements_only))
+        rec = reconcile(atoms)
+        ordering = order(atoms)
         if ordering.cycle:
             errors.append(BuildError(code="ORDER_CYCLE", detail=", ".join(f"{a}->{b}" for a, b in ordering.cycle)))
-    if not errors and reconciliation is not None and ordering is not None:
-        specs = rule_specs(confirmed, rules)
-        manifest = seal(name, sources, specs, ordering.order)
+        if not rec.consistent:
+            for core in rec.cores:
+                errors.append(BuildError(code="PRECEDENCE_CONTRADICTION", detail=", ".join(core)))
+    if not errors and rec is not None and ordering is not None:
+        manifest = seal(name, sources, parsed, atoms, rec, ordering, mp)
 
     return Build(
         pack=name,
         sources=tuple(sources),
-        sentences=tuple(sentences),
-        statements=tuple(statements),
-        confirmed=tuple(confirmed),
-        generate=gen,
-        reconciliation=reconciliation,
+        parsed=tuple(parsed),
+        atoms=tuple(atoms),
+        candidates=tuple(candidates),
+        reconciliation=rec,
         ordering=ordering,
         manifest=manifest,
         errors=tuple(sorted(errors, key=lambda e: (e.code, e.detail))),
@@ -215,34 +132,30 @@ def compile_pack(pack_dir: Path, proposer: Proposer | None = None) -> Build:
 
 def write_build(build: Build, out_dir: Path) -> dict[str, Path]:
     out_dir.mkdir(parents=True, exist_ok=True)
-    written: dict[str, Path] = {}
+    written = write_tables(list(build.parsed), out_dir)
+    atoms = out_dir / "atoms.jsonl"
+    with atoms.open("w", encoding="utf-8", newline="\n") as fh:
+        for a in build.atoms:
+            fh.write(json.dumps(a.model_dump(), sort_keys=True, ensure_ascii=False) + "\n")
+    written["atoms"] = atoms
+    cand = out_dir / "candidates.json"
+    cand.write_text(json.dumps([c.model_dump() for c in build.candidates], indent=2, sort_keys=True, ensure_ascii=False) + "\n", encoding="utf-8")
+    written["candidates"] = cand
+    if build.reconciliation is not None:
+        p = out_dir / "reconciliation.json"
+        p.write_text(json.dumps(build.reconciliation.model_dump(), indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        written["reconciliation"] = p
+    if build.ordering is not None:
+        p = out_dir / "ordering.json"
+        p.write_text(json.dumps(build.ordering.model_dump(), indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        written["ordering"] = p
     if build.manifest is not None:
         p = out_dir / "manifest.json"
         p.write_text(manifest_json(build.manifest), encoding="utf-8")
         written["manifest"] = p
-    report: dict[str, Any] = {
-        "pack": build.pack,
-        "sources": [{"id": s.id, "sha256": s.sha256, "units": len(s.units), "notes": list(s.notes)} for s in build.sources],
-        "sentences": len(build.sentences),
-        "proposed_sentences": sorted({st.sentence.id for st in build.statements}),
-        "accepted_statements": sorted(f"{st.sentence.id}:{st.proposal.kind}" for st in build.statements if st.check.ok),
-        "rejected": [
-            {"sentence": st.sentence.id, "kind": st.proposal.kind, "failures": [f.model_dump() for f in st.check.failures]}
-            for st in build.statements
-            if not st.check.ok
-        ],
-        "confirmed": [c.id for _, c in build.confirmed],
-        "provisional": [c.id for _, c in build.confirmed if c.provisional],
-        "generate": build.generate.model_dump(),
-        "reconciliation": build.reconciliation.model_dump() if build.reconciliation else None,
-        "ordering": build.ordering.model_dump() if build.ordering else None,
-        "errors": [e.model_dump() for e in build.errors],
-    }
-    import json
-
-    p = out_dir / "report.json"
-    p.write_text(json.dumps(report, indent=2, sort_keys=True, ensure_ascii=False) + "\n", encoding="utf-8")
-    written["report"] = p
+    errs = out_dir / "errors.json"
+    errs.write_text(json.dumps([e.model_dump() for e in build.errors], indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    written["errors"] = errs
     return written
 
 

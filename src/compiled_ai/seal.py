@@ -1,12 +1,7 @@
-"""Step 10, seal: a digest per rule from the bytes of its source sentence.
-
-The manifest lists every rule with the digest of its sentence's canonical
-bytes and the digest of its function's source. It also carries the
-canonicalization version and the pinned tool versions, so a rebuild on the
-same toolchain reproduces every digest and a toolchain change is visible as
-a digest change. The manifest's own digest is the SHA-256 of its canonical
-JSON, with sorted keys and no insignificant whitespace.
-"""
+"""Seal: a digest per atom from the bytes of its sentence and its quote, and one
+digest over the whole base. Canonical JSON with sorted keys and no insignificant
+whitespace. The pinned toolchain, including the parser model's SHA-256, is part
+of the manifest, so a change to the parser is visible as a digest change."""
 
 from __future__ import annotations
 
@@ -14,17 +9,17 @@ import hashlib
 import json
 from collections.abc import Iterable
 from importlib.metadata import PackageNotFoundError, version
+from pathlib import Path
 from typing import Any
 
 from .canon import CANON_VERSION
-from .model import Confirmation, Manifest, RuleSpec, Source, Statement, sha256_text
-from .registry import RuleDef
+from .model import Atom, AtomSeal, Manifest, Ordering, ParsedSentence, Reconciliation, Source, sha256_text
 
-PINNED = ("pydantic", "pdfplumber", "spacy", "z3-solver", "networkx", "mypy", "hypothesis")
+PINNED = ("pydantic", "ufal.udpipe", "z3-solver", "networkx", "pdfplumber")
 
 
-def toolchain() -> dict[str, str]:
-    out: dict[str, str] = {"canon": str(CANON_VERSION)}
+def toolchain(model_path: Path) -> dict[str, str]:
+    out: dict[str, str] = {"canon": str(CANON_VERSION), "udpipe_model_sha256": hashlib.sha256(model_path.read_bytes()).hexdigest()}
     for name in PINNED:
         try:
             out[name] = version(name)
@@ -37,38 +32,18 @@ def canonical_json(obj: Any) -> str:
     return json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
 
 
-def rule_specs(
-    confirmed: Iterable[tuple[Statement, Confirmation]], rules: Iterable[tuple[RuleDef, Any]]
-) -> list[RuleSpec]:
-    by_statement = {r.statement: r for r, _ in rules}
-    specs: list[RuleSpec] = []
-    for st, conf in confirmed:
-        r = by_statement.get(conf.id)
-        specs.append(
-            RuleSpec(
-                id=r.id if r else f"statement.{conf.id}",
-                sentence_id=st.sentence.id,
-                sentence_digest=st.sentence.digest,
-                path=st.sentence.path,
-                kind=st.proposal.kind,
-                function=r.function if r else "",
-                function_digest=sha256_text(r.source) if r else "",
-                quote=st.proposal.quote,
-                provisional=conf.provisional,
-            )
-        )
-    return sorted(specs, key=lambda s: s.id)
-
-
-def seal(pack: str, sources: Iterable[Source], specs: list[RuleSpec], order: Iterable[str]) -> Manifest:
+def seal(pack: str, sources: Iterable[Source], parsed: list[ParsedSentence], atoms: list[Atom], rec: Reconciliation, ordering: Ordering, model_path: Path) -> Manifest:
+    digests = {ps.sentence.id: ps.sentence.digest for ps in parsed}
+    seals = [AtomSeal(id=a.id, sentence_id=a.sentence_id, sentence_digest=digests[a.sentence_id], quote_digest=sha256_text(a.quote)) for a in atoms]
     body = {
         "pack": pack,
         "canon_version": CANON_VERSION,
-        "toolchain": toolchain(),
+        "toolchain": toolchain(model_path),
         "sources": sorted((s.id, s.sha256) for s in sources),
-        "rules": [s.model_dump() for s in specs],
-        "order": list(order),
-        "provisional": any(s.provisional for s in specs),
+        "atoms": [s.model_dump() for s in seals],
+        "forced": [list(e) for e in ordering.forced],
+        "order": list(ordering.order),
+        "consistent": rec.consistent,
     }
     digest = hashlib.sha256(canonical_json(body).encode("utf-8")).hexdigest()
     return Manifest(
@@ -76,9 +51,10 @@ def seal(pack: str, sources: Iterable[Source], specs: list[RuleSpec], order: Ite
         canon_version=CANON_VERSION,
         toolchain=body["toolchain"],  # type: ignore[arg-type]
         sources=tuple(body["sources"]),  # type: ignore[arg-type]
-        rules=tuple(specs),
-        order=tuple(order),
-        provisional=bool(body["provisional"]),
+        atoms=tuple(seals),
+        forced=ordering.forced,
+        order=ordering.order,
+        consistent=rec.consistent,
         digest=digest,
     )
 
@@ -91,4 +67,5 @@ def verify_digest(m: Manifest) -> bool:
     body = m.model_dump()
     body.pop("digest")
     body["sources"] = [list(s) for s in body["sources"]]
+    body["forced"] = [list(e) for e in body["forced"]]
     return hashlib.sha256(canonical_json(body).encode("utf-8")).hexdigest() == m.digest

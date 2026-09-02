@@ -1,0 +1,11 @@
+models:
+  - id: udpipe-english-ewt-ud-2.5-191206
+    file: english-ewt-ud-2.5-191206.udpipe
+    sha256: 784bd0fa85e3d831fd02a55290d0acfd05c953159dc38cc33d52e1b28add9957
+    treebank: UD_English-EWT, Universal Dependencies 2.5
+    publisher: Institute of Formal and Applied Linguistics, Charles University, LINDAT/CLARIAH-CZ
+    handle: http://hdl.handle.net/11234/1-3131
+    fetched_from: https://raw.githubusercontent.com/jwijffels/udpipe.models.ud.2.5/master/inst/udpipe-ud-2.5-191206/english-ewt-ud-2.5-191206.udpipe
+    repository: https://github.com/jwijffels/udpipe.models.ud.2.5
+    retrieved: "2026-09-02"
+    license: CC BY-NC-SA 4.0, per the repository's LICENSE and README; the LINDAT handle was unreachable from the build session

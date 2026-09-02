@@ -1,47 +1,30 @@
-"""Step 9, order: the precedence of the steps. Symbolic.
+"""Order: the forced-precedence graph and the derivation order.
 
-Edges come from precedence statements (before, after) and from clocks (the
-trigger comes before the subject). The order is the unique lexicographic
-topological order, so ties break the same way every time. A cycle is an
-ordering contradiction in the source and is reported with its edges sorted.
+The precedes atoms form a directed graph over events. Its transitive reduction
+is the forced-precedence graph: an edge survives only where a source clause
+states an order that no other chain of clauses already implies. The
+derivation order is the unique lexicographic topological order of that graph.
+A cycle is an ordering contradiction and is reported with its edges sorted.
 """
 
 from __future__ import annotations
 
-from collections.abc import Iterable
-
-from .model import Statement, Strict
+from .model import Atom, Ordering
 
 
-class Ordering(Strict):
-    order: tuple[str, ...]
-    edges: tuple[tuple[str, str, str], ...]  # (before, after, sentence id)
-    cycle: tuple[tuple[str, str], ...]
-
-
-def edges_from(statements: Iterable[Statement]) -> list[tuple[str, str, str]]:
-    out: list[tuple[str, str, str]] = []
-    for st in statements:
-        p = st.proposal
-        if p.kind == "precedence" and p.before and p.after:
-            out.append((p.before, p.after, st.sentence.id))
-        if p.clock is not None and p.clock.trigger and p.clock.subject and p.clock.trigger != p.clock.subject:
-            out.append((p.clock.trigger, p.clock.subject, st.sentence.id))
-    return sorted(set(out))
-
-
-def order(edges: list[tuple[str, str, str]]) -> Ordering:
-    import networkx as nx  # compiler-only dependency
+def order(atoms: list[Atom]) -> Ordering:
+    import networkx as nx
 
     g: "nx.DiGraph[str]" = nx.DiGraph()
-    for before, after, _ in sorted(edges):
-        g.add_edge(before, after)
-    for node in sorted(g.nodes):
-        g.nodes[node]["name"] = node
-    try:
-        seq = tuple(nx.lexicographical_topological_sort(g, key=str))
-        return Ordering(order=seq, edges=tuple(sorted(edges)), cycle=())
-    except nx.NetworkXUnfeasible:
+    for a in sorted((a for a in atoms if a.predicate == "precedes"), key=lambda a: a.id):
+        g.add_edge(a.args[0], a.args[1])
+    if g.number_of_nodes() == 0:
+        return Ordering(order=(), forced=(), cycle=())
+    if not nx.is_directed_acyclic_graph(g):
         first = min(g.nodes)
         cyc = nx.find_cycle(g, source=first)
-        return Ordering(order=(), edges=tuple(sorted(edges)), cycle=tuple(sorted((a, b) for a, b, *_ in cyc)))
+        return Ordering(order=(), forced=(), cycle=tuple(sorted((u, v) for u, v, *_ in cyc)))
+    reduced = nx.transitive_reduction(g)
+    forced = tuple(sorted((u, v) for u, v in reduced.edges))
+    seq = tuple(nx.lexicographical_topological_sort(reduced, key=str))
+    return Ordering(order=seq, forced=forced, cycle=())
