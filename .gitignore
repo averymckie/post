@@ -1,2 +1,13 @@
 # Personal per-project Claude Code instructions; never shared
 CLAUDE.local.md
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.mypy_cache/
+.pytest_cache/
+.hypothesis/
+build/
+dist/
+*.egg-info/

@@ -1,0 +1,35 @@
+# Sources compiled by the FOIA pack. Nothing in this pack is derived from text that
+# is not listed here with its hash.
+pack: foia
+sources:
+  - id: usc5-552-doj
+    title: "5 U.S.C. 552, Freedom of Information Act, as amended by the FOIA Improvement Act of 2016"
+    file: sources/usdoj-foia.gov-foia-statute.html
+    sha256: 4b36841eab2a27fa746cfb338daf73668e14f781aaa6e61f5885b6c0b4512103
+    kind: html
+    start_marker: "§ 552."
+    publisher: "U.S. Department of Justice, Office of Information Policy (FOIA.gov)"
+    url: https://www.foia.gov/foia-statute.html
+    fetched_from: https://raw.githubusercontent.com/usdoj/foia.gov/dc020ffc0b6eb7380f430f62c00557ff37a667cc/www.foia.gov/foia-statute.html
+    repository: https://github.com/usdoj/foia.gov
+    commit: dc020ffc0b6eb7380f430f62c00557ff37a667cc
+    retrieved: "2026-09-02"
+    license: "Work of the United States government: public domain in the United States, and CC0 1.0 worldwide per the repository's LICENSE.md"
+    edition_note: >-
+      The page shows the statute with the FOIA Improvement Act of 2016 amendments marked.
+      Struck-through text is repealed language and the reader drops it. Bold text is enacted
+      language and the reader keeps it. The reader records how many characters it dropped.
+    preferred_edition: >-
+      The official codified text on govinfo.gov (USCODE-2023-title5, section 552, PDF) is the
+      preferred edition. It was unreachable from the build session's network on 2026-09-02.
+      When it is reachable, add it as a second source; the seal step will show every sentence
+      whose bytes differ between the two.
+    status: fetched and hashed in the build session on 2026-09-02
+  - id: usc5-6103
+    title: "5 U.S.C. 6103, Holidays"
+    file: null
+    status: >-
+      Cited, not fetched. The list of legal public holidays and the observance rules in
+      calendar.py are recorded as data under this citation and were not verified against
+      fetched text in the build session. Verify against uscode.house.gov before relying on
+      the working-day computation for a live deadline.
