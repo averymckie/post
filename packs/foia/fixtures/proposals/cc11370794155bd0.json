@@ -1,0 +1,39 @@
+{
+  "sentence_digest": "cc11370794155bd09628d79a162655108e0e7a694ea04440019dc2344458beb1",
+  "sentence_text": "(aa) the right of such person to appeal to the head of the agency, within a period determined by the head of the agency that is not less than 90 days after the date of such adverse determination; and",
+  "proposals": [
+    {
+      "kind": "step",
+      "quote": "the right of such person to appeal to the head of the agency, within a period determined by the head of the agency that is not less than 90 days after the date of such adverse determination",
+      "context": {
+        "sentence_digest": "994ce953c600bbc24c81ac31cfabf26e4eb141edc4c364f3e940dba06ca18f0c",
+        "quote": "shall immediately notify the person making such a request of –"
+      },
+      "actor": "agency",
+      "action": "state the right to appeal to the head of the agency within a period of not less than 90 days after the adverse determination",
+      "subject": "adverse notice content",
+      "clock": {
+        "amount": 90,
+        "unit": "days",
+        "trigger": "date of adverse determination",
+        "subject": "appeal period minimum"
+      },
+      "allowed_example": "An adverse notice states the right to appeal to the head of the agency within 90 days after the determination.",
+      "forbidden_example": "An adverse notice gives the requester 30 days to appeal, or does not mention appeal at all."
+    },
+    {
+      "kind": "reserved_decision",
+      "quote": "within a period determined by the head of the agency",
+      "actor": "head of the agency",
+      "subject": "the appeal period",
+      "role": "head of the agency",
+      "allowed_example": "The head of the agency sets the appeal period, and it is 90 days or longer.",
+      "forbidden_example": "A program picks the appeal period, or the period set is shorter than 90 days."
+    }
+  ],
+  "provenance": {
+    "producer": "model",
+    "channel": "interactive-session",
+    "note": "Authored by a language model in an interactive session and written as fixtures, because the build session had no API credential for the propose adapter. Every quote was checked byte-exact against the sentence before the fixture was written. Re-record with `compiled-ai fixtures packs/foia --live` when a credential is available."
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "sentence_digest": "f770fd061078a82c991f1c9c2a5f09e8273a58e68ecc57c467bb53b01c78eb51",
+  "sentence_text": "(I) that the agency may make one request to the requester for information and toll the 20-day period while it is awaiting such information that it has reasonably requested from the requester under this section; or",
+  "proposals": [
+    {
+      "kind": "condition",
+      "quote": "the agency may make one request to the requester for information and toll the 20-day period while it is awaiting such information that it has reasonably requested from the requester under this section",
+      "context": {
+        "sentence_digest": "3ba1534e5e4cdfd0b97e9201801a3d5bac3756c8bb4092b1af54169c645f8250",
+        "quote": "The 20-day period shall not be tolled by the agency except—"
+      },
+      "condition": "the agency has made one request for information and is awaiting the response",
+      "subject": "tolling for information",
+      "allowed_example": "One request for clarifying information tolls the period until the requester responds.",
+      "forbidden_example": "A second request for information tolls the period a second time."
+    },
+    {
+      "kind": "reserved_decision",
+      "quote": "the agency may make one request to the requester for information and toll the 20-day period while it is awaiting such information that it has reasonably requested from the requester under this section",
+      "actor": "agency",
+      "subject": "whether the request for information was reasonable",
+      "role": "agency",
+      "allowed_example": "The agency records that its request for information was reasonable, and the tolling stands.",
+      "forbidden_example": "Tolling is claimed for a request for information that the agency has not found reasonable."
+    }
+  ],
+  "provenance": {
+    "producer": "model",
+    "channel": "interactive-session",
+    "note": "Authored by a language model in an interactive session and written as fixtures, because the build session had no API credential for the propose adapter. Every quote was checked byte-exact against the sentence before the fixture was written. Re-record with `compiled-ai fixtures packs/foia --live` when a credential is available."
+  }
+}

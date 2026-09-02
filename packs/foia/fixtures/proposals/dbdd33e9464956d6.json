@@ -1,0 +1,24 @@
+{
+  "sentence_digest": "dbdd33e9464956d64c48092732261577f81cffbd39f4a7d244c88bcbcd824826",
+  "sentence_text": "(I) such determination and the reasons therefor;",
+  "proposals": [
+    {
+      "kind": "step",
+      "quote": "such determination and the reasons therefor",
+      "context": {
+        "sentence_digest": "994ce953c600bbc24c81ac31cfabf26e4eb141edc4c364f3e940dba06ca18f0c",
+        "quote": "shall immediately notify the person making such a request of –"
+      },
+      "actor": "agency",
+      "action": "state the determination and the reasons for it in the notice",
+      "subject": "notice content",
+      "allowed_example": "The notice states the determination and the reasons for it.",
+      "forbidden_example": "The notice states only that the request is denied, with no reasons."
+    }
+  ],
+  "provenance": {
+    "producer": "model",
+    "channel": "interactive-session",
+    "note": "Authored by a language model in an interactive session and written as fixtures, because the build session had no API credential for the propose adapter. Every quote was checked byte-exact against the sentence before the fixture was written. Re-record with `compiled-ai fixtures packs/foia --live` when a credential is available."
+  }
+}

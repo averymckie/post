@@ -1,0 +1,33 @@
+{
+  "sentence_digest": "a293919ef478d277d52266ccf01621c50c524842064309ca1bb8df43ada0234d",
+  "sentence_text": "(ii)(I) consider whether partial disclosure of information is possible whenever the agency determines that a full disclosure of a requested record is not possible; and",
+  "proposals": [
+    {
+      "kind": "step",
+      "quote": "consider whether partial disclosure of information is possible whenever the agency determines that a full disclosure of a requested record is not possible",
+      "context": {
+        "sentence_digest": "b59fa160619437f0c1075b1b75bdcb5a882837a7add22aa6cf833365a8789c77",
+        "quote": "An agency shall –"
+      },
+      "actor": "agency",
+      "action": "consider partial disclosure whenever full disclosure is found not possible",
+      "subject": "partial disclosure",
+      "allowed_example": "The agency finds full disclosure not possible and records that it considered partial disclosure.",
+      "forbidden_example": "The agency finds full disclosure not possible and withholds the record in full without considering partial disclosure."
+    },
+    {
+      "kind": "reserved_decision",
+      "quote": "whenever the agency determines that a full disclosure of a requested record is not possible",
+      "actor": "agency",
+      "subject": "whether full disclosure is possible",
+      "role": "agency",
+      "allowed_example": "The agency decides whether full disclosure of the record is possible.",
+      "forbidden_example": "A program decides that full disclosure is not possible."
+    }
+  ],
+  "provenance": {
+    "producer": "model",
+    "channel": "interactive-session",
+    "note": "Authored by a language model in an interactive session and written as fixtures, because the build session had no API credential for the propose adapter. Every quote was checked byte-exact against the sentence before the fixture was written. Re-record with `compiled-ai fixtures packs/foia --live` when a credential is available."
+  }
+}

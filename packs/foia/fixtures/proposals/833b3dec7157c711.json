@@ -1,0 +1,23 @@
+{
+  "sentence_digest": "833b3dec7157c71141f093c13d793a40966da2dc445d7266a310439de5d30b39",
+  "sentence_text": "(II) disclosure is prohibited by law; and",
+  "proposals": [
+    {
+      "kind": "condition",
+      "quote": "disclosure is prohibited by law",
+      "context": {
+        "sentence_digest": "67fd20c66bd8d88db52df67ad06c1c378773e61f5420118a32a17092660f607f",
+        "quote": "withhold information under this section only if –"
+      },
+      "condition": "disclosure is prohibited by law",
+      "subject": "legal prohibition",
+      "allowed_example": "A withholding rests on a statute that prohibits disclosure.",
+      "forbidden_example": "A withholding claims a legal prohibition that the record does not identify."
+    }
+  ],
+  "provenance": {
+    "producer": "model",
+    "channel": "interactive-session",
+    "note": "Authored by a language model in an interactive session and written as fixtures, because the build session had no API credential for the propose adapter. Every quote was checked byte-exact against the sentence before the fixture was written. Re-record with `compiled-ai fixtures packs/foia --live` when a credential is available."
+  }
+}

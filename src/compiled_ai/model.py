@@ -83,11 +83,20 @@ class Clock(Strict):
     subject: str
 
 
+class ContextQuote(Strict):
+    """A quote from another sentence that the statement depends on, such as the
+    lead-in 'Each agency ... shall—' that governs a list of clauses."""
+
+    sentence_digest: str
+    quote: str
+
+
 class Proposal(Strict):
     """What the model proposes for one sentence. Nothing downstream trusts it."""
 
     kind: Kind
     quote: str
+    context: ContextQuote | None = None
     actor: str | None = None
     condition: str | None = None
     action: str | None = None
@@ -110,9 +119,11 @@ class Provenance(Strict):
 
 
 class ProposalRecord(Strict):
+    """One fixture: everything the proposer said about one sentence."""
+
     sentence_digest: str
     sentence_text: str
-    proposal: Proposal
+    proposals: tuple[Proposal, ...]
     provenance: Provenance
 
 
@@ -121,10 +132,14 @@ class ProposalRecord(Strict):
 CheckCode = Literal[
     "QUOTE_NOT_BYTE_EXACT",
     "QUOTE_EMPTY",
+    "CONTEXT_SENTENCE_UNKNOWN",
+    "CONTEXT_NOT_BYTE_EXACT",
+    "ACTOR_MISSING",
     "ACTOR_UNDEFINED",
     "CONNECTIVE_MISMATCH",
     "ROLE_NOT_RESERVED",
     "RESERVED_WITHOUT_ROLE",
+    "ROLE_UNDEFINED",
     "CLOCK_NOT_IN_QUOTE",
     "EXAMPLES_MISSING",
 ]
@@ -150,6 +165,7 @@ class Statement(Strict):
 
 
 class Confirmation(Strict):
+    id: str
     sentence_digest: str
     reviewer: str
     answer: bool | None

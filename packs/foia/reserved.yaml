@@ -1,0 +1,66 @@
+# Roles the statute names and decisions it reserves to them. Every entry carries a
+# quote that the build verifies byte-exact at the stated path; an entry whose quote
+# is not found fails the build. A role that is not listed here (or defined by an
+# accepted definition statement) cannot be an actor in any statement.
+roles:
+  - name: agency
+    path: "(f)(1)"
+    quote: '"agency" as defined in section 551(1) of this title includes'
+  - name: head of the agency
+    path: "(a)(6)(A)(i)(III)(aa)"
+    quote: "appeal to the head of the agency"
+  - name: person making such request
+    path: "(a)(6)(A)(ii)"
+    quote: "notify the person making such request"
+  - name: requester
+    path: "(a)(6)(A)(ii)(I)"
+    quote: "one request to the requester"
+  - name: FOIA Public Liaison
+    path: "(a)(6)(A)(i)(II)"
+    quote: "the FOIA Public Liaison of the agency"
+
+decisions:
+  - decision: whether to comply with the request
+    role: agency
+    path: "(a)(6)(A)(i)"
+    quote: "determine within 20 days (excepting Saturdays, Sundays, and legal public holidays) after the receipt of any such request whether to comply with such request"
+  - decision: the determination on appeal
+    role: head of the agency
+    path: "(a)(6)(A)(i)(III)(aa)"
+    quote: "appeal to the head of the agency"
+  - decision: the appeal period
+    role: head of the agency
+    path: "(a)(6)(A)(i)(III)(aa)"
+    quote: "within a period determined by the head of the agency"
+  - decision: whether to extend the time limits for unusual circumstances
+    role: agency
+    path: "(a)(6)(B)(i)"
+    quote: "may be extended by written notice to the person making such request"
+  - decision: whether the request for information was reasonable
+    role: agency
+    path: "(a)(6)(A)(ii)(I)"
+    quote: "reasonably requested from the requester"
+  - decision: whether to provide expedited processing
+    role: agency
+    path: "(a)(6)(E)(ii)(I)"
+    quote: "a determination of whether to provide expedited processing shall be made"
+  - decision: whether disclosure would harm an interest protected by an exemption
+    role: agency
+    path: "(a)(8)(A)(i)(I)"
+    quote: "the agency reasonably foresees that disclosure would harm an interest protected by an exemption"
+  - decision: whether full disclosure is possible
+    role: agency
+    path: "(a)(8)(A)(ii)(I)"
+    quote: "whenever the agency determines that a full disclosure of a requested record is not possible"
+  - decision: what steps to segregate and release nonexempt information are reasonable
+    role: agency
+    path: "(a)(8)(A)(ii)(II)"
+    quote: "take reasonable steps necessary to segregate and release nonexempt information"
+  - decision: which portions of a record are reasonably segregable
+    role: agency
+    path: "(b)(9)+"
+    quote: "Any reasonably segregable portion of a record shall be provided"
+  - decision: whether production of law enforcement records could reasonably be expected to cause a harm listed in (b)(7)
+    role: agency
+    path: "(b)(7)"
+    quote: "could reasonably be expected to interfere with enforcement proceedings"

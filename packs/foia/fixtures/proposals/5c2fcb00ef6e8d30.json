@@ -1,0 +1,29 @@
+{
+  "sentence_digest": "5c2fcb00ef6e8d305d4d81fcb6e7948c5da9534ae612d9e22ae73a7515274aa0",
+  "sentence_text": "(B)(i) In unusual circumstances as specified in this subparagraph, the time limits prescribed in either clause (i) or clause (ii) of subparagraph (A) may be extended by written notice to the person making such request setting forth the unusual circumstances for such extension and the date on which a determination is expected to be dispatched.",
+  "proposals": [
+    {
+      "kind": "condition",
+      "quote": "In unusual circumstances as specified in this subparagraph, the time limits prescribed in either clause (i) or clause (ii) of subparagraph (A) may be extended by written notice to the person making such request setting forth the unusual circumstances for such extension and the date on which a determination is expected to be dispatched",
+      "condition": "unusual circumstances as specified in this subparagraph exist",
+      "action": "extend the time limits by written notice that sets forth the unusual circumstances and the date a determination is expected to be dispatched",
+      "subject": "extension notice",
+      "allowed_example": "The agency extends the deadline by a written notice that states the unusual circumstances and the date a determination is expected.",
+      "forbidden_example": "The agency extends the deadline without a written notice, or the notice states no circumstances and no expected date."
+    },
+    {
+      "kind": "reserved_decision",
+      "quote": "may be extended by written notice to the person making such request",
+      "actor": "agency",
+      "subject": "whether to extend the time limits for unusual circumstances",
+      "role": "agency",
+      "allowed_example": "The agency decides whether unusual circumstances justify an extension.",
+      "forbidden_example": "A program decides that circumstances are unusual and extends the deadline on its own."
+    }
+  ],
+  "provenance": {
+    "producer": "model",
+    "channel": "interactive-session",
+    "note": "Authored by a language model in an interactive session and written as fixtures, because the build session had no API credential for the propose adapter. Every quote was checked byte-exact against the sentence before the fixture was written. Re-record with `compiled-ai fixtures packs/foia --live` when a credential is available."
+  }
+}

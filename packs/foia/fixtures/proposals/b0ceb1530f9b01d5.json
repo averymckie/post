@@ -1,0 +1,32 @@
+{
+  "sentence_digest": "b0ceb1530f9b01d59016e217b50d51029df6c3d650791ab335e0d2993389c733",
+  "sentence_text": "The 20-day period under clause (i) shall commence on the date on which the request is first received by the appropriate component of the agency, but in any event not later than ten days after the request is first received by any component of the agency that is designated in the agency’s regulations under this section to receive requests under this section.",
+  "proposals": [
+    {
+      "kind": "step",
+      "quote": "The 20-day period under clause (i) shall commence on the date on which the request is first received by the appropriate component of the agency, but in any event not later than ten days after the request is first received by any component of the agency that is designated in the agency’s regulations under this section to receive requests under this section",
+      "actor": "agency",
+      "action": "start the 20-day period on receipt by the appropriate component, and no later than ten days after receipt by any designated component",
+      "subject": "determination clock start",
+      "clock": {
+        "amount": 10,
+        "unit": "days",
+        "trigger": "receipt by any designated component",
+        "subject": "determination clock start"
+      },
+      "allowed_example": "A request received by a designated component on the 1st and by the appropriate component on the 5th starts the 20-day period on the 5th.",
+      "forbidden_example": "A request received by a designated component on the 1st and by the appropriate component on the 15th starts the 20-day period on the 15th instead of the 11th."
+    },
+    {
+      "kind": "precedence",
+      "quote": "shall commence on the date on which the request is first received",
+      "before": "receipt of request",
+      "after": "determination"
+    }
+  ],
+  "provenance": {
+    "producer": "model",
+    "channel": "interactive-session",
+    "note": "Authored by a language model in an interactive session and written as fixtures, because the build session had no API credential for the propose adapter. Every quote was checked byte-exact against the sentence before the fixture was written. Re-record with `compiled-ai fixtures packs/foia --live` when a credential is available."
+  }
+}

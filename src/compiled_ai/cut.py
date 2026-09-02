@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import re
 from functools import lru_cache
-from typing import Any
+from typing import Any, cast
 
 from .model import Sentence, Source, sha256_text
 
@@ -23,8 +23,9 @@ def _nlp() -> Any:
     import spacy  # compiler-only dependency
 
     nlp = spacy.blank("en")
+    tokenizer = cast(Any, nlp.tokenizer)
     for abbr in ABBREVIATIONS:
-        nlp.tokenizer.add_special_case(abbr, [{"ORTH": abbr}])
+        tokenizer.add_special_case(abbr, [{"ORTH": abbr}])
     nlp.add_pipe("sentencizer", config={"punct_chars": PUNCT_CHARS})
     return nlp
 

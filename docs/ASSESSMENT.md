@@ -27,6 +27,10 @@ The four asks split into work that is days and work that is weeks:
 
 "Zero fabrication" is not a fifth ask. It is the acceptance test for the other four. Sections 7 and 9 give the controls that make it checkable rather than promised.
 
+### Progress since this assessment was written
+
+Later on 2026-09-02, the first vertical slice was built and committed: the eleven-step pipeline under `src/compiled_ai/`, and a FOIA pack under `packs/foia/` compiled from the Department of Justice's published copy of 5 U.S.C. 552. The pack cuts 284 sentences, accepts 51 statements through the checker, compiles 45 of them into rule functions, routes 12 reserved decisions, reconciles 17 constraints with no contradiction, and seals to a manifest that two separate processes under different hash seeds reproduce byte for byte. All tests in section 7.3 exist and pass. Everything in the pack is marked provisional: the proposals were authored by a language model in an interactive session rather than through the propose adapter (the build session had no API credential), and the confirmations await a named reviewer. `packs/foia/README.md` states exactly what is compiled, what is provisional, and what is not compiled.
+
 ## 2. What exists today
 
 ### 2.1 The repository
@@ -348,7 +352,7 @@ Estimates are for one engineer with review from the document's author. They are 
 | --- | --- | --- | --- |
 | 0 (this pull request) | `papers/` with the original document and hash, the verified bibliography, the citation ledger, this assessment | Every bibliography entry has a fetched URL; every ledger row has a status and a source | Done |
 | 1 | Citation fixes in the document; the language pass; glossary; footnotes; readability check in CI | Readability script passes on every section; zero unverified citations | 2 to 4 days |
-| 2 | Core pipeline, one pack (FOIA), fixtures, the eight tests in section 7.3, the double-build gate in CI | All tests pass with no network; double build identical | 2 to 3 weeks |
+| 2 | Core pipeline, one pack (FOIA), fixtures, the eight tests in section 7.3, the double-build gate in CI | All tests pass with no network; double build identical | Built on 2026-09-02 as a provisional slice (see "Progress" above). Remaining: live fixtures, a named reviewer, the prove step wired into CI |
 | 3 | Banking, telecom, healthcare, energy, pharma, customs, GDPR, and aerospace packs on public sources | Same tests per pack; each pack has a gold set | 2 to 4 days per pack |
 | 4 | Bring-your-own-PDF path; manufacturing, insurance, legal, and device packs | Edition mismatch stops the build at the first sentence; matched edition builds identically | 1 to 2 weeks |
 | 5 | Evaluation in section 9.2; paper revision with measured numbers | Every number in the paper has a script that produced it | 2 to 3 weeks, including annotation time |

@@ -1,0 +1,23 @@
+{
+  "sentence_digest": "5b98369bcfeef8fecfeb67a70b929ad457284e6adb609f3a89115b69f3900481",
+  "sentence_text": "(III) in the case of an adverse determination –",
+  "proposals": [
+    {
+      "kind": "condition",
+      "quote": "in the case of an adverse determination",
+      "context": {
+        "sentence_digest": "994ce953c600bbc24c81ac31cfabf26e4eb141edc4c364f3e940dba06ca18f0c",
+        "quote": "shall immediately notify the person making such a request of –"
+      },
+      "condition": "the determination is adverse",
+      "subject": "adverse determination",
+      "allowed_example": "A denial in whole or in part is an adverse determination and the notice carries items (aa) and (bb).",
+      "forbidden_example": "A determination to comply in full is treated as adverse, or an adverse determination is sent without items (aa) and (bb)."
+    }
+  ],
+  "provenance": {
+    "producer": "model",
+    "channel": "interactive-session",
+    "note": "Authored by a language model in an interactive session and written as fixtures, because the build session had no API credential for the propose adapter. Every quote was checked byte-exact against the sentence before the fixture was written. Re-record with `compiled-ai fixtures packs/foia --live` when a credential is available."
+  }
+}

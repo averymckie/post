@@ -1,0 +1,23 @@
+{
+  "sentence_digest": "830c8039c1f08ea0ffdfb5814f575e48b1d2469c0ae3b54bf8bf3628af0c633b",
+  "sentence_text": "(2) related solely to the internal personnel rules and practices of an agency;",
+  "proposals": [
+    {
+      "kind": "condition",
+      "quote": "related solely to the internal personnel rules and practices of an agency;",
+      "context": {
+        "sentence_digest": "563d88553314f1ab10c8ccc77efbd1872ca31ad8ccdfe0b9de5d0143c986dc91",
+        "quote": "This section does not apply to matters that are—"
+      },
+      "condition": "the matter is matters related solely to the internal personnel rules and practices of an agency",
+      "subject": "exemption (b)(2)",
+      "allowed_example": "A withholding cites (b)(2) for a record that is matters related solely to the internal personnel rules and practices of an agency.",
+      "forbidden_example": "A withholding cites (b)(2) for a record that is not matters related solely to the internal personnel rules and practices of an agency."
+    }
+  ],
+  "provenance": {
+    "producer": "model",
+    "channel": "interactive-session",
+    "note": "Authored by a language model in an interactive session and written as fixtures, because the build session had no API credential for the propose adapter. Every quote was checked byte-exact against the sentence before the fixture was written. Re-record with `compiled-ai fixtures packs/foia --live` when a credential is available."
+  }
+}

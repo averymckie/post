@@ -26,6 +26,8 @@ live = [
 dev = [
   "pytest>=8.4",
   "hypothesis==6.167.1",
+  "types-PyYAML",
+  "types-networkx",
 ]
 
 [project.scripts]
@@ -41,9 +43,14 @@ packages = ["src/compiled_ai"]
 [tool.pytest.ini_options]
 testpaths = ["tests", "packs"]
 addopts = "-q -p no:cacheprovider"
+pythonpath = [".", "src"]
 
 [tool.mypy]
 python_version = "3.11"
 strict = true
 warn_unreachable = true
 files = ["src/compiled_ai", "packs"]
+
+[[tool.mypy.overrides]]
+module = ["z3", "z3.*", "anthropic", "anthropic.*"]
+ignore_missing_imports = true

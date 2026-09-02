@@ -1,0 +1,29 @@
+{
+  "sentence_digest": "5bfa3475672721bb87c69c4dc8e4d186dea3976db148f4f1a4be7ab138760109",
+  "sentence_text": "Any reasonably segregable portion of a record shall be provided to any person requesting such record after deletion of the portions which are exempt under this subsection.",
+  "proposals": [
+    {
+      "kind": "step",
+      "quote": "Any reasonably segregable portion of a record shall be provided to any person requesting such record after deletion of the portions which are exempt under this subsection",
+      "actor": "agency",
+      "action": "provide any reasonably segregable portion after deleting the exempt portions",
+      "subject": "segregable portions",
+      "allowed_example": "The agency releases the record with the exempt portions deleted and the rest provided.",
+      "forbidden_example": "The agency withholds the whole record without a segregability review."
+    },
+    {
+      "kind": "reserved_decision",
+      "quote": "Any reasonably segregable portion of a record shall be provided",
+      "actor": "agency",
+      "subject": "which portions of a record are reasonably segregable",
+      "role": "agency",
+      "allowed_example": "The agency decides which portions are reasonably segregable.",
+      "forbidden_example": "A program decides which portions are reasonably segregable."
+    }
+  ],
+  "provenance": {
+    "producer": "model",
+    "channel": "interactive-session",
+    "note": "Authored by a language model in an interactive session and written as fixtures, because the build session had no API credential for the propose adapter. Every quote was checked byte-exact against the sentence before the fixture was written. Re-record with `compiled-ai fixtures packs/foia --live` when a credential is available."
+  }
+}

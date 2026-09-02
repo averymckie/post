@@ -1,0 +1,23 @@
+{
+  "sentence_digest": "3d508093d40d5de79f4bdf92f1ef4a63e48398f73e115441b5ec806d3a8537f3",
+  "sentence_text": "(4) trade secrets and commercial or financial information obtained from a person and privileged or confidential;",
+  "proposals": [
+    {
+      "kind": "condition",
+      "quote": "trade secrets and commercial or financial information obtained from a person and privileged or confidential;",
+      "context": {
+        "sentence_digest": "563d88553314f1ab10c8ccc77efbd1872ca31ad8ccdfe0b9de5d0143c986dc91",
+        "quote": "This section does not apply to matters that are—"
+      },
+      "condition": "the matter is trade secrets and commercial or financial information obtained from a person and privileged or confidential",
+      "subject": "exemption (b)(4)",
+      "allowed_example": "A withholding cites (b)(4) for a record that is trade secrets and commercial or financial information obtained from a person and privileged or confidential.",
+      "forbidden_example": "A withholding cites (b)(4) for a record that is not trade secrets and commercial or financial information obtained from a person and privileged or confidential."
+    }
+  ],
+  "provenance": {
+    "producer": "model",
+    "channel": "interactive-session",
+    "note": "Authored by a language model in an interactive session and written as fixtures, because the build session had no API credential for the propose adapter. Every quote was checked byte-exact against the sentence before the fixture was written. Re-record with `compiled-ai fixtures packs/foia --live` when a credential is available."
+  }
+}

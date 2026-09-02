@@ -1,0 +1,15 @@
+{
+  "sentence_digest": "3f3e47872e4c565dee3621ac6b6a23ae71a4389affe57e70f0b379d75310d54c",
+  "sentence_text": "(6)(A) Each agency, upon any request for records made under paragraph (1), (2), or (3) of this subsection, shall—",
+  "proposals": [
+    {
+      "kind": "none",
+      "quote": "Each agency, upon any request for records made under paragraph (1), (2), or (3) of this subsection, shall—"
+    }
+  ],
+  "provenance": {
+    "producer": "model",
+    "channel": "interactive-session",
+    "note": "Authored by a language model in an interactive session and written as fixtures, because the build session had no API credential for the propose adapter. Every quote was checked byte-exact against the sentence before the fixture was written. Re-record with `compiled-ai fixtures packs/foia --live` when a credential is available."
+  }
+}

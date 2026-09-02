@@ -1,0 +1,43 @@
+{
+  "sentence_digest": "5fbb00947329106b05edd4daacf8cb08d9b2d42df939cdbd34261f232100eeff",
+  "sentence_text": "(ii) make a determination with respect to any appeal within twenty days (excepting Saturdays, Sundays, and legal public holidays) after the receipt of such appeal.",
+  "proposals": [
+    {
+      "kind": "step",
+      "quote": "make a determination with respect to any appeal within twenty days (excepting Saturdays, Sundays, and legal public holidays) after the receipt of such appeal",
+      "context": {
+        "sentence_digest": "3f3e47872e4c565dee3621ac6b6a23ae71a4389affe57e70f0b379d75310d54c",
+        "quote": "Each agency, upon any request for records made under paragraph (1), (2), or (3) of this subsection, shall—"
+      },
+      "actor": "agency",
+      "action": "determine the appeal within twenty working days after receipt of the appeal",
+      "subject": "appeal determination",
+      "clock": {
+        "amount": 20,
+        "unit": "working_days",
+        "trigger": "receipt of appeal",
+        "subject": "appeal determination"
+      },
+      "allowed_example": "An appeal received on a Tuesday is determined on or before the twentieth working day after that Tuesday.",
+      "forbidden_example": "An appeal received on a Tuesday is still undetermined on the thirtieth working day after receipt with no extension notice."
+    },
+    {
+      "kind": "reserved_decision",
+      "quote": "make a determination with respect to any appeal",
+      "context": {
+        "sentence_digest": "cc11370794155bd09628d79a162655108e0e7a694ea04440019dc2344458beb1",
+        "quote": "the right of such person to appeal to the head of the agency"
+      },
+      "actor": "agency",
+      "subject": "the determination on appeal",
+      "role": "head of the agency",
+      "allowed_example": "The head of the agency decides the appeal.",
+      "forbidden_example": "A program decides the appeal, or the record shows the appeal was decided by someone other than the head of the agency."
+    }
+  ],
+  "provenance": {
+    "producer": "model",
+    "channel": "interactive-session",
+    "note": "Authored by a language model in an interactive session and written as fixtures, because the build session had no API credential for the propose adapter. Every quote was checked byte-exact against the sentence before the fixture was written. Re-record with `compiled-ai fixtures packs/foia --live` when a credential is available."
+  }
+}

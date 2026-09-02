@@ -19,6 +19,7 @@ import html
 import re
 from html.parser import HTMLParser
 from pathlib import Path
+from typing import Any
 
 from .canon import CANON_VERSION, canonicalize
 from .model import Source, Unit
@@ -261,8 +262,9 @@ def read_pdf(path: Path, source_id: str) -> Source:
                 expand_ligatures=True,
                 return_chars=True,
             )
-            lines: list[list[dict[str, object]]] = []
-            for w in sorted(words, key=lambda w: (round(float(w["top"]), 1), float(w["x0"]))):
+            lines: list[list[dict[str, Any]]] = []
+            typed_words: list[dict[str, Any]] = list(words)
+            for w in sorted(typed_words, key=lambda w: (round(float(w["top"]), 1), float(w["x0"]))):
                 if lines and abs(float(lines[-1][0]["top"]) - float(w["top"])) <= 3:
                     lines[-1].append(w)
                 else:
@@ -298,7 +300,7 @@ def read_pdf(path: Path, source_id: str) -> Source:
                     if wi:
                         chars.append(" ")
                         offsets.append(running)
-                    for c in w["chars"]:  # type: ignore[union-attr]
+                    for c in w["chars"]:
                         chars.append(str(c["text"]))
                         offsets.append(running)
                         running += 1

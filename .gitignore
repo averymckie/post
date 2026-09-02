@@ -8,6 +8,6 @@ __pycache__/
 .mypy_cache/
 .pytest_cache/
 .hypothesis/
-build/
+/build/
 dist/
 *.egg-info/

@@ -1,0 +1,28 @@
+{
+  "as_of": "2026-03-01",
+  "received_by_designated_component_on": "2026-01-05",
+  "received_by_appropriate_component_on": "2026-01-05",
+  "determination": "deny",
+  "determination_on": "2026-02-20",
+  "determination_notice": {
+    "sent_on": "2026-02-20",
+    "states_determination": true,
+    "states_reasons": false,
+    "states_liaison_assistance": true,
+    "states_appeal_right": true,
+    "appeal_period_days": 90,
+    "states_dispute_resolution": true,
+    "names_and_titles_of_responsible_persons": []
+  },
+  "withholdings": [
+    {
+      "exemption": "(b)(5)",
+      "exemption_conditions_found": true,
+      "harm_finding_recorded": true,
+      "prohibited_by_law": false
+    }
+  ],
+  "full_disclosure_possible": false,
+  "partial_disclosure_considered": true,
+  "segregability_review_recorded": true
+}

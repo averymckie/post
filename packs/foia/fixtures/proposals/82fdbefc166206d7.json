@@ -1,0 +1,20 @@
+{
+  "sentence_digest": "82fdbefc166206d7adcf49a807a931a88b11ba488471617763d0fd2f5fa708c0",
+  "sentence_text": "The amount of information deleted, and the exemption under which the deletion is made, shall be indicated on the released portion of the record, unless including that indication would harm an interest protected by the exemption in this subsection under which the deletion is made.",
+  "proposals": [
+    {
+      "kind": "step",
+      "quote": "The amount of information deleted, and the exemption under which the deletion is made, shall be indicated on the released portion of the record, unless including that indication would harm an interest protected by the exemption in this subsection under which the deletion is made",
+      "actor": "agency",
+      "action": "indicate the amount deleted and the exemption on the released portion, unless the indication would itself harm a protected interest",
+      "subject": "deletion markings",
+      "allowed_example": "A released record marks each deletion with its amount and the exemption claimed.",
+      "forbidden_example": "A released record shows deletions with no indication of the amount or the exemption, and no finding that marking them would cause harm."
+    }
+  ],
+  "provenance": {
+    "producer": "model",
+    "channel": "interactive-session",
+    "note": "Authored by a language model in an interactive session and written as fixtures, because the build session had no API credential for the propose adapter. Every quote was checked byte-exact against the sentence before the fixture was written. Re-record with `compiled-ai fixtures packs/foia --live` when a credential is available."
+  }
+}
