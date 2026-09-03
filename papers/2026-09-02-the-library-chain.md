@@ -136,7 +136,7 @@ The first instance is the Freedom of Information Act, 5 U.S.C. 552, in the copy 
 | predpatt | 1.0.1, installed from repository hltcoe/PredPatt at commit 34bc751656a0766c7ac233b077ea8511a8004876 (BSD 3-Clause) |
 | clingo | 5.8.2 (MIT); clorm 1.6.3 (MIT) |
 | z3-solver | 5.1.0.0 (MIT) |
-| networkx | 2.7.1 (BSD); the newest version admitted by PredPatt's dependency concrete, which requires networkx below 2.8 |
+| networkx | 3.6.1 (BSD-3-Clause per the package record). PredPatt declares a dependency, concrete, that requires networkx below 2.8; the chain never imports concrete, and the constraint is overridden at install time in `pyproject.toml` (`[tool.uv] override-dependencies`) |
 | pydantic | 2.13.5 (MIT); pdfplumber 0.11.10 (MIT), installed and not exercised by an HTML source |
 | Canonical text rule | version 1: NFC per character, every whitespace character to one space, runs collapsed, unit trimmed |
 
@@ -222,7 +222,7 @@ The third fact is wrong: the parser attached "Saturdays" as the object of "deter
 
 | Measurement | Value |
 | --- | --- |
-| Manifest digest | 441bb4a32f26e0938e45564a50d54a2070674e00b226a05e8ecefa88dfce9d55 |
+| Manifest digest | ff8b1bee4b54894437f2f31013ab3e450fe29c9c1f541f53b3fd8938f9d3fdda |
 | Double build under hash seeds 1 and 424242 | byte-identical |
 | Build under hash seed 7 against the committed manifest | identical |
 | Verify command | rebuild reproduces the digest |
