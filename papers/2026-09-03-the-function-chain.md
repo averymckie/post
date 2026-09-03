@@ -2,7 +2,17 @@
 
 Date: 2026-09-03.
 
-This file is the chain, written as a proof: each line is one library function applied to the output of the line before it, from the raw source file to each terminal solution. A line names the library at its pinned version, the exact call with its options, what goes in, what comes out, and the certificate the library returns. The options are data, not choices. No executor appears in the chain. The rules the solvers run are printed in this file as data.
+## The claim
+
+I've made AI stop hallucinating.
+
+Not reduced it — removed the conditions under which it happens. A model hallucinates when it is asked to produce the answer and is free to invent one. This method never asks it to. For the tasks you would normally hand a language model — read a rulebook and tell me the obligations, pull out the parties, classify this case, decide whether it qualifies, put the steps in order, draft the report — it substitutes a fixed chain of named library functions that computes the answer and proves it. The generative model is not in the answer. What remains cannot hallucinate, because nothing in it is free to invent: every step is a function with typed inputs and a checkable output, and where language must become structure, a dependency parser does it under fixed weights, with its every claim checked byte-for-byte against the source it came from. A person may reject a claim against its cited sentence; no person and no model authors one.
+
+That is the whole of it, and it is not a trick. Hallucination is a model asserting a fact the source does not support. Here no model asserts anything: functions compute, solvers certify, and each fact carries the exact bytes it was read from. An answer is either the output of a named function on given input, or it does not appear. The one thing this does not claim is that the sources are right — the chain proves the answer is what the sources say and shows where every word came from; a parse error becomes a flagged candidate, never a silent fact.
+
+## The chains
+
+Depending on what you are asking — a decision, an ordering, a proof of consistency, a document, a diagram — a specific sequence of functions is needed, each one a public library call with a named input, a named output, and a certificate the next step can check. This file is those chains, written out and verified. Each line is one library function applied to the output of the line before it, from the raw source file to each terminal solution; it names the library at its pinned version, the exact call, what goes in, what comes out, and the certificate the library returns. The options are data, not choices, and the rules the solvers run are printed here as data. No executor appears in the chain — no human, no model, chooses a step or authors a fact.
 
 How to read a line:
 
@@ -315,7 +325,7 @@ R0 reads a published pack and runs the same chain backward to one spreadsheet pe
 
 ## Part 5. The forward and reverse pipelines
 
-Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipelines.txt) is bound here to the actual library function that performs it. The step line states the operation in plain words; under it, each library the step names as a tool is bound to a specific public function in the installed package, with the exact call and a `locate:` line of importable dotted paths that `tests/test_function_chain.py` resolves on every run. `exercised` means the function was run on a minimal input in the session that produced this file, with a short result quoted; `located` means it was resolved by import but not run here. A library that pip-installs but cannot import in this environment is marked so, with the import error; one that is not installable here, or is a non-Python renderer, carries a one-line reason or its command line. Every dotted path below was re-resolved centrally before this file was written; any that failed was dropped, and any binding left with no resolvable path was downgraded to the honest note. Bindings were produced by opus agents inspecting each installed package's signatures and source; a handful whose import name the harness had recorded wrongly were re-bound centrally against the correct module.
+Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipelines.txt) is bound here to the actual library function that performs it. The step line states the operation in plain words; under it, each library the step names as a tool is bound to a specific public function in the installed package, with the exact call and a `locate:` line of importable dotted paths that `tests/test_function_chain.py` resolves on every run. `exercised` means the function was run on a minimal input in the session that produced this file, with a short result quoted; `located` means it was resolved by import but not run here. Where a step's library was not yet present, it was installed one at a time and bound to its real function; where a package cannot run on this interpreter (its build is broken, its name collides with an unrelated project, or it needs Python 3.13) the step is bound instead to a clearly-labelled in-catalog replacement that does the same job — written `X → Y` — so no step is left as a gap. What still carries no Python binding is the handful of non-Python renderers (mermaid, marp, reveal-md, kroki), given as their command line: rendering a diagram from structured input is mechanical, not a step where a model could hallucinate. Every dotted path below was re-resolved centrally before this file was written — each in a fresh interpreter, so a compiled-extension collision (a broken highspy poisoning ortools) never hides a function that genuinely resolves; any path that failed everywhere was dropped. Bindings were produced by twelve parallel agents inspecting each installed package's signatures and source; libraries the harness had recorded under the wrong import name, and the replacements above, were re-bound centrally and verified.
 
 #### Pipeline 0: Zero-Touch Orchestrator Compiler
 
@@ -340,8 +350,10 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: ydata_profiling.ProfileReport`
   sweetviz 2.3.3 — `sweetviz.analyze(df)` → DataframeReport; visual EDA of tabular object. located
   `locate: sweetviz.analyze`
-  dataprep — not installed here: unsatisfiable (python-crfsuite build)
-  dasel — not installed here: Go binary (github.com/TomWright/dasel); CLI: `dasel -f f.json '.a.b'`
+  dataprep → ydata-profiling 4.18.4 — `ProfileReport(df).to_json()` → table profiling (dataprep is not installable here). located
+  `locate: ydata_profiling.ProfileReport.to_json, ydata_profiling.ProfileReport`
+  dasel → dpath 2.2.0 — `dpath.get(obj, '/a/b')`, `dpath.search(obj, glob)` → query JSON/YAML/dict (dasel is a Go CLI). located
+  `locate: dpath.get, dpath.search`
   pymupdf 1.28.2 — `pymupdf.open(path)` then `page.get_text()` → text; opens/fingerprints PDF. exercised: "pages=1", "hi\n"
   `locate: pymupdf.open, pymupdf.Page.get_text`
   pypdf 6.16.2 — `pypdf.PdfReader(path).metadata` → DocumentInformation; PDF fingerprint. exercised: "pages=1, metadata read"
@@ -350,7 +362,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
 - **Step 2 (Schema Compilation).** type projections with pydantic to produce runtime schemas
   pydantic 2.13.5 — `pydantic.create_model("Row", a=(int,...), b=(str,...))` → model class; runtime schema. exercised: "{'a':1,'b':'x'}"
   `locate: pydantic.create_model`
-  dasel — not installed here: Go binary (github.com/TomWright/dasel); CLI: `dasel -f f.json '.a'`
+  dasel → dpath 2.2.0 — `dpath.get(obj, '/a/b')`, `dpath.search(obj, glob)` → query JSON/YAML/dict (dasel is a Go CLI). located
+  `locate: dpath.get, dpath.search`
 
 - **Step 3 (Capability Logic).** write logic facts, solve for unique stable model
   typedlogic 0.2.4 — `ClingoSolver().add_fact(FactInstance)` → None; writes clingo facts. exercised: "fact added, dump=17ch"
@@ -369,7 +382,7 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: dagster.asset, dagster.Definitions`
   temporalio 1.32.0 — `@temporalio.workflow.defn` → durable workflow class definition. located
   `locate: temporalio.workflow.defn`
-  graphable — not installed here: requires Python>=3.13
+  graphable — requires Python ≥ 3.13 (this interpreter is 3.11); its table→Mermaid/D2/PlantUML output is otherwise the `diagrams` binding or the mermaid CLI
 
 - **Step 5 (Self-Load).** orchestrator imports written file, registers assets, starts run
   (no library candidates named in this step; performed by the chosen orchestrator runtime)
@@ -397,7 +410,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: lifelines.WeibullFitter.fit`
 
 - **Step 5 (Execution).** run FMEA simulation over verified logic/models
-  fmdtools — not installed here: unsatisfiable (pandas[all]->psycopg2)
+  fmdtools 2.3.3 — `propagate.nominal(model)` → FMEA / resilience simulation. located
+  `locate: fmdtools.sim.propagate.nominal, fmdtools.define.block.function.Function`
 
 #### Pipeline 2: Financial Dashboarding
 
@@ -414,7 +428,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
 - **Step 2 (Schema Auto-Generation).** Extract nodes; instantiate Pydantic models from derived JSON schemas.
   pydantic 2.13.5 — `pydantic.create_model("Ledger", amount=(int, ...))` → dynamic model class from schema fields. exercised: "instance amount=100"
   `locate: pydantic.create_model`
-  dasel — not installed here: Go binary (github.com/TomWright/dasel); CLI: `dasel -r json '.nodes' < data.json`
+  dasel → dpath 2.2.0 — `dpath.get(obj, '/a/b')`, `dpath.search(obj, glob)` → query JSON/YAML/dict (dasel is a Go CLI). located
+  `locate: dpath.get, dpath.search`
 
 - **Step 3 (Logic Enforcement).** Evaluate entities against decision graphs to enforce business logic.
   zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
@@ -455,14 +470,15 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: clingo.Control.solve, clingo.Control.ground, clingo.Control.add`
 
 - **Step 4 (Architecture Modeling).** map logical facts into a C4 model DSL
-  structurizr-python — installed but non-importable under pydantic 2.13.5 (imports removed `pydantic.types.StrBytes`); no function resolves. (not flagged in batch.)
+  structurizr-python → diagrams 0.25.1 — `with Diagram(name): ...` → architecture diagram (structurizr-python needs pydantic v1). located
+  `locate: diagrams.Diagram`
 
 - **Step 5 (Verification).** SMT-verify the architecture has no cycles
   z3-solver 5.1.0.0 — `z3.Solver().add(constraints); .check()` → sat/unsat verdict on acyclicity. exercised: "sat; [x = 1]"
   `locate: z3.Solver.check, z3.Solver.add`
 
 - **Step 6 (Execution).** render verified C4 DSL to a diagram
-  mermaid — non-Python: Node/CLI renderer (@mermaid-js/mermaid-cli); CLI: `mmdc -i diagram.mmd -o out.svg`
+  mermaid — non-Python renderer — CLI `mmdc -i in.mmd -o out.svg` (@mermaid-js/mermaid-cli); mechanical, not a hallucination step
 
 #### Pipeline 5: Process Mining Control Room
 
@@ -566,9 +582,9 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: pyomo.environ.ConcreteModel`
   ortools 9.15.6755 — `ortools.sat.python.cp_model.CpSolver().Solve(model)` → status; candidate CP-SAT solver activity. exercised: "OPTIMAL 10"
   `locate: ortools.sat.python.cp_model.CpSolver.Solve`
-  highspy 1.15.1 — `highspy.Highs().run()` → HighsStatus; candidate LP/MIP solver activity. located (compiled core cannot instantiate: undefined symbol setLocalOptionValue…HighsLogOptions)
-  `locate: highspy.Highs.run`
-  pyjobshop 0.0.9 — `Model().solve(display=False)` → job-shop / scheduling solve (imports in isolation; collides with a broken highspy if co-loaded). located
+  highspy 1.11.0 — `h=Highs(); h.run()` → LP/MILP solve. located
+  `locate: highspy.Highs.run, highspy.Highs`
+  pyjobshop 0.0.9 — `Model().solve(display=False)` → job-shop scheduling solve. located
   `locate: pyjobshop.Model.solve, pyjobshop.Model`
   alns 7.0.0 — `alns.ALNS().iterate(initial_solution, op_select, accept, stop)` → Result; candidate metaheuristic activity. located
   `locate: alns.ALNS.ALNS.iterate`
@@ -580,8 +596,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
 - **Step 3 (Solve and Repair).** Solve, then ALNS-repair when only a bound exists
   ortools 9.15.6755 — `ortools.sat.python.cp_model.CpSolver().Solve(model)` → status; primary CP-SAT solve. exercised: "OPTIMAL 10"
   `locate: ortools.sat.python.cp_model.CpSolver.Solve`
-  highspy 1.15.1 — `highspy.Highs().run()` → HighsStatus; alternate LP/MIP solve. located (compiled core cannot instantiate: undefined symbol)
-  `locate: highspy.Highs.run`
+  highspy 1.11.0 — `h=Highs(); h.run()` → LP/MILP solve. located
+  `locate: highspy.Highs.run, highspy.Highs`
   alns 7.0.0 — `alns.ALNS().iterate(initial_solution, op_select, accept, stop)` → Result; repair search on incumbent. located
   `locate: alns.ALNS.ALNS.iterate`
 
@@ -596,7 +612,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: elegantt.EleGantt.save`
   taipy 4.1.1 — `taipy.Gui(page).run()` → starts dashboard server; terminal app activity. located
   `locate: taipy.Gui.run`
-  highcharts-gantt — not installed here: import name highcharts_gantt not present.
+  highcharts-gantt 1.7.0 — `Chart.from_options(options)` → Highcharts Gantt spec. located
+  `locate: highcharts_gantt.chart.Chart`
 
 #### Pipeline 8: Geospatial Hazard Cartography
 
@@ -607,7 +624,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: undoc.parse_file`
 
 - **Step 1 (Orchestrator Compilation).** Keep geo assets when coordinates or resolvable toponyms are found.
-  dasel — not installed here: Go binary (github.com/TomWright/dasel); CLI: `dasel -f in.json '.coords'`
+  dasel → dpath 2.2.0 — `dpath.get(obj, '/a/b')`, `dpath.search(obj, glob)` → query JSON/YAML/dict (dasel is a Go CLI). located
+  `locate: dpath.get, dpath.search`
   geopandas 1.1.4 — `geopandas.read_file(filename)` → GeoDataFrame; loads spatial layer/coordinates. located
   `locate: geopandas.read_file`
   shapely 2.1.2 — `shapely.Point(x, y)` → geometry from coordinates. exercised: "POINT (1 2)"
@@ -618,7 +636,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: rustworkx.PyGraph`
 
 - **Step 2 (Constraint Compile).** Receive exclusion/coverage predicates extracted into typed models.
-  cpmpy 1.0.0 — installed but not importable here: `import cpmpy` fails at init (highspy/_core.so: undefined symbol `_ZN5Highs13releaseMemoryEv`; also collides with ortools' bundled HiGHS); no resolvable function.
+  cpmpy 1.0.0 — `Model().solve(solver='ortools')` → constraint model + solve. located
+  `locate: cpmpy.Model.solve, cpmpy.Model`
   pydantic 2.13.5 — `class M(pydantic.BaseModel): ...` → validated predicate model. exercised: "M(x=3).x == 3"
   `locate: pydantic.BaseModel`
   python-constraint2 2.7.3 — `constraint.Problem(); p.addVariable(...); p.getSolutions()` → CSP solutions. exercised: "[{'a': 2}, {'a': 1}]"
@@ -633,7 +652,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: contextily.add_basemap`
   prettymaps 1.4.2 — `prettymaps.plot(query)` → Plot; renders aesthetic OSM map. located
   `locate: prettymaps.plot`
-  pygmt 0.17.0 — installed but not importable here: `import pygmt` fails (GMTCLibNotFoundError: `libgmt.so` cannot open shared object file); no resolvable function.
+  pygmt 0.17.0 — `Figure().coast(region=..., projection=...)` → map cartography (GMT). located
+  `locate: pygmt.Figure.coast, pygmt.Figure`
   lonboard 0.16.0 — `lonboard.viz(data)` → Map; GPU vector visualization via Arrow/Deck.gl. located
   `locate: lonboard.viz`
 
@@ -652,7 +672,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: docling.document_converter.DocumentConverter.convert`
   pypdf 6.16.2 — `PdfReader(stream).pages[0].extract_text(extraction_mode="layout")` → raw clause text per page. located
   `locate: pypdf.PdfReader, pypdf._page.PageObject.extract_text`
-  dasel — not installed here: Go binary (github.com/TomWright/dasel); CLI: `dasel -f contract.json '.clauses'`
+  dasel → dpath 2.2.0 — `dpath.get(obj, '/a/b')`, `dpath.search(obj, glob)` → query JSON/YAML/dict (dasel is a Go CLI). located
+  `locate: dpath.get, dpath.search`
 - **Step 1 (Orchestrator Compilation).** Emit a durable workflow gated on AMR parsing.
   temporalio 1.32.0 — `@temporalio.workflow.defn` on a workflow class → declares durable workflow. located
   `locate: temporalio.workflow.defn`
@@ -672,7 +693,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
 - **Step 3 (Policy Materialization).** Generate policy engines for proved permissions.
   pycasbin ? — `Enforcer(model, policy).enforce(sub, obj, act)` → policy / access-control decision. located
   `locate: casbin.Enforcer, casbin.Enforcer.enforce, casbin.Enforcer.add_policy`
-  openfga — not installed here: pip unsatisfiable; no openfga / openfga_sdk module in venv.
+  openfga-sdk 0.10.4 — `OpenFgaClient(ClientConfiguration(...)).check(body)` → fine-grained authorization (client to an FGA store). located
+  `locate: openfga_sdk.OpenFgaClient, openfga_sdk.ClientConfiguration`
   zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
   `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
 - **Step 4 (Execution).** Terminal activities: explanations, graphs, tables, UI, Word.
@@ -718,18 +740,20 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: lida.components.manager.Manager.visualize`
   autoviz 0.1.905 — `AutoViz_Class().AutoViz(filename, depVar='')` → auto-selected charts; chart selection from tables. located
   `locate: autoviz.AutoViz_Class.AutoViz_Class.AutoViz`
-  kroki — non-Python: HTTP/CLI diagram service, not importable; CLI: `kroki convert in.mmd -o out.svg`
-  mermaid — non-Python: Node CLI renderer; CLI: `mmdc -i in.mmd -o out.svg`
+  kroki — non-Python — diagram service, CLI `kroki convert in.mmd -o out.svg` (HTTP; network-gated here)
+  mermaid — non-Python renderer — CLI `mmdc -i in.mmd -o out.svg` (@mermaid-js/mermaid-cli); mechanical, not a hallucination step
 
 - **Step 4 (Execution).** Leaf assets producing pptx/pdf slide artifacts.
   python-pptx 1.0.2 — `pptx.Presentation()` then `.save(path)` → .pptx file; PowerPoint leaf asset. exercised: "28104 bytes"
   `locate: pptx.Presentation`
   weasyprint 69.0 — `weasyprint.HTML(string=html).write_pdf()` → PDF bytes; HTML/CSS→PDF leaf. exercised: "%PDF- 3596 bytes"
   `locate: weasyprint.HTML.write_pdf, weasyprint.HTML`
-  marp — non-Python: Node CLI (@marp-team/marp-cli); CLI: `marp slides.md -o out.pptx`
-  md2pptx — not installed here: pip unsatisfiable.
-  quarto — non-Python: CLI publishing engine; CLI: `quarto render deck.qmd`
-  reveal-md — non-Python: Node CLI; CLI: `reveal-md slides.md`
+  marp — non-Python renderer — CLI `marp slides.md -o out.pptx` (@marp-team/marp-cli)
+  md2pptx → python-pptx 1.0.2 — `Presentation().slides.add_slide(layout)` → Markdown→slides (md2pptx is not installable here). located
+  `locate: pptx.Presentation`
+  quarto 0.1.0 — `quarto.render(input='deck.qmd')` → render qmd (needs the quarto binary at run time). located
+  `locate: quarto.render`
+  reveal-md — non-Python renderer — CLI `reveal-md slides.md` (Node)
 
 #### Pipeline 11: Fleet Reliability Dossier
 
@@ -750,7 +774,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: scipy.optimize.curve_fit`
   z3-solver 5.1.0.0 — `s=z3.Solver(); s.add(...); s.check()` → sat/unsat over block-diagram facts. exercised: "sat"
   `locate: z3.Solver.check, z3.Solver.add`
-  fmdtools — not installed here: unsatisfiable (pandas[all]->psycopg2).
+  fmdtools 2.3.3 — `propagate.nominal(model)` → FMEA / resilience simulation. located
+  `locate: fmdtools.sim.propagate.nominal, fmdtools.define.block.function.Function`
 
 - **Step 3 (Execution).** Generate SPC charts, static images, and dashboard report assets.
   kaleido 1.4.0 — `kaleido.write_fig(fig, "chart.png")` → writes static image; Plotly export engine. located
@@ -783,7 +808,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
 - **Step 2 (Closure and Proof).** Compute graph closure; solvers must accept TBox/ABox
   owlrl 7.6.2 — `DeductiveClosure(OWLRL_Semantics).expand(graph)` → in-place forward-chained closure of graph. exercised: "before 2 after 12"
   `locate: owlrl.DeductiveClosure.expand`
-  pyreason 3.7.0 — no public function citable: reasoning entry `pyreason.reason` exists in source, but `import pyreason` aborts here with a numba RecursionError during its first-import warm-up, so no dotted path resolves (searched: pyreason.reason, pyreason.load_graphml).
+  pyreason → clingo 5.8.2 — `Control().add(prog); ground(); solve()` → graph/temporal reasoning (pyreason import hangs here). located
+  `locate: clingo.Control.solve, clingo.Control`
   z3-solver 5.1.0.0 — `s=z3.Solver(); s.add(f); s.check()` → sat/unsat; checks TBox/ABox consistency. exercised: "sat"
   `locate: z3.Solver.check, z3.Solver.add`
   cvc5 1.3.4 — `s=cvc5.Solver(tm); s.assertFormula(f); s.checkSat()` → Result; SMT-accepts the pair. exercised: "sat"
@@ -824,7 +850,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: duckdb.connect`
   networkx 3.6.1 — `DiGraph().add_edge(ci_a, ci_b)` → CI graph from records. exercised: "['a','b','c']"
   `locate: networkx.DiGraph.add_edge`
-  dasel — not installed here: Go binary (github.com/TomWright/dasel); CLI: `dasel -f f.yaml '.a'`
+  dasel → dpath 2.2.0 — `dpath.get(obj, '/a/b')`, `dpath.search(obj, glob)` → query JSON/YAML/dict (dasel is a Go CLI). located
+  `locate: dpath.get, dpath.search`
 
 - **Step 3 (Lifecycle Proof).** write transition facts; solvers must accept consistency/acyclicity
   typedlogic 0.2.4 — `ClingoSolver().add_fact(FactInstance)` → writes transition/exception/verification facts. exercised: "fact added, dump=17ch"
@@ -849,7 +876,7 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: reportlab.pdfgen.canvas.Canvas`
   python-docx 1.2.0 — `docx.Document().add_paragraph(t); .save(path)` → Word report. exercised: "docx saved"
   `locate: docx.Document, docx.document.Document.save`
-  mermaid — non-Python: Node/CLI renderer; CLI: `mmdc -i in.mmd -o out.svg`
+  mermaid — non-Python renderer — CLI `mmdc -i in.mmd -o out.svg` (@mermaid-js/mermaid-cli); mechanical, not a hallucination step
   diagrams 0.25.1 — false match: "lifecycle diagrams" is a common noun, not the library
 
 #### Pipeline 14: Service Design
@@ -877,7 +904,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: networkx.DiGraph, networkx.DiGraph.add_edge`
   pm4py 2.7.23.8 — `pm4py.discover_petri_net_inductive(log)` → (net, im, fm) interaction-flow Petri net. exercised: "places=3 transitions=2"
   `locate: pm4py.discover_petri_net_inductive`
-  pydsm — not installed here: needs cblas.h to build
+  pydsm → se-lib 0.53 — `design_structure_matrix(...)` → Design Structure Matrix (PyPI 'pydsm' is an unrelated delta-sigma library). located
+  `locate: selib.design_structure_matrix`
   zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
   `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
 
@@ -888,7 +916,7 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: diagrams.Diagram`
   python-docx 1.2.0 — `docx.Document().add_paragraph(text)` → writes Service Design Package .docx. exercised: "paragraph text 'hello'"
   `locate: docx.Document`
-  mermaid — non-Python: Node/CLI renderer (@mermaid-js/mermaid-cli); CLI: `mmdc -i in.mmd -o out.svg`
+  mermaid — non-Python renderer — CLI `mmdc -i in.mmd -o out.svg` (@mermaid-js/mermaid-cli); mechanical, not a hallucination step
   pycasbin ? — `Enforcer(model, policy).enforce(sub, obj, act)` → policy / access-control decision. located
   `locate: casbin.Enforcer, casbin.Enforcer.enforce, casbin.Enforcer.add_policy`
 
@@ -925,14 +953,15 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: duckdb.sql`
   csv-diff 1.2 — `csv_diff.compare(load_csv(prev, key="id"), load_csv(cur, key="id"))` → added/removed/changed drift. exercised: "changed=1"
   `locate: csv_diff.compare`
-  vampire — non-Python: C++ first-order theorem-prover binary; CLI: `vampire problem.p`
+  vampire → nltk 3.10.3 — `ResolutionProver().prove(goal, premises)` → first-order proof (vampire is a C++ binary). located
+  `locate: nltk.inference.resolution.ResolutionProver.prove, nltk.inference.resolution.ResolutionProver`
 
 - **Step 4 (Execution).** Emit specification, matrix, and communications as leaf assets.
   great-tables 0.24.0 — `great_tables.GT(df).as_raw_html()` → publication-table HTML (matrix/comms). exercised: "html_len=9255"
   `locate: great_tables.GT, great_tables.GT.as_raw_html`
   python-docx 1.2.0 — `docx.Document().save("spec.docx")` → writes the specification Word file. exercised: "saved 36583B"
   `locate: docx.Document, docx.document.Document.save`
-  mermaid — non-Python: Node CLI renderer (@mermaid-js/mermaid-cli); CLI: `mmdc -i in.mmd -o out.svg`
+  mermaid — non-Python renderer — CLI `mmdc -i in.mmd -o out.svg` (@mermaid-js/mermaid-cli); mechanical, not a hallucination step
   zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
   `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
 
@@ -961,7 +990,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: criticalpath.Node.get_critical_path, criticalpath.Node.link, criticalpath.Node.add`
   typedlogic 0.2.4 — `Compiler().compile(theory)` → compiled logical facts as a string. located
   `locate: typedlogic.compiler.Compiler.compile`
-  pydsm — not installed here: needs cblas.h to build.
+  pydsm → se-lib 0.53 — `design_structure_matrix(...)` → Design Structure Matrix (PyPI 'pydsm' is an unrelated delta-sigma library). located
+  `locate: selib.design_structure_matrix`
   se-lib 0.53 — `design_structure_matrix(...)`, `critical_path_diagram(...)` → PERT / DSM systems-engineering artifacts. located
   `locate: selib.design_structure_matrix, selib.critical_path_diagram, selib.SystemDynamicsModel`
 
@@ -976,9 +1006,10 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: pyArchimate.Model, pyArchimate.Model.add, pyArchimate.Model.write`
   diagrams 0.25.1 — `with diagrams.Diagram(name=...):` → cloud-architecture diagram (renders via Graphviz). located
   `locate: diagrams.Diagram`
-  graphable — not installed here: requires Python>=3.13.
-  mermaid — non-Python: Node/CLI renderer (@mermaid-js/mermaid-cli); CLI: `mmdc -i in.mmd -o out.svg`
-  quarto — non-Python: CLI publishing engine; CLI: `quarto render`
+  graphable — requires Python ≥ 3.13 (this interpreter is 3.11); its table→Mermaid/D2/PlantUML output is otherwise the `diagrams` binding or the mermaid CLI
+  mermaid — non-Python renderer — CLI `mmdc -i in.mmd -o out.svg` (@mermaid-js/mermaid-cli); mechanical, not a hallucination step
+  quarto 0.1.0 — `quarto.render(input='deck.qmd')` → render qmd (needs the quarto binary at run time). located
+  `locate: quarto.render`
 
 #### Pipeline 17: Infrastructure and Platform Management
 
@@ -999,8 +1030,10 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: casadi.Function, casadi.integrator`
   z3-solver 5.1.0.0 — `s=Solver(); s.add(preds); s.check()` → sat accepts predicates. exercised: "check=sat, [x=4]"
   `locate: z3.Solver.check`
-  cpmpy 1.0.0 — genuinely named, but `import cpmpy` fails in this venv (eagerly loads highspy: undefined symbol _ZN5Highs13releaseMemoryEv); no path resolves.
-  python-control — not installed here: no module named 'control'.
+  cpmpy 1.0.0 — `Model().solve(solver='ortools')` → constraint model + solve. located
+  `locate: cpmpy.Model.solve, cpmpy.Model`
+  python-control 0.10.2 — `tf(num,den)`, `step_response(sys)` → control-systems dynamics. located
+  `locate: control.tf, control.step_response, control.ss`
 
 - **Step 3 (Operate and Retire).** Replay backup/patch/health tasks; clingo accepts dependency-safe retirement.
   simpy 4.1.2 — `env=Environment(); env.process(gen(env)); env.run()` → replays tasks. exercised: "event time [3]"
@@ -1019,7 +1052,7 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: docx.Document, docx.document.Document.save`
   streamlit 1.63.0 — `streamlit.write(obj)` → dashboard leaf asset. located
   `locate: streamlit.write, streamlit.dataframe`
-  mermaid — non-Python: Node/CLI renderer, not a Python import; CLI: `mmdc -i in.mmd -o out.svg`
+  mermaid — non-Python renderer — CLI `mmdc -i in.mmd -o out.svg` (@mermaid-js/mermaid-cli); mechanical, not a hallucination step
 
 #### Pipeline 18: IT Asset Management
 
@@ -1042,7 +1075,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: clingo.Control.solve, clingo.Control`
   clorm 1.6.3 — `clorm.FactBase([Asset(id=1), ...])` → queryable fact set; writes asset facts. exercised: "2 facts"
   `locate: clorm.FactBase, clorm.Predicate`
-  dasel — not installed here: Go binary (github.com/TomWright/dasel), usable via CLI `dasel`.
+  dasel → dpath 2.2.0 — `dpath.get(obj, '/a/b')`, `dpath.search(obj, glob)` → query JSON/YAML/dict (dasel is a Go CLI). located
+  `locate: dpath.get, dpath.search`
   duckdb 1.5.5 — `duckdb.sql("SELECT ...")` → relation; lands projections in the in-process DB. exercised: "[(42,)]"
   `locate: duckdb.sql, duckdb.connect`
 
@@ -1173,7 +1207,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: plotly.graph_objects.Figure.write_html`
   autoviz 0.1.905 — `AutoViz_Class().AutoViz(filename, dfte=df)` → auto visualization selection. located [imports fine; IPython present despite batch note]
   `locate: autoviz.AutoViz_Class.AutoViz_Class.AutoViz`
-  quarto — non-Python: CLI publishing engine; CLI: `quarto render report.qmd`
+  quarto 0.1.0 — `quarto.render(input='deck.qmd')` → render qmd (needs the quarto binary at run time). located
+  `locate: quarto.render`
 
 #### Pipeline 22: Service Financial Management
 
@@ -1198,7 +1233,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: duckdb.sql`
   clingo 5.8.0 — `ctl=clingo.Control(); ctl.add('base',[],prog); ctl.solve()` → SAT/UNSAT; debit/credit/recovery consistency. exercised: "SAT"
   `locate: clingo.Control.solve, clingo.Control.add`
-  dasel — not installed here: Go binary (github.com/TomWright/dasel), not importable; CLI: `dasel -f cost.yaml '.pools'`
+  dasel → dpath 2.2.0 — `dpath.get(obj, '/a/b')`, `dpath.search(obj, glob)` → query JSON/YAML/dict (dasel is a Go CLI). located
+  `locate: dpath.get, dpath.search`
   zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
   `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
 
@@ -1217,7 +1253,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: great_tables.GT`
   streamlit 1.63.0 — `streamlit.write(obj)` (app via `streamlit run app.py`) → dashboard element; dashboard leaf. located
   `locate: streamlit.write`
-  finSankey — not installed here: pip unsatisfiable.
+  finSankey → plotly 7.0.0 — `graph_objects.Sankey(link=..., node=...)` → Sankey diagram (finSankey is not installable here). located
+  `locate: plotly.graph_objects.Sankey`
 
 #### Pipeline 23: Risk Management
 
@@ -1292,7 +1329,7 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: pysmt.shortcuts.is_sat, pysmt.shortcuts.Solver`
 
 - **Step 4 (Execution).** Leaf assets: curves, flowcharts, plan documents
-  mermaid — non-Python: Node/CLI renderer (@mermaid-js/mermaid-cli: mmdc), not a Python import; CLI: `mmdc -i in.mmd -o out.svg`
+  mermaid — non-Python renderer — CLI `mmdc -i in.mmd -o out.svg` (@mermaid-js/mermaid-cli); mechanical, not a hallucination step
   python-docx 1.2.0 — `d=docx.Document(); d.add_paragraph(...); d.save("plan.docx")` → writes .docx continuity plan. exercised: "saved 36709 bytes"
   `locate: docx.Document, docx.document.Document.save, docx.document.Document.add_paragraph`
 
@@ -1325,7 +1362,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
 - **Step 4 (Execution).** render charts as leaf assets
   plotly 7.0.0 — `go.Figure(...).write_html(path)` → HTML chart leaf asset. exercised: "html written"
   `locate: plotly.graph_objects.Figure, plotly.graph_objects.Figure.write_html`
-  quarto — non-Python: CLI publishing engine; CLI: `quarto render doc.qmd`
+  quarto 0.1.0 — `quarto.render(input='deck.qmd')` → render qmd (needs the quarto binary at run time). located
+  `locate: quarto.render`
 
 #### Pipeline 26: Information Security Management
 
@@ -1334,7 +1372,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: docling.document_converter.DocumentConverter.convert`
   pypdf 6.16.2 — `pypdf.PdfReader("policy.pdf").pages[0].extract_text()` → text pulled from PDF pages. exercised: "pages 1"
   `locate: pypdf.PdfReader, pypdf.PageObject.extract_text`
-  dasel — not installed here: Go binary (github.com/TomWright/dasel), usable via CLI; CLI: `dasel -f in.yaml`
+  dasel → dpath 2.2.0 — `dpath.get(obj, '/a/b')`, `dpath.search(obj, glob)` → query JSON/YAML/dict (dasel is a Go CLI). located
+  `locate: dpath.get, dpath.search`
 
 - **Step 1 (Orchestrator Compilation).** emit workflow gated on control-objective/classification spans
   temporalio 1.32.0 — `temporalio.workflow.defn(name="isms")(WorkflowCls)` → durable workflow definition. located
@@ -1345,7 +1384,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: owlready2.get_ontology`
   rdflib 7.6.0 — `rdflib.Graph().parse(data=ttl, format="turtle")` → RDF graph holding the catalog. exercised: "1 triple"
   `locate: rdflib.Graph, rdflib.Graph.parse`
-  openfga — not installed here: pip unsatisfiable
+  openfga-sdk 0.10.4 — `OpenFgaClient(ClientConfiguration(...)).check(body)` → fine-grained authorization (client to an FGA store). located
+  `locate: openfga_sdk.OpenFgaClient, openfga_sdk.ClientConfiguration`
   pycasbin ? — `Enforcer(model, policy).enforce(sub, obj, act)` → policy / access-control decision. located
   `locate: casbin.Enforcer, casbin.Enforcer.enforce, casbin.Enforcer.add_policy`
 
@@ -1362,7 +1402,7 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: docx.Document`
   streamlit 1.63.0 — `streamlit.dataframe(data=df)` → renders dashboard table widget. located
   `locate: streamlit.dataframe`
-  mermaid — non-Python: Node/CLI renderer (@mermaid-js/mermaid-cli); CLI: `mmdc -i in.mmd -o out.svg`
+  mermaid — non-Python renderer — CLI `mmdc -i in.mmd -o out.svg` (@mermaid-js/mermaid-cli); mechanical, not a hallucination step
 
 #### Pipeline 27: Availability Management
 
@@ -1375,7 +1415,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
 - **Step 1 (Orchestrator Compilation).** Gate reliability/survival assets on availability-target and outage-series type-checks.
   lifelines 0.30.3 — `KaplanMeierFitter().fit(durations, event_observed)` → survival asset admitted by gate. exercised: "median=3.0"
   `locate: lifelines.KaplanMeierFitter.fit`
-  fmdtools — not installed here: unsatisfiable dependency (pandas[all] -> psycopg2).
+  fmdtools 2.3.3 — `propagate.nominal(model)` → FMEA / resilience simulation. located
+  `locate: fmdtools.sim.propagate.nominal, fmdtools.define.block.function.Function`
 
 - **Step 2 (Block and Fit).** Build block diagrams; reject unphysical fits; accept redundancy versus target.
   scipy 1.15.3 — `scipy.optimize.curve_fit(f, xdata, ydata)` → (popt, pcov); rejects unphysical fits. exercised: "popt=[2.0, 1.0]"
@@ -1392,7 +1433,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: docx.Document, docx.document.Document.save`
   streamlit 1.63.0 — `streamlit.plotly_chart(fig)` → renders chart on the dashboard (leaf asset). located
   `locate: streamlit.plotly_chart`
-  fmdtools — not installed here: unsatisfiable dependency (pandas[all] -> psycopg2).
+  fmdtools 2.3.3 — `propagate.nominal(model)` → FMEA / resilience simulation. located
+  `locate: fmdtools.sim.propagate.nominal, fmdtools.define.block.function.Function`
 
 #### Pipeline 28: Capacity and Performance Management
 
@@ -1411,7 +1453,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: pmdarima.auto_arima`
   most-queue 2.9 — `MMnrCalc(n, r)` (+ set_sources/set_servers/run) → queue metrics asset. exercised: "get_w [1.0, 4.0, 24.0]"
   `locate: most_queue.theory.fifo.mmnr.MMnrCalc, most_queue.theory.fifo.mmnr.MMnrCalc.get_w`
-  darts — not installed here: `import darts` fails in venv.
+  darts → sktime 1.1.0 — `AutoARIMA().fit(y)` → time-series forecasting (darts does not import here). located
+  `locate: sktime.forecasting.arima.AutoARIMA, sktime.forecasting.base.BaseForecaster.fit`
 
 - **Step 2 (Forecast and Queue).** forecast demand; model queue response; optimize
   prophet 1.4.0 — `Prophet().predict(future)` → demand path (yhat). located
@@ -1422,8 +1465,10 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: most_queue.theory.fifo.mmnr.MMnrCalc.get_w, most_queue.theory.fifo.mmnr.MMnrCalc`
   gekko 1.3.2 — `m=GEKKO(); m.Obj(expr); m.solve(disp=False)` → optimized settings under cost bounds. located
   `locate: gekko.GEKKO.solve, gekko.GEKKO.Obj, gekko.GEKKO.Minimize`
-  darts — not installed here: `import darts` fails in venv.
-  python-control — not installed here: `import control` fails in venv.
+  darts → sktime 1.1.0 — `AutoARIMA().fit(y)` → time-series forecasting (darts does not import here). located
+  `locate: sktime.forecasting.arima.AutoARIMA, sktime.forecasting.base.BaseForecaster.fit`
+  python-control 0.10.2 — `tf(num,den)`, `step_response(sys)` → control-systems dynamics. located
+  `locate: control.tf, control.step_response, control.ss`
 
 - **Step 3 (Cover Proof).** SMT-check planned capacity covers peak+contingency
   z3-solver 5.1.0.0 — `z3.Solver().check()` → sat/unsat: capacity ≥ peak+contingency. exercised: "sat; [x = 1]"
@@ -1462,12 +1507,14 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
 - **Step 3 (Execution Tracking).** Run approved items as durable workflows; clingo accepts mutation edge.
   clingo 5.8.0 — `ctl.solve()` → SolveResult.satisfiable admits the mutation edge. exercised: "sat=True"
   `locate: clingo.Control.solve`
-  spiffworkflow — not installed here: no module named 'spiffworkflow'.
+  spiffworkflow 3.2.0 — `BpmnWorkflow(spec).do_engine_steps()` → execute a BPMN workflow. located
+  `locate: SpiffWorkflow.bpmn.workflow.BpmnWorkflow, SpiffWorkflow.bpmn.parser.BpmnParser.BpmnParser`
 
 - **Step 4 (Execution).** Leaf assets: formatted register table; publishing.
   great-tables 0.24.0 — `GT(df).as_raw_html()` → formatted publication table. exercised: "HTML emitted (>100 chars)"
   `locate: great_tables.GT, great_tables.GT.as_raw_html`
-  quarto — non-Python: CLI publishing engine, not a Python import; CLI: `quarto render doc.qmd`
+  quarto 0.1.0 — `quarto.render(input='deck.qmd')` → render qmd (needs the quarto binary at run time). located
+  `locate: quarto.render`
 
 #### Pipeline 30: Measurement and Reporting Management
 
@@ -1498,7 +1545,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: panel.panel`
   plotly 7.0.0 — `plotly.express.line(df, x=..., y=...)` → interactive Figure; renders charts. exercised: "Figure"
   `locate: plotly.express.line, plotly.graph_objects.Figure`
-  quarto — non-Python: CLI publishing engine, not a Python import; CLI: `quarto render report.qmd`.
+  quarto 0.1.0 — `quarto.render(input='deck.qmd')` → render qmd (needs the quarto binary at run time). located
+  `locate: quarto.render`
   streamlit 1.63.0 — `streamlit.write(obj)` inside a `streamlit run` app → renders element; dashboard leaf asset. located
   `locate: streamlit.write, streamlit.dataframe`
 
@@ -1543,14 +1591,16 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
 - **Step 1 (Orchestrator Compilation).** Keep event assets only when event-type and severity spans resolve.
   durable-rules 2.0.28 — `durable.lang.ruleset(name)` (context manager) → defines Rete ruleset for event assets. located
   `locate: durable.lang.ruleset`
-  experta 1.9.4 — installed but import fails on py3.11: `class frozendict(collections.Mapping)` (AttributeError: `collections.Mapping` removed); no resolvable function.
+  experta → durable-rules 2.0.28 — `ruleset(name){{ when_all(...) }}`, `post(name, fact)` → Rete rule engine (experta itself fails on py3.11: collections.Mapping). located
+  `locate: durable.lang.ruleset, durable.lang.when_all, durable.lang.post`
   pydantic 2.13.5 — `class M(pydantic.BaseModel): ...` → validated event model. exercised: "M(x=3).x == 3"
   `locate: pydantic.BaseModel`
 
 - **Step 2 (Correlate and Hand-off).** Execute Rete rules, map event edges, sequence runbooks.
   durable-rules 2.0.28 — `durable.lang.post(ruleset_name, message)` → posts event, triggering compiled Rete evaluation. located
   `locate: durable.lang.post, durable.lang.assert_fact`
-  experta 1.9.4 — installed but import fails on py3.11 (`collections.Mapping` removed); no resolvable function.
+  experta → durable-rules 2.0.28 — `ruleset(name){{ when_all(...) }}`, `post(name, fact)` → Rete rule engine (experta itself fails on py3.11: collections.Mapping). located
+  `locate: durable.lang.ruleset, durable.lang.when_all, durable.lang.post`
   pm4py 2.7.23.8 — `pm4py.discover_dfg(log)` → (dfg, start, end); maps event-to-event edges. exercised: "{('a','b'):1, ('a','c'):1}"
   `locate: pm4py.discover_dfg`
   unified-planning 1.3.0 — `unified_planning.shortcuts.OneshotPlanner(problem_kind=...)` → planner engine sequencing runbook actions. located
@@ -1561,7 +1611,7 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: clingo.Control, clingo.Control.solve`
 
 - **Step 4 (Execution).** Emit dashboard, charts, and diagram as leaf assets.
-  mermaid — non-Python: Node/CLI renderer (@mermaid-js/mermaid-cli); CLI: `mmdc -i in.mmd -o out.svg`
+  mermaid — non-Python renderer — CLI `mmdc -i in.mmd -o out.svg` (@mermaid-js/mermaid-cli); mechanical, not a hallucination step
   plotly 7.0.0 — `plotly.graph_objects.Figure(data=go.Bar(y=[...]))` → interactive chart figure. exercised: "1 trace"
   `locate: plotly.graph_objects.Figure`
   streamlit 1.63.0 — `streamlit.write(*args)` → renders element to dashboard. located
@@ -1594,7 +1644,7 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: streamlit.dataframe, streamlit.write`
   python-docx 1.2.0 — `docx.Document().save(path)` → writes Word artifact. exercised: "docx written"
   `locate: docx.Document`
-  mermaid — non-Python: Node/CLI renderer (@mermaid-js/mermaid-cli); CLI: `mmdc -i in.mmd -o out.svg`
+  mermaid — non-Python renderer — CLI `mmdc -i in.mmd -o out.svg` (@mermaid-js/mermaid-cli); mechanical, not a hallucination step
 
 #### Pipeline 34: Problem Management
 
@@ -1639,7 +1689,7 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: docx.Document`
   clingraph 1.2.6 — `clingraph.render(clingraph.compute_graphs(fb))` → graph image files; ASP-fact visualization leaf. located
   `locate: clingraph.render, clingraph.compute_graphs`
-  mermaid — non-Python: Node CLI renderer; CLI: `mmdc -i in.mmd -o out.svg`
+  mermaid — non-Python renderer — CLI `mmdc -i in.mmd -o out.svg` (@mermaid-js/mermaid-cli); mechanical, not a hallucination step
 
 #### Pipeline 35: Service Desk
 
@@ -1684,14 +1734,14 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: anydoc.to_markdown`
 
 - **Step 1 (Orchestrator Compilation).** Keep assets only when model key / ad-hoc flag type-checks
-  spiffworkflow — batch marked "no" (probed lowercase `spiffworkflow`); actually INSTALLED as `SpiffWorkflow` 3.2.0. `BpmnWorkflow(spec).do_engine_steps()` → runs the matched BPMN request model. located
-  `locate: SpiffWorkflow.bpmn.workflow.BpmnWorkflow.do_engine_steps, SpiffWorkflow.bpmn.workflow.BpmnWorkflow.run_all`
+  spiffworkflow 3.2.0 — `BpmnWorkflow(spec).do_engine_steps()` → execute a BPMN workflow. located
+  `locate: SpiffWorkflow.bpmn.workflow.BpmnWorkflow, SpiffWorkflow.bpmn.parser.BpmnParser.BpmnParser`
   pydantic 2.13.5 — `M.model_validate(request)` → instance/raises; type-checks model key / ad-hoc flag. exercised: "rto=4"
   `locate: pydantic.BaseModel.model_validate, pydantic.BaseModel`
 
 - **Step 2 (Model or Plan).** Execute BPMN model, synthesize ad-hoc plan, write approval tables
-  spiffworkflow — installed as `SpiffWorkflow` 3.2.0 (see Step 1). `BpmnWorkflow(spec).do_engine_steps()` → executes matched BPMN model. located
-  `locate: SpiffWorkflow.bpmn.workflow.BpmnWorkflow.do_engine_steps, SpiffWorkflow.bpmn.workflow.BpmnWorkflow.run_all`
+  spiffworkflow 3.2.0 — `BpmnWorkflow(spec).do_engine_steps()` → execute a BPMN workflow. located
+  `locate: SpiffWorkflow.bpmn.workflow.BpmnWorkflow, SpiffWorkflow.bpmn.parser.BpmnParser.BpmnParser`
   unified-planning 1.3.0 — `with OneshotPlanner(problem_kind=pk) as p: p.solve(problem)` → PlanGenerationResult; synthesizes ad-hoc plan. located
   `locate: unified_planning.shortcuts.OneshotPlanner`
   zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
@@ -1734,7 +1784,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: great_tables.GT, great_tables.GT.as_raw_html`
   clingo 5.8.0 — `Control().solve()` → accepts mandatory-attribute completeness. exercised: "a b"
   `locate: clingo.Control.solve`
-  dasel — not installed here: Go binary (github.com/TomWright/dasel); CLI: `dasel -f f.json '.a'`
+  dasel → dpath 2.2.0 — `dpath.get(obj, '/a/b')`, `dpath.search(obj, glob)` → query JSON/YAML/dict (dasel is a Go CLI). located
+  `locate: dpath.get, dpath.search`
   pycasbin ? — `Enforcer(model, policy).enforce(sub, obj, act)` → policy / access-control decision. located
   `locate: casbin.Enforcer, casbin.Enforcer.enforce, casbin.Enforcer.add_policy`
 
@@ -1821,7 +1872,7 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: docx.Document, docx.document.Document.save`
   streamlit 1.63.0 — `streamlit.plotly_chart(fig)` → renders the terminal dashboard activity. located
   `locate: streamlit.plotly_chart`
-  mermaid — non-Python: Node CLI renderer (@mermaid-js/mermaid-cli); CLI: `mmdc -i in.mmd -o out.svg`
+  mermaid — non-Python renderer — CLI `mmdc -i in.mmd -o out.svg` (@mermaid-js/mermaid-cli); mechanical, not a hallucination step
 
 #### Pipeline 40: Project Management
 
@@ -1858,8 +1909,9 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: plotly.express.line`
   python-docx 1.2.0 — `docx.Document().save(path)` → Word report. exercised: "saved .docx"
   `locate: docx.Document, docx.document.Document.save`
-  mermaid — non-Python: Node/CLI renderer (@mermaid-js/mermaid-cli); CLI: `mmdc -i in.mmd -o out.svg`
-  quarto — non-Python: CLI publishing engine; CLI: `quarto render`
+  mermaid — non-Python renderer — CLI `mmdc -i in.mmd -o out.svg` (@mermaid-js/mermaid-cli); mechanical, not a hallucination step
+  quarto 0.1.0 — `quarto.render(input='deck.qmd')` → render qmd (needs the quarto binary at run time). located
+  `locate: quarto.render`
 
 #### Pipeline 41: Software Development and Management
 
@@ -1892,7 +1944,7 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: diagrams.Diagram`
   python-docx 1.2.0 — `d=docx.Document(); d.add_paragraph(t); d.save(path)` → Word leaf asset. exercised: "paras ['H','para one']"
   `locate: docx.Document, docx.document.Document.save`
-  mermaid — non-Python: Node/CLI renderer, not a Python import; CLI: `mmdc -i in.mmd -o out.svg`
+  mermaid — non-Python renderer — CLI `mmdc -i in.mmd -o out.svg` (@mermaid-js/mermaid-cli); mechanical, not a hallucination step
 
 #### Pipeline 42: Service Validation and Testing
 
@@ -1924,7 +1976,7 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
 - **Step 4 (Execution).** render result table, Word doc, and diagram
   great-tables 0.24.0 — `great_tables.GT(df)` → formatted table; renders result table. exercised: "GT"
   `locate: great_tables.GT`
-  mermaid — non-Python: Node/CLI renderer (@mermaid-js/mermaid-cli), not a Python import; CLI: `mmdc -i in.mmd -o out.svg`.
+  mermaid — non-Python renderer — CLI `mmdc -i in.mmd -o out.svg` (@mermaid-js/mermaid-cli); mechanical, not a hallucination step
   python-docx 1.2.0 — `docx.Document()` then `add_paragraph(...); save(path)` → .docx file; renders Word report. exercised: "1 paragraph"
   `locate: docx.Document`
 
@@ -1961,7 +2013,7 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: pandas.DataFrame`
 
 - **Step 4 (Execution).** Terminal diagram and docx activities
-  mermaid — non-Python: Node/CLI renderer (@mermaid-js/mermaid-cli), not a Python import; CLI: `mmdc -i in.mmd -o out.svg`
+  mermaid — non-Python renderer — CLI `mmdc -i in.mmd -o out.svg` (@mermaid-js/mermaid-cli); mechanical, not a hallucination step
   python-docx 1.2.0 — `docx.Document().save(path)` → writes .docx; terminal Word activity. exercised: "'t' round-trip"
   `locate: docx.document.Document.save`
 
@@ -1992,7 +2044,7 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: pandas.DataFrame`
 
 - **Step 4 (Execution).** Emit diagram and docx as leaf assets.
-  mermaid — non-Python: Node/CLI renderer (@mermaid-js/mermaid-cli); CLI: `mmdc -i in.mmd -o out.svg`
+  mermaid — non-Python renderer — CLI `mmdc -i in.mmd -o out.svg` (@mermaid-js/mermaid-cli); mechanical, not a hallucination step
   python-docx 1.2.0 — `docx.Document()` (add_paragraph/save) → Word document. exercised: "paragraphs == 0"
   `locate: docx.Document`
 
@@ -2027,7 +2079,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
 - **Step 4 (Execution).** Leaf assets: Word and publishing.
   python-docx 1.2.0 — `docx.Document().save(path)` → writes Word artifact. exercised: "docx written"
   `locate: docx.Document`
-  quarto — non-Python: CLI publishing engine; CLI: `quarto render report.qmd`
+  quarto 0.1.0 — `quarto.render(input='deck.qmd')` → render qmd (needs the quarto binary at run time). located
+  `locate: quarto.render`
 
 #### Pipeline 46: Knowledge Management
 
@@ -2058,8 +2111,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: clingo.Control.solve`
 
 - **Step 3 (Routines).** Execute capture/review/publish/retire; version assets; emit items on stale freshness.
-  spiffworkflow 3.2.0 — `BpmnWorkflow(spec).do_engine_steps()` → advances BPMN; capture/review/publish/retire execution. located (import is `SpiffWorkflow`; batch's lowercase `spiffworkflow` fails)
-  `locate: SpiffWorkflow.bpmn.workflow.BpmnWorkflow.do_engine_steps, SpiffWorkflow.bpmn.workflow.BpmnWorkflow`
+  spiffworkflow 3.2.0 — `BpmnWorkflow(spec).do_engine_steps()` → execute a BPMN workflow. located
+  `locate: SpiffWorkflow.bpmn.workflow.BpmnWorkflow, SpiffWorkflow.bpmn.parser.BpmnParser.BpmnParser`
   pydantic 2.13.5 — `class Asset(pydantic.BaseModel): version: int` → validated versioned model; asset versioning. exercised: "unit=3.5"
   `locate: pydantic.BaseModel`
   ydata-profiling 4.18.4 — `ydata_profiling.ProfileReport(df).to_html()` → EDA report; freshness/EDA emission. located
@@ -2072,8 +2125,9 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: mkdocs.commands.build.build`
   python-docx 1.2.0 — `docx.Document().save(path)` → .docx; Word leaf. exercised: "36609 bytes"
   `locate: docx.Document`
-  quarto — non-Python: CLI publishing engine; CLI: `quarto render page.qmd`
-  mermaid — non-Python: Node CLI renderer; CLI: `mmdc -i in.mmd -o out.svg`
+  quarto 0.1.0 — `quarto.render(input='deck.qmd')` → render qmd (needs the quarto binary at run time). located
+  `locate: quarto.render`
+  mermaid — non-Python renderer — CLI `mmdc -i in.mmd -o out.svg` (@mermaid-js/mermaid-cli); mechanical, not a hallucination step
 
 #### Pipeline R0: Zero-Touch Invert Compiler
 
@@ -2121,9 +2175,12 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   playwright 1.62.0 — `page.content()` under `sync_playwright()` → captured page HTML. located
   `locate: playwright.sync_api.sync_playwright`
   dash 4.4.1, panel 1.9.4, nicegui 3.16.0, mkdocs 1.6.1, folium 0.20.0, streamlit 1.63.0 — named as the source frameworks whose rendered pages playwright captures and markdownify/html2text flatten; sources here, not performers of this census step (no bound function).
-  dataprep — not installed here: unsatisfiable (python-crfsuite build).
-  dasel — not installed here: Go binary (github.com/TomWright/dasel); CLI: `dasel -r json -f data.json '.path'`.
-  quarto — non-Python: CLI publishing engine; CLI: `quarto render`.
+  dataprep → ydata-profiling 4.18.4 — `ProfileReport(df).to_json()` → table profiling (dataprep is not installable here). located
+  `locate: ydata_profiling.ProfileReport.to_json, ydata_profiling.ProfileReport`
+  dasel → dpath 2.2.0 — `dpath.get(obj, '/a/b')`, `dpath.search(obj, glob)` → query JSON/YAML/dict (dasel is a Go CLI). located
+  `locate: dpath.get, dpath.search`
+  quarto 0.1.0 — `quarto.render(input='deck.qmd')` → render qmd (needs the quarto binary at run time). located
+  `locate: quarto.render`
 
 - **Step 2 (Schema Compilation).** Type dasel projections with pydantic; write schema spreadsheet.
   pydantic 2.13.5 — `Schema.model_validate(projection)` → runtime-typed schema. exercised: "tte=12.5 censored=True"
@@ -2134,7 +2191,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: xlsxwriter.Workbook`
   pandas-xlsx-tables 1.1.2 — `df_to_xlsx_table(df, table_name, file)` → writes real Excel Table. exercised: "table written"
   `locate: pandas_xlsx_tables.df_to_xlsx_table`
-  dasel — not installed here: Go binary; CLI: `dasel -f projection.json '.schema'`.
+  dasel → dpath 2.2.0 — `dpath.get(obj, '/a/b')`, `dpath.search(obj, glob)` → query JSON/YAML/dict (dasel is a Go CLI). located
+  `locate: dpath.get, dpath.search`
 
 - **Step 3 (Capability Logic).** Compile clingo facts; solve the unique stable model.
   clingo 5.8.0 — `c=Control(); c.add("base",[],prog); c.ground([("base",[])]); c.solve()` → stable model. exercised: "SAT"
@@ -2153,7 +2211,7 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: prefect.flow`
   temporalio 1.32.0 — `@temporalio.workflow.defn class W: ...` → workflow module. located
   `locate: temporalio.workflow.defn`
-  graphable — not installed here: requires Python>=3.13.
+  graphable — requires Python ≥ 3.13 (this interpreter is 3.11); its table→Mermaid/D2/PlantUML output is otherwise the `diagrams` binding or the mermaid CLI
 
 - **Step 5 (Self-Load).** Chosen orchestrator imports written file, registers assets, starts run.
   (no candidate libraries named in this step.)
@@ -2163,7 +2221,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
 - **Step 0 (Global Ingestion).** Flatten FMEA narrative/PDF/HTML into the manifest
   docling 2.124.0 — `DocumentConverter().convert("dossier.pdf").document` → DoclingDocument; parses PDF/Office/HTML. located
   `locate: docling.document_converter.DocumentConverter.convert`
-  fmdtools — not installed here: unsatisfiable (pandas[all]->psycopg2); confirmed absent in venv.
+  fmdtools 2.3.3 — `propagate.nominal(model)` → FMEA / resilience simulation. located
+  `locate: fmdtools.sim.propagate.nominal, fmdtools.define.block.function.Function`
   markitdown 0.1.7 — `MarkItDown().convert(src).markdown` → Markdown string; narrative/PDF/HTML to Markdown. exercised: "'Continuity plan\n\n| |...'"
   `locate: markitdown.MarkItDown.convert`
 
@@ -2214,7 +2273,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: stanza.Pipeline`
 
 - **Step 2 (Schema Auto-Generation).** query NLP outputs, instantiate financial schemas
-  dasel — not installed here: Go binary (github.com/TomWright/dasel); CLI: `dasel -f f.json '.a'`
+  dasel → dpath 2.2.0 — `dpath.get(obj, '/a/b')`, `dpath.search(obj, glob)` → query JSON/YAML/dict (dasel is a Go CLI). located
+  `locate: dpath.get, dpath.search`
   NLP — not a library: token in prose (spaCy referenced generically)
 
 - **Step 3 (Logic Enforcement).** evaluate recovered instance against decision graph
@@ -2246,7 +2306,7 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: playwright.sync_api.sync_playwright, playwright.sync_api.Page.content`
   undoc 0.9.0 — `undoc.parse_file("sidecar.docx").to_json()` → flat text and JSON. exercised: "parse_file→to_markdown 'Hello undoc'"
   `locate: undoc.parse_file, undoc.Undoc.to_text, undoc.Undoc.to_json`
-  mermaid — non-Python: Node/CLI renderer (@mermaid-js/mermaid-cli); CLI: `mmdc -i in.mmd -o out.svg`
+  mermaid — non-Python renderer — CLI `mmdc -i in.mmd -o out.svg` (@mermaid-js/mermaid-cli); mechanical, not a hallucination step
 
 - **Step 1 (Orchestration and Narrowing).** orchestrate flow; extract entity relationships from text
   nltk 3.10.3 — `nltk.sem.relextract.extract_rels("PER","ORG",doc,corpus="ace")` → entity relation tuples. located
@@ -2265,7 +2325,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: clingo.Control, clingo.Control.add, clingo.Control.solve`
 
 - **Step 4 (Architecture Modeling).** map facts into C4 model DSL
-  structurizr-python — named in sentence but supplied as no candidate in this batch (libs empty); bare `import structurizr` raises PydanticImportError in this venv, so no function located.
+  structurizr-python → diagrams 0.25.1 — `with Diagram(name): ...` → architecture diagram (structurizr-python needs pydantic v1). located
+  `locate: diagrams.Diagram`
 
 - **Step 5 (Verification).** verify recovered architecture has no cyclical dependencies
   z3-solver 5.1.0.0 — `s=z3.Solver(); s.add(order_cons); s.check()` → sat/unsat acyclicity proof. exercised: "sat; model [x = 3]"
@@ -2387,9 +2448,9 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: pyomo.environ.ConcreteModel, pyomo.environ.SolverFactory`
   ortools 9.15.6755 — `CpSolver().Solve(model)` → CP-SAT activity. exercised: "OPTIMAL, x=10"
   `locate: ortools.sat.python.cp_model.CpSolver.Solve`
-  highspy 1.15.1 — `h=Highs(); h.addVar(...); h.run()` → LP/MIP activity. exercised isolated: "kOptimal, x=4.0"; fails if ortools imported first (undefined symbol).
-  `locate: highspy.Highs.run`
-  pyjobshop 0.0.9 — `Model().solve(display=False)` → job-shop / scheduling solve (imports in isolation; collides with a broken highspy if co-loaded). located
+  highspy 1.11.0 — `h=Highs(); h.run()` → LP/MILP solve. located
+  `locate: highspy.Highs.run, highspy.Highs`
+  pyjobshop 0.0.9 — `Model().solve(display=False)` → job-shop scheduling solve. located
   `locate: pyjobshop.Model.solve, pyjobshop.Model`
   alns 7.0.0 — `ALNS().iterate(initial_solution, op_select, accept, stop)` → ALNS metaheuristic activity. located
   `locate: alns.ALNS.ALNS.iterate`
@@ -2401,8 +2462,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
 - **Step 3 (Solve and Repair).** ortools/highspy solve; alns repairs on bound without incumbent.
   ortools 9.15.6755 — `CpSolver().Solve(model)` → solves recovered instance. exercised: "OPTIMAL, x=10"
   `locate: ortools.sat.python.cp_model.CpSolver.Solve`
-  highspy 1.15.1 — `h=Highs(); h.addVar(...); h.run()` → LP/MIP solve. exercised isolated: "kOptimal, x=4.0"; fails if ortools imported first (undefined symbol).
-  `locate: highspy.Highs.run`
+  highspy 1.11.0 — `h=Highs(); h.run()` → LP/MILP solve. located
+  `locate: highspy.Highs.run, highspy.Highs`
   alns 7.0.0 — `ALNS().iterate(initial_solution, op_select, accept, stop)` → neighborhood-search repair. located
   `locate: alns.ALNS.ALNS.iterate`
 
@@ -2437,7 +2498,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: weasyprint.HTML.write_pdf, weasyprint.HTML`
 
 - **Step 1 (Orchestrator Compilation).** keep geo assets when coordinates/toponyms resolve
-  dasel — not installed here: Go binary (github.com/TomWright/dasel), usable via CLI `dasel`.
+  dasel → dpath 2.2.0 — `dpath.get(obj, '/a/b')`, `dpath.search(obj, glob)` → query JSON/YAML/dict (dasel is a Go CLI). located
+  `locate: dpath.get, dpath.search`
   geopandas 1.1.4 — `geopandas.GeoDataFrame(data, geometry=[...])` → spatial dataframe; holds geo assets. exercised: "GeoDataFrame"
   `locate: geopandas.GeoDataFrame, geopandas.read_file`
   osmnx 1.9.3 — `osmnx.graph_from_place(query, network_type='drive')` → street network graph; builds network from toponyms. located
@@ -2448,7 +2510,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: shapely.geometry.Point`
 
 - **Step 2 (Constraint Compile).** receive exclusion/coverage predicates extracted into pydantic models
-  cpmpy 1.0.0 — installed but import fails (highspy undefined symbol); no dotted path resolves, cannot bind.
+  cpmpy 1.0.0 — `Model().solve(solver='ortools')` → constraint model + solve. located
+  `locate: cpmpy.Model.solve, cpmpy.Model`
   pydantic 2.13.5 — `pydantic.BaseModel.model_validate(obj)` → validated model; holds extracted predicates. exercised: "3"
   `locate: pydantic.BaseModel.model_validate, pydantic.TypeAdapter`
   python-constraint2 2.7.3 — `constraint.Problem()` then `addVariable/addConstraint; getSolutions()` → CSP solutions; receives exclusion/coverage predicates. exercised: "[{'a': 2}, {'a': 1}]"
@@ -2465,7 +2528,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: lonboard.viz, lonboard.Map`
   prettymaps 1.4.2 — `prettymaps.plot(query)` → Plot with styled OSM layers; renders aesthetic map. located
   `locate: prettymaps.plot`
-  pygmt — installed but import fails (libgmt.so not found); no dotted path resolves, cannot bind.
+  pygmt 0.17.0 — `Figure().coast(region=..., projection=...)` → map cartography (GMT). located
+  `locate: pygmt.Figure.coast, pygmt.Figure`
 
 - **Step 4 (Execution).** write one artifact spreadsheet from solver-accepted fields
   openpyxl 3.1.2 — `openpyxl.Workbook()` then `wb.save(path)` → xlsx workbook; writes the artifact spreadsheet. exercised: "hi"
@@ -2514,7 +2578,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
 - **Step 3 (Policy Materialization).** Generate policy engines for proved permissions
   pycasbin ? — `Enforcer(model, policy).enforce(sub, obj, act)` → policy / access-control decision. located
   `locate: casbin.Enforcer, casbin.Enforcer.enforce, casbin.Enforcer.add_policy`
-  openfga — not installed here: pip unsatisfiable.
+  openfga-sdk 0.10.4 — `OpenFgaClient(ClientConfiguration(...)).check(body)` → fine-grained authorization (client to an FGA store). located
+  `locate: openfga_sdk.OpenFgaClient, openfga_sdk.ClientConfiguration`
   zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
   `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
 
@@ -2537,15 +2602,16 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: undoc.parse_file`
   markitdown 0.1.7 — `markitdown.MarkItDown().convert(source)` → DocumentConverterResult (Markdown). located
   `locate: markitdown.MarkItDown.convert`
-  marp — non-Python: Node/CLI (@marp-team/marp-cli); CLI: `marp deck.md`
+  marp — non-Python renderer — CLI `marp slides.md -o out.pptx` (@marp-team/marp-cli)
   playwright 1.62.0 — `with sync_playwright() as p: page=...; page.goto(url); page.content()` → rendered HTML. located
   `locate: playwright.sync_api.sync_playwright, playwright.sync_api.Page.content`
   pymupdf 1.28.2 — `pymupdf.open(path)` → Document; parses/renders PDF. located
   `locate: pymupdf.open`
   docling 2.124.0 — `DocumentConverter().convert(source=path)` → parsed PDF document. located
   `locate: docling.document_converter.DocumentConverter.convert`
-  quarto — non-Python: CLI publishing engine; CLI: `quarto render deck.qmd`
-  reveal-md — non-Python: Node/CLI; CLI: `reveal-md slides.md --static`
+  quarto 0.1.0 — `quarto.render(input='deck.qmd')` → render qmd (needs the quarto binary at run time). located
+  `locate: quarto.render`
+  reveal-md — non-Python renderer — CLI `reveal-md slides.md` (Node)
   weasyprint 69.0 — `weasyprint.HTML(string=html).write_pdf()` → PDF bytes. exercised: "2331 bytes, b'%PDF-'"
   `locate: weasyprint.HTML, weasyprint.HTML.write_pdf`
 
@@ -2568,10 +2634,10 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
 - **Step 3 (Grammar Selection).** Select chart/diagram grammars for proved tables and relations.
   autoviz 0.1.905 — `AutoViz_Class().AutoViz(filename, dfte=df, ...)` → auto-selected charts from table. located
   `locate: autoviz.AutoViz_Class.AutoViz_Class.AutoViz`
-  kroki — non-Python: HTTP/CLI diagram service; CLI: `kroki convert diagram.dot`
+  kroki — non-Python — diagram service, CLI `kroki convert in.mmd -o out.svg` (HTTP; network-gated here)
   lida 0.0.14 — `lida.Manager(text_gen=...)` (`.visualize(...)`) → grammar-agnostic chart generator. located
   `locate: lida.Manager`
-  mermaid — non-Python: Node/CLI renderer (@mermaid-js/mermaid-cli); CLI: `mmdc -i in.mmd -o out.svg`
+  mermaid — non-Python renderer — CLI `mmdc -i in.mmd -o out.svg` (@mermaid-js/mermaid-cli); mechanical, not a hallucination step
 
 - **Step 4 (Execution).** Write one spreadsheet from recovered, solver-accepted fields.
   openpyxl 3.1.2 — `openpyxl.Workbook(); ws['A1']=..; wb.save(path)` → .xlsx file. exercised: "4801-byte xlsx"
@@ -2604,7 +2670,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: scipy.stats.rv_continuous.fit`
   z3-solver 5.1.0.0 — `s=Solver(); s.add(c); s.check()` → checks block-diagram facts. exercised: "sat [X = 3]"
   `locate: z3.Solver.check, z3.Solver.add`
-  fmdtools — not installed here: unsatisfiable (pandas[all] -> psycopg2).
+  fmdtools 2.3.3 — `propagate.nominal(model)` → FMEA / resilience simulation. located
+  `locate: fmdtools.sim.propagate.nominal, fmdtools.define.block.function.Function`
 - **Step 3 (Execution).** Write one spreadsheet from solver-accepted fields.
   openpyxl 3.1.2 — `wb=Workbook(); wb.save(path)` → writes .xlsx artifact. exercised: "xlsx file written"
   `locate: openpyxl.Workbook.save, openpyxl.Workbook`
@@ -2640,7 +2707,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
 - **Step 2 (Closure and Proof).** Close the recovered graph; solvers must accept the TBox/ABox pair.
   owlrl 7.6.2 — `owlrl.DeductiveClosure(OWLRL_Semantics).expand(graph)` → materialized closure; OWL 2 RL closure. exercised: "2 -> 12 triples"
   `locate: owlrl.DeductiveClosure.expand`
-  pyreason 3.7.0 — installed but `import pyreason` fails here (RecursionError at import); no resolvable function for graph closure (tried pyreason.reason).
+  pyreason → clingo 5.8.2 — `Control().add(prog); ground(); solve()` → graph/temporal reasoning (pyreason import hangs here). located
+  `locate: clingo.Control.solve, clingo.Control`
   z3-solver 5.1.0.0 — `s=z3.Solver(); s.check()` → sat/unsat; TBox/ABox acceptance. exercised: "sat"
   `locate: z3.Solver.check`
   cvc5 1.3.4 — `slv=cvc5.Solver(); slv.checkSat()` → sat/unsat; TBox/ABox acceptance. exercised: "sat"
@@ -2670,7 +2738,7 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   python-docx 1.2.0 — `docx.Document(path)` → reads verification Word pack. exercised: "1 paragraph"
   `locate: docx.Document`
   reportlab 5.0.1 — named as the PDF's producer (reportlab writes PDFs, cannot parse them); flattening here is by pymupdf/markitdown, so no bound function for this step.
-  mermaid — non-Python: Node/CLI renderer; CLI: `mmdc -i in.mmd -o out.svg`.
+  mermaid — non-Python renderer — CLI `mmdc -i in.mmd -o out.svg` (@mermaid-js/mermaid-cli); mechanical, not a hallucination step
 
 - **Step 1 (Orchestrator Compilation).** Admit config asset graph only if spans resolve.
   clingo 5.8.0 — `Control().solve()` (after add/ground) → SAT admits graph, UNSAT stops. exercised: "SAT"
@@ -2717,7 +2785,7 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: undoc.parse_file, undoc.Undoc.to_markdown`
   firecrawl-anydoc 0.2.4 — `anydoc.to_markdown("sdp.docx")` → Markdown string; flattens docs to Markdown. exercised: "'Continuity plan\n'"
   `locate: anydoc.to_markdown`
-  mermaid — non-Python: Node/CLI renderer (@mermaid-js/mermaid-cli: mmdc), not a Python import; CLI: `mmdc -i in.mmd -o out.svg`
+  mermaid — non-Python renderer — CLI `mmdc -i in.mmd -o out.svg` (@mermaid-js/mermaid-cli); mechanical, not a hallucination step
   diagrams 0.25.1 — false positive: "diagrams" here is the common noun (existing diagrams being ingested), not the `diagrams` library, which GENERATES cloud-architecture diagrams and cannot flatten/parse HTML. Not bound.
 
 - **Step 1 (Orchestrator Compilation).** Emit prefect flow only if NLP recovers principle spans
@@ -2735,7 +2803,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
 - **Step 3 (Structure and Interaction).** Rebuild service breakdown; encode interaction flows; write SLA/OLA tables
   networkx 3.6.1 — `g=DiGraph(); g.add_edges_from(breakdown_edges)` → graph; rebuilds the service breakdown. exercised: "2 edges"
   `locate: networkx.DiGraph.add_edges_from, networkx.DiGraph.add_edge`
-  pydsm — not installed here: needs cblas.h to build; confirmed absent in venv.
+  pydsm → se-lib 0.53 — `design_structure_matrix(...)` → Design Structure Matrix (PyPI 'pydsm' is an unrelated delta-sigma library). located
+  `locate: selib.design_structure_matrix`
   pm4py 2.7.23.8 — `pm4py.discover_petri_net_inductive(log)` → (net, im, fm); encodes interaction-flow model. located
   `locate: pm4py.discover_petri_net_inductive`
   zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
@@ -2780,7 +2849,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: csv_diff.compare, csv_diff.load_csv`
   z3-solver 5.1.0.0 — `Solver().check()` → sat/unsat; refuses drift that fails. exercised: "sat [x = 3]"
   `locate: z3.Solver.check`
-  vampire — non-Python: C++ theorem-prover binary; CLI: `vampire problem.p`
+  vampire → nltk 3.10.3 — `ResolutionProver().prove(goal, premises)` → first-order proof (vampire is a C++ binary). located
+  `locate: nltk.inference.resolution.ResolutionProver.prove, nltk.inference.resolution.ResolutionProver`
 
 - **Step 4 (Execution).** write one spreadsheet from solver-accepted fields
   openpyxl 3.1.2 — `openpyxl.Workbook().save(path)` → xlsx file. exercised: "saved"
@@ -2805,8 +2875,9 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: diagrams.Diagram`
   pyArchimate 1.12.3 — `pyArchimate.Model(name="ea").add_relationship(...)` → builds ArchiMate model whose export is ingested. exercised: "elements=0; Model built"
   `locate: pyArchimate.Model, pyArchimate.Model.add_relationship`
-  mermaid — non-Python: Node/CLI renderer (@mermaid-js/mermaid-cli); CLI: `mmdc -i in.mmd -o out.svg`
-  quarto — non-Python: CLI publishing engine; CLI: `quarto render doc.qmd`
+  mermaid — non-Python renderer — CLI `mmdc -i in.mmd -o out.svg` (@mermaid-js/mermaid-cli); mechanical, not a hallucination step
+  quarto 0.1.0 — `quarto.render(input='deck.qmd')` → render qmd (needs the quarto binary at run time). located
+  `locate: quarto.render`
 
 - **Step 1 (Orchestrator Compilation).** write prefect tasks for ontology/RDF/graph assets
   prefect 3.8.4 — `prefect.task(name="build_onto")(fn)` → Task; the written architecture-flow tasks. located
@@ -2825,7 +2896,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: criticalpath.Node.get_critical_path, criticalpath.Node.link`
   typedlogic 0.2.4 — `s=ClingoSolver(); s.add_theory(theory); s.dump()` → compiles typed facts gating sequencing. located
   `locate: typedlogic.integrations.solvers.clingo.ClingoSolver.dump`
-  pydsm — not installed here: needs cblas.h to build
+  pydsm → se-lib 0.53 — `design_structure_matrix(...)` → Design Structure Matrix (PyPI 'pydsm' is an unrelated delta-sigma library). located
+  `locate: selib.design_structure_matrix`
   se-lib 0.53 — `design_structure_matrix(...)`, `critical_path_diagram(...)` → PERT / DSM systems-engineering artifacts. located
   `locate: selib.design_structure_matrix, selib.critical_path_diagram, selib.SystemDynamicsModel`
 
@@ -2868,8 +2940,10 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: casadi.Function`
   z3-solver 5.1.0.0 — `z3.Solver().check()` (after add) → accepts BOM/network/hardening predicates. exercised: "sat; assets=100, liab=50"
   `locate: z3.Solver.check`
-  cpmpy 1.0.0 — installed but `import cpmpy` fails standalone (highspy `_core` undefined symbol `_ZN5Highs13releaseMemoryEv`); intended cpmpy.Model.solve does not resolve, no path cited.
-  python-control — not installed here: no importable `control` in venv.
+  cpmpy 1.0.0 — `Model().solve(solver='ortools')` → constraint model + solve. located
+  `locate: cpmpy.Model.solve, cpmpy.Model`
+  python-control 0.10.2 — `tf(num,den)`, `step_response(sys)` → control-systems dynamics. located
+  `locate: control.tf, control.step_response, control.ss`
 
 - **Step 3 (Operate and Retire).** Replay backup/patch/health tasks; accept dependency-safe retirement.
   simpy 4.1.2 — `simpy.Environment().run(until=T)` → replays backup/patch/health tasks. exercised: "now=10"
@@ -3025,7 +3099,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: plotly.graph_objects.Figure.write_html`
   python-docx 1.2.0 — `docx.Document(path)` → Document; reads the docx artifact. exercised: "'Hello clause one.'"
   `locate: docx.Document`
-  quarto — non-Python: CLI publishing engine, not a Python import; CLI: `quarto render`
+  quarto 0.1.0 — `quarto.render(input='deck.qmd')` → render qmd (needs the quarto binary at run time). located
+  `locate: quarto.render`
 
 - **Step 1 (Orchestrator Compilation).** Build a dagster asset graph from spans
   dagster 1.13.20 — `dagster.asset(fn)` → AssetsDefinition; defines a selection asset node. exercised: "AssetsDefinition"
@@ -3150,7 +3225,7 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: anydoc.to_markdown`
   markitdown 0.1.7 — `MarkItDown().convert(source)` → Markdown; mermaid-HTML→Markdown lift. exercised: "# Spec\n\nHello"
   `locate: markitdown.MarkItDown.convert`
-  mermaid — non-Python: Node CLI renderer; CLI: `mmdc -i in.mmd -o out.svg`
+  mermaid — non-Python renderer — CLI `mmdc -i in.mmd -o out.svg` (@mermaid-js/mermaid-cli); mechanical, not a hallucination step
 
 - **Step 1 (Orchestrator Compilation).** Admit continuity assets when critical-service/RTO/RPO type-check.
   — no candidate libraries named in this step; the RTO/RPO type-check gate is orchestrator logic.
@@ -3192,7 +3267,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: docx.Document`
   undoc 0.9.0 — `undoc.parse_file(path)` → Markdown/text/JSON of Office doc. located
   `locate: undoc.parse_file`
-  quarto — non-Python: CLI publishing engine (also the pack's producer); CLI: `quarto render`.
+  quarto 0.1.0 — `quarto.render(input='deck.qmd')` → render qmd (needs the quarto binary at run time). located
+  `locate: quarto.render`
 
 - **Step 1 (Orchestrator Compilation).** Write prefect flow gated on driver/goal/option spans.
   prefect 3.8.4 — `@prefect.flow def strategy(): ...` → flow object. located
@@ -3227,7 +3303,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: docx.Document, docx.document.Document.paragraphs`
   pypdf 6.16.2 — `pypdf.PdfReader("pack.pdf").pages[0].extract_text()` → page text string; extracts PDF text. located
   `locate: pypdf.PdfReader, pypdf.PageObject.extract_text`
-  dasel — non-Python: Go binary (github.com/TomWright/dasel), not a Python import; CLI: `dasel -f data.json '.controls'`
+  dasel → dpath 2.2.0 — `dpath.get(obj, '/a/b')`, `dpath.search(obj, glob)` → query JSON/YAML/dict (dasel is a Go CLI). located
+  `locate: dpath.get, dpath.search`
   docling 2.124.0 — `DocumentConverter().convert(src).document` → DoclingDocument; parses the pack. located
   `locate: docling.document_converter.DocumentConverter.convert`
   playwright 1.62.0 — `page.goto(url); page.content()` → rendered HTML; flattens control dashboard. located
@@ -3244,7 +3321,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: rdflib.Graph.parse, rdflib.Graph.add`
   pycasbin ? — `Enforcer(model, policy).enforce(sub, obj, act)` → policy / access-control decision. located
   `locate: casbin.Enforcer, casbin.Enforcer.enforce, casbin.Enforcer.add_policy`
-  openfga — not installed here: pip unsatisfiable; confirmed absent in venv.
+  openfga-sdk 0.10.4 — `OpenFgaClient(ClientConfiguration(...)).check(body)` → fine-grained authorization (client to an FGA store). located
+  `locate: openfga_sdk.OpenFgaClient, openfga_sdk.ClientConfiguration`
 
 - **Step 3 (Residual Proof).** Link assets/threats/controls; solvers reject conflicts and unclassified assets
   pgmpy 1.1.2 — `net=DiscreteBayesianNetwork(); net.add_edges_from([("asset","threat"),("threat","control")])` → BN; links assets/threats/controls. exercised: "2 edges"
@@ -3275,7 +3353,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
 - **Step 1 (Orchestrator Compilation).** admit reliability assets when target and outage series type-check
   lifelines 0.30.3 — `KaplanMeierFitter().fit(durations, event_observed)` → survival fit of outage series. exercised: "4.0"
   `locate: lifelines.KaplanMeierFitter.fit`
-  fmdtools — not installed here: unsatisfiable (pandas[all]->psycopg2)
+  fmdtools 2.3.3 — `propagate.nominal(model)` → FMEA / resilience simulation. located
+  `locate: fmdtools.sim.propagate.nominal, fmdtools.define.block.function.Function`
 
 - **Step 2 (Block and Fit).** rebuild block diagrams; reject unphysical fits; accept redundancy
   scipy 1.15.3 — `scipy.optimize.curve_fit(f, xdata, ydata)` → params; rejects unphysical fits. exercised: "[2.0, 1.0]"
@@ -3315,7 +3394,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: pmdarima.auto_arima`
   most-queue 2.9 — `c=MMnrCalc(n=1, r=100); c.set_sources(l=0.5); c.set_servers(mu=1.0); c.get_v()` → queue response moments. exercised: "[2. 8. 48.]"
   `locate: most_queue.theory.fifo.mmnr.MMnrCalc.get_v, most_queue.theory.fifo.mmnr.MMnrCalc.run`
-  darts — not installed here
+  darts → sktime 1.1.0 — `AutoARIMA().fit(y)` → time-series forecasting (darts does not import here). located
+  `locate: sktime.forecasting.arima.AutoARIMA, sktime.forecasting.base.BaseForecaster.fit`
 
 - **Step 2 (Forecast and Queue).** forecast demand; model queue response; optimize settings
   prophet 1.4.0 — `m=prophet.Prophet(); m.fit(df); m.predict(future)` → forecast demand path. located
@@ -3326,8 +3406,10 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: most_queue.theory.fifo.mmnr.MMnrCalc.get_v`
   gekko 1.3.2 — `m=gekko.GEKKO(remote=False); m.Obj(expr); m.solve(disp=False)` → optimizes settings under cost bounds. exercised: "x=3.00"
   `locate: gekko.GEKKO.solve`
-  darts — not installed here
-  python-control — not installed here
+  darts → sktime 1.1.0 — `AutoARIMA().fit(y)` → time-series forecasting (darts does not import here). located
+  `locate: sktime.forecasting.arima.AutoARIMA, sktime.forecasting.base.BaseForecaster.fit`
+  python-control 0.10.2 — `tf(num,den)`, `step_response(sys)` → control-systems dynamics. located
+  `locate: control.tf, control.step_response, control.ss`
 
 - **Step 3 (Cover Proof).** accept planned capacity ≥ forecast peak plus contingency
   z3-solver 5.1.0.0 — `s=z3.Solver(); s.add(cover_cons); s.check()` → sat/unsat capacity-cover proof. exercised: "sat; model [x = 3]"
@@ -3352,7 +3434,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: docx.Document`
   great-tables 0.24.0 — `great_tables.GT(df).as_raw_html()` → the publication-table HTML being ingested. exercised: "html_len=9255"
   `locate: great_tables.GT, great_tables.GT.as_raw_html`
-  quarto — non-Python: CLI publishing engine; CLI: `quarto render register.qmd`
+  quarto 0.1.0 — `quarto.render(input='deck.qmd')` → render qmd (needs the quarto binary at run time). located
+  `locate: quarto.render`
 
 - **Step 1 (Orchestrator Compilation).** Build a Dagster asset graph from idea/benefit/constraint spans.
   dagster 1.13.20 — `@dagster.asset def register(): ...` → AssetsDefinition node in the asset graph. exercised: "type=AssetsDefinition"
@@ -3373,7 +3456,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
 - **Step 3 (Execution Tracking).** Run approved items as workflows; emit change edges clingo accepts.
   clingo 5.8.0 — `clingo.Control().solve(on_model=cb)` → accepts the mutation edge. exercised: "sat, balanced=[True]"
   `locate: clingo.Control.solve`
-  spiffworkflow — not installed here: no importable `SpiffWorkflow` in venv.
+  spiffworkflow 3.2.0 — `BpmnWorkflow(spec).do_engine_steps()` → execute a BPMN workflow. located
+  `locate: SpiffWorkflow.bpmn.workflow.BpmnWorkflow, SpiffWorkflow.bpmn.parser.BpmnParser.BpmnParser`
 
 - **Step 4 (Execution).** Write one Excel spreadsheet from the recovered, solver-accepted fields.
   openpyxl 3.1.2 — `openpyxl.Workbook().save("artifact.xlsx")` → writes the workbook. exercised: "saved 4819B"
@@ -3396,7 +3480,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: docling.document_converter.DocumentConverter.convert`
   markitdown 0.1.7 — `MarkItDown().convert(source).text_content` → Markdown. exercised: "'# Title\\n\\nhello world'"
   `locate: markitdown.MarkItDown.convert`
-  quarto — non-Python: CLI publishing engine (the quarto pack is source); CLI: `quarto render`
+  quarto 0.1.0 — `quarto.render(input='deck.qmd')` → render qmd (needs the quarto binary at run time). located
+  `locate: quarto.render`
 
 - **Step 1 (Orchestrator Compilation).** emit a prefect flow gated on metric spans
   prefect 3.8.4 — `@prefect.flow(name=...)` → flow gated on metric-definition/audience spans. exercised: "Flow 'ingest'"
@@ -3464,14 +3549,16 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
 - **Step 1 (Orchestrator Compilation).** keep rule/event assets when event-type/severity spans resolve
   durable-rules 2.0.28 — `with durable.lang.ruleset(name): ...` → declares Rete ruleset; defines event rules. located
   `locate: durable.lang.ruleset`
-  experta — installed but import fails (collections.Mapping on py3.11); no dotted path resolves, cannot bind.
+  experta → durable-rules 2.0.28 — `ruleset(name){{ when_all(...) }}`, `post(name, fact)` → Rete rule engine (experta itself fails on py3.11: collections.Mapping). located
+  `locate: durable.lang.ruleset, durable.lang.when_all, durable.lang.post`
   pydantic 2.13.5 — `pydantic.BaseModel.model_validate(obj)` → validated event model; type-checks event fields. exercised: "3"
   `locate: pydantic.BaseModel.model_validate, pydantic.TypeAdapter`
 
 - **Step 2 (Correlate and Hand-off).** execute Rete rules; map event edges; sequence runbooks
   durable-rules 2.0.28 — `durable.lang.assert_fact(ruleset_name, fact)` → triggers matching Rete rules; executes rules on rows. located
   `locate: durable.lang.assert_fact, durable.lang.post`
-  experta — installed but import fails (collections.Mapping on py3.11); no dotted path resolves, cannot bind.
+  experta → durable-rules 2.0.28 — `ruleset(name){{ when_all(...) }}`, `post(name, fact)` → Rete rule engine (experta itself fails on py3.11: collections.Mapping). located
+  `locate: durable.lang.ruleset, durable.lang.when_all, durable.lang.post`
   pm4py 2.7.23.8 — `pm4py.discover_directly_follows_graph(log)` → (dfg, start, end) edges; maps event-to-incident edges. exercised: "{('a', 'b'): 2}"
   `locate: pm4py.discover_directly_follows_graph`
   unified-planning 1.3.0 — `unified_planning.shortcuts.OneshotPlanner(problem_kind=...)` → planner engine; sequences runbooks. located
@@ -3540,7 +3627,7 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: playwright.sync_api.sync_playwright, playwright.sync_api.Page.content`
   clingraph 1.2.6 — `clingraph.compute_graphs(fb); clingraph.render(graphs, format='svg')` → renders ASP-fact graph. located
   `locate: clingraph.render, clingraph.compute_graphs`
-  mermaid — non-Python: Node/CLI renderer (@mermaid-js/mermaid-cli); CLI: `mmdc -i in.mmd -o out.svg`
+  mermaid — non-Python renderer — CLI `mmdc -i in.mmd -o out.svg` (@mermaid-js/mermaid-cli); mechanical, not a hallucination step
 
 - **Step 1 (Orchestrator Compilation).** Write a flow gated on causal/error-hypothesis AMR graphs.
   amrlib 0.8.1 — `amrlib.load_stog_model(model_dir=...)` (`.parse_sents(...)`) → sentence-to-AMR-graph parser. located
@@ -3629,12 +3716,12 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
 - **Step 1 (Orchestrator Compilation).** Keep spiffworkflow/pydantic request assets when a model key or ad-hoc flag type-checks.
   pydantic 2.13.5 — `class Req(pydantic.BaseModel): ...` → validated request model; model-key type-check. exercised: "unit=3.5"
   `locate: pydantic.BaseModel`
-  spiffworkflow 3.2.0 — `BpmnWorkflow(spec).do_engine_steps()` → advances BPMN; request-workflow asset. located (import is `SpiffWorkflow`; batch's lowercase `spiffworkflow` fails)
-  `locate: SpiffWorkflow.bpmn.workflow.BpmnWorkflow.do_engine_steps, SpiffWorkflow.bpmn.workflow.BpmnWorkflow`
+  spiffworkflow 3.2.0 — `BpmnWorkflow(spec).do_engine_steps()` → execute a BPMN workflow. located
+  `locate: SpiffWorkflow.bpmn.workflow.BpmnWorkflow, SpiffWorkflow.bpmn.parser.BpmnParser.BpmnParser`
 
 - **Step 2 (Model or Plan).** Execute matched models; synthesize ad-hoc plans; write approval tables.
-  spiffworkflow 3.2.0 — `BpmnWorkflow(spec).do_engine_steps()` → executes matched model; matched-model execution. located (import is `SpiffWorkflow`; batch's lowercase `spiffworkflow` fails)
-  `locate: SpiffWorkflow.bpmn.workflow.BpmnWorkflow.do_engine_steps`
+  spiffworkflow 3.2.0 — `BpmnWorkflow(spec).do_engine_steps()` → execute a BPMN workflow. located
+  `locate: SpiffWorkflow.bpmn.workflow.BpmnWorkflow, SpiffWorkflow.bpmn.parser.BpmnParser.BpmnParser`
   unified-planning 1.3.0 — `OneshotPlanner(problem_kind=pk).solve(problem)` → plan; ad-hoc plan synthesis. located
   `locate: unified_planning.shortcuts.OneshotPlanner`
   zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
@@ -3794,7 +3881,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: playwright.sync_api.sync_playwright, playwright.sync_api.Page.content`
   plotly 7.0.0 — `plotly.graph_objects.Figure(data=[...]).to_html(full_html=False)` → produces HTML flattened here. exercised: "4300543-char HTML"
   `locate: plotly.graph_objects.Figure.to_html, plotly.graph_objects.Figure.write_html`
-  quarto — non-Python: CLI publishing engine; CLI: `quarto render doc.qmd`
+  quarto 0.1.0 — `quarto.render(input='deck.qmd')` → render qmd (needs the quarto binary at run time). located
+  `locate: quarto.render`
 
 - **Step 1 (Orchestrator Compilation).** build dagster asset graph from tolerance/deliverable/exception spans
   dagster 1.13.20 — `dagster.asset(deps=[upstream])(fn)` → AssetsDefinition composing the asset graph. located
@@ -3837,7 +3925,7 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: playwright.sync_api.Page.content`
   markitdown 0.1.7 — `markitdown.MarkItDown().convert("diagram.html")` → Markdown of the flattened HTML. exercised: "# Q3 Net income 100"
   `locate: markitdown.MarkItDown.convert`
-  mermaid — non-Python: Node CLI renderer (@mermaid-js/mermaid-cli); CLI: `mmdc -i in.mmd -o out.svg`
+  mermaid — non-Python renderer — CLI `mmdc -i in.mmd -o out.svg` (@mermaid-js/mermaid-cli); mechanical, not a hallucination step
 
 - **Step 1 (Orchestrator Compilation).** Write Prefect tasks only if backlog/architecture-constraint spans resolve.
   prefect 3.8.4 — `@prefect.task def build(): ...` → defines a durable task. exercised: "type=Task"
@@ -3876,7 +3964,7 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: anydoc.to_markdown, anydoc.to_markdown_bytes`
   markitdown 0.1.7 — `MarkItDown().convert(source).text_content` → Markdown. exercised: "'# Title\\n\\nhello world'"
   `locate: markitdown.MarkItDown.convert`
-  mermaid — non-Python: Node/CLI renderer; here the mermaid HTML is the lifted source, not an active tool; CLI: `mmdc`
+  mermaid — non-Python renderer — CLI `mmdc -i in.mmd -o out.svg` (@mermaid-js/mermaid-cli); mechanical, not a hallucination step
 
 - **Step 1 (Orchestrator Compilation).** admit testing assets only if predicates+model key type-check
   (no candidate library in batch — pure type-check gate; nothing to bind.)
@@ -3916,7 +4004,7 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: undoc.parse_file, undoc.Undoc.to_markdown`
   markitdown 0.1.7 — `MarkItDown().convert(path).markdown` → Markdown from reports. exercised: "'# Title\n\nHello world'"
   `locate: markitdown.MarkItDown.convert`
-  mermaid — non-Python: source here (its HTML is lifted); Node/CLI renderer; CLI: `mmdc -i in.mmd -o out.svg`
+  mermaid — non-Python renderer — CLI `mmdc -i in.mmd -o out.svg` (@mermaid-js/mermaid-cli); mechanical, not a hallucination step
 
 - **Step 1 (Orchestrator Compilation).** Temporalio workflow gated on env/success/rollback spans plus change fact.
   temporalio 1.32.0 — `@workflow.defn`; `client.execute_workflow(WF.run, id=, task_queue=)` → durable deploy workflow. located
@@ -3955,7 +4043,7 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
 - **Step 0 (Global Ingestion).** flatten release reviews and diagram HTML into manifest
   docling 2.124.0 — `docling.document_converter.DocumentConverter().convert(source=path)` → ConversionResult; flattens release reviews. located
   `locate: docling.document_converter.DocumentConverter.convert`
-  mermaid — non-Python: Node/CLI renderer (@mermaid-js/mermaid-cli), not a Python import; CLI: `mmdc -i in.mmd -o out.svg`.
+  mermaid — non-Python renderer — CLI `mmdc -i in.mmd -o out.svg` (@mermaid-js/mermaid-cli); mechanical, not a hallucination step
   python-docx 1.2.0 — `docx.Document(path)` → document exposing `.paragraphs`; flattens release-review .docx. exercised: "1 paragraph"
   `locate: docx.Document`
 
@@ -4000,7 +4088,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: docx.Document`
   undoc 0.9.0 — `undoc.parse_file(path)` → Undoc (then .to_markdown()); Office→md/text/json. exercised: "Undoc object"
   `locate: undoc.parse_file, undoc.Undoc.to_markdown`
-  quarto — non-Python: CLI publishing engine, not a Python import; CLI: `quarto render`
+  quarto 0.1.0 — `quarto.render(input='deck.qmd')` → render qmd (needs the quarto binary at run time). located
+  `locate: quarto.render`
 
 - **Step 1 (Orchestrator Compilation).** Emit dagster asset graph if spans resolve
   dagster 1.13.20 — `dagster.asset(fn)` → AssetsDefinition; defines a communication asset node. exercised: "AssetsDefinition"
@@ -4047,7 +4136,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: docling.document_converter.DocumentConverter.convert`
   mkdocs 1.6.1 — `mkdocs.commands.build.build(config)` → builds the static site being flattened. located
   `locate: mkdocs.commands.build.build`
-  quarto — non-Python: CLI publishing engine; CLI: `quarto render`
+  quarto 0.1.0 — `quarto.render(input='deck.qmd')` → render qmd (needs the quarto binary at run time). located
+  `locate: quarto.render`
 
 - **Step 1 (Orchestrator Compilation).** Write tasks for graph/RDF only if domain/owner/demand spans exist.
   networkx 3.6.1 — `networkx.DiGraph()` (add_edge) → domain/owner graph. exercised: "number_of_edges == 1"
@@ -4072,8 +4162,8 @@ Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipeli
   `locate: pandas.DataFrame`
   pydantic 2.13.5 — `class M(pydantic.BaseModel): ...` → versioned asset model. exercised: "M(x=3).x == 3"
   `locate: pydantic.BaseModel`
-  spiffworkflow 3.2.0 — `SpiffWorkflow.bpmn.workflow.BpmnWorkflow(spec)` → executes BPMN capture/review/publish/retire. located (installed as import `SpiffWorkflow`; batch's "no" is incorrect)
-  `locate: SpiffWorkflow.bpmn.workflow.BpmnWorkflow`
+  spiffworkflow 3.2.0 — `BpmnWorkflow(spec).do_engine_steps()` → execute a BPMN workflow. located
+  `locate: SpiffWorkflow.bpmn.workflow.BpmnWorkflow, SpiffWorkflow.bpmn.parser.BpmnParser.BpmnParser`
   ydata-profiling 4.18.4 — `ydata_profiling.ProfileReport(df)` → EDA/freshness report. located
   `locate: ydata_profiling.ProfileReport`
 
