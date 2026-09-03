@@ -18,34 +18,10 @@
     "sentence_id": "usc5-552-doj:u0000:s02"
   },
   {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0001:s00#e7,usc5-552-doj:u0001:s00#x5)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0001:s00"
-  },
-  {
     "atom_ids": [],
     "code": "NO_EVENT",
     "detail": "no event was compiled from this sentence",
     "sentence_id": "usc5-552-doj:u0002:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0002:s01#e5,usc5-552-doj:u0002:s01#x2)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0002:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0002:s01#e8,usc5-552-doj:u0002:s01#x2)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0002:s01"
   },
   {
     "atom_ids": [
@@ -70,16 +46,34 @@
     "sentence_id": "usc5-552-doj:u0003:s00"
   },
   {
-    "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
-    "sentence_id": "usc5-552-doj:u0004:s00"
+    "atom_ids": [
+      "theme(usc5-552-doj:u0003:s00#e44,usc5-552-doj:u0003:s00#x16)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 16 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0003:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0003:s00#e44,usc5-552-doj:u0003:s00#x34)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'whom' at token 34 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0003:s00"
   },
   {
     "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
-    "sentence_id": "usc5-552-doj:u0005:s00"
+    "code": "FRAGMENT",
+    "detail": "root 'statements' is NOUN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0004:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0004:s00#e16,usc5-552-doj:u0004:s00#x12)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 12 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0004:s00"
   },
   {
     "atom_ids": [],
@@ -94,32 +88,18 @@
     "sentence_id": "usc5-552-doj:u0007:s00"
   },
   {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0008:s00#e8,usc5-552-doj:u0008:s00#x7)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'person' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0008:s00"
-  },
-  {
     "atom_ids": [],
     "code": "FRAGMENT",
     "detail": "root 'extent' is NOUN, not a predicate",
     "sentence_id": "usc5-552-doj:u0008:s00"
   },
   {
-    "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
-    "sentence_id": "usc5-552-doj:u0008:s01"
-  },
-  {
     "atom_ids": [
-      "theme(usc5-552-doj:u0009:s00#e14,usc5-552-doj:u0009:s00#x5)"
+      "patient(usc5-552-doj:u0008:s00#e8,usc5-552-doj:u0008:s00#x5)"
     ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0009:s00"
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 5 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0008:s00"
   },
   {
     "atom_ids": [],
@@ -129,8 +109,24 @@
   },
   {
     "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
+    "code": "FRAGMENT",
+    "detail": "root 'statements' is NOUN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0011:s00"
+  },
+  {
+    "atom_ids": [
+      "patient(usc5-552-doj:u0011:s00#e13,usc5-552-doj:u0011:s00#x10)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 10 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0011:s00"
+  },
+  {
+    "atom_ids": [
+      "patient(usc5-552-doj:u0011:s00#e20,usc5-552-doj:u0011:s00#x10)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 10 has no matching antecedent in its unit",
     "sentence_id": "usc5-552-doj:u0011:s00"
   },
   {
@@ -154,9 +150,11 @@
     "sentence_id": "usc5-552-doj:u0013:s00"
   },
   {
-    "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
+    "atom_ids": [
+      "patient(usc5-552-doj:u0014:s00#e7,usc5-552-doj:u0014:s00#x4)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 4 has no matching antecedent in its unit",
     "sentence_id": "usc5-552-doj:u0014:s00"
   },
   {
@@ -183,8 +181,16 @@
   },
   {
     "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
+    "code": "FRAGMENT",
+    "detail": "root 'and' is CCONJ, not a predicate",
+    "sentence_id": "usc5-552-doj:u0016:s00"
+  },
+  {
+    "atom_ids": [
+      "patient(usc5-552-doj:u0016:s00#e7,usc5-552-doj:u0016:s00#x4)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 4 has no matching antecedent in its unit",
     "sentence_id": "usc5-552-doj:u0016:s00"
   },
   {
@@ -194,151 +200,51 @@
     "sentence_id": "usc5-552-doj:u0017:s00"
   },
   {
-    "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
-    "sentence_id": "usc5-552-doj:u0018:s00"
-  },
-  {
     "atom_ids": [
-      "theme(usc5-552-doj:u0018:s01#e22,usc5-552-doj:u0018:s01#x20)"
+      "agent(usc5-552-doj:u0018:s02#e23,usc5-552-doj:u0018:s02#x22)"
     ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0018:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0018:s02#e18,usc5-552-doj:u0018:s02#x16)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'it' at token 22 has no matching antecedent in its unit",
     "sentence_id": "usc5-552-doj:u0018:s02"
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0018:s02#e23,usc5-552-doj:u0018:s02#x16)"
+      "agent(usc5-552-doj:u0018:s02#e26,usc5-552-doj:u0018:s02#x22)"
     ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'it' at token 22 has no matching antecedent in its unit",
     "sentence_id": "usc5-552-doj:u0018:s02"
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0018:s02#e26,usc5-552-doj:u0018:s02#x16)"
+      "patient(usc5-552-doj:u0018:s03#e35,usc5-552-doj:u0018:s03#x33)"
     ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0018:s02"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0018:s03#e45,usc5-552-doj:u0018:s03#x43)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'indication' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 33 has no matching antecedent in its unit",
     "sentence_id": "usc5-552-doj:u0018:s03"
   },
   {
-    "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
-    "sentence_id": "usc5-552-doj:u0018:s04"
+    "atom_ids": [
+      "patient(usc5-552-doj:u0018:s03#e38,usc5-552-doj:u0018:s03#x33)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 33 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0018:s03"
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0018:s05#e5,usc5-552-doj:u0018:s05#x2)"
+      "theme(usc5-552-doj:u0018:s03#e62,usc5-552-doj:u0018:s03#x58)"
     ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0018:s05"
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 58 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0018:s03"
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0018:s05#e7,usc5-552-doj:u0018:s05#x2)"
+      "theme(usc5-552-doj:u0018:s06#e29,usc5-552-doj:u0018:s05#x20)"
     ],
     "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0018:s05"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0018:s05#e18,usc5-552-doj:u0018:s05#x2)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0018:s05"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0018:s06#e5,usc5-552-doj:u0018:s06#x2)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0018:s06"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0018:s06#e7,usc5-552-doj:u0018:s06#x2)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0018:s06"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0018:s06#e10,usc5-552-doj:u0018:s06#x2)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0018:s06"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0018:s06#e13,usc5-552-doj:u0018:s06#x2)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0018:s06"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0018:s06#e20,usc5-552-doj:u0018:s06#x2)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0018:s06"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0018:s06#e23,usc5-552-doj:u0018:s06#x2)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0018:s06"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0018:s06#e25,usc5-552-doj:u0018:s06#x2)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0018:s06"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0018:s06#e29,usc5-552-doj:u0018:s06#x2)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0018:s06"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0018:s06#e53,usc5-552-doj:u0018:s06#x50)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "detail": "subject 'information' is never the agent of a transitive event in the corpus; clingo routed it to theme",
     "sentence_id": "usc5-552-doj:u0018:s06"
   },
   {
@@ -359,33 +265,35 @@
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0018:s07#e4,usc5-552-doj:u0018:s07#x2)"
+      "theme(usc5-552-doj:u0018:s08#e19,usc5-552-doj:u0018:s07#x6)"
     ],
     "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0018:s07"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0018:s08#e19,usc5-552-doj:u0018:s07#x2)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "detail": "subject 'index' is never the agent of a transitive event in the corpus; clingo routed it to theme",
     "sentence_id": "usc5-552-doj:u0018:s08"
   },
   {
-    "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
+    "atom_ids": [
+      "patient(usc5-552-doj:u0019:s00#e7,usc5-552-doj:u0019:s00#x4)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'it' at token 4 has no matching antecedent in its unit",
     "sentence_id": "usc5-552-doj:u0019:s00"
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0020:s00#e6,usc5-552-doj:u0020:s00#x5)"
+      "patient(usc5-552-doj:u0019:s00#e10,usc5-552-doj:u0019:s00#x4)"
     ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'party' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0020:s00"
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'it' at token 4 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0019:s00"
+  },
+  {
+    "atom_ids": [
+      "patient(usc5-552-doj:u0019:s00#e13,usc5-552-doj:u0019:s00#x4)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'it' at token 4 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0019:s00"
   },
   {
     "atom_ids": [
@@ -396,6 +304,14 @@
     "sentence_id": "usc5-552-doj:u0021:s00"
   },
   {
+    "atom_ids": [
+      "patient(usc5-552-doj:u0021:s00#e51,usc5-552-doj:u0021:s00#x46)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 46 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0021:s00"
+  },
+  {
     "atom_ids": [],
     "code": "NO_EVENT",
     "detail": "no event was compiled from this sentence",
@@ -403,34 +319,10 @@
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0022:s01#e16,usc5-552-doj:u0022:s01#x14)"
+      "theme(usc5-552-doj:u0022:s02#e17,usc5-552-doj:u0022:s02#x6)"
     ],
     "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0022:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0022:s01#e33,usc5-552-doj:u0022:s01#x30)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'record' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0022:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0022:s02#e4,usc5-552-doj:u0022:s02#x2)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0022:s02"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0022:s02#e17,usc5-552-doj:u0022:s02#x2)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "detail": "subject 'effort' is never the agent of a transitive event in the corpus; clingo routed it to theme",
     "sentence_id": "usc5-552-doj:u0022:s02"
   },
   {
@@ -438,14 +330,6 @@
     "code": "NO_EVENT",
     "detail": "no event was compiled from this sentence",
     "sentence_id": "usc5-552-doj:u0023:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0023:s01#e15,usc5-552-doj:u0023:s01#x13)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0023:s01"
   },
   {
     "atom_ids": [
@@ -478,25 +362,17 @@
     "sentence_id": "usc5-552-doj:u0024:s01"
   },
   {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0025:s00#e52,usc5-552-doj:u0025:s00#x5)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0025:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0025:s00#e16,usc5-552-doj:u0025:s00#x5)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0025:s00"
-  },
-  {
     "atom_ids": [],
     "code": "FRAGMENT",
     "detail": "root 'E' is PROPN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0025:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(usc5-552-doj:u0025:s00#e16,usc5-552-doj:u0025:s00#x13)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 13 has no matching antecedent in its unit",
     "sentence_id": "usc5-552-doj:u0025:s00"
   },
   {
@@ -510,14 +386,6 @@
     "code": "NO_EVENT",
     "detail": "no event was compiled from this sentence",
     "sentence_id": "usc5-552-doj:u0027:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0028:s00#e24,usc5-552-doj:u0028:s00#x22)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0028:s00"
   },
   {
     "atom_ids": [
@@ -545,16 +413,18 @@
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0029:s00#e8,usc5-552-doj:u0029:s00#x6)"
+      "patient(usc5-552-doj:u0029:s00#e8,usc5-552-doj:u0029:s00#x9)"
     ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'regulation' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 9 has no matching antecedent in its unit",
     "sentence_id": "usc5-552-doj:u0029:s00"
   },
   {
-    "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
+    "atom_ids": [
+      "patient(usc5-552-doj:u0030:s00#e7,usc5-552-doj:u0030:s00#x2)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'I' at token 2 has no matching antecedent in its unit",
     "sentence_id": "usc5-552-doj:u0030:s00"
   },
   {
@@ -583,64 +453,40 @@
   },
   {
     "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
+    "code": "FRAGMENT",
+    "detail": "root 'III' is X, not a predicate",
     "sentence_id": "usc5-552-doj:u0032:s00"
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0033:s00#e15,usc5-552-doj:u0033:s00#x6)"
+      "theme(usc5-552-doj:u0033:s00#e50,usc5-552-doj:u0033:s00#x22)"
     ],
     "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'term' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "detail": "subject 'information' is never the agent of a transitive event in the corpus; clingo routed it to theme",
     "sentence_id": "usc5-552-doj:u0033:s00"
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0033:s00#e33,usc5-552-doj:u0033:s00#x6)"
+      "agent(usc5-552-doj:u0033:s00#e21,usc5-552-doj:u0033:s00#x20)"
     ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'term' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 20 has no matching antecedent in its unit",
     "sentence_id": "usc5-552-doj:u0033:s00"
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0033:s00#e21,usc5-552-doj:u0033:s00#x6)"
+      "theme(usc5-552-doj:u0033:s01#e16,usc5-552-doj:u0033:s01#x11)"
     ],
     "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'term' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0033:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0033:s00#e50,usc5-552-doj:u0033:s00#x6)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'term' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0033:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0033:s01#e10,usc5-552-doj:u0033:s01#x6)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'term' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "detail": "subject 'information' is never the agent of a transitive event in the corpus; clingo routed it to theme",
     "sentence_id": "usc5-552-doj:u0033:s01"
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0033:s01#e16,usc5-552-doj:u0033:s01#x6)"
+      "theme(usc5-552-doj:u0033:s01#e23,usc5-552-doj:u0033:s01#x11)"
     ],
     "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'term' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0033:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0033:s01#e23,usc5-552-doj:u0033:s01#x6)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'term' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "detail": "subject 'information' is never the agent of a transitive event in the corpus; clingo routed it to theme",
     "sentence_id": "usc5-552-doj:u0033:s01"
   },
   {
@@ -669,65 +515,11 @@
   },
   {
     "atom_ids": [
-      "agent(usc5-552-doj:u0033:s02#e36,usc5-552-doj:u0033:s02#x35)"
-    ],
-    "code": "UNRESOLVED_PRONOUN",
-    "detail": "'who' at token 35 has no matching antecedent in its unit",
-    "sentence_id": "usc5-552-doj:u0033:s02"
-  },
-  {
-    "atom_ids": [
       "theme(usc5-552-doj:u0033:s03#e7,usc5-552-doj:u0033:s03#x2)"
     ],
     "code": "ANIMACY_BY_VERB_SELECTION",
     "detail": "subject 'example' is never the agent of a transitive event in the corpus; clingo routed it to theme",
     "sentence_id": "usc5-552-doj:u0033:s03"
-  },
-  {
-    "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
-    "sentence_id": "usc5-552-doj:u0033:s04"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0033:s05#e19,usc5-552-doj:u0033:s05#x17)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'journalist' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0033:s05"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0033:s06#e5,usc5-552-doj:u0033:s06#x3)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'contract' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0033:s06"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0033:s06#e18,usc5-552-doj:u0033:s06#x15)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'government' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0033:s06"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0034:s00#e34,usc5-552-doj:u0034:s00#x26)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'disclosure' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0034:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0034:s00#e60,usc5-552-doj:u0034:s00#x26)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'disclosure' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0034:s00"
   },
   {
     "atom_ids": [],
@@ -742,44 +534,6 @@
     "code": "ANIMACY_BY_VERB_SELECTION",
     "detail": "subject 'schedule' is never the agent of a transitive event in the corpus; clingo routed it to theme",
     "sentence_id": "usc5-552-doj:u0035:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0035:s02#e4,usc5-552-doj:u0035:s02#x2)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'cost' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0035:s02"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0035:s03#e2,usc5-552-doj:u0035:s03#x1)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'review' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0035:s03"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0035:s03#e5,usc5-552-doj:u0035:s03#x1)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'review' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0035:s03"
-  },
-  {
-    "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
-    "sentence_id": "usc5-552-doj:u0035:s04"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0036:s00#e16,usc5-552-doj:u0036:s00#x6)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'cost' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0036:s00"
   },
   {
     "atom_ids": [
@@ -818,38 +572,6 @@
     "sentence_id": "usc5-552-doj:u0038:s00"
   },
   {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0038:s01#e4,usc5-552-doj:u0038:s01#x2)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0038:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0038:s01#e28,usc5-552-doj:u0038:s01#x26)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0038:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0038:s01#e33,usc5-552-doj:u0038:s01#x31)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'fee' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0038:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0038:s01#e15,usc5-552-doj:u0038:s01#x12)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'requester' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0038:s01"
-  },
-  {
     "atom_ids": [],
     "code": "FRAGMENT",
     "detail": "root 'vi' is X, not a predicate",
@@ -871,38 +593,6 @@
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0040:s01#e19,usc5-552-doj:u0040:s01#x17)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'court' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0040:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0040:s01#e25,usc5-552-doj:u0040:s01#x17)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'court' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0040:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0041:s00#e20,usc5-552-doj:u0041:s00#x17)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0041:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0041:s00#e55,usc5-552-doj:u0041:s00#x53)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0041:s00"
-  },
-  {
-    "atom_ids": [
       "agent(usc5-552-doj:u0041:s00#e20,usc5-552-doj:u0041:s00#x5)"
     ],
     "code": "UNRESOLVED_PRONOUN",
@@ -917,131 +607,11 @@
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0042:s01#e5,usc5-552-doj:u0042:s01#x3)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0042:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0042:s01#e28,usc5-552-doj:u0042:s01#x27)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0042:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0042:s01#e9,usc5-552-doj:u0042:s01#x8)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'circumstance' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0042:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0042:s02#e4,usc5-552-doj:u0042:s02#x3)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0042:s02"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0042:s02#e17,usc5-552-doj:u0042:s02#x14)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0042:s02"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0042:s02#e30,usc5-552-doj:u0042:s02#x14)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0042:s02"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0043:s00#e8,usc5-552-doj:u0043:s00#x6)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0043:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0043:s00#e29,usc5-552-doj:u0043:s00#x27)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0043:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0043:s00#e60,usc5-552-doj:u0043:s00#x58)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0043:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0043:s00#e95,usc5-552-doj:u0043:s00#x58)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0043:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0043:s00#e80,usc5-552-doj:u0043:s00#x78)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0043:s00"
-  },
-  {
-    "atom_ids": [
       "theme(usc5-552-doj:u0043:s00#e105,usc5-552-doj:u0043:s00#x103)"
     ],
     "code": "ANIMACY_BY_VERB_SELECTION",
     "detail": "subject 'attempt' is never the agent of a transitive event in the corpus; clingo routed it to theme",
     "sentence_id": "usc5-552-doj:u0043:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0043:s00#e12,usc5-552-doj:u0043:s00#x11)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'circumstance' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0043:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0043:s00#e113,usc5-552-doj:u0043:s00#x110)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'requester' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0043:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0044:s00#e12,usc5-552-doj:u0044:s00#x11)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'circumstance' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0044:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0044:s00#e8,usc5-552-doj:u0044:s00#x6)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'court' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0044:s00"
   },
   {
     "atom_ids": [],
@@ -1057,26 +627,18 @@
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0045:s01#e45,usc5-552-doj:u0045:s01#x6)"
+      "theme(usc5-552-doj:u0045:s01#e21,usc5-552-doj:u0045:s01#x15)"
     ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'court' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 15 has no matching antecedent in its unit",
     "sentence_id": "usc5-552-doj:u0045:s01"
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0045:s01#e35,usc5-552-doj:u0045:s01#x33)"
+      "theme(usc5-552-doj:u0045:s01#e35,usc5-552-doj:u0045:s01#x30)"
     ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'record' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0045:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0045:s01#e21,usc5-552-doj:u0045:s01#x18)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'reside' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 30 has no matching antecedent in its unit",
     "sentence_id": "usc5-552-doj:u0045:s01"
   },
   {
@@ -1088,38 +650,6 @@
     "sentence_id": "usc5-552-doj:u0045:s02"
   },
   {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0045:s02#e8,usc5-552-doj:u0045:s02#x6)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'court' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0045:s02"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0045:s02#e16,usc5-552-doj:u0045:s02#x6)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'court' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0045:s02"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0045:s02#e36,usc5-552-doj:u0045:s02#x6)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'court' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0045:s02"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0045:s03#e18,usc5-552-doj:u0045:s03#x16)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'court' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0045:s03"
-  },
-  {
     "atom_ids": [],
     "code": "NO_EVENT",
     "detail": "no event was compiled from this sentence",
@@ -1127,18 +657,10 @@
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0046:s01#e46,usc5-552-doj:u0046:s01#x44)"
+      "theme(usc5-552-doj:u0046:s01#e40,usc5-552-doj:u0046:s01#x36)"
     ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'court' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0046:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0046:s01#e11,usc5-552-doj:u0046:s01#x9)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'defendant' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 36 has no matching antecedent in its unit",
     "sentence_id": "usc5-552-doj:u0046:s01"
   },
   {
@@ -1161,18 +683,10 @@
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0048:s01#e30,usc5-552-doj:u0048:s01#x27)"
+      "theme(usc5-552-doj:u0048:s01#e30,usc5-552-doj:u0048:s01#x25)"
     ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'complainant' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0048:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0048:s01#e4,usc5-552-doj:u0048:s01#x2)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'court' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 25 has no matching antecedent in its unit",
     "sentence_id": "usc5-552-doj:u0048:s01"
   },
   {
@@ -1180,22 +694,6 @@
     "code": "NO_EVENT",
     "detail": "no event was compiled from this sentence",
     "sentence_id": "usc5-552-doj:u0049:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0049:s01#e11,usc5-552-doj:u0049:s01#x8)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'complainant' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0049:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0049:s01#e16,usc5-552-doj:u0049:s01#x14)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'complainant' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0049:s01"
   },
   {
     "atom_ids": [],
@@ -1225,83 +723,11 @@
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0052:s01#e49,usc5-552-doj:u0052:s01#x40)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'circumstance' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0052:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0052:s01#e64,usc5-552-doj:u0052:s01#x61)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'counsel' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0052:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0052:s01#e73,usc5-552-doj:u0052:s01#x61)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'counsel' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0052:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0052:s01#e4,usc5-552-doj:u0052:s01#x3)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'court' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0052:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0052:s01#e34,usc5-552-doj:u0052:s01#x32)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'court' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0052:s01"
-  },
-  {
-    "atom_ids": [
       "theme(usc5-552-doj:u0052:s01#e49,usc5-552-doj:u0052:s01#x48)"
     ],
     "code": "ANIMACY_BY_VERB_SELECTION",
     "detail": "subject 'personnel' is never the agent of a transitive event in the corpus; clingo routed it to theme",
     "sentence_id": "usc5-552-doj:u0052:s01"
-  },
-  {
-    "atom_ids": [
-      "agent(usc5-552-doj:u0052:s01#e82,usc5-552-doj:u0052:s01#x79)"
-    ],
-    "code": "UNRESOLVED_PRONOUN",
-    "detail": "'who' at token 79 has no matching antecedent in its unit",
-    "sentence_id": "usc5-552-doj:u0052:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0052:s02#e15,usc5-552-doj:u0052:s02#x3)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'counsel' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0052:s02"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0052:s03#e5,usc5-552-doj:u0052:s03#x3)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'authority' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0052:s03"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0053:s00#e7,usc5-552-doj:u0053:s00#x5)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'Attorney' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0053:s00"
   },
   {
     "atom_ids": [
@@ -1315,21 +741,7 @@
     "atom_ids": [],
     "code": "NO_EVENT",
     "detail": "no event was compiled from this sentence",
-    "sentence_id": "usc5-552-doj:u0055:s00"
-  },
-  {
-    "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
     "sentence_id": "usc5-552-doj:u0056:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0056:s01#e6,usc5-552-doj:u0056:s01#x3)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'counsel' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0056:s01"
   },
   {
     "atom_ids": [],
@@ -1338,34 +750,10 @@
     "sentence_id": "usc5-552-doj:u0057:s00"
   },
   {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0057:s01#e17,usc5-552-doj:u0057:s01#x15)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'court' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0057:s01"
-  },
-  {
     "atom_ids": [],
     "code": "NO_EVENT",
     "detail": "no event was compiled from this sentence",
     "sentence_id": "usc5-552-doj:u0058:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0058:s01#e9,usc5-552-doj:u0058:s01#x2)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0058:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0058:s01#e11,usc5-552-doj:u0058:s01#x2)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0058:s01"
   },
   {
     "atom_ids": [],
@@ -1377,18 +765,12 @@
     "atom_ids": [],
     "code": "NO_EVENT",
     "detail": "no event was compiled from this sentence",
-    "sentence_id": "usc5-552-doj:u0060:s00"
-  },
-  {
-    "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
     "sentence_id": "usc5-552-doj:u0061:s00"
   },
   {
     "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
+    "code": "FRAGMENT",
+    "detail": "root 'right' is NOUN, not a predicate",
     "sentence_id": "usc5-552-doj:u0062:s00"
   },
   {
@@ -1413,23 +795,9 @@
   },
   {
     "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
+    "code": "FRAGMENT",
+    "detail": "root 'right' is NOUN, not a predicate",
     "sentence_id": "usc5-552-doj:u0065:s00"
-  },
-  {
-    "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
-    "sentence_id": "usc5-552-doj:u0066:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0066:s01#e22,usc5-552-doj:u0066:s01#x20)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0066:s01"
   },
   {
     "atom_ids": [
@@ -1472,41 +840,19 @@
     "sentence_id": "usc5-552-doj:u0067:s00"
   },
   {
-    "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
-    "sentence_id": "usc5-552-doj:u0067:s01"
-  },
-  {
     "atom_ids": [
-      "theme(usc5-552-doj:u0068:s00#e8,usc5-552-doj:u0068:s00#x6)"
+      "theme(usc5-552-doj:u0068:s00#e33,usc5-552-doj:u0068:s00#x28)"
     ],
     "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "detail": "subject 'information' is never the agent of a transitive event in the corpus; clingo routed it to theme",
     "sentence_id": "usc5-552-doj:u0068:s00"
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0068:s00#e17,usc5-552-doj:u0068:s00#x6)"
+      "theme(usc5-552-doj:u0068:s00#e26,usc5-552-doj:u0068:s00#x22)"
     ],
     "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0068:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0068:s00#e26,usc5-552-doj:u0068:s00#x6)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0068:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0068:s00#e33,usc5-552-doj:u0068:s00#x6)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "detail": "subject 'period' is never the agent of a transitive event in the corpus; clingo routed it to theme",
     "sentence_id": "usc5-552-doj:u0068:s00"
   },
   {
@@ -1520,14 +866,6 @@
     "code": "NO_EVENT",
     "detail": "no event was compiled from this sentence",
     "sentence_id": "usc5-552-doj:u0069:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0069:s01#e23,usc5-552-doj:u0069:s01#x8)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'receipt' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0069:s01"
   },
   {
     "atom_ids": [],
@@ -1544,50 +882,28 @@
     "sentence_id": "usc5-552-doj:u0070:s00"
   },
   {
-    "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
+    "atom_ids": [
+      "theme(usc5-552-doj:u0070:s01#e58,usc5-552-doj:u0070:s01#x54)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 54 has no matching antecedent in its unit",
     "sentence_id": "usc5-552-doj:u0070:s01"
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0070:s02#e5,usc5-552-doj:u0070:s02#x3)"
+      "agent(usc5-552-doj:u0070:s02#e10,usc5-552-doj:u0070:s02#x8)"
     ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'notice' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 8 has no matching antecedent in its unit",
     "sentence_id": "usc5-552-doj:u0070:s02"
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0070:s02#e10,usc5-552-doj:u0070:s02#x3)"
+      "agent(usc5-552-doj:u0070:s02#e19,usc5-552-doj:u0070:s02#x8)"
     ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'notice' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 8 has no matching antecedent in its unit",
     "sentence_id": "usc5-552-doj:u0070:s02"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0070:s02#e19,usc5-552-doj:u0070:s02#x3)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'notice' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0070:s02"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0071:s00#e38,usc5-552-doj:u0071:s00#x36)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0071:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0071:s00#e19,usc5-552-doj:u0071:s00#x13)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'notice' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0071:s00"
   },
   {
     "atom_ids": [
@@ -1607,35 +923,19 @@
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0071:s01#e9,usc5-552-doj:u0071:s01#x7)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0071:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0071:s01#e33,usc5-552-doj:u0071:s01#x7)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0071:s01"
-  },
-  {
-    "atom_ids": [
-      "agent(usc5-552-doj:u0071:s01#e18,usc5-552-doj:u0071:s01#x16)"
+      "patient(usc5-552-doj:u0071:s00#e78,usc5-552-doj:u0071:s00#x75)"
     ],
     "code": "UNRESOLVED_PRONOUN",
-    "detail": "'who' at token 16 has no matching antecedent in its unit",
-    "sentence_id": "usc5-552-doj:u0071:s01"
+    "detail": "'it' at token 75 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0071:s00"
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0071:s02#e28,usc5-552-doj:u0071:s02#x27)"
+      "theme(usc5-552-doj:u0071:s00#e19,usc5-552-doj:u0071:s00#x10)"
     ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'circumstance' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0071:s02"
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 10 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0071:s00"
   },
   {
     "atom_ids": [],
@@ -1672,9 +972,17 @@
     "sentence_id": "usc5-552-doj:u0073:s00"
   },
   {
+    "atom_ids": [
+      "agent(usc5-552-doj:u0073:s00#e26,usc5-552-doj:u0073:s00#x20)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 20 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0073:s00"
+  },
+  {
     "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
+    "code": "FRAGMENT",
+    "detail": "root 'need' is NOUN, not a predicate",
     "sentence_id": "usc5-552-doj:u0074:s00"
   },
   {
@@ -1699,49 +1007,11 @@
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0076:s01#e4,usc5-552-doj:u0076:s01#x2)"
+      "agent(usc5-552-doj:u0076:s01#e55,usc5-552-doj:u0076:s01#x52)"
     ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 52 has no matching antecedent in its unit",
     "sentence_id": "usc5-552-doj:u0076:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0076:s01#e42,usc5-552-doj:u0076:s01#x40)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0076:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0076:s01#e47,usc5-552-doj:u0076:s01#x45)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'request' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0076:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0076:s01#e55,usc5-552-doj:u0076:s01#x45)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'request' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0076:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0076:s01#e67,usc5-552-doj:u0076:s01#x66)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'request' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0076:s01"
-  },
-  {
-    "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
-    "sentence_id": "usc5-552-doj:u0076:s02"
   },
   {
     "atom_ids": [],
@@ -1758,126 +1028,16 @@
     "sentence_id": "usc5-552-doj:u0077:s00"
   },
   {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0077:s01#e45,usc5-552-doj:u0077:s01#x44)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0077:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0077:s02#e14,usc5-552-doj:u0077:s02#x12)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0077:s02"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0077:s02#e29,usc5-552-doj:u0077:s02#x12)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0077:s02"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0077:s02#e8,usc5-552-doj:u0077:s02#x7)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'circumstance' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0077:s02"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0077:s02#e26,usc5-552-doj:u0077:s02#x24)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'court' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0077:s02"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0077:s02#e5,usc5-552-doj:u0077:s02#x3)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'government' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0077:s02"
-  },
-  {
-    "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
-    "sentence_id": "usc5-552-doj:u0077:s03"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0077:s04#e14,usc5-552-doj:u0077:s04#x2)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'notification' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0077:s04"
-  },
-  {
     "atom_ids": [],
     "code": "NO_EVENT",
     "detail": "no event was compiled from this sentence",
     "sentence_id": "usc5-552-doj:u0078:s00"
   },
   {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0078:s01#e34,usc5-552-doj:u0078:s01#x33)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0078:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0078:s01#e15,usc5-552-doj:u0078:s01#x11)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'circumstance' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0078:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0078:s01#e34,usc5-552-doj:u0078:s01#x19)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'result' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0078:s01"
-  },
-  {
     "atom_ids": [],
     "code": "NO_EVENT",
     "detail": "no event was compiled from this sentence",
     "sentence_id": "usc5-552-doj:u0079:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0079:s01#e63,usc5-552-doj:u0079:s01#x62)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'circumstance' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0079:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0079:s01#e49,usc5-552-doj:u0079:s01#x48)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'person' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0079:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0079:s01#e54,usc5-552-doj:u0079:s01#x48)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'person' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0079:s01"
   },
   {
     "atom_ids": [],
@@ -1895,26 +1055,18 @@
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0080:s01#e4,usc5-552-doj:u0080:s01#x2)"
+      "agent(usc5-552-doj:u0081:s00#e18,usc5-552-doj:u0081:s00#x15)"
     ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0080:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0081:s00#e9,usc5-552-doj:u0081:s00#x4)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'regulation' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 15 has no matching antecedent in its unit",
     "sentence_id": "usc5-552-doj:u0081:s00"
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0081:s00#e18,usc5-552-doj:u0081:s00#x4)"
+      "agent(usc5-552-doj:u0081:s00#e23,usc5-552-doj:u0081:s00#x15)"
     ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'regulation' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 15 has no matching antecedent in its unit",
     "sentence_id": "usc5-552-doj:u0081:s00"
   },
   {
@@ -1927,29 +1079,7 @@
     "atom_ids": [],
     "code": "NO_EVENT",
     "detail": "no event was compiled from this sentence",
-    "sentence_id": "usc5-552-doj:u0082:s01"
-  },
-  {
-    "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
     "sentence_id": "usc5-552-doj:u0083:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0083:s01#e4,usc5-552-doj:u0083:s01#x2)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0083:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0084:s00#e13,usc5-552-doj:u0084:s00#x9)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'person' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0084:s00"
   },
   {
     "atom_ids": [],
@@ -1966,18 +1096,18 @@
     "sentence_id": "usc5-552-doj:u0084:s00"
   },
   {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0084:s00#e13,usc5-552-doj:u0084:s00#x7)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 7 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0084:s00"
+  },
+  {
     "atom_ids": [],
     "code": "NO_EVENT",
     "detail": "no event was compiled from this sentence",
     "sentence_id": "usc5-552-doj:u0085:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0086:s00#e15,usc5-552-doj:u0086:s00#x10)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'regulation' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0086:s00"
   },
   {
     "atom_ids": [],
@@ -1994,9 +1124,17 @@
     "sentence_id": "usc5-552-doj:u0087:s00"
   },
   {
+    "atom_ids": [
+      "patient(usc5-552-doj:u0087:s00#e15,usc5-552-doj:u0087:s00#x4)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 4 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0087:s00"
+  },
+  {
     "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
+    "code": "FRAGMENT",
+    "detail": "root 'consideration' is NOUN, not a predicate",
     "sentence_id": "usc5-552-doj:u0088:s00"
   },
   {
@@ -2007,18 +1145,10 @@
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0089:s01#e4,usc5-552-doj:u0089:s01#x2)"
+      "theme(usc5-552-doj:u0089:s01#e18,usc5-552-doj:u0089:s01#x14)"
     ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0089:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0089:s01#e18,usc5-552-doj:u0089:s01#x16)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 14 has no matching antecedent in its unit",
     "sentence_id": "usc5-552-doj:u0089:s01"
   },
   {
@@ -2034,22 +1164,6 @@
     "code": "NO_EVENT",
     "detail": "no event was compiled from this sentence",
     "sentence_id": "usc5-552-doj:u0090:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0090:s01#e10,usc5-552-doj:u0090:s01#x3)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'court' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0090:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0090:s01#e29,usc5-552-doj:u0090:s01#x11)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'jurisdiction' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0090:s01"
   },
   {
     "atom_ids": [],
@@ -2078,46 +1192,24 @@
     "sentence_id": "usc5-552-doj:u0092:s00"
   },
   {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0092:s00#e21,usc5-552-doj:u0092:s00#x4)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 4 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0092:s00"
+  },
+  {
     "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
+    "code": "FRAGMENT",
+    "detail": "root 'II' is X, not a predicate",
     "sentence_id": "usc5-552-doj:u0093:s00"
   },
   {
     "atom_ids": [],
     "code": "NO_EVENT",
     "detail": "no event was compiled from this sentence",
-    "sentence_id": "usc5-552-doj:u0094:s00"
-  },
-  {
-    "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
     "sentence_id": "usc5-552-doj:u0095:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0095:s01#e17,usc5-552-doj:u0095:s01#x15)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0095:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0095:s01#e38,usc5-552-doj:u0095:s01#x15)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0095:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0095:s01#e54,usc5-552-doj:u0095:s01#x15)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0095:s01"
   },
   {
     "atom_ids": [],
@@ -2142,14 +1234,6 @@
     "sentence_id": "usc5-552-doj:u0098:s00"
   },
   {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0099:s00#e11,usc5-552-doj:u0099:s00#x9)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0099:s00"
-  },
-  {
     "atom_ids": [],
     "code": "FRAGMENT",
     "detail": "root 'date' is NOUN, not a predicate",
@@ -2157,16 +1241,24 @@
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0100:s00#e12,usc5-552-doj:u0100:s00#x10)"
+      "theme(usc5-552-doj:u0099:s00#e11,usc5-552-doj:u0099:s00#x7)"
     ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 7 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0099:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'date' is NOUN, not a predicate",
     "sentence_id": "usc5-552-doj:u0100:s00"
   },
   {
-    "atom_ids": [],
-    "code": "FRAGMENT",
-    "detail": "root 'date' is NOUN, not a predicate",
+    "atom_ids": [
+      "theme(usc5-552-doj:u0100:s00#e12,usc5-552-doj:u0100:s00#x8)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 8 has no matching antecedent in its unit",
     "sentence_id": "usc5-552-doj:u0100:s00"
   },
   {
@@ -2183,57 +1275,11 @@
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0103:s00#e7,usc5-552-doj:u0103:s00#x5)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0103:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0103:s00#e11,usc5-552-doj:u0103:s00#x9)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'disclosure' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0103:s00"
-  },
-  {
-    "atom_ids": [
       "agent(usc5-552-doj:u0103:s00#e7,usc5-552-doj:u0103:s00#x2)"
     ],
     "code": "UNRESOLVED_PRONOUN",
     "detail": "'I' at token 2 has no matching antecedent in its unit",
     "sentence_id": "usc5-552-doj:u0103:s00"
-  },
-  {
-    "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
-    "sentence_id": "usc5-552-doj:u0104:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0105:s00#e18,usc5-552-doj:u0105:s00#x17)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0105:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0105:s00#e14,usc5-552-doj:u0105:s00#x10)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'disclosure' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0105:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0105:s00#e29,usc5-552-doj:u0105:s00#x22)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'disclosure' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0105:s00"
   },
   {
     "atom_ids": [
@@ -2242,12 +1288,6 @@
     "code": "UNRESOLVED_PRONOUN",
     "detail": "'I' at token 5 has no matching antecedent in its unit",
     "sentence_id": "usc5-552-doj:u0105:s00"
-  },
-  {
-    "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
-    "sentence_id": "usc5-552-doj:u0106:s00"
   },
   {
     "atom_ids": [],
@@ -2265,18 +1305,18 @@
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0108:s00#e8,usc5-552-doj:u0108:s00#x5)"
+      "patient(usc5-552-doj:u0107:s01#e12,usc5-552-doj:u0107:s01#x9)"
     ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'section' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0108:s00"
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 9 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0107:s01"
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0108:s00#e12,usc5-552-doj:u0108:s00#x5)"
+      "agent(usc5-552-doj:u0108:s00#e12,usc5-552-doj:u0108:s00#x11)"
     ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'section' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 11 has no matching antecedent in its unit",
     "sentence_id": "usc5-552-doj:u0108:s00"
   },
   {
@@ -2292,22 +1332,8 @@
     "sentence_id": "usc5-552-doj:u0110:s00"
   },
   {
-    "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
-    "sentence_id": "usc5-552-doj:u0111:s00"
-  },
-  {
     "atom_ids": [
       "theme(usc5-552-doj:u0112:s00#e7,usc5-552-doj:u0112:s00#x2)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'a' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0112:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0112:s00#e12,usc5-552-doj:u0112:s00#x2)"
     ],
     "code": "ANIMACY_BY_VERB_SELECTION",
     "detail": "subject 'a' is never the agent of a transitive event in the corpus; clingo routed it to theme",
@@ -2326,18 +1352,6 @@
     "code": "UNRESOLVED_PRONOUN",
     "detail": "'i' at token 5 has no matching antecedent in its unit",
     "sentence_id": "usc5-552-doj:u0112:s00"
-  },
-  {
-    "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
-    "sentence_id": "usc5-552-doj:u0113:s00"
-  },
-  {
-    "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
-    "sentence_id": "usc5-552-doj:u0114:s00"
   },
   {
     "atom_ids": [],
@@ -2370,14 +1384,6 @@
     "sentence_id": "usc5-552-doj:u0116:s00"
   },
   {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0117:s00#e16,usc5-552-doj:u0117:s00#x12)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'disclosure' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0117:s00"
-  },
-  {
     "atom_ids": [],
     "code": "FRAGMENT",
     "detail": "root 'personnel' is NOUN, not a predicate",
@@ -2385,49 +1391,11 @@
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0118:s00#e45,usc5-552-doj:u0118:s00#x4)"
+      "agent(usc5-552-doj:u0118:s00#e108,usc5-552-doj:u0118:s00#x107)"
     ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'record' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 107 has no matching antecedent in its unit",
     "sentence_id": "usc5-552-doj:u0118:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0118:s00#e66,usc5-552-doj:u0118:s00#x4)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'record' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0118:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0118:s00#e82,usc5-552-doj:u0118:s00#x4)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'record' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0118:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0118:s00#e204,usc5-552-doj:u0118:s00#x4)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'record' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0118:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0118:s00#e108,usc5-552-doj:u0118:s00#x4)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'record' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0118:s00"
-  },
-  {
-    "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
-    "sentence_id": "usc5-552-doj:u0119:s00"
   },
   {
     "atom_ids": [],
@@ -2436,23 +1404,33 @@
     "sentence_id": "usc5-552-doj:u0120:s00"
   },
   {
-    "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
-    "sentence_id": "usc5-552-doj:u0121:s00"
-  },
-  {
     "atom_ids": [
-      "theme(usc5-552-doj:u0121:s01#e33,usc5-552-doj:u0121:s01#x31)"
+      "patient(usc5-552-doj:u0121:s00#e24,usc5-552-doj:u0121:s00#x22)"
     ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'indication' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0121:s01"
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 22 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0121:s00"
   },
   {
     "atom_ids": [],
     "code": "FRAGMENT",
     "detail": "root 'amount' is NOUN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0121:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0121:s01#e15,usc5-552-doj:u0121:s01#x11)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 11 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0121:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0121:s01#e48,usc5-552-doj:u0121:s01#x44)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 44 has no matching antecedent in its unit",
     "sentence_id": "usc5-552-doj:u0121:s01"
   },
   {
@@ -2479,67 +1457,11 @@
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0123:s00#e8,usc5-552-doj:u0123:s00#x5)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'investigation' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0123:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0124:s00#e50,usc5-552-doj:u0124:s00#x49)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0124:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0124:s00#e59,usc5-552-doj:u0124:s00#x58)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'circumstance' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0124:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0124:s00#e5,usc5-552-doj:u0124:s00#x6)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'reason' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0124:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0124:s00#e41,usc5-552-doj:u0124:s00#x6)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'reason' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0124:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0124:s00#e61,usc5-552-doj:u0124:s00#x6)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'reason' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0124:s00"
-  },
-  {
-    "atom_ids": [
       "theme(usc5-552-doj:u0124:s00#e22,usc5-552-doj:u0124:s00#x14)"
     ],
     "code": "ANIMACY_BY_VERB_SELECTION",
     "detail": "subject 'subject' is never the agent of a transitive event in the corpus; clingo routed it to theme",
     "sentence_id": "usc5-552-doj:u0124:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0125:s00#e41,usc5-552-doj:u0125:s00#x39)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0125:s00"
   },
   {
     "atom_ids": [
@@ -2566,38 +1488,6 @@
     "sentence_id": "usc5-552-doj:u0126:s00"
   },
   {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0127:s00#e8,usc5-552-doj:u0127:s00#x5)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'section' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0127:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0127:s00#e8,usc5-552-doj:u0127:s00#x2)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'would' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0127:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0127:s00#e14,usc5-552-doj:u0127:s00#x2)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'would' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0127:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0127:s01#e5,usc5-552-doj:u0127:s01#x2)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'section' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0127:s01"
-  },
-  {
     "atom_ids": [],
     "code": "NO_EVENT",
     "detail": "no event was compiled from this sentence",
@@ -2605,32 +1495,24 @@
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0128:s01#e13,usc5-552-doj:u0128:s01#x11)"
+      "agent(usc5-552-doj:u0128:s01#e37,usc5-552-doj:u0128:s01#x35)"
     ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 35 has no matching antecedent in its unit",
     "sentence_id": "usc5-552-doj:u0128:s01"
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0128:s01#e37,usc5-552-doj:u0128:s01#x11)"
+      "agent(usc5-552-doj:u0128:s01#e45,usc5-552-doj:u0128:s01#x43)"
     ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0128:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0128:s01#e45,usc5-552-doj:u0128:s01#x11)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 43 has no matching antecedent in its unit",
     "sentence_id": "usc5-552-doj:u0128:s01"
   },
   {
     "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
+    "code": "FRAGMENT",
+    "detail": "root 'A' is X, not a predicate",
     "sentence_id": "usc5-552-doj:u0129:s00"
   },
   {
@@ -2638,22 +1520,6 @@
     "code": "NO_EVENT",
     "detail": "no event was compiled from this sentence",
     "sentence_id": "usc5-552-doj:u0130:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0131:s00#e13,usc5-552-doj:u0131:s00#x12)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0131:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0131:s00#e50,usc5-552-doj:u0131:s00#x48)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'court' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0131:s00"
   },
   {
     "atom_ids": [
@@ -2670,14 +1536,6 @@
     "sentence_id": "usc5-552-doj:u0131:s00"
   },
   {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0132:s00#e36,usc5-552-doj:u0132:s00#x33)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'request' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0132:s00"
-  },
-  {
     "atom_ids": [],
     "code": "FRAGMENT",
     "detail": "root 'C' is X, not a predicate",
@@ -2685,11 +1543,11 @@
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0133:s00#e22,usc5-552-doj:u0133:s00#x21)"
+      "patient(usc5-552-doj:u0132:s00#e36,usc5-552-doj:u0132:s00#x31)"
     ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0133:s00"
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 31 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0132:s00"
   },
   {
     "atom_ids": [],
@@ -2698,32 +1556,48 @@
     "sentence_id": "usc5-552-doj:u0133:s00"
   },
   {
+    "atom_ids": [
+      "patient(usc5-552-doj:u0133:s00#e22,usc5-552-doj:u0133:s00#x19)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 19 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0133:s00"
+  },
+  {
     "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
+    "code": "FRAGMENT",
+    "detail": "root 'E' is PROPN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0134:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0134:s00#e29,usc5-552-doj:u0134:s00#x25)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 25 has no matching antecedent in its unit",
     "sentence_id": "usc5-552-doj:u0134:s00"
   },
   {
     "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
+    "code": "FRAGMENT",
+    "detail": "root 'F' is PROPN, not a predicate",
     "sentence_id": "usc5-552-doj:u0135:s00"
   },
   {
     "atom_ids": [
-      "agent(usc5-552-doj:u0136:s00#e13,usc5-552-doj:u0136:s00#x11)"
+      "theme(usc5-552-doj:u0135:s00#e26,usc5-552-doj:u0135:s00#x22)"
     ],
     "code": "UNRESOLVED_PRONOUN",
-    "detail": "'that' at token 11 has no matching antecedent in its unit",
-    "sentence_id": "usc5-552-doj:u0136:s00"
+    "detail": "'which' at token 22 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0135:s00"
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0137:s00#e15,usc5-552-doj:u0137:s00#x13)"
+      "theme(usc5-552-doj:u0136:s00#e13,usc5-552-doj:u0136:s00#x2)"
     ],
     "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0137:s00"
+    "detail": "subject 'g' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "usc5-552-doj:u0136:s00"
   },
   {
     "atom_ids": [],
@@ -2733,11 +1607,11 @@
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0138:s00#e15,usc5-552-doj:u0138:s00#x13)"
+      "theme(usc5-552-doj:u0137:s00#e15,usc5-552-doj:u0137:s00#x11)"
     ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0138:s00"
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 11 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0137:s00"
   },
   {
     "atom_ids": [],
@@ -2747,11 +1621,11 @@
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0139:s00#e15,usc5-552-doj:u0139:s00#x13)"
+      "theme(usc5-552-doj:u0138:s00#e15,usc5-552-doj:u0138:s00#x11)"
     ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0139:s00"
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 11 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0138:s00"
   },
   {
     "atom_ids": [],
@@ -2761,11 +1635,11 @@
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0140:s00#e15,usc5-552-doj:u0140:s00#x13)"
+      "theme(usc5-552-doj:u0139:s00#e15,usc5-552-doj:u0139:s00#x11)"
     ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0140:s00"
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 11 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0139:s00"
   },
   {
     "atom_ids": [],
@@ -2774,9 +1648,17 @@
     "sentence_id": "usc5-552-doj:u0140:s00"
   },
   {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0140:s00#e15,usc5-552-doj:u0140:s00#x11)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 11 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0140:s00"
+  },
+  {
     "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
+    "code": "FRAGMENT",
+    "detail": "root 'number' is NOUN, not a predicate",
     "sentence_id": "usc5-552-doj:u0141:s00"
   },
   {
@@ -2799,6 +1681,14 @@
     ],
     "code": "UNRESOLVED_PRONOUN",
     "detail": "'I' at token 2 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0142:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(usc5-552-doj:u0142:s00#e29,usc5-552-doj:u0142:s00#x24)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 24 has no matching antecedent in its unit",
     "sentence_id": "usc5-552-doj:u0142:s00"
   },
   {
@@ -2831,14 +1721,46 @@
   },
   {
     "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
+    "code": "FRAGMENT",
+    "detail": "root 'L' is PROPN, not a predicate",
+    "sentence_id": "usc5-552-doj:u0145:s00"
+  },
+  {
+    "atom_ids": [
+      "patient(usc5-552-doj:u0145:s00#e12,usc5-552-doj:u0145:s00#x10)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 10 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0145:s00"
+  },
+  {
+    "atom_ids": [
+      "patient(usc5-552-doj:u0145:s00#e14,usc5-552-doj:u0145:s00#x10)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 10 has no matching antecedent in its unit",
     "sentence_id": "usc5-552-doj:u0145:s00"
   },
   {
     "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
+    "code": "FRAGMENT",
+    "detail": "root 'M' is X, not a predicate",
+    "sentence_id": "usc5-552-doj:u0146:s00"
+  },
+  {
+    "atom_ids": [
+      "patient(usc5-552-doj:u0146:s00#e12,usc5-552-doj:u0146:s00#x10)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 10 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0146:s00"
+  },
+  {
+    "atom_ids": [
+      "patient(usc5-552-doj:u0146:s00#e14,usc5-552-doj:u0146:s00#x10)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 10 has no matching antecedent in its unit",
     "sentence_id": "usc5-552-doj:u0146:s00"
   },
   {
@@ -2849,17 +1771,9 @@
   },
   {
     "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
+    "code": "FRAGMENT",
+    "detail": "root 'number' is NOUN, not a predicate",
     "sentence_id": "usc5-552-doj:u0148:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0149:s00#e10,usc5-552-doj:u0149:s00#x9)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0149:s00"
   },
   {
     "atom_ids": [],
@@ -2874,33 +1788,27 @@
     "sentence_id": "usc5-552-doj:u0150:s00"
   },
   {
-    "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
-    "sentence_id": "usc5-552-doj:u0151:s00"
+    "atom_ids": [
+      "patient(usc5-552-doj:u0150:s00#e10,usc5-552-doj:u0150:s00#x8)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 8 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0150:s00"
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0152:s00#e7,usc5-552-doj:u0152:s00#x5)"
+      "patient(usc5-552-doj:u0150:s00#e14,usc5-552-doj:u0150:s00#x8)"
     ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0152:s00"
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 8 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0150:s00"
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0152:s01#e7,usc5-552-doj:u0152:s01#x5)"
+      "theme(usc5-552-doj:u0152:s01#e32,usc5-552-doj:u0152:s01#x11)"
     ],
     "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0152:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0152:s01#e32,usc5-552-doj:u0152:s01#x5)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "detail": "subject 'data' is never the agent of a transitive event in the corpus; clingo routed it to theme",
     "sentence_id": "usc5-552-doj:u0152:s01"
   },
   {
@@ -2917,41 +1825,17 @@
   },
   {
     "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
+    "code": "FRAGMENT",
+    "detail": "root 'C' is X, not a predicate",
     "sentence_id": "usc5-552-doj:u0155:s00"
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0156:s00#e12,usc5-552-doj:u0156:s00#x5)"
+      "patient(usc5-552-doj:u0155:s00#e10,usc5-552-doj:u0155:s00#x7)"
     ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'Attorney' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0156:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0156:s01#e9,usc5-552-doj:u0156:s01#x2)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'Attorney' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0156:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0156:s01#e13,usc5-552-doj:u0156:s01#x2)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'Attorney' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0156:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0156:s01#e33,usc5-552-doj:u0156:s01#x2)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'Attorney' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0156:s01"
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 7 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0155:s00"
   },
   {
     "atom_ids": [
@@ -2960,46 +1844,6 @@
     "code": "ANIMACY_BY_VERB_SELECTION",
     "detail": "subject 'report' is never the agent of a transitive event in the corpus; clingo routed it to theme",
     "sentence_id": "usc5-552-doj:u0156:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0157:s00#e26,usc5-552-doj:u0157:s00#x5)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'Attorney' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0157:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0157:s00#e47,usc5-552-doj:u0157:s00#x5)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'Attorney' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0157:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0157:s00#e57,usc5-552-doj:u0157:s00#x5)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'Attorney' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0157:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0157:s00#e60,usc5-552-doj:u0157:s00#x5)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'Attorney' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0157:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0158:s00#e15,usc5-552-doj:u0158:s00#x8)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'Attorney' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0158:s00"
   },
   {
     "atom_ids": [
@@ -3093,14 +1937,6 @@
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0165:s00#e12,usc5-552-doj:u0165:s00#x5)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'Attorney' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0165:s00"
-  },
-  {
-    "atom_ids": [
       "theme(usc5-552-doj:u0166:s00#e6,usc5-552-doj:u0166:s00#x5)"
     ],
     "code": "ANIMACY_BY_VERB_SELECTION",
@@ -3135,8 +1971,16 @@
   },
   {
     "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
+    "code": "FRAGMENT",
+    "detail": "root 'III' is X, not a predicate",
+    "sentence_id": "usc5-552-doj:u0170:s00"
+  },
+  {
+    "atom_ids": [
+      "patient(usc5-552-doj:u0170:s00#e10,usc5-552-doj:u0170:s00#x7)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 7 has no matching antecedent in its unit",
     "sentence_id": "usc5-552-doj:u0170:s00"
   },
   {
@@ -3150,14 +1994,6 @@
     "code": "NO_EVENT",
     "detail": "no event was compiled from this sentence",
     "sentence_id": "usc5-552-doj:u0171:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0172:s00#e18,usc5-552-doj:u0172:s00#x5)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0172:s00"
   },
   {
     "atom_ids": [],
@@ -3195,30 +2031,6 @@
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0176:s00#e10,usc5-552-doj:u0176:s00#x5)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'head' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0176:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0176:s00#e12,usc5-552-doj:u0176:s00#x5)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'head' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0176:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0176:s00#e46,usc5-552-doj:u0176:s00#x5)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'head' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0176:s00"
-  },
-  {
-    "atom_ids": [
       "theme(usc5-552-doj:u0177:s00#e2,usc5-552-doj:u0177:s00#x5)"
     ],
     "code": "ANIMACY_BY_VERB_SELECTION",
@@ -3238,40 +2050,18 @@
     "sentence_id": "usc5-552-doj:u0178:s00"
   },
   {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0179:s00#e20,usc5-552-doj:u0179:s00#x5)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'handbook' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0179:s00"
-  },
-  {
     "atom_ids": [],
     "code": "NO_EVENT",
     "detail": "no event was compiled from this sentence",
     "sentence_id": "usc5-552-doj:u0180:s00"
   },
   {
-    "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
+    "atom_ids": [
+      "patient(usc5-552-doj:u0180:s01#e3,usc5-552-doj:u0180:s01#x1)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'There' at token 1 has no matching antecedent in its unit",
     "sentence_id": "usc5-552-doj:u0180:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0180:s02#e9,usc5-552-doj:u0180:s02#x2)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'head' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0180:s02"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0181:s00#e10,usc5-552-doj:u0181:s00#x5)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'Office' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0181:s00"
   },
   {
     "atom_ids": [],
@@ -3286,33 +2076,11 @@
     "sentence_id": "usc5-552-doj:u0183:s00"
   },
   {
-    "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
-    "sentence_id": "usc5-552-doj:u0184:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0185:s00#e11,usc5-552-doj:u0185:s00#x5)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'Office' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0185:s00"
-  },
-  {
     "atom_ids": [
       "theme(usc5-552-doj:u0186:s00#e23,usc5-552-doj:u0186:s00#x5)"
     ],
     "code": "ANIMACY_BY_VERB_SELECTION",
     "detail": "subject 'a' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0186:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0186:s00#e23,usc5-552-doj:u0186:s00#x14)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'director' is never the agent of a transitive event in the corpus; clingo routed it to theme",
     "sentence_id": "usc5-552-doj:u0186:s00"
   },
   {
@@ -3363,30 +2131,6 @@
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0191:s01#e10,usc5-552-doj:u0191:s01#x4)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'recommendation' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0191:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0192:s00#e14,usc5-552-doj:u0192:s00#x5)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'director' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0192:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0193:s00#e82,usc5-552-doj:u0193:s00#x81)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'submission' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0193:s00"
-  },
-  {
-    "atom_ids": [
       "theme(usc5-552-doj:u0193:s00#e89,usc5-552-doj:u0193:s00#x88)"
     ],
     "code": "ANIMACY_BY_VERB_SELECTION",
@@ -3403,64 +2147,16 @@
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0194:s00#e15,usc5-552-doj:u0194:s00#x5)"
+      "theme(usc5-552-doj:u0195:s00#e22,usc5-552-doj:u0195:s00#x19)"
     ],
     "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'director' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0194:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0195:s00#e17,usc5-552-doj:u0195:s00#x11)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'Office' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "detail": "subject 'meeting' is never the agent of a transitive event in the corpus; clingo routed it to theme",
     "sentence_id": "usc5-552-doj:u0195:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0195:s00#e36,usc5-552-doj:u0195:s00#x11)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'Office' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0195:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0195:s00#e22,usc5-552-doj:u0195:s00#x11)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'Office' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0195:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0196:s00#e9,usc5-552-doj:u0196:s00#x7)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'Office' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0196:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0197:s00#e10,usc5-552-doj:u0197:s00#x8)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'agency' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0197:s00"
   },
   {
     "atom_ids": [],
     "code": "FRAGMENT",
     "detail": "root 'j' is PROPN, not a predicate",
-    "sentence_id": "usc5-552-doj:u0197:s00"
-  },
-  {
-    "atom_ids": [
-      "agent(usc5-552-doj:u0197:s00#e20,usc5-552-doj:u0197:s00#x15)"
-    ],
-    "code": "UNRESOLVED_PRONOUN",
-    "detail": "'who' at token 15 has no matching antecedent in its unit",
     "sentence_id": "usc5-552-doj:u0197:s00"
   },
   {
@@ -3479,38 +2175,8 @@
   },
   {
     "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
-    "sentence_id": "usc5-552-doj:u0199:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0200:s00#e33,usc5-552-doj:u0200:s00#x30)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'Attorney' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0200:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0200:s00#e33,usc5-552-doj:u0200:s00#x5)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'implementation' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0200:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0201:s00#e26,usc5-552-doj:u0201:s00#x12)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'adjustment' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0201:s00"
-  },
-  {
-    "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
+    "code": "FRAGMENT",
+    "detail": "root 'D' is PROPN, not a predicate",
     "sentence_id": "usc5-552-doj:u0202:s00"
   },
   {
@@ -3526,14 +2192,6 @@
     "code": "FRAGMENT",
     "detail": "root 'E' is PROPN, not a predicate",
     "sentence_id": "usc5-552-doj:u0203:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0204:s00#e4,usc5-552-doj:u0204:s00#x2)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'f' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0204:s00"
   },
   {
     "atom_ids": [
@@ -3600,16 +2258,12 @@
     "sentence_id": "usc5-552-doj:u0214:s00"
   },
   {
-    "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
+    "atom_ids": [
+      "patient(usc5-552-doj:u0214:s01#e3,usc5-552-doj:u0214:s01#x1)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'There' at token 1 has no matching antecedent in its unit",
     "sentence_id": "usc5-552-doj:u0214:s01"
-  },
-  {
-    "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
-    "sentence_id": "usc5-552-doj:u0215:s00"
   },
   {
     "atom_ids": [],
@@ -3648,30 +2302,6 @@
     "sentence_id": "usc5-552-doj:u0220:s01"
   },
   {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0221:s00#e31,usc5-552-doj:u0221:s00#x5)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'director' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0221:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0222:s00#e10,usc5-552-doj:u0222:s00#x5)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'administrator' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0222:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0223:s00#e13,usc5-552-doj:u0223:s00#x8)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'duty' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0223:s00"
-  },
-  {
     "atom_ids": [],
     "code": "FRAGMENT",
     "detail": "root 'A' is PROPN, not a predicate",
@@ -3679,8 +2309,8 @@
   },
   {
     "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
+    "code": "FRAGMENT",
+    "detail": "root 'recommendations' is NOUN, not a predicate",
     "sentence_id": "usc5-552-doj:u0224:s00"
   },
   {
@@ -3707,53 +2337,7 @@
     "atom_ids": [],
     "code": "NO_EVENT",
     "detail": "no event was compiled from this sentence",
-    "sentence_id": "usc5-552-doj:u0227:s01"
-  },
-  {
-    "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
     "sentence_id": "usc5-552-doj:u0228:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0228:s01#e15,usc5-552-doj:u0228:s01#x13)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'Council' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0228:s01"
-  },
-  {
-    "atom_ids": [
-      "agent(usc5-552-doj:u0228:s01#e26,usc5-552-doj:u0228:s01#x25)"
-    ],
-    "code": "UNRESOLVED_PRONOUN",
-    "detail": "'who' at token 25 has no matching antecedent in its unit",
-    "sentence_id": "usc5-552-doj:u0228:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0229:s00#e10,usc5-552-doj:u0229:s00#x8)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'Council' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0229:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0229:s00#e24,usc5-552-doj:u0229:s00#x23)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'Council' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0229:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0229:s00#e36,usc5-552-doj:u0229:s00#x23)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'Council' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0229:s00"
   },
   {
     "atom_ids": [
@@ -3771,25 +2355,11 @@
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0230:s00#e13,usc5-552-doj:u0230:s00#x11)"
+      "theme(usc5-552-doj:u0230:s00#e19,usc5-552-doj:u0230:s00#x15)"
     ],
     "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'Council' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "detail": "subject 'meeting' is never the agent of a transitive event in the corpus; clingo routed it to theme",
     "sentence_id": "usc5-552-doj:u0230:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0230:s00#e19,usc5-552-doj:u0230:s00#x11)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'Council' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0230:s00"
-  },
-  {
-    "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
-    "sentence_id": "usc5-552-doj:u0231:s00"
   },
   {
     "atom_ids": [],
@@ -3798,9 +2368,19 @@
     "sentence_id": "usc5-552-doj:u0232:s00"
   },
   {
-    "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
+    "atom_ids": [
+      "patient(usc5-552-doj:u0232:s01#e35,usc5-552-doj:u0232:s01#x33)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 33 has no matching antecedent in its unit",
+    "sentence_id": "usc5-552-doj:u0232:s01"
+  },
+  {
+    "atom_ids": [
+      "patient(usc5-552-doj:u0232:s01#e47,usc5-552-doj:u0232:s01#x33)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 33 has no matching antecedent in its unit",
     "sentence_id": "usc5-552-doj:u0232:s01"
   },
   {
@@ -3810,44 +2390,6 @@
     "code": "ANIMACY_BY_VERB_SELECTION",
     "detail": "subject 'e' is never the agent of a transitive event in the corpus; clingo routed it to theme",
     "sentence_id": "usc5-552-doj:u0233:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0233:s00#e14,usc5-552-doj:u0233:s00#x2)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'e' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0233:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0233:s00#e17,usc5-552-doj:u0233:s00#x2)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'e' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0233:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0233:s00#e23,usc5-552-doj:u0233:s00#x2)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'e' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0233:s00"
-  },
-  {
-    "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
-    "sentence_id": "usc5-552-doj:u0233:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0234:s00#e37,usc5-552-doj:u0234:s00#x35)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'requester' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0234:s00"
   },
   {
     "atom_ids": [
@@ -3873,27 +2415,19 @@
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0235:s01#e18,usc5-552-doj:u0235:s01#x2)"
+      "agent(usc5-552-doj:u0235:s01#e28,usc5-552-doj:u0235:s01#x27)"
     ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'director' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 27 has no matching antecedent in its unit",
     "sentence_id": "usc5-552-doj:u0235:s01"
   },
   {
     "atom_ids": [
-      "theme(usc5-552-doj:u0235:s01#e28,usc5-552-doj:u0235:s01#x2)"
+      "agent(usc5-552-doj:u0235:s01#e35,usc5-552-doj:u0235:s01#x27)"
     ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'director' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 27 has no matching antecedent in its unit",
     "sentence_id": "usc5-552-doj:u0235:s01"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0235:s02#e19,usc5-552-doj:u0235:s02#x9)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'Director' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0235:s02"
   },
   {
     "atom_ids": [
@@ -3902,19 +2436,5 @@
     "code": "ANIMACY_BY_VERB_SELECTION",
     "detail": "subject 'portal' is never the agent of a transitive event in the corpus; clingo routed it to theme",
     "sentence_id": "usc5-552-doj:u0235:s02"
-  },
-  {
-    "atom_ids": [],
-    "code": "NO_EVENT",
-    "detail": "no event was compiled from this sentence",
-    "sentence_id": "usc5-552-doj:u0236:s00"
-  },
-  {
-    "atom_ids": [
-      "theme(usc5-552-doj:u0236:s01#e11,usc5-552-doj:u0236:s01#x2)"
-    ],
-    "code": "ANIMACY_BY_VERB_SELECTION",
-    "detail": "subject 'director' is never the agent of a transitive event in the corpus; clingo routed it to theme",
-    "sentence_id": "usc5-552-doj:u0236:s01"
   }
 ]

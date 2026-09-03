@@ -8,7 +8,7 @@ dependencies = [
   "pdfplumber==0.11.10",
   "ufal.udpipe==1.4.0.1",
   "z3-solver==5.1.0.0",
-  "networkx==3.6.1",
+  "networkx==2.7.1",
   "pyyaml==6.0.2",
   "clingo==5.8.2",
   "clorm==1.6.3",

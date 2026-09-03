@@ -5,8 +5,11 @@ The predicate-argument structure of each sentence is extracted by PredPatt
 model. PredPatt identifies the predicates and their arguments, and handles the
 hard grammar (coordination, control, relative clauses, embedded predicates).
 This module does not re-implement that; it calls PredPatt over the UDPipe
-parse and projects PredPatt's output onto the seven predicates through a fixed
-table over the closed inventory of Universal Dependencies relations:
+parse, with PredPatt's Universal Dependencies v2 relation table selected
+(option ud="2.0"; the default is the v1 table, whose names "dobj",
+"nsubjpass", and "nmod" never occur in a v2 parse), and projects PredPatt's
+output onto the seven predicates through a fixed table over the closed
+inventory of Universal Dependencies relations:
 
     event(E, lemma)     a PredPatt predicate; E is its root token, lemma its lemma
     agent(E, X)         an argument whose root relation is a subject (nsubj, csubj)
@@ -14,7 +17,7 @@ table over the closed inventory of Universal Dependencies relations:
     patient(E, X)       an argument whose root relation is an object (obj) or a
                         passive subject (nsubj:pass)
     theme(E, X)         an argument whose root relation is an indirect object
-                        (iobj) or a non-temporal oblique (obl)
+                        (iobj) or an oblique (obl) whose case is not temporal
     obligatory(E)       the predicate root has the auxiliary "shall" or "must"
     negated(E)          the predicate root has "not"/"never", or its subject "no"
     precedes(E1, E2)    a temporal case ("after") or mark orders two events; the
@@ -51,13 +54,14 @@ def _x(sid: str, tid: int) -> str:
 
 @lru_cache(maxsize=4096)
 def _predpatt(conllu: str) -> Any:
-    from predpatt import PredPatt, load_conllu
+    from predpatt import PredPatt, PredPattOpts, load_conllu
+    from predpatt.util.ud import dep_v2
 
     parsed = list(load_conllu(conllu))
     if not parsed:
         return None
     _, ud = parsed[0]
-    return PredPatt(ud)
+    return PredPatt(ud, opts=PredPattOpts(ud=dep_v2.VERSION))
 
 
 def _minimal_conllu(ps: ParsedSentence) -> str:
@@ -88,6 +92,14 @@ def _atom(pred: str, args: tuple[str, ...], ps: ParsedSentence, tokens: tuple[in
 
 def _children(ps: ParsedSentence, head_id: int) -> list[Token]:
     return sorted((t for t in ps.tokens if t.head == head_id), key=lambda t: t.id)
+
+
+def _case_tokens(ps: ParsedSentence, head_id: int) -> list[Token]:
+    return [d for d in _children(ps, head_id) if d.deprel == "case"]
+
+
+def _is_temporal_anchor(ps: ParsedSentence, tid: int) -> bool:
+    return bool({d.lemma.lower() for d in _case_tokens(ps, tid)} & (AFTER | BEFORE))
 
 
 def _arg_predicate(gov_rel: str) -> str | None:
@@ -130,6 +142,8 @@ def compile_atoms(parsed: list[ParsedSentence]) -> list[Atom]:
                 kind = _arg_predicate(arg.root.gov_rel)
                 if kind is None:
                     continue
+                if kind == "theme" and _base_rel(arg.root.gov_rel) == "obl" and _is_temporal_anchor(ps, arg_id):
+                    continue  # a temporal anchor is compiled below as an event with a precedes atom
                 atoms.append(_atom(kind, (_e(sid, root_id), _x(sid, arg_id)), ps, (root_id, arg_id)))
 
         # modality, negation, and temporal precedence over the UD children of each predicate root
@@ -143,7 +157,7 @@ def compile_atoms(parsed: list[ParsedSentence]) -> list[Atom]:
                 elif base == "advmod" and low in NEGATORS:
                     atoms.append(_atom("negated", (E,), ps, (root_id, c.id)))
                 elif base == "obl":
-                    cases = [d for d in _children(ps, c.id) if d.deprel == "case"]
+                    cases = _case_tokens(ps, c.id)
                     case_lemmas = {d.lemma.lower() for d in cases}
                     if case_lemmas & AFTER or case_lemmas & BEFORE:
                         anchor = _e(sid, c.id)
