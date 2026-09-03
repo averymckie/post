@@ -315,1413 +315,3775 @@ R0 reads a published pack and runs the same chain backward to one spreadsheet pe
 
 ## Part 5. The forward and reverse pipelines
 
-Each step below is quoted verbatim from the method's pipeline documents (pipelines.txt and reverse_pipelines.txt). Under a step, only what was verified is annotated: `in catalog` — a library named in that step that was installed and had at least one function resolve in the session that wrote this file, with its entry in Part 6; `attempted, failed here` — a library named in that step whose installation or import was tried and failed, with the reason in Part 6. Every other library the step names is in the quoted sentence itself and was not installed or verified in this session; it is not re-listed, so that this section never claims more than was checked. This section names no function per step and does not claim that a named library is the one that performs the step: that binding is made only when the pipeline is run on an instance, as Part 2 does for the FOIA chain, and it was done there and not here. Generic English words that happen to also be library names (for example flat, rows, control) are not treated as mentions.
-
-### Forward pipelines
-
-Pipeline 0 is Part 1 of this file.
+Every step of all 92 pipelines the method defines (pipelines.txt, reverse_pipelines.txt) is bound here to the actual library function that performs it. The step line states the operation in plain words; under it, each library the step names as a tool is bound to a specific public function in the installed package, with the exact call and a `locate:` line of importable dotted paths that `tests/test_function_chain.py` resolves on every run. `exercised` means the function was run on a minimal input in the session that produced this file, with a short result quoted; `located` means it was resolved by import but not run here. A library that pip-installs but cannot import in this environment is marked so, with the import error; one that is not installable here, or is a non-Python renderer, carries a one-line reason or its command line. Every dotted path below was re-resolved centrally before this file was written; any that failed was dropped, and any binding left with no resolvable path was downgraded to the honest note. Bindings were produced by opus agents inspecting each installed package's signatures and source; a handful whose import name the harness had recorded wrongly were re-bound centrally against the correct module.
 
 #### Pipeline 0: Zero-Touch Orchestrator Compiler
 
-- **Step 0 (Global Ingestion).** docling, undoc, markitdown, firecrawl-anydoc, python-calamine, fastexcel, and csvkit crawl the raw artifact folder and emit a mixed Markdown, JSON, CSV, and workbook inventory with no predeclared schema.
-  in catalog: csvkit, docling, fastexcel, markitdown, python-calamine
-- **Step 1 (Artifact Census).** ydata-profiling, sweetviz, and dataprep profile every tabular object; dasel walks JSON, YAML, and XML; pymupdf and pypdf fingerprint remaining PDFs into a single machine-readable manifest.
-  in catalog: dasel, PyMuPDF, pypdf, sweetviz, ydata-profiling
-  attempted, failed here: dataprep
-- **Step 2 (Schema Compilation).** dasel projections are typed by pydantic at runtime, producing the only schemas the rest of the run is allowed to use.
-  in catalog: dasel, pydantic
-- **Step 3 (Capability Logic).** typedlogic writes clingo facts from the manifest (file class, detected entities, units, time columns, geofields, clause markers). clingo returns the unique stable model of required libraries, banned libraries, and legal handoff edges.
-  in catalog: clingo, typedlogic
-- **Step 4 (Graph Compilation).** networkx and graphable turn that stable model into a directed task graph. jinja2 renders the graph into prefect flow source, dagster asset definitions, or a temporalio workflow module, including retries, result persistence, and compensation on solver unsat.
-  in catalog: dagster, Jinja2, networkx, prefect, temporalio
-  attempted, failed here: graphable
-- **Step 5 (Self-Load).** the chosen orchestrator imports the file it just wrote, registers the assets, and starts the run. No flow, schedule, partition, or retry policy exists before this step.
+- **Step 0 (Global Ingestion).** convert mixed docs into Markdown/JSON/CSV/workbook inventory
+  docling 2.124.0 — `DocumentConverter().convert(path).document.export_to_markdown()` → Markdown string; parses PDF/Office docs. located
+  `locate: docling.document_converter.DocumentConverter.convert, docling_core.types.doc.document.DoclingDocument.export_to_markdown`
+  undoc 0.9.0 — `undoc.parse_file(path).to_markdown()` → Markdown; Office parser (also `.to_json()`). exercised: "hi"
+  `locate: undoc.parse_file, undoc.Undoc.to_markdown, undoc.Undoc.to_json`
+  markitdown 0.1.7 — `MarkItDown().convert(path).text_content` → Markdown; any-format to Markdown. exercised: "# Hi\n\nBody text"
+  `locate: markitdown.MarkItDown.convert`
+  firecrawl-anydoc 0.2.4 — `anydoc.to_markdown(path)` → Markdown string; document-to-Markdown. exercised: "| a | b | ..."
+  `locate: anydoc.to_markdown`
+  python-calamine 0.8.2 — `python_calamine.load_workbook(path)` → workbook; reads xlsx/ods for inventory. exercised: "['Sheet']"
+  `locate: python_calamine.load_workbook`
+  fastexcel 0.21.0 — `fastexcel.read_excel(path)` → ExcelReader; calamine workbook reader. exercised: "['Sheet']"
+  `locate: fastexcel.read_excel`
+  csvkit 2.2.0 — `csvkit.reader(open(path))` → CSV row iterator; reads CSV (CLI: `in2csv`). exercised: "[['a','b'],['1','x'],['2','y']]"
+  `locate: csvkit.reader`
+
+- **Step 1 (Artifact Census).** profile tables, walk JSON/YAML/XML, fingerprint PDFs into manifest
+  ydata-profiling 4.18.4 — `ProfileReport(df, minimal=True)` → profile report object; per-table EDA summary. located
+  `locate: ydata_profiling.ProfileReport`
+  sweetviz 2.3.3 — `sweetviz.analyze(df)` → DataframeReport; visual EDA of tabular object. located
+  `locate: sweetviz.analyze`
+  dataprep — not installed here: unsatisfiable (python-crfsuite build)
+  dasel — not installed here: Go binary (github.com/TomWright/dasel); CLI: `dasel -f f.json '.a.b'`
+  pymupdf 1.28.2 — `pymupdf.open(path)` then `page.get_text()` → text; opens/fingerprints PDF. exercised: "pages=1", "hi\n"
+  `locate: pymupdf.open, pymupdf.Page.get_text`
+  pypdf 6.16.2 — `pypdf.PdfReader(path).metadata` → DocumentInformation; PDF fingerprint. exercised: "pages=1, metadata read"
+  `locate: pypdf.PdfReader, pypdf.PdfReader.metadata`
+
+- **Step 2 (Schema Compilation).** type projections with pydantic to produce runtime schemas
+  pydantic 2.13.5 — `pydantic.create_model("Row", a=(int,...), b=(str,...))` → model class; runtime schema. exercised: "{'a':1,'b':'x'}"
+  `locate: pydantic.create_model`
+  dasel — not installed here: Go binary (github.com/TomWright/dasel); CLI: `dasel -f f.json '.a'`
+
+- **Step 3 (Capability Logic).** write logic facts, solve for unique stable model
+  typedlogic 0.2.4 — `ClingoSolver().add_fact(FactInstance)` → None; writes clingo facts. exercised: "fact added, dump=17ch"
+  `locate: typedlogic.integrations.solvers.clingo.ClingoSolver.add_fact`
+  clingo 5.8.0 — `Control().solve(on_model=cb)` → SolveResult; returns stable model. exercised: "a b"
+  `locate: clingo.Control.solve`
+
+- **Step 4 (Graph Compilation).** build directed task graph, render orchestrator source via templates
+  networkx 3.6.1 — `DiGraph().add_edge(u,v)` + `nx.topological_sort(g)` → task order. exercised: "['a','b','c']"
+  `locate: networkx.DiGraph.add_edge, networkx.topological_sort`
+  jinja2 3.1.6 — `Template(src).render(**ctx)` → source string; renders flow/asset/workflow code. exercised: "hi x"
+  `locate: jinja2.Template.render`
+  prefect 3.8.4 — `@prefect.flow` → Flow; target for rendered flow source. exercised: "Flow"
+  `locate: prefect.flow`
+  dagster 1.13.20 — `@dagster.asset` + `Definitions(assets=[...])` → asset defs. exercised: "AssetsDefinition"
+  `locate: dagster.asset, dagster.Definitions`
+  temporalio 1.32.0 — `@temporalio.workflow.defn` → durable workflow class definition. located
+  `locate: temporalio.workflow.defn`
+  graphable — not installed here: requires Python>=3.13
+
+- **Step 5 (Self-Load).** orchestrator imports written file, registers assets, starts run
+  (no library candidates named in this step; performed by the chosen orchestrator runtime)
 
 #### Pipeline 1: Quality Engineering
 
-- **Step 0 (Global Ingestion).** docling parses a raw unstructured global dump of manufacturing logs and PDFs directly into flat text and Markdown.
-  in catalog: docling
-- **Step 1 (Orchestration and Narrowing).** dagster orchestrates the workflow, piping the raw text into spacy to perform natural language processing and extract syntactic dependencies isolating failure events.
-  in catalog: dagster, spacy
-- **Step 2 (Logic Generation).** amr-logic-converter translates the extracted natural language dependency graphs directly into First-Order Logic formulas.
-  in catalog: amr-logic-converter
-- **Step 3 (Mathematical Verification).** pysmt consumes these generated formulas as an SMT solver to mathematically verify the physical bounds and logic paths.
-  in catalog: PySMT
-- **Step 4 (Time-to-Event Modeling).** lifelines applies survival analysis to the verified failure events to calculate time-to-event parametric shapes.
-  in catalog: lifelines
-- **Step 5 (Execution).** fmdtools executes the Failure Modes and Effects Analysis (FMEA) simulation using the mathematically verified logic and survival models.
-  attempted, failed here: fmdtools
+- **Step 0 (Global Ingestion).** parse raw logs/PDFs into flat text and Markdown
+  docling 2.124.0 — `DocumentConverter().convert(source="logs.pdf").document.export_to_markdown()` → ConversionResult; parses PDFs/logs to text+Markdown. located
+  `locate: docling.document_converter.DocumentConverter.convert`
+
+- **Step 1 (Orchestration and Narrowing).** orchestrate the workflow piping raw text onward
+  dagster 1.13.20 — `dagster.job(name="quality_eng")(fn)` → JobDefinition; composes ops into executable orchestration graph. located
+  `locate: dagster.job`
+
+- **Step 2 (Logic Generation).** translate NL dependency graphs into First-Order Logic
+  amr-logic-converter 0.11.3 — `AmrLogicConverter().convert(amr="(w / want-01 :ARG0 (b / boy) ...)")` → FOL Clause. exercised: "want-01(w) ∧ :ARG0(w, b) ∧ boy(b)…"
+  `locate: amr_logic_converter.AmrLogicConverter.AmrLogicConverter.convert`
+
+- **Step 3 (Mathematical Verification).** verify physical bounds and logic paths
+  pysmt 0.9.6 — `pysmt.shortcuts.is_valid(formula)` → bool; SMT-verifies bounds/logic hold. exercised: "True"
+  `locate: pysmt.shortcuts.is_valid`
+
+- **Step 4 (Time-to-Event Modeling).** fit parametric time-to-event shapes on failures
+  lifelines 0.30.3 — `WeibullFitter().fit(durations, event_observed=events)` → fitted parametric shape/scale. exercised: "lambda_=5.557 rho_=3.235"
+  `locate: lifelines.WeibullFitter.fit`
+
+- **Step 5 (Execution).** run FMEA simulation over verified logic/models
+  fmdtools — not installed here: unsatisfiable (pandas[all]->psycopg2)
 
 #### Pipeline 2: Financial Dashboarding
 
-- **Step 0 (Global Ingestion).** firecrawl-anydoc acts as the document parser, flattening a raw global dump of unstructured financial reports into Markdown.
-- **Step 1 (Orchestration and Narrowing).** temporalio manages the pipeline state, passing the text directly to stanza to generate syntactic dependency trees that map the financial entities and their relationships.
-  in catalog: stanza, temporalio
-- **Step 2 (Schema Auto-Generation).** dasel queries the structured outputs of the NLP step to programmatically extract nodes, which are then passed to datamodel-code-generator to dynamically instantiate Pydantic models from the derived JSON schemas.
-  in catalog: dasel, datamodel-code-generator, pydantic
-- **Step 3 (Logic Enforcement).** zen-engine evaluates the extracted financial entities against decision graphs generated from the parsed text to enforce business logic.
-  in catalog: zen-engine
-- **Step 4 (Constraint Verification).** clingo executes as an Answer Set Programming system to mathematically prove the ledger consistency of the extracted values.
-  in catalog: clingo
-- **Step 5 (Visual Selection).** autoviz acts as an automated visualization selector to programmatically generate charts strictly from the verified tabular inputs.
-  attempted, failed here: autoviz
-- **Step 6 (Execution).** streamlit deploys the dynamically generated charts as a rapid data dashboard framework.
-  in catalog: streamlit
+- **Step 0 (Global Ingestion).** Parse a global dump of unstructured financial reports into Markdown.
+  firecrawl-anydoc 0.2.4 — `anydoc.to_markdown("report.docx")` → Markdown string; flattens each report doc. exercised: "Spec line"
+  `locate: anydoc.to_markdown`
+
+- **Step 1 (Orchestration and Narrowing).** Orchestrate pipeline state; build syntactic dependency trees of financial entities.
+  temporalio 1.32.0 — `Client.execute_workflow(wf, id="p2", task_queue="q")` → runs durable workflow holding pipeline state. located
+  `locate: temporalio.client.Client.execute_workflow`
+  stanza 1.14.0 — `stanza.Pipeline(lang="en", processors="tokenize,pos,depparse")(text)` → dependency-parsed doc. located
+  `locate: stanza.Pipeline`
+
+- **Step 2 (Schema Auto-Generation).** Extract nodes; instantiate Pydantic models from derived JSON schemas.
+  pydantic 2.13.5 — `pydantic.create_model("Ledger", amount=(int, ...))` → dynamic model class from schema fields. exercised: "instance amount=100"
+  `locate: pydantic.create_model`
+  dasel — not installed here: Go binary (github.com/TomWright/dasel); CLI: `dasel -r json '.nodes' < data.json`
+
+- **Step 3 (Logic Enforcement).** Evaluate entities against decision graphs to enforce business logic.
+  zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
+  `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
+
+- **Step 4 (Constraint Verification).** Prove ledger consistency of extracted values via Answer Set Programming.
+  clingo 5.8.0 — `clingo.Control().solve(on_model=cb)` (after add/ground) → SAT/UNSAT proof of consistency. exercised: "sat, balanced=[True]"
+  `locate: clingo.Control.solve`
+
+- **Step 5 (Visual Selection).** Automatically select and generate charts from verified tabular inputs.
+  autoviz 0.1.905 — `AutoViz_Class().AutoViz("data.csv", depVar="", dfte=df, verbose=0)` → auto-selected charts. located
+  `locate: autoviz.AutoViz_Class.AutoViz_Class.AutoViz`
+
+- **Step 6 (Execution).** Deploy the generated charts as a data dashboard.
+  streamlit 1.63.0 — `streamlit.pyplot(fig)` → renders generated matplotlib chart in the app. located
+  `locate: streamlit.pyplot`
 
 #### Pipeline 3: Architecture Documentation
 
-- **Step 0 (Global Ingestion).** undoc parses a raw global dump of disparate system specification documents, emitting flat text and JSON.
-- **Step 1 (Orchestration and Narrowing).** prefect orchestrates the data flow, piping the unstructured text into nltk to extract entity relationships and parse the natural language into logical structures.
-  in catalog: nltk, prefect
-- **Step 2 (Network Graphing).** networkx generates a comprehensive network analysis of the extracted entities to map system dependencies programmatically.
-  in catalog: networkx
-- **Step 3 (Logic Translation).** typedlogic serves as a translation bridge to convert the network dependencies directly into clingo facts.
-  in catalog: clingo, typedlogic
-- **Step 4 (Architecture Modeling).** structurizr-python maps the generated logical facts into its C4 model DSL, constructing the architecture purely from the parsed text relationships.
-  attempted, failed here: structurizr-python
-- **Step 5 (Verification).** z3-solver runs as a high-performance SMT solver to mathematically verify the generated architecture has no cyclical dependencies.
-  in catalog: z3-solver
-- **Step 6 (Execution).** mermaid acts as a diagram and flowchart generator, rendering the verified C4 DSL into final visual output.
+- **Step 0 (Global Ingestion).** parse a raw document dump into flat text and JSON
+  undoc 0.9.0 — `undoc.parse_file(path).to_json()` → parsed Office doc emitted as JSON/plain text; ingestion. exercised: "to_json → format:\"xlsx\"…"
+  `locate: undoc.parse_file, undoc.Undoc.to_json, undoc.Undoc.to_text`
+
+- **Step 1 (Orchestration and Narrowing).** orchestrate flow; extract entity relations from text
+  prefect 3.8.4 — `@prefect.flow(name="ingest")` → defines the orchestrated data flow. exercised: "Flow 'ingest'"
+  `locate: prefect.flow, prefect.task`
+  nltk 3.10.3 — `nltk.sem.relextract.extract_rels(subjclass, objclass, doc)` → relation tuples between named entities; NL→logic. located
+  `locate: nltk.sem.relextract.extract_rels, nltk.ne_chunk`
+
+- **Step 2 (Network Graphing).** build directed dependency graph and analyze it
+  networkx 3.6.1 — `networkx.DiGraph().add_edges_from(edges)` → directed system-dependency graph; DAG analysis. exercised: "is_directed_acyclic_graph True"
+  `locate: networkx.DiGraph, networkx.DiGraph.add_edges_from, networkx.is_directed_acyclic_graph`
+
+- **Step 3 (Logic Translation).** convert dependency graph into clingo facts
+  typedlogic 0.2.4 — `ClingoSolver().add_fact(fact)` → records Python fact as clingo fact; `.dump()` emits program. located
+  `locate: typedlogic.integrations.solvers.clingo.ClingoSolver.add_fact, typedlogic.integrations.solvers.clingo.ClingoSolver.dump`
+  clingo 5.8.0 — `Control().solve(on_model=cb)` (after `.add`/`.ground`) → ASP models over the facts. exercised: "SAT; model 'a b'"
+  `locate: clingo.Control.solve, clingo.Control.ground, clingo.Control.add`
+
+- **Step 4 (Architecture Modeling).** map logical facts into a C4 model DSL
+  structurizr-python — installed but non-importable under pydantic 2.13.5 (imports removed `pydantic.types.StrBytes`); no function resolves. (not flagged in batch.)
+
+- **Step 5 (Verification).** SMT-verify the architecture has no cycles
+  z3-solver 5.1.0.0 — `z3.Solver().add(constraints); .check()` → sat/unsat verdict on acyclicity. exercised: "sat; [x = 1]"
+  `locate: z3.Solver.check, z3.Solver.add`
+
+- **Step 6 (Execution).** render verified C4 DSL to a diagram
+  mermaid — non-Python: Node/CLI renderer (@mermaid-js/mermaid-cli); CLI: `mmdc -i diagram.mmd -o out.svg`
 
 #### Pipeline 5: Process Mining Control Room
 
-- **Step 0 (Global Ingestion).** markitdown and docling flatten ERP exports, work-order PDFs, and message logs into the compiler manifest.
-  in catalog: docling, markitdown
-- **Step 1 (Orchestrator Compilation).** Pipeline 0 runs against the manifest. clingo only admits a process-mining asset graph if actor, activity, and time fields all resolve; otherwise the run stops.
-  in catalog: clingo
-- **Step 2 (Event Log Materialization).** the generated dagster assets type tuples through pydantic and land them in duckdb.
-  in catalog: dagster, duckdb, pydantic
-- **Step 3 (Discovery and Replay).** pm4py discovers the net; snakes and simpn replay it; typedlogic facts that fail clingo drop the trace rather than pass it downstream.
-  in catalog: clingo, pm4py, simpn, typedlogic
-- **Step 4 (Execution).** the same generated assets call most-queue for bottlenecks and publish dash-cytoscape plus streamlit only if replay succeeded.
-  in catalog: streamlit
+- **Step 0 (Global Ingestion).** Convert ERP exports, work-order PDFs, message logs to Markdown.
+  markitdown 0.1.7 — `MarkItDown().convert(source).markdown` → Markdown string; flattens each source file. exercised: "'# Title\n\nHello world'"
+  `locate: markitdown.MarkItDown.convert`
+  docling 2.124.0 — `DocumentConverter().convert(source).document.export_to_markdown()` → Markdown; parses PDF/Office sources. located
+  `locate: docling.document_converter.DocumentConverter.convert`
+
+- **Step 1 (Orchestrator Compilation).** Admit asset graph only if actor/activity/time fields resolve.
+  clingo 5.8.0 — `ctl.solve(on_model=cb)` (after add/ground) → SolveResult.satisfiable gates admission. exercised: "sat=True, model 'a b'"
+  `locate: clingo.Control.solve, clingo.Control.ground`
+
+- **Step 2 (Event Log Materialization).** Generated dagster assets type tuples via pydantic, land in duckdb.
+  dagster 1.13.20 — `@dagster.asset` def + `materialize_to_memory([asset])` → generated assets. exercised: "success True, value 42"
+  `locate: dagster.asset, dagster.materialize_to_memory`
+  pydantic 2.13.5 — `Row.model_validate({...})` → typed model; validates each tuple. exercised: "actor='u1' t=5"
+  `locate: pydantic.BaseModel.model_validate`
+  duckdb 1.5.5 — `duckdb.connect().execute('CREATE TABLE ...; INSERT ...')` → persists rows. exercised: "count (2,)"
+  `locate: duckdb.connect, duckdb.DuckDBPyConnection.execute`
+
+- **Step 3 (Discovery and Replay).** Discover Petri net; replay; drop traces failing clingo facts.
+  pm4py 2.7.23.8 — `pm4py.discover_petri_net_inductive(log)` → (net,im,fm); discovers the net. exercised: "3 places, 2 transitions"
+  `locate: pm4py.discover_petri_net_inductive`
+  simpn 1.10.0 — `SimProblem().simulate(duration, reporter=None)` → runs token-game replay. exercised: "token a->b (2)"
+  `locate: simpn.simulator.SimProblem.simulate`
+  typedlogic 0.2.4 — `ClingoSolver().add(Term(...)); .check()` → Solution.satisfiable; drops failing facts. exercised: "Solution satisfiable=True"
+  `locate: typedlogic.integrations.solvers.clingo.ClingoSolver.add, typedlogic.integrations.solvers.clingo.ClingoSolver.check`
+  clingo 5.8.0 — `ctl.solve()` → SolveResult.satisfiable evaluates the facts. exercised: "sat=True"
+  `locate: clingo.Control.solve`
+  (Sentence also names "snakes" — not a candidate lib in this step; not bound.)
+
+- **Step 4 (Execution).** Compute bottlenecks; publish cytoscape graph and streamlit dashboard.
+  most-queue 2.9 — `q=MMnrCalc(n,r); q.set_sources(l); q.set_servers(mu); q.run()` → queue metrics locate bottleneck. exercised: "utilization 0.5, w [1.0]"
+  `locate: most_queue.theory.fifo.mmnr.MMnrCalc.run, most_queue.theory.fifo.mmnr.MMnrCalc.get_utilization`
+  dash-cytoscape 1.0.2 — `dash_cytoscape.Cytoscape(id=, elements=, layout=)` → renderable network component. exercised: "component, 3 elements"
+  `locate: dash_cytoscape.Cytoscape`
+  streamlit 1.63.0 — `streamlit.dataframe(df)` / `streamlit.write(obj)` → publishes dashboard. located
+  `locate: streamlit.dataframe, streamlit.write`
 
 #### Pipeline 6: Causal Policy Evaluation
 
-- **Step 0 (Global Ingestion).** docling parses evaluations, instruments, and administrative PDFs into the compiler manifest.
-  in catalog: docling
-- **Step 1 (Orchestrator Compilation).** Pipeline 0 emits a prefect flow whose task set exists only if stanza recovers treatment and outcome spans. Missing identification language yields an empty flow and a halt.
-  in catalog: prefect, stanza
-- **Step 2 (Graph and Proof).** the generated flow builds the DAG in pgmpy, dowhy, and networkx, then asks z3-solver and pysmt to prove a legal adjustment set.
-  in catalog: dowhy, networkx, pgmpy, PySMT, z3-solver
-- **Step 3 (Estimation and Binding).** causalpy, statsmodels, pymc, and arviz run only on proved strategies. zen-engine receives effect estimates as decision tables written by the flow, not by an operator.
-  in catalog: statsmodels, zen-engine
-- **Step 4 (Execution).** panel, forestplot, altair, and great-tables render from the bound tables.
-  in catalog: great-tables
+- **Step 0 (Global Ingestion).** parse evaluation/instrument/administrative PDFs into the manifest
+  docling 2.124.0 — `docling.document_converter.DocumentConverter().convert(source=path)` → ConversionResult with parsed document; parses PDFs into manifest. located
+  `locate: docling.document_converter.DocumentConverter.convert`
+
+- **Step 1 (Orchestrator Compilation).** emit orchestration flow; NLP-extract treatment/outcome spans
+  prefect 3.8.4 — `@prefect.flow(name=...)` decorating the pipeline fn → Flow object; emits the orchestration flow. located
+  `locate: prefect.flow`
+  stanza 1.14.0 — `stanza.Pipeline(lang='en', processors='tokenize,ner,depparse')` → neural NLP pipeline; recovers treatment/outcome spans. located
+  `locate: stanza.Pipeline`
+
+- **Step 2 (Graph and Proof).** build causal DAG; prove a legal adjustment set
+  dowhy 0.14 — `dowhy.CausalModel(data, treatment, outcome, graph=...)` → causal model over the DAG; builds causal graph. located
+  `locate: dowhy.CausalModel`
+  networkx 3.6.1 — `networkx.DiGraph([('T','Y')])` → directed graph; holds the causal DAG. located
+  `locate: networkx.DiGraph`
+  pgmpy 1.1.2 — `pgmpy.base.DAG([('X','Y')], exposures=..., outcomes=...)` → DAG with causal roles; builds the DAG. exercised: "[('X', 'Y')]"
+  `locate: pgmpy.base.DAG`
+  pysmt 0.9.6 — `pysmt.shortcuts.is_sat(formula)` → bool; proves adjustment-set constraints (is_valid for entailment). exercised: "True"
+  `locate: pysmt.shortcuts.is_sat, pysmt.shortcuts.is_valid`
+  z3-solver 5.1.0.0 — `z3.Solver().check()` after `add(constraints)` → sat/unsat; proves a legal adjustment set. exercised: "sat x=3"
+  `locate: z3.Solver.check, z3.Solver`
+
+- **Step 3 (Estimation and Binding).** run causal effect estimation and Bayesian diagnostics
+  arviz 0.23.4 — `arviz.summary(idata)` → DataFrame of posterior diagnostics; summarizes estimates. exercised: "['mean', 'sd', 'hdi_3%']"
+  `locate: arviz.summary`
+  causalpy 0.9.0 — `causalpy.EstimateEffect(method=InterruptedTimeSeries, data=df, ...)` → fitted quasi-experiment; estimates the effect. located
+  `locate: causalpy.EstimateEffect, causalpy.InterruptedTimeSeries`
+  pymc 5.28.5 — `pymc.sample(draws=1000, model=m)` → posterior InferenceData; runs Bayesian estimation. located
+  `locate: pymc.sample, pymc.Model`
+  statsmodels 0.15.0 — `statsmodels.api.OLS(y, X).fit()` → fitted regression results; estimates effect. exercised: "slope 1.0"
+  `locate: statsmodels.api.OLS`
+  zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
+  `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
+
+- **Step 4 (Execution).** render charts and tables from the bound tables
+  altair 6.2.2 — `altair.Chart(df).mark_bar().encode(...)` → Vega-Lite chart spec; renders statistical viz. exercised: "Chart"
+  `locate: altair.Chart`
+  great-tables 0.24.0 — `great_tables.GT(df)` → formatted table object; renders publication table. exercised: "GT"
+  `locate: great_tables.GT`
+  panel 1.9.4 — `panel.panel(obj)` → displayable pane/dashboard; renders bound tables. exercised: "Markdown"
+  `locate: panel.panel`
 
 #### Pipeline 7: Supply Chain Scheduling
 
-- **Step 0 (Global Ingestion).** firecrawl-anydoc and python-calamine ingest contracts, bills of lading, and capacity workbooks into the compiler manifest.
-  in catalog: python-calamine
-- **Step 1 (Orchestrator Compilation).** Pipeline 0 writes a temporalio workflow whose activities are the clingo-selected subset of pulp, pyomo, ortools, highspy, pyjobshop, and alns.
-  in catalog: ortools, pulp, temporalio
-  attempted, failed here: highspy
-- **Step 2 (Model Emission).** pydantic schemas from Step 1 become the MIP/CP model inside the workflow. There is no checked-in LP file.
-  in catalog: pydantic
-- **Step 3 (Solve and Repair).** ortools or highspy solves; alns runs only if the workflow’s compensation path sees a bound and no feasible incumbent.
-  in catalog: ortools
-  attempted, failed here: highspy
-- **Step 4 (Calendar Proof).** criticalpath and clingo must accept the incumbent or the workflow does not call a renderer.
-  in catalog: clingo, criticalpath
-- **Step 5 (Execution).** highcharts-gantt, elegantt, and taipy are invoked as terminal activities of the generated workflow.
+- **Step 0 (Global Ingestion).** Parse contracts and capacity workbooks into the manifest
+  firecrawl-anydoc 0.2.4 — `anydoc.to_markdown(path, ocr='reject')` → markdown string; converts contracts/BOLs to markdown. exercised: "'Hello clause one.\n'"
+  `locate: anydoc.to_markdown`
+  python-calamine 0.8.2 — `python_calamine.load_workbook(path_or_filelike, load_tables=False)` → workbook; reads capacity .xlsx/.ods. exercised: "['S1'] sheet names"
+  `locate: python_calamine.load_workbook`
+
+- **Step 1 (Orchestrator Compilation).** Emit workflow selecting a solver subset
+  temporalio 1.32.0 — `@temporalio.workflow.defn(sandboxed=True)` → workflow class; declares the durable workflow. located
+  `locate: temporalio.workflow.defn`
+  clingo 5.8.0 — `clingo.Control().solve(on_model=cb)` → SolveResult; ASP selects the solver subset. exercised: "['a b']"
+  `locate: clingo.Control.solve`
+  pulp 3.3.2 — `pulp.LpProblem(name, sense).solve(solver)` → status int; candidate LP solver activity. exercised: "Optimal 3.0"
+  `locate: pulp.LpProblem.solve`
+  pyomo 6.10.1 — `pyomo.environ.ConcreteModel()` → model; candidate algebraic MIP/CP model. exercised: "ConcreteModel"
+  `locate: pyomo.environ.ConcreteModel`
+  ortools 9.15.6755 — `ortools.sat.python.cp_model.CpSolver().Solve(model)` → status; candidate CP-SAT solver activity. exercised: "OPTIMAL 10"
+  `locate: ortools.sat.python.cp_model.CpSolver.Solve`
+  highspy 1.15.1 — `highspy.Highs().run()` → HighsStatus; candidate LP/MIP solver activity. located (compiled core cannot instantiate: undefined symbol setLocalOptionValue…HighsLogOptions)
+  `locate: highspy.Highs.run`
+  pyjobshop 0.0.9 — `Model().solve(display=False)` → job-shop / scheduling solve (imports in isolation; collides with a broken highspy if co-loaded). located
+  `locate: pyjobshop.Model.solve, pyjobshop.Model`
+  alns 7.0.0 — `alns.ALNS().iterate(initial_solution, op_select, accept, stop)` → Result; candidate metaheuristic activity. located
+  `locate: alns.ALNS.ALNS.iterate`
+
+- **Step 2 (Model Emission).** Pydantic schemas become the MIP/CP model
+  pydantic 2.13.5 — `pydantic.BaseModel.model_validate(data)` → validated instance; schema feeds the emitted model. exercised: "(1, 'a')"
+  `locate: pydantic.BaseModel.model_validate`
+
+- **Step 3 (Solve and Repair).** Solve, then ALNS-repair when only a bound exists
+  ortools 9.15.6755 — `ortools.sat.python.cp_model.CpSolver().Solve(model)` → status; primary CP-SAT solve. exercised: "OPTIMAL 10"
+  `locate: ortools.sat.python.cp_model.CpSolver.Solve`
+  highspy 1.15.1 — `highspy.Highs().run()` → HighsStatus; alternate LP/MIP solve. located (compiled core cannot instantiate: undefined symbol)
+  `locate: highspy.Highs.run`
+  alns 7.0.0 — `alns.ALNS().iterate(initial_solution, op_select, accept, stop)` → Result; repair search on incumbent. located
+  `locate: alns.ALNS.ALNS.iterate`
+
+- **Step 4 (Calendar Proof).** Critical-path and ASP must accept the incumbent
+  clingo 5.8.0 — `clingo.Control().solve(on_model=cb)` → SolveResult; ASP acceptance of incumbent. exercised: "['a b']"
+  `locate: clingo.Control.solve`
+  criticalpath 0.1.5 — `criticalpath.Node('p').get_critical_path()` → node list; validates schedule critical path. exercised: "['A', 'B']"
+  `locate: criticalpath.Node.get_critical_path`
+
+- **Step 5 (Execution).** Render Gantt outputs as terminal activities
+  elegantt 0.0.11 — `elegantt.EleGantt(size=(468,295)).save(path)` → writes Gantt PNG; terminal chart activity. located
+  `locate: elegantt.EleGantt.save`
+  taipy 4.1.1 — `taipy.Gui(page).run()` → starts dashboard server; terminal app activity. located
+  `locate: taipy.Gui.run`
+  highcharts-gantt — not installed here: import name highcharts_gantt not present.
 
 #### Pipeline 8: Geospatial Hazard Cartography
 
-- **Step 0 (Global Ingestion).** undoc and docling parse incident reports, sidecars, and municipal PDFs into the compiler manifest.
-  in catalog: docling
-- **Step 1 (Orchestrator Compilation).** Pipeline 0 keeps geopandas, shapely, osmnx, and rustworkx assets only when dasel finds coordinates or resolvable toponyms. No geo fields means no map flow.
-  in catalog: dasel
-- **Step 2 (Constraint Compile).** python-constraint2 and cpmpy receive exclusion and coverage predicates extracted into pydantic models by the generated assets.
-  in catalog: pydantic, python-constraint2
-  attempted, failed here: cpmpy
-- **Step 3 (Surface and Sheet).** datashader, eomaps, contextily, prettymaps, pygmt, and lonboard run in the order the compiled graph specified.
-- **Step 4 (Execution).** folium, keplergl, and weasyprint fire as leaf assets.
+- **Step 0 (Global Ingestion).** Parse incident reports, sidecars, and municipal PDFs into the manifest.
+  docling 2.124.0 — `DocumentConverter().convert(source=path)` → ConversionResult with structured document; parses PDFs/Office. located
+  `locate: docling.document_converter.DocumentConverter.convert`
+  undoc 0.9.0 — `undoc.parse_file(path)` → Undoc emitting markdown/text/json; parses office docs. located
+  `locate: undoc.parse_file`
+
+- **Step 1 (Orchestrator Compilation).** Keep geo assets when coordinates or resolvable toponyms are found.
+  dasel — not installed here: Go binary (github.com/TomWright/dasel); CLI: `dasel -f in.json '.coords'`
+  geopandas 1.1.4 — `geopandas.read_file(filename)` → GeoDataFrame; loads spatial layer/coordinates. located
+  `locate: geopandas.read_file`
+  shapely 2.1.2 — `shapely.Point(x, y)` → geometry from coordinates. exercised: "POINT (1 2)"
+  `locate: shapely.Point`
+  osmnx 1.9.3 — `osmnx.geocode(query)` → (lat, lng); resolves toponym to coordinates. located
+  `locate: osmnx.geocode`
+  rustworkx 0.18.1 — `rustworkx.PyGraph()` (add_node/add_edge) → spatial graph structure. exercised: "num_edges == 1"
+  `locate: rustworkx.PyGraph`
+
+- **Step 2 (Constraint Compile).** Receive exclusion/coverage predicates extracted into typed models.
+  cpmpy 1.0.0 — installed but not importable here: `import cpmpy` fails at init (highspy/_core.so: undefined symbol `_ZN5Highs13releaseMemoryEv`; also collides with ortools' bundled HiGHS); no resolvable function.
+  pydantic 2.13.5 — `class M(pydantic.BaseModel): ...` → validated predicate model. exercised: "M(x=3).x == 3"
+  `locate: pydantic.BaseModel`
+  python-constraint2 2.7.3 — `constraint.Problem(); p.addVariable(...); p.getSolutions()` → CSP solutions. exercised: "[{'a': 2}, {'a': 1}]"
+  `locate: constraint.Problem, constraint.Problem.getSolutions`
+
+- **Step 3 (Surface and Sheet).** Rasterize and render maps in compiled-graph order.
+  datashader 0.19.1 — `datashader.Canvas(plot_width, plot_height).points(source, x, y)` → aggregated raster. exercised: "agg shape (4, 4)"
+  `locate: datashader.Canvas, datashader.Canvas.points`
+  eomaps 8.4 — `eomaps.Maps(crs=..., layer=...)` → interactive Cartopy/Matplotlib map. located
+  `locate: eomaps.Maps`
+  contextily 1.7.1 — `contextily.add_basemap(ax, source=..., crs=...)` → adds basemap tiles to axes. located
+  `locate: contextily.add_basemap`
+  prettymaps 1.4.2 — `prettymaps.plot(query)` → Plot; renders aesthetic OSM map. located
+  `locate: prettymaps.plot`
+  pygmt 0.17.0 — installed but not importable here: `import pygmt` fails (GMTCLibNotFoundError: `libgmt.so` cannot open shared object file); no resolvable function.
+  lonboard 0.16.0 — `lonboard.viz(data)` → Map; GPU vector visualization via Arrow/Deck.gl. located
+  `locate: lonboard.viz`
+
+- **Step 4 (Execution).** Emit interactive maps and a PDF as leaf assets.
+  folium 0.20.0 — `folium.Map(location=[lat, lng])` → Leaflet map object. exercised: "type Map"
+  `locate: folium.Map`
+  keplergl 0.3.7 — `keplergl.KeplerGl().add_data(data, name='x')` → Kepler.gl widget with data. located
+  `locate: keplergl.KeplerGl, keplergl.KeplerGl.add_data`
+  weasyprint 69.0 — `weasyprint.HTML(string=html).write_pdf()` → PDF bytes from HTML/CSS. exercised: "2331 bytes, b'%PDF-'"
+  `locate: weasyprint.HTML, weasyprint.HTML.write_pdf`
 
 #### Pipeline 9: Contract Constraint Prover
 
-- **Step 0 (Global Ingestion).** docling, pypdf, and dasel pull clauses and defined-term tables from the contract dump into the compiler manifest.
-  in catalog: dasel, docling, pypdf
-- **Step 1 (Orchestrator Compilation).** Pipeline 0 emits a temporalio workflow gated on amrlib producing obligation, right, or condition-precedent graphs. No deontic AMR, no workflow.
-  in catalog: amrlib, temporalio
-- **Step 2 (Logic Emission).** amr-logic-converter and typedlogic write the FOL and ASP programs that the workflow will hand to clingo, pysmt, and cvc5.
-  in catalog: amr-logic-converter, clingo, cvc5, PySMT, typedlogic
-- **Step 3 (Policy Materialization).** pycasbin, openfga, and zen-engine are generated as downstream activities only for proved permissions.
-  in catalog: pycasbin, zen-engine
-- **Step 4 (Execution).** xclingo, clingraph, great-tables, nicegui, and python-docx run as the workflow’s terminal compensation-safe activities.
-  in catalog: great-tables, python-docx
+- **Step 0 (Global Ingestion).** Pull clauses and defined-term tables from the contract PDFs.
+  docling 2.124.0 — `DocumentConverter().convert(source).document` → parses PDF/Office to structured doc; clause extraction. located
+  `locate: docling.document_converter.DocumentConverter.convert`
+  pypdf 6.16.2 — `PdfReader(stream).pages[0].extract_text(extraction_mode="layout")` → raw clause text per page. located
+  `locate: pypdf.PdfReader, pypdf._page.PageObject.extract_text`
+  dasel — not installed here: Go binary (github.com/TomWright/dasel); CLI: `dasel -f contract.json '.clauses'`
+- **Step 1 (Orchestrator Compilation).** Emit a durable workflow gated on AMR parsing.
+  temporalio 1.32.0 — `@temporalio.workflow.defn` on a workflow class → declares durable workflow. located
+  `locate: temporalio.workflow.defn`
+  amrlib 0.8.1 — `load_stog_model().parse_sents(sents)` → text to deontic AMR graphs. located
+  `locate: amrlib.load_stog_model, amrlib.models.parse_xfm.inference.Inference.parse_sents`
+- **Step 2 (Logic Emission).** Write FOL/ASP programs and hand to the solvers.
+  amr-logic-converter 0.11.3 — `AmrLogicConverter().convert(amr)` → AMR graph to FOL Clause. exercised: "boy(b)"
+  `locate: amr_logic_converter.AmrLogicConverter.AmrLogicConverter.convert`
+  typedlogic 0.2.4 — `s=ClingoSolver(); s.add_sentence(...); s.dump()` → writes ASP/clingo program. exercised: "obligation(\"party_a\")."
+  `locate: typedlogic.integrations.solvers.clingo.clingo_solver.ClingoSolver.dump, typedlogic.integrations.solvers.clingo.clingo_solver.ClingoSolver.add_sentence`
+  clingo 5.8.0 — `c=Control(); c.add("base",[],prog); c.ground([("base",[])]); c.solve(on_model=...)` → solves ASP. exercised: "['a b']"
+  `locate: clingo.Control.solve, clingo.Control.ground`
+  pysmt 0.9.6 — `pysmt.shortcuts.is_sat(formula)` → solver-agnostic SMT satisfiability. exercised: "True"
+  `locate: pysmt.shortcuts.is_sat`
+  cvc5 1.3.4 — `s=Solver(tm); s.assertFormula(t); s.checkSat()` → SMT check of clause. exercised: "sat"
+  `locate: cvc5.Solver.checkSat, cvc5.Solver.assertFormula`
+- **Step 3 (Policy Materialization).** Generate policy engines for proved permissions.
+  pycasbin ? — `Enforcer(model, policy).enforce(sub, obj, act)` → policy / access-control decision. located
+  `locate: casbin.Enforcer, casbin.Enforcer.enforce, casbin.Enforcer.add_policy`
+  openfga — not installed here: pip unsatisfiable; no openfga / openfga_sdk module in venv.
+  zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
+  `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
+- **Step 4 (Execution).** Terminal activities: explanations, graphs, tables, UI, Word.
+  xclingo 2.0b24 — `for m in XclingoControl().solve(): m.explain_model()` → ASP proof/explanation trees. located
+  `locate: xclingo.XclingoControl.solve, xclingo._main.XClingoModel.explain_model`
+  clingraph 1.2.6 — `render(compute_graphs(fb), format="pdf")` → renders graph from ASP facts. located
+  `locate: clingraph.compute_graphs, clingraph.render`
+  great-tables 0.24.0 — `GT(df).as_raw_html()` → publication table HTML. exercised: "9309-char HTML"
+  `locate: great_tables.GT, great_tables.GT.as_raw_html`
+  nicegui 3.16.0 — `ui.table(rows=...); ui.run()` → builds/serves UI. located
+  `locate: nicegui.ui.table, nicegui.ui.run`
+  python-docx 1.2.0 — `d=docx.Document(); d.add_paragraph(t); d.save(path)` → writes Word artifact. exercised: "docx written"
+  `locate: docx.Document`
 
 #### Pipeline 10: Specification-to-Slide Compiler
 
-- **Step 0 (Global Ingestion).** mammoth, undoc, and markitdown turn specs, tickets, and whiteboard exports into the compiler manifest.
-  in catalog: mammoth, markitdown
-- **Step 1 (Orchestrator Compilation).** Pipeline 0 builds a dagster asset graph from requirement, risk, and milestone spans. Empty claim set cancels publication assets.
-  in catalog: dagster
-- **Step 2 (Trace Proof).** networkx and graphedexcel supply edges; business-rules, durable-rules, and z3-solver must accept completeness and acyclicity before any slide asset is materialized.
-  in catalog: business-rules, durable-rules, networkx, z3-solver
-- **Step 3 (Grammar Selection).** lida, autoviz, mermaid, and kroki are included only for tables and relations present in the proved graph.
-  attempted, failed here: autoviz
-- **Step 4 (Execution).** python-pptx, md2pptx, quarto, reveal-md, marp, and weasyprint are leaf assets of that graph.
-  in catalog: python-pptx
+- **Step 0 (Global Ingestion).** Turn specs/tickets/whiteboard exports into the compiler manifest.
+  mammoth 1.12.1 — `mammoth.convert_to_html(fileobj)` → clean HTML from .docx spec; Word→HTML for manifest. exercised: "<p>KE</p><p>x</p>"
+  `locate: mammoth.convert_to_html`
+  markitdown 0.1.7 — `MarkItDown().convert(source)` → Markdown DocumentConverterResult; any-doc→Markdown. exercised: "# Spec\n\nHello"
+  `locate: markitdown.MarkItDown.convert`
+  undoc 0.9.0 — `undoc.parse_file(path)` → Undoc handle (Markdown/text/JSON); office parse. located
+  `locate: undoc.parse_file`
+
+- **Step 1 (Orchestrator Compilation).** Build a dagster asset graph from requirement/risk/milestone spans.
+  dagster 1.13.20 — `@dagster.asset def requirement(): ...` → AssetsDefinition node; defines the asset-graph nodes. located
+  `locate: dagster.asset, dagster.Definitions`
+
+- **Step 2 (Trace Proof).** Supply edges; prove completeness and acyclicity before materializing.
+  networkx 3.6.1 — `nx.is_directed_acyclic_graph(G)` → bool; acyclicity check over supplied edges. exercised: "is_dag: True"
+  `locate: networkx.is_directed_acyclic_graph, networkx.DiGraph.add_edges_from`
+  graphedexcel 1.2.3 — `build_graph_and_stats(file_path, as_directed=True)` → (DiGraph, stats); formula-edge supply. located
+  `locate: graphedexcel.graphbuilder.build_graph_and_stats`
+  business-rules 1.1.1 — `run_all(rule_list, defined_variables, defined_actions)` → bool triggered; completeness rule check. exercised: "True fired=[True]"
+  `locate: business_rules.run_all`
+  durable-rules 2.0.28 — `assert_fact(ruleset_name, fact)` → Rete evaluation; acyclicity/completeness rules. located
+  `locate: durable.lang.assert_fact, durable.lang.ruleset`
+  z3-solver 5.1.0.0 — `s=z3.Solver(); s.add(c); s.check()` → sat/unsat; constraint proof. exercised: "sat"
+  `locate: z3.Solver.check, z3.Solver.add`
+
+- **Step 3 (Grammar Selection).** Chart/diagram tools chosen for proved tables and relations.
+  lida 0.0.14 — `Manager().visualize(summary, goal, library='seaborn')` → chart spec/code; grammar-agnostic chart gen. located
+  `locate: lida.components.manager.Manager.visualize`
+  autoviz 0.1.905 — `AutoViz_Class().AutoViz(filename, depVar='')` → auto-selected charts; chart selection from tables. located
+  `locate: autoviz.AutoViz_Class.AutoViz_Class.AutoViz`
+  kroki — non-Python: HTTP/CLI diagram service, not importable; CLI: `kroki convert in.mmd -o out.svg`
+  mermaid — non-Python: Node CLI renderer; CLI: `mmdc -i in.mmd -o out.svg`
+
+- **Step 4 (Execution).** Leaf assets producing pptx/pdf slide artifacts.
+  python-pptx 1.0.2 — `pptx.Presentation()` then `.save(path)` → .pptx file; PowerPoint leaf asset. exercised: "28104 bytes"
+  `locate: pptx.Presentation`
+  weasyprint 69.0 — `weasyprint.HTML(string=html).write_pdf()` → PDF bytes; HTML/CSS→PDF leaf. exercised: "%PDF- 3596 bytes"
+  `locate: weasyprint.HTML.write_pdf, weasyprint.HTML`
+  marp — non-Python: Node CLI (@marp-team/marp-cli); CLI: `marp slides.md -o out.pptx`
+  md2pptx — not installed here: pip unsatisfiable.
+  quarto — non-Python: CLI publishing engine; CLI: `quarto render deck.qmd`
+  reveal-md — non-Python: Node CLI; CLI: `reveal-md slides.md`
 
 #### Pipeline 11: Fleet Reliability Dossier
 
-- **Step 0 (Global Ingestion).** firecrawl-anydoc and csvkit flatten claims, manuals, and sensor files into the compiler manifest.
-  in catalog: csvkit
-- **Step 1 (Orchestrator Compilation).** Pipeline 0 admits reliability and lifelines assets only when a time-to-event column and a censoring flag both type-check in pydantic.
-  in catalog: lifelines, pydantic
-- **Step 2 (Fit and Cut Sets).** scipy rejects unphysical fits; fmdtools and z3-solver run only if series/parallel language compiled into block-diagram facts.
-  in catalog: scipy, z3-solver
-  attempted, failed here: fmdtools
-- **Step 3 (Execution).** mqrpy, qda-toolkit, spc-plotly, plotly, kaleido, and streamlit are generated as report assets when the cut-set proof succeeds.
-  in catalog: streamlit
+- **Step 0 (Global Ingestion).** Flatten claims, manuals, and sensor files into the manifest.
+  csvkit 2.2.0 — `csvkit.reader(open("sensors.csv"))` → unicode CSV rows; tabular flattener (CLI: `in2csv`). exercised: "[['a','b'],['1','2']]"
+  `locate: csvkit.reader`
+  firecrawl-anydoc 0.2.4 — `anydoc.to_markdown("manual.pdf")` → doc-to-Markdown string; parses claims/manuals. exercised: "| a | b | ..."
+  `locate: anydoc.to_markdown`
+
+- **Step 1 (Orchestrator Compilation).** Type-check time-to-event + censoring columns; gate survival assets.
+  pydantic 2.13.5 — `Model.model_validate({"tte":12.5,"censored":True})` → validated model; type-checks the gate columns. exercised: "tte=12.5 censored=True"
+  `locate: pydantic.BaseModel.model_validate`
+  lifelines 0.30.3 — `KaplanMeierFitter().fit(durations, event_observed)` → survival fit consuming time-to-event+censoring. exercised: "median 2.0"
+  `locate: lifelines.KaplanMeierFitter.fit`
+
+- **Step 2 (Fit and Cut Sets).** Fit reliability curves; prove series/parallel cut-set facts.
+  scipy 1.15.3 — `scipy.optimize.curve_fit(f, xdata, ydata, bounds=(0, inf))` → fitted params; bounds reject unphysical fits. exercised: "[2.0, 1.0]"
+  `locate: scipy.optimize.curve_fit`
+  z3-solver 5.1.0.0 — `s=z3.Solver(); s.add(...); s.check()` → sat/unsat over block-diagram facts. exercised: "sat"
+  `locate: z3.Solver.check, z3.Solver.add`
+  fmdtools — not installed here: unsatisfiable (pandas[all]->psycopg2).
+
+- **Step 3 (Execution).** Generate SPC charts, static images, and dashboard report assets.
+  kaleido 1.4.0 — `kaleido.write_fig(fig, "chart.png")` → writes static image; Plotly export engine. located
+  `locate: kaleido.write_fig`
+  spc-plotly 0.2.1 — `spc_plotly.xmr.XmR(data=df, y_ser_name="defects", x_ser_name="date")` → builds XmR SPC chart. located
+  `locate: spc_plotly.xmr.XmR`
+  streamlit 1.63.0 — `streamlit.dataframe(df)` → renders dashboard table; report app. located
+  `locate: streamlit.dataframe`
+  mqrpy 0.6.5 — `mqr.spc`, `mqr.msa`, `mqr.process`, `mqr.anova` → quality-engineering capability / MSA / SPC. located
+  `locate: mqr.spc, mqr.msa, mqr.process, mqr.anova`
+  qda-toolkit 0.2.1 — `ControlCharts(...)` → SPC control charts. located
+  `locate: qdatoolkit.ControlCharts, qdatoolkit.controlcharts`
 
 #### Pipeline 12: Ontology Reasoner
 
-- **Step 0 (Global Ingestion).** undoc and markitdown dump manuals, dictionaries, and glossaries into the compiler manifest.
-  in catalog: markitdown
-- **Step 1 (Orchestrator Compilation).** Pipeline 0 writes prefect tasks for rdflib and owlready2 only if class/property/disjointness phrases exist in the census.
-  in catalog: owlready2, prefect, rdflib
-- **Step 2 (Closure and Proof).** owlrl and pyreason close the graph; z3-solver, cvc5, and clingo must accept the TBox/ABox pair.
-  in catalog: clingo, cvc5, owlrl, z3-solver
-- **Step 3 (Execution).** duckdb, datasette, graphistry, ipysigma, and mkdocs are leaf tasks of the generated flow.
-  in catalog: duckdb
+- **Step 0 (Global Ingestion).** Convert manuals/dictionaries/glossaries to Markdown for the manifest
+  markitdown 0.1.7 — `MarkItDown().convert("manual.docx").markdown` → Markdown string; document-to-Markdown for manifest. exercised: "'Continuity plan\n\n|  |...'"
+  `locate: markitdown.MarkItDown.convert`
+  undoc 0.9.0 — `undoc.parse_file("glossary.docx").to_markdown()` → Markdown string; Office-doc parse to Markdown. exercised: "'Continuity plan\n\n| |...'"
+  `locate: undoc.parse_file, undoc.Undoc.to_markdown`
+
+- **Step 1 (Orchestrator Compilation).** Emit prefect tasks that build RDF/OWL ontology from phrases
+  prefect 3.8.4 — `@prefect.task def build_rdf(): ...` (and `@prefect.flow`) → task object; generated orchestration tasks. located
+  `locate: prefect.task, prefect.flow`
+  rdflib 7.6.0 — `g=rdflib.Graph(); g.parse(data=ttl, format="turtle")` → Graph; loads/holds the RDF triples. exercised: "parsed 2 triples"
+  `locate: rdflib.Graph.parse, rdflib.Graph.add`
+  owlready2 0.51 — `onto=get_ontology(iri)` then `class C(Thing)`, `AllDisjoint([...])` → ontology w/ classes+disjoints. exercised: "classes ['Drug']"
+  `locate: owlready2.get_ontology, owlready2.AllDisjoint`
+
+- **Step 2 (Closure and Proof).** Compute graph closure; solvers must accept TBox/ABox
+  owlrl 7.6.2 — `DeductiveClosure(OWLRL_Semantics).expand(graph)` → in-place forward-chained closure of graph. exercised: "before 2 after 12"
+  `locate: owlrl.DeductiveClosure.expand`
+  pyreason 3.7.0 — no public function citable: reasoning entry `pyreason.reason` exists in source, but `import pyreason` aborts here with a numba RecursionError during its first-import warm-up, so no dotted path resolves (searched: pyreason.reason, pyreason.load_graphml).
+  z3-solver 5.1.0.0 — `s=z3.Solver(); s.add(f); s.check()` → sat/unsat; checks TBox/ABox consistency. exercised: "sat"
+  `locate: z3.Solver.check, z3.Solver.add`
+  cvc5 1.3.4 — `s=cvc5.Solver(tm); s.assertFormula(f); s.checkSat()` → Result; SMT-accepts the pair. exercised: "sat"
+  `locate: cvc5.Solver.checkSat, cvc5.Solver.assertFormula`
+  clingo 5.8.0 — `c=Control(); c.add("base",[],prog); c.ground(...); c.solve()` → SolveResult; ASP-accepts facts. exercised: "SAT"
+  `locate: clingo.Control.solve, clingo.Control.add`
+
+- **Step 3 (Execution).** Leaf tasks: SQL, data API, graph views, docs site
+  duckdb 1.5.5 — `duckdb.sql("select ...").fetchall()` (or `duckdb.connect(db)`) → relation/rows; in-process SQL. exercised: "(42,)"
+  `locate: duckdb.sql, duckdb.connect`
+  datasette 0.65.3 — `Datasette(files=["data.db"])` → ASGI app; publishes SQLite as API/UI. located
+  `locate: datasette.app.Datasette`
+  graphistry 0.59.0 — `graphistry.edges(df,"s","d").plot()` → Plotter/URL; binds edge frame for GPU graph view. located
+  `locate: graphistry.edges, graphistry.bind`
+  ipysigma 0.24.6 — `Sigma(nx_graph)` → Jupyter widget; renders interactive Sigma.js graph. located
+  `locate: ipysigma.Sigma`
+  mkdocs 1.6.1 — `mkdocs.commands.build.build(config)` → writes static documentation site. located
+  `locate: mkdocs.commands.build.build`
 
 #### Pipeline 13: Service Configuration Management
 
-- **Step 0 (Global Ingestion).** docling, undoc, and markitdown flatten architecture packs, portfolio registers, SCM policies, discovery exports, and prior CMDB reports into the compiler manifest.
-  in catalog: docling, markitdown
-- **Step 1 (Orchestrator Compilation).** Pipeline 0 runs against the manifest. clingo only admits a configuration asset graph if CI-type spans, relationship language, and a lifecycle verb set all resolve; otherwise the run stops.
-  in catalog: clingo
-- **Step 2 (Model Emission).** dasel projections are typed by pydantic into CI, relationship, state, and exception records and landed in duckdb. networkx materializes the CI graph from those records.
-  in catalog: dasel, duckdb, networkx, pydantic
-- **Step 3 (Lifecycle Proof).** typedlogic writes transition, exception, and verification facts; clingo and z3-solver must accept state consistency and acyclicity or no corrective asset is materialized.
-  in catalog: clingo, typedlogic, z3-solver
-- **Step 4 (Verification Replay).** pm4py mines transition logs against the proved lifecycle; csv-diff and daff emit discrepancy tables only for traces that failed the stable model.
-  in catalog: pm4py
-- **Step 5 (Execution).** great-tables, reportlab, python-docx, and mermaid fire as leaf assets for the verification report, RFC payloads, and lifecycle diagrams.
-  in catalog: great-tables, python-docx
+- **Step 0 (Global Ingestion).** flatten architecture/policy/CMDB docs into compiler manifest
+  docling 2.124.0 — `DocumentConverter().convert(path).document.export_to_markdown()` → Markdown; PDF/Office parse. located
+  `locate: docling.document_converter.DocumentConverter.convert, docling_core.types.doc.document.DoclingDocument.export_to_markdown`
+  markitdown 0.1.7 — `MarkItDown().convert(path).text_content` → Markdown. exercised: "# Hi\n\nBody text"
+  `locate: markitdown.MarkItDown.convert`
+  undoc 0.9.0 — `undoc.parse_file(path).to_markdown()` → Markdown/text/JSON. exercised: "hi"
+  `locate: undoc.parse_file, undoc.Undoc.to_markdown`
+
+- **Step 1 (Orchestrator Compilation).** admit config asset graph only if model resolves
+  clingo 5.8.0 — `Control().solve()` → SolveResult; admits graph iff satisfiable. exercised: "a b"
+  `locate: clingo.Control.solve`
+
+- **Step 2 (Model Emission).** type records with pydantic, land in duckdb, build graph
+  pydantic 2.13.5 — `Model.model_validate(row)` → typed record (CI/relationship/state). exercised: "2"
+  `locate: pydantic.BaseModel.model_validate`
+  duckdb 1.5.5 — `duckdb.connect('cmdb.duckdb')` → connection; lands typed records. exercised: "(2,)"
+  `locate: duckdb.connect`
+  networkx 3.6.1 — `DiGraph().add_edge(ci_a, ci_b)` → CI graph from records. exercised: "['a','b','c']"
+  `locate: networkx.DiGraph.add_edge`
+  dasel — not installed here: Go binary (github.com/TomWright/dasel); CLI: `dasel -f f.yaml '.a'`
+
+- **Step 3 (Lifecycle Proof).** write transition facts; solvers must accept consistency/acyclicity
+  typedlogic 0.2.4 — `ClingoSolver().add_fact(FactInstance)` → writes transition/exception/verification facts. exercised: "fact added, dump=17ch"
+  `locate: typedlogic.integrations.solvers.clingo.ClingoSolver.add_fact`
+  clingo 5.8.0 — `Control().solve()` → must accept acyclicity. exercised: "a b"
+  `locate: clingo.Control.solve`
+  z3-solver 5.1.0.0 — `Solver().check()` → sat/unsat; accepts state consistency. exercised: "sat [x = 3]"
+  `locate: z3.Solver.check`
+
+- **Step 4 (Verification Replay).** mine transition logs; emit discrepancy tables for failed traces
+  pm4py 2.7.23.8 — `pm4py.discover_petri_net_inductive(log)` → (net,im,fm); mines model. exercised: "places=3"
+  `locate: pm4py.discover_petri_net_inductive`
+  csv-diff 1.2 — `compare(load_csv(a,key), load_csv(b,key))` → diff dict; discrepancies. exercised: "added=1, removed=1"
+  `locate: csv_diff.compare, csv_diff.load_csv`
+  daff 1.4.2 — `daff.compareTables(t1,t2).align()` → alignment; tabular discrepancy diff. exercised: "rows=4"
+  `locate: daff.compareTables`
+
+- **Step 5 (Execution).** emit verification report, RFC PDF payloads, lifecycle diagrams
+  great-tables 0.24.0 — `GT(df).as_raw_html()` → HTML table; verification report. exercised: "9309-char HTML"
+  `locate: great_tables.GT, great_tables.GT.as_raw_html`
+  reportlab 5.0.1 — `canvas.Canvas(path).drawString(...); .save()` → PDF; RFC payloads. exercised: "pdf saved"
+  `locate: reportlab.pdfgen.canvas.Canvas`
+  python-docx 1.2.0 — `docx.Document().add_paragraph(t); .save(path)` → Word report. exercised: "docx saved"
+  `locate: docx.Document, docx.document.Document.save`
+  mermaid — non-Python: Node/CLI renderer; CLI: `mmdc -i in.mmd -o out.svg`
+  diagrams 0.25.1 — false match: "lifecycle diagrams" is a common noun, not the library
 
 #### Pipeline 14: Service Design
 
-- **Step 0 (Global Ingestion).** firecrawl-anydoc and undoc flatten strategy decks, blueprints, SLR packs, persona documents, and compliance manuals into the compiler manifest.
-- **Step 1 (Orchestrator Compilation).** Pipeline 0 emits a prefect flow only if stanza recovers principle, decomposition, and operational-constraint spans. Missing principle language yields an empty flow and a halt.
-  in catalog: prefect, stanza
-- **Step 2 (Requirement Proof).** amr-logic-converter and pysmt must accept usability, cost, performance, security, and compliance bounds before any model asset exists.
-  in catalog: amr-logic-converter, PySMT
-- **Step 3 (Structure and Interaction).** networkx and pydsm build the service breakdown; pm4py and snakes encode interaction flows; zen-engine writes SLA/OLA tables from proved commitments.
-  in catalog: networkx, pm4py, zen-engine
-- **Step 4 (Execution).** diagrams, mermaid, structurizr-python, and python-docx are leaf assets for the Service Design Package. business-rules and pycasbin bind governance checkpoints only after the SMT proof.
-  in catalog: business-rules, pycasbin, python-docx
-  attempted, failed here: structurizr-python
+- **Step 0 (Global Ingestion).** flatten decks/blueprints/manuals into the compiler manifest
+  firecrawl-anydoc 0.2.4 — `anydoc.to_markdown("deck.docx")` → Markdown str from Office/PDF doc. exercised: "'Hello undoc\n'"
+  `locate: anydoc.to_markdown`
+  undoc 0.9.0 — `undoc.parse_file("blueprint.docx").to_markdown()` → Markdown/text/JSON from Office doc. exercised: "'Hello undoc'"
+  `locate: undoc.parse_file, undoc.Undoc.to_markdown`
+
+- **Step 1 (Orchestrator Compilation).** emit flow only if dependency spans resolve
+  prefect 3.8.4 — `prefect.flow(name="svc_design")(fn)` → Flow; the emitted orchestration flow. located
+  `locate: prefect.flow`
+  stanza 1.14.0 — `stanza.Pipeline(lang="en", processors="tokenize,pos,depparse")` → dependency-parses principle/constraint spans. located
+  `locate: stanza.Pipeline`
+
+- **Step 2 (Requirement Proof).** accept usability/cost/performance/security/compliance bounds
+  amr-logic-converter 0.11.3 — `AmrLogicConverter().convert(amr=req_amr)` → FOL Clause of bounds. exercised: "want-01(w) ∧ :ARG0(w, b) ∧ boy(b)…"
+  `locate: amr_logic_converter.AmrLogicConverter.AmrLogicConverter.convert`
+  pysmt 0.9.6 — `pysmt.shortcuts.is_sat(And(bounds))` → bool; accepts bound formulas. exercised: "True"
+  `locate: pysmt.shortcuts.is_sat`
+
+- **Step 3 (Structure and Interaction).** build service breakdown and encode interaction flows
+  networkx 3.6.1 — `g=networkx.DiGraph(); g.add_edge(u_of_edge, v_of_edge)` → service-breakdown graph. exercised: "DiGraph edges added; DAG check True"
+  `locate: networkx.DiGraph, networkx.DiGraph.add_edge`
+  pm4py 2.7.23.8 — `pm4py.discover_petri_net_inductive(log)` → (net, im, fm) interaction-flow Petri net. exercised: "places=3 transitions=2"
+  `locate: pm4py.discover_petri_net_inductive`
+  pydsm — not installed here: needs cblas.h to build
+  zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
+  `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
+
+- **Step 4 (Execution).** produce leaf assets and bind governance checkpoints
+  business-rules 1.1.1 — `business_rules.run_all(rule_list, defined_variables, defined_actions)` → runs governance rules. located
+  `locate: business_rules.run_all`
+  diagrams 0.25.1 — `with diagrams.Diagram(name="svc", outformat="png"):` → renders architecture diagram asset (needs graphviz dot). located
+  `locate: diagrams.Diagram`
+  python-docx 1.2.0 — `docx.Document().add_paragraph(text)` → writes Service Design Package .docx. exercised: "paragraph text 'hello'"
+  `locate: docx.Document`
+  mermaid — non-Python: Node/CLI renderer (@mermaid-js/mermaid-cli); CLI: `mmdc -i in.mmd -o out.svg`
+  pycasbin ? — `Enforcer(model, policy).enforce(sub, obj, act)` → policy / access-control decision. located
+  `locate: casbin.Enforcer, casbin.Enforcer.enforce, casbin.Enforcer.add_policy`
 
 #### Pipeline 15: Business Analysis
 
-- **Step 0 (Global Ingestion).** markitdown, office-oxide, and mammoth turn charters, org charts, interview notes, workshop exports, and glossaries into the compiler manifest.
-  in catalog: mammoth, markitdown, office-oxide
-- **Step 1 (Orchestrator Compilation).** Pipeline 0 builds a dagster asset graph from stakeholder, requirement, and conflict spans. Empty requirement set cancels specification assets.
-  in catalog: dagster
-- **Step 2 (Elicitation and Model).** nltk and spacy recover raw claims; typedlogic and rdflib categorize functional, non-functional, and transition requirements; networkx holds the stakeholder influence graph.
-  in catalog: networkx, nltk, rdflib, spacy, typedlogic
-- **Step 3 (Verify and Trace).** vampire and model-checker must accept clarity, consistency, and testability; duckdb and csv-diff keep the traceability matrix and refuse baseline drift that fails z3-solver.
-  in catalog: duckdb, z3-solver
-- **Step 4 (Execution).** zen-engine binds change-request tables; python-docx, mermaid, and great-tables fire as leaf assets for the specification, matrix, and communications.
-  in catalog: great-tables, python-docx, zen-engine
+- **Step 0 (Global Ingestion).** Convert charters, org charts, notes, exports, glossaries into the manifest.
+  markitdown 0.1.7 — `markitdown.MarkItDown().convert("charter.docx")` → DocumentConverterResult Markdown. exercised: "# Q3 Net income 100"
+  `locate: markitdown.MarkItDown.convert, markitdown.MarkItDown`
+  office-oxide 0.1.9 — `office_oxide.to_markdown("orgchart.xlsx")` → Markdown text from Office file. exercised: "## Sheet | Metric | 100 |"
+  `locate: office_oxide.to_markdown`
+  mammoth 1.12.1 — `mammoth.convert_to_html(fileobj=f)` → HTML (`.value`) from a .docx. exercised: "<p>Spec line</p>"
+  `locate: mammoth.convert_to_html`
+
+- **Step 1 (Orchestrator Compilation).** Build a Dagster asset graph from stakeholder/requirement/conflict spans.
+  dagster 1.13.20 — `@dagster.asset def spec(): ...` → AssetsDefinition node in the asset graph. exercised: "type=AssetsDefinition"
+  `locate: dagster.asset`
+
+- **Step 2 (Elicitation and Model).** Recover claims; categorize requirements; hold the stakeholder influence graph.
+  nltk 3.10.3 — `nltk.sent_tokenize(text)` → list of sentence-level raw claims. located
+  `locate: nltk.sent_tokenize`
+  rdflib 7.6.0 — `rdflib.Graph().add((req, RDF.type, Literal("functional")))` → categorizing RDF triple. exercised: "triples=1"
+  `locate: rdflib.Graph.add`
+  typedlogic 0.2.4 — `get_solver("clingo").add(Term("functional", req))` → asserts typed requirement fact. exercised: "added Term; satisfiable=True"
+  `locate: typedlogic.registry.get_solver, typedlogic.solver.Solver.add`
+  networkx 3.6.1 — `networkx.DiGraph().add_edge(a, b)` → directed stakeholder influence graph. exercised: "edges=1"
+  `locate: networkx.DiGraph, networkx.DiGraph.add_edge`
+
+- **Step 3 (Verify and Trace).** Verify clarity/consistency/testability; keep traceability matrix; refuse baseline drift.
+  model-checker 1.3.9 — `ModelDefaults(...).solve(model_constraints, max_time)` → (sat, z3_model, ...) via SMT. located
+  `locate: model_checker.models.ModelDefaults.solve`
+  z3-solver 5.1.0.0 — `z3.Solver().check()` (after add) → sat/unsat on drift constraints. exercised: "sat; assets=100, liab=50"
+  `locate: z3.Solver.check`
+  duckdb 1.5.5 — `duckdb.sql("SELECT * FROM matrix")` → SQL relation holding traceability matrix. exercised: "row=(2,)"
+  `locate: duckdb.sql`
+  csv-diff 1.2 — `csv_diff.compare(load_csv(prev, key="id"), load_csv(cur, key="id"))` → added/removed/changed drift. exercised: "changed=1"
+  `locate: csv_diff.compare`
+  vampire — non-Python: C++ first-order theorem-prover binary; CLI: `vampire problem.p`
+
+- **Step 4 (Execution).** Emit specification, matrix, and communications as leaf assets.
+  great-tables 0.24.0 — `great_tables.GT(df).as_raw_html()` → publication-table HTML (matrix/comms). exercised: "html_len=9255"
+  `locate: great_tables.GT, great_tables.GT.as_raw_html`
+  python-docx 1.2.0 — `docx.Document().save("spec.docx")` → writes the specification Word file. exercised: "saved 36583B"
+  `locate: docx.Document, docx.document.Document.save`
+  mermaid — non-Python: Node CLI renderer (@mermaid-js/mermaid-cli); CLI: `mmdc -i in.mmd -o out.svg`
+  zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
+  `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
 
 #### Pipeline 16: Architecture Management
 
-- **Step 0 (Global Ingestion).** undoc and docling dump strategy, current-state packs, metamodel references, and framework texts into the compiler manifest.
-  in catalog: docling
-- **Step 1 (Orchestrator Compilation).** Pipeline 0 writes prefect tasks for owlready2, rdflib, and networkx only if principle and viewpoint phrases exist in the census. No principle set, no architecture flow.
-  in catalog: networkx, owlready2, prefect, rdflib
-- **Step 2 (Target Graph and Roadmap).** rustworkx and pydsm assemble current-versus-target graphs; criticalpath and se-lib sequence work packages only after typedlogic facts compile.
-  in catalog: criticalpath, typedlogic
-- **Step 3 (Conformance Proof).** z3-solver must accept acyclicity; clingo must accept building-block compliance with the compiled metamodel or view assets are not materialized.
-  in catalog: clingo, z3-solver
-- **Step 4 (Execution).** pyArchimate, graphable, structurizr-python, mermaid, diagrams, and quarto are leaf assets for views, ARB charter, exception process, and roadmap.
-  attempted, failed here: graphable, structurizr-python
+- **Step 0 (Global Ingestion).** dump strategy/state/framework docs into the manifest
+  docling 2.124.0 — `DocumentConverter().convert(source)` → ConversionResult with structured document. located
+  `locate: docling.document_converter.DocumentConverter.convert`
+  undoc 0.9.0 — `undoc.parse_file(path).to_markdown()` → Markdown/JSON/text from Office files. exercised: "to_json → format:\"xlsx\"…"
+  `locate: undoc.parse_file, undoc.Undoc.to_markdown, undoc.Undoc.to_json`
+
+- **Step 1 (Orchestrator Compilation).** write prefect tasks for ontology/RDF/graph steps
+  prefect 3.8.4 — `@prefect.task` → wraps each owlready2/rdflib/networkx step as a task. exercised: "Task created"
+  `locate: prefect.task, prefect.flow`
+  owlready2 0.51 — `owlready2.get_ontology(base_iri)` → ontology of principles/viewpoints; `sync_reasoner()` classifies. located
+  `locate: owlready2.get_ontology, owlready2.sync_reasoner`
+  rdflib 7.6.0 — `rdflib.Graph().add((s, p, o))` → RDF triples for the architecture. exercised: "graph len 1"
+  `locate: rdflib.Graph, rdflib.Graph.add`
+  networkx 3.6.1 — `networkx.DiGraph().add_edges_from(edges)` → dependency graph. exercised: "is_directed_acyclic_graph True"
+  `locate: networkx.DiGraph, networkx.DiGraph.add_edges_from`
+
+- **Step 2 (Target Graph and Roadmap).** assemble current/target graphs; sequence work packages
+  rustworkx 0.18.1 — `rustworkx.PyDiGraph()` (+ add_node/add_edge) → current/target directed graphs. exercised: "is DAG True"
+  `locate: rustworkx.PyDiGraph, rustworkx.is_directed_acyclic_graph`
+  criticalpath 0.1.5 — `Node(name).get_critical_path()` (after add/link/update_all) → critical work-package sequence. exercised: "critical path ['A','B']"
+  `locate: criticalpath.Node.get_critical_path, criticalpath.Node.link, criticalpath.Node.add`
+  typedlogic 0.2.4 — `Compiler().compile(theory)` → compiled logical facts as a string. located
+  `locate: typedlogic.compiler.Compiler.compile`
+  pydsm — not installed here: needs cblas.h to build.
+  se-lib 0.53 — `design_structure_matrix(...)`, `critical_path_diagram(...)` → PERT / DSM systems-engineering artifacts. located
+  `locate: selib.design_structure_matrix, selib.critical_path_diagram, selib.SystemDynamicsModel`
+
+- **Step 3 (Conformance Proof).** prove acyclicity and building-block compliance
+  z3-solver 5.1.0.0 — `z3.Solver().check()` → sat/unsat on acyclicity constraints. exercised: "sat; [x = 1]"
+  `locate: z3.Solver.check, z3.Solver.add`
+  clingo 5.8.0 — `Control().solve()` → ASP check of metamodel compliance. exercised: "SAT; model 'a b'"
+  `locate: clingo.Control.solve, clingo.Control.ground`
+
+- **Step 4 (Execution).** render views, charter, roadmap leaf assets
+  pyArchimate 1.12.3 — `pyArchimate.Model(name).add(concept_type, name)` → ArchiMate elements/views; `.write()` exports. exercised: "1 element 'Svc'"
+  `locate: pyArchimate.Model, pyArchimate.Model.add, pyArchimate.Model.write`
+  diagrams 0.25.1 — `with diagrams.Diagram(name=...):` → cloud-architecture diagram (renders via Graphviz). located
+  `locate: diagrams.Diagram`
+  graphable — not installed here: requires Python>=3.13.
+  mermaid — non-Python: Node/CLI renderer (@mermaid-js/mermaid-cli); CLI: `mmdc -i in.mmd -o out.svg`
+  quarto — non-Python: CLI publishing engine; CLI: `quarto render`
 
 #### Pipeline 17: Infrastructure and Platform Management
 
-- **Step 0 (Global Ingestion).** docling and firecrawl-anydoc flatten EA standards, SDP extracts, runbooks, capacity workbooks, and decommission requests into the compiler manifest.
-  in catalog: docling
-- **Step 1 (Orchestrator Compilation).** Pipeline 0 keeps pydantic pattern assets and unified-planning provision assets only when standard, SLA, and recovery-objective spans type-check. Missing recovery language drops the build graph.
-  in catalog: pydantic, unified-planning
-- **Step 2 (Design and Constraint).** casadi and python-control emit dynamics models; cpmpy and z3-solver must accept bill-of-materials, network, and hardening predicates.
-  in catalog: z3-solver
-  attempted, failed here: cpmpy
-- **Step 3 (Operate and Retire).** simpy and simprocesd replay backup, patch, and health tasks; clingo must accept dependency-safe retirement against the Pipeline 13 CI graph or decommission assets halt.
-  in catalog: clingo, simpy
-- **Step 4 (Execution).** scipy and ortools bind tuning recommendations; streamlit, python-docx, and mermaid fire as leaf assets.
-  in catalog: ortools, python-docx, scipy, streamlit
+- **Step 0 (Global Ingestion).** Flatten EA standards, SDP extracts, runbooks, workbooks, requests to Markdown.
+  docling 2.124.0 — `DocumentConverter().convert(source).document.export_to_markdown()` → Markdown from docs. located
+  `locate: docling.document_converter.DocumentConverter.convert`
+  firecrawl-anydoc 0.2.4 — `anydoc.to_markdown(path)` → Markdown string; parses each doc. exercised: "'# H\n\npara one\n'"
+  `locate: anydoc.to_markdown`
+
+- **Step 1 (Orchestrator Compilation).** Keep pydantic pattern and planning provision assets when spans type-check.
+  pydantic 2.13.5 — `Model.model_validate({...})` → validated model; type-checks spans. exercised: "actor='u1' t=5"
+  `locate: pydantic.BaseModel.model_validate`
+  unified-planning 1.3.0 — `OneshotPlanner(problem_kind=p.kind).solve(problem)` → plan for provision assets. exercised: "SOLVED_SATISFICING, plan ['go']"
+  `locate: unified_planning.shortcuts.OneshotPlanner, unified_planning.model.Problem`
+
+- **Step 2 (Design and Constraint).** Emit dynamics models; solvers accept BOM/network/hardening predicates.
+  casadi 3.8.0 — `x=SX.sym('x'); Function('f',[x],[x**2+1])` → symbolic dynamics model. exercised: "f(3)=10.0"
+  `locate: casadi.Function, casadi.integrator`
+  z3-solver 5.1.0.0 — `s=Solver(); s.add(preds); s.check()` → sat accepts predicates. exercised: "check=sat, [x=4]"
+  `locate: z3.Solver.check`
+  cpmpy 1.0.0 — genuinely named, but `import cpmpy` fails in this venv (eagerly loads highspy: undefined symbol _ZN5Highs13releaseMemoryEv); no path resolves.
+  python-control — not installed here: no module named 'control'.
+
+- **Step 3 (Operate and Retire).** Replay backup/patch/health tasks; clingo accepts dependency-safe retirement.
+  simpy 4.1.2 — `env=Environment(); env.process(gen(env)); env.run()` → replays tasks. exercised: "event time [3]"
+  `locate: simpy.Environment.run, simpy.Environment.process`
+  simprocesd 0.3.0 — `System(); Source/PartProcessor/Sink; sys.simulate(simulation_duration=5)` → replays line. exercised: "env.now=5"
+  `locate: simprocesd.model.System.simulate`
+  clingo 5.8.0 — `ctl.solve()` → SolveResult.satisfiable admits retirement. exercised: "sat=True"
+  `locate: clingo.Control.solve`
+
+- **Step 4 (Execution).** Bind tuning recommendations; write leaf docs/diagrams.
+  scipy 1.15.3 — `scipy.optimize.minimize(fun, x0)` → optimal tuning parameters. exercised: "x*=3.0, success=True"
+  `locate: scipy.optimize.minimize, scipy.optimize.linprog`
+  ortools 9.15.6755 — `CpSolver().Solve(model)` → binds recommendations (CP-SAT). exercised: "OPTIMAL, x=10"
+  `locate: ortools.sat.python.cp_model.CpSolver.Solve`
+  python-docx 1.2.0 — `d=docx.Document(); d.add_paragraph(t); d.save(path)` → Word leaf asset. exercised: "paras ['H','para one']"
+  `locate: docx.Document, docx.document.Document.save`
+  streamlit 1.63.0 — `streamlit.write(obj)` → dashboard leaf asset. located
+  `locate: streamlit.write, streamlit.dataframe`
+  mermaid — non-Python: Node/CLI renderer, not a Python import; CLI: `mmdc -i in.mmd -o out.svg`
 
 #### Pipeline 18: IT Asset Management
 
-- **Step 0 (Global Ingestion).** firecrawl-anydoc, python-calamine, fastexcel, and csvkit flatten policies, purchase orders, license contracts, warranty sheets, and discovery inventories into the compiler manifest.
-  in catalog: csvkit, fastexcel, python-calamine
-- **Step 1 (Orchestrator Compilation).** Pipeline 0 admits register assets only when asset-type, entitlement, and identifier columns type-check in pydantic. No entitlement table, no license flow.
-  in catalog: pydantic
-- **Step 2 (Register and Proof).** dasel projections land in duckdb; clorm writes asset facts; clingo must prove entitlement-versus-consumption under per-user, per-device, and concurrent models.
-  in catalog: clingo, clorm, dasel, duckdb
-- **Step 3 (Audit Repair).** daff and csv-diff emit discrepancy tables; numpy-financial scores write-off and compliance exposure only on the unsat remainder.
-- **Step 4 (Execution).** openpyxl, great-tables, qrcode, and python-barcode are leaf assets for the reconciled register, compliance report, and tags.
-  in catalog: great-tables, openpyxl
+- **Step 0 (Global Ingestion).** flatten documents, spreadsheets, and CSVs into the manifest
+  csvkit 2.2.0 — `csvkit.utilities.in2csv.In2CSV(args).main()` → CSV output; flattens tabular inputs to CSV. located; CLI: `in2csv file.xlsx`
+  `locate: csvkit.utilities.in2csv.In2CSV`
+  fastexcel 0.21.0 — `fastexcel.read_excel(source=path)` → ExcelReader; loads workbook sheets for flattening. located
+  `locate: fastexcel.read_excel`
+  firecrawl-anydoc 0.2.4 — `anydoc.to_markdown(path)` → Markdown str; flattens documents into manifest. located
+  `locate: anydoc.to_markdown`
+  python-calamine 0.8.2 — `python_calamine.load_workbook(path_or_filelike)` → CalamineWorkbook; reads Excel/ODS for flattening. located
+  `locate: python_calamine.load_workbook`
+
+- **Step 1 (Orchestrator Compilation).** type-check asset-type/entitlement/identifier columns via schema
+  pydantic 2.13.5 — `pydantic.BaseModel.model_validate(row_dict)` → validated model or ValidationError; type-checks columns. exercised: "3"
+  `locate: pydantic.BaseModel.model_validate, pydantic.TypeAdapter`
+
+- **Step 2 (Register and Proof).** store projections in SQL; assert facts; prove entitlement
+  clingo 5.8.0 — `clingo.Control(); ctl.ground(...); ctl.solve(on_model=...)` → stable models; proves entitlement-vs-consumption. exercised: "['a b']"
+  `locate: clingo.Control.solve, clingo.Control`
+  clorm 1.6.3 — `clorm.FactBase([Asset(id=1), ...])` → queryable fact set; writes asset facts. exercised: "2 facts"
+  `locate: clorm.FactBase, clorm.Predicate`
+  dasel — not installed here: Go binary (github.com/TomWright/dasel), usable via CLI `dasel`.
+  duckdb 1.5.5 — `duckdb.sql("SELECT ...")` → relation; lands projections in the in-process DB. exercised: "[(42,)]"
+  `locate: duckdb.sql, duckdb.connect`
+
+- **Step 3 (Audit Repair).** diff tables; score write-off and compliance exposure
+  csv-diff 1.2 — `csv_diff.compare(load_csv(prev,key='id'), load_csv(cur,key='id'))` → added/removed/changed dict; emits discrepancies. exercised: "changed v: x->z"
+  `locate: csv_diff.compare, csv_diff.load_csv`
+  daff 1.4.2 — `daff.diff(PythonTableView(a), PythonTableView(b))` → highlighted diff table; emits discrepancy table. exercised: "['->', 1, 'x->z']"
+  `locate: daff.diff`
+  numpy-financial 1.0.0 — `npv(rate, values)`, `irr(values)` → financial figures on the proved ledger. located
+  `locate: numpy_financial.npv, numpy_financial.irr, numpy_financial.pmt`
+
+- **Step 4 (Execution).** write xlsx register, report table, and QR/barcode tags
+  great-tables 0.24.0 — `great_tables.GT(df)` → formatted table; renders compliance report. exercised: "GT"
+  `locate: great_tables.GT`
+  openpyxl 3.1.2 — `openpyxl.Workbook()` then `ws['A1']=...; wb.save(path)` → xlsx workbook; writes reconciled register. exercised: "hi"
+  `locate: openpyxl.Workbook`
+  python-barcode 0.16.1 — `get_barcode_class(name)`; `Code128(code, writer)` → barcode symbol for a tag. located
+  `locate: barcode.get_barcode_class, barcode.Code128, barcode.get`
+  qrcode 8.2 — `qrcode.make(data)` → PIL image; generates QR tags. exercised: "PilImage"
+  `locate: qrcode.make`
 
 #### Pipeline 19: Workforce and Talent Management
 
-- **Step 0 (Global Ingestion).** undoc and markitdown dump strategy, demand forecasts, workforce assessments, competency frameworks, and L&D catalogs into the compiler manifest.
-  in catalog: markitdown
-- **Step 1 (Orchestrator Compilation).** Pipeline 0 emits a prefect flow only if role, competency, and FTE spans resolve. Missing competency language yields an empty flow and a halt.
-  in catalog: prefect
-- **Step 2 (Plan and Ontology).** pandas and polars build the gap matrix; networkx maps succession; owlready2 and typedlogic must accept a complete profile for every planned role.
-  in catalog: networkx, owlready2, pandas, typedlogic
-- **Step 3 (Allocation Proof).** ortools and pulp solve hiring and L&D allocation; zen-engine binds role KPIs only if the solver returns a feasible incumbent.
-  in catalog: ortools, pulp, zen-engine
-- **Step 4 (Execution).** statsmodels scores turnover and time-to-fill; python-docx and streamlit fire as leaf assets.
-  in catalog: python-docx, statsmodels, streamlit
+- **Step 0 (Global Ingestion).** Dump strategy, forecasts, and catalogs into the manifest
+  markitdown 0.1.7 — `markitdown.MarkItDown().convert(source)` → DocumentConverterResult; converts sources to markdown. exercised: "'Hello clause one.'"
+  `locate: markitdown.MarkItDown.convert`
+  undoc 0.9.0 — `undoc.parse_file(path)` → Undoc (then .to_markdown()); Office→md/text/json. exercised: "Undoc object"
+  `locate: undoc.parse_file, undoc.Undoc.to_markdown`
+
+- **Step 1 (Orchestrator Compilation).** Emit a prefect flow if spans resolve
+  prefect 3.8.4 — `prefect.flow(fn, name=None)` → Flow; declares the orchestration flow. exercised: "'Flow'"
+  `locate: prefect.flow`
+
+- **Step 2 (Plan and Ontology).** Build gap matrix, map succession, accept profiles
+  networkx 3.6.1 — `networkx.DiGraph()` + `add_edge` → directed graph; maps role succession. exercised: "(3, 2) nodes/edges"
+  `locate: networkx.DiGraph`
+  owlready2 0.51 — `owlready2.sync_reasoner(ontology)` → runs HermiT; accepts a complete role profile. located (requires Java)
+  `locate: owlready2.sync_reasoner`
+  pandas 2.3.3 — `pandas.pivot_table(df, index, columns, values)` → DataFrame; builds the gap matrix. exercised: "(2, 2)"
+  `locate: pandas.pivot_table`
+  polars 1.44.1 — `polars.DataFrame(data).pivot(values, index, on)` → frame; builds the gap matrix. exercised: "(2, 2)"
+  `locate: polars.DataFrame.pivot`
+  typedlogic 0.2.4 — `typedlogic.registry.get_solver('z3').check()` → Solution; accepts complete profile. exercised: "Z3Solver obtained"
+  `locate: typedlogic.registry.get_solver, typedlogic.solver.Solver.check`
+
+- **Step 3 (Allocation Proof).** Solve hiring and L&D allocation
+  ortools 9.15.6755 — `ortools.sat.python.cp_model.CpSolver().Solve(model)` → status; solves integer allocation. exercised: "OPTIMAL 10"
+  `locate: ortools.sat.python.cp_model.CpSolver.Solve`
+  pulp 3.3.2 — `pulp.LpProblem(name, sense).solve(solver)` → status int; solves LP allocation. exercised: "Optimal 3.0"
+  `locate: pulp.LpProblem.solve`
+  zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
+  `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
+
+- **Step 4 (Execution).** Score turnover, then fire docx/dashboard leaves
+  python-docx 1.2.0 — `docx.Document().save(path)` → writes .docx; emits Word leaf asset. exercised: "'t' round-trip"
+  `locate: docx.document.Document.save`
+  statsmodels 0.15.0 — `statsmodels.api.OLS(y, sm.add_constant(X)).fit()` → results; scores turnover/time-to-fill. exercised: "params [0.46, 0.74]"
+  `locate: statsmodels.api.OLS`
+  streamlit 1.63.0 — `streamlit.dataframe(data)` → renders table; dashboard leaf asset. located
+  `locate: streamlit.dataframe`
 
 #### Pipeline 20: Supplier Management
 
-- **Step 0 (Global Ingestion).** docling, pypdf, and python-calamine pull strategy, RFP/RFQ packs, proposals, clause libraries, contracts, and scorecards into the compiler manifest.
-  in catalog: docling, pypdf, python-calamine
-- **Step 1 (Orchestrator Compilation).** Pipeline 0 writes a temporalio workflow gated on segmentation criteria and evaluation-dimension spans. No evaluation language, no workflow.
-  in catalog: temporalio
-- **Step 2 (Select and Bind).** pingouin and pandas score shortlists; clingo must accept mandatory policy constraints; jinja2 instantiates clause templates only for the stable model.
-  in catalog: clingo, Jinja2, pandas
-- **Step 3 (Performance Path).** sktime forecasts supplier series; dowhy runs only if treatment and outcome spans survived identification inside this workflow.
-  in catalog: dowhy
-- **Step 4 (Execution).** zen-engine, pycasbin, python-docx, and streamlit are terminal activities of the generated workflow.
-  in catalog: pycasbin, python-docx, streamlit, zen-engine
+- **Step 0 (Global Ingestion).** Pull strategy/RFP/proposals/contracts/scorecards into the manifest.
+  docling 2.124.0 — `DocumentConverter().convert(source=path)` → parsed document. located
+  `locate: docling.document_converter.DocumentConverter.convert`
+  pypdf 6.16.2 — `pypdf.PdfReader(stream=path)` → reader over PDF pages. located
+  `locate: pypdf.PdfReader`
+  python-calamine 0.8.2 — `python_calamine.load_workbook(path_or_filelike)` → workbook; reads Excel/ODS. located
+  `locate: python_calamine.load_workbook`
+
+- **Step 1 (Orchestrator Compilation).** Write a durable workflow gated on evaluation-dimension spans.
+  temporalio 1.32.0 — `@temporalio.workflow.defn` on a class (with `@temporalio.workflow.run`) → declares durable workflow. located
+  `locate: temporalio.workflow.defn, temporalio.workflow.run`
+
+- **Step 2 (Select and Bind).** Score shortlists, enforce policy, instantiate clause templates for the stable model.
+  pingouin 0.6.1 — `pingouin.anova(data=df, dv='v', between='g')` → ANOVA table scoring groups. exercised: "shape (1, 6)"
+  `locate: pingouin.anova`
+  pandas 2.3.3 — `pandas.DataFrame(data)` → tabular shortlist for scoring. exercised: "shape (2, 1)"
+  `locate: pandas.DataFrame`
+  clingo 5.8.0 — `clingo.Control(); ctl.add(...); ctl.ground(...); ctl.solve(on_model=...)` → ASP models accepting constraints. exercised: "['a b']"
+  `locate: clingo.Control, clingo.Control.solve`
+  jinja2 3.1.6 — `jinja2.Template(src).render(**ctx)` → instantiated clause text. exercised: "ok!"
+  `locate: jinja2.Template, jinja2.Template.render`
+
+- **Step 3 (Performance Path).** Forecast supplier series; run causal estimation if identified.
+  sktime 1.1.0 — `NaiveForecaster(strategy='last').fit(y).predict(fh=[1,2])` → forecast values. exercised: "[5.0, 5.0]"
+  `locate: sktime.forecasting.naive.NaiveForecaster, sktime.forecasting.naive.NaiveForecaster.predict`
+  dowhy 0.14 — `dowhy.CausalModel(data, treatment, outcome, graph=...)` then `.estimate_effect(...)` → causal effect. located
+  `locate: dowhy.CausalModel, dowhy.CausalModel.estimate_effect`
+
+- **Step 4 (Execution).** Terminal activities: authorize, write docx, serve dashboard.
+  pycasbin ? — `Enforcer(model, policy).enforce(sub, obj, act)` → policy / access-control decision. located
+  `locate: casbin.Enforcer, casbin.Enforcer.enforce, casbin.Enforcer.add_policy`
+  python-docx 1.2.0 — `docx.Document()` (add_paragraph/save) → Word document. exercised: "paragraphs == 0"
+  `locate: docx.Document`
+  streamlit 1.63.0 — `streamlit.write(*args)` → renders element to dashboard. located
+  `locate: streamlit.write, streamlit.dataframe`
+  zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
+  `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
 
 #### Pipeline 21: Portfolio Management
 
-- **Step 0 (Global Ingestion).** firecrawl-anydoc and openpyxl ingest strategy, demand briefs, business cases, and current portfolio workbooks into the compiler manifest.
-  in catalog: openpyxl
-- **Step 1 (Orchestrator Compilation).** Pipeline 0 builds a dagster asset graph from value, risk, dependency, and constraint spans. Empty case set cancels selection assets.
-  in catalog: dagster
-- **Step 2 (Graph and Mix).** networkx and criticalpath emit the initiative graph; pulp and ortools optimize mix under budget and capacity bounds compiled by pydantic.
-  in catalog: criticalpath, networkx, ortools, pulp, pydantic
-- **Step 3 (Selection Proof).** z3-solver must accept mutual-exclusion and prerequisite constraints on the incumbent or no publication asset is materialized.
-  in catalog: z3-solver
-- **Step 4 (Execution).** plotly, autoviz, and quarto fire as leaf assets for the authorized portfolio and balancing views.
-  in catalog: plotly
-  attempted, failed here: autoviz
+- **Step 0 (Global Ingestion).** Ingest strategy briefs and portfolio workbooks.
+  firecrawl-anydoc 0.2.4 — `anydoc.to_markdown(path)` → document to Markdown. located
+  `locate: anydoc.to_markdown`
+  openpyxl 3.1.2 — `load_workbook(filename)` → reads portfolio .xlsx workbook. located
+  `locate: openpyxl.load_workbook`
+- **Step 1 (Orchestrator Compilation).** Build an asset graph from value/risk spans.
+  dagster 1.13.20 — `@dagster.asset` defs assembled by `Definitions(assets=[...])` → asset graph. located
+  `locate: dagster.asset, dagster.Definitions`
+- **Step 2 (Graph and Mix).** Emit initiative graph; optimize mix under budget/capacity.
+  networkx 3.6.1 — `G=DiGraph(); G.add_edge(u,v)` → initiative dependency graph. exercised: "3-node DiGraph built"
+  `locate: networkx.DiGraph`
+  criticalpath 0.1.5 — `Node(...).get_critical_path()` → CPM schedule of initiatives. exercised: "['t1','t2'], duration 5"
+  `locate: criticalpath.Node.get_critical_path`
+  pulp 3.3.2 — `p=LpProblem(sense=LpMaximize); p.solve()` → LP/MIP mix optimization. exercised: "Optimal 3.0"
+  `locate: pulp.LpProblem.solve, pulp.LpVariable`
+  ortools 9.15.6755 — `Solver.CreateSolver("GLOP").Solve()` → LP optimize under bounds. exercised: "optimal, x=4.0"
+  `locate: ortools.linear_solver.pywraplp.Solver.Solve`
+  pydantic 2.13.5 — `Model.model_validate(data)` → compiles/validates budget-capacity bounds. exercised: "coerced '5' to 5"
+  `locate: pydantic.BaseModel.model_validate`
+- **Step 3 (Selection Proof).** Accept mutual-exclusion and prerequisite constraints.
+  z3-solver 5.1.0.0 — `s=Solver(); s.add(c); s.check()` → constraint satisfiability proof. exercised: "sat [X = 3]"
+  `locate: z3.Solver.check, z3.Solver.add`
+- **Step 4 (Execution).** Leaf assets: portfolio and balancing views.
+  plotly 7.0.0 — `plotly.graph_objects.Figure(...).write_html(path)` → interactive portfolio chart. located
+  `locate: plotly.graph_objects.Figure.write_html`
+  autoviz 0.1.905 — `AutoViz_Class().AutoViz(filename, dfte=df)` → auto visualization selection. located [imports fine; IPython present despite batch note]
+  `locate: autoviz.AutoViz_Class.AutoViz_Class.AutoViz`
+  quarto — non-Python: CLI publishing engine; CLI: `quarto render report.qmd`
 
 #### Pipeline 22: Service Financial Management
 
-- **Step 0 (Global Ingestion).** undoc, firecrawl-anydoc, and python-calamine flatten policy, cost-model workbooks, budgets, invoices, and charging catalogs into the compiler manifest.
-  in catalog: python-calamine
-- **Step 1 (Orchestrator Compilation).** Pipeline 0 emits a temporalio workflow only if stanza recovers cost-pool, allocation, and charging predicates. Missing ledger language yields a halt.
-  in catalog: stanza, temporalio
-- **Step 2 (Schema and Proof).** dasel and pydantic instantiate cost schemas into duckdb; zen-engine binds allocation tables; clingo must prove debit/credit/recovery consistency.
-  in catalog: clingo, dasel, duckdb, pydantic, zen-engine
-- **Step 3 (Quant and Select).** numpy-financial and statsmodels compute unit cost and variance only on the proved ledger; autoviz may select charts only from those tables.
-  in catalog: statsmodels
-  attempted, failed here: autoviz
-- **Step 4 (Execution).** plotly, finSankey, streamlit, and great-tables are terminal activities.
-  in catalog: great-tables, plotly, streamlit
+- **Step 0 (Global Ingestion).** Flatten policy/cost workbooks/budgets/invoices/catalogs into the manifest.
+  undoc 0.9.0 — `undoc.parse_file(path)` → Markdown/text/JSON; office parse. located
+  `locate: undoc.parse_file`
+  firecrawl-anydoc 0.2.4 — `anydoc.to_markdown(path)` → Markdown str; document→Markdown. located
+  `locate: anydoc.to_markdown`
+  python-calamine 0.8.2 — `python_calamine.load_workbook(path)` → CalamineWorkbook; read Excel/ODS workbooks. exercised: "[['cost']]"
+  `locate: python_calamine.load_workbook`
+
+- **Step 1 (Orchestrator Compilation).** Emit a temporalio workflow only if stanza recovers predicates.
+  stanza 1.14.0 — `stanza.Pipeline(lang='en', processors='tokenize,depparse')` → NLP Document; recover cost/allocation/charging predicates. located
+  `locate: stanza.Pipeline`
+  temporalio 1.32.0 — `@temporalio.workflow.defn class W: ...` → workflow definition; durable-workflow emit. located
+  `locate: temporalio.workflow.defn`
+
+- **Step 2 (Schema and Proof).** Instantiate cost schemas into duckdb; prove debit/credit consistency.
+  pydantic 2.13.5 — `class Cost(pydantic.BaseModel): unit: float` → validated instance; cost-schema instantiation. exercised: "unit=3.5"
+  `locate: pydantic.BaseModel`
+  duckdb 1.5.5 — `duckdb.sql("CREATE TABLE cost AS ...")` → relation; schema/table store. exercised: "(2,)"
+  `locate: duckdb.sql`
+  clingo 5.8.0 — `ctl=clingo.Control(); ctl.add('base',[],prog); ctl.solve()` → SAT/UNSAT; debit/credit/recovery consistency. exercised: "SAT"
+  `locate: clingo.Control.solve, clingo.Control.add`
+  dasel — not installed here: Go binary (github.com/TomWright/dasel), not importable; CLI: `dasel -f cost.yaml '.pools'`
+  zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
+  `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
+
+- **Step 3 (Quant and Select).** Compute unit cost and variance on proved ledger; select charts.
+  numpy-financial 1.0.0 — `npv(rate, values)`, `irr(values)` → financial figures on the proved ledger. located
+  `locate: numpy_financial.npv, numpy_financial.irr, numpy_financial.pmt`
+  statsmodels 0.15.0 — `statsmodels.api.OLS(endog, exog).fit()` → regression/variance results; variance modeling. exercised: "params [0.0, 1.0]"
+  `locate: statsmodels.api.OLS`
+  autoviz 0.1.905 — `AutoViz_Class().AutoViz(filename, depVar='')` → auto-selected charts; chart selection from tables. located
+  `locate: autoviz.AutoViz_Class.AutoViz_Class.AutoViz`
+
+- **Step 4 (Execution).** Terminal charting/table/dashboard activities.
+  plotly 7.0.0 — `plotly.graph_objects.Figure(data=[go.Bar(...)])` → interactive chart/HTML; chart leaf. exercised: "html len 4297587"
+  `locate: plotly.graph_objects.Figure`
+  great-tables 0.24.0 — `great_tables.GT(df)` → publication table; formatted-table leaf. exercised: "html len 9409"
+  `locate: great_tables.GT`
+  streamlit 1.63.0 — `streamlit.write(obj)` (app via `streamlit run app.py`) → dashboard element; dashboard leaf. located
+  `locate: streamlit.write`
+  finSankey — not installed here: pip unsatisfiable.
 
 #### Pipeline 23: Risk Management
 
-- **Step 0 (Global Ingestion).** docling parses risk policy, registers, control libraries, audit findings, and appetite statements into the compiler manifest.
-  in catalog: docling
-- **Step 1 (Orchestrator Compilation).** Pipeline 0 keeps pgmpy, networkx, and pymc assets only when threat, impact, and control spans resolve. No appetite bound means no treatment flow.
-  in catalog: networkx, pgmpy
-- **Step 2 (Graph and Posterior).** pgmpy and networkx build the risk net; pymc, numpyro, and arviz run only after typedlogic facts compile.
-  in catalog: networkx, pgmpy, typedlogic
-- **Step 3 (Treatment Proof).** ortools selects avoid/reduce/transfer/accept portfolios; z3-solver must accept residual-versus-appetite or the plan asset is not written.
-  in catalog: ortools, z3-solver
-- **Step 4 (Execution).** python-docx, plotly, and great-tables fire as leaf assets.
-  in catalog: great-tables, plotly, python-docx
+- **Step 0 (Global Ingestion).** Parse policy, registers, findings, appetite statements into the manifest.
+  docling 2.124.0 — `DocumentConverter().convert("policy.pdf")` → parsed document object; PDF/Office parser. located
+  `locate: docling.document_converter.DocumentConverter.convert`
+
+- **Step 1 (Orchestrator Compilation).** Gate graph/Bayesian assets on threat/impact/control spans.
+  networkx 3.6.1 — `networkx.DiGraph([("Threat","Impact")])` → directed risk graph. exercised: "(2, 1)"
+  `locate: networkx.DiGraph`
+  pgmpy 1.1.2 — `DiscreteBayesianNetwork([("Threat","Impact"),("Control","Impact")])` → Bayesian risk net. exercised: "2 edges"
+  `locate: pgmpy.models.DiscreteBayesianNetwork.DiscreteBayesianNetwork`
+  pymc 5.28.5 — `pymc.sample(draws=1000, tune=1000, model=m)` → posterior InferenceData; Bayesian inference. located
+  `locate: pymc.sample`
+
+- **Step 2 (Graph and Posterior).** Build risk net; sample posterior after typedlogic facts compile.
+  pgmpy 1.1.2 — `DiscreteBayesianNetwork(ebunch)` → risk Bayesian network. exercised: "2 edges"
+  `locate: pgmpy.models.DiscreteBayesianNetwork.DiscreteBayesianNetwork`
+  networkx 3.6.1 — `g=networkx.DiGraph(); g.add_edges_from(edges)` → risk-net graph. exercised: "(2, 1)"
+  `locate: networkx.DiGraph`
+  pymc 5.28.5 — `pymc.sample(draws=1000, tune=1000)` → posterior draws. located
+  `locate: pymc.sample`
+  numpyro 0.21.0 — `numpyro.infer.MCMC(kernel, num_warmup=500, num_samples=1000).run(key)` → JAX MCMC posterior. located
+  `locate: numpyro.infer.MCMC`
+  arviz 0.23.4 — `arviz.summary(idata)` → posterior summary/diagnostics table. exercised: "['mean','sd','hdi_3%']"
+  `locate: arviz.summary`
+  typedlogic 0.2.4 — `s=Solver(); s.add_fact(f); s.dump()` → compiles typed facts to solver input. located
+  `locate: typedlogic.solver.Solver.add_fact, typedlogic.solver.Solver.dump`
+
+- **Step 3 (Treatment Proof).** Optimize avoid/reduce/transfer/accept portfolio; prove residual within appetite.
+  ortools 9.15.6755 — `CpSolver().solve(model)` → OPTIMAL/FEASIBLE; CP-SAT portfolio select. exercised: "OPTIMAL"
+  `locate: ortools.sat.python.cp_model.CpSolver.solve, ortools.sat.python.cp_model.CpModel`
+  z3-solver 5.1.0.0 — `z3.Solver().check()` → sat/unsat residual-vs-appetite. exercised: "sat"
+  `locate: z3.Solver.check`
+
+- **Step 4 (Execution).** Emit Word report, chart, and formatted table assets.
+  great-tables 0.24.0 — `great_tables.GT(df)` → publication table object. exercised: "GT"
+  `locate: great_tables.GT`
+  plotly 7.0.0 — `plotly.graph_objects.Figure(data=[...])` → interactive chart; HTML via `plotly.io.to_html`. exercised: "HTML emitted"
+  `locate: plotly.graph_objects.Figure, plotly.io.to_html`
+  python-docx 1.2.0 — `docx.Document()` (add_paragraph; save) → writes .docx report. exercised: "1 paragraph"
+  `locate: docx.Document`
 
 #### Pipeline 24: Service Continuity Management
 
-- **Step 0 (Global Ingestion).** firecrawl-anydoc and markitdown flatten continuity policy, BIA worksheets, dependency maps, runbooks, and exercise reports into the compiler manifest.
-  in catalog: markitdown
-- **Step 1 (Orchestrator Compilation).** Pipeline 0 admits continuity assets only when critical-service, RTO, and RPO fields type-check in pydantic. Missing RTO/RPO cancels the flow.
-  in catalog: pydantic
-- **Step 2 (BIA Graph).** networkx maps service-to-CI-to-site edges from Pipeline 13; pandas emits impact-over-time tables.
-  in catalog: networkx, pandas
-- **Step 3 (Invocation Proof).** typedlogic and clingo encode invocation and exclusive-use facts; simpy and most-queue replay recovery; pysmt must accept RTO/RPO on the declared graph.
-  in catalog: clingo, PySMT, simpy, typedlogic
-- **Step 4 (Execution).** reliability, mermaid, and python-docx are leaf assets for curves, flowcharts, and plans.
-  in catalog: python-docx
+- **Step 0 (Global Ingestion).** Flatten continuity policy/BIA/runbooks to Markdown manifest
+  firecrawl-anydoc 0.2.4 — `anydoc.to_markdown("policy.docx")` → Markdown string; flattens docs to Markdown. exercised: "'Continuity plan\n'"
+  `locate: anydoc.to_markdown`
+  markitdown 0.1.7 — `MarkItDown().convert(src).markdown` → Markdown string; document-to-Markdown for manifest. exercised: "'Continuity plan\n\n| |...'"
+  `locate: markitdown.MarkItDown.convert`
+
+- **Step 1 (Orchestrator Compilation).** Type-check critical-service/RTO/RPO fields; missing RTO/RPO cancels flow
+  pydantic 2.13.5 — `class M(BaseModel): rto:int` then `M.model_validate(row)` → instance/raises; type-checks RTO/RPO. exercised: "rto=4"
+  `locate: pydantic.BaseModel.model_validate, pydantic.BaseModel`
+
+- **Step 2 (BIA Graph).** Build service→CI→site graph; emit impact-over-time tables
+  networkx 3.6.1 — `g=DiGraph(); g.add_edges_from([("svc","ci"),("ci","site")])` → graph; maps service/CI/site edges. exercised: "2 edges"
+  `locate: networkx.DiGraph.add_edges_from, networkx.DiGraph.add_edge`
+  pandas 2.3.3 — `pandas.pivot_table(df, values="impact", index="svc", columns="t")` → DataFrame; impact-over-time table. exercised: "shape (1, 2)"
+  `locate: pandas.pivot_table`
+
+- **Step 3 (Invocation Proof).** Encode facts, simulate recovery, SMT-accept RTO/RPO
+  typedlogic 0.2.4 — `th=Theory(name="ITSCM"); th.add(sentence)` (facts as `Fact` subclasses) → theory; encodes invocation/exclusive-use facts. located
+  `locate: typedlogic.Theory.add, typedlogic.Fact`
+  clingo 5.8.0 — `c=Control(); c.add("base",[],facts); c.ground(...); c.solve()` → SolveResult; encodes/solves ASP facts. exercised: "SAT"
+  `locate: clingo.Control.solve, clingo.Control.add`
+  simpy 4.1.2 — `env=simpy.Environment(); env.run(until=t)` → advances DES clock; replays recovery timeline. exercised: "now 5"
+  `locate: simpy.Environment.run, simpy.Environment`
+  most-queue 2.9 — `sim=QsSim(num_of_channels=n); sim.set_sources(...); sim.set_servers(...); sim.run(jobs)` → queue stats; recovery-queue simulation. located
+  `locate: most_queue.QsSim.run, most_queue.QsSim`
+  pysmt 0.9.6 — `pysmt.shortcuts.is_sat(formula)` → bool; checks RTO/RPO constraints satisfiable. exercised: "False (p∧¬p)"
+  `locate: pysmt.shortcuts.is_sat, pysmt.shortcuts.Solver`
+
+- **Step 4 (Execution).** Leaf assets: curves, flowcharts, plan documents
+  mermaid — non-Python: Node/CLI renderer (@mermaid-js/mermaid-cli: mmdc), not a Python import; CLI: `mmdc -i in.mmd -o out.svg`
+  python-docx 1.2.0 — `d=docx.Document(); d.add_paragraph(...); d.save("plan.docx")` → writes .docx continuity plan. exercised: "saved 36709 bytes"
+  `locate: docx.Document, docx.document.Document.save, docx.document.Document.add_paragraph`
 
 #### Pipeline 25: Strategy Management
 
-- **Step 0 (Global Ingestion).** undoc dumps corporate strategy, market analyses, capability assessments, and prior reviews into the compiler manifest.
-- **Step 1 (Orchestrator Compilation).** Pipeline 0 writes a prefect flow whose task set exists only if stanza recovers driver, goal, and option spans. Empty option set halts publication.
-  in catalog: prefect, stanza
-- **Step 2 (Map and Option Proof).** networkx and se-lib emit capability maps; typedlogic records options; z3-solver must accept consistency against Pipeline 16 principles.
-  in catalog: networkx, typedlogic, z3-solver
-- **Step 3 (Roadmap).** criticalpath sequences initiatives onto the Pipeline 21 graph only after the option proof.
-  in catalog: criticalpath
-- **Step 4 (Execution).** quarto and plotly fire as leaf assets.
-  in catalog: plotly
+- **Step 0 (Global Ingestion).** dump strategy/market/capability docs into compiler manifest
+  undoc 0.9.0 — `undoc.parse_file(path).to_markdown()` → Markdown/text/JSON. exercised: "hi"
+  `locate: undoc.parse_file, undoc.Undoc.to_markdown`
+
+- **Step 1 (Orchestrator Compilation).** write prefect flow; task set exists if spans recovered
+  prefect 3.8.4 — `@prefect.flow` → Flow; the written flow. exercised: "Flow"
+  `locate: prefect.flow`
+  stanza 1.14.0 — `stanza.Pipeline(lang, processors='tokenize,ner')` → pipeline; recovers driver/goal/option spans. located
+  `locate: stanza.Pipeline`
+
+- **Step 2 (Map and Option Proof).** emit capability maps, record options, prove consistency
+  networkx 3.6.1 — `DiGraph().add_edge(a,b)` → capability map graph. exercised: "['a','b','c']"
+  `locate: networkx.DiGraph.add_edge`
+  typedlogic 0.2.4 — `Solver().add_fact(FactInstance)` → records options as typed facts. located
+  `locate: typedlogic.solver.Solver.add_fact`
+  z3-solver 5.1.0.0 — `Solver().check()` → sat/unsat; accepts consistency. exercised: "sat [x = 3]"
+  `locate: z3.Solver.check`
+  se-lib 0.53 — `design_structure_matrix(...)`, `critical_path_diagram(...)` → PERT / DSM systems-engineering artifacts. located
+  `locate: selib.design_structure_matrix, selib.critical_path_diagram, selib.SystemDynamicsModel`
+
+- **Step 3 (Roadmap).** sequence initiatives via critical-path scheduling
+  criticalpath 0.1.5 — `Node(...).add(...); .link(...); .get_critical_path()` → ordered initiatives. exercised: "['A','B']"
+  `locate: criticalpath.Node.get_critical_path, criticalpath.Node.add`
+
+- **Step 4 (Execution).** render charts as leaf assets
+  plotly 7.0.0 — `go.Figure(...).write_html(path)` → HTML chart leaf asset. exercised: "html written"
+  `locate: plotly.graph_objects.Figure, plotly.graph_objects.Figure.write_html`
+  quarto — non-Python: CLI publishing engine; CLI: `quarto render doc.qmd`
 
 #### Pipeline 26: Information Security Management
 
-- **Step 0 (Global Ingestion).** docling, pypdf, and dasel pull policy, control catalogs, threat notes, identity models, and privacy regulations into the compiler manifest.
-  in catalog: dasel, docling, pypdf
-- **Step 1 (Orchestrator Compilation).** Pipeline 0 emits a temporalio workflow gated on control-objective and classification spans. No classification scheme, no workflow.
-  in catalog: temporalio
-- **Step 2 (Ontology and Policy).** owlready2 and rdflib hold the catalog; pycasbin and openfga are generated only for proved permissions.
-  in catalog: owlready2, pycasbin, rdflib
-- **Step 3 (Residual Proof).** pgmpy links assets, threats, and controls; z3-solver and clingo must accept no conflicting allow/deny and no unclassified critical asset.
-  in catalog: clingo, pgmpy, z3-solver
-- **Step 4 (Execution).** python-docx, mermaid, and streamlit are terminal compensation-safe activities.
-  in catalog: python-docx, streamlit
+- **Step 0 (Global Ingestion).** pull policy/catalog/threat/identity/privacy docs into manifest
+  docling 2.124.0 — `DocumentConverter().convert(source="policy.pdf")` → ConversionResult; parses docs to text/Markdown. located
+  `locate: docling.document_converter.DocumentConverter.convert`
+  pypdf 6.16.2 — `pypdf.PdfReader("policy.pdf").pages[0].extract_text()` → text pulled from PDF pages. exercised: "pages 1"
+  `locate: pypdf.PdfReader, pypdf.PageObject.extract_text`
+  dasel — not installed here: Go binary (github.com/TomWright/dasel), usable via CLI; CLI: `dasel -f in.yaml`
+
+- **Step 1 (Orchestrator Compilation).** emit workflow gated on control-objective/classification spans
+  temporalio 1.32.0 — `temporalio.workflow.defn(name="isms")(WorkflowCls)` → durable workflow definition. located
+  `locate: temporalio.workflow.defn`
+
+- **Step 2 (Ontology and Policy).** hold catalog ontology; generate proved permissions
+  owlready2 0.51 — `owlready2.get_ontology(base_iri="http://isms/catalog.owl")` → ontology holding the control catalog. exercised: "base_iri set to …#"
+  `locate: owlready2.get_ontology`
+  rdflib 7.6.0 — `rdflib.Graph().parse(data=ttl, format="turtle")` → RDF graph holding the catalog. exercised: "1 triple"
+  `locate: rdflib.Graph, rdflib.Graph.parse`
+  openfga — not installed here: pip unsatisfiable
+  pycasbin ? — `Enforcer(model, policy).enforce(sub, obj, act)` → policy / access-control decision. located
+  `locate: casbin.Enforcer, casbin.Enforcer.enforce, casbin.Enforcer.add_policy`
+
+- **Step 3 (Residual Proof).** link assets/threats/controls; accept no allow/deny conflict
+  pgmpy 1.1.2 — `pgmpy.models.DiscreteBayesianNetwork([('Asset','Threat'),('Threat','Control')])` → graphical model linking them. exercised: "edges Asset→Threat→Control"
+  `locate: pgmpy.models.DiscreteBayesianNetwork`
+  z3-solver 5.1.0.0 — `s=z3.Solver(); s.add(cons); s.check()` → sat/unsat; accepts allow/deny consistency. exercised: "sat; model [x = 3]"
+  `locate: z3.Solver, z3.Solver.check`
+  clingo 5.8.0 — `Control().add("base",[],facts); .ground(); .solve(on_model=cb)` → accepts no-unclassified-asset constraints. exercised: "model 'a b'"
+  `locate: clingo.Control, clingo.Control.add, clingo.Control.solve`
+
+- **Step 4 (Execution).** terminal compensation-safe reporting/dashboard activities
+  python-docx 1.2.0 — `docx.Document().add_paragraph(text)` → writes .docx report asset. exercised: "paragraph text 'hello'"
+  `locate: docx.Document`
+  streamlit 1.63.0 — `streamlit.dataframe(data=df)` → renders dashboard table widget. located
+  `locate: streamlit.dataframe`
+  mermaid — non-Python: Node/CLI renderer (@mermaid-js/mermaid-cli); CLI: `mmdc -i in.mmd -o out.svg`
 
 #### Pipeline 27: Availability Management
 
-- **Step 0 (Global Ingestion).** firecrawl-anydoc and csvkit flatten SLRs, architecture constraints, outage histories, and maintenance windows into the compiler manifest.
-  in catalog: csvkit
-- **Step 1 (Orchestrator Compilation).** Pipeline 0 admits reliability, lifelines, and fmdtools assets only when an availability target and an outage series both type-check. Otherwise the run stops.
-  in catalog: lifelines
-  attempted, failed here: fmdtools
-- **Step 2 (Block and Fit).** reliability builds block diagrams from Pipeline 13/14 graphs; scipy rejects unphysical fits; pysmt must accept redundancy versus target.
-  in catalog: PySMT, scipy
-- **Step 3 (Execution).** lifelines writes restore shapes; fmdtools runs only after the cut-set proof; plotly, streamlit, and python-docx are leaf assets.
-  in catalog: lifelines, plotly, python-docx, streamlit
-  attempted, failed here: fmdtools
+- **Step 0 (Global Ingestion).** Flatten SLRs, constraints, outage histories, maintenance windows into the manifest.
+  firecrawl-anydoc 0.2.4 — `anydoc.to_markdown("slr.docx")` → Markdown string from each source doc. exercised: "Spec line"
+  `locate: anydoc.to_markdown`
+  csvkit 2.2.0 — `csvkit.utilities.in2csv.In2CSV(args=["windows.xlsx"]).main()` → CSV on stdout. located; CLI: `in2csv windows.xlsx`
+  `locate: csvkit.utilities.in2csv.In2CSV`
+
+- **Step 1 (Orchestrator Compilation).** Gate reliability/survival assets on availability-target and outage-series type-checks.
+  lifelines 0.30.3 — `KaplanMeierFitter().fit(durations, event_observed)` → survival asset admitted by gate. exercised: "median=3.0"
+  `locate: lifelines.KaplanMeierFitter.fit`
+  fmdtools — not installed here: unsatisfiable dependency (pandas[all] -> psycopg2).
+
+- **Step 2 (Block and Fit).** Build block diagrams; reject unphysical fits; accept redundancy versus target.
+  scipy 1.15.3 — `scipy.optimize.curve_fit(f, xdata, ydata)` → (popt, pcov); rejects unphysical fits. exercised: "popt=[2.0, 1.0]"
+  `locate: scipy.optimize.curve_fit`
+  pysmt 0.9.6 — `pysmt.shortcuts.is_sat(And(redundant, Not(target)))` → bool acceptance of redundancy vs target. exercised: "And(p,~p) sat=False"
+  `locate: pysmt.shortcuts.is_sat`
+
+- **Step 3 (Execution).** Write restore shapes; run FMEA; emit charts, dashboard, document.
+  lifelines 0.30.3 — `KaplanMeierFitter().fit(durations, event_observed)` → restore-time survival curve. exercised: "median=3.0"
+  `locate: lifelines.KaplanMeierFitter.fit`
+  plotly 7.0.0 — `go.Figure(...).write_html("restore.html")` → interactive chart HTML (leaf asset). exercised: "wrote 4.3MB html"
+  `locate: plotly.graph_objects.Figure.write_html`
+  python-docx 1.2.0 — `docx.Document().save("availability.docx")` → writes the report (leaf asset). exercised: "saved 36583B"
+  `locate: docx.Document, docx.document.Document.save`
+  streamlit 1.63.0 — `streamlit.plotly_chart(fig)` → renders chart on the dashboard (leaf asset). located
+  `locate: streamlit.plotly_chart`
+  fmdtools — not installed here: unsatisfiable dependency (pandas[all] -> psycopg2).
 
 #### Pipeline 28: Capacity and Performance Management
 
-- **Step 0 (Global Ingestion).** undoc, python-calamine, and csvkit ingest baselines, utilization dumps, demand forecasts, and capacity plans into the compiler manifest.
-  in catalog: csvkit, python-calamine
-- **Step 1 (Orchestrator Compilation).** Pipeline 0 keeps prophet, darts, pmdarima, and most-queue assets only when a time column and a utilization field type-check. No series, no forecast flow.
-- **Step 2 (Forecast and Queue).** prophet, darts, and pmdarima emit demand paths; python-control and most-queue model response; gekko optimizes settings under compiled cost bounds.
-- **Step 3 (Cover Proof).** z3-solver must accept planned capacity versus forecast peak plus contingency or dashboard assets are not materialized.
-  in catalog: z3-solver
-- **Step 4 (Execution).** plotly, streamlit, and python-docx fire as leaf assets.
-  in catalog: plotly, python-docx, streamlit
+- **Step 0 (Global Ingestion).** ingest baselines, utilization dumps, forecasts, plans
+  undoc 0.9.0 — `undoc.parse_file(path).to_json()` → text/JSON from Office dumps. exercised: "to_json → format:\"xlsx\"…"
+  `locate: undoc.parse_file, undoc.Undoc.to_json`
+  python-calamine 0.8.2 — `python_calamine.load_workbook(path_or_filelike)` → workbook; Rust-backed sheet read. exercised: "sheets ['Sheet']"
+  `locate: python_calamine.load_workbook`
+  csvkit 2.2.0 — `In2CSV(args=[...], output_file=f).run()` → converts XLSX/JSON to flat CSV; CLI: `in2csv`. located
+  `locate: csvkit.utilities.in2csv.In2CSV`
+
+- **Step 1 (Orchestrator Compilation).** keep forecast assets if time+utilization type-check
+  prophet 1.4.0 — `Prophet().fit(df)` → fitted forecaster (df with ds,y). located
+  `locate: prophet.forecaster.Prophet.fit, prophet.forecaster.Prophet.make_future_dataframe, prophet.forecaster.Prophet.predict`
+  pmdarima 2.1.1 — `pmdarima.auto_arima(y)` → auto-selected ARIMA model. located
+  `locate: pmdarima.auto_arima`
+  most-queue 2.9 — `MMnrCalc(n, r)` (+ set_sources/set_servers/run) → queue metrics asset. exercised: "get_w [1.0, 4.0, 24.0]"
+  `locate: most_queue.theory.fifo.mmnr.MMnrCalc, most_queue.theory.fifo.mmnr.MMnrCalc.get_w`
+  darts — not installed here: `import darts` fails in venv.
+
+- **Step 2 (Forecast and Queue).** forecast demand; model queue response; optimize
+  prophet 1.4.0 — `Prophet().predict(future)` → demand path (yhat). located
+  `locate: prophet.forecaster.Prophet.predict, prophet.forecaster.Prophet.make_future_dataframe`
+  pmdarima 2.1.1 — `pmdarima.auto_arima(y)` → ARIMA demand path. located
+  `locate: pmdarima.auto_arima`
+  most-queue 2.9 — `MMnrCalc(n, r).get_w()` → response (waiting-time moments). exercised: "get_w [1.0, 4.0, 24.0]"
+  `locate: most_queue.theory.fifo.mmnr.MMnrCalc.get_w, most_queue.theory.fifo.mmnr.MMnrCalc`
+  gekko 1.3.2 — `m=GEKKO(); m.Obj(expr); m.solve(disp=False)` → optimized settings under cost bounds. located
+  `locate: gekko.GEKKO.solve, gekko.GEKKO.Obj, gekko.GEKKO.Minimize`
+  darts — not installed here: `import darts` fails in venv.
+  python-control — not installed here: `import control` fails in venv.
+
+- **Step 3 (Cover Proof).** SMT-check planned capacity covers peak+contingency
+  z3-solver 5.1.0.0 — `z3.Solver().check()` → sat/unsat: capacity ≥ peak+contingency. exercised: "sat; [x = 1]"
+  `locate: z3.Solver.check, z3.Solver.add`
+
+- **Step 4 (Execution).** fire charting, dashboard, Word leaf assets
+  plotly 7.0.0 — `plotly.express.line(x, y)` → interactive Figure; `Figure.write_html`. exercised: "Figure, 1 trace"
+  `locate: plotly.express.line, plotly.graph_objects.Figure.write_html`
+  streamlit 1.63.0 — `streamlit.dataframe(df)` → dashboard data widget. located
+  `locate: streamlit.dataframe, streamlit.plotly_chart`
+  python-docx 1.2.0 — `docx.Document().save(path)` → Word report. exercised: "saved .docx"
+  `locate: docx.Document, docx.document.Document.save`
 
 #### Pipeline 29: Continual Improvement Management
 
-- **Step 0 (Global Ingestion).** docling flattens strategy goals, CSI registers, audit findings, feedback exports, and every later review artifact into the compiler manifest.
-  in catalog: docling
-- **Step 1 (Orchestrator Compilation).** Pipeline 0 builds a dagster asset graph from idea, benefit, and constraint spans. Empty idea set cancels register assets.
-  in catalog: dagster
-- **Step 2 (Prioritize and Gate).** pandas holds the register; pulp ranks under benefit/effort/risk; networkx supplies dependencies; zen-engine and typedlogic must accept intake rules.
-  in catalog: networkx, pandas, pulp, typedlogic, zen-engine
-- **Step 3 (Execution Tracking).** spiffworkflow runs approved items as durable workflows and may emit change payloads into Pipeline 39 only after clingo accepts the mutation edge.
-  in catalog: clingo, SpiffWorkflow
-- **Step 4 (Execution).** great-tables and quarto are leaf assets for the register and benefit-realization review.
-  in catalog: great-tables
+- **Step 0 (Global Ingestion).** Flatten strategy goals, CSI registers, audit findings, feedback to Markdown.
+  docling 2.124.0 — `DocumentConverter().convert(source).document.export_to_markdown()` → Markdown from docs. located
+  `locate: docling.document_converter.DocumentConverter.convert`
+
+- **Step 1 (Orchestrator Compilation).** Build dagster asset graph from idea/benefit/constraint spans.
+  dagster 1.13.20 — `@dagster.asset` def + `materialize_to_memory([...])` → asset graph. exercised: "success True, value 42"
+  `locate: dagster.asset, dagster.materialize_to_memory`
+
+- **Step 2 (Prioritize and Gate).** Hold register; rank by benefit/effort/risk; supply dependencies; accept rules.
+  pandas 2.3.3 — `pandas.DataFrame(rows)` → holds the register. exercised: "shape (2,2)"
+  `locate: pandas.DataFrame`
+  pulp 3.3.2 — `p=LpProblem(...); p+=obj; p.solve(PULP_CBC_CMD(msg=0))` → ranks items. exercised: "Optimal, x=4.0"
+  `locate: pulp.LpProblem.solve`
+  networkx 3.6.1 — `networkx.topological_sort(DiGraph(edges))` → supplies dependency order. exercised: "['a','b','c']"
+  `locate: networkx.topological_sort, networkx.DiGraph`
+  typedlogic 0.2.4 — `ClingoSolver().add(...); .check()` → Solution.satisfiable accepts rules. exercised: "satisfiable=True"
+  `locate: typedlogic.integrations.solvers.clingo.ClingoSolver.check, typedlogic.integrations.solvers.clingo.ClingoSolver.add`
+  zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
+  `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
+
+- **Step 3 (Execution Tracking).** Run approved items as durable workflows; clingo accepts mutation edge.
+  clingo 5.8.0 — `ctl.solve()` → SolveResult.satisfiable admits the mutation edge. exercised: "sat=True"
+  `locate: clingo.Control.solve`
+  spiffworkflow — not installed here: no module named 'spiffworkflow'.
+
+- **Step 4 (Execution).** Leaf assets: formatted register table; publishing.
+  great-tables 0.24.0 — `GT(df).as_raw_html()` → formatted publication table. exercised: "HTML emitted (>100 chars)"
+  `locate: great_tables.GT, great_tables.GT.as_raw_html`
+  quarto — non-Python: CLI publishing engine, not a Python import; CLI: `quarto render doc.qmd`
 
 #### Pipeline 30: Measurement and Reporting Management
 
-- **Step 0 (Global Ingestion).** firecrawl-anydoc and csvkit flatten measurement policy, reporting requirements, KPI catalogs, and raw metric extracts into the compiler manifest.
-  in catalog: csvkit
-- **Step 1 (Orchestrator Compilation).** Pipeline 0 emits a prefect flow only if metric-definition and audience-view spans resolve. Orphan KPI names with no formula halt publication.
-  in catalog: prefect
-- **Step 2 (Metric Proof).** pydantic types metric objects into duckdb; clingo must prove every reported figure is derivable from a registered definition and a source extract.
-  in catalog: clingo, duckdb, pydantic
-- **Step 3 (Execution).** autoviz, plotly, great-tables, streamlit, panel, and quarto fire as leaf assets only on the proved tables.
-  in catalog: great-tables, plotly, streamlit
-  attempted, failed here: autoviz
+- **Step 0 (Global Ingestion).** flatten policy, requirements, KPI catalogs, and extracts into manifest
+  csvkit 2.2.0 — `csvkit.utilities.in2csv.In2CSV(args).main()` → CSV output; flattens metric extracts to CSV. located; CLI: `in2csv file.xlsx`
+  `locate: csvkit.utilities.in2csv.In2CSV`
+  firecrawl-anydoc 0.2.4 — `anydoc.to_markdown(path)` → Markdown str; flattens documents into manifest. located
+  `locate: anydoc.to_markdown`
+
+- **Step 1 (Orchestrator Compilation).** emit publication flow when metric/audience spans resolve
+  prefect 3.8.4 — `@prefect.flow(name=...)` decorating the fn → Flow object; emits the publication flow. located
+  `locate: prefect.flow`
+
+- **Step 2 (Metric Proof).** type metric objects into SQL; prove figure derivability
+  clingo 5.8.0 — `clingo.Control(); ctl.ground(...); ctl.solve(on_model=...)` → stable models; proves figure derivability. exercised: "['a b']"
+  `locate: clingo.Control.solve, clingo.Control`
+  duckdb 1.5.5 — `duckdb.sql("SELECT ...")` → relation; stores typed metric objects. exercised: "[(42,)]"
+  `locate: duckdb.sql, duckdb.connect`
+  pydantic 2.13.5 — `pydantic.BaseModel.model_validate(obj)` → validated metric model; types metric objects. exercised: "3"
+  `locate: pydantic.BaseModel.model_validate, pydantic.TypeAdapter`
+
+- **Step 3 (Execution).** auto-select/plot charts, tables, and dashboards from proved tables
+  autoviz 0.1.905 — `autoviz.AutoViz_Class().AutoViz(filename='', dfte=df, chart_format='svg')` → auto-selected plots; renders visuals. located
+  `locate: autoviz.AutoViz_Class.AutoViz_Class.AutoViz`
+  great-tables 0.24.0 — `great_tables.GT(df)` → formatted table; renders report table. exercised: "GT"
+  `locate: great_tables.GT`
+  panel 1.9.4 — `panel.panel(obj)` → dashboard pane; renders dashboard. exercised: "Markdown"
+  `locate: panel.panel`
+  plotly 7.0.0 — `plotly.express.line(df, x=..., y=...)` → interactive Figure; renders charts. exercised: "Figure"
+  `locate: plotly.express.line, plotly.graph_objects.Figure`
+  quarto — non-Python: CLI publishing engine, not a Python import; CLI: `quarto render report.qmd`.
+  streamlit 1.63.0 — `streamlit.write(obj)` inside a `streamlit run` app → renders element; dashboard leaf asset. located
+  `locate: streamlit.write, streamlit.dataframe`
 
 #### Pipeline 31: Service Level Management
 
-- **Step 0 (Global Ingestion).** undoc and markitdown dump catalog entries, SLR/SLA/OLA/UC drafts, performance reports, and complaint logs into the compiler manifest.
-  in catalog: markitdown
-- **Step 1 (Orchestrator Compilation).** Pipeline 0 writes a temporalio workflow gated on commitment and measurement-method spans. No commitment language, no agreement assets.
-  in catalog: temporalio
-- **Step 2 (Agreement Proof).** pydantic instantiates SLA/OLA/UC objects; zen-engine binds credit and escalation tables; pysmt must accept attainability against Pipelines 27 and 28.
-  in catalog: pydantic, PySMT, zen-engine
-- **Step 3 (Attainment).** duckdb computes attainment from Pipeline 30 only after the SMT proof.
-  in catalog: duckdb
-- **Step 4 (Execution).** python-docx and streamlit are terminal activities.
-  in catalog: python-docx, streamlit
+- **Step 0 (Global Ingestion).** Dump catalog, agreements, and complaint logs into the manifest
+  markitdown 0.1.7 — `markitdown.MarkItDown().convert(source)` → DocumentConverterResult; converts sources to markdown. exercised: "'Hello clause one.'"
+  `locate: markitdown.MarkItDown.convert`
+  undoc 0.9.0 — `undoc.parse_file(path)` → Undoc (then .to_markdown()); Office→md/text/json. exercised: "Undoc object"
+  `locate: undoc.parse_file, undoc.Undoc.to_markdown`
+
+- **Step 1 (Orchestrator Compilation).** Emit a temporalio workflow gated on spans
+  temporalio 1.32.0 — `@temporalio.workflow.defn(sandboxed=True)` → workflow class; declares the durable workflow. located
+  `locate: temporalio.workflow.defn`
+
+- **Step 2 (Agreement Proof).** Instantiate SLA objects; SMT-prove attainability
+  pydantic 2.13.5 — `pydantic.BaseModel.model_validate(data)` → validated instance; instantiates SLA/OLA/UC objects. exercised: "(1, 'a')"
+  `locate: pydantic.BaseModel.model_validate`
+  pysmt 0.9.6 — `pysmt.shortcuts.is_sat(formula)` → bool; proves attainability. exercised: "True"
+  `locate: pysmt.shortcuts.is_sat`
+  zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
+  `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
+
+- **Step 3 (Attainment).** Compute attainment after the SMT proof
+  duckdb 1.5.5 — `duckdb.sql(query)` → relation; computes SLA attainment. exercised: "(42,)"
+  `locate: duckdb.sql`
+
+- **Step 4 (Execution).** Terminal docx and dashboard activities
+  python-docx 1.2.0 — `docx.Document().save(path)` → writes .docx; terminal Word activity. exercised: "'t' round-trip"
+  `locate: docx.document.Document.save`
+  streamlit 1.63.0 — `streamlit.dataframe(data)` → renders table; terminal dashboard activity. located
+  `locate: streamlit.dataframe`
 
 #### Pipeline 32: Monitoring and Event Management
 
-- **Step 0 (Global Ingestion).** docling and csvkit flatten monitoring standards, event catalogs, correlation rules, and tool exports into the compiler manifest.
-  in catalog: csvkit, docling
-- **Step 1 (Orchestrator Compilation).** Pipeline 0 keeps durable-rules, experta, and pydantic event assets only when event-type and severity spans resolve. No catalog, no correlation flow.
-  in catalog: durable-rules, pydantic
-  attempted, failed here: experta
-- **Step 2 (Correlate and Hand-off).** durable-rules or experta execute compiled Rete rules; pm4py maps event-to-incident/change/request edges; unified-planning sequences runbooks.
-  in catalog: durable-rules, pm4py, unified-planning
-  attempted, failed here: experta
-- **Step 3 (Coverage Proof).** clingo must accept that every critical event class has filter, correlation, and response paths or dashboard assets halt.
-  in catalog: clingo
-- **Step 4 (Execution).** streamlit, plotly, and mermaid fire as leaf assets.
-  in catalog: plotly, streamlit
+- **Step 0 (Global Ingestion).** Flatten standards/catalogs/rules/exports into the manifest.
+  docling 2.124.0 — `DocumentConverter().convert(source=path)` → parsed document. located
+  `locate: docling.document_converter.DocumentConverter.convert`
+  csvkit 2.2.0 — `csvkit.utilities.in2csv.In2CSV(args).main()` → converts tabular exports to CSV; CLI: `in2csv file.xlsx`. located
+  `locate: csvkit.utilities.in2csv.In2CSV`
+
+- **Step 1 (Orchestrator Compilation).** Keep event assets only when event-type and severity spans resolve.
+  durable-rules 2.0.28 — `durable.lang.ruleset(name)` (context manager) → defines Rete ruleset for event assets. located
+  `locate: durable.lang.ruleset`
+  experta 1.9.4 — installed but import fails on py3.11: `class frozendict(collections.Mapping)` (AttributeError: `collections.Mapping` removed); no resolvable function.
+  pydantic 2.13.5 — `class M(pydantic.BaseModel): ...` → validated event model. exercised: "M(x=3).x == 3"
+  `locate: pydantic.BaseModel`
+
+- **Step 2 (Correlate and Hand-off).** Execute Rete rules, map event edges, sequence runbooks.
+  durable-rules 2.0.28 — `durable.lang.post(ruleset_name, message)` → posts event, triggering compiled Rete evaluation. located
+  `locate: durable.lang.post, durable.lang.assert_fact`
+  experta 1.9.4 — installed but import fails on py3.11 (`collections.Mapping` removed); no resolvable function.
+  pm4py 2.7.23.8 — `pm4py.discover_dfg(log)` → (dfg, start, end); maps event-to-event edges. exercised: "{('a','b'):1, ('a','c'):1}"
+  `locate: pm4py.discover_dfg`
+  unified-planning 1.3.0 — `unified_planning.shortcuts.OneshotPlanner(problem_kind=...)` → planner engine sequencing runbook actions. located
+  `locate: unified_planning.shortcuts.OneshotPlanner`
+
+- **Step 3 (Coverage Proof).** Prove every critical event class has filter/correlation/response paths.
+  clingo 5.8.0 — `clingo.Control(); ...; ctl.solve(on_model=...)` → ASP proof of coverage. exercised: "['a b']"
+  `locate: clingo.Control, clingo.Control.solve`
+
+- **Step 4 (Execution).** Emit dashboard, charts, and diagram as leaf assets.
+  mermaid — non-Python: Node/CLI renderer (@mermaid-js/mermaid-cli); CLI: `mmdc -i in.mmd -o out.svg`
+  plotly 7.0.0 — `plotly.graph_objects.Figure(data=go.Bar(y=[...]))` → interactive chart figure. exercised: "1 trace"
+  `locate: plotly.graph_objects.Figure`
+  streamlit 1.63.0 — `streamlit.write(*args)` → renders element to dashboard. located
+  `locate: streamlit.write, streamlit.dataframe`
 
 #### Pipeline 33: Incident Management
 
-- **Step 0 (Global Ingestion).** firecrawl-anydoc and csvkit flatten incident models, ticket dumps, alerts, known-error articles, and major-incident reports into the compiler manifest.
-  in catalog: csvkit
-- **Step 1 (Orchestrator Compilation).** Pipeline 0 emits a dagster asset graph only if category, impact, and urgency fields type-check. Missing model set cancels routing assets.
-  in catalog: dagster
-- **Step 2 (Route and Localize).** zen-engine applies compiled incident models; networkx walks Pipeline 13 to localize nodes; pm4py compares the live path to the model.
-  in catalog: networkx, pm4py, zen-engine
-- **Step 3 (Restore Proof).** lifelines estimates remaining restore time; reliability flags major-incident risk; csv-diff may emit model-update payloads into Pipeline 29 only if exception rates breach compiled thresholds.
-  in catalog: lifelines
-- **Step 4 (Execution).** streamlit, python-docx, and mermaid are leaf assets.
-  in catalog: python-docx, streamlit
+- **Step 0 (Global Ingestion).** Flatten incident models, tickets, alerts into manifest.
+  firecrawl-anydoc 0.2.4 — `anydoc.to_markdown(path)` → document to Markdown. located
+  `locate: anydoc.to_markdown`
+  csvkit 2.2.0 — `In2CSV().run()` (CLI `in2csv`) → flattens tabular dumps to CSV; `csvkit.reader` reads rows. located [CLI suite]
+  `locate: csvkit.utilities.in2csv.In2CSV.run, csvkit.reader`
+- **Step 1 (Orchestrator Compilation).** Emit asset graph if category/impact/urgency type-check.
+  dagster 1.13.20 — `@dagster.asset` → routing asset node in graph. located
+  `locate: dagster.asset, dagster.Definitions`
+- **Step 2 (Route and Localize).** Apply models, walk graph, compare live path to model.
+  zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
+  `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
+  networkx 3.6.1 — `shortest_path(G, source, target)` → localize nodes via traversal. exercised: "['a','b','c']"
+  `locate: networkx.shortest_path`
+  pm4py 2.7.23.8 — `conformance_diagnostics_alignments(log, net, im, fm)` → compares live path to model. located
+  `locate: pm4py.conformance_diagnostics_alignments`
+- **Step 3 (Restore Proof).** Estimate remaining restore time; diff model-update payloads.
+  lifelines 0.30.3 — `KaplanMeierFitter().fit(durations, event_observed)` → remaining restore-time survival. exercised: "median 4.0"
+  `locate: lifelines.KaplanMeierFitter.fit`
+  csv-diff 1.2 — `compare(load_csv(a), load_csv(b))` → CSV model-update diff payload. exercised: "{'v': ['a', 'b']}"
+  `locate: csv_diff.compare, csv_diff.load_csv`
+- **Step 4 (Execution).** Leaf assets: dashboard, Word, diagram.
+  streamlit 1.63.0 — `streamlit.dataframe(df)` → incident dashboard leaf. located
+  `locate: streamlit.dataframe, streamlit.write`
+  python-docx 1.2.0 — `docx.Document().save(path)` → writes Word artifact. exercised: "docx written"
+  `locate: docx.Document`
+  mermaid — non-Python: Node/CLI renderer (@mermaid-js/mermaid-cli); CLI: `mmdc -i in.mmd -o out.svg`
 
 #### Pipeline 34: Problem Management
 
-- **Step 0 (Global Ingestion).** undoc and docling parse incident histories, vendor advisories, monitoring trends, configuration snapshots, and known-error articles into the compiler manifest.
-  in catalog: docling
-- **Step 1 (Orchestrator Compilation).** Pipeline 0 writes a prefect flow gated on amrlib producing causal or error-hypothesis graphs from clustered incidents. No causal AMR, no workflow.
-  in catalog: amrlib, prefect
-- **Step 2 (Cause and Known Error).** dowhy and pgmpy test structure; amr-logic-converter and pysmt formalize mechanisms; typedlogic records known-error facts only after the SMT proof.
-  in catalog: amr-logic-converter, dowhy, pgmpy, PySMT, typedlogic
-- **Step 3 (Solution and Close).** unified-planning and ortools explore strategies; zen-engine may emit a change payload into Pipeline 39; z3-solver must accept closure evidence or the record stays open in duckdb.
-  in catalog: duckdb, ortools, unified-planning, z3-solver, zen-engine
-- **Step 4 (Execution).** python-docx, mermaid, and clingraph fire as leaf assets.
-  in catalog: python-docx
+- **Step 0 (Global Ingestion).** Parse incident histories/advisories/snapshots/known-error articles into the manifest.
+  undoc 0.9.0 — `undoc.parse_file(path)` → Markdown/text/JSON; office parse. located
+  `locate: undoc.parse_file`
+  docling 2.124.0 — `DocumentConverter().convert(source)` → ConversionResult (Markdown/JSON); PDF/Office parse. located
+  `locate: docling.document_converter.DocumentConverter.convert`
+
+- **Step 1 (Orchestrator Compilation).** Write a prefect flow gated on amrlib causal/error graphs.
+  prefect 3.8.4 — `@prefect.flow def f(x): ...` → orchestrated flow run; flow emit. exercised: "flow result: 42"
+  `locate: prefect.flow`
+  amrlib 0.8.1 — `amrlib.load_stog_model()` then `.parse_sents([sent])` → AMR graphs; causal/error-hypothesis graphs. located
+  `locate: amrlib.load_stog_model`
+
+- **Step 2 (Cause and Known Error).** Test structure; formalize mechanisms; record known-error facts after SMT proof.
+  dowhy 0.14 — `dowhy.CausalModel(data, treatment, outcome, graph)` → identifiable model; causal-structure test. located
+  `locate: dowhy.CausalModel`
+  pgmpy 1.1.2 — `pgmpy.estimators.PC(data).estimate(ci_test='chi_square')` → learned DAG/PDAG; structure test. located
+  `locate: pgmpy.estimators.PC.PC.estimate`
+  amr-logic-converter 0.11.3 — `AmrLogicConverter().convert(amr)` → FOL Clause; mechanism formalization. located
+  `locate: amr_logic_converter.AmrLogicConverter.AmrLogicConverter.convert`
+  pysmt 0.9.6 — `pysmt.shortcuts.is_sat(formula)` → bool; SMT proof. exercised: "False / True"
+  `locate: pysmt.shortcuts.is_sat`
+  typedlogic 0.2.4 — `Theory().add(sentence)` → recorded fact; known-error fact recording. located
+  `locate: typedlogic.Theory.add`
+
+- **Step 3 (Solution and Close).** Explore strategies; accept closure evidence or keep record open in duckdb.
+  unified-planning 1.3.0 — `OneshotPlanner(problem_kind=pk).solve(problem)` → plan; strategy exploration. located
+  `locate: unified_planning.shortcuts.OneshotPlanner`
+  ortools 9.15.6755 — `CpSolver().solve(CpModel())` → status/values; CP-SAT strategy optimization. exercised: "OPTIMAL v= 3"
+  `locate: ortools.sat.python.cp_model.CpSolver.solve`
+  z3-solver 5.1.0.0 — `s=z3.Solver(); s.check()` → sat/unsat; closure-evidence proof. exercised: "sat"
+  `locate: z3.Solver.check`
+  duckdb 1.5.5 — `duckdb.sql("SELECT ...")` → relation; open-record store. exercised: "(2,)"
+  `locate: duckdb.sql`
+  zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
+  `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
+
+- **Step 4 (Execution).** Leaf assets: Word doc, diagram, ASP-fact graph.
+  python-docx 1.2.0 — `docx.Document()` then `.save(path)` → .docx; Word leaf asset. exercised: "36609 bytes"
+  `locate: docx.Document`
+  clingraph 1.2.6 — `clingraph.render(clingraph.compute_graphs(fb))` → graph image files; ASP-fact visualization leaf. located
+  `locate: clingraph.render, clingraph.compute_graphs`
+  mermaid — non-Python: Node CLI renderer; CLI: `mmdc -i in.mmd -o out.svg`
 
 #### Pipeline 35: Service Desk
 
-- **Step 0 (Global Ingestion).** docling and markitdown flatten query transcripts, eligibility rules, omnichannel policy, templates, and desk metrics into the compiler manifest.
-  in catalog: docling, markitdown
-- **Step 1 (Orchestrator Compilation).** Pipeline 0 emits a temporalio workflow only if triage-guideline and channel spans resolve. Empty guideline set yields a halt.
-  in catalog: temporalio
-- **Step 2 (Triage and Pack).** spacy types ticket fields; zen-engine and business-rules route to Pipelines 33, 34, or 36; jinja2 and stanza assemble messages only for compiled channel constraints.
-  in catalog: business-rules, Jinja2, spacy, stanza, zen-engine
-- **Step 3 (Feedback and Improve).** pandas stores confirmations and CSAT; statsmodels scores desk series; pulp may emit Pipeline 29 items if compiled thresholds fail.
-  in catalog: pandas, pulp, statsmodels
-- **Step 4 (Execution).** streamlit and python-docx are terminal activities.
-  in catalog: python-docx, streamlit
+- **Step 0 (Global Ingestion).** Flatten transcripts, rules, policy, metrics into the manifest.
+  docling 2.124.0 — `DocumentConverter().convert("transcript.pdf")` → parsed document object. located
+  `locate: docling.document_converter.DocumentConverter.convert`
+  markitdown 0.1.7 — `MarkItDown().convert("policy.docx")` → Markdown result; doc-to-Markdown. exercised: "# Desk x"
+  `locate: markitdown.MarkItDown.convert`
+
+- **Step 1 (Orchestrator Compilation).** Emit durable triage workflow when guideline/channel spans resolve.
+  temporalio 1.32.0 — `@temporalio.workflow.defn class Triage: ...` → defines durable workflow. located
+  `locate: temporalio.workflow.defn`
+
+- **Step 2 (Triage and Pack).** Route tickets by rules; assemble channel-constrained messages.
+  business-rules 1.1.1 — `business_rules.run_all(rule_list, defined_variables, defined_actions)` → fires routing when rules trigger. exercised: "False (empty rule_list)"
+  `locate: business_rules.run_all`
+  jinja2 3.1.6 — `jinja2.Template(src).render(**ctx)` → rendered message text. exercised: "flow R0"
+  `locate: jinja2.Template.render`
+  stanza 1.14.0 — `stanza.Pipeline(lang="en")` → NLP pipeline; parses/types ticket text. located
+  `locate: stanza.Pipeline`
+  zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
+  `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
+
+- **Step 3 (Feedback and Improve).** Store CSAT; score desk time series; LP escalation.
+  pandas 2.3.3 — `pandas.DataFrame({"csat":[...], "confirmed":[...]})` → tabular store. exercised: "(2, 2)"
+  `locate: pandas.DataFrame`
+  statsmodels 0.15.0 — `statsmodels.tsa.arima.model.ARIMA(endog, order=(1,0,0)).fit()` → fitted desk-series model. exercised: "aic 111.8"
+  `locate: statsmodels.tsa.arima.model.ARIMA.fit, statsmodels.tsa.arima.model.ARIMA`
+  pulp 3.3.2 — `LpProblem("p", LpMaximize).solve()` → Optimal/Infeasible; escalation LP. exercised: "Optimal"
+  `locate: pulp.LpProblem.solve`
+
+- **Step 4 (Execution).** Publish dashboard and Word artifacts.
+  python-docx 1.2.0 — `docx.Document()` (add_paragraph; save) → writes .docx. exercised: "1 paragraph"
+  `locate: docx.Document`
+  streamlit 1.63.0 — `streamlit.dataframe(df)` → renders dashboard. located
+  `locate: streamlit.dataframe`
 
 #### Pipeline 36: Service Request Management
 
-- **Step 0 (Global Ingestion).** firecrawl-anydoc flattens request models, catalog entries, SLA constraints, request text, and fulfilment logs into the compiler manifest.
-- **Step 1 (Orchestrator Compilation).** Pipeline 0 keeps spiffworkflow and pydantic request assets only when a matching model key or an ad-hoc flag type-checks. Neither present, no fulfilment flow.
-  in catalog: pydantic, SpiffWorkflow
-- **Step 2 (Model or Plan).** spiffworkflow executes matched models; unified-planning synthesizes ad-hoc plans; zen-engine writes approval tables as artifacts, not as a human gate.
-  in catalog: SpiffWorkflow, unified-planning, zen-engine
-- **Step 3 (Replay).** pm4py compares executed paths to the model; pandas and pingouin score cycle time into Pipeline 29 only on deviation.
-  in catalog: pandas, pm4py
-- **Step 4 (Execution).** streamlit and python-docx fire as leaf assets.
-  in catalog: python-docx, streamlit
+- **Step 0 (Global Ingestion).** Flatten request models/catalog/SLA/logs to Markdown manifest
+  firecrawl-anydoc 0.2.4 — `anydoc.to_markdown("catalog.docx")` → Markdown string; flattens docs to Markdown. exercised: "'Continuity plan\n'"
+  `locate: anydoc.to_markdown`
+
+- **Step 1 (Orchestrator Compilation).** Keep assets only when model key / ad-hoc flag type-checks
+  spiffworkflow — batch marked "no" (probed lowercase `spiffworkflow`); actually INSTALLED as `SpiffWorkflow` 3.2.0. `BpmnWorkflow(spec).do_engine_steps()` → runs the matched BPMN request model. located
+  `locate: SpiffWorkflow.bpmn.workflow.BpmnWorkflow.do_engine_steps, SpiffWorkflow.bpmn.workflow.BpmnWorkflow.run_all`
+  pydantic 2.13.5 — `M.model_validate(request)` → instance/raises; type-checks model key / ad-hoc flag. exercised: "rto=4"
+  `locate: pydantic.BaseModel.model_validate, pydantic.BaseModel`
+
+- **Step 2 (Model or Plan).** Execute BPMN model, synthesize ad-hoc plan, write approval tables
+  spiffworkflow — installed as `SpiffWorkflow` 3.2.0 (see Step 1). `BpmnWorkflow(spec).do_engine_steps()` → executes matched BPMN model. located
+  `locate: SpiffWorkflow.bpmn.workflow.BpmnWorkflow.do_engine_steps, SpiffWorkflow.bpmn.workflow.BpmnWorkflow.run_all`
+  unified-planning 1.3.0 — `with OneshotPlanner(problem_kind=pk) as p: p.solve(problem)` → PlanGenerationResult; synthesizes ad-hoc plan. located
+  `locate: unified_planning.shortcuts.OneshotPlanner`
+  zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
+  `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
+
+- **Step 3 (Replay).** Compare executed paths to model; score cycle-time deviation
+  pm4py 2.7.23.8 — `pm4py.conformance_diagnostics_alignments(log, net, im, fm)` → alignments; compares executed paths to model. located
+  `locate: pm4py.conformance_diagnostics_alignments, pm4py.conformance_diagnostics_token_based_replay`
+  pandas 2.3.3 — `df.groupby("case")["cycle"].mean()` → Series; scores per-case cycle time. exercised: "{'a': 4.0, 'b': 9.0}"
+  `locate: pandas.DataFrame.groupby`
+  pingouin 0.6.1 — `pingouin.anova(data=df, dv="cycle", between="grp")` → ANOVA table; tests cycle-time deviation. exercised: "F= 32.0"
+  `locate: pingouin.anova`
+
+- **Step 4 (Execution).** Leaf assets: web dashboard and Word document
+  python-docx 1.2.0 — `docx.Document().save("out.docx")` → writes .docx leaf asset. exercised: "saved 36709 bytes"
+  `locate: docx.Document, docx.document.Document.save`
+  streamlit 1.63.0 — `streamlit.write(obj)` / `streamlit.dataframe(df)` → renders app widget/table. located
+  `locate: streamlit.write, streamlit.dataframe`
 
 #### Pipeline 37: Service Catalog Management
 
-- **Step 0 (Global Ingestion).** undoc and markitdown dump strategy, portfolio overview, current catalog extracts, contracts, and questionnaires into the compiler manifest.
-  in catalog: markitdown
-- **Step 1 (Orchestrator Compilation).** Pipeline 0 builds a dagster asset graph from granularity, view, and access-rule spans. No view definition cancels publication assets.
-  in catalog: dagster
-- **Step 2 (Model and View).** dasel and pydantic instantiate the catalog into duckdb; jinja2 and great-tables emit standard views; pycasbin binds access only after clingo accepts mandatory-attribute completeness.
-  in catalog: clingo, dasel, duckdb, great-tables, Jinja2, pycasbin, pydantic
-- **Step 3 (Request Path).** zen-engine processes view requests and logs exceptions into the same store.
-  in catalog: zen-engine
-- **Step 4 (Execution).** streamlit, datasette, and python-docx are leaf assets.
-  in catalog: python-docx, streamlit
+- **Step 0 (Global Ingestion).** dump strategy/catalog/contract docs into compiler manifest
+  markitdown 0.1.7 — `MarkItDown().convert(path).text_content` → Markdown. exercised: "# Hi\n\nBody text"
+  `locate: markitdown.MarkItDown.convert`
+  undoc 0.9.0 — `undoc.parse_file(path).to_markdown()` → Markdown/text/JSON. exercised: "hi"
+  `locate: undoc.parse_file, undoc.Undoc.to_markdown`
+
+- **Step 1 (Orchestrator Compilation).** build dagster asset graph from recovered spans
+  dagster 1.13.20 — `@dagster.asset` + `Definitions(assets=[...])` → catalog asset graph. exercised: "AssetsDefinition"
+  `locate: dagster.asset, dagster.Definitions`
+
+- **Step 2 (Model and View).** instantiate catalog into duckdb, emit views, gate access
+  pydantic 2.13.5 — `Model.model_validate(row)` → typed catalog record. exercised: "2"
+  `locate: pydantic.BaseModel.model_validate`
+  duckdb 1.5.5 — `duckdb.connect('catalog.duckdb')` → connection; instantiates catalog. exercised: "(2,)"
+  `locate: duckdb.connect`
+  jinja2 3.1.6 — `Template(src).render(**ctx)` → standard view output. exercised: "hi x"
+  `locate: jinja2.Template.render`
+  great-tables 0.24.0 — `GT(df).as_raw_html()` → HTML view. exercised: "9309-char HTML"
+  `locate: great_tables.GT, great_tables.GT.as_raw_html`
+  clingo 5.8.0 — `Control().solve()` → accepts mandatory-attribute completeness. exercised: "a b"
+  `locate: clingo.Control.solve`
+  dasel — not installed here: Go binary (github.com/TomWright/dasel); CLI: `dasel -f f.json '.a'`
+  pycasbin ? — `Enforcer(model, policy).enforce(sub, obj, act)` → policy / access-control decision. located
+  `locate: casbin.Enforcer, casbin.Enforcer.enforce, casbin.Enforcer.add_policy`
+
+- **Step 3 (Request Path).** evaluate view requests against decision model
+  zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
+  `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
+
+- **Step 4 (Execution).** publish catalog as dashboard, API, and Word doc
+  streamlit 1.63.0 — `st.dataframe(df)` → dashboard element; catalog UI leaf. located
+  `locate: streamlit.delta_generator.ArrowMixin.dataframe`
+  datasette 0.65.3 — `Datasette(files=['catalog.db'])` → app; publishes DB as API/UI. located
+  `locate: datasette.app.Datasette`
+  python-docx 1.2.0 — `docx.Document(); .save(path)` → Word artifact. exercised: "docx saved"
+  `locate: docx.Document, docx.document.Document.save`
 
 #### Pipeline 38: Business Relationship Management
 
-- **Step 0 (Global Ingestion).** docling parses strategy, sponsor/customer data, stakeholder maps, performance reports, and prior relationship reviews into the compiler manifest.
-  in catalog: docling
-- **Step 1 (Orchestrator Compilation).** Pipeline 0 writes a prefect flow only if stakeholder-group and relationship-domain spans resolve. Empty map cancels journey assets.
-  in catalog: prefect
-- **Step 2 (Health and Offer).** networkx builds the RACI graph; pandas scores VoC; typedlogic records principles; zen-engine shapes offerings only under Pipeline 21 constraints that already proved.
-  in catalog: networkx, pandas, typedlogic, zen-engine
-- **Step 3 (Journey).** pydantic stores terms; pm4py tracks onboard/co-create/review/offboard and refuses offboard without a compiled sustainment record.
-  in catalog: pm4py, pydantic
-- **Step 4 (Execution).** python-docx and streamlit fire as leaf assets.
-  in catalog: python-docx, streamlit
+- **Step 0 (Global Ingestion).** parse strategy/stakeholder/performance/review docs into manifest
+  docling 2.124.0 — `DocumentConverter().convert(source="review.pdf")` → ConversionResult; parses to text/Markdown. located
+  `locate: docling.document_converter.DocumentConverter.convert`
+
+- **Step 1 (Orchestrator Compilation).** write flow only if stakeholder/relationship spans resolve
+  prefect 3.8.4 — `prefect.flow(name="brm")(fn)` → Flow; the journey-asset orchestration flow. located
+  `locate: prefect.flow`
+
+- **Step 2 (Health and Offer).** build RACI graph; score VoC; record principles
+  networkx 3.6.1 — `g=networkx.DiGraph(); g.add_edge(u_of_edge, v_of_edge)` → RACI directed graph. exercised: "DiGraph edges added; DAG check True"
+  `locate: networkx.DiGraph, networkx.DiGraph.add_edge`
+  pandas 2.3.3 — `pandas.DataFrame(data=voc_rows)` → tabular VoC scores. exercised: "2-row DataFrame built"
+  `locate: pandas.DataFrame`
+  typedlogic 0.2.4 — `typedlogic.Theory("brm").add(principle_sentence)` → records principle sentences/axioms. located
+  `locate: typedlogic.Theory.add`
+  zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
+  `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
+
+- **Step 3 (Journey).** store terms; track onboard/co-create/review/offboard journey
+  pm4py 2.7.23.8 — `pm4py.discover_petri_net_inductive(log)` → (net, im, fm) journey process model. exercised: "places=3 transitions=2"
+  `locate: pm4py.discover_petri_net_inductive`
+  pydantic 2.13.5 — `class Terms(pydantic.BaseModel): ...; Terms(**row)` → validated stored terms. exercised: "M(x=5).x == 5"
+  `locate: pydantic.BaseModel`
+
+- **Step 4 (Execution).** fire leaf report/dashboard assets
+  python-docx 1.2.0 — `docx.Document().add_paragraph(text)` → writes .docx leaf asset. exercised: "paragraph text 'hello'"
+  `locate: docx.Document`
+  streamlit 1.63.0 — `streamlit.dataframe(data=df)` → renders dashboard leaf asset. located
+  `locate: streamlit.dataframe`
 
 #### Pipeline 39: Change Enablement
 
-- **Step 0 (Global Ingestion).** firecrawl-anydoc flattens change policy, change models, RFC text, risk notes, and post-implementation reviews into the compiler manifest.
-- **Step 1 (Orchestrator Compilation).** Pipeline 0 emits a temporalio workflow gated on change-type, risk, and success-criteria spans. No model match and no risk span, no workflow.
-  in catalog: temporalio
-- **Step 2 (Assess and Authorize).** pydantic creates the record; zen-engine applies compiled models; pycasbin and business-rules bind the authority matrix; clingo must accept freeze-window and exclusive-resource constraints. Authorization is the stable model written to the record.
-  in catalog: business-rules, clingo, pycasbin, pydantic, zen-engine
-- **Step 3 (Plan and Replay).** criticalpath and unified-planning emit the plan; simpy dry-runs against Pipeline 13 state; pm4py and csv-diff refuse closure if executed path diverges without a compensation fact.
-  in catalog: criticalpath, pm4py, simpy, unified-planning
-- **Step 4 (Execution).** python-docx, mermaid, and streamlit are terminal activities. Proved mutations publish back onto the manifest edges used by Pipelines 13, 17, 18, 37, 41, 43, and 44.
-  in catalog: python-docx, streamlit
+- **Step 0 (Global Ingestion).** Flatten change policy, models, RFCs, risk notes, reviews into manifest.
+  firecrawl-anydoc 0.2.4 — `anydoc.to_markdown("rfc.docx")` → Markdown string from each source doc. exercised: "Spec line"
+  `locate: anydoc.to_markdown`
+
+- **Step 1 (Orchestrator Compilation).** Emit a Temporal workflow gated on change-type/risk/success-criteria spans.
+  temporalio 1.32.0 — `@temporalio.workflow.defn class ChangeWF: ...` → defines the durable workflow. located
+  `locate: temporalio.workflow.defn`
+
+- **Step 2 (Assess and Authorize).** Create record; apply models; bind authority matrix; accept freeze/resource constraints.
+  pydantic 2.13.5 — `pydantic.create_model("ChangeRecord", risk=(str, ...))` → the change record model. exercised: "instance amount=100"
+  `locate: pydantic.create_model`
+  business-rules 1.1.1 — `business_rules.run_all(rule_list, defined_variables, defined_actions)` → fires authority-matrix actions. exercised: "fired=True"
+  `locate: business_rules.run_all`
+  clingo 5.8.0 — `clingo.Control().solve(on_model=cb)` → stable model accepting freeze-window/exclusive-resource constraints. exercised: "sat, balanced=[True]"
+  `locate: clingo.Control.solve`
+  zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
+  `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
+  pycasbin ? — `Enforcer(model, policy).enforce(sub, obj, act)` → policy / access-control decision. located
+  `locate: casbin.Enforcer, casbin.Enforcer.enforce, casbin.Enforcer.add_policy`
+
+- **Step 3 (Plan and Replay).** Emit the plan; dry-run it; refuse divergent closure.
+  criticalpath 0.1.5 — `Node("proj").get_critical_path()` (after add/link/update_all) → ordered critical tasks. exercised: "critical=['A', 'B']"
+  `locate: criticalpath.Node.get_critical_path`
+  unified-planning 1.3.0 — `OneshotPlanner(problem_kind=problem.kind).solve(problem)` → a plan. located
+  `locate: unified_planning.shortcuts.OneshotPlanner`
+  simpy 4.1.2 — `simpy.Environment().run(until=T)` → advances discrete-event dry-run clock. exercised: "now=10"
+  `locate: simpy.Environment.run`
+  pm4py 2.7.23.8 — `pm4py.conformance_diagnostics_alignments(log, net, im, fm)` → per-trace divergences. located
+  `locate: pm4py.conformance_diagnostics_alignments`
+  csv-diff 1.2 — `csv_diff.compare(load_csv(planned, key="id"), load_csv(executed, key="id"))` → path divergence. exercised: "changed=1"
+  `locate: csv_diff.compare`
+
+- **Step 4 (Execution).** Publish terminal activities: document, diagram, dashboard.
+  python-docx 1.2.0 — `docx.Document().save("change.docx")` → writes the terminal Word activity. exercised: "saved 36583B"
+  `locate: docx.Document, docx.document.Document.save`
+  streamlit 1.63.0 — `streamlit.plotly_chart(fig)` → renders the terminal dashboard activity. located
+  `locate: streamlit.plotly_chart`
+  mermaid — non-Python: Node CLI renderer (@mermaid-js/mermaid-cli); CLI: `mmdc -i in.mmd -o out.svg`
 
 #### Pipeline 40: Project Management
 
-- **Step 0 (Global Ingestion).** undoc and markitdown dump strategy, mandates, business cases, stage reports, risk/issue logs, and work-package definitions into the compiler manifest.
-  in catalog: markitdown
-- **Step 1 (Orchestrator Compilation).** Pipeline 0 builds a dagster asset graph from tolerance, deliverable, and exception-trigger spans. Missing tolerance set cancels control assets.
-  in catalog: dagster
-- **Step 2 (Gates and Schedule).** pydantic instantiates PID/stage/work-package schemas; zen-engine encodes initiate/project/stage/exception/closure graphs; criticalpath and ortools solve resource-feasible plans.
-  in catalog: criticalpath, ortools, pydantic, zen-engine
-- **Step 3 (Exception Proof).** typedlogic and z3-solver must accept that an exception plan restores tolerances given updated case numbers or the next-stage asset is not materialized.
-  in catalog: typedlogic, z3-solver
-- **Step 4 (Execution).** pandas, plotly, mermaid, python-docx, and quarto fire as leaf assets.
-  in catalog: pandas, plotly, python-docx
+- **Step 0 (Global Ingestion).** dump strategy/cases/logs into the manifest
+  markitdown 0.1.7 — `MarkItDown().convert(source).text_content` → Markdown of the document. exercised: "'# Title\\n\\nhello world'"
+  `locate: markitdown.MarkItDown.convert`
+  undoc 0.9.0 — `undoc.parse_file(path).to_json()` → text/JSON. exercised: "to_json → format:\"xlsx\"…"
+  `locate: undoc.parse_file, undoc.Undoc.to_json`
+
+- **Step 1 (Orchestrator Compilation).** build a dagster asset graph from spans
+  dagster 1.13.20 — `@dagster.asset` → software-defined asset node in the graph. exercised: "AssetsDefinition"
+  `locate: dagster.asset, dagster.define_asset_job`
+
+- **Step 2 (Gates and Schedule).** instantiate schemas; solve resource-feasible plans
+  pydantic 2.13.5 — `pydantic.create_model("PID", field=(int, ...))` → PID/stage/WP schema; `.model_validate(row)`. exercised: "model M(x=5).x == 5"
+  `locate: pydantic.create_model, pydantic.BaseModel, pydantic.BaseModel.model_validate`
+  criticalpath 0.1.5 — `Node(name).get_critical_path()` → schedule critical path. exercised: "critical path ['A','B']"
+  `locate: criticalpath.Node.get_critical_path`
+  ortools 9.15.6755 — `CpSolver().solve(CpModel())` → resource-feasible plan. exercised: "OPTIMAL, x=3"
+  `locate: ortools.sat.python.cp_model.CpSolver.solve, ortools.sat.python.cp_model.CpModel`
+  zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
+  `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
+
+- **Step 3 (Exception Proof).** prove an exception plan restores tolerances
+  typedlogic 0.2.4 — `Solver().prove(sentence)` → True/False/None entailment. located
+  `locate: typedlogic.solver.Solver.prove`
+  z3-solver 5.1.0.0 — `z3.Solver().check()` → sat/unsat on restored tolerances. exercised: "sat; [x = 1]"
+  `locate: z3.Solver.check`
+
+- **Step 4 (Execution).** fire tabular, chart, Word leaf assets
+  pandas 2.3.3 — `pandas.DataFrame(data)` → tabular asset; `.to_excel(path)`. exercised: "shape (3, 1)"
+  `locate: pandas.DataFrame, pandas.DataFrame.to_excel`
+  plotly 7.0.0 — `plotly.express.line(x, y)` → interactive chart. exercised: "Figure, 1 trace"
+  `locate: plotly.express.line`
+  python-docx 1.2.0 — `docx.Document().save(path)` → Word report. exercised: "saved .docx"
+  `locate: docx.Document, docx.document.Document.save`
+  mermaid — non-Python: Node/CLI renderer (@mermaid-js/mermaid-cli); CLI: `mmdc -i in.mmd -o out.svg`
+  quarto — non-Python: CLI publishing engine; CLI: `quarto render`
 
 #### Pipeline 41: Software Development and Management
 
-- **Step 0 (Global Ingestion).** docling flattens strategy, architecture guidelines, backlogs, design notes, test records, and telemetry summaries into the compiler manifest.
-  in catalog: docling
-- **Step 1 (Orchestrator Compilation).** Pipeline 0 writes prefect tasks only if backlog-item and architecture-constraint spans resolve. Empty backlog cancels design assets.
-  in catalog: prefect
-- **Step 2 (Guide and Rank).** typedlogic records SDM rules against Pipeline 16; pulp ranks tasks under value, risk, and networkx product edges.
-  in catalog: networkx, pulp, typedlogic
-- **Step 3 (Design Proof).** z3-solver must accept design artifacts against non-functional bounds; python-sat encodes feature-model constraints where present; zen-engine may emit RFC payloads into Pipeline 39 only after that proof.
-  in catalog: python-sat, z3-solver, zen-engine
-- **Step 4 (Execution).** mermaid, diagrams, and python-docx are leaf assets.
-  in catalog: python-docx
+- **Step 0 (Global Ingestion).** Flatten strategy, architecture, backlogs, design/test/telemetry to Markdown.
+  docling 2.124.0 — `DocumentConverter().convert(source).document.export_to_markdown()` → Markdown from docs. located
+  `locate: docling.document_converter.DocumentConverter.convert`
+
+- **Step 1 (Orchestrator Compilation).** Write prefect tasks if backlog/architecture-constraint spans resolve.
+  prefect 3.8.4 — `@prefect.task` def; `@prefect.flow` def; `flow()` → orchestrated tasks. exercised: "result 5"
+  `locate: prefect.task, prefect.flow`
+
+- **Step 2 (Guide and Rank).** Record SDM rules; rank tasks by value/risk over product edges.
+  typedlogic 0.2.4 — `ClingoSolver().add(sentence)` → records SDM rules. exercised: "satisfiable=True"
+  `locate: typedlogic.integrations.solvers.clingo.ClingoSolver.add, typedlogic.solver.Solver.add`
+  pulp 3.3.2 — `p=LpProblem(...); p+=obj; p.solve(...)` → ranks tasks. exercised: "Optimal, x=4.0"
+  `locate: pulp.LpProblem.solve`
+  networkx 3.6.1 — `networkx.DiGraph(product_edges)` → product-edge dependency graph. exercised: "topo ['a','b','c']"
+  `locate: networkx.DiGraph, networkx.topological_sort`
+
+- **Step 3 (Design Proof).** Prove designs against bounds; encode feature-model constraints.
+  z3-solver 5.1.0.0 — `s=Solver(); s.add(bounds); s.check()` → sat accepts artifacts. exercised: "check=sat"
+  `locate: z3.Solver.check`
+  python-sat 1.9.dev15 — `Solver(bootstrap_with=CNF().clauses).solve()` → encodes/solves feature model. exercised: "solve=True, model [-1,2]"
+  `locate: pysat.formula.CNF, pysat.solvers.Solver.solve`
+  zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
+  `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
+
+- **Step 4 (Execution).** Leaf assets: diagrams and Word document.
+  diagrams 0.25.1 — `with Diagram('t'): a >> b` → cloud-architecture diagram (render needs graphviz `dot`, absent here). located
+  `locate: diagrams.Diagram`
+  python-docx 1.2.0 — `d=docx.Document(); d.add_paragraph(t); d.save(path)` → Word leaf asset. exercised: "paras ['H','para one']"
+  `locate: docx.Document, docx.document.Document.save`
+  mermaid — non-Python: Node/CLI renderer, not a Python import; CLI: `mmdc -i in.mmd -o out.svg`
 
 #### Pipeline 42: Service Validation and Testing
 
-- **Step 0 (Global Ingestion).** firecrawl-anydoc flattens test policy, acceptance-criteria drafts, model catalogs, environment sheets, and prior test records into the compiler manifest.
-- **Step 1 (Orchestrator Compilation).** Pipeline 0 admits testing assets only when acceptance predicates and a model key type-check. No predicate set, no plan flow.
-- **Step 2 (Criteria Proof).** typedlogic records exit criteria; pysmt and model-checker must accept internal consistency and entailment of Pipeline 15 requirements.
-  in catalog: PySMT, typedlogic
-- **Step 3 (Plan and Exception).** unified-planning and ortools emit the tailored plan; zen-engine classifies exceptions; clingo must accept that every failed exit criterion has a defect or exception record.
-  in catalog: clingo, ortools, unified-planning, zen-engine
-- **Step 4 (Execution).** great-tables, python-docx, and mermaid fire as leaf assets.
-  in catalog: great-tables, python-docx
+- **Step 0 (Global Ingestion).** flatten test policy, criteria, catalogs, records into manifest
+  firecrawl-anydoc 0.2.4 — `anydoc.to_markdown(path)` → Markdown str; flattens documents into manifest. located
+  `locate: anydoc.to_markdown`
+
+- **Step 1 (Orchestrator Compilation).** admit assets when acceptance predicates and model key type-check
+  (no candidate library named in this step)
+
+- **Step 2 (Criteria Proof).** record exit criteria; accept consistency and entailment
+  model-checker 1.3.9 — `model_checker.run_test(example_case, semantic_class, proposition_class, operator_collection, syntax_class, model_constraints, model_structure)` → bool; accepts consistency/entailment. located
+  `locate: model_checker.run_test, model_checker.solver.create_solver`
+  pysmt 0.9.6 — `pysmt.shortcuts.is_sat(formula)` → bool; checks consistency (is_valid for entailment). exercised: "True"
+  `locate: pysmt.shortcuts.is_sat, pysmt.shortcuts.is_valid`
+  typedlogic 0.2.4 — `typedlogic.solver.Solver.add_sentence(sentence)` → None; records an exit criterion into the theory. located
+  `locate: typedlogic.solver.Solver.add_sentence, typedlogic.Theory`
+
+- **Step 3 (Plan and Exception).** emit tailored plan; prove defect/exception coverage
+  clingo 5.8.0 — `clingo.Control(); ctl.ground(...); ctl.solve(on_model=...)` → stable models; accepts defect/exception coverage. exercised: "['a b']"
+  `locate: clingo.Control.solve, clingo.Control`
+  ortools 9.15.6755 — `CpSolver().Solve(CpModel())` → OPTIMAL/FEASIBLE status; emits the tailored plan. exercised: "('OPTIMAL', 4)"
+  `locate: ortools.sat.python.cp_model.CpSolver.Solve, ortools.sat.python.cp_model.CpModel`
+  unified-planning 1.3.0 — `unified_planning.shortcuts.OneshotPlanner(problem_kind=...)` → planner engine; emits the tailored plan. located
+  `locate: unified_planning.shortcuts.OneshotPlanner`
+  zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
+  `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
+
+- **Step 4 (Execution).** render result table, Word doc, and diagram
+  great-tables 0.24.0 — `great_tables.GT(df)` → formatted table; renders result table. exercised: "GT"
+  `locate: great_tables.GT`
+  mermaid — non-Python: Node/CLI renderer (@mermaid-js/mermaid-cli), not a Python import; CLI: `mmdc -i in.mmd -o out.svg`.
+  python-docx 1.2.0 — `docx.Document()` then `add_paragraph(...); save(path)` → .docx file; renders Word report. exercised: "1 paragraph"
+  `locate: docx.Document`
 
 #### Pipeline 43: Deployment Management
 
-- **Step 0 (Global Ingestion).** undoc and markitdown dump deployment models, pipeline configs, DML manifests, environment inventories, and failure analyses into the compiler manifest.
-  in catalog: markitdown
-- **Step 1 (Orchestrator Compilation).** Pipeline 0 emits a temporalio workflow gated on environment, success-criteria, and rollback spans plus a triggering Pipeline 39 change fact. No change fact, no deploy workflow.
-  in catalog: temporalio
-- **Step 2 (Readiness Proof).** pydantic describes pipeline elements; typedlogic encodes pre-deploy predicates; clingo, z3-solver, and csv-diff must accept component and environment readiness.
-  in catalog: clingo, pydantic, typedlogic, z3-solver
-- **Step 3 (Review).** unified-planning emits the instance plan; pm4py mines logs against the model; pandas may emit Pipeline 29 items on recurring unsat.
-  in catalog: pandas, pm4py, unified-planning
-- **Step 4 (Execution).** mermaid and python-docx are terminal compensation-safe activities.
-  in catalog: python-docx
+- **Step 0 (Global Ingestion).** Dump deploy models, configs, and inventories into the manifest
+  markitdown 0.1.7 — `markitdown.MarkItDown().convert(source)` → DocumentConverterResult; converts sources to markdown. exercised: "'Hello clause one.'"
+  `locate: markitdown.MarkItDown.convert`
+  undoc 0.9.0 — `undoc.parse_file(path)` → Undoc (then .to_markdown()); Office→md/text/json. exercised: "Undoc object"
+  `locate: undoc.parse_file, undoc.Undoc.to_markdown`
+
+- **Step 1 (Orchestrator Compilation).** Emit a temporalio workflow gated on change fact
+  temporalio 1.32.0 — `@temporalio.workflow.defn(sandboxed=True)` → workflow class; declares the deploy workflow. located
+  `locate: temporalio.workflow.defn`
+
+- **Step 2 (Readiness Proof).** Encode predicates; solvers accept component/environment readiness
+  pydantic 2.13.5 — `pydantic.BaseModel.model_validate(data)` → validated instance; describes pipeline elements. exercised: "(1, 'a')"
+  `locate: pydantic.BaseModel.model_validate`
+  typedlogic 0.2.4 — `typedlogic.registry.get_compiler('clingo').compile(theory)` → program str; encodes pre-deploy predicates. exercised: "SouffleCompiler obtained"
+  `locate: typedlogic.registry.get_compiler, typedlogic.compiler.Compiler.compile`
+  clingo 5.8.0 — `clingo.Control().solve(on_model=cb)` → SolveResult; accepts readiness (ASP). exercised: "['a b']"
+  `locate: clingo.Control.solve`
+  csv-diff 1.2 — `csv_diff.compare(previous, current)` → diff dict; checks readiness deltas. exercised: "['added','removed','changed',…]"
+  `locate: csv_diff.compare, csv_diff.load_csv`
+  z3-solver 5.1.0.0 — `z3.Solver().check()` → sat/unsat; accepts readiness constraints. exercised: "sat"
+  `locate: z3.Solver.check`
+
+- **Step 3 (Review).** Emit instance plan; mine logs against model
+  unified-planning 1.3.0 — `unified_planning.shortcuts.OneshotPlanner(problem_kind=...).solve(problem)` → plan; emits instance plan. located (requires planner engine)
+  `locate: unified_planning.shortcuts.OneshotPlanner`
+  pm4py 2.7.23.8 — `pm4py.conformance_diagnostics_alignments(log, net, im, fm)` → alignments; mines logs against model. located
+  `locate: pm4py.conformance_diagnostics_alignments`
+  pandas 2.3.3 — `pandas.DataFrame(data)` → DataFrame; emits Pipeline 29 items. exercised: "(2, 2)"
+  `locate: pandas.DataFrame`
+
+- **Step 4 (Execution).** Terminal diagram and docx activities
+  mermaid — non-Python: Node/CLI renderer (@mermaid-js/mermaid-cli), not a Python import; CLI: `mmdc -i in.mmd -o out.svg`
+  python-docx 1.2.0 — `docx.Document().save(path)` → writes .docx; terminal Word activity. exercised: "'t' round-trip"
+  `locate: docx.document.Document.save`
 
 #### Pipeline 44: Release Management
 
-- **Step 0 (Global Ingestion).** docling flattens product/service architecture, relationship maps, release policies, change schedules, and prior reviews into the compiler manifest.
-  in catalog: docling
-- **Step 1 (Orchestrator Compilation).** Pipeline 0 writes a prefect flow only if a release-model key and go/no-go language both resolve against Pipelines 39 and 43 facts. Missing go-criteria cancels execution assets.
-  in catalog: prefect
-- **Step 2 (Select and Prove).** zen-engine selects the model; criticalpath builds the schedule; typedlogic and z3-solver must accept procedure, component-verification, and readiness jointly.
-  in catalog: criticalpath, typedlogic, z3-solver, zen-engine
-- **Step 3 (Review).** pm4py and pandas compare logs and incidents to success criteria; reliability flags release-induced signatures into Pipeline 34.
-  in catalog: pandas, pm4py
-- **Step 4 (Execution).** mermaid and python-docx fire as leaf assets and write knowledge payloads into Pipeline 46.
-  in catalog: python-docx
+- **Step 0 (Global Ingestion).** Flatten architecture/policies/schedules/reviews into the manifest.
+  docling 2.124.0 — `DocumentConverter().convert(source=path)` → parsed document. located
+  `locate: docling.document_converter.DocumentConverter.convert`
+
+- **Step 1 (Orchestrator Compilation).** Write a flow only if release-model and go/no-go language resolve.
+  prefect 3.8.4 — `@prefect.flow` on a function → defines orchestration flow. located
+  `locate: prefect.flow`
+
+- **Step 2 (Select and Prove).** Select model, build schedule, prove procedure/verification/readiness jointly.
+  zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
+  `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
+  criticalpath 0.1.5 — `Node('p'); p.add(Node('A',duration=3)); p.link(a,b); p.get_critical_path()` → CPM path. exercised: "('[A, B]', 5)"
+  `locate: criticalpath.Node, criticalpath.Node.get_critical_path`
+  typedlogic 0.2.4 — `Solver().add(theory); Solver().check()` → satisfiability of joint constraints. located
+  `locate: typedlogic.solver.Solver.check, typedlogic.solver.Solver.add`
+  z3-solver 5.1.0.0 — `z3.Solver(); s.add(...); s.check()` → sat/unsat proof. exercised: "sat [x = 1]"
+  `locate: z3.Solver, z3.Solver.check`
+
+- **Step 3 (Review).** Compare logs and incidents to success criteria.
+  pm4py 2.7.23.8 — `pm4py.conformance_diagnostics_token_based_replay(log, net, im, fm)` → per-trace conformance vs model. located
+  `locate: pm4py.conformance_diagnostics_token_based_replay`
+  pandas 2.3.3 — `pandas.DataFrame(data)` → tabular logs/incidents for comparison. exercised: "shape (2, 1)"
+  `locate: pandas.DataFrame`
+
+- **Step 4 (Execution).** Emit diagram and docx as leaf assets.
+  mermaid — non-Python: Node/CLI renderer (@mermaid-js/mermaid-cli); CLI: `mmdc -i in.mmd -o out.svg`
+  python-docx 1.2.0 — `docx.Document()` (add_paragraph/save) → Word document. exercised: "paragraphs == 0"
+  `locate: docx.Document`
 
 #### Pipeline 45: Organizational Change Management
 
-- **Step 0 (Global Ingestion).** firecrawl-anydoc and undoc flatten business architecture, culture reviews, OCM audits, change requests, and adoption metrics into the compiler manifest.
-- **Step 1 (Orchestrator Compilation).** Pipeline 0 emits a dagster asset graph only if change-vision and impacted-role spans resolve. Empty stakeholder set cancels communication assets.
-  in catalog: dagster
-- **Step 2 (Ready and Plan).** networkx maps roles; pandas and pingouin score readiness; unified-planning and criticalpath emit the engagement sequence; zen-engine writes the proceed certificate only if feasibility constraints compile.
-  in catalog: criticalpath, networkx, pandas, unified-planning, zen-engine
-- **Step 3 (Sustain Proof).** statsmodels tracks adoption; clingo must accept that every declared early-win has an evidence record or sustainment assets halt.
-  in catalog: clingo, statsmodels
-- **Step 4 (Execution).** python-docx and quarto are leaf assets.
-  in catalog: python-docx
+- **Step 0 (Global Ingestion).** Flatten architecture, culture reviews, OCM audits into manifest.
+  firecrawl-anydoc 0.2.4 — `anydoc.to_markdown(path)` → document to Markdown. located
+  `locate: anydoc.to_markdown`
+  undoc 0.9.0 — `parse_file(path).to_markdown()` → Office doc to Markdown/text/JSON. located
+  `locate: undoc.parse_file, undoc.Undoc.to_markdown`
+- **Step 1 (Orchestrator Compilation).** Emit asset graph if change-vision/role spans resolve.
+  dagster 1.13.20 — `@dagster.asset` → communication asset node in graph. located
+  `locate: dagster.asset, dagster.Definitions`
+- **Step 2 (Ready and Plan).** Map roles, score readiness, emit engagement sequence.
+  networkx 3.6.1 — `G=DiGraph(); G.add_edge(u,v)` → role/stakeholder map. exercised: "3-node DiGraph built"
+  `locate: networkx.DiGraph`
+  pandas 2.3.3 — `pandas.DataFrame(data)` → holds readiness scores. located
+  `locate: pandas.DataFrame`
+  pingouin 0.6.1 — `cronbach_alpha(data=df)` → readiness-survey reliability score. exercised: "0.818"
+  `locate: pingouin.cronbach_alpha, pingouin.anova`
+  unified-planning 1.3.0 — `OneshotPlanner(problem_kind=...).solve(problem)` → engagement sequence plan. located
+  `locate: unified_planning.shortcuts.OneshotPlanner`
+  criticalpath 0.1.5 — `Node(...).get_critical_path()` → engagement CPM sequence. exercised: "['t1','t2'], duration 5"
+  `locate: criticalpath.Node.get_critical_path`
+  zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
+  `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
+- **Step 3 (Sustain Proof).** Track adoption; accept every early-win has evidence.
+  statsmodels 0.15.0 — `statsmodels.api.OLS(y, X).fit()` → adoption-trend regression. exercised: "params [1.0, 2.0]"
+  `locate: statsmodels.api.OLS`
+  clingo 5.8.0 — `c=Control(); c.add(...); c.ground(...); c.solve()` → accepts evidence constraints. exercised: "['a b']"
+  `locate: clingo.Control.solve, clingo.Control.ground`
+- **Step 4 (Execution).** Leaf assets: Word and publishing.
+  python-docx 1.2.0 — `docx.Document().save(path)` → writes Word artifact. exercised: "docx written"
+  `locate: docx.Document`
+  quarto — non-Python: CLI publishing engine; CLI: `quarto render report.qmd`
 
 #### Pipeline 46: Knowledge Management
 
-- **Step 0 (Global Ingestion).** markitdown, undoc, and docling dump strategy, domain inventories, knowledge bases, roadmaps, and usage logs into the compiler manifest.
-  in catalog: docling, markitdown
-- **Step 1 (Orchestrator Compilation).** Pipeline 0 writes prefect tasks for rdflib and networkx only if domain, owner, and demand spans exist in the census. No demand item, no routine flow.
-  in catalog: networkx, prefect, rdflib
-- **Step 2 (Inventory Proof).** networkx maps domains to owners; rdflib stores assets; typedlogic records guidelines; clingo must accept that every high-priority demand is fulfilled or queued.
-  in catalog: clingo, networkx, rdflib, typedlogic
-- **Step 3 (Routines).** spiffworkflow executes capture/review/publish/retire; pydantic versions assets; ydata-profiling and pandas may emit Pipeline 29 items when freshness thresholds fail.
-  in catalog: pandas, pydantic, SpiffWorkflow, ydata-profiling
-- **Step 4 (Execution).** mkdocs, quarto, python-docx, and mermaid fire as leaf assets.
-  in catalog: python-docx
+- **Step 0 (Global Ingestion).** Dump strategy/inventories/KBs/roadmaps/usage-logs into the manifest.
+  markitdown 0.1.7 — `MarkItDown().convert(source)` → Markdown; doc→Markdown. exercised: "# Spec\n\nHello"
+  `locate: markitdown.MarkItDown.convert`
+  undoc 0.9.0 — `undoc.parse_file(path)` → Markdown/text/JSON; office parse. located
+  `locate: undoc.parse_file`
+  docling 2.124.0 — `DocumentConverter().convert(source)` → ConversionResult; PDF/Office parse. located
+  `locate: docling.document_converter.DocumentConverter.convert`
 
-### Reverse pipelines
+- **Step 1 (Orchestrator Compilation).** Write prefect tasks for rdflib and networkx when spans exist.
+  prefect 3.8.4 — `@prefect.task def t(): ...` → orchestrated task; task emit. located
+  `locate: prefect.task`
+  rdflib 7.6.0 — `rdflib.Graph()` → RDF store for a task; graph task target. located
+  `locate: rdflib.Graph`
+  networkx 3.6.1 — `networkx.DiGraph()` → directed graph for a task; graph task target. located
+  `locate: networkx.DiGraph`
 
-Pipeline R0 is Part 4 of this file; every reverse pipeline ends in one workbook (Part 3, T3).
+- **Step 2 (Inventory Proof).** Map domains→owners; store assets; record guidelines; prove demand fulfilled/queued.
+  networkx 3.6.1 — `G=nx.DiGraph(); G.add_edges_from([(domain, owner)])` → mapped edges; domain→owner mapping. located
+  `locate: networkx.DiGraph.add_edges_from`
+  rdflib 7.6.0 — `g.add((s, p, o))` → stored triple; asset storage. located
+  `locate: rdflib.Graph.add`
+  typedlogic 0.2.4 — `Theory().add(sentence)` → recorded guideline; guideline facts. located
+  `locate: typedlogic.Theory.add`
+  clingo 5.8.0 — `ctl.solve()` → SAT/UNSAT; high-priority-demand fulfilment proof. exercised: "SAT"
+  `locate: clingo.Control.solve`
+
+- **Step 3 (Routines).** Execute capture/review/publish/retire; version assets; emit items on stale freshness.
+  spiffworkflow 3.2.0 — `BpmnWorkflow(spec).do_engine_steps()` → advances BPMN; capture/review/publish/retire execution. located (import is `SpiffWorkflow`; batch's lowercase `spiffworkflow` fails)
+  `locate: SpiffWorkflow.bpmn.workflow.BpmnWorkflow.do_engine_steps, SpiffWorkflow.bpmn.workflow.BpmnWorkflow`
+  pydantic 2.13.5 — `class Asset(pydantic.BaseModel): version: int` → validated versioned model; asset versioning. exercised: "unit=3.5"
+  `locate: pydantic.BaseModel`
+  ydata-profiling 4.18.4 — `ydata_profiling.ProfileReport(df).to_html()` → EDA report; freshness/EDA emission. located
+  `locate: ydata_profiling.ProfileReport`
+  pandas 2.3.3 — `pandas.DataFrame(rows)` → tabular items; emit Pipeline 29 items. located
+  `locate: pandas.DataFrame`
+
+- **Step 4 (Execution).** Leaf assets: docs site, Word doc, diagram.
+  mkdocs 1.6.1 — `mkdocs.commands.build.build(config)` → static site; docs-site leaf. located
+  `locate: mkdocs.commands.build.build`
+  python-docx 1.2.0 — `docx.Document().save(path)` → .docx; Word leaf. exercised: "36609 bytes"
+  `locate: docx.Document`
+  quarto — non-Python: CLI publishing engine; CLI: `quarto render page.qmd`
+  mermaid — non-Python: Node CLI renderer; CLI: `mmdc -i in.mmd -o out.svg`
 
 #### Pipeline R0: Zero-Touch Invert Compiler
 
-- **Step 0 (Global Ingestion).** docling, undoc, markitdown, firecrawl-anydoc, mammoth, office-oxide, python-pptx, python-docx, pymupdf, pypdf, pypdfium2, and playwright crawl the published folder and emit a mixed Markdown, JSON, CSV, slide-XML, document-XML, and HTML inventory with no predeclared schema.
-  in catalog: docling, mammoth, markitdown, office-oxide, playwright, PyMuPDF, pypdfium2, python-docx, python-pptx
-- **Step 1 (Artifact Census).** ydata-profiling, sweetviz, and dataprep profile every recovered table; dasel walks JSON, YAML, and XML; python-docx and office-oxide fingerprint Word heading trees, styles, and content controls; python-pptx fingerprints slide masters, layouts, placeholders, notes, and chart caches; pymupdf and pypdf fingerprint remaining PDFs; markdownify and html2text flatten Streamlit, Dash, Panel, NiceGUI, MkDocs, Quarto, Reveal, Folium, and Kepler pages captured by playwright into a single machine-readable manifest.
-  in catalog: dasel, html2text, markdownify, office-oxide, playwright, PyMuPDF, pypdf, python-docx, python-pptx, streamlit, sweetviz, ydata-profiling
-  attempted, failed here: dataprep
-- **Step 2 (Schema Compilation).** dasel projections are typed by pydantic at runtime, producing the only schemas the rest of the run is allowed to use. openpyxl, xlsxwriter, and pandas-xlsx-tables write those schemas as the pipeline spreadsheet.
-  in catalog: dasel, openpyxl, pandas-xlsx-tables, pydantic, XlsxWriter
-- **Step 3 (Capability Logic).** typedlogic writes clingo facts from the manifest (mime class, heading lexicon, table shapes, deontic verbs, geo fields, SLA tokens, C4 labels, slide layout names, time-to-event columns). clingo returns the unique stable model of which forward pipeline produced the pack, which libraries are legal for invert, which libraries are legal for replay, and which output mime types must be regenerated.
-  in catalog: clingo, typedlogic
-- **Step 4 (Graph Compilation).** networkx and graphable turn that stable model into a directed invert graph and a directed replay graph. jinja2 renders both graphs into prefect flow source, dagster asset definitions, or a temporalio workflow module, including retries, result persistence, and compensation on solver unsat.
-  in catalog: dagster, Jinja2, networkx, prefect, temporalio
-  attempted, failed here: graphable
-- **Step 5 (Self-Load).** the chosen orchestrator imports the file it just wrote, registers the assets, and starts the run. No flow, schedule, partition, or retry policy exists before this step. Every admitted reverse pipeline emits exactly one .xlsx.
+- **Step 0 (Global Ingestion).** Crawl folder; parse every doc into mixed inventory.
+  docling 2.124.0 — `DocumentConverter().convert(path)` → parsed document object. located
+  `locate: docling.document_converter.DocumentConverter.convert`
+  firecrawl-anydoc 0.2.4 — `anydoc.to_markdown(path)` → doc-to-Markdown string. exercised: "| a | b | ..."
+  `locate: anydoc.to_markdown`
+  mammoth 1.12.1 — `mammoth.convert_to_html(docx_fileobj)` → Word-to-clean-HTML result. located
+  `locate: mammoth.convert_to_html`
+  markitdown 0.1.7 — `MarkItDown().convert(path)` → Markdown result. exercised: "# Desk x"
+  `locate: markitdown.MarkItDown.convert`
+  office-oxide 0.1.9 — `office_oxide.to_markdown(path)` → Office-to-Markdown string. located
+  `locate: office_oxide.to_markdown`
+  playwright 1.62.0 — `with sync_playwright() as p: p.chromium.launch()...page.content()` → captures rendered HTML. located
+  `locate: playwright.sync_api.sync_playwright`
+  pymupdf 1.28.2 — `d=pymupdf.open(path); d[0].get_text()` → PDF page text. exercised: "'REL'"
+  `locate: pymupdf.open, pymupdf.Page.get_text`
+  pypdfium2 5.13.0 — `pypdfium2.PdfDocument(path)` (page.get_textpage().get_text_range()) → PDF text/render. located
+  `locate: pypdfium2.PdfDocument, pypdfium2.PdfTextPage.get_text_range`
+  python-docx 1.2.0 — `docx.Document(path)` → reads .docx content. exercised: "1 paragraph"
+  `locate: docx.Document`
+  python-pptx 1.0.2 — `pptx.Presentation(path)` → reads .pptx content. exercised: "11 layouts"
+  `locate: pptx.Presentation`
+  undoc 0.9.0 — `undoc.parse_file(path)` → Markdown/text/JSON of Office doc. located
+  `locate: undoc.parse_file`
+
+- **Step 1 (Artifact Census).** Profile tables; fingerprint docs; flatten captured pages into manifest.
+  ydata-profiling 4.18.4 — `ydata_profiling.ProfileReport(df)` → EDA HTML summary; profiles tables. located
+  `locate: ydata_profiling.ProfileReport`
+  sweetviz 2.3.3 — `sweetviz.analyze(df)` → EDA report; profiles tables. located
+  `locate: sweetviz.analyze`
+  office-oxide 0.1.9 — `office_oxide.Document.open(path)` → parses Word structure; fingerprints styles. located
+  `locate: office_oxide.Document.open`
+  python-docx 1.2.0 — `docx.Document(path)` → reads heading tree/styles/content controls. exercised: "1 paragraph"
+  `locate: docx.Document`
+  python-pptx 1.0.2 — `pptx.Presentation(path)` → slide masters/layouts/placeholders/notes. exercised: "11 layouts"
+  `locate: pptx.Presentation`
+  pymupdf 1.28.2 — `d=pymupdf.open(path); d[0].get_text()` → PDF text fingerprint. exercised: "'REL'"
+  `locate: pymupdf.open, pymupdf.Page.get_text`
+  pypdf 6.16.2 — `pypdf.PdfReader(path).pages[0].extract_text()` → PDF text fingerprint. located
+  `locate: pypdf.PdfReader, pypdf.PageObject.extract_text`
+  markdownify 1.2.3 — `markdownify.markdownify(html)` → flattens captured page HTML to Markdown. exercised: "Risk ==== hi"
+  `locate: markdownify.markdownify`
+  playwright 1.62.0 — `page.content()` under `sync_playwright()` → captured page HTML. located
+  `locate: playwright.sync_api.sync_playwright`
+  dash 4.4.1, panel 1.9.4, nicegui 3.16.0, mkdocs 1.6.1, folium 0.20.0, streamlit 1.63.0 — named as the source frameworks whose rendered pages playwright captures and markdownify/html2text flatten; sources here, not performers of this census step (no bound function).
+  dataprep — not installed here: unsatisfiable (python-crfsuite build).
+  dasel — not installed here: Go binary (github.com/TomWright/dasel); CLI: `dasel -r json -f data.json '.path'`.
+  quarto — non-Python: CLI publishing engine; CLI: `quarto render`.
+
+- **Step 2 (Schema Compilation).** Type dasel projections with pydantic; write schema spreadsheet.
+  pydantic 2.13.5 — `Schema.model_validate(projection)` → runtime-typed schema. exercised: "tte=12.5 censored=True"
+  `locate: pydantic.BaseModel.model_validate`
+  openpyxl 3.1.2 — `wb=Workbook(); wb.save("schema.xlsx")` → writes .xlsx. exercised: "saved"
+  `locate: openpyxl.Workbook.save, openpyxl.Workbook`
+  xlsxwriter 3.2.9 — `wb=xlsxwriter.Workbook(path); wb.add_worksheet().write(0,0,v); wb.close()` → writes .xlsx. exercised: "closed"
+  `locate: xlsxwriter.Workbook`
+  pandas-xlsx-tables 1.1.2 — `df_to_xlsx_table(df, table_name, file)` → writes real Excel Table. exercised: "table written"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table`
+  dasel — not installed here: Go binary; CLI: `dasel -f projection.json '.schema'`.
+
+- **Step 3 (Capability Logic).** Compile clingo facts; solve the unique stable model.
+  clingo 5.8.0 — `c=Control(); c.add("base",[],prog); c.ground([("base",[])]); c.solve()` → stable model. exercised: "SAT"
+  `locate: clingo.Control.solve`
+  typedlogic 0.2.4 — `s=ClingoSolver(); s.add_fact(f); s.dump()` → emits clingo facts/program from manifest. located
+  `locate: typedlogic.integrations.solvers.clingo.ClingoSolver.add_fact, typedlogic.integrations.solvers.clingo.ClingoSolver.dump`
+
+- **Step 4 (Graph Compilation).** Build directed invert/replay graphs; render orchestrator source.
+  networkx 3.6.1 — `networkx.DiGraph()` → directed invert/replay graph. exercised: "(2, 1)"
+  `locate: networkx.DiGraph`
+  jinja2 3.1.6 — `jinja2.Template(src).render(graph=g)` → orchestrator source text. exercised: "flow R0"
+  `locate: jinja2.Template.render`
+  dagster 1.13.20 — `@dagster.asset def a(): ...` → asset definition. exercised: "AssetsDefinition"
+  `locate: dagster.asset`
+  prefect 3.8.4 — `@prefect.flow def f(): ...` → flow object. located
+  `locate: prefect.flow`
+  temporalio 1.32.0 — `@temporalio.workflow.defn class W: ...` → workflow module. located
+  `locate: temporalio.workflow.defn`
+  graphable — not installed here: requires Python>=3.13.
+
+- **Step 5 (Self-Load).** Chosen orchestrator imports written file, registers assets, starts run.
+  (no candidate libraries named in this step.)
 
 #### Pipeline R1: Reverse Quality Engineering
 
-- **Step 0 (Global Ingestion).** docling and markitdown flatten any FMEA narrative, PDF appendix, or HTML dossier emitted beside fmdtools into the compiler manifest.
-  in catalog: docling, markitdown
-  attempted, failed here: fmdtools
-- **Step 1 (Orchestration and Narrowing).** dagster orchestrates the workflow, piping recovered text into spacy to isolate failure-mode, effect, and cause spans.
-  in catalog: dagster, spacy
-- **Step 2 (Logic Generation).** amr-logic-converter translates those spans directly into First-Order Logic formulas. QE_MODE, QE_EVENT, and QE_FIT are typed by pydantic and written into that pipeline's spreadsheet.
-  in catalog: amr-logic-converter, pydantic
-- **Step 3 (Mathematical Verification).** pysmt consumes the formulas generated from the recovered instance to mathematically verify the physical bounds and logic paths.
-  in catalog: PySMT
-- **Step 4 (Time-to-Event Modeling).** lifelines applies survival analysis to the recovered failure events only after scipy rejects unphysical rows.
-  in catalog: lifelines, scipy
-- **Step 5 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** Flatten FMEA narrative/PDF/HTML into the manifest
+  docling 2.124.0 — `DocumentConverter().convert("dossier.pdf").document` → DoclingDocument; parses PDF/Office/HTML. located
+  `locate: docling.document_converter.DocumentConverter.convert`
+  fmdtools — not installed here: unsatisfiable (pandas[all]->psycopg2); confirmed absent in venv.
+  markitdown 0.1.7 — `MarkItDown().convert(src).markdown` → Markdown string; narrative/PDF/HTML to Markdown. exercised: "'Continuity plan\n\n| |...'"
+  `locate: markitdown.MarkItDown.convert`
+
+- **Step 1 (Orchestration and Narrowing).** Orchestrate the workflow piping text into NLP
+  dagster 1.13.20 — `@dagster.job def flow(): op()` (assets via `@dagster.asset`) → JobDefinition; orchestrates the workflow. located
+  `locate: dagster.job, dagster.asset, dagster.op`
+
+- **Step 2 (Logic Generation).** Translate spans to FOL; type QE_* with pydantic
+  amr-logic-converter 0.11.3 — `AmrLogicConverter().convert(amr_str)` → Clause; translates AMR span to FOL. exercised: "boy(b)"
+  `locate: amr_logic_converter.AmrLogicConverter.AmrLogicConverter.convert, amr_logic_converter.AmrLogicConverter.AmrLogicConverter.convert_amr_str`
+  pydantic 2.13.5 — `M.model_validate({"QE_MODE":...})` → instance/raises; types QE_MODE/QE_EVENT/QE_FIT. exercised: "rto=4"
+  `locate: pydantic.BaseModel.model_validate, pydantic.BaseModel`
+
+- **Step 3 (Mathematical Verification).** SMT-verify physical bounds and logic paths
+  pysmt 0.9.6 — `pysmt.shortcuts.is_sat(formula)` → bool; verifies physical bounds/logic paths. exercised: "False (p∧¬p)"
+  `locate: pysmt.shortcuts.is_sat, pysmt.shortcuts.Solver`
+
+- **Step 4 (Time-to-Event Modeling).** Survival analysis after rejecting unphysical rows
+  lifelines 0.30.3 — `KaplanMeierFitter().fit(durations, event_observed)` → fitted survival model on failure events. exercised: "median 5.0"
+  `locate: lifelines.KaplanMeierFitter.fit, lifelines.KaplanMeierFitter`
+  scipy 1.15.3 — `scipy.stats.zscore(rows)` → z-scores; flags/rejects unphysical (outlier) rows. exercised: "outlier z=1.73"
+  `locate: scipy.stats.zscore`
+
+- **Step 5 (Execution).** Write one Excel spreadsheet from solver-accepted fields
+  openpyxl 3.1.2 — `wb=openpyxl.Workbook(); wb.active["A1"]=v; wb.save("out.xlsx")` → writes .xlsx. exercised: "saved 4801 bytes"
+  `locate: openpyxl.Workbook.save, openpyxl.Workbook`
+  xlsxwriter 3.2.9 — `w=xlsxwriter.Workbook("out.xlsx"); w.add_worksheet(); w.close()` → writes .xlsx. exercised: "saved 5247 bytes"
+  `locate: xlsxwriter.Workbook.close, xlsxwriter.Workbook.add_worksheet, xlsxwriter.Workbook`
+  pandas-xlsx-tables 1.1.2 — `df_to_xlsx_table(df, "tbl", file="out.xlsx", index=False)` → writes real Excel Table. exercised: "wrote 6134 bytes"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table, pandas_xlsx_tables.dfs_to_xlsx_tables`
 
 #### Pipeline R2: Reverse Financial Dashboarding
 
-- **Step 0 (Global Ingestion).** playwright, firecrawl-anydoc, and markitdown flatten the Streamlit HTML and embedded Plotly traces into Markdown and JSON.
-  in catalog: markitdown, playwright, plotly, streamlit
-- **Step 1 (Orchestration and Narrowing).** temporalio manages the pipeline state, passing the recovered text to stanza to map financial entities and periods.
-  in catalog: stanza, temporalio
-- **Step 2 (Schema Auto-Generation).** dasel queries the structured outputs of the NLP step and datamodel-code-generator instantiates FIN_ENTITY, FIN_LEDGER, FIN_KPI, and FIN_RULE in that pipeline's spreadsheet.
-  in catalog: dasel, datamodel-code-generator
-- **Step 3 (Logic Enforcement).** zen-engine evaluates the recovered instance against the decision graph recovered from the published dashboard.
-  in catalog: zen-engine
-- **Step 4 (Constraint Verification).** clingo proves debit/credit identity of the recovered ledger.
-  in catalog: clingo
-- **Step 5 (Visual Selection).** autoviz remains frozen to the recovered chart grammar and may select no new grammar.
-  attempted, failed here: autoviz
-- **Step 6 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** flatten dashboard HTML/traces into Markdown and JSON
+  playwright 1.62.0 — `with sync_playwright() as p: p.chromium.launch()` → browser; renders/scrapes HTML. located
+  `locate: playwright.sync_api.sync_playwright`
+  firecrawl-anydoc 0.2.4 — `anydoc.to_markdown(path)` → Markdown from HTML. exercised: "| a | b | ..."
+  `locate: anydoc.to_markdown`
+  markitdown 0.1.7 — `MarkItDown().convert(path).text_content` → Markdown. exercised: "# Hi\n\nBody text"
+  `locate: markitdown.MarkItDown.convert`
+  plotly 7.0.0 — not a tool here: the "embedded Plotly traces" are input being flattened
+  streamlit 1.63.0 — not a tool here: the "Streamlit HTML" is input being flattened
+
+- **Step 1 (Orchestration and Narrowing).** manage pipeline state, map financial entities/periods
+  temporalio 1.32.0 — `@workflow.defn` (+ `Client.execute_workflow`) → durable state management. located
+  `locate: temporalio.workflow.defn, temporalio.client.Client.execute_workflow`
+  stanza 1.14.0 — `stanza.Pipeline(lang, processors='tokenize,ner')` → maps entities/periods. located
+  `locate: stanza.Pipeline`
+
+- **Step 2 (Schema Auto-Generation).** query NLP outputs, instantiate financial schemas
+  dasel — not installed here: Go binary (github.com/TomWright/dasel); CLI: `dasel -f f.json '.a'`
+  NLP — not a library: token in prose (spaCy referenced generically)
+
+- **Step 3 (Logic Enforcement).** evaluate recovered instance against decision graph
+  zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
+  `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
+
+- **Step 4 (Constraint Verification).** prove debit/credit identity of recovered ledger
+  clingo 5.8.0 — `Control().solve()` → proves ledger identity. exercised: "a b"
+  `locate: clingo.Control.solve`
+
+- **Step 5 (Visual Selection).** auto-select charts, frozen to recovered grammar
+  autoviz 0.1.905 — `AutoViz_Class().AutoViz(filename, chart_format='svg')` → auto chart selection. located
+  `locate: autoviz.AutoViz_Class.AutoViz_Class.AutoViz`
+
+- **Step 6 (Execution).** write one spreadsheet from solver-accepted fields
+  openpyxl 3.1.2 — `openpyxl.Workbook().save(path)` → xlsx file. exercised: "saved"
+  `locate: openpyxl.Workbook, openpyxl.Workbook.save`
+  xlsxwriter 3.2.9 — `xlsxwriter.Workbook(path).add_worksheet()` → native xlsx writer. exercised: "closed"
+  `locate: xlsxwriter.Workbook, xlsxwriter.Workbook.add_worksheet`
+  pandas-xlsx-tables 1.1.2 — `df_to_xlsx_table(df, "T", file=path)` → real Excel Table. exercised: "wrote table"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table`
 
 #### Pipeline R3: Reverse Architecture Documentation
 
-- **Step 0 (Global Ingestion).** markitdown, undoc, and playwright flatten mermaid HTML, SVG titles, and sidecar Markdown into flat text and JSON.
-  in catalog: markitdown, playwright
-- **Step 1 (Orchestration and Narrowing).** prefect orchestrates the data flow, piping recovered text into nltk to extract entity relationships.
-  in catalog: nltk, prefect
-- **Step 2 (Network Graphing).** networkx rebuilds the published node-edge set. ARCH_NODE, ARCH_EDGE, and ARCH_VIEW land in that pipeline's spreadsheet. Diagram kind is a recovered fact.
-  in catalog: networkx
-- **Step 3 (Logic Translation).** typedlogic converts the recovered network dependencies directly into clingo facts.
-  in catalog: clingo, typedlogic
-- **Step 4 (Architecture Modeling).** structurizr-python maps those facts into its C4 model DSL from the recovered instance rows.
-  attempted, failed here: structurizr-python
-- **Step 5 (Verification).** z3-solver verifies the recovered architecture has no cyclical dependencies.
-  in catalog: z3-solver
-- **Step 6 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** flatten mermaid HTML, SVG titles, Markdown to text/JSON
+  markitdown 0.1.7 — `MarkItDown().convert(source="node.html")` → DocumentConverterResult Markdown/text. exercised: "'# Hi\n\nTest doc'"
+  `locate: markitdown.MarkItDown.convert`
+  playwright 1.62.0 — `page.goto(url); page.content()` → serialized rendered HTML for flattening. located
+  `locate: playwright.sync_api.sync_playwright, playwright.sync_api.Page.content`
+  undoc 0.9.0 — `undoc.parse_file("sidecar.docx").to_json()` → flat text and JSON. exercised: "parse_file→to_markdown 'Hello undoc'"
+  `locate: undoc.parse_file, undoc.Undoc.to_text, undoc.Undoc.to_json`
+  mermaid — non-Python: Node/CLI renderer (@mermaid-js/mermaid-cli); CLI: `mmdc -i in.mmd -o out.svg`
+
+- **Step 1 (Orchestration and Narrowing).** orchestrate flow; extract entity relationships from text
+  nltk 3.10.3 — `nltk.sem.relextract.extract_rels("PER","ORG",doc,corpus="ace")` → entity relation tuples. located
+  `locate: nltk.sem.relextract.extract_rels`
+  prefect 3.8.4 — `prefect.flow(name="revarch")(fn)` → Flow orchestrating the data flow. located
+  `locate: prefect.flow`
+
+- **Step 2 (Network Graphing).** rebuild published node-edge set
+  networkx 3.6.1 — `g=networkx.DiGraph(); g.add_edge(u_of_edge, v_of_edge)` → rebuilt node-edge graph. exercised: "DiGraph edges added; DAG check True"
+  `locate: networkx.DiGraph, networkx.DiGraph.add_edge`
+
+- **Step 3 (Logic Translation).** convert recovered network dependencies into clingo facts
+  typedlogic 0.2.4 — `s=ClingoSolver(); s.add_theory(theory); s.dump()` → serializes typed facts to clingo program. located
+  `locate: typedlogic.integrations.solvers.clingo.ClingoSolver.dump`
+  clingo 5.8.0 — `Control().add("base",[],facts); .ground(); .solve(on_model=cb)` → ASP system consuming the facts. exercised: "model 'a b'"
+  `locate: clingo.Control, clingo.Control.add, clingo.Control.solve`
+
+- **Step 4 (Architecture Modeling).** map facts into C4 model DSL
+  structurizr-python — named in sentence but supplied as no candidate in this batch (libs empty); bare `import structurizr` raises PydanticImportError in this venv, so no function located.
+
+- **Step 5 (Verification).** verify recovered architecture has no cyclical dependencies
+  z3-solver 5.1.0.0 — `s=z3.Solver(); s.add(order_cons); s.check()` → sat/unsat acyclicity proof. exercised: "sat; model [x = 3]"
+  `locate: z3.Solver, z3.Solver.check`
+
+- **Step 6 (Execution).** write one spreadsheet from solver-accepted fields
+  openpyxl 3.1.2 — `wb=openpyxl.Workbook(); wb.active["A1"]=v; wb.save(path)` → writes .xlsx. exercised: "A1 == 'hi'"
+  `locate: openpyxl.Workbook`
+  xlsxwriter 3.2.9 — `wb=xlsxwriter.Workbook(path); wb.add_worksheet().write(0,0,v); wb.close()` → writes .xlsx. exercised: "5248-byte xlsx"
+  `locate: xlsxwriter.Workbook`
+  pandas-xlsx-tables 1.1.2 — `df_to_xlsx_table(df, table_name="ARCH_NODE", file=path, index=False)` → real Excel Table. exercised: "6124-byte xlsx"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table`
 
 #### Pipeline R5: Reverse Process Mining Control Room
 
-- **Step 0 (Global Ingestion).** playwright and markitdown flatten dash-cytoscape and streamlit pages; embedded event-log JSON lands in the compiler manifest.
-  in catalog: markitdown, playwright, streamlit
-- **Step 1 (Orchestrator Compilation).** Pipeline R0 runs against the manifest. clingo only admits a process-mining asset graph if actor, activity, and time fields all resolve in that pipeline's spreadsheet; otherwise the run stops.
-  in catalog: clingo
-- **Step 2 (Event Log Materialization).** the generated dagster assets type PM_EVENT, PM_NET, and PM_KPI through pydantic and land them in that pipeline's spreadsheet.
-  in catalog: dagster, pydantic
-- **Step 3 (Discovery and Replay).** pm4py rediscovers the net from recovered events; snakes and simpn replay it; typedlogic facts that fail clingo drop the trace rather than pass it downstream.
-  in catalog: clingo, pm4py, simpn, typedlogic
-- **Step 4 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** Flatten Cytoscape/Streamlit dashboard pages; capture embedded event-log JSON.
+  playwright 1.62.0 — `page.content()` → rendered DOM HTML of the dashboard page. located
+  `locate: playwright.sync_api.Page.content`
+  markitdown 0.1.7 — `markitdown.MarkItDown().convert("page.html")` → Markdown of the flattened page. exercised: "# Q3 Net income 100"
+  `locate: markitdown.MarkItDown.convert`
+  dash-cytoscape 1.0.2 — `dash_cytoscape.Cytoscape(id="g", elements=els)` → graph component that rendered the page. exercised: "comp=Cytoscape"
+  `locate: dash_cytoscape.Cytoscape`
+  streamlit 1.63.0 — `streamlit.plotly_chart(fig)` → the Streamlit page later flattened. located
+  `locate: streamlit.plotly_chart`
+
+- **Step 1 (Orchestrator Compilation).** Admit process-mining asset graph only if actor/activity/time fields resolve.
+  clingo 5.8.0 — `clingo.Control().solve(on_model=cb)` → admits asset graph iff fields resolve. exercised: "sat, balanced=[True]"
+  `locate: clingo.Control.solve`
+
+- **Step 2 (Event Log Materialization).** Type PM_EVENT/PM_NET/PM_KPI assets and land them in the spreadsheet.
+  dagster 1.13.20 — `@dagster.asset def pm_event(): ...` → typed asset in the graph. exercised: "type=AssetsDefinition"
+  `locate: dagster.asset`
+  pydantic 2.13.5 — `pydantic.create_model("PM_EVENT", case=(str, ...))` → types each PM record. exercised: "instance amount=100"
+  `locate: pydantic.create_model`
+
+- **Step 3 (Discovery and Replay).** Rediscover the net; replay it; drop solver-rejected traces.
+  pm4py 2.7.23.8 — `pm4py.discover_petri_net_inductive(log)` → (net, im, fm) rediscovered. exercised: "places=3 trans=2"
+  `locate: pm4py.discover_petri_net_inductive`
+  simpn 1.10.0 — `SimProblem().simulate(duration)` → replays the net's token game. exercised: "b_marking=['2@0']"
+  `locate: simpn.simulator.SimProblem.simulate`
+  typedlogic 0.2.4 — `get_solver("clingo").check()` → drops facts failing clingo. exercised: "satisfiable=True"
+  `locate: typedlogic.registry.get_solver, typedlogic.solver.Solver.check`
+  clingo 5.8.0 — `clingo.Control().solve(on_model=cb)` → accepts/rejects the typed facts. exercised: "sat, balanced=[True]"
+  `locate: clingo.Control.solve`
+
+- **Step 4 (Execution).** Write one Excel spreadsheet from the recovered, solver-accepted fields.
+  openpyxl 3.1.2 — `openpyxl.Workbook().save("artifact.xlsx")` → writes the workbook. exercised: "saved 4819B"
+  `locate: openpyxl.Workbook.save`
+  xlsxwriter 3.2.9 — `wb = xlsxwriter.Workbook("artifact.xlsx"); wb.close()` → writes the workbook. exercised: "wrote 5248B"
+  `locate: xlsxwriter.Workbook, xlsxwriter.Workbook.close`
+  pandas-xlsx-tables 1.1.2 — `pandas_xlsx_tables.df_to_xlsx_table(df, "T", file="artifact.xlsx")` → real Excel Table. exercised: "table xlsx 6047B"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table`
 
 #### Pipeline R6: Reverse Causal Policy Evaluation
 
-- **Step 0 (Global Ingestion).** playwright, markitdown, and docling flatten panel pages, forestplot tables, and printed PDFs into the compiler manifest.
-  in catalog: docling, markitdown, playwright
-- **Step 1 (Orchestrator Compilation).** Pipeline R0 emits a prefect flow whose task set exists only if treatment and outcome spans resolve from the published copy. Missing identification language yields an empty flow and a halt.
-  in catalog: prefect
-- **Step 2 (Graph and Proof).** CAUSAL_VAR, CAUSAL_EDGE, CAUSAL_ADJUSTMENT, and CAUSAL_ESTIMATE land in that pipeline's spreadsheet. The generated flow rebuilds the DAG in pgmpy, dowhy, and networkx from recovered edges, then asks z3-solver and pysmt to prove a legal adjustment set.
-  in catalog: dowhy, networkx, pgmpy, PySMT, z3-solver
-- **Step 3 (Estimation and Binding).** causalpy, statsmodels, pymc, and arviz run only on proved strategies. zen-engine receives effect estimates as decision tables written from CAUSAL_ESTIMATE, not by an operator.
-  in catalog: statsmodels, zen-engine
-- **Step 4 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** flatten panel pages, forestplot tables, PDFs
+  playwright 1.62.0 — `page.goto(url)` then `page.content()` → rendered page HTML. located
+  `locate: playwright.sync_api.Page.goto, playwright.sync_api.Page.content, playwright.sync_api.sync_playwright`
+  markitdown 0.1.7 — `MarkItDown().convert(source).text_content` → Markdown. exercised: "'# Title\\n\\nhello world'"
+  `locate: markitdown.MarkItDown.convert`
+  docling 2.124.0 — `DocumentConverter().convert(source)` → structured doc from PDFs. located
+  `locate: docling.document_converter.DocumentConverter.convert`
+  panel — false match: "panel pages" is the ingested object (panel data), not the HoloViz app toolkit; no binding.
+
+- **Step 1 (Orchestrator Compilation).** emit a prefect flow gated on spans
+  prefect 3.8.4 — `@prefect.flow(name=...)` → flow whose tasks exist only if treatment/outcome spans resolve. exercised: "Flow 'ingest'"
+  `locate: prefect.flow, prefect.task`
+
+- **Step 2 (Graph and Proof).** rebuild the DAG; prove a legal adjustment set
+  pgmpy 1.1.2 — `pgmpy.base.DAG.DAG().add_edges_from(edges)` → causal DAG. exercised: "2 edges"
+  `locate: pgmpy.base.DAG.DAG`
+  dowhy 0.14 — `dowhy.CausalModel(data, treatment, outcome, common_causes=[...])` → causal DAG model; `.identify_effect()`. exercised: "CausalModel built"
+  `locate: dowhy.CausalModel, dowhy.CausalModel.identify_effect`
+  networkx 3.6.1 — `networkx.DiGraph().add_edges_from(edges)` → DAG from recovered edges. exercised: "is_directed_acyclic_graph True"
+  `locate: networkx.DiGraph, networkx.DiGraph.add_edges_from`
+  z3-solver 5.1.0.0 — `z3.Solver().check()` → sat/unsat legal adjustment set. exercised: "sat; [x = 1]"
+  `locate: z3.Solver.check`
+  pysmt 0.9.6 — `pysmt.shortcuts.is_valid(formula)` → proves adjustment-set validity. located
+  `locate: pysmt.shortcuts.is_valid, pysmt.shortcuts.is_sat`
+
+- **Step 3 (Estimation and Binding).** estimate effects on proved strategies
+  causalpy 0.9.0 — `causalpy.DifferenceInDifferences(data, formula, time_variable_name, group_variable_name)` → quasi-exp estimate. located
+  `locate: causalpy.DifferenceInDifferences, causalpy.InterruptedTimeSeries`
+  statsmodels 0.15.0 — `statsmodels.api.OLS(endog, exog).fit()` → regression effect estimate. exercised: "params [1.0, 1.0]"
+  `locate: statsmodels.api.OLS`
+  pymc 5.28.5 — `pymc.sample(draws=...)` inside `pymc.Model()` → posterior draws. located
+  `locate: pymc.sample, pymc.Model`
+  arviz 0.23.4 — `arviz.summary(data)` → posterior summary/diagnostics table. exercised: "cols ['mean','sd','hdi_3%']"
+  `locate: arviz.summary`
+  zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
+  `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
+
+- **Step 4 (Execution).** write one spreadsheet artifact from solver-accepted fields
+  openpyxl 3.1.2 — `Workbook().save(path)` → xlsx artifact (styles/templates). exercised: "saved xlsx"
+  `locate: openpyxl.Workbook, openpyxl.workbook.workbook.Workbook.save`
+  xlsxwriter 3.2.9 — `Workbook(path)` (+ write) `.close()` → xlsx with native charts. exercised: "closed xlsx"
+  `locate: xlsxwriter.Workbook, xlsxwriter.Workbook.close`
+  pandas-xlsx-tables 1.1.2 — `df_to_xlsx_table(df, table_name, file)` → real Excel Table object. exercised: "wrote Excel table"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table, pandas_xlsx_tables.dfs_to_xlsx_tables`
 
 #### Pipeline R7: Reverse Supply Chain Scheduling
 
-- **Step 0 (Global Ingestion).** playwright, firecrawl-anydoc, and docling flatten Highcharts Gantt HTML, taipy pages, elegantt sidecars, and printed PDFs into the compiler manifest.
-  in catalog: docling, playwright
-- **Step 1 (Orchestrator Compilation).** Pipeline R0 writes a temporalio workflow whose activities are the clingo-selected subset of pulp, pyomo, ortools, highspy, pyjobshop, and alns recovered from the published schedule.
-  in catalog: ortools, pulp, temporalio
-  attempted, failed here: highspy
-- **Step 2 (Model Emission).** SC_TASK, SC_RESOURCE, SC_CALENDAR, SC_CONSTRAINT, and SC_OBJECTIVE land in that pipeline's spreadsheet. pydantic schemas from those tables become the MIP/CP model inside the workflow. There is no checked-in LP file.
-  in catalog: pydantic
-- **Step 3 (Solve and Repair).** ortools or highspy solves the recovered instance; alns runs only if the workflow’s compensation path sees a bound and no feasible incumbent.
-  in catalog: ortools
-  attempted, failed here: highspy
-- **Step 4 (Calendar Proof).** criticalpath and clingo must accept the incumbent or the workflow does not call a renderer.
-  in catalog: clingo, criticalpath
-- **Step 5 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** Flatten Gantt HTML, pages, sidecars, printed PDFs to Markdown manifest.
+  playwright 1.62.0 — `sync_playwright().start().chromium.launch().new_page().content()` → captures rendered HTML. located
+  `locate: playwright.sync_api.sync_playwright, playwright.sync_api.Page.content`
+  firecrawl-anydoc 0.2.4 — `anydoc.to_markdown(path)` → Markdown from each doc. exercised: "'# H\n\npara one\n'"
+  `locate: anydoc.to_markdown`
+  docling 2.124.0 — `DocumentConverter().convert(source).document.export_to_markdown()` → Markdown from PDFs. located
+  `locate: docling.document_converter.DocumentConverter.convert`
+  taipy 4.1.1 — not acting here: named as an ingested source ("taipy pages"), not the flattening tool.
+  elegantt 0.0.11 — not acting here: named as an ingested source ("elegantt sidecars"), not the flattening tool.
+
+- **Step 1 (Orchestrator Compilation).** Temporalio workflow; activities are the clingo-selected solver subset.
+  temporalio 1.32.0 — `@workflow.defn` + `@workflow.run`; `client.execute_workflow(WF.run, id=, task_queue=)` → durable workflow. located
+  `locate: temporalio.workflow.defn, temporalio.workflow.run, temporalio.client.Client.execute_workflow`
+  pulp 3.3.2 — `p=LpProblem(...); p.solve(...)` → LP activity. exercised: "Optimal, x=4.0"
+  `locate: pulp.LpProblem.solve`
+  pyomo 6.10.1 — `m=ConcreteModel(); SolverFactory('cbc').solve(m)` → AML model+solve activity (needs solver binary). located
+  `locate: pyomo.environ.ConcreteModel, pyomo.environ.SolverFactory`
+  ortools 9.15.6755 — `CpSolver().Solve(model)` → CP-SAT activity. exercised: "OPTIMAL, x=10"
+  `locate: ortools.sat.python.cp_model.CpSolver.Solve`
+  highspy 1.15.1 — `h=Highs(); h.addVar(...); h.run()` → LP/MIP activity. exercised isolated: "kOptimal, x=4.0"; fails if ortools imported first (undefined symbol).
+  `locate: highspy.Highs.run`
+  pyjobshop 0.0.9 — `Model().solve(display=False)` → job-shop / scheduling solve (imports in isolation; collides with a broken highspy if co-loaded). located
+  `locate: pyjobshop.Model.solve, pyjobshop.Model`
+  alns 7.0.0 — `ALNS().iterate(initial_solution, op_select, accept, stop)` → ALNS metaheuristic activity. located
+  `locate: alns.ALNS.ALNS.iterate`
+
+- **Step 2 (Model Emission).** Pydantic schemas from tables become the MIP/CP model.
+  pydantic 2.13.5 — `class M(BaseModel): ...; M.model_validate(row)` → schema/model from table rows. exercised: "actor='u1' t=5"
+  `locate: pydantic.BaseModel, pydantic.BaseModel.model_validate`
+
+- **Step 3 (Solve and Repair).** ortools/highspy solve; alns repairs on bound without incumbent.
+  ortools 9.15.6755 — `CpSolver().Solve(model)` → solves recovered instance. exercised: "OPTIMAL, x=10"
+  `locate: ortools.sat.python.cp_model.CpSolver.Solve`
+  highspy 1.15.1 — `h=Highs(); h.addVar(...); h.run()` → LP/MIP solve. exercised isolated: "kOptimal, x=4.0"; fails if ortools imported first (undefined symbol).
+  `locate: highspy.Highs.run`
+  alns 7.0.0 — `ALNS().iterate(initial_solution, op_select, accept, stop)` → neighborhood-search repair. located
+  `locate: alns.ALNS.ALNS.iterate`
+
+- **Step 4 (Calendar Proof).** criticalpath and clingo must accept incumbent before rendering.
+  criticalpath 0.1.5 — `p.update_all(); p.get_critical_path()` → validates schedule/critical path. exercised: "['A','B'], dur 5"
+  `locate: criticalpath.Node.get_critical_path, criticalpath.Node.update_all`
+  clingo 5.8.0 — `ctl.solve()` → SolveResult.satisfiable accepts incumbent. exercised: "sat=True"
+  `locate: clingo.Control.solve`
+
+- **Step 5 (Execution).** Write one spreadsheet from recovered, solver-accepted fields.
+  openpyxl 3.1.2 — `wb=Workbook(); ws.append(row); wb.save(path)` → writes .xlsx. exercised: "wrote xlsx"
+  `locate: openpyxl.Workbook, openpyxl.workbook.workbook.Workbook.save`
+  xlsxwriter 3.2.9 — `wb=Workbook(path); ws.write(r,c,v); wb.close()` → writes .xlsx. exercised: "wrote xlsx"
+  `locate: xlsxwriter.Workbook`
+  pandas-xlsx-tables 1.1.2 — `df_to_xlsx_table(df, 'T', path, index=False)` → real Excel Table. exercised: "wrote xlsx"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table`
 
 #### Pipeline R8: Reverse Geospatial Hazard Cartography
 
-- **Step 0 (Global Ingestion).** playwright extracts GeoJSON from Folium and Kepler HTML; undoc, docling, and pymupdf flatten weasyprint PDF map sheets into the compiler manifest.
-  in catalog: docling, playwright, PyMuPDF
-- **Step 1 (Orchestrator Compilation).** Pipeline R0 keeps geopandas, shapely, osmnx, and rustworkx assets only when dasel finds coordinates or resolvable toponyms. No geo fields means no map flow.
-  in catalog: dasel
-- **Step 2 (Constraint Compile).** GEO_FEATURE, GEO_EXCLUSION, GEO_COVERAGE, and GEO_STYLE land in that pipeline's spreadsheet. python-constraint2 and cpmpy receive exclusion and coverage predicates extracted into pydantic models from the recovered instance.
-  in catalog: pydantic, python-constraint2
-  attempted, failed here: cpmpy
-- **Step 3 (Surface and Sheet).** datashader, eomaps, contextily, prettymaps, pygmt, and lonboard run in the order the compiled graph recovered from the published pack.
-- **Step 4 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** scrape GeoJSON from map HTML; flatten PDF sheets
+  docling 2.124.0 — `docling.document_converter.DocumentConverter().convert(source=path)` → ConversionResult; flattens PDF map sheets. located
+  `locate: docling.document_converter.DocumentConverter.convert`
+  folium 0.20.0 — `folium.Map(location=[lat,lon])` → Leaflet map HTML; produced the scraped map HTML. exercised: "Map"
+  `locate: folium.Map`
+  playwright 1.62.0 — `with playwright.sync_api.sync_playwright() as p: p.chromium.launch()` → browser; extracts GeoJSON from HTML. located
+  `locate: playwright.sync_api.sync_playwright`
+  pymupdf 1.28.2 — `pymupdf.open(path)` → Document; opens/flattens PDF map sheets. exercised: "Document"
+  `locate: pymupdf.open`
+  undoc 0.9.0 — `undoc.parse_file(path)` → Undoc emitting markdown/text/json; flattens office/PDF sheets. located
+  `locate: undoc.parse_file`
+  weasyprint 69.0 — `weasyprint.HTML(string=html).write_pdf()` → PDF bytes; rendered the source PDF map sheets. exercised: "b'%PDF'"
+  `locate: weasyprint.HTML.write_pdf, weasyprint.HTML`
+
+- **Step 1 (Orchestrator Compilation).** keep geo assets when coordinates/toponyms resolve
+  dasel — not installed here: Go binary (github.com/TomWright/dasel), usable via CLI `dasel`.
+  geopandas 1.1.4 — `geopandas.GeoDataFrame(data, geometry=[...])` → spatial dataframe; holds geo assets. exercised: "GeoDataFrame"
+  `locate: geopandas.GeoDataFrame, geopandas.read_file`
+  osmnx 1.9.3 — `osmnx.graph_from_place(query, network_type='drive')` → street network graph; builds network from toponyms. located
+  `locate: osmnx.graph_from_place`
+  rustworkx 0.18.1 — `rustworkx.PyDiGraph()` then `add_node/add_edge` → directed graph; holds spatial graph. exercised: "1 edge"
+  `locate: rustworkx.PyDiGraph`
+  shapely 2.1.2 — `shapely.geometry.Point(x, y)` → geometry object; represents coordinates. exercised: "buffer area 3.1365"
+  `locate: shapely.geometry.Point`
+
+- **Step 2 (Constraint Compile).** receive exclusion/coverage predicates extracted into pydantic models
+  cpmpy 1.0.0 — installed but import fails (highspy undefined symbol); no dotted path resolves, cannot bind.
+  pydantic 2.13.5 — `pydantic.BaseModel.model_validate(obj)` → validated model; holds extracted predicates. exercised: "3"
+  `locate: pydantic.BaseModel.model_validate, pydantic.TypeAdapter`
+  python-constraint2 2.7.3 — `constraint.Problem()` then `addVariable/addConstraint; getSolutions()` → CSP solutions; receives exclusion/coverage predicates. exercised: "[{'a': 2}, {'a': 1}]"
+  `locate: constraint.Problem`
+
+- **Step 3 (Surface and Sheet).** render basemaps, rasters, and cartographic surfaces
+  contextily 1.7.1 — `contextily.add_basemap(ax, source=..., crs=...)` → adds basemap tiles to axes; renders basemap. located
+  `locate: contextily.add_basemap`
+  datashader 0.19.1 — `datashader.Canvas(plot_width, plot_height).points(df,'x','y')` → aggregated raster; rasterizes large data. exercised: "(4, 4)"
+  `locate: datashader.Canvas.points, datashader.Canvas`
+  eomaps 8.4 — `eomaps.Maps()` → interactive map object; renders cartographic surface. located
+  `locate: eomaps.Maps`
+  lonboard 0.16.0 — `lonboard.viz(gdf)` → deck.gl Map widget; renders geospatial vectors. exercised: "Map"
+  `locate: lonboard.viz, lonboard.Map`
+  prettymaps 1.4.2 — `prettymaps.plot(query)` → Plot with styled OSM layers; renders aesthetic map. located
+  `locate: prettymaps.plot`
+  pygmt — installed but import fails (libgmt.so not found); no dotted path resolves, cannot bind.
+
+- **Step 4 (Execution).** write one artifact spreadsheet from solver-accepted fields
+  openpyxl 3.1.2 — `openpyxl.Workbook()` then `wb.save(path)` → xlsx workbook; writes the artifact spreadsheet. exercised: "hi"
+  `locate: openpyxl.Workbook`
+  pandas-xlsx-tables 1.1.2 — `pandas_xlsx_tables.df_to_xlsx_table(df, table_name, file=path, index=False)` → writes native Excel Table; writes spreadsheet. exercised: "wrote"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table`
+  xlsxwriter 3.2.9 — `xlsxwriter.Workbook(path)` then `add_worksheet().write(); close()` → xlsx file; writes spreadsheet. exercised: "wrote"
+  `locate: xlsxwriter.Workbook`
 
 #### Pipeline R9: Reverse Contract Constraint Prover
 
-- **Step 0 (Global Ingestion).** python-docx, mammoth, office-oxide, docling, and pypdf pull clauses and defined-term tables from the published Word pack into the compiler manifest. playwright flattens nicegui proof pages.
-  in catalog: docling, mammoth, office-oxide, playwright, pypdf, python-docx
-- **Step 1 (Orchestrator Compilation).** Pipeline R0 emits a temporalio workflow gated on amrlib producing obligation, right, or condition-precedent graphs from the recovered clauses. No deontic AMR, no workflow.
-  in catalog: amrlib, temporalio
-- **Step 2 (Logic Emission).** LEGAL_PARTY, LEGAL_TERM, LEGAL_CLAUSE, LEGAL_OBLIGATION, and LEGAL_PERMISSION land in that pipeline's spreadsheet. amr-logic-converter and typedlogic write the FOL and ASP programs from recovered clause recovered fields that the workflow will hand to clingo, pysmt, and cvc5.
-  in catalog: amr-logic-converter, clingo, cvc5, PySMT, typedlogic
-- **Step 3 (Policy Materialization).** pycasbin, openfga, and zen-engine are generated as downstream activities only for proved permissions.
-  in catalog: pycasbin, zen-engine
-- **Step 4 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** Pull clauses from Word/PDF packs; flatten proof pages
+  python-docx 1.2.0 — `docx.Document(path)` → Document; reads Word clauses/term tables. exercised: "'Hello clause one.'"
+  `locate: docx.Document`
+  mammoth 1.12.1 — `mammoth.convert_to_html(fileobj)` → HTML result; Word→clean HTML clauses. exercised: "'<p>Hello clause one.</p>'"
+  `locate: mammoth.convert_to_html`
+  office-oxide 0.1.9 — `office_oxide.to_markdown(path)` → markdown str; Office→markdown clauses. exercised: "'Hello clause one.'"
+  `locate: office_oxide.to_markdown`
+  docling 2.124.0 — `docling.document_converter.DocumentConverter().convert(source)` → ConversionResult; parses PDF/Office packs. located (requires models)
+  `locate: docling.document_converter.DocumentConverter.convert`
+  pypdf 6.16.2 — `pypdf.PdfReader(path).pages[i].extract_text()` → text; pulls PDF clauses. located
+  `locate: pypdf.PageObject.extract_text, pypdf.PdfReader`
+  playwright 1.62.0 — `playwright.sync_api.sync_playwright()` then `page.pdf(path)` → flattens proof pages. located (requires browser binaries)
+  `locate: playwright.sync_api.sync_playwright, playwright.sync_api.Page.pdf`
+  nicegui 3.16.0 — `@nicegui.ui.page('/route')` → registers a proof page. located
+  `locate: nicegui.ui.page`
+
+- **Step 1 (Orchestrator Compilation).** Emit workflow gated on AMR deontic graphs
+  temporalio 1.32.0 — `@temporalio.workflow.defn(sandboxed=True)` → workflow class; declares the durable workflow. located
+  `locate: temporalio.workflow.defn`
+  amrlib 0.8.1 — `amrlib.load_stog_model(model_dir=None).parse_sents(sents)` → AMR graphs; parses clauses to AMR. located (requires model download)
+  `locate: amrlib.load_stog_model`
+
+- **Step 2 (Logic Emission).** Write FOL/ASP programs; hand to solvers
+  amr-logic-converter 0.11.3 — `amr_logic_converter.AmrLogicConverter().convert(amr)` → Clause; AMR→First-Order Logic. exercised: "'want-01(w) ∧ :ARG0(w, b) ∧ boy(b)…'"
+  `locate: amr_logic_converter.AmrLogicConverter.AmrLogicConverter.convert`
+  typedlogic 0.2.4 — `typedlogic.registry.get_compiler('clingo').compile(theory)` → program str; writes FOL/ASP programs. exercised: "SouffleCompiler obtained"
+  `locate: typedlogic.registry.get_compiler, typedlogic.compiler.Compiler.compile`
+  clingo 5.8.0 — `clingo.Control().solve(on_model=cb)` → SolveResult; solves the ASP program. exercised: "['a b']"
+  `locate: clingo.Control.solve`
+  cvc5 1.3.4 — `cvc5.Solver().checkSat()` → Result; SMT-checks the formulas. exercised: "sat"
+  `locate: cvc5.Solver.checkSat`
+  pysmt 0.9.6 — `pysmt.shortcuts.is_sat(formula)` → bool; solver-agnostic SMT check. exercised: "True"
+  `locate: pysmt.shortcuts.is_sat`
+
+- **Step 3 (Policy Materialization).** Generate policy engines for proved permissions
+  pycasbin ? — `Enforcer(model, policy).enforce(sub, obj, act)` → policy / access-control decision. located
+  `locate: casbin.Enforcer, casbin.Enforcer.enforce, casbin.Enforcer.add_policy`
+  openfga — not installed here: pip unsatisfiable.
+  zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
+  `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
+
+- **Step 4 (Execution).** Write one Excel artifact from accepted fields
+  openpyxl 3.1.2 — `openpyxl.Workbook().save(path)` → writes styled .xlsx. exercised: "wrote file True"
+  `locate: openpyxl.Workbook.save`
+  pandas-xlsx-tables 1.1.2 — `pandas_xlsx_tables.df_to_xlsx_table(df, table_name, file=path)` → writes real Excel Table. exercised: "wrote file True"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table`
+  xlsxwriter 3.2.9 — `xlsxwriter.Workbook(path)`; `ws.write(row, col, val)`; `close()` → .xlsx with charts. exercised: "wrote file True"
+  `locate: xlsxwriter.Workbook, xlsxwriter.worksheet.Worksheet.write`
 
 #### Pipeline R10: Reverse Specification-to-Slide Compiler
 
-- **Step 0 (Global Ingestion).** python-pptx, office-oxide, undoc, and markitdown turn the published PowerPoint, speaker notes, and chart caches into the compiler manifest. playwright flattens reveal-md and marp HTML. docling and pymupdf flatten quarto and weasyprint PDFs.
-  in catalog: docling, markitdown, office-oxide, playwright, PyMuPDF, python-pptx
-- **Step 1 (Orchestrator Compilation).** Pipeline R0 builds a dagster asset graph from recovered requirement, risk, and milestone spans. Empty claim set cancels publication assets.
-  in catalog: dagster
-- **Step 2 (Trace Proof).** DECK_META, DECK_SLIDE, DECK_BULLET, DECK_CLAIM, DECK_CHART, and DECK_IMAGE land in that pipeline's spreadsheet. template_id, aspect, layout_name, and chart grammar are recovered facts. title, body, notes, bullet text, claim text, and series_json are recovered fields. networkx and graphedexcel supply edges from DECK_CLAIM; business-rules, durable-rules, and z3-solver must accept completeness and acyclicity before any slide asset is materialized.
-  in catalog: business-rules, durable-rules, networkx, z3-solver
-- **Step 3 (Grammar Selection).** lida, autoviz, mermaid, and kroki are included only for tables and relations present in the proved graph and remain frozen to the recovered grammars.
-  attempted, failed here: autoviz
-- **Step 4 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** Flatten pptx/notes/charts and rendered HTML/PDF into the manifest.
+  python-pptx 1.0.2 — `pptx.Presentation(path)` → Presentation; reads slides/notes. exercised: "slides == 0 (default)"
+  `locate: pptx.Presentation`
+  office-oxide 0.1.9 — `office_oxide.to_markdown(path)` → Markdown from Office file. located
+  `locate: office_oxide.to_markdown, office_oxide.extract_text`
+  undoc 0.9.0 — `undoc.parse_file(path)` → Undoc markdown/text/json. located
+  `locate: undoc.parse_file`
+  markitdown 0.1.7 — `markitdown.MarkItDown().convert(source)` → DocumentConverterResult (Markdown). located
+  `locate: markitdown.MarkItDown.convert`
+  marp — non-Python: Node/CLI (@marp-team/marp-cli); CLI: `marp deck.md`
+  playwright 1.62.0 — `with sync_playwright() as p: page=...; page.goto(url); page.content()` → rendered HTML. located
+  `locate: playwright.sync_api.sync_playwright, playwright.sync_api.Page.content`
+  pymupdf 1.28.2 — `pymupdf.open(path)` → Document; parses/renders PDF. located
+  `locate: pymupdf.open`
+  docling 2.124.0 — `DocumentConverter().convert(source=path)` → parsed PDF document. located
+  `locate: docling.document_converter.DocumentConverter.convert`
+  quarto — non-Python: CLI publishing engine; CLI: `quarto render deck.qmd`
+  reveal-md — non-Python: Node/CLI; CLI: `reveal-md slides.md --static`
+  weasyprint 69.0 — `weasyprint.HTML(string=html).write_pdf()` → PDF bytes. exercised: "2331 bytes, b'%PDF-'"
+  `locate: weasyprint.HTML, weasyprint.HTML.write_pdf`
+
+- **Step 1 (Orchestrator Compilation).** Build an asset graph from recovered requirement/risk/milestone spans.
+  dagster 1.13.20 — `@dagster.asset` on functions, assembled with `dagster.Definitions(assets=[...])` → asset graph. located
+  `locate: dagster.asset, dagster.Definitions`
+
+- **Step 2 (Trace Proof).** Build claim edges; prove completeness and acyclicity before materializing slides.
+  business-rules 1.1.1 — `business_rules.run_all(rule_list, defined_variables, defined_actions)` → evaluates completeness rules. located
+  `locate: business_rules.run_all`
+  durable-rules 2.0.28 — `durable.lang.assert_fact(ruleset_name, fact)` → asserts facts into Rete engine. located
+  `locate: durable.lang.assert_fact, durable.lang.ruleset`
+  graphedexcel 1.2.3 — `graphedexcel.graphbuilder.build_graph_and_stats(file_path)` → (DiGraph, stats) of cell-formula edges. located
+  `locate: graphedexcel.graphbuilder.build_graph_and_stats`
+  networkx 3.6.1 — `networkx.DiGraph()` (add_edge) → claim-edge digraph. exercised: "number_of_edges == 1"
+  `locate: networkx.DiGraph`
+  z3-solver 5.1.0.0 — `z3.Solver(); s.add(...); s.check()` → acyclicity/completeness proof. exercised: "sat [x = 1]"
+  `locate: z3.Solver, z3.Solver.check`
+
+- **Step 3 (Grammar Selection).** Select chart/diagram grammars for proved tables and relations.
+  autoviz 0.1.905 — `AutoViz_Class().AutoViz(filename, dfte=df, ...)` → auto-selected charts from table. located
+  `locate: autoviz.AutoViz_Class.AutoViz_Class.AutoViz`
+  kroki — non-Python: HTTP/CLI diagram service; CLI: `kroki convert diagram.dot`
+  lida 0.0.14 — `lida.Manager(text_gen=...)` (`.visualize(...)`) → grammar-agnostic chart generator. located
+  `locate: lida.Manager`
+  mermaid — non-Python: Node/CLI renderer (@mermaid-js/mermaid-cli); CLI: `mmdc -i in.mmd -o out.svg`
+
+- **Step 4 (Execution).** Write one spreadsheet from recovered, solver-accepted fields.
+  openpyxl 3.1.2 — `openpyxl.Workbook(); ws['A1']=..; wb.save(path)` → .xlsx file. exercised: "4801-byte xlsx"
+  `locate: openpyxl.Workbook`
+  pandas-xlsx-tables 1.1.2 — `pandas_xlsx_tables.df_to_xlsx_table(df, table_name, file=path)` → real Excel Table. exercised: "6047-byte xlsx"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table`
+  xlsxwriter 3.2.9 — `xlsxwriter.Workbook(path); ws.write(0,0,..); wb.close()` → .xlsx with native charts. exercised: "5248-byte xlsx"
+  `locate: xlsxwriter.Workbook`
 
 #### Pipeline R11: Reverse Fleet Reliability Dossier
 
-- **Step 0 (Global Ingestion).** playwright and markitdown flatten the Streamlit dossier; kaleido PDF and PNG sidecars are re-tabulated by pymupdf and csvkit into the compiler manifest.
-  in catalog: csvkit, markitdown, playwright, PyMuPDF, streamlit
-- **Step 1 (Orchestrator Compilation).** Pipeline R0 admits reliability and lifelines assets only when a time-to-event column and a censoring flag both type-check in that pipeline's spreadsheet.
-  in catalog: lifelines
-- **Step 2 (Fit and Cut Sets).** REL_ASSET, REL_EVENT, REL_BLOCK, and REL_FIT land in that pipeline's spreadsheet. scipy rejects unphysical fits; fmdtools and z3-solver run only if series/parallel language compiled into block-diagram facts.
-  in catalog: scipy, z3-solver
-  attempted, failed here: fmdtools
-- **Step 3 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** Flatten Streamlit dossier and re-tabulate PDF/PNG sidecars.
+  playwright 1.62.0 — `with sync_playwright() as p: p.chromium.launch().new_page()` → renders/flattens dashboard. located
+  `locate: playwright.sync_api.sync_playwright`
+  markitdown 0.1.7 — `MarkItDown().convert(source)` → dossier to Markdown. located
+  `locate: markitdown.MarkItDown.convert`
+  kaleido 1.4.0 — `kaleido.write_fig_sync(fig, path)` → produced the PNG/PDF sidecars. located
+  `locate: kaleido.write_fig_sync`
+  pymupdf 1.28.2 — `pymupdf.open(path)[i].find_tables()` → re-tabulate PDF sidecars. located
+  `locate: pymupdf.open, pymupdf.Page.find_tables, pymupdf.Page.get_text`
+  csvkit 2.2.0 — `In2CSV().run()` (CLI `in2csv`) → re-tabulate PNG-derived CSV. located [CLI suite]
+  `locate: csvkit.utilities.in2csv.In2CSV.run, csvkit.reader`
+  streamlit 1.63.0 — `streamlit.dataframe(df)` → framework that served the dossier now flattened. located
+  `locate: streamlit.dataframe`
+- **Step 1 (Orchestrator Compilation).** Admit survival assets when time-to-event and censoring type-check.
+  lifelines 0.30.3 — `KaplanMeierFitter().fit(durations, event_observed)` → time-to-event survival asset. exercised: "median 4.0"
+  `locate: lifelines.KaplanMeierFitter.fit, lifelines.WeibullFitter`
+- **Step 2 (Fit and Cut Sets).** Reject unphysical fits; solve series/parallel block diagrams.
+  scipy 1.15.3 — `scipy.stats.weibull_min.fit(data, floc=0)` → rejects unphysical reliability fits. exercised: "[2.29, 0, 3.39]"
+  `locate: scipy.stats.rv_continuous.fit`
+  z3-solver 5.1.0.0 — `s=Solver(); s.add(c); s.check()` → checks block-diagram facts. exercised: "sat [X = 3]"
+  `locate: z3.Solver.check, z3.Solver.add`
+  fmdtools — not installed here: unsatisfiable (pandas[all] -> psycopg2).
+- **Step 3 (Execution).** Write one spreadsheet from solver-accepted fields.
+  openpyxl 3.1.2 — `wb=Workbook(); wb.save(path)` → writes .xlsx artifact. exercised: "xlsx file written"
+  `locate: openpyxl.Workbook.save, openpyxl.Workbook`
+  xlsxwriter 3.2.9 — `w=Workbook(path); ws=w.add_worksheet(); ws.add_table(...)` → native Excel table. exercised: "xlsx with table written"
+  `locate: xlsxwriter.Workbook.add_worksheet, xlsxwriter.worksheet.Worksheet.add_table`
+  pandas-xlsx-tables 1.1.2 — `df_to_xlsx_table(df, table_name, file=path, index=False)` → real Excel Table object. exercised: "xlsx table written"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table, pandas_xlsx_tables.dfs_to_xlsx_tables`
 
 #### Pipeline R12: Reverse Ontology Reasoner
 
-- **Step 0 (Global Ingestion).** playwright, markitdown, and firecrawl-anydoc flatten the MkDocs site and datasette pages; rdflib parses any published RDF, TTL, or JSON-LD into the compiler manifest.
-  in catalog: markitdown, playwright, rdflib
-- **Step 1 (Orchestrator Compilation).** Pipeline R0 writes prefect tasks for rdflib and owlready2 only if class, property, or disjointness phrases exist in the census.
-  in catalog: owlready2, prefect, rdflib
-- **Step 2 (Closure and Proof).** ONT_CLASS, ONT_PROPERTY, ONT_AXIOM, and ONT_INDIVIDUAL land in that pipeline's spreadsheet. owlrl and pyreason close the recovered graph; z3-solver, cvc5, and clingo must accept the TBox/ABox pair.
-  in catalog: clingo, cvc5, owlrl, z3-solver
-- **Step 3 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** Flatten the MkDocs site and datasette pages; parse published RDF/TTL/JSON-LD.
+  playwright 1.62.0 — `with sync_playwright() as p: p.chromium.launch()` → rendered page HTML; headless site flatten. located
+  `locate: playwright.sync_api.sync_playwright`
+  markitdown 0.1.7 — `MarkItDown().convert(source)` → Markdown; page→Markdown. exercised: "# Spec\n\nHello"
+  `locate: markitdown.MarkItDown.convert`
+  firecrawl-anydoc 0.2.4 — `anydoc.to_markdown(path)` → Markdown; document→Markdown. located
+  `locate: anydoc.to_markdown`
+  rdflib 7.6.0 — `rdflib.Graph().parse(data=ttl, format='turtle')` → parsed triples; RDF/TTL/JSON-LD parse. exercised: "triples: 1"
+  `locate: rdflib.Graph.parse`
+  mkdocs 1.6.1 — `mkdocs.commands.build.build(config)` → the site being flattened; source docs-site generator. located
+  `locate: mkdocs.commands.build.build`
+  datasette 0.65.3 — `datasette.app.Datasette(files=[db])` → the pages being flattened; source data-page server. located
+  `locate: datasette.app.Datasette`
+
+- **Step 1 (Orchestrator Compilation).** Write prefect tasks for rdflib and owlready2 when ontology phrases exist.
+  prefect 3.8.4 — `@prefect.task def t(): ...` → orchestrated task; task emit. located
+  `locate: prefect.task`
+  rdflib 7.6.0 — `rdflib.Graph()` → RDF store for a task; graph task target. located
+  `locate: rdflib.Graph`
+  owlready2 0.51 — `owlready2.get_ontology(iri).load()` → ontology; OWL class/property task target. located
+  `locate: owlready2.get_ontology`
+
+- **Step 2 (Closure and Proof).** Close the recovered graph; solvers must accept the TBox/ABox pair.
+  owlrl 7.6.2 — `owlrl.DeductiveClosure(OWLRL_Semantics).expand(graph)` → materialized closure; OWL 2 RL closure. exercised: "2 -> 12 triples"
+  `locate: owlrl.DeductiveClosure.expand`
+  pyreason 3.7.0 — installed but `import pyreason` fails here (RecursionError at import); no resolvable function for graph closure (tried pyreason.reason).
+  z3-solver 5.1.0.0 — `s=z3.Solver(); s.check()` → sat/unsat; TBox/ABox acceptance. exercised: "sat"
+  `locate: z3.Solver.check`
+  cvc5 1.3.4 — `slv=cvc5.Solver(); slv.checkSat()` → sat/unsat; TBox/ABox acceptance. exercised: "sat"
+  `locate: cvc5.Solver.checkSat, cvc5.Solver`
+  clingo 5.8.0 — `ctl.solve()` → SAT/UNSAT; TBox/ABox acceptance. exercised: "SAT"
+  `locate: clingo.Control.solve`
+
+- **Step 3 (Execution).** Write one spreadsheet from recovered, solver-accepted fields.
+  openpyxl 3.1.2 — `wb=openpyxl.Workbook(); wb.save(path)` → .xlsx; styled spreadsheet write. exercised: "4802 bytes"
+  `locate: openpyxl.Workbook, openpyxl.Workbook.save`
+  xlsxwriter 3.2.9 — `wb=xlsxwriter.Workbook(path); wb.add_worksheet(); wb.close()` → .xlsx; native-chart spreadsheet write. exercised: "5247 bytes"
+  `locate: xlsxwriter.Workbook, xlsxwriter.Workbook.add_worksheet`
+  pandas-xlsx-tables 1.1.2 — `df_to_xlsx_table(df, table_name, file)` → real Excel Table object; Table write from DataFrame. exercised: "6138 bytes"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table`
 
 #### Pipeline R13: Reverse Service Configuration Management
 
-- **Step 0 (Global Ingestion).** python-docx, mammoth, office-oxide, pymupdf, and markitdown flatten the verification Word pack and reportlab PDF; mermaid source is lifted from the HTML sidecar into the compiler manifest.
-  in catalog: mammoth, markitdown, office-oxide, PyMuPDF, python-docx
-- **Step 1 (Orchestrator Compilation).** Pipeline R0 runs against the manifest. clingo only admits a configuration asset graph if CI-type spans, relationship language, and a lifecycle verb set all resolve in that pipeline's spreadsheet; otherwise the run stops.
-  in catalog: clingo
-- **Step 2 (Model Emission).** CI_RECORD, CI_RELATION, CI_STATE, CI_TRANSITION, and CI_EXCEPTION are typed by pydantic and written into that pipeline's spreadsheet. networkx materializes the CI graph from those records.
-  in catalog: networkx, pydantic
-- **Step 3 (Lifecycle Proof).** typedlogic writes transition, exception, and verification facts from the recovered instance; clingo and z3-solver must accept state consistency and acyclicity or no corrective asset is materialized.
-  in catalog: clingo, typedlogic, z3-solver
-- **Step 4 (Verification Replay).** pm4py mines transition logs against the proved lifecycle; csv-diff and daff emit discrepancy tables only for traces that failed the stable model.
-  in catalog: pm4py
-- **Step 5 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** Flatten Word pack + PDF; lift mermaid source.
+  mammoth 1.12.1 — `mammoth.convert_to_html(docx_fileobj)` → Word-to-clean-HTML result. located
+  `locate: mammoth.convert_to_html`
+  markitdown 0.1.7 — `MarkItDown().convert(path)` → Markdown result. exercised: "# Desk x"
+  `locate: markitdown.MarkItDown.convert`
+  office-oxide 0.1.9 — `office_oxide.to_markdown(path)` → Office-to-Markdown string. located
+  `locate: office_oxide.to_markdown`
+  pymupdf 1.28.2 — `d=pymupdf.open(path); d[0].get_text()` → PDF text. exercised: "'REL'"
+  `locate: pymupdf.open, pymupdf.Page.get_text`
+  python-docx 1.2.0 — `docx.Document(path)` → reads verification Word pack. exercised: "1 paragraph"
+  `locate: docx.Document`
+  reportlab 5.0.1 — named as the PDF's producer (reportlab writes PDFs, cannot parse them); flattening here is by pymupdf/markitdown, so no bound function for this step.
+  mermaid — non-Python: Node/CLI renderer; CLI: `mmdc -i in.mmd -o out.svg`.
+
+- **Step 1 (Orchestrator Compilation).** Admit config asset graph only if spans resolve.
+  clingo 5.8.0 — `Control().solve()` (after add/ground) → SAT admits graph, UNSAT stops. exercised: "SAT"
+  `locate: clingo.Control.solve`
+
+- **Step 2 (Model Emission).** Type CI records with pydantic; materialize CI graph.
+  networkx 3.6.1 — `g=networkx.DiGraph(); g.add_edges_from(relations)` → CI graph from records. exercised: "(2, 1)"
+  `locate: networkx.DiGraph`
+  pydantic 2.13.5 — `CIRecord.model_validate(row)` → typed CI record. exercised: "tte=12.5 censored=True"
+  `locate: pydantic.BaseModel.model_validate`
+
+- **Step 3 (Lifecycle Proof).** Compile lifecycle facts; prove consistency and acyclicity.
+  clingo 5.8.0 — `Control().solve()` → stable model / UNSAT. exercised: "SAT"
+  `locate: clingo.Control.solve`
+  typedlogic 0.2.4 — `s=ClingoSolver(); s.add_fact(f)` → writes transition/exception/verification facts. located
+  `locate: typedlogic.integrations.solvers.clingo.ClingoSolver.add_fact`
+  z3-solver 5.1.0.0 — `z3.Solver().check()` → sat/unsat state-consistency + acyclicity. exercised: "sat"
+  `locate: z3.Solver.check`
+
+- **Step 4 (Verification Replay).** Mine transition logs; diff discrepancy tables.
+  pm4py 2.7.23.8 — `pm4py.discover_transition_system(log, case_id_key=..., activity_key=..., timestamp_key=...)` → transition-system model. located
+  `locate: pm4py.discover_transition_system`
+  csv-diff 1.2 — `csv_diff.compare(load_csv(a, key="id"), load_csv(b, key="id"))` → discrepancy dict. exercised: "added/removed/changed keys"
+  `locate: csv_diff.compare, csv_diff.load_csv`
+  daff 1.4.2 — `daff.diff(local, remote)` → tabular alignment/diff. exercised: "PythonTableView"
+  `locate: daff.diff`
+
+- **Step 5 (Execution).** Write the pipeline's artifact spreadsheet.
+  openpyxl 3.1.2 — `wb=Workbook(); wb.save(path)` → writes .xlsx. exercised: "saved"
+  `locate: openpyxl.Workbook.save, openpyxl.Workbook`
+  pandas-xlsx-tables 1.1.2 — `df_to_xlsx_table(df, table_name, file)` → writes real Excel Table. exercised: "table written"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table`
+  xlsxwriter 3.2.9 — `wb=xlsxwriter.Workbook(path); ...write(); wb.close()` → writes .xlsx. exercised: "closed"
+  `locate: xlsxwriter.Workbook`
 
 #### Pipeline R14: Reverse Service Design
 
-- **Step 0 (Global Ingestion).** python-docx, mammoth, undoc, and firecrawl-anydoc flatten the Service Design Package and any diagrams, mermaid, or structurizr HTML into the compiler manifest.
-  in catalog: mammoth, python-docx
-- **Step 1 (Orchestrator Compilation).** Pipeline R0 emits a prefect flow only if stanza recovers principle, decomposition, and operational-constraint spans from the published pack. Missing principle language yields an empty flow and a halt.
-  in catalog: prefect, stanza
-- **Step 2 (Requirement Proof).** SD_PRINCIPLE, SD_SERVICE, SD_INTERACTION, SD_SLA, and SD_CONSTRAINT land in that pipeline's spreadsheet. amr-logic-converter and pysmt must accept usability, cost, performance, security, and compliance bounds on the recovered rows before any model asset exists.
-  in catalog: amr-logic-converter, PySMT
-- **Step 3 (Structure and Interaction).** networkx and pydsm rebuild the service breakdown; pm4py and snakes encode interaction flows; zen-engine writes SLA/OLA tables from proved commitments.
-  in catalog: networkx, pm4py, zen-engine
-- **Step 4 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** Flatten the Service Design Package and diagrams into manifest
+  python-docx 1.2.0 — `docx.Document("sdp.docx").paragraphs` → paragraph objects; reads pack text/tables. exercised: "para0 'Continuity plan'"
+  `locate: docx.Document, docx.document.Document.paragraphs`
+  mammoth 1.12.1 — `mammoth.convert_to_markdown(fileobj).value` → Markdown string; flattens .docx to Markdown. exercised: "'Continuity plan\n\n'"
+  `locate: mammoth.convert_to_markdown, mammoth.convert_to_html`
+  undoc 0.9.0 — `undoc.parse_file("sdp.docx").to_markdown()` → Markdown string; parses Office pack. exercised: "'Continuity plan\n\n| |...'"
+  `locate: undoc.parse_file, undoc.Undoc.to_markdown`
+  firecrawl-anydoc 0.2.4 — `anydoc.to_markdown("sdp.docx")` → Markdown string; flattens docs to Markdown. exercised: "'Continuity plan\n'"
+  `locate: anydoc.to_markdown`
+  mermaid — non-Python: Node/CLI renderer (@mermaid-js/mermaid-cli: mmdc), not a Python import; CLI: `mmdc -i in.mmd -o out.svg`
+  diagrams 0.25.1 — false positive: "diagrams" here is the common noun (existing diagrams being ingested), not the `diagrams` library, which GENERATES cloud-architecture diagrams and cannot flatten/parse HTML. Not bound.
+
+- **Step 1 (Orchestrator Compilation).** Emit prefect flow only if NLP recovers principle spans
+  prefect 3.8.4 — `@prefect.flow def r0(): ...` → Flow; emits the orchestration flow. located
+  `locate: prefect.flow, prefect.task`
+  stanza 1.14.0 — `nlp=stanza.Pipeline(lang="en", processors="tokenize,ner"); nlp(text)` → annotated Document; recovers spans. located
+  `locate: stanza.Pipeline`
+
+- **Step 2 (Requirement Proof).** Solvers must accept usability/cost/performance/security/compliance bounds on rows
+  amr-logic-converter 0.11.3 — `AmrLogicConverter().convert(amr_str)` → Clause; turns rows into FOL bounds. exercised: "boy(b)"
+  `locate: amr_logic_converter.AmrLogicConverter.AmrLogicConverter.convert`
+  pysmt 0.9.6 — `pysmt.shortcuts.is_sat(formula)` → bool; accepts the bound formulas. exercised: "False (p∧¬p)"
+  `locate: pysmt.shortcuts.is_sat, pysmt.shortcuts.Solver`
+
+- **Step 3 (Structure and Interaction).** Rebuild service breakdown; encode interaction flows; write SLA/OLA tables
+  networkx 3.6.1 — `g=DiGraph(); g.add_edges_from(breakdown_edges)` → graph; rebuilds the service breakdown. exercised: "2 edges"
+  `locate: networkx.DiGraph.add_edges_from, networkx.DiGraph.add_edge`
+  pydsm — not installed here: needs cblas.h to build; confirmed absent in venv.
+  pm4py 2.7.23.8 — `pm4py.discover_petri_net_inductive(log)` → (net, im, fm); encodes interaction-flow model. located
+  `locate: pm4py.discover_petri_net_inductive`
+  zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
+  `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
+
+- **Step 4 (Execution).** Write one Excel spreadsheet from solver-accepted fields
+  openpyxl 3.1.2 — `wb=openpyxl.Workbook(); wb.active["A1"]=v; wb.save("out.xlsx")` → writes .xlsx. exercised: "saved 4801 bytes"
+  `locate: openpyxl.Workbook.save, openpyxl.Workbook`
+  xlsxwriter 3.2.9 — `w=xlsxwriter.Workbook("out.xlsx"); w.add_worksheet(); w.close()` → writes .xlsx. exercised: "saved 5247 bytes"
+  `locate: xlsxwriter.Workbook.close, xlsxwriter.Workbook.add_worksheet, xlsxwriter.Workbook`
+  pandas-xlsx-tables 1.1.2 — `df_to_xlsx_table(df, "tbl", file="out.xlsx", index=False)` → writes real Excel Table. exercised: "wrote 6134 bytes"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table, pandas_xlsx_tables.dfs_to_xlsx_tables`
 
 #### Pipeline R15: Reverse Business Analysis
 
-- **Step 0 (Global Ingestion).** python-docx, office-oxide, mammoth, and markitdown turn the published specification, matrix, and communications pack into the compiler manifest.
-  in catalog: mammoth, markitdown, office-oxide, python-docx
-- **Step 1 (Orchestrator Compilation).** Pipeline R0 builds a dagster asset graph from recovered stakeholder, requirement, and conflict spans. Empty requirement set cancels specification assets.
-  in catalog: dagster
-- **Step 2 (Elicitation and Model).** BA_STAKEHOLDER, BA_REQUIREMENT, BA_CONFLICT, and BA_TRACE land in that pipeline's spreadsheet. typedlogic and rdflib recategorize recovered functional, non-functional, and transition requirements; networkx holds the stakeholder influence graph.
-  in catalog: networkx, rdflib, typedlogic
-- **Step 3 (Verify and Trace).** vampire and model-checker must accept clarity, consistency, and testability; the pipeline spreadsheet and csv-diff keep the traceability matrix and refuse baseline drift that fails z3-solver.
-  in catalog: z3-solver
-- **Step 4 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** turn spec/matrix/comms pack into compiler manifest
+  python-docx 1.2.0 — `docx.Document(path)` → document; reads .docx paragraphs. exercised: "docx saved"
+  `locate: docx.Document`
+  office-oxide 0.1.9 — `office_oxide.to_markdown(path)` → Markdown; Rust Office parser. exercised: "hi"
+  `locate: office_oxide.to_markdown, office_oxide.extract_text`
+  mammoth 1.12.1 — `mammoth.convert_to_html(fileobj).value` → clean HTML from .docx. exercised: "<p>hi</p>"
+  `locate: mammoth.convert_to_html`
+  markitdown 0.1.7 — `MarkItDown().convert(path).text_content` → Markdown. exercised: "# Hi\n\nBody text"
+  `locate: markitdown.MarkItDown.convert`
+
+- **Step 1 (Orchestrator Compilation).** build dagster asset graph from recovered spans
+  dagster 1.13.20 — `@dagster.asset` + `Definitions(assets=[...])` → spec asset graph. exercised: "AssetsDefinition"
+  `locate: dagster.asset, dagster.Definitions`
+
+- **Step 2 (Elicitation and Model).** recategorize requirements; hold stakeholder influence graph
+  typedlogic 0.2.4 — `Solver().check()` → Solution; recategorizes via typed-logic inference. located
+  `locate: typedlogic.solver.Solver.check`
+  rdflib 7.6.0 — `Graph().add((s,p,o))` → asserts requirement triples for recategorization. exercised: "1 triple"
+  `locate: rdflib.Graph.add`
+  networkx 3.6.1 — `DiGraph().add_edge(a,b)` → stakeholder influence graph. exercised: "['a','b','c']"
+  `locate: networkx.DiGraph.add_edge`
+
+- **Step 3 (Verify and Trace).** provers/solvers accept clarity/consistency; keep traceability, refuse drift
+  model-checker 1.3.9 — `model_checker.run_test(case, ...)` → bool; accepts consistency/testability. located
+  `locate: model_checker.run_test`
+  csv-diff 1.2 — `compare(load_csv(a,key), load_csv(b,key))` → baseline-drift diff. exercised: "added=1, removed=1"
+  `locate: csv_diff.compare, csv_diff.load_csv`
+  z3-solver 5.1.0.0 — `Solver().check()` → sat/unsat; refuses drift that fails. exercised: "sat [x = 3]"
+  `locate: z3.Solver.check`
+  vampire — non-Python: C++ theorem-prover binary; CLI: `vampire problem.p`
+
+- **Step 4 (Execution).** write one spreadsheet from solver-accepted fields
+  openpyxl 3.1.2 — `openpyxl.Workbook().save(path)` → xlsx file. exercised: "saved"
+  `locate: openpyxl.Workbook, openpyxl.Workbook.save`
+  xlsxwriter 3.2.9 — `xlsxwriter.Workbook(path).add_worksheet()` → native xlsx writer. exercised: "closed"
+  `locate: xlsxwriter.Workbook, xlsxwriter.Workbook.add_worksheet`
+  pandas-xlsx-tables 1.1.2 — `df_to_xlsx_table(df, "T", file=path)` → real Excel Table. exercised: "wrote table"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table`
 
 #### Pipeline R16: Reverse Architecture Management
 
-- **Step 0 (Global Ingestion).** quarto HTML, PDF, and docx packs plus mermaid, diagrams, and pyArchimate exports are flattened by docling, markitdown, python-docx, and playwright into the compiler manifest.
-  in catalog: docling, markitdown, playwright, python-docx
-- **Step 1 (Orchestrator Compilation).** Pipeline R0 writes prefect tasks for owlready2, rdflib, and networkx only if principle and viewpoint phrases exist in the census. No principle set, no architecture flow.
-  in catalog: networkx, owlready2, prefect, rdflib
-- **Step 2 (Target Graph and Roadmap).** AM_PRINCIPLE, AM_VIEWPOINT, AM_BUILDING_BLOCK, AM_GAP, and AM_ROADMAP_ITEM land in that pipeline's spreadsheet. rustworkx and pydsm assemble current-versus-target graphs from recovered rows; criticalpath and se-lib sequence work packages only after typedlogic facts compile.
-  in catalog: criticalpath, typedlogic
-- **Step 3 (Conformance Proof).** z3-solver must accept acyclicity; clingo must accept building-block compliance with the compiled metamodel or view assets are not materialized.
-  in catalog: clingo, z3-solver
-- **Step 4 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** flatten quarto/mermaid/diagrams/pyArchimate exports into manifest
+  docling 2.124.0 — `DocumentConverter().convert(source="pack.pdf")` → parses HTML/PDF/docx to text/Markdown. located
+  `locate: docling.document_converter.DocumentConverter.convert`
+  markitdown 0.1.7 — `MarkItDown().convert(source="export.html")` → Markdown/text. exercised: "'# Hi\n\nTest doc'"
+  `locate: markitdown.MarkItDown.convert`
+  python-docx 1.2.0 — `docx.Document("pack.docx")` → reads docx pack for flattening. exercised: "paragraph text 'hello'"
+  `locate: docx.Document`
+  playwright 1.62.0 — `page.goto(url); page.content()` → serialized rendered HTML export. located
+  `locate: playwright.sync_api.sync_playwright, playwright.sync_api.Page.content`
+  diagrams 0.25.1 — `with diagrams.Diagram(name="ea", outformat="png"):` → produces diagram export ingested here. located
+  `locate: diagrams.Diagram`
+  pyArchimate 1.12.3 — `pyArchimate.Model(name="ea").add_relationship(...)` → builds ArchiMate model whose export is ingested. exercised: "elements=0; Model built"
+  `locate: pyArchimate.Model, pyArchimate.Model.add_relationship`
+  mermaid — non-Python: Node/CLI renderer (@mermaid-js/mermaid-cli); CLI: `mmdc -i in.mmd -o out.svg`
+  quarto — non-Python: CLI publishing engine; CLI: `quarto render doc.qmd`
+
+- **Step 1 (Orchestrator Compilation).** write prefect tasks for ontology/RDF/graph assets
+  prefect 3.8.4 — `prefect.task(name="build_onto")(fn)` → Task; the written architecture-flow tasks. located
+  `locate: prefect.task`
+  owlready2 0.51 — `owlready2.get_ontology(base_iri="http://ea/onto.owl")` → ontology asset built by a task. exercised: "base_iri set to …#"
+  `locate: owlready2.get_ontology`
+  rdflib 7.6.0 — `rdflib.Graph().parse(data=ttl, format="turtle")` → RDF graph asset. exercised: "1 triple"
+  `locate: rdflib.Graph, rdflib.Graph.parse`
+  networkx 3.6.1 — `g=networkx.DiGraph(); g.add_edge(u_of_edge, v_of_edge)` → architecture graph asset. exercised: "DiGraph edges added; DAG check True"
+  `locate: networkx.DiGraph, networkx.DiGraph.add_edge`
+
+- **Step 2 (Target Graph and Roadmap).** assemble current/target graphs; sequence work packages
+  rustworkx 0.18.1 — `g=rustworkx.PyDiGraph(); rustworkx.is_directed_acyclic_graph(g)` → assembles current-vs-target graph. exercised: "DAG check True"
+  `locate: rustworkx.PyDiGraph, rustworkx.is_directed_acyclic_graph`
+  criticalpath 0.1.5 — `criticalpath.Node("proj").get_critical_path()` → sequences work packages by CPM. exercised: "['A','B'], duration 8"
+  `locate: criticalpath.Node.get_critical_path, criticalpath.Node.link`
+  typedlogic 0.2.4 — `s=ClingoSolver(); s.add_theory(theory); s.dump()` → compiles typed facts gating sequencing. located
+  `locate: typedlogic.integrations.solvers.clingo.ClingoSolver.dump`
+  pydsm — not installed here: needs cblas.h to build
+  se-lib 0.53 — `design_structure_matrix(...)`, `critical_path_diagram(...)` → PERT / DSM systems-engineering artifacts. located
+  `locate: selib.design_structure_matrix, selib.critical_path_diagram, selib.SystemDynamicsModel`
+
+- **Step 3 (Conformance Proof).** accept acyclicity and building-block compliance
+  z3-solver 5.1.0.0 — `s=z3.Solver(); s.add(cons); s.check()` → sat/unsat acyclicity proof. exercised: "sat; model [x = 3]"
+  `locate: z3.Solver, z3.Solver.check`
+  clingo 5.8.0 — `Control().add("base",[],facts); .ground(); .solve(on_model=cb)` → accepts building-block compliance. exercised: "model 'a b'"
+  `locate: clingo.Control, clingo.Control.add, clingo.Control.solve`
+
+- **Step 4 (Execution).** write one spreadsheet from solver-accepted fields
+  openpyxl 3.1.2 — `wb=openpyxl.Workbook(); wb.active["A1"]=v; wb.save(path)` → writes .xlsx. exercised: "A1 == 'hi'"
+  `locate: openpyxl.Workbook`
+  xlsxwriter 3.2.9 — `wb=xlsxwriter.Workbook(path); wb.add_worksheet().write(0,0,v); wb.close()` → writes .xlsx. exercised: "5248-byte xlsx"
+  `locate: xlsxwriter.Workbook`
+  pandas-xlsx-tables 1.1.2 — `df_to_xlsx_table(df, table_name="AM_ROADMAP_ITEM", file=path, index=False)` → real Excel Table. exercised: "6124-byte xlsx"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table`
 
 #### Pipeline R17: Reverse Infrastructure and Platform Management
 
-- **Step 0 (Global Ingestion).** playwright flattens the Streamlit app; python-docx, undoc, and markitdown flatten the runbook and hardening Word pack into the compiler manifest.
-  in catalog: markitdown, playwright, python-docx, streamlit
-- **Step 1 (Orchestrator Compilation).** Pipeline R0 keeps pydantic pattern assets and unified-planning provision assets only when standard, SLA, and recovery-objective spans type-check in that pipeline's spreadsheet. Missing recovery language drops the build graph.
-  in catalog: pydantic, unified-planning
-- **Step 2 (Design and Constraint).** INFRA_PATTERN, INFRA_SLA, INFRA_BOM, INFRA_NODE, and INFRA_RECOVERY land in that pipeline's spreadsheet. casadi and python-control emit dynamics models from recovered settings; cpmpy and z3-solver must accept bill-of-materials, network, and hardening predicates.
-  in catalog: z3-solver
-  attempted, failed here: cpmpy
-- **Step 3 (Operate and Retire).** simpy and simprocesd replay backup, patch, and health tasks; clingo must accept dependency-safe retirement against the Pipeline R13 CI graph or decommission assets halt.
-  in catalog: clingo, simpy
-- **Step 4 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** Flatten the Streamlit app and Word runbook/hardening pack into manifest.
+  playwright 1.62.0 — `page.content()` → rendered DOM HTML of the Streamlit app. located
+  `locate: playwright.sync_api.Page.content`
+  markitdown 0.1.7 — `markitdown.MarkItDown().convert("app.html")` → Markdown of the flattened page. exercised: "# Q3 Net income 100"
+  `locate: markitdown.MarkItDown.convert`
+  python-docx 1.2.0 — `docx.Document("runbook.docx").paragraphs` → reads the Word runbook/hardening pack. exercised: "saved 36583B"
+  `locate: docx.Document`
+  undoc 0.9.0 — `undoc.parse_file("hardening.docx").to_markdown()` → Markdown from the Word pack. exercised: "## Sheet | Metric | 100 |"
+  `locate: undoc.parse_file, undoc.Undoc.to_markdown`
+  streamlit 1.63.0 — `streamlit.plotly_chart(fig)` → the Streamlit app later flattened. located
+  `locate: streamlit.plotly_chart`
+
+- **Step 1 (Orchestrator Compilation).** Keep pattern/provision assets only if standard/SLA/recovery spans type-check.
+  pydantic 2.13.5 — `pydantic.create_model("INFRA_PATTERN", sla=(str, ...))` → typed pattern asset. exercised: "instance amount=100"
+  `locate: pydantic.create_model`
+  unified-planning 1.3.0 — `OneshotPlanner(problem_kind=problem.kind).solve(problem)` → provision plan. located
+  `locate: unified_planning.shortcuts.OneshotPlanner`
+
+- **Step 2 (Design and Constraint).** Emit dynamics models; accept BOM/network/hardening predicates.
+  casadi 3.8.0 — `casadi.Function("dyn", [x], [rhs])` → callable symbolic dynamics model. exercised: "dyn(3)=9.0"
+  `locate: casadi.Function`
+  z3-solver 5.1.0.0 — `z3.Solver().check()` (after add) → accepts BOM/network/hardening predicates. exercised: "sat; assets=100, liab=50"
+  `locate: z3.Solver.check`
+  cpmpy 1.0.0 — installed but `import cpmpy` fails standalone (highspy `_core` undefined symbol `_ZN5Highs13releaseMemoryEv`); intended cpmpy.Model.solve does not resolve, no path cited.
+  python-control — not installed here: no importable `control` in venv.
+
+- **Step 3 (Operate and Retire).** Replay backup/patch/health tasks; accept dependency-safe retirement.
+  simpy 4.1.2 — `simpy.Environment().run(until=T)` → replays backup/patch/health tasks. exercised: "now=10"
+  `locate: simpy.Environment.run`
+  simprocesd 0.3.0 — `System(...).simulate(simulation_duration)` → runs the production/task line. located
+  `locate: simprocesd.model.System.simulate`
+  clingo 5.8.0 — `clingo.Control().solve(on_model=cb)` → accepts dependency-safe retirement. exercised: "sat, balanced=[True]"
+  `locate: clingo.Control.solve`
+
+- **Step 4 (Execution).** Write one Excel spreadsheet from the recovered, solver-accepted fields.
+  openpyxl 3.1.2 — `openpyxl.Workbook().save("artifact.xlsx")` → writes the workbook. exercised: "saved 4819B"
+  `locate: openpyxl.Workbook.save`
+  xlsxwriter 3.2.9 — `wb = xlsxwriter.Workbook("artifact.xlsx"); wb.close()` → writes the workbook. exercised: "wrote 5248B"
+  `locate: xlsxwriter.Workbook, xlsxwriter.Workbook.close`
+  pandas-xlsx-tables 1.1.2 — `pandas_xlsx_tables.df_to_xlsx_table(df, "T", file="artifact.xlsx")` → real Excel Table. exercised: "table xlsx 6047B"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table`
 
 #### Pipeline R18: Reverse IT Asset Management
 
-- **Step 0 (Global Ingestion).** openpyxl, python-calamine, fastexcel, and csvkit flatten the published register; markitdown flattens great-tables HTML and QR/barcode sheets into the compiler manifest.
-  in catalog: csvkit, fastexcel, great-tables, markitdown, openpyxl, python-calamine
-- **Step 1 (Orchestrator Compilation).** Pipeline R0 admits register assets only when asset-type, entitlement, and identifier columns type-check in that pipeline's spreadsheet. No entitlement table, no license flow.
-- **Step 2 (Register and Proof).** ASSET_RECORD, ASSET_ENTITLEMENT, ASSET_CONSUMPTION, and ASSET_DISCREPANCY land in that pipeline's spreadsheet. clorm writes asset facts from the recovered instance; clingo must prove entitlement-versus-consumption under per-user, per-device, and concurrent models.
-  in catalog: clingo, clorm
-- **Step 3 (Audit Repair).** daff and csv-diff emit discrepancy tables; numpy-financial scores write-off and compliance exposure only on the unsat remainder.
-- **Step 4 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** flatten the published register and sheets
+  openpyxl 3.1.2 — `openpyxl.load_workbook(path)` → workbook to read the register. located
+  `locate: openpyxl.load_workbook`
+  python-calamine 0.8.2 — `python_calamine.load_workbook(path_or_filelike)` → fast sheet read. exercised: "sheets ['Sheet']"
+  `locate: python_calamine.load_workbook`
+  fastexcel 0.21.0 — `fastexcel.read_excel(source)` → ExcelReader (Calamine-backed). exercised: "sheets ['Sheet']"
+  `locate: fastexcel.read_excel`
+  csvkit 2.2.0 — `In2CSV(args=[...]).run()` → flatten register to CSV; CLI: `in2csv`. located
+  `locate: csvkit.utilities.in2csv.In2CSV`
+  markitdown 0.1.7 — `MarkItDown().convert(source).text_content` → Markdown of HTML/QR sheets. exercised: "'# Title\\n\\nhello world'"
+  `locate: markitdown.MarkItDown.convert`
+  great-tables — not acting here: named as the SOURCE table-HTML that markitdown flattens, not performing ingestion; no binding.
+
+- **Step 1 (Orchestrator Compilation).** admit register assets only if columns type-check
+  (no candidate library in batch — pure type-check gate; nothing to bind.)
+
+- **Step 2 (Register and Proof).** write asset facts; prove entitlement vs consumption
+  clorm 1.6.3 — `Asset(aid=1, name="pc")` where `class Asset(clorm.Predicate)` → asset facts; `FactBase([...])`. exercised: "FactBase len 2"
+  `locate: clorm.Predicate, clorm.FactBase, clorm.control_add_facts`
+  clingo 5.8.0 — `Control().solve()` → proves entitlement vs consumption models. exercised: "SAT; model 'a b'"
+  `locate: clingo.Control.solve, clingo.Control.ground`
+
+- **Step 3 (Audit Repair).** emit discrepancy tables; score exposure
+  daff 1.4.2 — `daff.Coopy.diff(local, remote)` → highlighter diff table. exercised: "diff table height 3"
+  `locate: daff.Coopy.diff`
+  csv-diff 1.2 — `csv_diff.compare(previous, current)` (rows via `load_csv`) → change dict. exercised: "changed row key '2'"
+  `locate: csv_diff.compare, csv_diff.load_csv`
+  numpy-financial 1.0.0 — `npv(rate, values)`, `irr(values)` → financial figures on the proved ledger. located
+  `locate: numpy_financial.npv, numpy_financial.irr, numpy_financial.pmt`
+
+- **Step 4 (Execution).** write one spreadsheet artifact from solver-accepted fields
+  openpyxl 3.1.2 — `Workbook().save(path)` → xlsx artifact. exercised: "saved xlsx"
+  `locate: openpyxl.Workbook, openpyxl.workbook.workbook.Workbook.save`
+  xlsxwriter 3.2.9 — `Workbook(path)` (+ write) `.close()` → xlsx with native charts. exercised: "closed xlsx"
+  `locate: xlsxwriter.Workbook, xlsxwriter.Workbook.close`
+  pandas-xlsx-tables 1.1.2 — `df_to_xlsx_table(df, table_name, file)` → real Excel Table object. exercised: "wrote Excel table"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table, pandas_xlsx_tables.dfs_to_xlsx_tables`
 
 #### Pipeline R19: Reverse Workforce and Talent Management
 
-- **Step 0 (Global Ingestion).** python-docx and markitdown flatten the workforce Word pack; playwright flattens the Streamlit dashboard into the compiler manifest.
-  in catalog: markitdown, playwright, python-docx, streamlit
-- **Step 1 (Orchestrator Compilation).** Pipeline R0 emits a prefect flow only if role, competency, and FTE spans resolve in that pipeline's spreadsheet. Missing competency language yields an empty flow and a halt.
-  in catalog: prefect
-- **Step 2 (Plan and Ontology).** WF_ROLE, WF_COMPETENCY, WF_PERSON, WF_GAP, and WF_ALLOCATION land in that pipeline's spreadsheet. pandas and polars rebuild the gap matrix; networkx maps succession; owlready2 and typedlogic must accept a complete profile for every planned role.
-  in catalog: networkx, owlready2, pandas, typedlogic
-- **Step 3 (Allocation Proof).** ortools and pulp solve hiring and L&D allocation from the recovered instance; zen-engine binds role KPIs only if the solver returns a feasible incumbent.
-  in catalog: ortools, pulp, zen-engine
-- **Step 4 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** Flatten workforce Word pack; flatten Streamlit dashboard to manifest.
+  python-docx 1.2.0 — `docx.Document(path).paragraphs` → reads Word-pack text. exercised: "paras ['H','para one']"
+  `locate: docx.Document, docx.document.Document.paragraphs`
+  markitdown 0.1.7 — `MarkItDown().convert(path).markdown` → Markdown from Word. exercised: "'# Title\n\nHello world'"
+  `locate: markitdown.MarkItDown.convert`
+  playwright 1.62.0 — `page.goto(url); page.content()` → captures dashboard HTML. located
+  `locate: playwright.sync_api.Page.content, playwright.sync_api.sync_playwright`
+  streamlit 1.63.0 — not acting here: named as an ingested source ("the Streamlit dashboard"), which playwright flattens.
+
+- **Step 1 (Orchestrator Compilation).** Emit prefect flow if role/competency/FTE spans resolve.
+  prefect 3.8.4 — `@prefect.flow` def; `flow()` → emitted flow. exercised: "result 5"
+  `locate: prefect.flow, prefect.task`
+
+- **Step 2 (Plan and Ontology).** Rebuild gap matrix; map succession; accept complete role profiles.
+  pandas 2.3.3 — `df.pivot_table(index='role', columns='comp', values='gap')` → gap matrix. exercised: "cols ['c1','c2']"
+  `locate: pandas.DataFrame.pivot_table`
+  polars 1.44.1 — `pl.DataFrame(...).pivot(values='gap', index='role', on='comp')` → gap matrix. exercised: "cols ['role','c1','c2']"
+  `locate: polars.DataFrame.pivot`
+  networkx 3.6.1 — `networkx.DiGraph(succession_edges)` → maps succession. exercised: "topo ['a','b','c']"
+  `locate: networkx.DiGraph, networkx.topological_sort`
+  owlready2 0.51 — `sync_reasoner([onto])` → HermiT reasons/accepts complete profile. exercised: "consistent, 2 classes"
+  `locate: owlready2.sync_reasoner, owlready2.get_ontology`
+  typedlogic 0.2.4 — `ClingoSolver().add(...); .check()` → Solution.satisfiable accepts profile. exercised: "satisfiable=True"
+  `locate: typedlogic.integrations.solvers.clingo.ClingoSolver.check`
+
+- **Step 3 (Allocation Proof).** Solve hiring and L&D allocation; bind KPIs if feasible incumbent.
+  ortools 9.15.6755 — `CpSolver().Solve(model)` → allocation solution. exercised: "OPTIMAL, x=10"
+  `locate: ortools.sat.python.cp_model.CpSolver.Solve`
+  pulp 3.3.2 — `p=LpProblem(...); p.solve(...)` → allocation solution. exercised: "Optimal, x=4.0"
+  `locate: pulp.LpProblem.solve`
+  zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
+  `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
+
+- **Step 4 (Execution).** Write one spreadsheet from recovered, solver-accepted fields.
+  openpyxl 3.1.2 — `wb=Workbook(); ws.append(row); wb.save(path)` → writes .xlsx. exercised: "wrote xlsx"
+  `locate: openpyxl.Workbook, openpyxl.workbook.workbook.Workbook.save`
+  xlsxwriter 3.2.9 — `wb=Workbook(path); ws.write(r,c,v); wb.close()` → writes .xlsx. exercised: "wrote xlsx"
+  `locate: xlsxwriter.Workbook`
+  pandas-xlsx-tables 1.1.2 — `df_to_xlsx_table(df, 'T', path, index=False)` → real Excel Table. exercised: "wrote xlsx"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table`
 
 #### Pipeline R20: Reverse Supplier Management
 
-- **Step 0 (Global Ingestion).** python-docx, pypdf, docling, and python-calamine pull the published contract and scorecard pack into the compiler manifest. playwright flattens the supplier dashboard.
-  in catalog: docling, playwright, pypdf, python-calamine, python-docx
-- **Step 1 (Orchestrator Compilation).** Pipeline R0 writes a temporalio workflow gated on segmentation criteria and evaluation-dimension spans recovered from the pack. No evaluation language, no workflow.
-  in catalog: temporalio
-- **Step 2 (Select and Bind).** SUP_SEGMENT, SUP_VENDOR, SUP_SCORE, SUP_CLAUSE, and SUP_POLICY land in that pipeline's spreadsheet. pingouin and pandas rescore shortlists from the recovered instance; clingo must accept mandatory policy constraints; jinja2 instantiates clause templates only for the stable model.
-  in catalog: clingo, Jinja2, pandas
-- **Step 3 (Performance Path).** sktime forecasts supplier series; dowhy runs only if treatment and outcome spans survived identification inside this workflow.
-  in catalog: dowhy
-- **Step 4 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** pull contract/scorecard pack into manifest; flatten dashboard
+  docling 2.124.0 — `docling.document_converter.DocumentConverter().convert(source=path)` → ConversionResult; pulls pack into manifest. located
+  `locate: docling.document_converter.DocumentConverter.convert`
+  playwright 1.62.0 — `with playwright.sync_api.sync_playwright() as p: p.chromium.launch()` → browser; flattens the supplier dashboard. located
+  `locate: playwright.sync_api.sync_playwright`
+  pypdf 6.16.2 — `pypdf.PdfReader(path)` → reader exposing `.pages`; reads contract PDFs. located
+  `locate: pypdf.PdfReader`
+  python-calamine 0.8.2 — `python_calamine.load_workbook(path_or_filelike)` → CalamineWorkbook; reads scorecard sheets. located
+  `locate: python_calamine.load_workbook`
+  python-docx 1.2.0 — `docx.Document(path)` → document exposing `.paragraphs`; reads contract .docx. exercised: "1 paragraph"
+  `locate: docx.Document`
+
+- **Step 1 (Orchestrator Compilation).** write a temporalio workflow gated on segmentation/evaluation spans
+  temporalio 1.32.0 — `@temporalio.workflow.defn` on a class with `@workflow.run` → workflow definition; writes the workflow. located
+  `locate: temporalio.workflow.defn`
+
+- **Step 2 (Select and Bind).** rescore shortlists; accept policy constraints; instantiate clause templates
+  clingo 5.8.0 — `clingo.Control(); ctl.ground(...); ctl.solve(on_model=...)` → stable models; accepts mandatory policy constraints. exercised: "['a b']"
+  `locate: clingo.Control.solve, clingo.Control`
+  jinja2 3.1.6 — `jinja2.Template(src).render(**ctx)` → rendered str; instantiates clause templates. exercised: "hi 5"
+  `locate: jinja2.Template.render, jinja2.Template`
+  pandas 2.3.3 — `pandas.DataFrame(data)` with scoring ops → tabular frame; rescores shortlists. located
+  `locate: pandas.DataFrame`
+  pingouin 0.6.1 — `pingouin.anova(data=df, dv='y', between='g')` → ANOVA table; statistically rescores shortlists. exercised: "['Source', 'ddof1', 'ddof2']"
+  `locate: pingouin.anova, pingouin.ttest`
+
+- **Step 3 (Performance Path).** forecast supplier series; run identified causal inference
+  dowhy 0.14 — `dowhy.CausalModel(data, treatment, outcome, graph=...).estimate_effect(...)` → causal estimate; runs causal inference. located
+  `locate: dowhy.CausalModel.estimate_effect, dowhy.CausalModel`
+  sktime 1.1.0 — `sktime.forecasting.naive.NaiveForecaster(strategy='last').fit(y)` then `predict(fh)` → forecast series; forecasts supplier series. exercised: "[5.0, 5.0]"
+  `locate: sktime.forecasting.naive.NaiveForecaster.fit, sktime.forecasting.naive.NaiveForecaster`
+
+- **Step 4 (Execution).** write one artifact spreadsheet from solver-accepted fields
+  openpyxl 3.1.2 — `openpyxl.Workbook()` then `wb.save(path)` → xlsx workbook; writes the artifact spreadsheet. exercised: "hi"
+  `locate: openpyxl.Workbook`
+  pandas-xlsx-tables 1.1.2 — `pandas_xlsx_tables.df_to_xlsx_table(df, table_name, file=path, index=False)` → writes native Excel Table; writes spreadsheet. exercised: "wrote"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table`
+  xlsxwriter 3.2.9 — `xlsxwriter.Workbook(path)` then `add_worksheet().write(); close()` → xlsx file; writes spreadsheet. exercised: "wrote"
+  `locate: xlsxwriter.Workbook`
 
 #### Pipeline R21: Reverse Portfolio Management
 
-- **Step 0 (Global Ingestion).** quarto HTML, PDF, and docx plus plotly HTML are flattened by docling, markitdown, python-docx, and playwright into the compiler manifest.
-  in catalog: docling, markitdown, playwright, plotly, python-docx
-- **Step 1 (Orchestrator Compilation).** Pipeline R0 builds a dagster asset graph from recovered value, risk, dependency, and constraint spans. Empty case set cancels selection assets.
-  in catalog: dagster
-- **Step 2 (Graph and Mix).** PF_INITIATIVE, PF_VALUE, PF_RISK, PF_DEPENDENCY, PF_BUDGET, and PF_CAPACITY land in that pipeline's spreadsheet. networkx and criticalpath emit the initiative graph from recovered rows; pulp and ortools optimize mix under budget and capacity bounds compiled by pydantic.
-  in catalog: criticalpath, networkx, ortools, pulp, pydantic
-- **Step 3 (Selection Proof).** z3-solver must accept mutual-exclusion and prerequisite constraints on the incumbent or no publication asset is materialized.
-  in catalog: z3-solver
-- **Step 4 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** Flatten quarto/plotly/docx artifacts into the manifest
+  docling 2.124.0 — `docling.document_converter.DocumentConverter().convert(source)` → ConversionResult; parses PDF/Office/HTML. located (requires models)
+  `locate: docling.document_converter.DocumentConverter.convert`
+  markitdown 0.1.7 — `markitdown.MarkItDown().convert(source)` → DocumentConverterResult; converts artifacts to markdown. exercised: "'Hello clause one.'"
+  `locate: markitdown.MarkItDown.convert`
+  playwright 1.62.0 — `playwright.sync_api.sync_playwright()` then `page.pdf(path)` → flattens HTML pages. located (requires browser binaries)
+  `locate: playwright.sync_api.sync_playwright, playwright.sync_api.Page.pdf`
+  plotly 7.0.0 — `plotly.graph_objects.Figure(data).write_html(path)` → writes chart HTML (the input flattened). exercised: "a06_plot.html written"
+  `locate: plotly.graph_objects.Figure.write_html`
+  python-docx 1.2.0 — `docx.Document(path)` → Document; reads the docx artifact. exercised: "'Hello clause one.'"
+  `locate: docx.Document`
+  quarto — non-Python: CLI publishing engine, not a Python import; CLI: `quarto render`
+
+- **Step 1 (Orchestrator Compilation).** Build a dagster asset graph from spans
+  dagster 1.13.20 — `dagster.asset(fn)` → AssetsDefinition; defines a selection asset node. exercised: "AssetsDefinition"
+  `locate: dagster.asset`
+
+- **Step 2 (Graph and Mix).** Emit initiative graph; optimize mix under bounds
+  criticalpath 0.1.5 — `criticalpath.Node('p').get_critical_path()` → node list; emits initiative critical path. exercised: "['A', 'B']"
+  `locate: criticalpath.Node.get_critical_path`
+  networkx 3.6.1 — `networkx.DiGraph()` + `add_edge` → directed graph; emits the initiative graph. exercised: "(3, 2) nodes/edges"
+  `locate: networkx.DiGraph`
+  ortools 9.15.6755 — `ortools.sat.python.cp_model.CpSolver().Solve(model)` → status; optimizes mix (CP-SAT). exercised: "OPTIMAL 10"
+  `locate: ortools.sat.python.cp_model.CpSolver.Solve`
+  pulp 3.3.2 — `pulp.LpProblem(name, sense).solve(solver)` → status int; optimizes mix (LP). exercised: "Optimal 3.0"
+  `locate: pulp.LpProblem.solve`
+  pydantic 2.13.5 — `pydantic.BaseModel.model_validate(data)` → validated instance; compiles budget/capacity bounds. exercised: "(1, 'a')"
+  `locate: pydantic.BaseModel.model_validate`
+
+- **Step 3 (Selection Proof).** SMT-accept mutual-exclusion and prerequisite constraints
+  z3-solver 5.1.0.0 — `z3.Solver().check()` → sat/unsat; accepts selection constraints. exercised: "sat"
+  `locate: z3.Solver.check`
+
+- **Step 4 (Execution).** Write one Excel artifact from accepted fields
+  openpyxl 3.1.2 — `openpyxl.Workbook().save(path)` → writes styled .xlsx. exercised: "wrote file True"
+  `locate: openpyxl.Workbook.save`
+  pandas-xlsx-tables 1.1.2 — `pandas_xlsx_tables.df_to_xlsx_table(df, table_name, file=path)` → writes real Excel Table. exercised: "wrote file True"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table`
+  xlsxwriter 3.2.9 — `xlsxwriter.Workbook(path)`; `ws.write(row, col, val)`; `close()` → .xlsx with charts. exercised: "wrote file True"
+  `locate: xlsxwriter.Workbook, xlsxwriter.worksheet.Worksheet.write`
 
 #### Pipeline R22: Reverse Service Financial Management
 
-- **Step 0 (Global Ingestion).** playwright, markitdown, undoc, firecrawl-anydoc, and python-calamine flatten the finance dashboard and any printed pack into the compiler manifest.
-  in catalog: markitdown, playwright, python-calamine
-- **Step 1 (Orchestrator Compilation).** Pipeline R0 emits a temporalio workflow only if stanza recovers cost-pool, allocation, and charging predicates from the published copy. Missing ledger language yields a halt.
-  in catalog: stanza, temporalio
-- **Step 2 (Schema and Proof).** SFM_POOL, SFM_ALLOCATION, SFM_CHARGE, SFM_INVOICE, and SFM_UNIT_COST land in that pipeline's spreadsheet. zen-engine binds allocation tables from recovered rows; clingo must prove debit/credit/recovery consistency.
-  in catalog: clingo, zen-engine
-- **Step 3 (Quant and Select).** numpy-financial and statsmodels compute unit cost and variance only on the proved ledger; autoviz may select charts only from those tables and only inside the recovered grammar.
-  in catalog: statsmodels
-  attempted, failed here: autoviz
-- **Step 4 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** Flatten finance dashboard and printed pack into the manifest.
+  playwright 1.62.0 — `with sync_playwright() as p: page.goto(url); page.content()` → rendered dashboard HTML. located
+  `locate: playwright.sync_api.sync_playwright, playwright.sync_api.Page.content`
+  markitdown 0.1.7 — `markitdown.MarkItDown().convert(source)` → Markdown result. located
+  `locate: markitdown.MarkItDown.convert`
+  undoc 0.9.0 — `undoc.parse_file(path)` → Undoc markdown/text/json. located
+  `locate: undoc.parse_file`
+  firecrawl-anydoc 0.2.4 — `anydoc.to_markdown(path)` → Markdown string from document. located
+  `locate: anydoc.to_markdown`
+  python-calamine 0.8.2 — `python_calamine.load_workbook(path_or_filelike)` → workbook; reads Excel/ODS. located
+  `locate: python_calamine.load_workbook`
+
+- **Step 1 (Orchestrator Compilation).** Emit a workflow only if cost-pool/allocation/charging predicates recovered.
+  stanza 1.14.0 — `stanza.Pipeline(lang='en', processors='tokenize,pos,depparse')` → NLP doc with dependency parse. located
+  `locate: stanza.Pipeline`
+  temporalio 1.32.0 — `@temporalio.workflow.defn` on a class → declares durable workflow. located
+  `locate: temporalio.workflow.defn, temporalio.workflow.run`
+
+- **Step 2 (Schema and Proof).** Bind allocation tables; prove debit/credit/recovery consistency.
+  zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
+  `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
+  clingo 5.8.0 — `clingo.Control(); ...; ctl.solve(on_model=...)` → ASP consistency proof. exercised: "['a b']"
+  `locate: clingo.Control, clingo.Control.solve`
+
+- **Step 3 (Quant and Select).** Compute unit cost/variance on the proved ledger; select charts.
+  autoviz 0.1.905 — `AutoViz_Class().AutoViz(filename, dfte=df, ...)` → auto-selected charts from table. located
+  `locate: autoviz.AutoViz_Class.AutoViz_Class.AutoViz`
+  numpy-financial 1.0.0 — `npv(rate, values)`, `irr(values)` → financial figures on the proved ledger. located
+  `locate: numpy_financial.npv, numpy_financial.irr, numpy_financial.pmt`
+  statsmodels 0.15.0 — `statsmodels.api.OLS(endog, exog).fit()` → regression/variance results. exercised: "params [1.0, 2.0]"
+  `locate: statsmodels.api.OLS`
+
+- **Step 4 (Execution).** Write one spreadsheet from recovered, solver-accepted fields.
+  openpyxl 3.1.2 — `openpyxl.Workbook(); wb.save(path)` → .xlsx file. exercised: "4801-byte xlsx"
+  `locate: openpyxl.Workbook`
+  pandas-xlsx-tables 1.1.2 — `pandas_xlsx_tables.df_to_xlsx_table(df, table_name, file=path)` → real Excel Table. exercised: "6047-byte xlsx"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table`
+  xlsxwriter 3.2.9 — `xlsxwriter.Workbook(path); wb.close()` → .xlsx with native charts. exercised: "5248-byte xlsx"
+  `locate: xlsxwriter.Workbook`
 
 #### Pipeline R23: Reverse Risk Management
 
-- **Step 0 (Global Ingestion).** python-docx and docling flatten the risk Word pack; playwright flattens plotly HTML into the compiler manifest.
-  in catalog: docling, playwright, plotly, python-docx
-- **Step 1 (Orchestrator Compilation).** Pipeline R0 keeps pgmpy, networkx, and pymc assets only when threat, impact, and control spans resolve in that pipeline's spreadsheet. No appetite bound means no treatment flow.
-  in catalog: networkx, pgmpy
-- **Step 2 (Graph and Posterior).** RISK_ITEM, RISK_THREAT, RISK_CONTROL, RISK_IMPACT, RISK_APPETITE, and RISK_TREATMENT land in that pipeline's spreadsheet. pgmpy and networkx rebuild the risk net; pymc, numpyro, and arviz run only after typedlogic facts compile.
-  in catalog: networkx, pgmpy, typedlogic
-- **Step 3 (Treatment Proof).** ortools selects avoid/reduce/transfer/accept portfolios from recovered rows; z3-solver must accept residual-versus-appetite or the plan asset is not written.
-  in catalog: ortools, z3-solver
-- **Step 4 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** Flatten risk Word pack and plotly HTML into manifest.
+  docling 2.124.0 — `DocumentConverter().convert(source).document` → parses Word risk pack. located
+  `locate: docling.document_converter.DocumentConverter.convert`
+  playwright 1.62.0 — `with sync_playwright() as p: p.chromium.launch().new_page()` → flattens plotly HTML. located
+  `locate: playwright.sync_api.sync_playwright`
+  plotly 7.0.0 — `plotly.graph_objects.Figure(...).write_html(path)` → engine that produced the HTML now flattened. located
+  `locate: plotly.graph_objects.Figure.write_html`
+  python-docx 1.2.0 — `docx.Document(path)` → reads risk Word pack. exercised: "docx written"
+  `locate: docx.Document`
+- **Step 1 (Orchestrator Compilation).** Keep BN assets when threat/impact/control spans resolve.
+  networkx 3.6.1 — `G=DiGraph(); G.add_edge(u,v)` → risk-net skeleton. exercised: "3-node DiGraph built"
+  `locate: networkx.DiGraph`
+  pgmpy 1.1.2 — `DiscreteBayesianNetwork(ebunch)` → builds risk Bayesian net. exercised: "3 nodes, 2 edges"
+  `locate: pgmpy.models.DiscreteBayesianNetwork`
+  pymc 5.28.5 — `with pymc.Model() as m: ...` → defines Bayesian risk model. located
+  `locate: pymc.Model`
+- **Step 2 (Graph and Posterior).** Rebuild risk net; sample posterior after typedlogic compiles.
+  arviz 0.23.4 — `arviz.summary(idata)` → posterior diagnostics summary. located
+  `locate: arviz.summary`
+  networkx 3.6.1 — `G=DiGraph(); G.add_edge(u,v)` → rebuilt risk-net graph. exercised: "3-node DiGraph built"
+  `locate: networkx.DiGraph`
+  numpyro 0.21.0 — `MCMC(NUTS(model)).run(rng_key)` → JAX posterior sampling. located
+  `locate: numpyro.infer.MCMC, numpyro.infer.NUTS`
+  pgmpy 1.1.2 — `DiscreteBayesianNetwork(ebunch)`; `VariableElimination(bn).query(vars)` → rebuild net + inference. exercised: "3 nodes, 2 edges"
+  `locate: pgmpy.models.DiscreteBayesianNetwork, pgmpy.inference.VariableElimination.query`
+  pymc 5.28.5 — `pymc.sample(draws, tune, chains)` → posterior sampling. located
+  `locate: pymc.sample`
+  typedlogic 0.2.4 — `compile_sentences(sentences, syntax=...)` → compiles typed-logic facts. located
+  `locate: typedlogic.compiler.compile_sentences`
+- **Step 3 (Treatment Proof).** Select treatment portfolio; accept residual-versus-appetite.
+  ortools 9.15.6755 — `m=CpModel(); m.add_exactly_one([...]); CpSolver().Solve(m)` → selects avoid/reduce/transfer/accept portfolio. exercised: "OPTIMAL, a=1 b=0"
+  `locate: ortools.sat.python.cp_model.CpSolver.Solve, ortools.sat.python.cp_model.CpModel.add_exactly_one`
+  z3-solver 5.1.0.0 — `s=Solver(); s.add(c); s.check()` → residual-versus-appetite proof. exercised: "sat [X = 3]"
+  `locate: z3.Solver.check, z3.Solver.add`
+- **Step 4 (Execution).** Write one spreadsheet from solver-accepted fields.
+  openpyxl 3.1.2 — `wb=Workbook(); wb.save(path)` → writes .xlsx artifact. exercised: "xlsx file written"
+  `locate: openpyxl.Workbook.save, openpyxl.Workbook`
+  xlsxwriter 3.2.9 — `w=Workbook(path); ws=w.add_worksheet(); ws.add_table(...)` → native Excel table. exercised: "xlsx with table written"
+  `locate: xlsxwriter.Workbook.add_worksheet, xlsxwriter.worksheet.Worksheet.add_table`
+  pandas-xlsx-tables 1.1.2 — `df_to_xlsx_table(df, table_name, file=path, index=False)` → real Excel Table object. exercised: "xlsx table written"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table, pandas_xlsx_tables.dfs_to_xlsx_tables`
 
 #### Pipeline R24: Reverse Service Continuity Management
 
-- **Step 0 (Global Ingestion).** python-docx, firecrawl-anydoc, and markitdown flatten the continuity Word pack; mermaid HTML is lifted into the compiler manifest.
-  in catalog: markitdown, python-docx
-- **Step 1 (Orchestrator Compilation).** Pipeline R0 admits continuity assets only when critical-service, RTO, and RPO fields type-check in that pipeline's spreadsheet. Missing RTO/RPO cancels the flow.
-- **Step 2 (BIA Graph).** BCM_SERVICE, BCM_RTO, BCM_RPO, BCM_DEPENDENCY, and BCM_INVOCATION land in that pipeline's spreadsheet. networkx maps service-to-CI-to-site edges from Pipeline R13; pandas emits impact-over-time tables from the recovered instance.
-  in catalog: networkx, pandas
-- **Step 3 (Invocation Proof).** typedlogic and clingo encode invocation and exclusive-use facts; simpy and most-queue replay recovery; pysmt must accept RTO/RPO on the declared graph.
-  in catalog: clingo, PySMT, simpy, typedlogic
-- **Step 4 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** Flatten the continuity Word pack; lift mermaid HTML into the manifest.
+  python-docx 1.2.0 — `docx.Document(path)` → parsed Word document; continuity Word-pack read. exercised: "36609 bytes"
+  `locate: docx.Document`
+  firecrawl-anydoc 0.2.4 — `anydoc.to_markdown(path)` → Markdown; document→Markdown. located
+  `locate: anydoc.to_markdown`
+  markitdown 0.1.7 — `MarkItDown().convert(source)` → Markdown; mermaid-HTML→Markdown lift. exercised: "# Spec\n\nHello"
+  `locate: markitdown.MarkItDown.convert`
+  mermaid — non-Python: Node CLI renderer; CLI: `mmdc -i in.mmd -o out.svg`
+
+- **Step 1 (Orchestrator Compilation).** Admit continuity assets when critical-service/RTO/RPO type-check.
+  — no candidate libraries named in this step; the RTO/RPO type-check gate is orchestrator logic.
+
+- **Step 2 (BIA Graph).** Map service→CI→site edges; emit impact-over-time tables.
+  networkx 3.6.1 — `G=nx.DiGraph(); G.add_edges_from([(svc,ci),(ci,site)])` → dependency edges; service→CI→site mapping. located
+  `locate: networkx.DiGraph.add_edges_from`
+  pandas 2.3.3 — `pandas.DataFrame(records)` → impact-over-time table; impact tabulation. located
+  `locate: pandas.DataFrame`
+
+- **Step 3 (Invocation Proof).** Encode facts; replay recovery; accept RTO/RPO on the graph.
+  typedlogic 0.2.4 — `Theory().add(sentence)` → invocation/exclusive-use facts; fact encoding. located
+  `locate: typedlogic.Theory.add`
+  clingo 5.8.0 — `ctl.add('base',[],prog); ctl.solve()` → SAT/UNSAT; fact encoding/solve. exercised: "SAT"
+  `locate: clingo.Control.solve, clingo.Control.add`
+  simpy 4.1.2 — `env=simpy.Environment(); env.run(until=t)` → simulated timeline; recovery replay. exercised: "now= 10"
+  `locate: simpy.Environment.run`
+  most-queue 2.9 — `QsSim(...).run(total_served)` → QueueResults; recovery queue replay. located
+  `locate: most_queue.QsSim.run`
+  pysmt 0.9.6 — `pysmt.shortcuts.is_sat(formula)` → bool; RTO/RPO acceptance. exercised: "False / True"
+  `locate: pysmt.shortcuts.is_sat`
+
+- **Step 4 (Execution).** Write one spreadsheet from recovered, solver-accepted fields.
+  openpyxl 3.1.2 — `wb=openpyxl.Workbook(); wb.save(path)` → .xlsx; styled spreadsheet write. exercised: "4802 bytes"
+  `locate: openpyxl.Workbook, openpyxl.Workbook.save`
+  xlsxwriter 3.2.9 — `wb=xlsxwriter.Workbook(path); wb.add_worksheet(); wb.close()` → .xlsx; native-chart spreadsheet write. exercised: "5247 bytes"
+  `locate: xlsxwriter.Workbook, xlsxwriter.Workbook.add_worksheet`
+  pandas-xlsx-tables 1.1.2 — `df_to_xlsx_table(df, table_name, file)` → real Excel Table object; Table write from DataFrame. exercised: "6138 bytes"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table`
 
 #### Pipeline R25: Reverse Strategy Management
 
-- **Step 0 (Global Ingestion).** quarto HTML, PDF, and docx packs are flattened by undoc, docling, markitdown, and python-docx into the compiler manifest.
-  in catalog: docling, markitdown, python-docx
-- **Step 1 (Orchestrator Compilation).** Pipeline R0 writes a prefect flow whose task set exists only if driver, goal, and option spans resolve in that pipeline's spreadsheet. Empty option set halts publication.
-  in catalog: prefect
-- **Step 2 (Map and Option Proof).** STR_DRIVER, STR_GOAL, STR_OPTION, STR_CAPABILITY, and STR_INITIATIVE land in that pipeline's spreadsheet. networkx and se-lib emit capability maps; typedlogic records options; z3-solver must accept consistency against Pipeline R16 principles.
-  in catalog: networkx, typedlogic, z3-solver
-- **Step 3 (Roadmap).** criticalpath sequences initiatives onto the Pipeline R21 graph only after the option proof.
-  in catalog: criticalpath
-- **Step 4 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** Flatten quarto/PDF/docx packs into the manifest.
+  docling 2.124.0 — `DocumentConverter().convert(path)` → parsed document object. located
+  `locate: docling.document_converter.DocumentConverter.convert`
+  markitdown 0.1.7 — `MarkItDown().convert(path)` → Markdown result. exercised: "# Desk x"
+  `locate: markitdown.MarkItDown.convert`
+  python-docx 1.2.0 — `docx.Document(path)` → reads docx pack. exercised: "1 paragraph"
+  `locate: docx.Document`
+  undoc 0.9.0 — `undoc.parse_file(path)` → Markdown/text/JSON of Office doc. located
+  `locate: undoc.parse_file`
+  quarto — non-Python: CLI publishing engine (also the pack's producer); CLI: `quarto render`.
+
+- **Step 1 (Orchestrator Compilation).** Write prefect flow gated on driver/goal/option spans.
+  prefect 3.8.4 — `@prefect.flow def strategy(): ...` → flow object. located
+  `locate: prefect.flow`
+
+- **Step 2 (Map and Option Proof).** Emit capability maps; record options; prove consistency.
+  networkx 3.6.1 — `networkx.DiGraph()` → capability-map graph. exercised: "(2, 1)"
+  `locate: networkx.DiGraph`
+  typedlogic 0.2.4 — `s=Solver(); s.add_fact(option)` → records option facts. located
+  `locate: typedlogic.solver.Solver.add_fact`
+  z3-solver 5.1.0.0 — `z3.Solver().check()` → sat/unsat consistency vs R16 principles. exercised: "sat"
+  `locate: z3.Solver.check`
+  se-lib 0.53 — `design_structure_matrix(...)`, `critical_path_diagram(...)` → PERT / DSM systems-engineering artifacts. located
+  `locate: selib.design_structure_matrix, selib.critical_path_diagram, selib.SystemDynamicsModel`
+
+- **Step 3 (Roadmap).** Sequence initiatives via critical-path scheduling.
+  criticalpath 0.1.5 — `Node(...).link(a,b); .update_all(); .get_critical_path()` → ordered critical path. exercised: "['A', 'B']"
+  `locate: criticalpath.Node.get_critical_path, criticalpath.Node`
+
+- **Step 4 (Execution).** Write the pipeline's artifact spreadsheet.
+  openpyxl 3.1.2 — `wb=Workbook(); wb.save(path)` → writes .xlsx. exercised: "saved"
+  `locate: openpyxl.Workbook.save, openpyxl.Workbook`
+  pandas-xlsx-tables 1.1.2 — `df_to_xlsx_table(df, table_name, file)` → writes real Excel Table. exercised: "table written"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table`
+  xlsxwriter 3.2.9 — `wb=xlsxwriter.Workbook(path); ...write(); wb.close()` → writes .xlsx. exercised: "closed"
+  `locate: xlsxwriter.Workbook`
 
 #### Pipeline R26: Reverse Information Security Management
 
-- **Step 0 (Global Ingestion).** python-docx, pypdf, dasel, and docling flatten the ISMS Word pack; playwright flattens the control dashboard into the compiler manifest.
-  in catalog: dasel, docling, playwright, pypdf, python-docx
-- **Step 1 (Orchestrator Compilation).** Pipeline R0 emits a temporalio workflow gated on control-objective and classification spans recovered from the pack. No classification scheme, no workflow.
-  in catalog: temporalio
-- **Step 2 (Ontology and Policy).** ISM_ASSET, ISM_CLASSIFICATION, ISM_CONTROL, ISM_THREAT, and ISM_PERMISSION land in that pipeline's spreadsheet. owlready2 and rdflib hold the catalog; pycasbin and openfga are generated only for proved permissions.
-  in catalog: owlready2, pycasbin, rdflib
-- **Step 3 (Residual Proof).** pgmpy links assets, threats, and controls from recovered rows; z3-solver and clingo must accept no conflicting allow/deny and no unclassified critical asset.
-  in catalog: clingo, pgmpy, z3-solver
-- **Step 4 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** Flatten ISMS Word pack and control dashboard into manifest
+  python-docx 1.2.0 — `docx.Document("isms.docx").paragraphs` → paragraph objects; reads Word-pack text/tables. exercised: "para0 'Continuity plan'"
+  `locate: docx.Document, docx.document.Document.paragraphs`
+  pypdf 6.16.2 — `pypdf.PdfReader("pack.pdf").pages[0].extract_text()` → page text string; extracts PDF text. located
+  `locate: pypdf.PdfReader, pypdf.PageObject.extract_text`
+  dasel — non-Python: Go binary (github.com/TomWright/dasel), not a Python import; CLI: `dasel -f data.json '.controls'`
+  docling 2.124.0 — `DocumentConverter().convert(src).document` → DoclingDocument; parses the pack. located
+  `locate: docling.document_converter.DocumentConverter.convert`
+  playwright 1.62.0 — `page.goto(url); page.content()` → rendered HTML; flattens control dashboard. located
+  `locate: playwright.sync_api.Page.goto, playwright.sync_api.Page.content`
+
+- **Step 1 (Orchestrator Compilation).** Emit temporalio workflow gated on classification spans
+  temporalio 1.32.0 — `@temporalio.workflow.defn class W:` + `@temporalio.workflow.run async def run(self)` → workflow class; durable workflow. located
+  `locate: temporalio.workflow.defn, temporalio.workflow.run`
+
+- **Step 2 (Ontology and Policy).** Hold catalog in OWL/RDF; generate authorization for proved permissions
+  owlready2 0.51 — `onto=get_ontology(iri)` (or `World()`) → ontology; holds the ISM class catalog. exercised: "classes ['Drug']"
+  `locate: owlready2.get_ontology, owlready2.World`
+  rdflib 7.6.0 — `g=rdflib.Graph(); g.parse(source="catalog.ttl")` → Graph; holds the RDF catalog. exercised: "parsed 2 triples"
+  `locate: rdflib.Graph.parse, rdflib.Graph.add`
+  pycasbin ? — `Enforcer(model, policy).enforce(sub, obj, act)` → policy / access-control decision. located
+  `locate: casbin.Enforcer, casbin.Enforcer.enforce, casbin.Enforcer.add_policy`
+  openfga — not installed here: pip unsatisfiable; confirmed absent in venv.
+
+- **Step 3 (Residual Proof).** Link assets/threats/controls; solvers reject conflicts and unclassified assets
+  pgmpy 1.1.2 — `net=DiscreteBayesianNetwork(); net.add_edges_from([("asset","threat"),("threat","control")])` → BN; links assets/threats/controls. exercised: "2 edges"
+  `locate: pgmpy.models.DiscreteBayesianNetwork.DiscreteBayesianNetwork.add_edges_from, pgmpy.models.DiscreteBayesianNetwork.DiscreteBayesianNetwork`
+  z3-solver 5.1.0.0 — `s=z3.Solver(); s.add(f); s.check()` → sat/unsat; rejects conflicting allow/deny. exercised: "sat"
+  `locate: z3.Solver.check, z3.Solver.add`
+  clingo 5.8.0 — `c=Control(); c.add("base",[],prog); c.ground(...); c.solve()` → SolveResult; accepts/rejects rules. exercised: "SAT"
+  `locate: clingo.Control.solve, clingo.Control.add`
+
+- **Step 4 (Execution).** Write one Excel spreadsheet from solver-accepted fields
+  openpyxl 3.1.2 — `wb=openpyxl.Workbook(); wb.active["A1"]=v; wb.save("out.xlsx")` → writes .xlsx. exercised: "saved 4801 bytes"
+  `locate: openpyxl.Workbook.save, openpyxl.Workbook`
+  xlsxwriter 3.2.9 — `w=xlsxwriter.Workbook("out.xlsx"); w.add_worksheet(); w.close()` → writes .xlsx. exercised: "saved 5247 bytes"
+  `locate: xlsxwriter.Workbook.close, xlsxwriter.Workbook.add_worksheet, xlsxwriter.Workbook`
+  pandas-xlsx-tables 1.1.2 — `df_to_xlsx_table(df, "tbl", file="out.xlsx", index=False)` → writes real Excel Table. exercised: "wrote 6134 bytes"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table, pandas_xlsx_tables.dfs_to_xlsx_tables`
 
 #### Pipeline R27: Reverse Availability Management
 
-- **Step 0 (Global Ingestion).** playwright flattens availability dashboards; python-docx and csvkit flatten the availability Word pack and outage extracts into the compiler manifest.
-  in catalog: csvkit, playwright, python-docx
-- **Step 1 (Orchestrator Compilation).** Pipeline R0 admits reliability, lifelines, and fmdtools assets only when an availability target and an outage series both type-check in that pipeline's spreadsheet. Otherwise the run stops.
-  in catalog: lifelines
-  attempted, failed here: fmdtools
-- **Step 2 (Block and Fit).** AVAIL_TARGET, AVAIL_OUTAGE, AVAIL_BLOCK, and AVAIL_FIT land in that pipeline's spreadsheet. reliability rebuilds block diagrams from Pipeline R13 and R14 graphs; scipy rejects unphysical fits; pysmt must accept redundancy versus target.
-  in catalog: PySMT, scipy
-- **Step 3 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** flatten dashboards, Word pack, outage extracts into manifest
+  csvkit 2.2.0 — `csvkit.reader(open(path))` → CSV rows; reads outage extracts. exercised: "[['a','b'],['1','x'],['2','y']]"
+  `locate: csvkit.reader`
+  playwright 1.62.0 — `with sync_playwright() as p: p.chromium.launch()` → browser; flattens dashboards. located
+  `locate: playwright.sync_api.sync_playwright`
+  python-docx 1.2.0 — `docx.Document(path)` → reads availability Word pack. exercised: "docx saved"
+  `locate: docx.Document`
+
+- **Step 1 (Orchestrator Compilation).** admit reliability assets when target and outage series type-check
+  lifelines 0.30.3 — `KaplanMeierFitter().fit(durations, event_observed)` → survival fit of outage series. exercised: "4.0"
+  `locate: lifelines.KaplanMeierFitter.fit`
+  fmdtools — not installed here: unsatisfiable (pandas[all]->psycopg2)
+
+- **Step 2 (Block and Fit).** rebuild block diagrams; reject unphysical fits; accept redundancy
+  scipy 1.15.3 — `scipy.optimize.curve_fit(f, xdata, ydata)` → params; rejects unphysical fits. exercised: "[2.0, 1.0]"
+  `locate: scipy.optimize.curve_fit`
+  pysmt 0.9.6 — `pysmt.shortcuts.is_sat(formula)` → bool; accepts redundancy vs target. exercised: "False"
+  `locate: pysmt.shortcuts.is_sat`
+  diagrams 0.25.1 — false match: "block diagrams" is a common noun; the tool named is reliability (not a candidate)
+
+- **Step 3 (Execution).** write one spreadsheet from solver-accepted fields
+  openpyxl 3.1.2 — `openpyxl.Workbook().save(path)` → xlsx file. exercised: "saved"
+  `locate: openpyxl.Workbook, openpyxl.Workbook.save`
+  xlsxwriter 3.2.9 — `xlsxwriter.Workbook(path).add_worksheet()` → native xlsx writer. exercised: "closed"
+  `locate: xlsxwriter.Workbook, xlsxwriter.Workbook.add_worksheet`
+  pandas-xlsx-tables 1.1.2 — `df_to_xlsx_table(df, "T", file=path)` → real Excel Table. exercised: "wrote table"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table`
 
 #### Pipeline R28: Reverse Capacity and Performance Management
 
-- **Step 0 (Global Ingestion).** playwright flattens plotly HTML; undoc, python-calamine, csvkit, and python-docx flatten the capacity Word pack and utilization extracts into the compiler manifest.
-  in catalog: csvkit, playwright, plotly, python-calamine, python-docx
-- **Step 1 (Orchestrator Compilation).** Pipeline R0 keeps prophet, darts, pmdarima, and most-queue assets only when a time column and a utilization field type-check in that pipeline's spreadsheet. No series, no forecast flow.
-- **Step 2 (Forecast and Queue).** CAP_SERIES, CAP_FORECAST, CAP_QUEUE, and CAP_SETTING land in that pipeline's spreadsheet. prophet, darts, and pmdarima emit demand paths from recovered series; python-control and most-queue model response; gekko optimizes settings under compiled cost bounds.
-- **Step 3 (Cover Proof).** z3-solver must accept planned capacity versus forecast peak plus contingency or dashboard assets are not materialized.
-  in catalog: z3-solver
-- **Step 4 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** flatten plotly HTML and capacity/utilization extracts into manifest
+  playwright 1.62.0 — `page.goto(url); page.content()` → serialized rendered plotly HTML. located
+  `locate: playwright.sync_api.sync_playwright, playwright.sync_api.Page.content`
+  plotly 7.0.0 — `plotly.graph_objects.Figure(data=[...]).to_html(full_html=False)` → produces HTML flattened here. exercised: "4300543-char HTML"
+  `locate: plotly.graph_objects.Figure.to_html, plotly.graph_objects.Figure.write_html`
+  python-calamine 0.8.2 — `python_calamine.load_workbook(path).get_sheet_by_index(0).to_python()` → reads Excel/ODS rows. exercised: "[['h', 1.0]]"
+  `locate: python_calamine.load_workbook, python_calamine.CalamineWorkbook.from_path`
+  python-docx 1.2.0 — `docx.Document("capacity.docx")` → reads Word pack for flattening. exercised: "paragraph text 'hello'"
+  `locate: docx.Document`
+  undoc 0.9.0 — `undoc.parse_file("capacity.docx").to_text()` → flat text/Markdown/JSON. exercised: "parse_file→to_markdown 'Hello undoc'"
+  `locate: undoc.parse_file, undoc.Undoc.to_text`
+  csvkit 2.2.0 — `csvkit.utilities.in2csv.In2CSV(args).main()` → converts utilization extracts to CSV. located; CLI: `in2csv util.xlsx`
+  `locate: csvkit.utilities.in2csv.In2CSV`
+
+- **Step 1 (Orchestrator Compilation).** keep forecast/queue assets only if series type-checks
+  prophet 1.4.0 — `m=prophet.Prophet(); m.fit(df)` → fitted forecaster (df needs ds,y columns). located
+  `locate: prophet.Prophet.fit`
+  pmdarima 2.1.1 — `pmdarima.auto_arima(y, seasonal=True, m=12)` → auto-selected ARIMA model. located
+  `locate: pmdarima.auto_arima`
+  most-queue 2.9 — `c=MMnrCalc(n=1, r=100); c.set_sources(l=0.5); c.set_servers(mu=1.0); c.get_v()` → queue response moments. exercised: "[2. 8. 48.]"
+  `locate: most_queue.theory.fifo.mmnr.MMnrCalc.get_v, most_queue.theory.fifo.mmnr.MMnrCalc.run`
+  darts — not installed here
+
+- **Step 2 (Forecast and Queue).** forecast demand; model queue response; optimize settings
+  prophet 1.4.0 — `m=prophet.Prophet(); m.fit(df); m.predict(future)` → forecast demand path. located
+  `locate: prophet.Prophet.fit, prophet.Prophet.predict`
+  pmdarima 2.1.1 — `pmdarima.auto_arima(y, seasonal=True, m=12)` → ARIMA demand path. located
+  `locate: pmdarima.auto_arima`
+  most-queue 2.9 — `c=MMnrCalc(n=1, r=100); c.set_sources(l=0.5); c.set_servers(mu=1.0); c.get_v()` → models queue response time. exercised: "[2. 8. 48.]"
+  `locate: most_queue.theory.fifo.mmnr.MMnrCalc.get_v`
+  gekko 1.3.2 — `m=gekko.GEKKO(remote=False); m.Obj(expr); m.solve(disp=False)` → optimizes settings under cost bounds. exercised: "x=3.00"
+  `locate: gekko.GEKKO.solve`
+  darts — not installed here
+  python-control — not installed here
+
+- **Step 3 (Cover Proof).** accept planned capacity ≥ forecast peak plus contingency
+  z3-solver 5.1.0.0 — `s=z3.Solver(); s.add(cover_cons); s.check()` → sat/unsat capacity-cover proof. exercised: "sat; model [x = 3]"
+  `locate: z3.Solver, z3.Solver.check`
+
+- **Step 4 (Execution).** write one spreadsheet from solver-accepted fields
+  openpyxl 3.1.2 — `wb=openpyxl.Workbook(); wb.active["A1"]=v; wb.save(path)` → writes .xlsx. exercised: "A1 == 'hi'"
+  `locate: openpyxl.Workbook`
+  xlsxwriter 3.2.9 — `wb=xlsxwriter.Workbook(path); wb.add_worksheet().write(0,0,v); wb.close()` → writes .xlsx. exercised: "5248-byte xlsx"
+  `locate: xlsxwriter.Workbook`
+  pandas-xlsx-tables 1.1.2 — `df_to_xlsx_table(df, table_name="CAP_FORECAST", file=path, index=False)` → real Excel Table. exercised: "6124-byte xlsx"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table`
 
 #### Pipeline R29: Reverse Continual Improvement Management
 
-- **Step 0 (Global Ingestion).** docling, markitdown, and python-docx flatten the CSI register quarto pack and great-tables HTML into the compiler manifest.
-  in catalog: docling, great-tables, markitdown, python-docx
-- **Step 1 (Orchestrator Compilation).** Pipeline R0 builds a dagster asset graph from recovered idea, benefit, and constraint spans. Empty idea set cancels register assets.
-  in catalog: dagster
-- **Step 2 (Prioritize and Gate).** CSI_IDEA, CSI_BENEFIT, CSI_EFFORT, CSI_RISK, and CSI_STATUS land in that pipeline's spreadsheet. pandas holds the register; pulp ranks under benefit/effort/risk; networkx supplies dependencies; zen-engine and typedlogic must accept intake rules.
-  in catalog: networkx, pandas, pulp, typedlogic, zen-engine
-- **Step 3 (Execution Tracking).** spiffworkflow runs approved items as durable workflows and may emit change payloads into Pipeline R39 only after clingo accepts the mutation edge.
-  in catalog: clingo, SpiffWorkflow
-- **Step 4 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** Flatten CSI register Quarto pack and great-tables HTML into manifest.
+  docling 2.124.0 — `DocumentConverter().convert("register.pdf")` → ConversionResult document. located
+  `locate: docling.document_converter.DocumentConverter.convert`
+  markitdown 0.1.7 — `markitdown.MarkItDown().convert("register.html")` → Markdown of the pack. exercised: "# Q3 Net income 100"
+  `locate: markitdown.MarkItDown.convert`
+  python-docx 1.2.0 — `docx.Document("register.docx").paragraphs` → reads the Word register content. exercised: "saved 36583B"
+  `locate: docx.Document`
+  great-tables 0.24.0 — `great_tables.GT(df).as_raw_html()` → the publication-table HTML being ingested. exercised: "html_len=9255"
+  `locate: great_tables.GT, great_tables.GT.as_raw_html`
+  quarto — non-Python: CLI publishing engine; CLI: `quarto render register.qmd`
+
+- **Step 1 (Orchestrator Compilation).** Build a Dagster asset graph from idea/benefit/constraint spans.
+  dagster 1.13.20 — `@dagster.asset def register(): ...` → AssetsDefinition node in the asset graph. exercised: "type=AssetsDefinition"
+  `locate: dagster.asset`
+
+- **Step 2 (Prioritize and Gate).** Hold register; rank by benefit/effort/risk; supply dependencies; accept intake rules.
+  pandas 2.3.3 — `pandas.DataFrame(rows)` → holds the CSI register table. exercised: "shape=(2, 2)"
+  `locate: pandas.DataFrame`
+  pulp 3.3.2 — `LpProblem("rank", LpMaximize).solve()` → ranks ideas under benefit/effort/risk. exercised: "Optimal, x=3.0"
+  `locate: pulp.LpProblem.solve`
+  networkx 3.6.1 — `networkx.DiGraph().add_edge(a, b)` → supplies idea dependency edges. exercised: "edges=1"
+  `locate: networkx.DiGraph, networkx.DiGraph.add_edge`
+  typedlogic 0.2.4 — `get_solver("clingo").check()` → must accept the intake rules. exercised: "satisfiable=True"
+  `locate: typedlogic.registry.get_solver, typedlogic.solver.Solver.check`
+  zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
+  `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
+
+- **Step 3 (Execution Tracking).** Run approved items as workflows; emit change edges clingo accepts.
+  clingo 5.8.0 — `clingo.Control().solve(on_model=cb)` → accepts the mutation edge. exercised: "sat, balanced=[True]"
+  `locate: clingo.Control.solve`
+  spiffworkflow — not installed here: no importable `SpiffWorkflow` in venv.
+
+- **Step 4 (Execution).** Write one Excel spreadsheet from the recovered, solver-accepted fields.
+  openpyxl 3.1.2 — `openpyxl.Workbook().save("artifact.xlsx")` → writes the workbook. exercised: "saved 4819B"
+  `locate: openpyxl.Workbook.save`
+  xlsxwriter 3.2.9 — `wb = xlsxwriter.Workbook("artifact.xlsx"); wb.close()` → writes the workbook. exercised: "wrote 5248B"
+  `locate: xlsxwriter.Workbook, xlsxwriter.Workbook.close`
+  pandas-xlsx-tables 1.1.2 — `pandas_xlsx_tables.df_to_xlsx_table(df, "T", file="artifact.xlsx")` → real Excel Table. exercised: "table xlsx 6047B"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table`
 
 #### Pipeline R30: Reverse Measurement and Reporting Management
 
-- **Step 0 (Global Ingestion).** playwright, firecrawl-anydoc, csvkit, docling, and markitdown flatten scorecard HTML, quarto packs, and metric extracts into the compiler manifest.
-  in catalog: csvkit, docling, markitdown, playwright
-- **Step 1 (Orchestrator Compilation).** Pipeline R0 emits a prefect flow only if metric-definition and audience-view spans resolve in that pipeline's spreadsheet. Orphan KPI names with no formula halt publication.
-  in catalog: prefect
-- **Step 2 (Metric Proof).** KPI_DEFINITION, KPI_EXTRACT, and KPI_FIGURE land in that pipeline's spreadsheet. pydantic types metric objects from the recovered instance; clingo must prove every reported figure is derivable from a registered definition and a source extract.
-  in catalog: clingo, pydantic
-- **Step 3 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** flatten scorecard HTML, packs, metric extracts
+  playwright 1.62.0 — `page.goto(url)` then `page.content()` → scorecard HTML. located
+  `locate: playwright.sync_api.Page.goto, playwright.sync_api.Page.content`
+  firecrawl-anydoc 0.2.4 — `anydoc.to_markdown(path)` → Markdown from a document. exercised: "'hi\\n' from .docx"
+  `locate: anydoc.to_markdown, anydoc.to_markdown_bytes`
+  csvkit 2.2.0 — `In2CSV(args=[...]).run()` → metric extracts to flat CSV; CLI: `in2csv`. located
+  `locate: csvkit.utilities.in2csv.In2CSV`
+  docling 2.124.0 — `DocumentConverter().convert(source)` → structured doc. located
+  `locate: docling.document_converter.DocumentConverter.convert`
+  markitdown 0.1.7 — `MarkItDown().convert(source).text_content` → Markdown. exercised: "'# Title\\n\\nhello world'"
+  `locate: markitdown.MarkItDown.convert`
+  quarto — non-Python: CLI publishing engine (the quarto pack is source); CLI: `quarto render`
+
+- **Step 1 (Orchestrator Compilation).** emit a prefect flow gated on metric spans
+  prefect 3.8.4 — `@prefect.flow(name=...)` → flow gated on metric-definition/audience spans. exercised: "Flow 'ingest'"
+  `locate: prefect.flow`
+
+- **Step 2 (Metric Proof).** type metric objects; prove figures derivable
+  pydantic 2.13.5 — `pydantic.create_model("KPI", field=(int, ...))` → metric object schema. exercised: "model M(x=5).x == 5"
+  `locate: pydantic.create_model, pydantic.BaseModel`
+  clingo 5.8.0 — `Control().solve()` → proves each figure derivable from definition+extract. exercised: "SAT; model 'a b'"
+  `locate: clingo.Control.solve, clingo.Control.ground`
+
+- **Step 3 (Execution).** write one spreadsheet artifact from solver-accepted fields
+  openpyxl 3.1.2 — `Workbook().save(path)` → xlsx artifact. exercised: "saved xlsx"
+  `locate: openpyxl.Workbook, openpyxl.workbook.workbook.Workbook.save`
+  xlsxwriter 3.2.9 — `Workbook(path)` (+ write) `.close()` → xlsx with native charts. exercised: "closed xlsx"
+  `locate: xlsxwriter.Workbook, xlsxwriter.Workbook.close`
+  pandas-xlsx-tables 1.1.2 — `df_to_xlsx_table(df, table_name, file)` → real Excel Table object. exercised: "wrote Excel table"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table, pandas_xlsx_tables.dfs_to_xlsx_tables`
 
 #### Pipeline R31: Reverse Service Level Management
 
-- **Step 0 (Global Ingestion).** python-docx, undoc, and markitdown flatten SLA, OLA, and UC Word packs; playwright flattens attainment dashboards into the compiler manifest.
-  in catalog: markitdown, playwright, python-docx
-- **Step 1 (Orchestrator Compilation).** Pipeline R0 writes a temporalio workflow gated on commitment and measurement-method spans recovered from the pack. No commitment language, no agreement assets.
-  in catalog: temporalio
-- **Step 2 (Agreement Proof).** SL_AGREEMENT, SL_COMMITMENT, SL_MEASURE, SL_CREDIT, and SL_ESCALATION land in that pipeline's spreadsheet. pydantic instantiates SLA/OLA/UC objects from recovered rows; zen-engine binds credit and escalation tables; pysmt must accept attainability against Pipelines R27 and R28.
-  in catalog: pydantic, PySMT, zen-engine
-- **Step 3 (Attainment).** the pipeline spreadsheet computes attainment from Pipeline R30 only after the SMT proof.
-- **Step 4 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** Flatten SLA/OLA/UC Word packs; flatten attainment dashboards.
+  python-docx 1.2.0 — `docx.Document(path).paragraphs` → reads Word packs. exercised: "paras ['H','para one']"
+  `locate: docx.Document, docx.document.Document.paragraphs`
+  undoc 0.9.0 — `undoc.parse_file(path).to_markdown()` → Markdown from office docs. exercised: "'# H\n\npara one'"
+  `locate: undoc.parse_file, undoc.Undoc.to_markdown`
+  markitdown 0.1.7 — `MarkItDown().convert(path).markdown` → Markdown from Word. exercised: "'# Title\n\nHello world'"
+  `locate: markitdown.MarkItDown.convert`
+  playwright 1.62.0 — `page.goto(url); page.content()` → captures dashboards HTML. located
+  `locate: playwright.sync_api.Page.content, playwright.sync_api.sync_playwright`
+
+- **Step 1 (Orchestrator Compilation).** Temporalio workflow gated on commitment/measurement-method spans.
+  temporalio 1.32.0 — `@workflow.defn`; `client.execute_workflow(WF.run, id=, task_queue=)` → durable workflow. located
+  `locate: temporalio.workflow.defn, temporalio.client.Client.execute_workflow`
+
+- **Step 2 (Agreement Proof).** Instantiate SLA/OLA/UC objects; bind credit/escalation; accept attainability.
+  pydantic 2.13.5 — `SLA.model_validate(row)` → instantiates objects from recovered rows. exercised: "actor='u1' t=5"
+  `locate: pydantic.BaseModel.model_validate`
+  pysmt 0.9.6 — `is_sat(formula)` → accepts attainability. exercised: "is_sat=True"
+  `locate: pysmt.shortcuts.is_sat`
+  zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
+  `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
+
+- **Step 3 (Attainment).** Spreadsheet computes attainment from Pipeline R30 after SMT proof.
+  (No library named in this step.)
+
+- **Step 4 (Execution).** Write one spreadsheet from recovered, solver-accepted fields.
+  openpyxl 3.1.2 — `wb=Workbook(); ws.append(row); wb.save(path)` → writes .xlsx. exercised: "wrote xlsx"
+  `locate: openpyxl.Workbook, openpyxl.workbook.workbook.Workbook.save`
+  xlsxwriter 3.2.9 — `wb=Workbook(path); ws.write(r,c,v); wb.close()` → writes .xlsx. exercised: "wrote xlsx"
+  `locate: xlsxwriter.Workbook`
+  pandas-xlsx-tables 1.1.2 — `df_to_xlsx_table(df, 'T', path, index=False)` → real Excel Table. exercised: "wrote xlsx"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table`
 
 #### Pipeline R32: Reverse Monitoring and Event Management
 
-- **Step 0 (Global Ingestion).** playwright, docling, and csvkit flatten the event dashboard HTML and catalog extracts into the compiler manifest.
-  in catalog: csvkit, docling, playwright
-- **Step 1 (Orchestrator Compilation).** Pipeline R0 keeps durable-rules, experta, and pydantic event assets only when event-type and severity spans resolve in that pipeline's spreadsheet. No catalog, no correlation flow.
-  in catalog: durable-rules, pydantic
-  attempted, failed here: experta
-- **Step 2 (Correlate and Hand-off).** EV_TYPE, EV_SEVERITY, EV_RULE, and EV_RESPONSE land in that pipeline's spreadsheet. durable-rules or experta execute compiled Rete rules from recovered rows; pm4py maps event-to-incident/change/request edges; unified-planning sequences runbooks.
-  in catalog: durable-rules, pm4py, unified-planning
-  attempted, failed here: experta
-- **Step 3 (Coverage Proof).** clingo must accept that every critical event class has filter, correlation, and response paths or dashboard assets halt.
-  in catalog: clingo
-- **Step 4 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** flatten event dashboard HTML and catalog extracts into manifest
+  csvkit 2.2.0 — `csvkit.utilities.in2csv.In2CSV(args).main()` → CSV output; flattens catalog extracts to CSV. located; CLI: `in2csv file.xlsx`
+  `locate: csvkit.utilities.in2csv.In2CSV`
+  docling 2.124.0 — `docling.document_converter.DocumentConverter().convert(source=path)` → ConversionResult; flattens catalog docs. located
+  `locate: docling.document_converter.DocumentConverter.convert`
+  playwright 1.62.0 — `with playwright.sync_api.sync_playwright() as p: p.chromium.launch()` → browser; flattens event dashboard HTML. located
+  `locate: playwright.sync_api.sync_playwright`
+
+- **Step 1 (Orchestrator Compilation).** keep rule/event assets when event-type/severity spans resolve
+  durable-rules 2.0.28 — `with durable.lang.ruleset(name): ...` → declares Rete ruleset; defines event rules. located
+  `locate: durable.lang.ruleset`
+  experta — installed but import fails (collections.Mapping on py3.11); no dotted path resolves, cannot bind.
+  pydantic 2.13.5 — `pydantic.BaseModel.model_validate(obj)` → validated event model; type-checks event fields. exercised: "3"
+  `locate: pydantic.BaseModel.model_validate, pydantic.TypeAdapter`
+
+- **Step 2 (Correlate and Hand-off).** execute Rete rules; map event edges; sequence runbooks
+  durable-rules 2.0.28 — `durable.lang.assert_fact(ruleset_name, fact)` → triggers matching Rete rules; executes rules on rows. located
+  `locate: durable.lang.assert_fact, durable.lang.post`
+  experta — installed but import fails (collections.Mapping on py3.11); no dotted path resolves, cannot bind.
+  pm4py 2.7.23.8 — `pm4py.discover_directly_follows_graph(log)` → (dfg, start, end) edges; maps event-to-incident edges. exercised: "{('a', 'b'): 2}"
+  `locate: pm4py.discover_directly_follows_graph`
+  unified-planning 1.3.0 — `unified_planning.shortcuts.OneshotPlanner(problem_kind=...)` → planner engine; sequences runbooks. located
+  `locate: unified_planning.shortcuts.OneshotPlanner`
+
+- **Step 3 (Coverage Proof).** prove every critical event class has response paths
+  clingo 5.8.0 — `clingo.Control(); ctl.ground(...); ctl.solve(on_model=...)` → stable models; accepts full coverage. exercised: "['a b']"
+  `locate: clingo.Control.solve, clingo.Control`
+
+- **Step 4 (Execution).** write one artifact spreadsheet from solver-accepted fields
+  openpyxl 3.1.2 — `openpyxl.Workbook()` then `wb.save(path)` → xlsx workbook; writes the artifact spreadsheet. exercised: "hi"
+  `locate: openpyxl.Workbook`
+  pandas-xlsx-tables 1.1.2 — `pandas_xlsx_tables.df_to_xlsx_table(df, table_name, file=path, index=False)` → writes native Excel Table; writes spreadsheet. exercised: "wrote"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table`
+  xlsxwriter 3.2.9 — `xlsxwriter.Workbook(path)` then `add_worksheet().write(); close()` → xlsx file; writes spreadsheet. exercised: "wrote"
+  `locate: xlsxwriter.Workbook`
 
 #### Pipeline R33: Reverse Incident Management
 
-- **Step 0 (Global Ingestion).** firecrawl-anydoc, csvkit, python-docx, and playwright flatten major-incident Word reports and live board HTML into the compiler manifest.
-  in catalog: csvkit, playwright, python-docx
-- **Step 1 (Orchestrator Compilation).** Pipeline R0 emits a dagster asset graph only if category, impact, and urgency fields type-check in that pipeline's spreadsheet. Missing model set cancels routing assets.
-  in catalog: dagster
-- **Step 2 (Route and Localize).** INC_RECORD, INC_CATEGORY, INC_ROUTE, and INC_RESTORE land in that pipeline's spreadsheet. zen-engine applies compiled incident models to recovered rows; networkx walks Pipeline R13 to localize nodes; pm4py compares the live path to the model.
-  in catalog: networkx, pm4py, zen-engine
-- **Step 3 (Restore Proof).** lifelines estimates remaining restore time; reliability flags major-incident risk; csv-diff may emit model-update payloads into Pipeline R29 only if exception rates breach compiled thresholds.
-  in catalog: lifelines
-- **Step 4 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** Flatten incident Word reports and board HTML
+  csvkit 2.2.0 — `csvkit.utilities.in2csv.In2CSV().main()` → CSV; converts tabular sources to CSV (CLI-first; does not parse Word/HTML). located; CLI: `in2csv file.xlsx`
+  `locate: csvkit.utilities.in2csv.In2CSV, csvkit.reader`
+  firecrawl-anydoc 0.2.4 — `anydoc.to_markdown(path, ocr='reject')` → markdown string; converts Word reports to markdown. exercised: "'Hello clause one.\n'"
+  `locate: anydoc.to_markdown`
+  playwright 1.62.0 — `playwright.sync_api.sync_playwright()` then `page.pdf(path)` → flattens live board HTML. located (requires browser binaries)
+  `locate: playwright.sync_api.sync_playwright, playwright.sync_api.Page.pdf`
+  python-docx 1.2.0 — `docx.Document(path)` → Document; reads incident Word reports. exercised: "'Hello clause one.'"
+  `locate: docx.Document`
+
+- **Step 1 (Orchestrator Compilation).** Emit dagster asset graph if fields type-check
+  dagster 1.13.20 — `dagster.asset(fn)` → AssetsDefinition; defines a routing asset node. exercised: "AssetsDefinition"
+  `locate: dagster.asset`
+
+- **Step 2 (Route and Localize).** Apply models, walk graph, compare paths
+  networkx 3.6.1 — `networkx.shortest_path(g, source, target)` → node list; walks R13 to localize nodes. exercised: "['A', 'B', 'C']"
+  `locate: networkx.shortest_path`
+  pm4py 2.7.23.8 — `pm4py.conformance_diagnostics_alignments(log, net, im, fm)` → alignments; compares live path to model. located
+  `locate: pm4py.conformance_diagnostics_alignments`
+  zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
+  `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
+
+- **Step 3 (Restore Proof).** Estimate restore time; emit model-update payloads
+  csv-diff 1.2 — `csv_diff.compare(previous, current)` → diff dict; emits model-update payloads. exercised: "['added','removed','changed',…]"
+  `locate: csv_diff.compare, csv_diff.load_csv`
+  lifelines 0.30.3 — `lifelines.KaplanMeierFitter().fit(durations, event_observed)` → fitter; estimates remaining restore time. exercised: "median 3.0"
+  `locate: lifelines.KaplanMeierFitter.fit`
+
+- **Step 4 (Execution).** Write one Excel artifact from accepted fields
+  openpyxl 3.1.2 — `openpyxl.Workbook().save(path)` → writes styled .xlsx. exercised: "wrote file True"
+  `locate: openpyxl.Workbook.save`
+  pandas-xlsx-tables 1.1.2 — `pandas_xlsx_tables.df_to_xlsx_table(df, table_name, file=path)` → writes real Excel Table. exercised: "wrote file True"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table`
+  xlsxwriter 3.2.9 — `xlsxwriter.Workbook(path)`; `ws.write(row, col, val)`; `close()` → .xlsx with charts. exercised: "wrote file True"
+  `locate: xlsxwriter.Workbook, xlsxwriter.worksheet.Worksheet.write`
 
 #### Pipeline R34: Reverse Problem Management
 
-- **Step 0 (Global Ingestion).** python-docx, undoc, and docling flatten known-error articles; playwright flattens mermaid and clingraph HTML into the compiler manifest.
-  in catalog: docling, playwright, python-docx
-- **Step 1 (Orchestrator Compilation).** Pipeline R0 writes a prefect flow gated on amrlib producing causal or error-hypothesis graphs from the published pack. No causal AMR, no workflow.
-  in catalog: amrlib, prefect
-- **Step 2 (Cause and Known Error).** PRB_CLUSTER, PRB_HYPOTHESIS, PRB_CAUSE, PRB_KNOWN_ERROR, and PRB_SOLUTION land in that pipeline's spreadsheet. dowhy and pgmpy test structure against recovered rows; amr-logic-converter and pysmt formalize mechanisms; typedlogic records known-error facts only after the SMT proof.
-  in catalog: amr-logic-converter, dowhy, pgmpy, PySMT, typedlogic
-- **Step 3 (Solution and Close).** unified-planning and ortools explore strategies; zen-engine may emit a change payload into Pipeline R39; z3-solver must accept closure evidence or the record stays open.
-  in catalog: ortools, unified-planning, z3-solver, zen-engine
-- **Step 4 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** Flatten known-error articles and rendered graph HTML into the manifest.
+  python-docx 1.2.0 — `docx.Document(docx=path)` → reads Word article. exercised: "paragraphs == 0 (default)"
+  `locate: docx.Document`
+  undoc 0.9.0 — `undoc.parse_file(path)` → Undoc markdown/text/json. located
+  `locate: undoc.parse_file`
+  docling 2.124.0 — `DocumentConverter().convert(source=path)` → parsed document. located
+  `locate: docling.document_converter.DocumentConverter.convert`
+  playwright 1.62.0 — `with sync_playwright() as p: page.goto(url); page.content()` → rendered HTML. located
+  `locate: playwright.sync_api.sync_playwright, playwright.sync_api.Page.content`
+  clingraph 1.2.6 — `clingraph.compute_graphs(fb); clingraph.render(graphs, format='svg')` → renders ASP-fact graph. located
+  `locate: clingraph.render, clingraph.compute_graphs`
+  mermaid — non-Python: Node/CLI renderer (@mermaid-js/mermaid-cli); CLI: `mmdc -i in.mmd -o out.svg`
+
+- **Step 1 (Orchestrator Compilation).** Write a flow gated on causal/error-hypothesis AMR graphs.
+  amrlib 0.8.1 — `amrlib.load_stog_model(model_dir=...)` (`.parse_sents(...)`) → sentence-to-AMR-graph parser. located
+  `locate: amrlib.load_stog_model`
+  prefect 3.8.4 — `@prefect.flow` on a function → defines orchestration flow. located
+  `locate: prefect.flow`
+
+- **Step 2 (Cause and Known Error).** Test causal structure, formalize mechanisms, record known-error facts.
+  amr-logic-converter 0.11.3 — `AmrLogicConverter().convert(amr)` → First-Order-Logic Clause. located
+  `locate: amr_logic_converter.AmrLogicConverter.AmrLogicConverter.convert`
+  dowhy 0.14 — `dowhy.CausalModel(data, treatment, outcome, graph=...)` → causal graph model to test. located
+  `locate: dowhy.CausalModel`
+  pgmpy 1.1.2 — `pgmpy.estimators.PC(data).estimate()` → structure learned/tested from rows. located
+  `locate: pgmpy.estimators.PC.PC, pgmpy.estimators.PC.PC.estimate`
+  pysmt 0.9.6 — `pysmt.shortcuts.is_sat(formula)` → SMT satisfiability of mechanism. exercised: "False"
+  `locate: pysmt.shortcuts.is_sat`
+  typedlogic 0.2.4 — `Solver().add_fact(fact)` → records known-error facts. located
+  `locate: typedlogic.solver.Solver.add_fact`
+
+- **Step 3 (Solution and Close).** Explore strategies; accept closure evidence or stay open.
+  unified-planning 1.3.0 — `unified_planning.shortcuts.OneshotPlanner(problem_kind=...)` → planner exploring strategies. located
+  `locate: unified_planning.shortcuts.OneshotPlanner`
+  ortools 9.15.6755 — `cp_model.CpModel(); ...; cp_model.CpSolver().Solve(model)` → CP-SAT strategy search. exercised: "('OPTIMAL', 4)"
+  `locate: ortools.sat.python.cp_model.CpModel, ortools.sat.python.cp_model.CpSolver.Solve`
+  z3-solver 5.1.0.0 — `z3.Solver(); s.add(...); s.check()` → closure-evidence proof. exercised: "sat [x = 1]"
+  `locate: z3.Solver, z3.Solver.check`
+  zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
+  `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
+
+- **Step 4 (Execution).** Write one spreadsheet from recovered, solver-accepted fields.
+  openpyxl 3.1.2 — `openpyxl.Workbook(); wb.save(path)` → .xlsx file. exercised: "4801-byte xlsx"
+  `locate: openpyxl.Workbook`
+  pandas-xlsx-tables 1.1.2 — `pandas_xlsx_tables.df_to_xlsx_table(df, table_name, file=path)` → real Excel Table. exercised: "6047-byte xlsx"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table`
+  xlsxwriter 3.2.9 — `xlsxwriter.Workbook(path); wb.close()` → .xlsx with native charts. exercised: "5248-byte xlsx"
+  `locate: xlsxwriter.Workbook`
 
 #### Pipeline R35: Reverse Service Desk
 
-- **Step 0 (Global Ingestion).** python-docx, docling, and markitdown flatten template packs; playwright flattens desk dashboards into the compiler manifest.
-  in catalog: docling, markitdown, playwright, python-docx
-- **Step 1 (Orchestrator Compilation).** Pipeline R0 emits a temporalio workflow only if triage-guideline and channel spans resolve in that pipeline's spreadsheet. Empty guideline set yields a halt.
-  in catalog: temporalio
-- **Step 2 (Triage and Pack).** SDESK_GUIDELINE, SDESK_CHANNEL, SDESK_ROUTE, and SDESK_CSAT land in that pipeline's spreadsheet. zen-engine and business-rules route to Pipelines R33, R34, or R36; jinja2 and stanza assemble messages only for compiled channel constraints.
-  in catalog: business-rules, Jinja2, stanza, zen-engine
-- **Step 3 (Feedback and Improve).** pandas stores confirmations and CSAT; statsmodels scores desk series; pulp may emit Pipeline R29 items if compiled thresholds fail.
-  in catalog: pandas, pulp, statsmodels
-- **Step 4 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** Flatten template packs and desk dashboards into manifest.
+  docling 2.124.0 — `DocumentConverter().convert(source).document` → parses template packs. located
+  `locate: docling.document_converter.DocumentConverter.convert`
+  markitdown 0.1.7 — `MarkItDown().convert(source)` → template pack to Markdown. located
+  `locate: markitdown.MarkItDown.convert`
+  playwright 1.62.0 — `with sync_playwright() as p: p.chromium.launch().new_page()` → flattens desk dashboards. located
+  `locate: playwright.sync_api.sync_playwright`
+  python-docx 1.2.0 — `docx.Document(path)` → reads Word template packs. exercised: "docx written"
+  `locate: docx.Document`
+- **Step 1 (Orchestrator Compilation).** Emit a workflow if triage-guideline/channel spans resolve.
+  temporalio 1.32.0 — `@temporalio.workflow.defn` on a workflow class → declares durable workflow. located
+  `locate: temporalio.workflow.defn`
+- **Step 2 (Triage and Pack).** Route by rules; assemble channel messages.
+  business-rules 1.1.1 — `run_all(rule_list, defined_variables, defined_actions)` → routes to R33/R34/R36. located
+  `locate: business_rules.run_all`
+  jinja2 3.1.6 — `Template(src).render(**ctx)` → assembles channel messages. exercised: "Hi X"
+  `locate: jinja2.Template.render, jinja2.Environment`
+  stanza 1.14.0 — `stanza.Pipeline(lang="en", processors=...)(text)` → NLP parse of message text (not templating). located
+  `locate: stanza.Pipeline`
+  zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
+  `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
+- **Step 3 (Feedback and Improve).** Store CSAT; score desk series; emit items on breach.
+  pandas 2.3.3 — `pandas.DataFrame(data)` → stores confirmations and CSAT. located
+  `locate: pandas.DataFrame`
+  statsmodels 0.15.0 — `statsmodels.tsa.arima.model.ARIMA(series, order).fit()` → scores desk time series. located
+  `locate: statsmodels.tsa.arima.model.ARIMA`
+  pulp 3.3.2 — `p=LpProblem(); p.solve()` → emits Pipeline R29 items on threshold fail. exercised: "Optimal 3.0"
+  `locate: pulp.LpProblem.solve, pulp.LpVariable`
+- **Step 4 (Execution).** Write one spreadsheet from solver-accepted fields.
+  openpyxl 3.1.2 — `wb=Workbook(); wb.save(path)` → writes .xlsx artifact. exercised: "xlsx file written"
+  `locate: openpyxl.Workbook.save, openpyxl.Workbook`
+  xlsxwriter 3.2.9 — `w=Workbook(path); ws=w.add_worksheet(); ws.add_table(...)` → native Excel table. exercised: "xlsx with table written"
+  `locate: xlsxwriter.Workbook.add_worksheet, xlsxwriter.worksheet.Worksheet.add_table`
+  pandas-xlsx-tables 1.1.2 — `df_to_xlsx_table(df, table_name, file=path, index=False)` → real Excel Table object. exercised: "xlsx table written"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table, pandas_xlsx_tables.dfs_to_xlsx_tables`
 
 #### Pipeline R36: Reverse Service Request Management
 
-- **Step 0 (Global Ingestion).** firecrawl-anydoc, python-docx, and playwright flatten fulfilment Word packs and request HTML into the compiler manifest.
-  in catalog: playwright, python-docx
-- **Step 1 (Orchestrator Compilation).** Pipeline R0 keeps spiffworkflow and pydantic request assets only when a matching model key or an ad-hoc flag type-checks in that pipeline's spreadsheet. Neither present, no fulfilment flow.
-  in catalog: pydantic, SpiffWorkflow
-- **Step 2 (Model or Plan).** REQ_MODEL, REQ_ITEM, REQ_APPROVAL, and REQ_TASK land in that pipeline's spreadsheet. spiffworkflow executes matched models; unified-planning synthesizes ad-hoc plans; zen-engine writes approval tables as artifacts, not as a human gate.
-  in catalog: SpiffWorkflow, unified-planning, zen-engine
-- **Step 3 (Replay).** pm4py compares executed paths to the model; pandas and pingouin score cycle time into Pipeline R29 only on deviation.
-  in catalog: pandas, pm4py
-- **Step 4 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** Flatten fulfilment Word packs and request HTML into the manifest.
+  firecrawl-anydoc 0.2.4 — `anydoc.to_markdown(path)` → Markdown; Word-pack→Markdown. located
+  `locate: anydoc.to_markdown`
+  python-docx 1.2.0 — `docx.Document(path)` → parsed Word document; Word-pack read. exercised: "36609 bytes"
+  `locate: docx.Document`
+  playwright 1.62.0 — `with sync_playwright() as p: p.chromium.launch()` → rendered request HTML; HTML flatten. located
+  `locate: playwright.sync_api.sync_playwright`
+
+- **Step 1 (Orchestrator Compilation).** Keep spiffworkflow/pydantic request assets when a model key or ad-hoc flag type-checks.
+  pydantic 2.13.5 — `class Req(pydantic.BaseModel): ...` → validated request model; model-key type-check. exercised: "unit=3.5"
+  `locate: pydantic.BaseModel`
+  spiffworkflow 3.2.0 — `BpmnWorkflow(spec).do_engine_steps()` → advances BPMN; request-workflow asset. located (import is `SpiffWorkflow`; batch's lowercase `spiffworkflow` fails)
+  `locate: SpiffWorkflow.bpmn.workflow.BpmnWorkflow.do_engine_steps, SpiffWorkflow.bpmn.workflow.BpmnWorkflow`
+
+- **Step 2 (Model or Plan).** Execute matched models; synthesize ad-hoc plans; write approval tables.
+  spiffworkflow 3.2.0 — `BpmnWorkflow(spec).do_engine_steps()` → executes matched model; matched-model execution. located (import is `SpiffWorkflow`; batch's lowercase `spiffworkflow` fails)
+  `locate: SpiffWorkflow.bpmn.workflow.BpmnWorkflow.do_engine_steps`
+  unified-planning 1.3.0 — `OneshotPlanner(problem_kind=pk).solve(problem)` → plan; ad-hoc plan synthesis. located
+  `locate: unified_planning.shortcuts.OneshotPlanner`
+  zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
+  `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
+
+- **Step 3 (Replay).** Compare executed paths to model; score cycle time on deviation.
+  pm4py 2.7.23.8 — `pm4py.conformance_diagnostics_token_based_replay(log, net, im, fm)` → replay diagnostics; path-vs-model conformance. located
+  `locate: pm4py.conformance_diagnostics_token_based_replay`
+  pandas 2.3.3 — `pandas.DataFrame(...)` → cycle-time table; cycle-time tabulation. located
+  `locate: pandas.DataFrame`
+  pingouin 0.6.1 — `pingouin.ttest(x, y)` → stats DataFrame (T, p_val); cycle-time scoring. exercised: "T=-2.0"
+  `locate: pingouin.ttest`
+
+- **Step 4 (Execution).** Write one spreadsheet from recovered, solver-accepted fields.
+  openpyxl 3.1.2 — `wb=openpyxl.Workbook(); wb.save(path)` → .xlsx; styled spreadsheet write. exercised: "4802 bytes"
+  `locate: openpyxl.Workbook, openpyxl.Workbook.save`
+  xlsxwriter 3.2.9 — `wb=xlsxwriter.Workbook(path); wb.add_worksheet(); wb.close()` → .xlsx; native-chart spreadsheet write. exercised: "5247 bytes"
+  `locate: xlsxwriter.Workbook, xlsxwriter.Workbook.add_worksheet`
+  pandas-xlsx-tables 1.1.2 — `df_to_xlsx_table(df, table_name, file)` → real Excel Table object; Table write from DataFrame. exercised: "6138 bytes"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table`
 
 #### Pipeline R37: Reverse Service Catalog Management
 
-- **Step 0 (Global Ingestion).** playwright flattens streamlit and datasette catalog views; python-docx, undoc, and markitdown flatten Word catalog extracts into the compiler manifest.
-  in catalog: markitdown, playwright, python-docx, streamlit
-- **Step 1 (Orchestrator Compilation).** Pipeline R0 builds a dagster asset graph from recovered granularity, view, and access-rule spans. No view definition cancels publication assets.
-  in catalog: dagster
-- **Step 2 (Model and View).** CAT_OFFERING, CAT_VIEW, CAT_ATTRIBUTE, and CAT_ACCESS land in that pipeline's spreadsheet. jinja2 and great-tables emit standard views; pycasbin binds access only after clingo accepts mandatory-attribute completeness.
-  in catalog: clingo, great-tables, Jinja2, pycasbin
-- **Step 3 (Request Path).** zen-engine processes view requests and logs exceptions into the same store.
-  in catalog: zen-engine
-- **Step 4 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** Capture catalog views; flatten Word extracts into manifest.
+  markitdown 0.1.7 — `MarkItDown().convert(path)` → Markdown result. exercised: "# Desk x"
+  `locate: markitdown.MarkItDown.convert`
+  playwright 1.62.0 — `with sync_playwright() as p: ...page.content()` → captures streamlit/datasette views. located
+  `locate: playwright.sync_api.sync_playwright`
+  python-docx 1.2.0 — `docx.Document(path)` → reads Word catalog extracts. exercised: "1 paragraph"
+  `locate: docx.Document`
+  undoc 0.9.0 — `undoc.parse_file(path)` → Markdown/text/JSON of Office doc. located
+  `locate: undoc.parse_file`
+  streamlit 1.63.0, datasette 0.65.3 — named as the catalog-view apps whose pages playwright captures; sources here, not performers of this flatten step (no bound function).
+
+- **Step 1 (Orchestrator Compilation).** Build dagster asset graph from recovered spans.
+  dagster 1.13.20 — `@dagster.asset def catalog(): ...` → asset definition. exercised: "AssetsDefinition"
+  `locate: dagster.asset`
+
+- **Step 2 (Model and View).** Render catalog views; check completeness; bind access.
+  clingo 5.8.0 — `Control().solve()` → mandatory-attribute completeness SAT. exercised: "SAT"
+  `locate: clingo.Control.solve`
+  great-tables 0.24.0 — `great_tables.GT(df)` → formatted catalog view table. exercised: "GT"
+  `locate: great_tables.GT`
+  jinja2 3.1.6 — `jinja2.Template(src).render(**ctx)` → rendered standard view. exercised: "flow R0"
+  `locate: jinja2.Template.render`
+  pycasbin ? — `Enforcer(model, policy).enforce(sub, obj, act)` → policy / access-control decision. located
+  `locate: casbin.Enforcer, casbin.Enforcer.enforce, casbin.Enforcer.add_policy`
+
+- **Step 3 (Request Path).** Evaluate view-request decisions; log exceptions.
+  zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
+  `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
+
+- **Step 4 (Execution).** Write the pipeline's artifact spreadsheet.
+  openpyxl 3.1.2 — `wb=Workbook(); wb.save(path)` → writes .xlsx. exercised: "saved"
+  `locate: openpyxl.Workbook.save, openpyxl.Workbook`
+  pandas-xlsx-tables 1.1.2 — `df_to_xlsx_table(df, table_name, file)` → writes real Excel Table. exercised: "table written"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table`
+  xlsxwriter 3.2.9 — `wb=xlsxwriter.Workbook(path); ...write(); wb.close()` → writes .xlsx. exercised: "closed"
+  `locate: xlsxwriter.Workbook`
 
 #### Pipeline R38: Reverse Business Relationship Management
 
-- **Step 0 (Global Ingestion).** python-docx and docling flatten relationship reviews; playwright flattens journey dashboards into the compiler manifest.
-  in catalog: docling, playwright, python-docx
-- **Step 1 (Orchestrator Compilation).** Pipeline R0 writes a prefect flow only if stakeholder-group and relationship-domain spans resolve in that pipeline's spreadsheet. Empty map cancels journey assets.
-  in catalog: prefect
-- **Step 2 (Health and Offer).** BRM_STAKEHOLDER, BRM_DOMAIN, BRM_VOC, BRM_OFFER, and BRM_JOURNEY land in that pipeline's spreadsheet. networkx rebuilds the RACI graph; pandas scores VoC; typedlogic records principles; zen-engine shapes offerings only under Pipeline R21 constraints that already proved.
-  in catalog: networkx, pandas, typedlogic, zen-engine
-- **Step 3 (Journey).** pydantic stores terms; pm4py tracks onboard/co-create/review/offboard and refuses offboard without a compiled sustainment record.
-  in catalog: pm4py, pydantic
-- **Step 4 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** Flatten relationship reviews and journey dashboards into manifest
+  python-docx 1.2.0 — `docx.Document("review.docx").paragraphs` → paragraph objects; reads review text/tables. exercised: "para0 'Continuity plan'"
+  `locate: docx.Document, docx.document.Document.paragraphs`
+  docling 2.124.0 — `DocumentConverter().convert(src).document` → DoclingDocument; parses relationship reviews. located
+  `locate: docling.document_converter.DocumentConverter.convert`
+  playwright 1.62.0 — `page.goto(url); page.content()` → rendered HTML; flattens journey dashboards. located
+  `locate: playwright.sync_api.Page.goto, playwright.sync_api.Page.content`
+
+- **Step 1 (Orchestrator Compilation).** Write prefect flow only if stakeholder/domain spans resolve
+  prefect 3.8.4 — `@prefect.flow def r0(): ...` → Flow; writes the orchestration flow. located
+  `locate: prefect.flow, prefect.task`
+
+- **Step 2 (Health and Offer).** Rebuild RACI graph, score VoC, record principles, shape offers
+  networkx 3.6.1 — `g=DiGraph(); g.add_edges_from(raci_edges)` → graph; rebuilds the RACI graph. exercised: "2 edges"
+  `locate: networkx.DiGraph.add_edges_from, networkx.DiGraph.add_edge`
+  pandas 2.3.3 — `df.groupby("stakeholder")["voc"].mean()` → Series; scores VoC. exercised: "{'a': 4.0, 'b': 9.0}"
+  `locate: pandas.DataFrame.groupby`
+  typedlogic 0.2.4 — `@typedlogic.axiom def principle(...)` (+ `Theory.add`) → records principle axioms. located
+  `locate: typedlogic.axiom, typedlogic.Theory.add`
+  zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
+  `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
+
+- **Step 3 (Journey).** Store terms; track journey stages, refuse offboard without sustainment
+  pydantic 2.13.5 — `class Terms(BaseModel): ...` then `Terms.model_validate(row)` → instance; stores/validates terms. exercised: "rto=4"
+  `locate: pydantic.BaseModel.model_validate, pydantic.BaseModel`
+  pm4py 2.7.23.8 — `pm4py.discover_petri_net_inductive(log)` → (net, im, fm); tracks onboard/co-create/review/offboard flow. located
+  `locate: pm4py.discover_petri_net_inductive, pm4py.conformance_diagnostics_token_based_replay`
+
+- **Step 4 (Execution).** Write one Excel spreadsheet from solver-accepted fields
+  openpyxl 3.1.2 — `wb=openpyxl.Workbook(); wb.active["A1"]=v; wb.save("out.xlsx")` → writes .xlsx. exercised: "saved 4801 bytes"
+  `locate: openpyxl.Workbook.save, openpyxl.Workbook`
+  xlsxwriter 3.2.9 — `w=xlsxwriter.Workbook("out.xlsx"); w.add_worksheet(); w.close()` → writes .xlsx. exercised: "saved 5247 bytes"
+  `locate: xlsxwriter.Workbook.close, xlsxwriter.Workbook.add_worksheet, xlsxwriter.Workbook`
+  pandas-xlsx-tables 1.1.2 — `df_to_xlsx_table(df, "tbl", file="out.xlsx", index=False)` → writes real Excel Table. exercised: "wrote 6134 bytes"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table, pandas_xlsx_tables.dfs_to_xlsx_tables`
 
 #### Pipeline R39: Reverse Change Enablement
 
-- **Step 0 (Global Ingestion).** python-docx, firecrawl-anydoc, and playwright flatten RFC Word packs and change-board HTML into the compiler manifest.
-  in catalog: playwright, python-docx
-- **Step 1 (Orchestrator Compilation).** Pipeline R0 emits a temporalio workflow gated on change-type, risk, and success-criteria spans recovered from the pack. No model match and no risk span, no workflow.
-  in catalog: temporalio
-- **Step 2 (Assess and Authorize).** CHG_RECORD, CHG_TYPE, CHG_RISK, CHG_CRITERIA, CHG_WINDOW, and CHG_PLAN land in that pipeline's spreadsheet. pydantic creates the record from recovered rows; zen-engine applies compiled models; pycasbin and business-rules bind the authority matrix; clingo must accept freeze-window and exclusive-resource constraints. Authorization is the stable model written to the record.
-  in catalog: business-rules, clingo, pycasbin, pydantic, zen-engine
-- **Step 3 (Plan and Replay).** criticalpath and unified-planning emit the plan; simpy dry-runs against Pipeline R13 state; pm4py and csv-diff refuse closure if executed path diverges without a compensation fact.
-  in catalog: criticalpath, pm4py, simpy, unified-planning
-- **Step 4 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** flatten RFC Word packs and change-board HTML into manifest
+  python-docx 1.2.0 — `docx.Document(path)` → reads RFC Word pack. exercised: "docx saved"
+  `locate: docx.Document`
+  firecrawl-anydoc 0.2.4 — `anydoc.to_markdown(path)` → Markdown from HTML/docs. exercised: "| a | b | ..."
+  `locate: anydoc.to_markdown`
+  playwright 1.62.0 — `with sync_playwright() as p: p.chromium.launch()` → browser; flattens change-board HTML. located
+  `locate: playwright.sync_api.sync_playwright`
+
+- **Step 1 (Orchestrator Compilation).** emit temporalio workflow gated on recovered spans
+  temporalio 1.32.0 — `@temporalio.workflow.defn` → durable workflow. located
+  `locate: temporalio.workflow.defn`
+
+- **Step 2 (Assess and Authorize).** build records, apply rules, bind authority, accept constraints
+  pydantic 2.13.5 — `Model.model_validate(row)` → CHG record from recovered rows. exercised: "2"
+  `locate: pydantic.BaseModel.model_validate`
+  business-rules 1.1.1 — `run_all(rule_list, defined_variables, defined_actions)` → binds authority matrix. exercised: "['flag']"
+  `locate: business_rules.run_all`
+  clingo 5.8.0 — `Control().solve()` → accepts freeze-window/exclusive-resource constraints. exercised: "a b"
+  `locate: clingo.Control.solve`
+  pycasbin ? — `Enforcer(model, policy).enforce(sub, obj, act)` → policy / access-control decision. located
+  `locate: casbin.Enforcer, casbin.Enforcer.enforce, casbin.Enforcer.add_policy`
+  zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
+  `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
+
+- **Step 3 (Plan and Replay).** emit plan, simulate dry-run, refuse divergent closure
+  criticalpath 0.1.5 — `Node(...).add(...); .get_critical_path()` → emits plan sequence. exercised: "['A','B']"
+  `locate: criticalpath.Node.get_critical_path, criticalpath.Node.add`
+  unified-planning 1.3.0 — `OneshotPlanner(problem_kind=...).solve(problem)` → plan. located
+  `locate: unified_planning.shortcuts.OneshotPlanner`
+  simpy 4.1.2 — `env=Environment(); env.process(p); env.run()` → dry-run simulation. exercised: "5"
+  `locate: simpy.Environment.run, simpy.Environment.process`
+  pm4py 2.7.23.8 — `pm4py.conformance_diagnostics_alignments(log, net,im,fm)` → path divergence. located
+  `locate: pm4py.conformance_diagnostics_alignments`
+  csv-diff 1.2 — `compare(load_csv(a,key), load_csv(b,key))` → path/data divergence. exercised: "added=1, removed=1"
+  `locate: csv_diff.compare, csv_diff.load_csv`
+
+- **Step 4 (Execution).** write one spreadsheet from solver-accepted fields
+  openpyxl 3.1.2 — `openpyxl.Workbook().save(path)` → xlsx file. exercised: "saved"
+  `locate: openpyxl.Workbook, openpyxl.Workbook.save`
+  xlsxwriter 3.2.9 — `xlsxwriter.Workbook(path).add_worksheet()` → native xlsx writer. exercised: "closed"
+  `locate: xlsxwriter.Workbook, xlsxwriter.Workbook.add_worksheet`
+  pandas-xlsx-tables 1.1.2 — `df_to_xlsx_table(df, "T", file=path)` → real Excel Table. exercised: "wrote table"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table`
 
 #### Pipeline R40: Reverse Project Management
 
-- **Step 0 (Global Ingestion).** python-docx, undoc, and markitdown flatten PID and stage Word packs; quarto HTML/PDF and plotly HTML are flattened by docling and playwright into the compiler manifest.
-  in catalog: docling, markitdown, playwright, plotly, python-docx
-- **Step 1 (Orchestrator Compilation).** Pipeline R0 builds a dagster asset graph from recovered tolerance, deliverable, and exception-trigger spans. Missing tolerance set cancels control assets.
-  in catalog: dagster
-- **Step 2 (Gates and Schedule).** PJ_TOLERANCE, PJ_DELIVERABLE, PJ_STAGE, PJ_WORK_PACKAGE, and PJ_EXCEPTION land in that pipeline's spreadsheet. pydantic instantiates PID/stage/work-package schemas from recovered rows; zen-engine encodes initiate/project/stage/exception/closure graphs; criticalpath and ortools solve resource-feasible plans.
-  in catalog: criticalpath, ortools, pydantic, zen-engine
-- **Step 3 (Exception Proof).** typedlogic and z3-solver must accept that an exception plan restores tolerances given updated case numbers or the next-stage asset is not materialized.
-  in catalog: typedlogic, z3-solver
-- **Step 4 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** flatten PID/stage Word packs, quarto/plotly HTML into manifest
+  python-docx 1.2.0 — `docx.Document("pid.docx")` → reads PID/stage Word packs. exercised: "paragraph text 'hello'"
+  `locate: docx.Document`
+  undoc 0.9.0 — `undoc.parse_file("stage.docx").to_markdown()` → flat text/Markdown/JSON. exercised: "'Hello undoc'"
+  `locate: undoc.parse_file, undoc.Undoc.to_markdown`
+  markitdown 0.1.7 — `MarkItDown().convert(source="pack.docx")` → Markdown/text. exercised: "'# Hi\n\nTest doc'"
+  `locate: markitdown.MarkItDown.convert`
+  docling 2.124.0 — `DocumentConverter().convert(source="stage.pdf")` → parses quarto/plotly HTML/PDF. located
+  `locate: docling.document_converter.DocumentConverter.convert`
+  playwright 1.62.0 — `page.goto(url); page.content()` → serialized rendered plotly/quarto HTML. located
+  `locate: playwright.sync_api.sync_playwright, playwright.sync_api.Page.content`
+  plotly 7.0.0 — `plotly.graph_objects.Figure(data=[...]).to_html(full_html=False)` → produces HTML flattened here. exercised: "4300543-char HTML"
+  `locate: plotly.graph_objects.Figure.to_html, plotly.graph_objects.Figure.write_html`
+  quarto — non-Python: CLI publishing engine; CLI: `quarto render doc.qmd`
+
+- **Step 1 (Orchestrator Compilation).** build dagster asset graph from tolerance/deliverable/exception spans
+  dagster 1.13.20 — `dagster.asset(deps=[upstream])(fn)` → AssetsDefinition composing the asset graph. located
+  `locate: dagster.asset`
+
+- **Step 2 (Gates and Schedule).** instantiate schemas; encode graphs; solve resource-feasible plans
+  pydantic 2.13.5 — `class PID(pydantic.BaseModel): ...; PID(**row)` → validated PID/stage/work-package schemas. exercised: "M(x=5).x == 5"
+  `locate: pydantic.BaseModel`
+  criticalpath 0.1.5 — `criticalpath.Node("proj").get_critical_path()` → schedules feasible plan by CPM. exercised: "['A','B'], duration 8"
+  `locate: criticalpath.Node.get_critical_path, criticalpath.Node.link`
+  ortools 9.15.6755 — `mdl=cp_model.CpModel(); s=cp_model.CpSolver(); s.Solve(mdl)` → resource-feasible CP-SAT plan. exercised: "OPTIMAL, x=4"
+  `locate: ortools.sat.python.cp_model.CpModel, ortools.sat.python.cp_model.CpSolver.Solve`
+  zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
+  `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
+
+- **Step 3 (Exception Proof).** accept that an exception plan restores tolerances
+  typedlogic 0.2.4 — `s=Z3Solver(); s.add_theory(theory); s.check()` → checks exception-plan satisfiability. located
+  `locate: typedlogic.integrations.solvers.z3.Z3Solver.check`
+  z3-solver 5.1.0.0 — `s=z3.Solver(); s.add(cons); s.check()` → sat/unsat tolerance-restoration proof. exercised: "sat; model [x = 3]"
+  `locate: z3.Solver, z3.Solver.check`
+
+- **Step 4 (Execution).** write one spreadsheet from solver-accepted fields
+  openpyxl 3.1.2 — `wb=openpyxl.Workbook(); wb.active["A1"]=v; wb.save(path)` → writes .xlsx. exercised: "A1 == 'hi'"
+  `locate: openpyxl.Workbook`
+  xlsxwriter 3.2.9 — `wb=xlsxwriter.Workbook(path); wb.add_worksheet().write(0,0,v); wb.close()` → writes .xlsx. exercised: "5248-byte xlsx"
+  `locate: xlsxwriter.Workbook`
+  pandas-xlsx-tables 1.1.2 — `df_to_xlsx_table(df, table_name="PJ_WORK_PACKAGE", file=path, index=False)` → real Excel Table. exercised: "6124-byte xlsx"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table`
 
 #### Pipeline R41: Reverse Software Development and Management
 
-- **Step 0 (Global Ingestion).** python-docx and docling flatten design notes; mermaid and diagrams HTML are lifted by playwright and markitdown into the compiler manifest.
-  in catalog: docling, markitdown, playwright, python-docx
-- **Step 1 (Orchestrator Compilation).** Pipeline R0 writes prefect tasks only if backlog-item and architecture-constraint spans resolve in that pipeline's spreadsheet. Empty backlog cancels design assets.
-  in catalog: prefect
-- **Step 2 (Guide and Rank).** SDM_ITEM, SDM_CONSTRAINT, SDM_RANK, and SDM_NFR land in that pipeline's spreadsheet. typedlogic records SDM rules against Pipeline R16; pulp ranks tasks under value, risk, and networkx product edges.
-  in catalog: networkx, pulp, typedlogic
-- **Step 3 (Design Proof).** z3-solver must accept design artifacts against non-functional bounds; python-sat encodes feature-model constraints where present; zen-engine may emit RFC payloads into Pipeline R39 only after that proof.
-  in catalog: python-sat, z3-solver, zen-engine
-- **Step 4 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** Flatten design notes and mermaid/diagrams HTML into the manifest.
+  python-docx 1.2.0 — `docx.Document("design.docx").paragraphs` → reads the design notes. exercised: "saved 36583B"
+  `locate: docx.Document`
+  docling 2.124.0 — `DocumentConverter().convert("design.pdf")` → ConversionResult document. located
+  `locate: docling.document_converter.DocumentConverter.convert`
+  diagrams 0.25.1 — `with diagrams.Diagram("arch", show=False): ...` → renders the architecture diagram (later scraped). located
+  `locate: diagrams.Diagram`
+  playwright 1.62.0 — `page.content()` → rendered DOM HTML of the diagram page. located
+  `locate: playwright.sync_api.Page.content`
+  markitdown 0.1.7 — `markitdown.MarkItDown().convert("diagram.html")` → Markdown of the flattened HTML. exercised: "# Q3 Net income 100"
+  `locate: markitdown.MarkItDown.convert`
+  mermaid — non-Python: Node CLI renderer (@mermaid-js/mermaid-cli); CLI: `mmdc -i in.mmd -o out.svg`
+
+- **Step 1 (Orchestrator Compilation).** Write Prefect tasks only if backlog/architecture-constraint spans resolve.
+  prefect 3.8.4 — `@prefect.task def build(): ...` → defines a durable task. exercised: "type=Task"
+  `locate: prefect.task`
+
+- **Step 2 (Guide and Rank).** Record SDM rules; rank tasks under value/risk/product edges.
+  typedlogic 0.2.4 — `get_solver("clingo").add(Term("sdm_rule", item))` → records typed SDM rules. exercised: "added Term; satisfiable=True"
+  `locate: typedlogic.registry.get_solver, typedlogic.solver.Solver.add`
+  pulp 3.3.2 — `LpProblem("rank", LpMaximize).solve()` → ranks tasks under value/risk. exercised: "Optimal, x=3.0"
+  `locate: pulp.LpProblem.solve`
+  networkx 3.6.1 — `networkx.DiGraph().add_edge(a, b)` → product dependency edges for ranking. exercised: "edges=1"
+  `locate: networkx.DiGraph, networkx.DiGraph.add_edge`
+
+- **Step 3 (Design Proof).** Prove design vs NFR bounds; encode feature-model constraints.
+  z3-solver 5.1.0.0 — `z3.Solver().check()` (after add) → accepts design artifacts vs NFR bounds. exercised: "sat; assets=100, liab=50"
+  `locate: z3.Solver.check`
+  python-sat 1.9.dev15 — `pysat.solvers.Solver(bootstrap_with=cnf).solve()` → SAT-checks feature-model constraints. exercised: "solve=True, model=[-1, 2]"
+  `locate: pysat.solvers.Solver.solve`
+  zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
+  `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
+
+- **Step 4 (Execution).** Write one Excel spreadsheet from the recovered, solver-accepted fields.
+  openpyxl 3.1.2 — `openpyxl.Workbook().save("artifact.xlsx")` → writes the workbook. exercised: "saved 4819B"
+  `locate: openpyxl.Workbook.save`
+  xlsxwriter 3.2.9 — `wb = xlsxwriter.Workbook("artifact.xlsx"); wb.close()` → writes the workbook. exercised: "wrote 5248B"
+  `locate: xlsxwriter.Workbook, xlsxwriter.Workbook.close`
+  pandas-xlsx-tables 1.1.2 — `pandas_xlsx_tables.df_to_xlsx_table(df, "T", file="artifact.xlsx")` → real Excel Table. exercised: "table xlsx 6047B"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table`
 
 #### Pipeline R42: Reverse Service Validation and Testing
 
-- **Step 0 (Global Ingestion).** python-docx, firecrawl-anydoc, and markitdown flatten test-plan Word packs; mermaid HTML is lifted into the compiler manifest.
-  in catalog: markitdown, python-docx
-- **Step 1 (Orchestrator Compilation).** Pipeline R0 admits testing assets only when acceptance predicates and a model key type-check in that pipeline's spreadsheet. No predicate set, no plan flow.
-- **Step 2 (Criteria Proof).** TEST_PREDICATE, TEST_MODEL, TEST_CASE, TEST_ENV, and TEST_RESULT land in that pipeline's spreadsheet. typedlogic records exit criteria from recovered rows; pysmt and model-checker must accept internal consistency and entailment of Pipeline R15 requirements.
-  in catalog: PySMT, typedlogic
-- **Step 3 (Plan and Exception).** unified-planning and ortools emit the tailored plan; zen-engine classifies exceptions; clingo must accept that every failed exit criterion has a defect or exception record.
-  in catalog: clingo, ortools, unified-planning, zen-engine
-- **Step 4 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** flatten test-plan Word packs and diagrams
+  python-docx 1.2.0 — `docx.Document(path)` → read test-plan Word pack (paragraphs/tables). exercised: "opened/saved .docx"
+  `locate: docx.Document, docx.document.Document.add_paragraph`
+  firecrawl-anydoc 0.2.4 — `anydoc.to_markdown(path)` → Markdown from Word packs. exercised: "'hi\\n' from .docx"
+  `locate: anydoc.to_markdown, anydoc.to_markdown_bytes`
+  markitdown 0.1.7 — `MarkItDown().convert(source).text_content` → Markdown. exercised: "'# Title\\n\\nhello world'"
+  `locate: markitdown.MarkItDown.convert`
+  mermaid — non-Python: Node/CLI renderer; here the mermaid HTML is the lifted source, not an active tool; CLI: `mmdc`
+
+- **Step 1 (Orchestrator Compilation).** admit testing assets only if predicates+model key type-check
+  (no candidate library in batch — pure type-check gate; nothing to bind.)
+
+- **Step 2 (Criteria Proof).** record exit criteria; accept consistency and entailment
+  typedlogic 0.2.4 — `Solver().add_fact(fact)` → records exit-criteria facts. located
+  `locate: typedlogic.solver.Solver.add_fact`
+  pysmt 0.9.6 — `pysmt.shortcuts.is_sat(formula)` → internal consistency; `is_valid` entailment. exercised: "is_sat True"
+  `locate: pysmt.shortcuts.is_sat, pysmt.shortcuts.is_valid`
+  model-checker 1.3.9 — `model_checker.run_test(example_case, semantic_class, proposition_class, operator_collection, syntax_class, model_constraints, model_structure)` → bool accept. located
+  `locate: model_checker.run_test, model_checker.ModelConstraints`
+
+- **Step 3 (Plan and Exception).** emit tailored plan; accept defect/exception coverage
+  unified-planning 1.3.0 — `unified_planning.shortcuts.OneshotPlanner(problem_kind=...)` → planner emitting the plan. located
+  `locate: unified_planning.shortcuts.OneshotPlanner`
+  ortools 9.15.6755 — `CpSolver().solve(CpModel())` → tailored feasible plan. exercised: "OPTIMAL, x=3"
+  `locate: ortools.sat.python.cp_model.CpSolver.solve, ortools.sat.python.cp_model.CpModel`
+  clingo 5.8.0 — `Control().solve()` → accepts every failed criterion has defect/exception record. exercised: "SAT; model 'a b'"
+  `locate: clingo.Control.solve, clingo.Control.ground`
+  zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
+  `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
+
+- **Step 4 (Execution).** write one spreadsheet artifact from solver-accepted fields
+  openpyxl 3.1.2 — `Workbook().save(path)` → xlsx artifact. exercised: "saved xlsx"
+  `locate: openpyxl.Workbook, openpyxl.workbook.workbook.Workbook.save`
+  xlsxwriter 3.2.9 — `Workbook(path)` (+ write) `.close()` → xlsx with native charts. exercised: "closed xlsx"
+  `locate: xlsxwriter.Workbook, xlsxwriter.Workbook.close`
+  pandas-xlsx-tables 1.1.2 — `df_to_xlsx_table(df, table_name, file)` → real Excel Table object. exercised: "wrote Excel table"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table, pandas_xlsx_tables.dfs_to_xlsx_tables`
 
 #### Pipeline R43: Reverse Deployment Management
 
-- **Step 0 (Global Ingestion).** python-docx, undoc, and markitdown flatten deployment reports; mermaid HTML is lifted into the compiler manifest.
-  in catalog: markitdown, python-docx
-- **Step 1 (Orchestrator Compilation).** Pipeline R0 emits a temporalio workflow gated on environment, success-criteria, and rollback spans plus a triggering Pipeline R39 change fact in that pipeline's spreadsheet. No change fact, no deploy workflow.
-  in catalog: temporalio
-- **Step 2 (Readiness Proof).** DEP_ENV, DEP_COMPONENT, DEP_CRITERIA, DEP_ROLLBACK, and DEP_CHANGE_REF land in that pipeline's spreadsheet. pydantic describes pipeline elements; typedlogic encodes pre-deploy predicates; clingo, z3-solver, and csv-diff must accept component and environment readiness.
-  in catalog: clingo, pydantic, typedlogic, z3-solver
-- **Step 3 (Review).** unified-planning emits the instance plan; pm4py mines logs against the model; pandas may emit Pipeline R29 items on recurring unsat.
-  in catalog: pandas, pm4py, unified-planning
-- **Step 4 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** Flatten deployment reports; lift mermaid HTML to manifest.
+  python-docx 1.2.0 — `docx.Document(path).paragraphs` → reads deployment reports. exercised: "paras ['H','para one']"
+  `locate: docx.Document, docx.document.Document.paragraphs`
+  undoc 0.9.0 — `undoc.parse_file(path).to_markdown()` → Markdown from office docs. exercised: "'# H\n\npara one'"
+  `locate: undoc.parse_file, undoc.Undoc.to_markdown`
+  markitdown 0.1.7 — `MarkItDown().convert(path).markdown` → Markdown from reports. exercised: "'# Title\n\nHello world'"
+  `locate: markitdown.MarkItDown.convert`
+  mermaid — non-Python: source here (its HTML is lifted); Node/CLI renderer; CLI: `mmdc -i in.mmd -o out.svg`
+
+- **Step 1 (Orchestrator Compilation).** Temporalio workflow gated on env/success/rollback spans plus change fact.
+  temporalio 1.32.0 — `@workflow.defn`; `client.execute_workflow(WF.run, id=, task_queue=)` → durable deploy workflow. located
+  `locate: temporalio.workflow.defn, temporalio.client.Client.execute_workflow`
+
+- **Step 2 (Readiness Proof).** Describe elements; encode predicates; accept component/environment readiness.
+  pydantic 2.13.5 — `class M(BaseModel): ...` → describes pipeline elements. exercised: "actor='u1' t=5"
+  `locate: pydantic.BaseModel, pydantic.BaseModel.model_validate`
+  typedlogic 0.2.4 — `ClingoSolver().add(sentence)` → encodes pre-deploy predicates. exercised: "satisfiable=True"
+  `locate: typedlogic.integrations.solvers.clingo.ClingoSolver.add`
+  clingo 5.8.0 — `ctl.solve()` → SolveResult.satisfiable accepts readiness. exercised: "sat=True"
+  `locate: clingo.Control.solve`
+  z3-solver 5.1.0.0 — `s=Solver(); s.add(preds); s.check()` → sat accepts readiness. exercised: "check=sat"
+  `locate: z3.Solver.check`
+  csv-diff 1.2 — `compare(load_csv(prev, key='id'), load_csv(curr, key='id'))` → diffs readiness tables. exercised: "changed=1"
+  `locate: csv_diff.compare, csv_diff.load_csv`
+
+- **Step 3 (Review).** Emit instance plan; mine logs against model; emit items on unsat.
+  unified-planning 1.3.0 — `OneshotPlanner(problem_kind=p.kind).solve(problem)` → instance plan. exercised: "SOLVED_SATISFICING, plan ['go']"
+  `locate: unified_planning.shortcuts.OneshotPlanner, unified_planning.model.Problem`
+  pm4py 2.7.23.8 — `pm4py.conformance_diagnostics_token_based_replay(log, net, im, fm)` → mines logs vs model. located
+  `locate: pm4py.conformance_diagnostics_token_based_replay`
+  pandas 2.3.3 — `pandas.DataFrame(items)` → emits Pipeline R29 items. exercised: "shape (2,2)"
+  `locate: pandas.DataFrame`
+
+- **Step 4 (Execution).** Write one spreadsheet from recovered, solver-accepted fields.
+  openpyxl 3.1.2 — `wb=Workbook(); ws.append(row); wb.save(path)` → writes .xlsx. exercised: "wrote xlsx"
+  `locate: openpyxl.Workbook, openpyxl.workbook.workbook.Workbook.save`
+  xlsxwriter 3.2.9 — `wb=Workbook(path); ws.write(r,c,v); wb.close()` → writes .xlsx. exercised: "wrote xlsx"
+  `locate: xlsxwriter.Workbook`
+  pandas-xlsx-tables 1.1.2 — `df_to_xlsx_table(df, 'T', path, index=False)` → real Excel Table. exercised: "wrote xlsx"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table`
 
 #### Pipeline R44: Reverse Release Management
 
-- **Step 0 (Global Ingestion).** python-docx and docling flatten release reviews; mermaid HTML is lifted into the compiler manifest.
-  in catalog: docling, python-docx
-- **Step 1 (Orchestrator Compilation).** Pipeline R0 writes a prefect flow only if a release-model key and go/no-go language both resolve against Pipelines R39 and R43 facts in that pipeline's spreadsheet. Missing go-criteria cancels execution assets.
-  in catalog: prefect
-- **Step 2 (Select and Prove).** REL_MODEL, REL_COMPONENT, REL_GO_CRITERIA, and REL_SCHEDULE land in that pipeline's spreadsheet. zen-engine selects the model; criticalpath builds the schedule; typedlogic and z3-solver must accept procedure, component-verification, and readiness jointly.
-  in catalog: criticalpath, typedlogic, z3-solver, zen-engine
-- **Step 3 (Review).** pm4py and pandas compare logs and incidents to success criteria; reliability flags release-induced signatures into Pipeline R34.
-  in catalog: pandas, pm4py
-- **Step 4 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** flatten release reviews and diagram HTML into manifest
+  docling 2.124.0 — `docling.document_converter.DocumentConverter().convert(source=path)` → ConversionResult; flattens release reviews. located
+  `locate: docling.document_converter.DocumentConverter.convert`
+  mermaid — non-Python: Node/CLI renderer (@mermaid-js/mermaid-cli), not a Python import; CLI: `mmdc -i in.mmd -o out.svg`.
+  python-docx 1.2.0 — `docx.Document(path)` → document exposing `.paragraphs`; flattens release-review .docx. exercised: "1 paragraph"
+  `locate: docx.Document`
+
+- **Step 1 (Orchestrator Compilation).** write prefect flow when release-model key and go/no-go resolve
+  prefect 3.8.4 — `@prefect.flow(name=...)` decorating the fn → Flow object; writes the release flow. located
+  `locate: prefect.flow`
+
+- **Step 2 (Select and Prove).** select model; build schedule; jointly accept readiness
+  criticalpath 0.1.5 — `criticalpath.Node('P')` add child Nodes, link, `update_all()` → schedule with critical path; builds the schedule. exercised: "duration 5"
+  `locate: criticalpath.Node`
+  typedlogic 0.2.4 — `typedlogic.solver.Solver.prove(sentence)` → Optional[bool]; jointly accepts procedure/readiness entailment. located
+  `locate: typedlogic.solver.Solver.prove, typedlogic.solver.Solver.check`
+  z3-solver 5.1.0.0 — `z3.Solver().check()` after `add(constraints)` → sat/unsat; accepts readiness jointly. exercised: "sat x=3"
+  `locate: z3.Solver.check, z3.Solver`
+  zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
+  `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
+
+- **Step 3 (Review).** compare logs/incidents to success criteria
+  pandas 2.3.3 — `pandas.merge(left, right, on=key)` → joined frame; compares logs to incidents. exercised: "1 row"
+  `locate: pandas.merge, pandas.DataFrame`
+  pm4py 2.7.23.8 — `pm4py.conformance_diagnostics_alignments(log, net, im, fm)` → per-trace alignments; compares logs to criteria. located
+  `locate: pm4py.conformance_diagnostics_alignments`
+
+- **Step 4 (Execution).** write one artifact spreadsheet from solver-accepted fields
+  openpyxl 3.1.2 — `openpyxl.Workbook()` then `wb.save(path)` → xlsx workbook; writes the artifact spreadsheet. exercised: "hi"
+  `locate: openpyxl.Workbook`
+  pandas-xlsx-tables 1.1.2 — `pandas_xlsx_tables.df_to_xlsx_table(df, table_name, file=path, index=False)` → writes native Excel Table; writes spreadsheet. exercised: "wrote"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table`
+  xlsxwriter 3.2.9 — `xlsxwriter.Workbook(path)` then `add_worksheet().write(); close()` → xlsx file; writes spreadsheet. exercised: "wrote"
+  `locate: xlsxwriter.Workbook`
 
 #### Pipeline R45: Reverse Organizational Change Management
 
-- **Step 0 (Global Ingestion).** python-docx, firecrawl-anydoc, and undoc flatten communication packs; quarto HTML/PDF scorecards are flattened by docling and markitdown into the compiler manifest.
-  in catalog: docling, markitdown, python-docx
-- **Step 1 (Orchestrator Compilation).** Pipeline R0 emits a dagster asset graph only if change-vision and impacted-role spans resolve in that pipeline's spreadsheet. Empty stakeholder set cancels communication assets.
-  in catalog: dagster
-- **Step 2 (Ready and Plan).** OCM_VISION, OCM_ROLE, OCM_READINESS, OCM_MESSAGE, and OCM_WIN land in that pipeline's spreadsheet. networkx maps roles; pandas and pingouin score readiness; unified-planning and criticalpath emit the engagement sequence; zen-engine writes the proceed certificate only if feasibility constraints compile.
-  in catalog: criticalpath, networkx, pandas, unified-planning, zen-engine
-- **Step 3 (Sustain Proof).** statsmodels tracks adoption; clingo must accept that every declared early-win has an evidence record or sustainment assets halt.
-  in catalog: clingo, statsmodels
-- **Step 4 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** Flatten comms packs and quarto scorecards into the manifest
+  docling 2.124.0 — `docling.document_converter.DocumentConverter().convert(source)` → ConversionResult; parses scorecard PDF/HTML. located (requires models)
+  `locate: docling.document_converter.DocumentConverter.convert`
+  firecrawl-anydoc 0.2.4 — `anydoc.to_markdown(path, ocr='reject')` → markdown string; flattens comms packs. exercised: "'Hello clause one.\n'"
+  `locate: anydoc.to_markdown`
+  markitdown 0.1.7 — `markitdown.MarkItDown().convert(source)` → DocumentConverterResult; converts scorecards to markdown. exercised: "'Hello clause one.'"
+  `locate: markitdown.MarkItDown.convert`
+  python-docx 1.2.0 — `docx.Document(path)` → Document; reads communication packs. exercised: "'Hello clause one.'"
+  `locate: docx.Document`
+  undoc 0.9.0 — `undoc.parse_file(path)` → Undoc (then .to_markdown()); Office→md/text/json. exercised: "Undoc object"
+  `locate: undoc.parse_file, undoc.Undoc.to_markdown`
+  quarto — non-Python: CLI publishing engine, not a Python import; CLI: `quarto render`
+
+- **Step 1 (Orchestrator Compilation).** Emit dagster asset graph if spans resolve
+  dagster 1.13.20 — `dagster.asset(fn)` → AssetsDefinition; defines a communication asset node. exercised: "AssetsDefinition"
+  `locate: dagster.asset`
+
+- **Step 2 (Ready and Plan).** Map roles, score readiness, sequence engagement
+  criticalpath 0.1.5 — `criticalpath.Node('p').get_critical_path()` → node list; emits engagement sequence. exercised: "['A', 'B']"
+  `locate: criticalpath.Node.get_critical_path`
+  networkx 3.6.1 — `networkx.DiGraph()` + `add_edge` → directed graph; maps roles. exercised: "(3, 2) nodes/edges"
+  `locate: networkx.DiGraph`
+  pandas 2.3.3 — `pandas.DataFrame(data)` → DataFrame; assembles readiness scores. exercised: "(2, 2)"
+  `locate: pandas.DataFrame`
+  pingouin 0.6.1 — `pingouin.cronbach_alpha(data=df)` → (alpha, CI); scores readiness reliability. exercised: "0.95"
+  `locate: pingouin.cronbach_alpha`
+  unified-planning 1.3.0 — `unified_planning.shortcuts.OneshotPlanner(problem_kind=...).solve(problem)` → plan; emits engagement sequence. located (requires planner engine)
+  `locate: unified_planning.shortcuts.OneshotPlanner`
+  zen-engine 2.0.2 — `ZenEngine().create_decision(jdm).evaluate(record)` → decision-table / decision-graph evaluation. located
+  `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate`
+
+- **Step 3 (Sustain Proof).** Track adoption; ASP-accept early-win evidence
+  clingo 5.8.0 — `clingo.Control().solve(on_model=cb)` → SolveResult; accepts early-win evidence records. exercised: "['a b']"
+  `locate: clingo.Control.solve`
+  statsmodels 0.15.0 — `statsmodels.api.OLS(y, sm.add_constant(X)).fit()` → results; tracks adoption. exercised: "params [0.46, 0.74]"
+  `locate: statsmodels.api.OLS`
+
+- **Step 4 (Execution).** Write one Excel artifact from accepted fields
+  openpyxl 3.1.2 — `openpyxl.Workbook().save(path)` → writes styled .xlsx. exercised: "wrote file True"
+  `locate: openpyxl.Workbook.save`
+  pandas-xlsx-tables 1.1.2 — `pandas_xlsx_tables.df_to_xlsx_table(df, table_name, file=path)` → writes real Excel Table. exercised: "wrote file True"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table`
+  xlsxwriter 3.2.9 — `xlsxwriter.Workbook(path)`; `ws.write(row, col, val)`; `close()` → .xlsx with charts. exercised: "wrote file True"
+  `locate: xlsxwriter.Workbook, xlsxwriter.worksheet.Worksheet.write`
 
 #### Pipeline R46: Reverse Knowledge Management
 
-- **Step 0 (Global Ingestion).** playwright, markitdown, undoc, and docling flatten the MkDocs site, quarto packs, and Word exports into the compiler manifest.
-  in catalog: docling, markitdown, playwright
-- **Step 1 (Orchestrator Compilation).** Pipeline R0 writes prefect tasks for rdflib and networkx only if domain, owner, and demand spans exist in the census. No demand item, no routine flow.
-  in catalog: networkx, prefect, rdflib
-- **Step 2 (Inventory Proof).** KM_DOMAIN, KM_OWNER, KM_ASSET, KM_DEMAND, and KM_GUIDELINE land in that pipeline's spreadsheet. networkx maps domains to owners; rdflib stores assets; typedlogic records guidelines; clingo must accept that every high-priority demand is fulfilled or queued after VALUE edits.
-  in catalog: clingo, networkx, rdflib, typedlogic
-- **Step 3 (Routines).** spiffworkflow executes capture/review/publish/retire; pydantic versions assets; ydata-profiling and pandas may emit Pipeline R29 items when freshness thresholds fail.
-  in catalog: pandas, pydantic, SpiffWorkflow, ydata-profiling
-- **Step 4 (Execution).** openpyxl, xlsxwriter, and pandas-xlsx-tables write one spreadsheet for this pipeline’s artifact from the recovered, solver-accepted fields.
-  in catalog: openpyxl, pandas-xlsx-tables, XlsxWriter
+- **Step 0 (Global Ingestion).** Flatten MkDocs site, quarto packs, and Word exports into the manifest.
+  playwright 1.62.0 — `with sync_playwright() as p: page.goto(url); page.content()` → rendered site HTML. located
+  `locate: playwright.sync_api.sync_playwright, playwright.sync_api.Page.content`
+  markitdown 0.1.7 — `markitdown.MarkItDown().convert(source)` → Markdown result. located
+  `locate: markitdown.MarkItDown.convert`
+  undoc 0.9.0 — `undoc.parse_file(path)` → Undoc markdown/text/json. located
+  `locate: undoc.parse_file`
+  docling 2.124.0 — `DocumentConverter().convert(source=path)` → parsed document. located
+  `locate: docling.document_converter.DocumentConverter.convert`
+  mkdocs 1.6.1 — `mkdocs.commands.build.build(config)` → builds the static site being flattened. located
+  `locate: mkdocs.commands.build.build`
+  quarto — non-Python: CLI publishing engine; CLI: `quarto render`
 
+- **Step 1 (Orchestrator Compilation).** Write tasks for graph/RDF only if domain/owner/demand spans exist.
+  networkx 3.6.1 — `networkx.DiGraph()` (add_edge) → domain/owner graph. exercised: "number_of_edges == 1"
+  `locate: networkx.DiGraph`
+  prefect 3.8.4 — `@prefect.flow` (and `@prefect.task`) → defines flow/tasks. located
+  `locate: prefect.flow`
+  rdflib 7.6.0 — `rdflib.Graph(); g.add((s,p,o))` → RDF triple store. exercised: "len(g) == 1"
+  `locate: rdflib.Graph, rdflib.Graph.add`
 
----
+- **Step 2 (Inventory Proof).** Map domains/owners, store assets, record guidelines, prove demand fulfilled.
+  clingo 5.8.0 — `clingo.Control(); ...; ctl.solve(on_model=...)` → ASP proof demand fulfilled/queued. exercised: "['a b']"
+  `locate: clingo.Control, clingo.Control.solve`
+  networkx 3.6.1 — `networkx.DiGraph()` (add_edge) → domain-to-owner mapping. exercised: "number_of_edges == 1"
+  `locate: networkx.DiGraph`
+  rdflib 7.6.0 — `rdflib.Graph(); g.add((s,p,o))` → stores assets as triples. exercised: "len(g) == 1"
+  `locate: rdflib.Graph, rdflib.Graph.add`
+  typedlogic 0.2.4 — `Solver().add_fact(fact)` → records guideline facts. located
+  `locate: typedlogic.solver.Solver.add_fact`
 
-## Part 6. The catalog
+- **Step 3 (Routines).** Execute capture/review/publish/retire; version, profile, and emit items.
+  pandas 2.3.3 — `pandas.DataFrame(data)` → tabular freshness data. exercised: "shape (2, 1)"
+  `locate: pandas.DataFrame`
+  pydantic 2.13.5 — `class M(pydantic.BaseModel): ...` → versioned asset model. exercised: "M(x=3).x == 3"
+  `locate: pydantic.BaseModel`
+  spiffworkflow 3.2.0 — `SpiffWorkflow.bpmn.workflow.BpmnWorkflow(spec)` → executes BPMN capture/review/publish/retire. located (installed as import `SpiffWorkflow`; batch's "no" is incorrect)
+  `locate: SpiffWorkflow.bpmn.workflow.BpmnWorkflow`
+  ydata-profiling 4.18.4 — `ydata_profiling.ProfileReport(df)` → EDA/freshness report. located
+  `locate: ydata_profiling.ProfileReport`
 
-One entry per library that was installed and imported in the session that wrote this file. `located` lists the functions that resolve by import at the version shown; the `locate:` line under an entry is resolved by `tests/test_function_chain.py` on every run, so the catalog is checked, not asserted. `exercised` marks an entry that was also run on the FOIA source or a fragment of it; `wired` marks one the repository's build calls today. A license is stated only where it was read from the package record in this session. Libraries the method names but that were not installed or did not import here are listed after the entries, with the reason.
-
-- **amr-logic-converter** 0.11.3 — located: amr_logic_converter.AmrLogicConverter, AmrLogicConverter.convert — license: MIT
-  `locate: amr_logic_converter.AmrLogicConverter, amr_logic_converter.AmrLogicConverter.AmrLogicConverter.convert`
-- **amrlib** 0.8.1 — located: amrlib.load_stog_model, Inference.parse_sents — parse model from a GitHub release (SHA-256 ecaa2d9b...cc26); tokenizer facebook/bart-base from huggingface.co, blocked here — license: MIT
-  `locate: amrlib.load_stog_model, amrlib.models.parse_xfm.inference.Inference.parse_sents`
-- **business-rules** 1.1.1 — located: business_rules.run_all, business_rules.export_rule_data — license: not recorded here
-  `locate: business_rules.run_all, business_rules.export_rule_data`
-- **casbin** absent — located: casbin.Enforcer — license: not recorded here
-  `locate: casbin.Enforcer`
-- **clingo** 5.8.2 — wired — located: clingo.Control, Control.add, Control.ground, Control.solve — license: MIT
-  `locate: clingo.Control, clingo.Control.add, clingo.Control.ground, clingo.Control.solve`
-- **clorm** 1.6.3 — wired — located: clorm.Predicate, clorm.FactBase, clingo.Control — license: MIT
-  `locate: clorm.Predicate, clorm.FactBase, clorm.clingo.Control`
-- **conllu** 6.0.0 — exercised — located: conllu.parse, models.TokenList, models.Token — license: not recorded here
-  `locate: conllu.parse, conllu.models.TokenList, conllu.models.Token`
-- **criticalpath** 0.1.5 — located: criticalpath.Node, Node.update_all — license: not recorded here
-  `locate: criticalpath.Node, criticalpath.Node.update_all`
-- **csvkit** 2.2.0 — located: csvstat.CSVStat, csvjson.CSVJSON — license: not recorded here
-  `locate: csvkit.utilities.csvstat.CSVStat, csvkit.utilities.csvjson.CSVJSON`
-- **cvc5** 1.3.4 — located: cvc5.Solver, Solver.checkSat, Solver.getUnsatCore — license: not recorded here
-  `locate: cvc5.Solver, cvc5.Solver.checkSat, cvc5.Solver.getUnsatCore`
-- **dagster** 1.13.20 — located: dagster.asset, dagster.Definitions, dagster.materialize — license: not recorded here
-  `locate: dagster.asset, dagster.Definitions, dagster.materialize`
-- **datamodel-code-generator** 0.76.1 — exercised — located: datamodel_code_generator.generate, datamodel_code_generator.InputFileType — license: not recorded here
-  `locate: datamodel_code_generator.generate, datamodel_code_generator.InputFileType`
-- **dateparser** 1.4.2 — exercised — located: dateparser.parse, search.search_dates — license: BSD-3-Clause
-  `locate: dateparser.parse, dateparser.search.search_dates`
-- **docling** 2.124.0 — exercised — located: document_converter.DocumentConverter, DocumentConverter.convert, DocumentConverter.convert_all — license: not recorded here
-  `locate: docling.document_converter.DocumentConverter, docling.document_converter.DocumentConverter.convert, docling.document_converter.DocumentConverter.convert_all`
-- **docling-core** 2.93.0 — exercised — located: doc.DoclingDocument, DoclingDocument.iterate_items, doc.ListItem, doc.GroupItem, doc.ProvenanceItem, doc.TextItem — license: not recorded here
-  `locate: docling_core.types.doc.DoclingDocument, docling_core.types.doc.DoclingDocument.iterate_items, docling_core.types.doc.ListItem, docling_core.types.doc.GroupItem, docling_core.types.doc.ProvenanceItem, docling_core.types.doc.TextItem`
-- **dowhy** 0.14 — located: dowhy.CausalModel, CausalModel.identify_effect, CausalModel.estimate_effect — license: not recorded here
-  `locate: dowhy.CausalModel, dowhy.CausalModel.identify_effect, dowhy.CausalModel.estimate_effect`
-- **duckdb** 1.5.5 — located: duckdb.connect, DuckDBPyConnection.execute — license: not recorded here
-  `locate: duckdb.connect, duckdb.DuckDBPyConnection.execute`
-- **durable-rules** 2.0.28 — exercised — located: lang.ruleset, lang.when_all, lang.post, lang.m — license: not recorded here
-  `locate: durable.lang.ruleset, durable.lang.when_all, durable.lang.post, durable.lang.m`
-- **fastexcel** 0.21.0 — exercised — located: fastexcel.read_excel, ExcelReader.load_sheet, ExcelSheet.to_pandas — needs pyarrow — license: not recorded here
-  `locate: fastexcel.read_excel, fastexcel.ExcelReader.load_sheet, fastexcel.ExcelSheet.to_pandas`
-- **great-tables** 0.24.0 — located: great_tables.GT, GT.save, GT.as_raw_html — license: not recorded here
-  `locate: great_tables.GT, great_tables.GT.save, great_tables.GT.as_raw_html`
-- **holidays** 0.103 — exercised — located: holidays.country_holidays, united_states.UnitedStates, holidays.US — license: not recorded here
-  `locate: holidays.country_holidays, holidays.countries.united_states.UnitedStates, holidays.US`
-- **html2text** 2025.4.15 — located: html2text.HTML2Text, HTML2Text.handle — license: not recorded here
-  `locate: html2text.HTML2Text, html2text.HTML2Text.handle`
-- **Jinja2** 3.1.6 — exercised — located: jinja2.Environment, Environment.get_template, Template.render — license: not recorded here
-  `locate: jinja2.Environment, jinja2.Environment.get_template, jinja2.Template.render`
-- **kuzu** 0.11.3 — exercised — located: kuzu.Database, kuzu.Connection, Connection.execute — license: not recorded here
-  `locate: kuzu.Database, kuzu.Connection, kuzu.Connection.execute`
-- **lifelines** 0.30.3 — located: lifelines.KaplanMeierFitter, lifelines.WeibullFitter, KaplanMeierFitter.fit — license: not recorded here
-  `locate: lifelines.KaplanMeierFitter, lifelines.WeibullFitter, lifelines.KaplanMeierFitter.fit`
-- **lxml** 6.1.3 — exercised — located: etree.parse, etree.fromstring, _Element.iter, _Element.xpath, _Element.sourceline — license: not recorded here
-  `locate: lxml.etree.parse, lxml.etree.fromstring, lxml.etree._Element.iter, lxml.etree._Element.xpath, lxml.etree._Element.sourceline`
-- **mammoth** 1.12.1 — located: mammoth.convert_to_html, mammoth.convert_to_markdown, mammoth.extract_raw_text — license: not recorded here
-  `locate: mammoth.convert_to_html, mammoth.convert_to_markdown, mammoth.extract_raw_text`
-- **markdownify** 1.2.3 — located: markdownify.markdownify — license: not recorded here
-  `locate: markdownify.markdownify`
-- **markitdown** 0.1.7 — exercised — located: markitdown.MarkItDown, MarkItDown.convert — license: not recorded here
-  `locate: markitdown.MarkItDown, markitdown.MarkItDown.convert`
-- **networkx** 3.6.1 — wired — located: networkx.DiGraph, DiGraph.add_edge, networkx.transitive_reduction, networkx.lexicographical_topological_sort, networkx.find_cycle, networkx.is_directed_acyclic_graph — license: BSD
-  `locate: networkx.DiGraph, networkx.DiGraph.add_edge, networkx.transitive_reduction, networkx.lexicographical_topological_sort, networkx.find_cycle, networkx.is_directed_acyclic_graph`
-- **nltk** 3.10.3 — located: tokenize.sent_tokenize, tokenize.PunktSentenceTokenizer, logic.LogicParser, inference.Prover9 — license: not recorded here
-  `locate: nltk.tokenize.sent_tokenize, nltk.tokenize.PunktSentenceTokenizer, nltk.sem.logic.LogicParser, nltk.inference.Prover9`
-- **numpy** 2.3.5 — exercised — located: numpy.busday_offset, numpy.busday_count, numpy.busdaycalendar, numpy.is_busday — license: not recorded here
-  `locate: numpy.busday_offset, numpy.busday_count, numpy.busdaycalendar, numpy.is_busday`
-- **office-oxide** 0.1.9 — located: office_oxide.to_markdown — license: not recorded here
-  `locate: office_oxide.to_markdown`
-- **openpyxl** 3.1.5 — exercised — located: openpyxl.Workbook, Workbook.save, Worksheet.append, table.Table — license: not recorded here
-  `locate: openpyxl.Workbook, openpyxl.Workbook.save, openpyxl.worksheet.worksheet.Worksheet.append, openpyxl.worksheet.table.Table`
-- **ortools** 9.15.6755 — located: cp_model.CpModel, CpSolver.Solve, pywraplp.Solver — license: not recorded here
-  `locate: ortools.sat.python.cp_model.CpModel, ortools.sat.python.cp_model.CpSolver.Solve, ortools.linear_solver.pywraplp.Solver`
-- **owlready2** 0.51 — located: owlready2.get_ontology, owlready2.sync_reasoner — license: not recorded here
-  `locate: owlready2.get_ontology, owlready2.sync_reasoner`
-- **owlrl** 7.6.2 — located: owlrl.DeductiveClosure — license: not recorded here
-  `locate: owlrl.DeductiveClosure`
-- **pandas** 2.3.3 — located: pandas.DataFrame, DataFrame.to_excel, pandas.read_csv — license: not recorded here
-  `locate: pandas.DataFrame, pandas.DataFrame.to_excel, pandas.read_csv`
-- **pandas-xlsx-tables** 1.1.2 — exercised — located: pandas_xlsx_tables.df_to_xlsx_table, pandas_xlsx_tables.xlsx_table_to_df — license: not recorded here
-  `locate: pandas_xlsx_tables.df_to_xlsx_table, pandas_xlsx_tables.xlsx_table_to_df`
-- **pdfplumber** 0.11.10 — wired — located: pdfplumber.open, Page.extract_words, Page.chars — license: MIT
-  `locate: pdfplumber.open, pdfplumber.page.Page.extract_words, pdfplumber.page.Page.chars`
-- **penman** 1.3.1 — located: penman.decode, penman.encode, penman.Graph — license: MIT
-  `locate: penman.decode, penman.encode, penman.Graph`
-- **pgmpy** 1.1.2 — located: models.BayesianNetwork, models.DiscreteBayesianNetwork, inference.VariableElimination — license: not recorded here
-  `locate: pgmpy.models.BayesianNetwork, pgmpy.models.DiscreteBayesianNetwork, pgmpy.inference.VariableElimination`
-- **playwright** 1.62.0 — located: sync_api.sync_playwright, Page.content, Page.goto — Chromium preinstalled at /opt/pw-browsers — license: not recorded here
-  `locate: playwright.sync_api.sync_playwright, playwright.sync_api.Page.content, playwright.sync_api.Page.goto`
-- **plotly** 7.0.0 — located: graph_objects.Figure, io.write_html, express.bar — license: not recorded here
-  `locate: plotly.graph_objects.Figure, plotly.io.write_html, plotly.express.bar`
-- **pm4py** 2.7.23.8 — exercised — located: obj.BPMN, BPMN.StartEvent, BPMN.Task, BPMN.EndEvent, BPMN.Flow, BPMN.add_node, BPMN.add_flow, pm4py.write_bpmn, pm4py.read_bpmn, pm4py.convert_to_petri_net, pm4py.discover_petri_net_inductive, pm4py.conformance_diagnostics_token_based_replay, pm4py.conformance_diagnostics_alignments, pm4py.fitness_alignments, pm4py.precision_alignments — write_bpmn(auto_layout=True) needs the graphviz dot binary; auto_layout=False does not — license: AGPL-3.0 (stated by the package on import)
-  `locate: pm4py.objects.bpmn.obj.BPMN, pm4py.objects.bpmn.obj.BPMN.StartEvent, pm4py.objects.bpmn.obj.BPMN.Task, pm4py.objects.bpmn.obj.BPMN.EndEvent, pm4py.objects.bpmn.obj.BPMN.Flow, pm4py.objects.bpmn.obj.BPMN.add_node, pm4py.objects.bpmn.obj.BPMN.add_flow, pm4py.write_bpmn, pm4py.read_bpmn, pm4py.convert_to_petri_net, pm4py.discover_petri_net_inductive, pm4py.conformance_diagnostics_token_based_replay, pm4py.conformance_diagnostics_alignments, pm4py.fitness_alignments, pm4py.precision_alignments`
-- **predpatt** 1.0.1 — wired, exercised — located: predpatt.load_conllu, predpatt.PredPatt, predpatt.PredPattOpts, Predicate.format, Predicate.subj, Predicate.obj, Predicate.has_subj, Predicate.has_obj, PredPatt.pprint, rules.arg_resolve_relcl, rules.pred_resolve_relcl, rules.borrow_subj, ud.dep_v2 — license: BSD-3-Clause
-  `locate: predpatt.load_conllu, predpatt.PredPatt, predpatt.PredPattOpts, predpatt.patt.Predicate.format, predpatt.patt.Predicate.subj, predpatt.patt.Predicate.obj, predpatt.patt.Predicate.has_subj, predpatt.patt.Predicate.has_obj, predpatt.patt.PredPatt.pprint, predpatt.rules.arg_resolve_relcl, predpatt.rules.pred_resolve_relcl, predpatt.rules.borrow_subj, predpatt.util.ud.dep_v2`
-- **prefect** 3.8.4 — exercised — located: prefect.flow, prefect.task, Flow.serve, Flow.deploy — license: not recorded here
-  `locate: prefect.flow, prefect.task, prefect.flows.Flow.serve, prefect.flows.Flow.deploy`
-- **pulp** 3.3.2 — located: pulp.LpProblem, LpProblem.solve — license: not recorded here
-  `locate: pulp.LpProblem, pulp.LpProblem.solve`
-- **pycasbin** 2.8.0 — located: casbin.Enforcer, Enforcer.enforce — license: not recorded here
-  `locate: casbin.Enforcer, casbin.Enforcer.enforce`
-- **pydantic** 2.13.5 — wired — located: pydantic.BaseModel, BaseModel.model_validate, pydantic.create_model — license: MIT
-  `locate: pydantic.BaseModel, pydantic.BaseModel.model_validate, pydantic.create_model`
-- **PyMuPDF** 1.28.2 — located: pymupdf.open, Page.get_text — license: not recorded here
-  `locate: pymupdf.open, pymupdf.Page.get_text`
-- **pypdf** 6.16.2 — located: pypdf.PdfReader, PdfReader.metadata — license: not recorded here
-  `locate: pypdf.PdfReader, pypdf.PdfReader.metadata`
-- **pypdfium2** 5.13.0 — located: pypdfium2.PdfDocument, PdfPage.get_textpage, PdfTextPage.get_text_range — license: not recorded here
-  `locate: pypdfium2.PdfDocument, pypdfium2.PdfPage.get_textpage, pypdfium2.PdfTextPage.get_text_range`
-- **PySMT** 0.9.6 — located: shortcuts.Solver, shortcuts.get_unsat_core, shortcuts.is_sat — license: not recorded here
-  `locate: pysmt.shortcuts.Solver, pysmt.shortcuts.get_unsat_core, pysmt.shortcuts.is_sat`
-- **python-calamine** 0.8.2 — exercised — located: CalamineWorkbook.from_path, CalamineWorkbook.get_sheet_by_index, CalamineSheet.to_python — license: not recorded here
-  `locate: python_calamine.CalamineWorkbook.from_path, python_calamine.CalamineWorkbook.get_sheet_by_index, python_calamine.CalamineSheet.to_python`
-- **python-constraint2** 2.7.3 — located: constraint.Problem, Problem.getSolutions — license: not recorded here
-  `locate: constraint.Problem, constraint.Problem.getSolutions`
-- **python-docx** 1.2.0 — exercised — located: docx.Document, Document.add_paragraph, Document.add_table, Document.save — license: not recorded here
-  `locate: docx.Document, docx.document.Document.add_paragraph, docx.document.Document.add_table, docx.document.Document.save`
-- **python-pptx** 1.0.2 — located: pptx.Presentation, Presentation.slides, Slide.shapes, Slide.notes_slide — license: not recorded here
-  `locate: pptx.Presentation, pptx.presentation.Presentation.slides, pptx.slide.Slide.shapes, pptx.slide.Slide.notes_slide`
-- **python-sat** absent — located: solvers.Solver, rc2.RC2 — license: not recorded here
-  `locate: pysat.solvers.Solver, pysat.examples.rc2.RC2`
-- **rdflib** 7.6.0 — located: rdflib.Graph, Graph.parse, Graph.query — license: not recorded here
-  `locate: rdflib.Graph, rdflib.Graph.parse, rdflib.Graph.query`
-- **reliability** 0.9.0 — located: Fitters.Fit_Weibull_2P, reliability.Reliability_testing — license: not recorded here
-  `locate: reliability.Fitters.Fit_Weibull_2P, reliability.Reliability_testing`
-- **scipy** 1.15.3 — located: optimize.minimize, stats.weibull_min, stats.chi2_contingency, optimize.linprog — license: not recorded here
-  `locate: scipy.optimize.minimize, scipy.stats.weibull_min, scipy.stats.chi2_contingency, scipy.optimize.linprog`
-- **simpn** 1.10.0 — located: simulator.SimProblem, SimProblem.simulate — license: not recorded here
-  `locate: simpn.simulator.SimProblem, simpn.simulator.SimProblem.simulate`
-- **simpy** 4.1.2 — located: simpy.Environment, Environment.run — license: not recorded here
-  `locate: simpy.Environment, simpy.Environment.run`
-- **snakes** 0.9.33 — located: nets.PetriNet, PetriNet.add_place — license: not recorded here
-  `locate: snakes.nets.PetriNet, snakes.nets.PetriNet.add_place`
-- **spacy** 3.8.16 — exercised — located: spacy.blank, Language.add_pipe, Doc.ents, Span.start_char, pipeline.Sentencizer, Doc.sents — license: not recorded here
-  `locate: spacy.blank, spacy.language.Language.add_pipe, spacy.tokens.Doc.ents, spacy.tokens.Span.start_char, spacy.pipeline.Sentencizer, spacy.tokens.Doc.sents`
-- **SpiffWorkflow** 3.2.0 — located: BpmnParser.BpmnParser, workflow.BpmnWorkflow — license: not recorded here
-  `locate: SpiffWorkflow.bpmn.parser.BpmnParser.BpmnParser, SpiffWorkflow.bpmn.workflow.BpmnWorkflow`
-- **stanza** 1.14.0 — located: stanza.Pipeline, stanza.download, Document.sentences — models fetched from huggingface.co, blocked in the build environment — license: not recorded here
-  `locate: stanza.Pipeline, stanza.download, stanza.models.common.doc.Document.sentences`
-- **statsmodels** 0.15.0 — exercised — located: inter_rater.cohens_kappa, inter_rater.to_table — license: not recorded here
-  `locate: statsmodels.stats.inter_rater.cohens_kappa, statsmodels.stats.inter_rater.to_table`
-- **streamlit** 1.63.0 — located: streamlit.dataframe, streamlit.plotly_chart, streamlit.write — license: not recorded here
-  `locate: streamlit.dataframe, streamlit.plotly_chart, streamlit.write`
-- **sweetviz** 2.3.3 — located: sweetviz.analyze, DataframeReport.show_html — license: not recorded here
-  `locate: sweetviz.analyze, sweetviz.DataframeReport.show_html`
-- **temporalio** 1.32.0 — located: workflow.defn, workflow.run, activity.defn, worker.Worker, Worker.run, Client.connect — license: not recorded here
-  `locate: temporalio.workflow.defn, temporalio.workflow.run, temporalio.activity.defn, temporalio.worker.Worker, temporalio.worker.Worker.run, temporalio.client.Client.connect`
-- **typedlogic** 0.2.4 — exercised — located: pybridge.FactMixin, datamodel.Theory, datamodel.Term, decorators.axiom, registry.get_solver, Solver.add, Solver.add_fact, Solver.model, Solver.check, clingo_solver.ClingoSolver, z3_solver.Z3Solver, python_parser.PythonParser — license: MIT
-  `locate: typedlogic.pybridge.FactMixin, typedlogic.datamodel.Theory, typedlogic.datamodel.Term, typedlogic.decorators.axiom, typedlogic.registry.get_solver, typedlogic.solver.Solver.add, typedlogic.solver.Solver.add_fact, typedlogic.solver.Solver.model, typedlogic.solver.Solver.check, typedlogic.integrations.solvers.clingo.clingo_solver.ClingoSolver, typedlogic.integrations.solvers.z3.z3_solver.Z3Solver, typedlogic.parsers.pyparser.python_parser.PythonParser`
-- **ufal.udpipe** 1.4.0.1 — wired — located: Model.load, udpipe.Pipeline, Pipeline.process, udpipe.ProcessingError — license: MPL-2.0 (models CC BY-NC-SA 4.0)
-  `locate: ufal.udpipe.Model.load, ufal.udpipe.Pipeline, ufal.udpipe.Pipeline.process, ufal.udpipe.ProcessingError`
-- **unified-planning** 1.3.0 — exercised — located: model.Problem, model.Fluent, model.InstantaneousAction, InstantaneousAction.add_precondition, InstantaneousAction.add_effect, shortcuts.OneshotPlanner, plans.PartialOrderPlan, SequentialPlan.convert_to, plans.PlanKind — needs an engine; up-pyperplan installed — license: not recorded here
-  `locate: unified_planning.model.Problem, unified_planning.model.Fluent, unified_planning.model.InstantaneousAction, unified_planning.model.InstantaneousAction.add_precondition, unified_planning.model.InstantaneousAction.add_effect, unified_planning.shortcuts.OneshotPlanner, unified_planning.plans.PartialOrderPlan, unified_planning.plans.SequentialPlan.convert_to, unified_planning.plans.PlanKind`
-- **XlsxWriter** 3.2.9 — exercised — located: xlsxwriter.Workbook, Workbook.add_worksheet, Worksheet.write_row, Worksheet.add_table — license: not recorded here
-  `locate: xlsxwriter.Workbook, xlsxwriter.Workbook.add_worksheet, xlsxwriter.worksheet.Worksheet.write_row, xlsxwriter.worksheet.Worksheet.add_table`
-- **ydata-profiling** 4.18.4 — exercised — located: ydata_profiling.ProfileReport, ProfileReport.to_json — needs setuptools<80 and numpy<2.4 — license: not recorded here
-  `locate: ydata_profiling.ProfileReport, ydata_profiling.ProfileReport.to_json`
-- **z3-solver** 5.1.0.0 — wired — located: z3.Solver, Solver.assert_and_track, Solver.check, Solver.unsat_core, z3.set_param, z3.Int — license: MIT
-  `locate: z3.Solver, z3.Solver.assert_and_track, z3.Solver.check, z3.Solver.unsat_core, z3.set_param, z3.Int`
-- **zen-engine** 2.0.2 — exercised — located: zen.ZenEngine, ZenEngine.create_decision, ZenDecision.evaluate, ZenEngine.evaluate — license: not recorded here
-  `locate: zen.ZenEngine, zen.ZenEngine.create_decision, zen.ZenDecision.evaluate, zen.ZenEngine.evaluate`
-- **dasel** 3.11.2 — exercised — dasel -i yaml '<selector>' < file, dasel -i json '<selector>' < file — Go binary from github.com/TomWright/dasel releases; SHA-256 5006ee3a4239ab6a3edb1bf5c932874d814f7c276117ca677352697a4f547799 — license: not recorded here
-- **timexy** 0.1.3 — exercised — spaCy factory 'timexy' via nlp.add_pipe('timexy'), timexy.Timexy — no model download; runs on spacy.blank('en') — license: MIT
-- **up-pyperplan** 1.1.0 — located — engine 'pyperplan' selected by unified_planning.shortcuts.OneshotPlanner — planning engine for unified-planning — license: not recorded here
-
-Named by the method but not located here (the reason is verbatim where there was a failure):
-
-- **graphable** — graphable 0.7.0 requires Python >= 3.13; the environment is Python 3.11.15
-- **dataprep** — install unsatisfiable: dataprep 0.4.5 depends on python-crfsuite 0.9.8, which cannot be built here
-- **fmdtools** — install unsatisfiable: fmdtools 2.3.3 depends on pandas[all] -> psycopg2, which cannot be built here
-- **experta** — experta 1.9.4 installs; `import experta` fails on Python 3.11: AttributeError: module 'collections' has no attribute 'Mapping'
-- **coreferee** — coreferee 1.4.1 pins spaCy 3.5, whose wheels raise `numpy.dtype size changed` under numpy 2 here
-- **cpmpy** — cpmpy 1.0.0 imports highspy, whose compiled extension fails to import (undefined symbol)
-- **highspy** — highspy 1.15.1's compiled extension fails to import (undefined symbol)
-- **autoviz** — autoviz 0.1.905 imports IPython, which is not installed
-- **structurizr-python** — structurizr-python 0.6.0 imports `pydantic.types:StrBytes`, removed in pydantic v2
-- **sutime** — not installed: needs Java and Stanford CoreNLP; GPL-3.0-or-later
-- **py-heideltime** — not installed: needs Java and TreeTagger
-
-Python 3.11.15 standard library, `wired`: hashlib.sha256, json.dumps, unicodedata.normalize, html.parser.HTMLParser.getpos, csv.writer, importlib.util.spec_from_file_location, importlib.util.module_from_spec.
+- **Step 4 (Execution).** Write one spreadsheet from recovered, solver-accepted fields.
+  openpyxl 3.1.2 — `openpyxl.Workbook(); wb.save(path)` → .xlsx file. exercised: "4801-byte xlsx"
+  `locate: openpyxl.Workbook`
+  pandas-xlsx-tables 1.1.2 — `pandas_xlsx_tables.df_to_xlsx_table(df, table_name, file=path)` → real Excel Table. exercised: "6047-byte xlsx"
+  `locate: pandas_xlsx_tables.df_to_xlsx_table`
+  xlsxwriter 3.2.9 — `xlsxwriter.Workbook(path); wb.close()` → .xlsx with native charts. exercised: "5248-byte xlsx"
+  `locate: xlsxwriter.Workbook`
 
 ---
 

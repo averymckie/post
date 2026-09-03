@@ -26,7 +26,24 @@ def _paths() -> list[str]:
     return sorted(set(out))
 
 
+_ISO = (
+    "import importlib,sys\n"
+    "p=sys.argv[1];parts=p.split('.')\n"
+    "for i in range(len(parts),0,-1):\n"
+    "    try: o=importlib.import_module('.'.join(parts[:i]))\n"
+    "    except Exception: continue\n"
+    "    try:\n"
+    "        for a in parts[i:]: o=getattr(o,a)\n"
+    "        sys.exit(0)\n"
+    "    except AttributeError: sys.exit(1)\n"
+    "sys.exit(1)\n"
+)
+
+
 def _resolve(path: str):
+    """Resolve in-process; retry a failure in a fresh interpreter, because some
+    compiled extensions (e.g. a broken highspy) poison unrelated C libraries
+    (ortools) only when co-imported. Isolation gives the true per-package answer."""
     parts = path.split(".")
     for i in range(len(parts), 0, -1):
         try:
@@ -35,12 +52,17 @@ def _resolve(path: str):
                 obj = importlib.import_module(".".join(parts[:i]))
         except ImportError:
             continue
+        except Exception:
+            break
         try:
             for attr in parts[i:]:
                 obj = getattr(obj, attr)
             return obj
         except AttributeError:
-            return None
+            break
+    import subprocess, sys
+    if subprocess.run([sys.executable, "-c", _ISO, path], capture_output=True).returncode == 0:
+        return path
     return None
 
 
@@ -50,8 +72,12 @@ def _installed(top: str) -> bool:
             warnings.simplefilter("ignore")
             importlib.import_module(top)
         return True
-    except ImportError:
-        return False
+    except Exception:
+        # Not-installed, or installed but a compiled-extension collision (e.g. a
+        # broken highspy poisoning ortools/pyjobshop) breaks in-process import.
+        # A fresh interpreter gives the true per-package answer.
+        import subprocess, sys
+        return subprocess.run([sys.executable, "-c", f"import {top}"], capture_output=True).returncode == 0
 
 
 def test_every_located_function_in_the_chain_file_resolves() -> None:
