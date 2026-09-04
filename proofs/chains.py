@@ -386,22 +386,51 @@ def s_bpmn_from_order(ctx: dict[str, Any]) -> None:
     for a, c in o.forced:
         preds[c].add(a)
         succs[a].add(c)
+    entry: dict[str, Any] = {}
+    exit_: dict[str, Any] = {}
+    gateways = 0
     for e in o.order:
-        t = BPMN.Task(name=f"{lemma.get(e, '?')} [{e.split(':')[-1]}]")
+        t = BPMN.Task(name=f"{lemma.get(e, '?')} [{e.split(':', 1)[1]}]")
         nodes[e] = t
         b.add_node(t)
+        entry[e], exit_[e] = t, t
+        if len(preds[e]) > 1:
+            g = BPMN.ParallelGateway(name=f"join {e.split(':')[-1]}", gateway_direction=BPMN.Gateway.Direction.CONVERGING)
+            b.add_node(g)
+            b.add_flow(BPMN.SequenceFlow(g, t))
+            entry[e] = g
+            gateways += 1
+        if len(succs[e]) > 1:
+            g = BPMN.ParallelGateway(name=f"split {e.split(':')[-1]}", gateway_direction=BPMN.Gateway.Direction.DIVERGING)
+            b.add_node(g)
+            b.add_flow(BPMN.SequenceFlow(t, g))
+            exit_[e] = g
+            gateways += 1
     for a, c in o.forced:
-        b.add_flow(BPMN.Flow(nodes[a], nodes[c]))
-    for e in o.order:
-        if not preds[e]:
-            b.add_flow(BPMN.Flow(start, nodes[e]))
-        if not succs[e]:
-            b.add_flow(BPMN.Flow(nodes[e], end))
+        b.add_flow(BPMN.SequenceFlow(exit_[a], entry[c]))
+    sources = [e for e in o.order if not preds[e]]
+    sinks = [e for e in o.order if not succs[e]]
+    first_node: Any = start
+    if len(sources) > 1:
+        first_node = BPMN.ParallelGateway(name="split start", gateway_direction=BPMN.Gateway.Direction.DIVERGING)
+        b.add_node(first_node)
+        b.add_flow(BPMN.SequenceFlow(start, first_node))
+        gateways += 1
+    last_node: Any = end
+    if len(sinks) > 1:
+        last_node = BPMN.ParallelGateway(name="join end", gateway_direction=BPMN.Gateway.Direction.CONVERGING)
+        b.add_node(last_node)
+        b.add_flow(BPMN.SequenceFlow(last_node, end))
+        gateways += 1
+    for e in sources:
+        b.add_flow(BPMN.SequenceFlow(first_node, entry[e]))
+    for e in sinks:
+        b.add_flow(BPMN.SequenceFlow(exit_[e], last_node))
     p = ctx["dir"] / "process.bpmn"
     bpmn_exporter.apply(b, str(p))
     ctx["bpmn"] = b
     ctx["files"] = [p]
-    ctx["shows"] = [f"tasks {len(inv)}, flows {len(b.get_flows())}; first flow {lemma.get(o.forced[0][0])} -> {lemma.get(o.forced[0][1])}" if o.forced else "no forced edges"]
+    ctx["shows"] = [f"tasks {len(inv)}, parallel gateways {gateways}, flows {len(b.get_flows())}; first flow {lemma.get(o.forced[0][0])} -> {lemma.get(o.forced[0][1])}" if o.forced else "no forced edges"]
 
 
 def process_from_order(label: str) -> dict[str, Any]:
@@ -410,7 +439,7 @@ def process_from_order(label: str) -> dict[str, Any]:
         "P5",
         "ordered steps -> process model -> process",
         ["ordered steps"],
-        [Step("process model", "pm4py.objects.bpmn.obj.BPMN (StartEvent, Task, EndEvent, Flow); pm4py.objects.bpmn.exporter.exporter.apply", s_bpmn_from_order)],
+        [Step("process model", "pm4py.objects.bpmn.obj.BPMN (StartEvent, Task, EndEvent, SequenceFlow); pm4py.objects.bpmn.exporter.exporter.apply", s_bpmn_from_order)],
         "process",
     )
     ctx = dict(src)
@@ -701,22 +730,27 @@ def s_tag(ctx: dict[str, Any]) -> None:
     ]
 
 
-def tag(label_steps: str, label_minutes: str) -> dict[str, Any]:
+def tag(label_steps: str, label_minutes: str, pid: str = "P10", required: bool = False) -> dict[str, Any]:
     steps_ctx = RESULTS[("ordered steps", label_steps)]
     minutes = RESULTS[("parsed minutes", label_minutes)]
-    events = list(steps_ctx["ordering"].order)
+    if required:
+        events = sorted({a.args[0] for a in steps_ctx["atoms"] if a.predicate == "obligatory"})
+        title, inputs = "required actions, parsed minutes -> tagged actions -> workbook", ["required actions (P4), parsed minutes"]
+    else:
+        events = list(steps_ctx["ordering"].order)
+        title, inputs = "ordered steps, parsed minutes -> tagged steps -> workbook", ["ordered steps, parsed minutes"]
     proof = Proof(
-        "P10",
-        "ordered steps, parsed minutes -> tagged steps -> workbook",
-        ["ordered steps, parsed minutes"],
+        pid,
+        title,
+        inputs,
         [
             Step("tag", "clingo: shared words, #max score, ties flagged, untagged listed; stopword list as data", s_tag),
             Step("tabulate", "openpyxl.Workbook.save", lambda c: None),
         ],
-        "tagged steps",
+        "tagged actions" if required else "tagged steps",
     )
     ctx = {
-        "dir": out_dir("P10", f"{label_steps}+{label_minutes}"),
+        "dir": out_dir(pid, f"{label_steps}+{label_minutes}"),
         "steps": step_words(steps_ctx, events),
         "minutes_ctx": minutes,
         "lemma": {a.args[0]: a.args[1] for a in steps_ctx["atoms"] if a.predicate == "event"},
@@ -788,6 +822,7 @@ def s_key_measure_log(ctx: dict[str, Any]) -> None:
     ).fetchall()
     table = [["activity", "events", "mean_hours_since_previous"]] + [list(r) for r in res]
     p = workbook(ctx["dir"] / "measured_activities.xlsx", {"measured": table})
+    ctx["measured"] = table
     ctx["files"] = [p]
     ctx["shows"] = [f"{r[0]}: events {r[1]}, mean hours since previous {r[2]}" for r in res[:4]]
 
@@ -806,6 +841,7 @@ def key_measure_log(label_log: str, label_records: str) -> dict[str, Any]:
     )
     ctx = {"dir": out_dir("P12", f"{label_log}+{label_records}"), "net": RESULTS[("log", label_log)]["net"], "rows": RESULTS[("records", label_records)]["rows"]}
     run(proof, f"{label_log}+{label_records}", ctx)
+    RESULTS[("measured activities", f"{label_log}+{label_records}")] = ctx
     return ctx
 
 
@@ -871,6 +907,7 @@ def s_evaluate(ctx: dict[str, Any]) -> None:
         res = ctx["decision"].evaluate({"present": r["present_voting"]})["result"]
         rows.append([r["meeting"], r["present_voting"], res["majority_reachable"]])
     p = workbook(ctx["dir"] / "decisions.xlsx", {"decisions": rows})
+    ctx["decision_rows"] = rows
     ctx["files"].append(p)
     ctx["shows"] += [f"{r[0]}: present {r[1]} -> majority reachable {r[2]}" for r in rows[1:]]
 
@@ -896,6 +933,7 @@ def evaluate_majority() -> dict[str, Any]:
         "charter_parsed": RESULTS[("facts", "nodejs-tsc-charter")]["parsed"],
     }
     run(proof, "charter+roster+minutes", ctx)
+    RESULTS[("decisions", "majority")] = ctx
     return ctx
 
 
@@ -1264,6 +1302,393 @@ def write_md() -> None:
     MD.write_text("\n".join(lines), encoding="utf-8")
 
 
+# ----------------------------------------------------------------------------
+# P21 .. P30
+# ----------------------------------------------------------------------------
+
+
+def duck_events(rows: list[dict[str, Any]]) -> Any:
+    import duckdb
+
+    con = duckdb.connect()
+    con.execute("create table ev(case_id varchar, activity varchar, ts timestamptz, deadline varchar, enddate varchar, department varchar, channel varchar)")
+    con.executemany(
+        "insert into ev values (?, ?, ?, ?, ?, ?, ?)",
+        [(r["case:concept:name"], r["concept:name"], r["time:timestamp"], r["case:deadline"], r["case:enddate"], r["case:department"], r["case:channel"]) for r in rows],
+    )
+    return con
+
+
+def s_deadlines(ctx: dict[str, Any]) -> None:
+    con = duck_events(ctx["rows"])
+    res = con.execute(
+        """
+        with c as (select case_id, any_value(deadline) as deadline, any_value(enddate) as enddate,
+                          any_value(department) as department, any_value(channel) as channel, max(ts) as last_event
+                   from ev group by case_id)
+        select case_id, department, channel, deadline, enddate, last_event,
+               case when enddate = '' then 'open'
+                    when try_cast(enddate as timestamptz) > try_cast(deadline as timestamptz) then 'after deadline'
+                    else 'by deadline' end as outcome
+        from c order by case_id
+        """
+    ).fetchall()
+    rows = [["case", "department", "channel", "deadline", "enddate", "last_event", "outcome"]] + [list(r) for r in res]
+    counts = collections.Counter(r[6] for r in res)
+    p = workbook(ctx["dir"] / "deadlines.xlsx", {"cases": rows})
+    ctx["deadline_rows"] = rows
+    ctx["files"] = [p]
+    ctx["shows"] = [f"outcomes {dict(sorted(counts.items()))}", f"first rows {[r[:1] + r[6:] for r in res[:3]]}"]
+
+
+def deadlines(label: str) -> dict[str, Any]:
+    proof = Proof(
+        "P21",
+        "records -> measured cases -> workbook",
+        ["records (receipt.csv: the rows carry case:deadline and case:enddate)"],
+        [
+            Step("key", "duckdb: group the rows by case", s_deadlines),
+            Step("measure", "duckdb: enddate compared with deadline per case; open when enddate is empty", lambda c: None),
+            Step("tabulate", "openpyxl.Workbook.save", lambda c: None),
+        ],
+        "measured cases",
+    )
+    ctx = {"dir": out_dir("P21", label), "rows": RESULTS[("records", label)]["rows"]}
+    run(proof, label, ctx)
+    RESULTS[("measured cases", label)] = ctx
+    return ctx
+
+
+def s_by_department(ctx: dict[str, Any]) -> None:
+    con = duck_events(ctx["rows"])
+    q = """
+        with c as (select case_id, any_value({col}) as k, min(ts) as first, max(ts) as last, any_value(enddate) as enddate, any_value(deadline) as deadline
+                   from ev group by case_id)
+        select k, count(*) as cases, round(avg(epoch(last - first))/86400, 2) as mean_days_first_to_last,
+               sum(case when enddate <> '' and try_cast(enddate as timestamptz) > try_cast(deadline as timestamptz) then 1 else 0 end) as after_deadline
+        from c group by k order by k
+        """
+    sheets = {}
+    for col in ("department", "channel"):
+        res = con.execute(q.format(col=col)).fetchall()
+        sheets[col] = [[col, "cases", "mean_days_first_to_last", "after_deadline"]] + [list(r) for r in res]
+    p = workbook(ctx["dir"] / "by_department_and_channel.xlsx", sheets)
+    ctx["files"] = [p]
+    ctx["shows"] = [f"{r[0]}: cases {r[1]}, mean days {r[2]}, after deadline {r[3]}" for r in sheets["department"][1:4]] + [
+        f"channel {r[0]}: cases {r[1]}, mean days {r[2]}" for r in sheets["channel"][1:3]
+    ]
+
+
+def by_department(label: str) -> dict[str, Any]:
+    proof = Proof(
+        "P22",
+        "records -> measured groups -> workbook",
+        ["records"],
+        [
+            Step("key", "duckdb: group by case, then by department and by channel", s_by_department),
+            Step("measure", "duckdb: count, avg(epoch(last - first)), cases ended after deadline", lambda c: None),
+            Step("tabulate", "openpyxl.Workbook.save", lambda c: None),
+        ],
+        "measured groups",
+    )
+    ctx = {"dir": out_dir("P22", label), "rows": RESULTS[("records", label)]["rows"]}
+    run(proof, label, ctx)
+    return ctx
+
+
+def s_dfg(ctx: dict[str, Any]) -> None:
+    import pm4py
+
+    dfg, sa, ea = pm4py.discover_dfg(ctx["log"])
+    edges = sorted(dfg.items(), key=lambda kv: (-kv[1], kv[0]))
+    rows = [["from", "to", "count"]] + [[a, b, n] for (a, b), n in edges]
+    starts = [["activity", "cases"]] + sorted(([a, n] for a, n in sa.items()), key=lambda r: -r[1])
+    ends = [["activity", "cases"]] + sorted(([a, n] for a, n in ea.items()), key=lambda r: -r[1])
+    p = workbook(ctx["dir"] / "directly_follows.xlsx", {"edges": rows, "start": starts, "end": ends})
+    p2 = write_json(ctx["dir"] / "directly_follows.json", {"edges": [[a, b, n] for (a, b), n in edges], "start": sa, "end": ea})
+    ctx["dfg_rows"] = rows
+    ctx["files"] = [p, p2]
+    ctx["shows"] = [f"edges {len(edges)}; strongest {rows[1][0]} -> {rows[1][1]} ({rows[1][2]})", f"end activities {ends[1:3]}"]
+
+
+def dfg(label: str) -> dict[str, Any]:
+    proof = Proof(
+        "P23",
+        "log -> directly-follows graph -> workbook",
+        ["log (P8)"],
+        [Step("discover", "pm4py.discover_dfg", s_dfg), Step("tabulate", "openpyxl.Workbook.save; json.dumps", lambda c: None)],
+        "directly-follows graph",
+    )
+    ctx = dict(RESULTS[("log", label)])
+    ctx["dir"] = out_dir("P23", label)
+    run(proof, label, ctx)
+    return ctx
+
+
+def s_dashboard(ctx: dict[str, Any]) -> None:
+    import plotly.express as px
+    import plotly.io as pio
+
+    table = ctx["measured"][1:]
+    fig = px.bar(x=[r[0] for r in table], y=[r[1] for r in table], labels={"x": "activity", "y": "events"}, title="events per activity, receipt phase")
+    fig.update_layout(xaxis_tickangle=-45)
+    p = ctx["dir"] / "dashboard.html"
+    pio.write_html(fig, str(p), include_plotlyjs="cdn", full_html=True, div_id="chart")
+    ctx["files"] = [p]
+    ctx["shows"] = [f"one bar per activity, {len(table)} bars; plotly.js from cdn"]
+
+
+def dashboard(label: str) -> dict[str, Any]:
+    proof = Proof(
+        "P24",
+        "measured steps -> chart -> page",
+        ["measured steps (P12)"],
+        [Step("chart", "plotly.express.bar; Figure.update_layout", s_dashboard), Step("page", "plotly.io.write_html(full_html, div_id)", lambda c: None)],
+        "page",
+    )
+    ctx = {"dir": out_dir("P24", label), "measured": RESULTS[("measured activities", label)]["measured"]}
+    run(proof, label, ctx)
+    return ctx
+
+
+def s_obligations_doc(ctx: dict[str, Any]) -> None:
+    import docx
+
+    sent = {ps.sentence.id: ps.sentence.text for ps in ctx["parsed"]}
+    atoms = ctx["atoms"]
+    agent = collections.defaultdict(list)
+    for a in atoms:
+        if a.predicate == "agent":
+            agent[a.args[0]].append(a.quote)
+    d = docx.Document()
+    d.add_heading(f"{ctx['label']}: required actions", 1)
+    t = d.add_table(rows=1, cols=3)
+    t.rows[0].cells[0].text, t.rows[0].cells[1].text, t.rows[0].cells[2].text = "who", "must", "sentence"
+    for r in ctx["required"]:
+        c = t.add_row().cells
+        c[0].text = "; ".join(agent.get(r["event"], []))
+        c[1].text = r["action"]
+        c[2].text = sent.get(r["sentence_id"], "")
+    p = ctx["dir"] / "required_actions.docx"
+    d.save(p)
+    ctx["files"] = [p]
+    ctx["shows"] = [f"table rows {len(t.rows) - 1}"] + [f'{"; ".join(agent.get(r["event"], []))} must {r["action"]}' for r in ctx["required"][:3]]
+
+
+def obligations_document(label: str) -> dict[str, Any]:
+    proof = Proof(
+        "P25",
+        "required actions -> document",
+        ["required actions (P4), facts (P1)"],
+        [Step("write", "docx.Document; Document.add_table; docx.document.Document.save", s_obligations_doc)],
+        "document",
+    )
+    ctx = dict(RESULTS[("policy", label)])
+    ctx["dir"] = out_dir("P25", label)
+    run(proof, label, ctx)
+    return ctx
+
+
+def s_conf_by_department(ctx: dict[str, Any]) -> None:
+    import duckdb
+
+    con = duckdb.connect()
+    con.execute("create table conf(case_id varchar, fitness double, is_fit boolean)")
+    con.executemany("insert into conf values (?, ?, ?)", [(r[0], float(r[1]), bool(r[2])) for r in ctx["conformance_rows"][1:]])
+    con.execute("create table attr(case_id varchar, department varchar, channel varchar)")
+    seen = set()
+    vals = []
+    for r in ctx["rows"]:
+        if r["case:concept:name"] not in seen:
+            seen.add(r["case:concept:name"])
+            vals.append((r["case:concept:name"], r["case:department"], r["case:channel"]))
+    con.executemany("insert into attr values (?, ?, ?)", vals)
+    sheets = {}
+    for col in ("department", "channel"):
+        res = con.execute(
+            f"select a.{col}, count(*) as cases, sum(case when c.is_fit then 1 else 0 end) as fit, round(avg(c.fitness), 4) as mean_fitness "
+            f"from conf c join attr a on a.case_id = c.case_id group by a.{col} order by a.{col}"
+        ).fetchall()
+        sheets[col] = [[col, "cases", "fit", "mean_fitness"]] + [list(r) for r in res]
+    p = workbook(ctx["dir"] / "conformance_by_group.xlsx", sheets)
+    ctx["files"] = [p]
+    ctx["shows"] = [f"{r[0]}: cases {r[1]}, fit {r[2]}, mean fitness {r[3]}" for r in sheets["department"][1:4]]
+
+
+def conformance_by_department(label_log: str, label_records: str) -> dict[str, Any]:
+    proof = Proof(
+        "P27",
+        "conformance, records -> measured groups -> workbook",
+        ["conformance (P9), records (P6)"],
+        [
+            Step("key", "duckdb: join on case id", s_conf_by_department),
+            Step("measure", "duckdb: cases, fit cases, avg(fitness) per department and per channel", lambda c: None),
+            Step("tabulate", "openpyxl.Workbook.save", lambda c: None),
+        ],
+        "measured groups",
+    )
+    ctx = {"dir": out_dir("P27", f"{label_log}+{label_records}"), "conformance_rows": RESULTS[("conformance", label_log)]["conformance_rows"], "rows": RESULTS[("records", label_records)]["rows"]}
+    run(proof, f"{label_log}+{label_records}", ctx)
+    return ctx
+
+
+def s_decisions_discussion(ctx: dict[str, Any]) -> None:
+    import clingo
+
+    prog = [f"decision({lit(r[0])},{lit(str(r[2]).lower())})." for r in ctx["decision_rows"][1:]]
+    prog += [f"tag({lit(t['sentence_id'])},{lit(t['step'])})." for t in ctx["tags"] if not t["tie"]]
+    prog.append("meeting(L,M) :- tag(L,_), M = @meeting(L).")
+    prog.append("discussed(M,E) :- tag(L,E), meeting(L,M).")
+    prog.append("n(M,N) :- decision(M,_), N = #count{ E : discussed(M,E) }.")
+    prog.append("#show decision/2. #show discussed/2. #show n/2.")
+
+    class Ctx:
+        def meeting(self, l: Any) -> Any:
+            return clingo.String(l.string.split(":")[0])
+
+    ctl = clingo.Control(["0"])
+    ctl.add("base", [], "\n".join(prog))
+    ctl.ground([("base", [])], context=Ctx())
+    syms: list[Any] = []
+    ctl.solve(on_model=lambda m: syms.extend(m.symbols(shown=True)))
+    dec, disc, n = {}, collections.defaultdict(list), {}
+    for s in syms:
+        a = [x.string if x.type == clingo.SymbolType.String else x.number for x in s.arguments]
+        if s.name == "decision":
+            dec[a[0]] = a[1]
+        elif s.name == "discussed":
+            disc[a[0]].append(ctx["lemma"].get(a[1], "?"))
+        else:
+            n[a[0]] = a[1]
+    rows = [["meeting", "majority_reachable", "required_actions_discussed", "actions"]] + [[m, dec[m], n.get(m, 0), ", ".join(sorted(disc.get(m, [])))] for m in sorted(dec)]
+    p = workbook(ctx["dir"] / "decisions_with_discussion.xlsx", {"meetings": rows})
+    ctx["files"] = [p]
+    ctx["shows"] = [f"{r[0]}: majority {r[1]}, required actions discussed {r[2]}: {r[3][:60]}" for r in rows[1:5]]
+
+
+def decisions_with_discussion() -> dict[str, Any]:
+    proof = Proof(
+        "P28",
+        "decisions, tagged actions -> meetings -> workbook",
+        ["decisions (P13), tagged actions (P26)"],
+        [
+            Step("key", "clingo: join on meeting id", s_decisions_discussion),
+            Step("measure", "clingo #count of required actions discussed per meeting", lambda c: None),
+            Step("tabulate", "openpyxl.Workbook.save", lambda c: None),
+        ],
+        "meetings",
+    )
+    tagged = RESULTS[("tagged steps", "nodejs-tsc-charter")]
+    ctx = {"dir": out_dir("P28", "majority+charter-tags"), "decision_rows": RESULTS[("decisions", "majority")]["decision_rows"], "tags": tagged["tags"], "lemma": tagged["lemma"]}
+    run(proof, "majority+charter-tags", ctx)
+    return ctx
+
+
+def s_mark_executable(ctx: dict[str, Any]) -> None:
+    import lxml.etree as ET
+
+    t = ET.parse(str(ctx["bpmn_path"]))
+    ns = "{http://www.omg.org/spec/BPMN/20100524/MODEL}"
+    for pr in t.getroot().iter(f"{ns}process"):
+        pr.set("isExecutable", "true")
+    for el in t.getroot().iter(f"{ns}task"):
+        el.tag = f"{ns}manualTask"
+    p = ctx["dir"] / "process.executable.bpmn"
+    t.write(str(p), xml_declaration=True, encoding="UTF-8")
+    ctx["exec_path"] = p
+    ctx["files"] = [p]
+
+
+def s_execute(ctx: dict[str, Any]) -> None:
+    from SpiffWorkflow.bpmn.parser.BpmnParser import BpmnParser
+    from SpiffWorkflow.bpmn.workflow import BpmnWorkflow
+    from SpiffWorkflow.util.task import TaskState
+
+    parser = BpmnParser()
+    parser.add_bpmn_file(str(ctx["exec_path"]))
+    pid = list(parser.process_parsers)[0]
+    wf = BpmnWorkflow(parser.get_spec(pid))
+    wf.do_engine_steps()
+    trace: list[str] = []
+    n = 0
+    while not wf.is_completed() and n < 5000:
+        ready = sorted(wf.get_tasks(state=TaskState.READY), key=lambda t: t.task_spec.bpmn_name or t.task_spec.name)
+        if not ready:
+            break
+        t0 = ready[0]
+        trace.append(t0.task_spec.bpmn_name or t0.task_spec.name)
+        t0.run()
+        wf.do_engine_steps()
+        n += 1
+    if not trace:
+        done = sorted(wf.get_tasks(state=TaskState.COMPLETED), key=lambda t: (getattr(t, "last_state_change", 0.0), t.task_spec.bpmn_name or t.task_spec.name))
+        trace = [t.task_spec.bpmn_name or t.task_spec.name for t in done if (t.task_spec.bpmn_name or "").endswith("]")]
+    ctx["trace"] = trace
+    ctx["completed"] = wf.is_completed()
+    first = {}
+    for i, name in enumerate(trace):
+        if "[" in name:
+            first.setdefault(name.split(" [")[1].rstrip("]"), i)
+    o = ctx["ordering"]
+    ok = sum(1 for a, b in o.forced if first.get(a.split(":", 1)[1], 10**9) < first.get(b.split(":", 1)[1], -1))
+    rows = [["position", "task"]] + [[i + 1, name] for i, name in enumerate(trace)]
+    p = workbook(ctx["dir"] / "execution_trace.xlsx", {"trace": rows})
+    ctx["files"].append(p)
+    ctx["shows"] = [f"workflow completed: {ctx['completed']}; tasks run {len(trace)}", f"forced edges completed in order: {ok} of {len(o.forced)}", f"first tasks {trace[:4]}"]
+
+
+def execute_process(label: str) -> dict[str, Any]:
+    proof = Proof(
+        "P29",
+        "process -> executable process -> execution trace -> workbook",
+        ["process (P5), forced order (P2)"],
+        [
+            Step("mark executable", "lxml.etree.parse; process.set('isExecutable', 'true'); each task renamed manualTask; ElementTree.write", s_mark_executable),
+            Step("load", "SpiffWorkflow.bpmn.parser.BpmnParser.add_bpmn_file; BpmnParser.get_spec", s_execute),
+            Step("execute", "SpiffWorkflow.bpmn.workflow.BpmnWorkflow; do_engine_steps; Task.run on ready tasks in name order", lambda c: None),
+            Step("check", "every forced edge: first completion of the earlier task precedes the later", lambda c: None),
+            Step("tabulate", "openpyxl.Workbook.save", lambda c: None),
+        ],
+        "execution trace",
+    )
+    src = RESULTS[("process", label)]
+    ctx = {"dir": out_dir("P29", label), "bpmn_path": src["files"][0], "ordering": src["ordering"]}
+    run(proof, label, ctx)
+    return ctx
+
+
+def s_roundtrip(ctx: dict[str, Any]) -> None:
+    import python_calamine
+    from csv_diff import compare
+
+    rows = python_calamine.CalamineWorkbook.from_path(str(ctx["xlsx"])).get_sheet_by_name("facts").to_python()
+    back = [{"id": r[0], "predicate": r[1], "args": str(r[2]).split(" "), "sentence_id": r[3], "quote": r[4]} for r in rows[1:]]
+    fwd = [{"id": a.id, "predicate": a.predicate, "args": list(a.args), "sentence_id": a.sentence_id, "quote": a.quote} for a in ctx["atoms"]]
+    d_f, d_b = sha256_json(fwd), sha256_json(back)
+    diff = compare({r["id"]: {k: str(v) for k, v in r.items()} for r in fwd}, {r["id"]: {k: str(v) for k, v in r.items()} for r in back})
+    same = d_f == d_b
+    p = write_json(ctx["dir"] / "roundtrip.json", {"digest_forward": d_f, "digest_back": d_b, "match": same, "changed": diff["changed"][:5], "added": diff["added"][:5], "removed": diff["removed"][:5]})
+    ctx["files"] = [p]
+    ctx["shows"] = [f"rows read back {len(back)}; digest forward {d_f[:16]}…, back {d_b[:16]}…; match {same}; changed {len(diff['changed'])}"]
+
+
+def workbook_roundtrip(label: str) -> dict[str, Any]:
+    proof = Proof(
+        "P30",
+        "workbook -> facts' -> digest' ; digest', digest -> match",
+        ["workbook (P16), facts (P1)"],
+        [
+            Step("read rows", "python_calamine.CalamineWorkbook.from_path; CalamineSheet.to_python", s_roundtrip),
+            Step("seal", "json.dumps sort_keys; hashlib.sha256", lambda c: None),
+            Step("compare", "csv_diff.compare", lambda c: None),
+        ],
+        "match, or the differing cell",
+    )
+    ctx = {"dir": out_dir("P30", label), "xlsx": OUT / "P16" / label / "facts.xlsx", "atoms": RESULTS[("facts", label)]["atoms"]}
+    run(proof, label, ctx)
+    return ctx
+
+
 def main() -> None:
     for label in ["usc5-552-doj", "nodejs-tsc-charter", "nodejs-governance"]:
         door_one(label)
@@ -1291,6 +1716,22 @@ def main() -> None:
     compose("nodejs-governance", "tsc-2024-01-17")
     reverse("nodejs-governance")
     minutes_as_log("nodejs-governance")
+    document("nodejs-governance")
+    for label in ["nodejs-tsc-charter", "nodejs-governance"]:
+        tabulate(label)
+    deadlines("receipt-csv")
+    by_department("receipt-csv")
+    dfg("receipt-xes")
+    dashboard("receipt-xes+receipt-csv")
+    obligations_document("usc5-552-doj")
+    obligations_document("nodejs-tsc-charter")
+    tag("nodejs-tsc-charter", "nodejs-tsc-minutes", pid="P26", required=True)
+    measure_tags("nodejs-tsc-charter")
+    conformance_by_department("receipt-xes", "receipt-csv")
+    decisions_with_discussion()
+    execute_process("usc5-552-doj")
+    execute_process("nodejs-governance")
+    workbook_roundtrip("usc5-552-doj")
     seal_all()
     write_md()
     print(f"proofs {len(PROOFS)}; wrote {MD.relative_to(ROOT)}")

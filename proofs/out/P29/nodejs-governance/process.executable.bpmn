@@ -1,52 +1,52 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.signavio.com/bpmn20" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath">
-	<bpmn:process id="id2638902f-bdd8-495b-9eac-e01e63560dda" isClosed="false" isExecutable="false" processType="None">
+	<bpmn:process id="id2638902f-bdd8-495b-9eac-e01e63560dda" isClosed="false" isExecutable="true" processType="None">
 		<bpmn:endEvent id="id44d16c82-49a5-4de7-817e-edb34688aab0" name="end">
 			<bpmn:incoming>idb10de836-2fa6-4c29-a4ac-df29b35fa42e</bpmn:incoming>
 		</bpmn:endEvent>
-		<bpmn:task id="id0a2232f7-83d6-4945-9dd8-24a18b20bbfc" name="zero [u0063:s00#e18]">
+		<bpmn:manualTask id="id0a2232f7-83d6-4945-9dd8-24a18b20bbfc" name="zero [u0063:s00#e18]">
 			<bpmn:incoming>id7f8969a8-9069-4084-8525-a3fc1815d894</bpmn:incoming>
 			<bpmn:outgoing>id9b854a46-86f4-4935-a004-bed2ae7d41ef</bpmn:outgoing>
-		</bpmn:task>
-		<bpmn:task id="id71765ecc-137a-46fb-bb3e-de713c955e9e" name="ensure [u0033:s01#e8]">
+		</bpmn:manualTask>
+		<bpmn:manualTask id="id71765ecc-137a-46fb-bb3e-de713c955e9e" name="ensure [u0033:s01#e8]">
 			<bpmn:incoming>id4d55ec0c-bb4a-478a-ace0-d2a78c8cdc5f</bpmn:incoming>
 			<bpmn:outgoing>idb12a4c2e-7db7-49dd-844b-27aa72e47cf5</bpmn:outgoing>
-		</bpmn:task>
-		<bpmn:task id="id05d661e9-c254-416c-951a-e67661f60cc9" name="visible [u0070:s00#e11]">
+		</bpmn:manualTask>
+		<bpmn:manualTask id="id05d661e9-c254-416c-951a-e67661f60cc9" name="visible [u0070:s00#e11]">
 			<bpmn:incoming>id4988a7c3-7d5a-432b-952c-27ae6377a962</bpmn:incoming>
 			<bpmn:outgoing>id65143563-4ba4-40d8-9a5b-951763031b6a</bpmn:outgoing>
-		</bpmn:task>
-		<bpmn:task id="id1f34cf43-9cdc-431c-b1c4-34e0c78b5cc1" name="meeting [u0031:s00#e4]">
+		</bpmn:manualTask>
+		<bpmn:manualTask id="id1f34cf43-9cdc-431c-b1c4-34e0c78b5cc1" name="meeting [u0031:s00#e4]">
 			<bpmn:incoming>id33312d7c-178a-4965-a88e-e54a1ff58daa</bpmn:incoming>
 			<bpmn:outgoing>id21394e57-1909-4900-8f99-afdf80440041</bpmn:outgoing>
-		</bpmn:task>
-		<bpmn:task id="idd6b95342-c2df-4773-9961-f20a2eadc851" name="require [u0063:s00#e23]">
+		</bpmn:manualTask>
+		<bpmn:manualTask id="idd6b95342-c2df-4773-9961-f20a2eadc851" name="require [u0063:s00#e23]">
 			<bpmn:incoming>id74533de9-cb47-47c4-9e30-b13b4512826e</bpmn:incoming>
 			<bpmn:outgoing>id7f8969a8-9069-4084-8525-a3fc1815d894</bpmn:outgoing>
-		</bpmn:task>
-		<bpmn:task id="id7dbd4264-6838-437e-8100-5a104b3ffd97" name="meeting [u0033:s01#e3]">
+		</bpmn:manualTask>
+		<bpmn:manualTask id="id7dbd4264-6838-437e-8100-5a104b3ffd97" name="meeting [u0033:s01#e3]">
 			<bpmn:incoming>id7a3b31ba-5d46-4c5c-bcf3-1e61d9831814</bpmn:incoming>
 			<bpmn:outgoing>id4d55ec0c-bb4a-478a-ace0-d2a78c8cdc5f</bpmn:outgoing>
-		</bpmn:task>
-		<bpmn:task id="id7aa502e2-c859-49de-aef5-12c621fcf8b9" name="oppose [u0059:s00#e7]">
+		</bpmn:manualTask>
+		<bpmn:manualTask id="id7aa502e2-c859-49de-aef5-12c621fcf8b9" name="oppose [u0059:s00#e7]">
 			<bpmn:incoming>id17ec4723-b78f-4a14-b427-9db7df5ab75d</bpmn:incoming>
 			<bpmn:outgoing>id64724cfc-31fd-44a6-942d-057e0eb427c1</bpmn:outgoing>
-		</bpmn:task>
+		</bpmn:manualTask>
 		<bpmn:startEvent id="id73734717-7c47-43f7-b466-8e2a330ac6db" isInterrupting="false" name="start" parallelMultiple="false">
 			<bpmn:outgoing>idcf9897fc-e7ce-4aa6-8425-6de1d2c270f0</bpmn:outgoing>
 		</bpmn:startEvent>
-		<bpmn:task id="idcdc6ef1e-beb8-473f-9f35-cf2dfd904016" name="share [u0031:s00#e10]">
+		<bpmn:manualTask id="idcdc6ef1e-beb8-473f-9f35-cf2dfd904016" name="share [u0031:s00#e10]">
 			<bpmn:incoming>ide7c3bfd4-c2cd-429a-81e6-b504ed54d595</bpmn:incoming>
 			<bpmn:outgoing>id33312d7c-178a-4965-a88e-e54a1ff58daa</bpmn:outgoing>
-		</bpmn:task>
-		<bpmn:task id="id5a8f6664-a25c-48fe-8534-28a049d6353c" name="time [u0055:s04#e4]">
+		</bpmn:manualTask>
+		<bpmn:manualTask id="id5a8f6664-a25c-48fe-8534-28a049d6353c" name="time [u0055:s04#e4]">
 			<bpmn:incoming>id8924636f-7d91-4a92-91bb-2e75092ecfa1</bpmn:incoming>
 			<bpmn:outgoing>ideb281638-4798-4206-81bf-54423f41aad0</bpmn:outgoing>
-		</bpmn:task>
-		<bpmn:task id="idfbb7d6b2-0eaa-4a06-a40f-cc64affe1f32" name="onboarded [u0070:s00#e18]">
+		</bpmn:manualTask>
+		<bpmn:manualTask id="idfbb7d6b2-0eaa-4a06-a40f-cc64affe1f32" name="onboarded [u0070:s00#e18]">
 			<bpmn:incoming>id15597452-39b4-4b9b-ad11-65caf7e1bf78</bpmn:incoming>
 			<bpmn:outgoing>id4988a7c3-7d5a-432b-952c-27ae6377a962</bpmn:outgoing>
-		</bpmn:task>
+		</bpmn:manualTask>
 		<bpmn:parallelGateway id="id7ebd5da5-55f2-4a4a-8b03-e5f9b2eb12eb" gatewayDirection="Converging" name="join end">
 			<bpmn:incoming>id9287f253-edc7-4e5f-b3ac-1f0414ed2be6</bpmn:incoming>
 			<bpmn:incoming>id21394e57-1909-4900-8f99-afdf80440041</bpmn:incoming>
@@ -59,34 +59,34 @@
 			<bpmn:incoming>id65143563-4ba4-40d8-9a5b-951763031b6a</bpmn:incoming>
 			<bpmn:outgoing>idb10de836-2fa6-4c29-a4ac-df29b35fa42e</bpmn:outgoing>
 		</bpmn:parallelGateway>
-		<bpmn:task id="idc0143b93-d172-41df-ae00-daaf25930e9e" name="hour [u0040:s01#e8]">
+		<bpmn:manualTask id="idc0143b93-d172-41df-ae00-daaf25930e9e" name="hour [u0040:s01#e8]">
 			<bpmn:incoming>id5408d1d3-fbc5-485b-8dd1-9533b9b8147c</bpmn:incoming>
 			<bpmn:outgoing>id34054881-3b21-460c-8739-1ea5cf03f73a</bpmn:outgoing>
-		</bpmn:task>
-		<bpmn:task id="id471aec82-35db-4af6-8353-4b4362728d55" name="week [u0059:s00#e19]">
+		</bpmn:manualTask>
+		<bpmn:manualTask id="id471aec82-35db-4af6-8353-4b4362728d55" name="week [u0059:s00#e19]">
 			<bpmn:incoming>id9a48ccf8-53fe-49a2-be5c-2c2fb9db294f</bpmn:incoming>
 			<bpmn:outgoing>id17ec4723-b78f-4a14-b427-9db7df5ab75d</bpmn:outgoing>
-		</bpmn:task>
-		<bpmn:task id="ide349ee39-e1a5-4b56-8d76-4630194974e4" name="address [u0068:s01#e29]">
+		</bpmn:manualTask>
+		<bpmn:manualTask id="ide349ee39-e1a5-4b56-8d76-4630194974e4" name="address [u0068:s01#e29]">
 			<bpmn:incoming>id5724a6b7-3fd2-4777-ad09-6767eb7c4023</bpmn:incoming>
 			<bpmn:outgoing>id86350762-8605-40aa-8f78-65fb46bd6a4a</bpmn:outgoing>
-		</bpmn:task>
-		<bpmn:task id="idfd130829-b32d-4bcc-af01-c7b485a6b07e" name="add [u0055:s04#e33]">
+		</bpmn:manualTask>
+		<bpmn:manualTask id="idfd130829-b32d-4bcc-af01-c7b485a6b07e" name="add [u0055:s04#e33]">
 			<bpmn:incoming>ideb281638-4798-4206-81bf-54423f41aad0</bpmn:incoming>
 			<bpmn:outgoing>idf98df338-fd2b-42b9-8d52-264ec6da10f5</bpmn:outgoing>
-		</bpmn:task>
-		<bpmn:task id="idd3b96a52-cba8-4acc-98cb-05a82337377b" name="be [u0040:s01#e11]">
+		</bpmn:manualTask>
+		<bpmn:manualTask id="idd3b96a52-cba8-4acc-98cb-05a82337377b" name="be [u0040:s01#e11]">
 			<bpmn:incoming>id34054881-3b21-460c-8739-1ea5cf03f73a</bpmn:incoming>
 			<bpmn:outgoing>idd9501b67-e8d0-48c8-935b-0dae81edd93b</bpmn:outgoing>
-		</bpmn:task>
-		<bpmn:task id="id8190c239-2a6c-4331-8543-fb492c9822fa" name="advance [u0068:s01#e33]">
+		</bpmn:manualTask>
+		<bpmn:manualTask id="id8190c239-2a6c-4331-8543-fb492c9822fa" name="advance [u0068:s01#e33]">
 			<bpmn:incoming>id86350762-8605-40aa-8f78-65fb46bd6a4a</bpmn:incoming>
 			<bpmn:outgoing>id27f088ee-efc1-4c5d-ba39-c1fab5049058</bpmn:outgoing>
-		</bpmn:task>
-		<bpmn:task id="idcbc177eb-8d00-40ef-9559-950cf7a0c47a" name="collaborator [u0020:s00#e25]">
+		</bpmn:manualTask>
+		<bpmn:manualTask id="idcbc177eb-8d00-40ef-9559-950cf7a0c47a" name="collaborator [u0020:s00#e25]">
 			<bpmn:incoming>idcfade33a-3db7-412c-9f74-f1722f164523</bpmn:incoming>
 			<bpmn:outgoing>id2bd6422a-8895-4e5c-ae2f-4e660c62528a</bpmn:outgoing>
-		</bpmn:task>
+		</bpmn:manualTask>
 		<bpmn:parallelGateway id="idc1ebff5c-478d-4575-a9c0-38116ef77e03" gatewayDirection="Diverging" name="split start">
 			<bpmn:incoming>idcf9897fc-e7ce-4aa6-8425-6de1d2c270f0</bpmn:incoming>
 			<bpmn:outgoing>idcfade33a-3db7-412c-9f74-f1722f164523</bpmn:outgoing>
@@ -99,10 +99,10 @@
 			<bpmn:outgoing>id5724a6b7-3fd2-4777-ad09-6767eb7c4023</bpmn:outgoing>
 			<bpmn:outgoing>id15597452-39b4-4b9b-ad11-65caf7e1bf78</bpmn:outgoing>
 		</bpmn:parallelGateway>
-		<bpmn:task id="id38315b8d-8e0e-42b9-851d-1801fb11ed78" name="more [u0020:s00#e19]">
+		<bpmn:manualTask id="id38315b8d-8e0e-42b9-851d-1801fb11ed78" name="more [u0020:s00#e19]">
 			<bpmn:incoming>id2bd6422a-8895-4e5c-ae2f-4e660c62528a</bpmn:incoming>
 			<bpmn:outgoing>id9287f253-edc7-4e5f-b3ac-1f0414ed2be6</bpmn:outgoing>
-		</bpmn:task>
+		</bpmn:manualTask>
 		<bpmn:sequenceFlow id="id7f8969a8-9069-4084-8525-a3fc1815d894" name="" sourceRef="idd6b95342-c2df-4773-9961-f20a2eadc851" targetRef="id0a2232f7-83d6-4945-9dd8-24a18b20bbfc"/>
 		<bpmn:sequenceFlow id="idd9501b67-e8d0-48c8-935b-0dae81edd93b" name="" sourceRef="idd3b96a52-cba8-4acc-98cb-05a82337377b" targetRef="id7ebd5da5-55f2-4a4a-8b03-e5f9b2eb12eb"/>
 		<bpmn:sequenceFlow id="id8924636f-7d91-4a92-91bb-2e75092ecfa1" name="" sourceRef="idc1ebff5c-478d-4575-a9c0-38116ef77e03" targetRef="id5a8f6664-a25c-48fe-8534-28a049d6353c"/>

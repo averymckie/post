@@ -169,22 +169,22 @@ shows: zen loads the table; evaluate({action: 'open'}) -> {'required': True, 'ru
 
 ```
 ordered steps
--> process model (pm4py.objects.bpmn.obj.BPMN (StartEvent, Task, EndEvent, Flow); pm4py.objects.bpmn.exporter.exporter.apply)
+-> process model (pm4py.objects.bpmn.obj.BPMN (StartEvent, Task, EndEvent, SequenceFlow); pm4py.objects.bpmn.exporter.exporter.apply)
 -> process
 ```
 
 **usc5-552-doj**
 
 ```
-proofs/out/P5/usc5-552-doj/process.bpmn                    sha256 d9d971a9a885bc30235b38276e1b3d30b247decee25ab37f25006adad9178953
-shows: tasks 24, flows 36; first flow request -> make
+proofs/out/P5/usc5-552-doj/process.bpmn                    sha256 83082f9300f7122ff8c76c784aa1a68785af134c72f7fed5e3eeabed8e1de6fe
+shows: tasks 24, parallel gateways 2, flows 38; first flow request -> make
 ```
 
 **nodejs-governance**
 
 ```
-proofs/out/P5/nodejs-governance/process.bpmn               sha256 c38de863a2d578f57ac33fbb6162284b5204c4b74f2f52b257680ea34cf3d167
-shows: tasks 18, flows 27; first flow collaborator -> more
+proofs/out/P5/nodejs-governance/process.bpmn               sha256 a8c5aba9fef35080d31b16c29e0ce69f0475014cd31f638169cbd43e855e4cb8
+shows: tasks 18, parallel gateways 2, flows 29; first flow collaborator -> more
 ```
 
 ## P6  records -> facts
@@ -253,8 +253,8 @@ event log
 **receipt-xes**
 
 ```
-proofs/out/P8/receipt-xes/process.pnml                     sha256 3c096e55edcc20f300a68b17398d1c6083a863b6ee476eba37bec018785fb80d
-proofs/out/P8/receipt-xes/process.bpmn                     sha256 2a157d59a8ddf1315cab98d827d512e76f9318de8fdb6dddd39b2bec9881b0bc
+proofs/out/P8/receipt-xes/process.pnml                     sha256 3b81bfc4cf30c3f8cbc3bd51681aa8535226db7fd76dd2acf93adf65c1003113
+proofs/out/P8/receipt-xes/process.bpmn                     sha256 e60f633d515657fbf758a8d19e6a196fe318a7c7330dab078dce96966739fa7d
 shows: events 8577, cases 1434, activities 27
 shows: span 2010-10-02 to 2012-01-23
 shows: discovered from the first half of cases by id; start activities {'Confirmation of receipt': 717}
@@ -273,7 +273,7 @@ process, event log
 **receipt-xes**
 
 ```
-proofs/out/P9/receipt-xes/conformance.xlsx                 sha256 26a3ab4fa7a0bdd562cf0ce61a36afa95cecbf0c258ecb0ac97b512a7f6d140f
+proofs/out/P9/receipt-xes/conformance.xlsx                 sha256 5790819c93d2728ab8825ac97d867b639d6a3ae465586213105cc43ab66015a7
 shows: cases fit 1425 of 1434; model from the first 717 cases
 shows: first rows [['case-10011', 1.0, True, 0, 0], ['case-10017', 1.0, True, 0, 0]]
 ```
@@ -290,7 +290,7 @@ ordered steps, parsed minutes
 **nodejs-governance+nodejs-tsc-minutes**
 
 ```
-proofs/out/P10/nodejs-governance+nodejs-tsc-minutes/tagged_steps.xlsx sha256 add3219e9ddd2cb9a41807ad2a35e4e82001f91f4973c846de3c92dffaa23ffd
+proofs/out/P10/nodejs-governance+nodejs-tsc-minutes/tagged_steps.xlsx sha256 79ce4fa400fe6455d98f7150b50da5bb8b0545d3ba34998cf35524968a18c5e1
 proofs/out/P10/nodejs-governance+nodejs-tsc-minutes/tags.jsonl sha256 00216f1e1e3eb38cb74e11d3478787ffb2cc219d093277e9fb74dec5e2389f2d
 shows: tagged sentences 78, ties 33, untagged 96
 shows: address <- "* gireesh: personally in favor of fixing CI flakes as issues become ha"  shared: address effort
@@ -311,11 +311,21 @@ tagged steps
 **nodejs-governance**
 
 ```
-proofs/out/P11/nodejs-governance/measured_steps.xlsx       sha256 d45da313770c165e52cd21082ffa8ab78a4841469b14c4e5165bebc1fba6cbb1
+proofs/out/P11/nodejs-governance/measured_steps.xlsx       sha256 f8fe378a7a43af4430b6d4e12f20ee929ad4ebbcc4fe3162084f06f30df48ecf
 shows: be: 40
 shows: add: 16
 shows: share: 13
 shows: time: 11
+```
+
+**nodejs-tsc-charter**
+
+```
+proofs/out/P11/nodejs-tsc-charter/measured_steps.xlsx      sha256 c47f5c8d9b00930bc8cb26b281b3ba54d5d6404ca46d9dac009f7e0917eedb12
+shows: have: 31
+shows: establish: 30
+shows: direct: 15
+shows: meet: 9
 ```
 
 ## P12  process, records -> measured steps -> workbook
@@ -331,7 +341,7 @@ process, records
 **receipt-xes+receipt-csv**
 
 ```
-proofs/out/P12/receipt-xes+receipt-csv/measured_activities.xlsx sha256 fcb5be3f545783b8accec11b9588eae961231f2e7f3e30c564ad04095f8faf1a
+proofs/out/P12/receipt-xes+receipt-csv/measured_activities.xlsx sha256 fac0f6bb33af3d4a9acea00e8d94b7efa3a79f674f03dfee9080c42a44727513
 shows: Confirmation of receipt: events 1434, mean hours since previous None
 shows: T02 Check confirmation of receipt: events 1368, mean hours since previous 27.94
 shows: T03 Adjust confirmation of receipt: events 55, mean hours since previous 129.66
@@ -353,7 +363,7 @@ policy (charter: simple majority of all TSC voting members), records (roster; at
 
 ```
 proofs/out/P13/charter+roster+minutes/policy.jdm.json      sha256 e038135743787da6ec53bb05fbff39ff9be42b7ceba99398f9dcddb9c11428d9
-proofs/out/P13/charter+roster+minutes/decisions.xlsx       sha256 850849d047dfa541489194091395c25fab9e6b80f79cc21ae4272ac56ed90447
+proofs/out/P13/charter+roster+minutes/decisions.xlsx       sha256 39ddf07056edfbedac92363bd6ee1e2af630aba6f1eadfd6fcc95955e96ebbab
 shows: tsc-2023-11-08: voting members present 6
 shows: tsc-2023-12-06: voting members present 10
 shows: tsc-2024-01-10: voting members present 10
@@ -380,14 +390,14 @@ ordered steps
 **usc5-552-doj**
 
 ```
-proofs/out/P14/usc5-552-doj/dependencies.pptx              sha256 1ac4206631f506649502d9dfbd35f5912a9d2b39cb48dcbc9b3bdc8c26764bb0
+proofs/out/P14/usc5-552-doj/dependencies.pptx              sha256 21b62cb237d0a8bda395ac1e2881fc9e0dfaf09e9e960c528a5b5589130bce20
 shows: layers 2, boxes 24, connectors 12
 ```
 
 **nodejs-governance**
 
 ```
-proofs/out/P14/nodejs-governance/dependencies.pptx         sha256 b81addd37191e7c2b395d1b97add7c2bed30f81c4a83bbdf42029422b264392e
+proofs/out/P14/nodejs-governance/dependencies.pptx         sha256 9e393e9452337d038c0f1e8a2909a5e0b366119e798455ca3f3e4209bfe14bb5
 shows: layers 2, boxes 18, connectors 9
 ```
 
@@ -402,8 +412,15 @@ ordered steps
 **usc5-552-doj**
 
 ```
-proofs/out/P15/usc5-552-doj/ordered_steps.docx             sha256 c667775b907b4e0904ad39089534222508fc0c8c2e096d20b790693ee1ebf163
+proofs/out/P15/usc5-552-doj/ordered_steps.docx             sha256 5aa2363e65c8197534070c225c5fda0f3b51383f0bb6ed447fbe8ffa14d0a53b
 shows: paragraphs 50, table rows 13
+```
+
+**nodejs-governance**
+
+```
+proofs/out/P15/nodejs-governance/ordered_steps.docx        sha256 5a98fa1036e2907f48b87aa9cbc4dd02f9ca9cd79c2bcd9d204f7abcabca7cf4
+shows: paragraphs 38, table rows 10
 ```
 
 ## P16  facts -> workbook
@@ -417,8 +434,22 @@ facts
 **usc5-552-doj**
 
 ```
-proofs/out/P16/usc5-552-doj/facts.xlsx                     sha256 1c9ee3a7ab0f60c24b4163db79fb3969b861a0be35fa7f36fd8866662fc6b83b
+proofs/out/P16/usc5-552-doj/facts.xlsx                     sha256 24481ed43fd1bf84950092112f0746eadca81c284175aa135c1b406c2276988c
 shows: rows 1869; first agent usc5-552-doj:u0001:s00#e7 usc5-552-doj:u0001:s00#x5 "agency shall make"
+```
+
+**nodejs-tsc-charter**
+
+```
+proofs/out/P16/nodejs-tsc-charter/facts.xlsx               sha256 006843be61ac4cb9d35f14e02d71e39c7995b9e93839579dd9e2496ca80ca535
+shows: rows 336; first event nodejs-tsc-charter:u0001:s02#e1 guide "Guiding"
+```
+
+**nodejs-governance**
+
+```
+proofs/out/P16/nodejs-governance/facts.xlsx                sha256 2ffbc8222d66f2dc2bbf372bb8fc17ef9076acadd3440e749fad17588eeccace
+shows: rows 815; first agent nodejs-governance:u0002:s00#e56 nodejs-governance:u0002:s00#x54 "Who can nominate"
 ```
 
 ## P17  anything -> digest
@@ -432,8 +463,8 @@ every deliverable above
 **all**
 
 ```
-proofs/out/P17/all/digests.json                            sha256 9e322e6c80be00f8781ad22f7dfb8d8b32f7cec06dca9dc564d4af8fc9d783a2
-shows: deliverables 35; digest a2afe43607c51dc2fb2ed8173e6cb515a95f52b16ea05e3d17a659e7ff1ad853
+proofs/out/P17/all/digests.json                            sha256 c3d4b3cfe1c69133dc2c34e23f2503e0e8c31dfd50c3536c6ded73d5efe02638
+shows: deliverables 55; digest e307efbdc62a5f0ad3f2055c491f0c20bb1cf01e004c34c7f84258a590e2bedc
 ```
 
 ## P18  ordered steps, parsed minutes -> tagged steps -> measured steps -> selected steps -> deck -> digest
@@ -450,7 +481,7 @@ tagged steps (P10), forced order (P2)
 **nodejs-governance+tsc-2024-01-17**
 
 ```
-proofs/out/P18/nodejs-governance+tsc-2024-01-17/deck.pptx  sha256 811dbbd95322a1aa1437bcf772deb76b6a4d429c5c32016bc6910bbb6749949c
+proofs/out/P18/nodejs-governance+tsc-2024-01-17/deck.pptx  sha256 4b52b9119fd684609e7e6732bdc645db2cb756ee10a510c95e9b2568a9f6c423
 proofs/out/P18/nodejs-governance+tsc-2024-01-17/digest.json sha256 b2328db5e57553bf2e78baeae9d4ab96bf46dd621ad37e82c3c6a4c1f274c684
 shows: meeting tsc-2024-01-17: steps discussed 8, forced edges among them 2
 shows: deck layers 2, boxes 8, connectors 2
@@ -489,10 +520,220 @@ tagged steps (P10), forced order (P2)
 **nodejs-governance**
 
 ```
-proofs/out/P20/nodejs-governance/conformance.xlsx          sha256 b53ea0adab90081ffc1bd56b82c5395434e278d7abbde3601c5297610f9ff083
+proofs/out/P20/nodejs-governance/conformance.xlsx          sha256 027bdb8554e012f2fdc006f7cea4cc83341e901a3c67764d4eeb34ec92b22502
 shows: forced edges respected in the minutes 0, violated 2
 shows: VIOLATED tsc-2024-01-17: add discussed before time
 shows: VIOLATED tsc-2025-01-08: add discussed before time
+```
+
+## P21  records -> measured cases -> workbook
+
+```
+records (receipt.csv: the rows carry case:deadline and case:enddate)
+-> key (duckdb: group the rows by case)
+-> measure (duckdb: enddate compared with deadline per case; open when enddate is empty)
+-> tabulate (openpyxl.Workbook.save)
+-> measured cases
+```
+
+**receipt-csv**
+
+```
+proofs/out/P21/receipt-csv/deadlines.xlsx                  sha256 b747794df52a4a57706efbb3379f16935dd4da8a2c8ad3d11c8177e8130b8635
+shows: outcomes {'after deadline': 377, 'by deadline': 952, 'open': 105}
+shows: first rows [('case-10011', 'open'), ('case-10017', 'by deadline'), ('case-10024', 'by deadline')]
+```
+
+## P22  records -> measured groups -> workbook
+
+```
+records
+-> key (duckdb: group by case, then by department and by channel)
+-> measure (duckdb: count, avg(epoch(last - first)), cases ended after deadline)
+-> tabulate (openpyxl.Workbook.save)
+-> measured groups
+```
+
+**receipt-csv**
+
+```
+proofs/out/P22/receipt-csv/by_department_and_channel.xlsx  sha256 ecb5795581c99d3c908bae5eb1f3d6d788d1a7555489090e22c14a0e87ef42db
+shows: Customer contact: cases 29, mean days 1.66, after deadline 1
+shows: Experts: cases 15, mean days 11.32, after deadline 6
+shows: General: cases 1390, mean days 5.42, after deadline 370
+shows: channel Desk: cases 109, mean days 5.88
+shows: channel Intern: cases 1, mean days 0.97
+```
+
+## P23  log -> directly-follows graph -> workbook
+
+```
+log (P8)
+-> discover (pm4py.discover_dfg)
+-> tabulate (openpyxl.Workbook.save; json.dumps)
+-> directly-follows graph
+```
+
+**receipt-xes**
+
+```
+proofs/out/P23/receipt-xes/directly_follows.xlsx           sha256 891c5814ebe0d16cce1e2e572fc1b629182b9702da4d23c6f9c6811da0f4e8ae
+proofs/out/P23/receipt-xes/directly_follows.json           sha256 947a329a7817cca79e8268d567bdec66cf9268f03b103d7ae31dddb81dc9a904
+shows: edges 99; strongest T04 Determine confirmation of receipt -> T05 Print and send confirmation of receipt (1177)
+shows: end activities [['T10 Determine necessity to stop indication', 828], ['T05 Print and send confirmation of receipt', 400]]
+```
+
+## P24  measured steps -> chart -> page
+
+```
+measured steps (P12)
+-> chart (plotly.express.bar; Figure.update_layout)
+-> page (plotly.io.write_html(full_html, div_id))
+-> page
+```
+
+**receipt-xes+receipt-csv**
+
+```
+proofs/out/P24/receipt-xes+receipt-csv/dashboard.html      sha256 9e9eafed6a5d4e719bd43e1e7589d3645912c0db53f420d8670510903940d21a
+shows: one bar per activity, 26 bars; plotly.js from cdn
+```
+
+## P25  required actions -> document
+
+```
+required actions (P4), facts (P1)
+-> write (docx.Document; Document.add_table; docx.document.Document.save)
+-> document
+```
+
+**usc5-552-doj**
+
+```
+proofs/out/P25/usc5-552-doj/required_actions.docx          sha256 20dc73844b6eda2e1d730452a8070fcbe449b0df4bfbd75ea18cfb138d875e79
+shows: table rows 122
+shows: agency shall make must make
+shows: agency shall separately state must state
+shows: agency, in accordance with published rules, shall make must make
+```
+
+**nodejs-tsc-charter**
+
+```
+proofs/out/P25/nodejs-tsc-charter/required_actions.docx    sha256 1ff341a1edf18851e2e5d81937382ab568f004b205ff74813a1e6fb6d2654d3a
+shows: table rows 13
+shows:  must open
+shows: TSC must have must have
+shows:  must remedy
+```
+
+## P26  required actions, parsed minutes -> tagged actions -> workbook
+
+```
+required actions (P4), parsed minutes
+-> tag (clingo: shared words, #max score, ties flagged, untagged listed; stopword list as data)
+-> tabulate (openpyxl.Workbook.save)
+-> tagged actions
+```
+
+**nodejs-tsc-charter+nodejs-tsc-minutes**
+
+```
+proofs/out/P26/nodejs-tsc-charter+nodejs-tsc-minutes/tagged_steps.xlsx sha256 86f7882d295e60003c4d65c3ce5e9cafe894b3254cbb07b110fa01092ce8e65a
+proofs/out/P26/nodejs-tsc-charter+nodejs-tsc-minutes/tags.jsonl sha256 9f1e239f2364163034070c055de5d26c87b3539df330ecdbf717a1c603442a7f
+shows: tagged sentences 72, ties 19, untagged 102
+shows: establish <- "It’s not causing any maintenance burdens AFAIK, so it should be alrigh"  shared: consensus expected time tsc
+shows: establish <- "* lib: promote process.binding/_tickCallback to runtime deprecation [#"  shared: process time tsc
+shows: direct <- "I think it’s only fair if they want to make up their case in a TSC mee"  shared: meeting tsc
+shows: establish <- "I think it’s only fair if they want to make up their case in a TSC mee"  shared: process tsc
+```
+
+## P27  conformance, records -> measured groups -> workbook
+
+```
+conformance (P9), records (P6)
+-> key (duckdb: join on case id)
+-> measure (duckdb: cases, fit cases, avg(fitness) per department and per channel)
+-> tabulate (openpyxl.Workbook.save)
+-> measured groups
+```
+
+**receipt-xes+receipt-csv**
+
+```
+proofs/out/P27/receipt-xes+receipt-csv/conformance_by_group.xlsx sha256 c47d4fd9fcca8086e2ad4e35d393f160b6229113d74749db09b43990d2fe2f66
+shows: Customer contact: cases 29, fit 29, mean fitness 1.0
+shows: Experts: cases 15, fit 15, mean fitness 1.0
+shows: General: cases 1390, fit 1381, mean fitness 0.9999
+```
+
+## P28  decisions, tagged actions -> meetings -> workbook
+
+```
+decisions (P13), tagged actions (P26)
+-> key (clingo: join on meeting id)
+-> measure (clingo #count of required actions discussed per meeting)
+-> tabulate (openpyxl.Workbook.save)
+-> meetings
+```
+
+**majority+charter-tags**
+
+```
+proofs/out/P28/majority+charter-tags/decisions_with_discussion.xlsx sha256 8604c41c5f827847ab8591a19f7c1c75ce570a4b11d5976a6c68b88277c94b5c
+shows: tsc-2023-11-08: majority false, required actions discussed 1: establish
+shows: tsc-2023-12-06: majority true, required actions discussed 5: direct, establish, have, open, publish
+shows: tsc-2024-01-10: majority true, required actions discussed 5: approve, do, establish, have, remedy
+shows: tsc-2024-01-17: majority true, required actions discussed 5: establish, have, open, publish, take
+```
+
+## P29  process -> executable process -> execution trace -> workbook
+
+```
+process (P5), forced order (P2)
+-> mark executable (lxml.etree.parse; process.set('isExecutable', 'true'); each task renamed manualTask; ElementTree.write)
+-> load (SpiffWorkflow.bpmn.parser.BpmnParser.add_bpmn_file; BpmnParser.get_spec)
+-> execute (SpiffWorkflow.bpmn.workflow.BpmnWorkflow; do_engine_steps; Task.run on ready tasks in name order)
+-> check (every forced edge: first completion of the earlier task precedes the later)
+-> tabulate (openpyxl.Workbook.save)
+-> execution trace
+```
+
+**usc5-552-doj**
+
+```
+proofs/out/P29/usc5-552-doj/process.executable.bpmn        sha256 b630a4c41554be7954d4421a8c71157af76614e53f389297d8819c1edd251731
+proofs/out/P29/usc5-552-doj/execution_trace.xlsx           sha256 67824bf5929d40f73ec72f649811facbc130f9e0599dcc4ef2487f866fe62cda
+shows: workflow completed: True; tasks run 24
+shows: forced edges completed in order: 12 of 12
+shows: first tasks ['authorize [u0131:s00#e16]', 'base [u0089:s02#e53]', 'agency [u0089:s02#e59]', 'description [u0131:s00#e44]']
+```
+
+**nodejs-governance**
+
+```
+proofs/out/P29/nodejs-governance/process.executable.bpmn   sha256 60cc794db4e0df4e77cc06d7f2ede4ac81a9ccbd553d66291edad6cd71d8df8d
+proofs/out/P29/nodejs-governance/execution_trace.xlsx      sha256 553150f3815291eeaf11c08731f67e058799a4dec62bf16cea180dc519f317ad
+shows: workflow completed: True; tasks run 18
+shows: forced edges completed in order: 9 of 9
+shows: first tasks ['address [u0068:s01#e29]', 'advance [u0068:s01#e33]', 'collaborator [u0020:s00#e25]', 'hour [u0040:s01#e8]']
+```
+
+## P30  workbook -> facts' -> digest' ; digest', digest -> match
+
+```
+workbook (P16), facts (P1)
+-> read rows (python_calamine.CalamineWorkbook.from_path; CalamineSheet.to_python)
+-> seal (json.dumps sort_keys; hashlib.sha256)
+-> compare (csv_diff.compare)
+-> match, or the differing cell
+```
+
+**usc5-552-doj**
+
+```
+proofs/out/P30/usc5-552-doj/roundtrip.json                 sha256 a8f11bdab6e62f5cc18f74624aa4bcb5840327bc674962224602cb3d4a412f39
+shows: rows read back 1869; digest forward 55b30c7360337452…, back 55b30c7360337452…; match True; changed 0
 ```
 
 ## Pins
