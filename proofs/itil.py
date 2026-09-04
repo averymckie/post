@@ -372,7 +372,16 @@ def op_derive(rows: Rows, field: str, fn: str, **kw: Any) -> Rows:
     return _fetch(con, f'select *, {expr} as "{field}" from r')
 
 
-AGG = {"count": "count(*)", "sum": "sum({f})", "avg": "round(avg({f}), 2)", "min": "min({f})", "max": "max({f})", "list": "string_agg(cast({f} as varchar), ', ' order by {f})", "distinct": "count(distinct {f})", "median": "median({f})"}
+AGG = {
+    "count": "count(*)",
+    "sum": "sum(cast({f} as double))",
+    "avg": "round(avg(cast({f} as double)), 2)",
+    "min": "min({f})",
+    "max": "max({f})",
+    "list": "string_agg(cast({f} as varchar), ', ' order by {f})",
+    "distinct": "count(distinct {f})",
+    "median": "median(cast({f} as double))",
+}
 
 
 def op_group(rows: Rows, by: list[str], aggregates: list[list[str]]) -> Rows:

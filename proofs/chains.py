@@ -2760,6 +2760,7 @@ def main() -> None:
     anchor_dates("nodejs-tsc-charter")
     policy("usc5-552-doj")
     policy("nodejs-tsc-charter")
+    policy("nodejs-governance")
     process_from_order("usc5-552-doj")
     process_from_order("nodejs-governance")
     door_two("receipt-csv", ROOT / "proofs" / "in" / "receipt.csv", s_read_rows_csv, "receipt_event", "event_row", ["case:concept:name", "concept:name", "time:timestamp", "org:resource", "case:department", "case:channel"])
