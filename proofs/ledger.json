@@ -301,7 +301,7 @@
   "Project management                                       4       4      0       0              0",
   "Relationship management                                  3       2      0       0              1",
   "Risk management                                          3       3      0       0              0",
-  "Service financial management                             4       1      0       0              3",
+  "Service financial management                             4       4      0       0              0",
   "Strategy management                                      3       3      0       0              0",
   "Supplier management                                      3       3      0       0              0",
   "Workforce and talent management                          4       4      0       0              0",
@@ -325,7 +325,7 @@
   "Deployment management                                    4       4      0       0              0",
   "Infrastructure and platform management                   3       3      0       0              0",
   "Software development and management                      4       4      0       0              0",
-  "all                                                    130     124      0       0              6"
+  "all                                                    130     127      0       0              3"
  ],
  "chain_revisions": {
   "P5": 1,
@@ -350,6 +350,9 @@
   "itil|IT asset management|lifecycle records": 1,
   "itil|Monitoring and event management|alert list": 1,
   "itil|Problem management|trend analysis": 1,
-  "itil|Infrastructure and platform management|utilization report": 1
+  "itil|Infrastructure and platform management|utilization report": 1,
+  "itil|Service financial management|budget": 1,
+  "itil|Service financial management|cost model": 1,
+  "itil|Service financial management|chargeback report": 1
  }
 }

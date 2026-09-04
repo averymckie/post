@@ -342,21 +342,37 @@ practices:
     - [workbook, {name: fee_rules}]
   - name: budget
     shape: planned spend per period and cost centre
-    instantiated_on: none
+    instantiated_on: OMB budget authority per agency, fiscal years 2016 to 2021 (FY2017 President's Budget database)
     chain:
-    - [cases, {}]
+    - [budget, {of: budauth}]
+    - [group, {by: [agency_name], aggregates: [[sum, y2016, fy2016], [sum, y2017, fy2017], [sum, y2018, fy2018], [sum, y2019, fy2019], [sum, y2020, fy2020], [sum, y2021, fy2021], [count, "*", accounts]]}]
+    - [sort, {by: [fy2017], desc: true}]
     - [workbook, {name: budget}]
   - name: cost model
-    shape: cost per unit of service
-    instantiated_on: none
+    shape: cost per account within each bureau, and the bureau's total
+    instantiated_on: OMB budget authority, fiscal year 2017, by bureau and account
     chain:
-    - [cases, {}]
+    - [budget, {of: budauth}]
+    - [group, {by: [agency_name, bureau_name], aggregates: [[sum, y2017, bureau_fy2017]]}]
+    - [save_as, {name: bureaus}]
+    - [budget, {of: budauth}]
+    - [join, {with: bureaus, keys: [[agency_name, agency_name], [bureau_name, bureau_name]]}]
+    - [derive, {field: share_of_bureau, fn: ratio, num: y2017, den: bureau_fy2017}]
+    - [select, {fields: [agency_name, bureau_name, account_name, bea_category, y2017, bureau_fy2017, share_of_bureau]}]
+    - [sort, {by: [y2017], desc: true}]
     - [workbook, {name: cost_model}]
   - name: chargeback report
-    shape: charges per consumer
-    instantiated_on: none
+    shape: what each consumer is charged, as its share of the whole
+    instantiated_on: OMB outlays per agency and bureau, fiscal year 2017, as shares of the agency's outlays
     chain:
-    - [cases, {}]
+    - [budget, {of: outlays}]
+    - [group, {by: [agency_name], aggregates: [[sum, y2017, agency_fy2017]]}]
+    - [save_as, {name: agencies}]
+    - [budget, {of: outlays}]
+    - [group, {by: [agency_name, bureau_name], aggregates: [[sum, y2017, bureau_fy2017]]}]
+    - [join, {with: agencies, keys: [[agency_name, agency_name]]}]
+    - [derive, {field: share, fn: ratio, num: bureau_fy2017, den: agency_fy2017}]
+    - [sort, {by: [bureau_fy2017], desc: true}]
     - [workbook, {name: chargeback}]
 
 - name: Strategy management

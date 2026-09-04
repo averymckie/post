@@ -1,5 +1,5 @@
 {
- "digest": "c3eb270ca174bcff4629d73efb60da57e65c97445c7ea8fdf58a15a0277e1ead",
+ "digest": "65a14f4b02ff62cef6bb2d4150634a12bd7ebaf9d511297bbe2120ce3e700184",
  "entries": [
   {
    "file": "proofs/out/P1/nodejs-governance/facts.jsonl",
@@ -539,7 +539,7 @@
    "file": "proofs/out/P53/all/register_state.json",
    "input": "all",
    "proof": "P53",
-   "sha256": "fddd1ba2e839152c4c445f4de52252a13486c35b4e1c44c9627b424289f1ac79"
+   "sha256": "5529ec9a55d1a8bc42e16b438febfc08b8f848ccc44b0651409068f96f55a151"
   },
   {
    "file": "proofs/out/P54/majority/truth_table.html",

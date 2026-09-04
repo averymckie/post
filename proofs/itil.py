@@ -52,6 +52,7 @@ BINDINGS: dict[str, str] = {
     "dependencies": "re over maintaining-dependencies.md: one row per maintained dependency",
     "changelog": "re over CHANGELOG_V22.md: one row per release, security releases flagged",
     "changelog_commits": "re over CHANGELOG_V22.md: one row per commit with release, date, scope, message, author, CVE",
+    "budget": "csv.DictReader over the OMB budget database extract (budget authority or outlays), one row per account, year columns typed as numbers",
     "filter": "duckdb WHERE",
     "select": "duckdb SELECT",
     "derive": "duckdb expression (closed set: month, year, days_between, hours_between, contains, ratio, length, words, upper, gt, word)",
@@ -418,6 +419,28 @@ class Ctx:
                 rows.append({"version": version, "date": date, "commit": m.group(1), "cve": m.group(2) or "", "scope": m.group(3), "message": m.group(4), "author": m.group(5), "reference": m.group(6) or ""})
         return rows
 
+    def budget(self, which: str = "budauth") -> Rows:
+        """OMB budget database rows: one per account, year columns as y1976..y2021 in thousands of dollars."""
+        import csv
+
+        path = ROOT / "proofs" / "in" / ("omb-outlays-2017.csv" if which == "outlays" else "omb-budauth-2017.csv")
+        with path.open(encoding="utf-8", newline="") as fh:
+            reader = csv.DictReader(fh)
+            rows = []
+            for r in reader:
+                row: dict[str, Any] = {}
+                for k, v in r.items():
+                    key = ident(k) if not k[:1].isdigit() else "y" + k
+                    if key in ("tq",) or key.startswith("y"):
+                        try:
+                            row[key] = float(v.replace(",", "")) if v not in ("", None) else 0.0
+                        except ValueError:
+                            row[key] = 0.0
+                    else:
+                        row[key] = v
+                rows.append(row)
+        return rows
+
     def source(self, op: str, arg: str) -> Rows:
         return getattr(self, op)(arg) if arg else getattr(self, op)()
 
@@ -728,7 +751,7 @@ def run_chain(ctx: Ctx, chain: list[list[Any]], out_dir: Path, name: str) -> tup
     for step in chain:
         op, params = (step[0], step[1] if len(step) > 1 else {})
         params = dict(params)
-        if op in ("facts", "required_actions", "ordered_steps", "forced_edges", "anchors", "definitions", "prohibitions", "who_must_what", "records", "cases", "events", "minutes_sentences", "minutes_sections", "participants", "attendance", "decisions", "tags", "conformance", "variants", "dfg", "handover", "execution_trace", "roundtrips", "bottlenecks", "release_schedule", "licenses", "dependencies", "changelog", "changelog_commits"):
+        if op in ("facts", "required_actions", "ordered_steps", "forced_edges", "anchors", "definitions", "prohibitions", "who_must_what", "records", "cases", "events", "minutes_sentences", "minutes_sections", "participants", "attendance", "decisions", "tags", "conformance", "variants", "dfg", "handover", "execution_trace", "roundtrips", "bottlenecks", "release_schedule", "licenses", "dependencies", "changelog", "changelog_commits", "budget"):
             rows = ctx.source(op, params.get("of", ""))
         elif op == "filter":
             rows = op_filter(rows, params["where"])

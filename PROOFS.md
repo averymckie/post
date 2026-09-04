@@ -3751,3 +3751,95 @@ proofs/out/P61/usc5-552-doj/cross_references.xlsx          sha256 75b43ea314ce16
 proofs/out/P61/usc5-552-doj/cross_references.json          sha256 f8244167e0545ee47bd5fbe3e51150757aa4bc81f9324b5353cfaa194223f674  reproduced
 shows: reference edges 12 between 9 subsections; most referenced [('(b)', 13), ('(a)', 6), ('(c)', 1)]; acyclic True
 ```
+### coverage
+
+```
+practice                                      deliverables  proven  empty  failed  no real input
+Architecture management                                  4       4      0       0              0
+Continual improvement                                    4       3      0       0              1
+Information security management                          4       4      0       0              0
+Knowledge management                                     4       4      0       0              0
+Measurement and reporting                                4       4      0       0              0
+Organizational change management                         4       3      0       0              1
+Portfolio management                                     3       3      0       0              0
+Project management                                       4       4      0       0              0
+Relationship management                                  3       2      0       0              1
+Risk management                                          3       3      0       0              0
+Service financial management                             4       4      0       0              0
+Strategy management                                      3       3      0       0              0
+Supplier management                                      3       3      0       0              0
+Workforce and talent management                          4       4      0       0              0
+Availability management                                  3       3      0       0              0
+Business analysis                                        4       4      0       0              0
+Capacity and performance management                      4       4      0       0              0
+Change enablement                                        5       5      0       0              0
+Incident management                                      6       6      0       0              0
+IT asset management                                      4       4      0       0              0
+Monitoring and event management                          4       4      0       0              0
+Problem management                                       4       4      0       0              0
+Release management                                       4       4      0       0              0
+Service catalogue management                             3       3      0       0              0
+Service configuration management                         4       4      0       0              0
+Service continuity management                            4       4      0       0              0
+Service design                                           3       3      0       0              0
+Service desk                                             4       4      0       0              0
+Service level management                                 4       4      0       0              0
+Service request management                               4       4      0       0              0
+Service validation and testing                           4       4      0       0              0
+Deployment management                                    4       4      0       0              0
+Infrastructure and platform management                   3       3      0       0              0
+Software development and management                      4       4      0       0              0
+all                                                    130     127      0       0              3
+```
+
+### Service financial management / budget  proven  (revised 1)
+
+```
+shape: planned spend per period and cost centre
+instantiated on: OMB budget authority per agency, fiscal years 2016 to 2021 (FY2017 President's Budget database)
+-> budget of=budauth (csv.DictReader over the OMB budget database extract (budget authority or outlays), one row per account, year columns typed as numbers)
+-> group by=["agency_name"], aggregates=[["sum", "y2016", "fy2016"], ["sum", "y2017", "fy2017"], ["sum", "y2018", "fy2018"], ["sum", "y2019", "fy2019"], ["sum", "y2020", "fy2020"], ["sum", "y2021", "fy2021"], ["count", "*", "accounts"]] (duckdb GROUP BY with count, sum, avg, min, max, list)
+-> sort by=["fy2017"], desc=true (duckdb ORDER BY)
+-> workbook name=budget (openpyxl.Workbook.save)
+-> budget
+proofs/out/itil/service-financial-management/budget/budget.xlsx        sha256 414b3c8700c1f3a71309f524eee0a10100722ef254a0d526c65ca2328e1bf573  registered
+shows: rows 219; first {"agency_name": "Department of Health and Human Services", "fy2016": 1116839000.0, "fy2017": 1150141000.0, "fy2018": 1167055000.0, "fy2019": 1245532000.0, "fy2020": 1312262000.0, "fy2021": 1378449000.0, "accounts": 204}
+```
+
+### Service financial management / cost model  proven  (revised 1)
+
+```
+shape: cost per account within each bureau, and the bureau's total
+instantiated on: OMB budget authority, fiscal year 2017, by bureau and account
+-> budget of=budauth (csv.DictReader over the OMB budget database extract (budget authority or outlays), one row per account, year columns typed as numbers)
+-> group by=["agency_name", "bureau_name"], aggregates=[["sum", "y2017", "bureau_fy2017"]] (duckdb GROUP BY with count, sum, avg, min, max, list)
+-> save_as name=bureaus (the relation kept under a name for a later join)
+-> budget of=budauth (csv.DictReader over the OMB budget database extract (budget authority or outlays), one row per account, year columns typed as numbers)
+-> join with=bureaus, keys=[["agency_name", "agency_name"], ["bureau_name", "bureau_name"]] (duckdb JOIN)
+-> derive field=share_of_bureau, fn=ratio, num=y2017, den=bureau_fy2017 (duckdb expression (closed set: month, year, days_between, hours_between, contains, ratio, length, words, upper, gt, word))
+-> select fields=["agency_name", "bureau_name", "account_name", "bea_category", "y2017", "bureau_fy2017", "share_of_bureau"] (duckdb SELECT)
+-> sort by=["y2017"], desc=true (duckdb ORDER BY)
+-> workbook name=cost_model (openpyxl.Workbook.save)
+-> cost model
+proofs/out/itil/service-financial-management/cost-model/cost_model.xlsx sha256 922095d9e56aabdc2d5a18529c69401863a3e28f49f3e8058e0206a6eb04e403  registered
+shows: rows 4521; first {"agency_name": "Social Security Administration", "bureau_name": "Social Security Administration", "account_name": "Federal Old-age and Survivors Insurance Trust Fund", "bea_category": "Mandatory", "y2017": 820793000.0, 
+```
+
+### Service financial management / chargeback report  proven  (revised 1)
+
+```
+shape: what each consumer is charged, as its share of the whole
+instantiated on: OMB outlays per agency and bureau, fiscal year 2017, as shares of the agency's outlays
+-> budget of=outlays (csv.DictReader over the OMB budget database extract (budget authority or outlays), one row per account, year columns typed as numbers)
+-> group by=["agency_name"], aggregates=[["sum", "y2017", "agency_fy2017"]] (duckdb GROUP BY with count, sum, avg, min, max, list)
+-> save_as name=agencies (the relation kept under a name for a later join)
+-> budget of=outlays (csv.DictReader over the OMB budget database extract (budget authority or outlays), one row per account, year columns typed as numbers)
+-> group by=["agency_name", "bureau_name"], aggregates=[["sum", "y2017", "bureau_fy2017"]] (duckdb GROUP BY with count, sum, avg, min, max, list)
+-> join with=agencies, keys=[["agency_name", "agency_name"]] (duckdb JOIN)
+-> derive field=share, fn=ratio, num=bureau_fy2017, den=agency_fy2017 (duckdb expression (closed set: month, year, days_between, hours_between, contains, ratio, length, words, upper, gt, word))
+-> sort by=["bureau_fy2017"], desc=true (duckdb ORDER BY)
+-> workbook name=chargeback (openpyxl.Workbook.save)
+-> chargeback report
+proofs/out/itil/service-financial-management/chargeback-report/chargeback.xlsx sha256 99166a37d8035c263ce4b2071c75dca78dcec004b445a8baf834ab982571cb0a  registered
+shows: rows 507; first {"agency_name": "Department of Health and Human Services", "bureau_name": "Centers for Medicare and Medicaid Services", "bureau_fy2017": 1128631000.0, "agency_fy2017": 1144690000.0, "share": 0.986}
+```

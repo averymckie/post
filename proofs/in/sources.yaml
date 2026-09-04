@@ -48,3 +48,17 @@ inputs:
     origin: https://github.com/nodejs/node
     retrieved: "2026-09-04"
     license: per the origin
+  - file: omb-budauth-2017.csv
+    title: OMB budget authority by agency, bureau and account, FY1976 to FY2021, thousands of dollars
+    sha256: 8dbc5d89462a43f327a09f694cbc7a7bbf7cc86fda0f48588c9329aca1796ac3
+    fetched_from: https://raw.githubusercontent.com/WhiteHouse/budgetdata/2017/data/budauth.csv
+    origin: https://github.com/WhiteHouse/budgetdata (Office of Management and Budget, Fiscal Year 2017 President's Budget database extract)
+    retrieved: "2026-09-04"
+    license: United States government work
+  - file: omb-outlays-2017.csv
+    title: OMB outlays by agency, bureau and account, FY1962 to FY2021, thousands of dollars
+    sha256: 5490164c7438428692bc06ac63babf01eadfbf17c66d6a18c0bac15fc07bcf73
+    fetched_from: https://raw.githubusercontent.com/WhiteHouse/budgetdata/2017/data/outlays.csv
+    origin: https://github.com/WhiteHouse/budgetdata (Office of Management and Budget, Fiscal Year 2017 President's Budget database extract)
+    retrieved: "2026-09-04"
+    license: United States government work
