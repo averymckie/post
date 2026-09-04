@@ -1,0 +1,1782 @@
+{
+  "nodejs-governance:u0000:s00": {
+    "digest": "1d9f63ad241e51ff78db86c4e8a3a8cb8eea2052a07d88848ab1ac245bd5c257",
+    "end": 28,
+    "origin_offset": 0,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "# Node.js Project Governance",
+    "unit_id": "u0000"
+  },
+  "nodejs-governance:u0001:s00": {
+    "digest": "387024533cc8e3dcfa268803a33d642f4eaeec7d73c6080becfa96b38351c337",
+    "end": 12,
+    "origin_offset": 30,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "<!-- TOC -->",
+    "unit_id": "u0001"
+  },
+  "nodejs-governance:u0002:s00": {
+    "digest": "57ca411486d9c2e1ee7fc157c933d0e76f8427e0f7d7e01dde43276265bbdb72",
+    "end": 520,
+    "origin_offset": 44,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "* [Triagers](#triagers) * [Collaborators](#collaborators) * [Collaborator activities](#collaborator-activities) * [Technical steering committee](#technical-steering-committee) * [TSC meetings](#tsc-meetings) * [Collaborator nominations](#collaborator-nominations) * [Who can nominate Collaborators?](#who-can-nominate-collaborators) * [Ideal Nominees](#ideal-nominees) * [Nominating a new Collaborator](#nominating-a-new-collaborator) * [Onboarding](#onboarding) * [Consensus seeking process](#consensus-seeking-process)",
+    "unit_id": "u0002"
+  },
+  "nodejs-governance:u0003:s00": {
+    "digest": "f96d2d56ca338db169d9d65a3a158a7616603bfad68254d77135053ef292e354",
+    "end": 13,
+    "origin_offset": 578,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "<!-- /TOC -->",
+    "unit_id": "u0003"
+  },
+  "nodejs-governance:u0004:s00": {
+    "digest": "76a71fbef8a8339fcbcaff8c9aadfb85c834bc3cc0c07069a5ebb2eea3d90d68",
+    "end": 2,
+    "origin_offset": 593,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "##",
+    "unit_id": "u0004"
+  },
+  "nodejs-governance:u0004:s01": {
+    "digest": "4e3f3180f4d5bd7031e064a33e238e2d7a3dcd936bdbd313e123b6705067de5e",
+    "end": 11,
+    "origin_offset": 596,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 3,
+    "text": "Triagers",
+    "unit_id": "u0004"
+  },
+  "nodejs-governance:u0005:s00": {
+    "digest": "6b1fb86b15c6f342f6384bddbe124aee8d43d69e2171f9d26252f7e7a9451772",
+    "end": 92,
+    "origin_offset": 606,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "Triagers assess newly-opened issues in the [nodejs/node][] and [nodejs/help][] repositories.",
+    "unit_id": "u0005"
+  },
+  "nodejs-governance:u0005:s01": {
+    "digest": "912ab48e2dc0aa82b96ebe125888e96010545ef5ea4f9d0e7c173d18f395a62c",
+    "end": 154,
+    "origin_offset": 699,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 93,
+    "text": "The GitHub team for Node.js triagers is @nodejs/issue-triage.",
+    "unit_id": "u0005"
+  },
+  "nodejs-governance:u0005:s02": {
+    "digest": "82a73854d17a196615bfa2a419485455c2c2440655aa13ddc71dc0989cbeab5d",
+    "end": 186,
+    "origin_offset": 761,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 155,
+    "text": "Triagers are given the \"Triage\"",
+    "unit_id": "u0005"
+  },
+  "nodejs-governance:u0005:s03": {
+    "digest": "98e4f52c2d286bc1eabd3bba2b7372764d0590dfd0c89c2f67713810987b626f",
+    "end": 208,
+    "origin_offset": 793,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 187,
+    "text": "GitHub role and have:",
+    "unit_id": "u0005"
+  },
+  "nodejs-governance:u0006:s00": {
+    "digest": "68f670d30b5415555e15d5dc0f5618060b94c7e560c43415635d1a02f5eea3f0",
+    "end": 108,
+    "origin_offset": 816,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "* Ability to label issues and pull requests * Ability to comment, close, and reopen issues and pull requests",
+    "unit_id": "u0006"
+  },
+  "nodejs-governance:u0007:s00": {
+    "digest": "9e6b578a1404ecc9974d24c219692d2304b5b3cc2d31fd45fc0ae412ac451967",
+    "end": 4,
+    "origin_offset": 926,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "See:",
+    "unit_id": "u0007"
+  },
+  "nodejs-governance:u0008:s00": {
+    "digest": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
+    "end": 1,
+    "origin_offset": 932,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "*",
+    "unit_id": "u0008"
+  },
+  "nodejs-governance:u0008:s01": {
+    "digest": "c7f9086351401220e93ad425e4f77a68cb4b925b0e67a77397c27ff189c82407",
+    "end": 119,
+    "origin_offset": 934,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 2,
+    "text": "[List of triagers](./README.md#triagers) * [A guide for triagers](./doc/contributing/issues.md#triaging-a-bug-report)",
+    "unit_id": "u0008"
+  },
+  "nodejs-governance:u0009:s00": {
+    "digest": "76a71fbef8a8339fcbcaff8c9aadfb85c834bc3cc0c07069a5ebb2eea3d90d68",
+    "end": 2,
+    "origin_offset": 1053,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "##",
+    "unit_id": "u0009"
+  },
+  "nodejs-governance:u0009:s01": {
+    "digest": "439c0bddcded12eb3e032981d56416fced96dea5b4a08247e7099f44ebd112f6",
+    "end": 16,
+    "origin_offset": 1056,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 3,
+    "text": "Collaborators",
+    "unit_id": "u0009"
+  },
+  "nodejs-governance:u0010:s00": {
+    "digest": "04c198e97c3b6145d566725a9ea206781ea0e538f3d42a6f3b055b5594f5f0f0",
+    "end": 55,
+    "origin_offset": 1071,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "Node.js core collaborators maintain the [nodejs/node][]",
+    "unit_id": "u0010"
+  },
+  "nodejs-governance:u0010:s01": {
+    "digest": "817e68a03da51180fe695304e69dfe569c3c1fa8b0cd9f92b42ac9e10b52011d",
+    "end": 74,
+    "origin_offset": 1127,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 56,
+    "text": "GitHub repository.",
+    "unit_id": "u0010"
+  },
+  "nodejs-governance:u0010:s02": {
+    "digest": "5a5d8d49fbd8bb36c6ab7c6afbc0b63fdd0ebbc3cc788de21e22f3eed71260f1",
+    "end": 102,
+    "origin_offset": 1146,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 75,
+    "text": "The GitHub team for Node.js",
+    "unit_id": "u0010"
+  },
+  "nodejs-governance:u0010:s03": {
+    "digest": "cbe3e10a888009d2f4631eec7c5f7d0c36d1ddb955197ab99c7fdcce573f83b6",
+    "end": 147,
+    "origin_offset": 1174,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 103,
+    "text": "core collaborators is @nodejs/collaborators.",
+    "unit_id": "u0010"
+  },
+  "nodejs-governance:u0010:s04": {
+    "digest": "fa0814f4d7554b0668e88397bd7df3166b689618c0d4bf2d0009fe99623fdaf9",
+    "end": 167,
+    "origin_offset": 1219,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 148,
+    "text": "Collaborators have:",
+    "unit_id": "u0010"
+  },
+  "nodejs-governance:u0011:s00": {
+    "digest": "7a86fa949d89474acf614c48d64bd41f8100f1c304a1947552a50dd01f49026c",
+    "end": 106,
+    "origin_offset": 1240,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "* Commit access to the [nodejs/node][] repository * Access to the Node.js continuous integration (CI) jobs",
+    "unit_id": "u0011"
+  },
+  "nodejs-governance:u0012:s00": {
+    "digest": "bd5047d4b174bc47f146044242bb33596725e55a2730c98f34094fcb64d3d01e",
+    "end": 88,
+    "origin_offset": 1348,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "Both collaborators and non-collaborators may propose changes to the Node.js source code.",
+    "unit_id": "u0012"
+  },
+  "nodejs-governance:u0012:s01": {
+    "digest": "92a6446b86b85d941f479c05e09839cb2fdcbee1b1512a8d610bc84b97358960",
+    "end": 153,
+    "origin_offset": 1437,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 89,
+    "text": "The mechanism to propose such a change is a GitHub pull request.",
+    "unit_id": "u0012"
+  },
+  "nodejs-governance:u0012:s02": {
+    "digest": "c7c6df2c089e091d22856883c4e5b5082d2af09a8843ca945e3e21791eafade5",
+    "end": 208,
+    "origin_offset": 1502,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 154,
+    "text": "Collaborators review and merge (_land_) pull requests.",
+    "unit_id": "u0012"
+  },
+  "nodejs-governance:u0013:s00": {
+    "digest": "23fba9f94d0b45f453d83c77a0491379d0ed2f46f1b60cfa7c4bc5d802ab033c",
+    "end": 79,
+    "origin_offset": 1558,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "Two collaborators must approve a pull request before the pull request can land.",
+    "unit_id": "u0013"
+  },
+  "nodejs-governance:u0013:s01": {
+    "digest": "7b9cbc72eddd35775e7f69023d2ce552f09a1dddd913b6cf4381197e6362da14",
+    "end": 173,
+    "origin_offset": 1638,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 80,
+    "text": "(One collaborator approval is enough if the pull request has been open for more than 7 days.)",
+    "unit_id": "u0013"
+  },
+  "nodejs-governance:u0013:s02": {
+    "digest": "6b45286d8561038c22968be5070f31b9254c2f8c3e549b81296c8e75a942b597",
+    "end": 269,
+    "origin_offset": 1732,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 174,
+    "text": "Approving a pull request indicates that the collaborator accepts responsibility for the change.",
+    "unit_id": "u0013"
+  },
+  "nodejs-governance:u0013:s03": {
+    "digest": "4cfbb70e39b14ae687dc1aab2885b7096a8c52be60eb321498f0330cadc86edd",
+    "end": 340,
+    "origin_offset": 1828,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 270,
+    "text": "Approval must be from collaborators who are not authors of the change.",
+    "unit_id": "u0013"
+  },
+  "nodejs-governance:u0014:s00": {
+    "digest": "1825a2ce9bd3d164c09a01218d18e9f7e92d868e3bd34c569ce6b0e81625f474",
+    "end": 73,
+    "origin_offset": 1900,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "If a collaborator opposes a proposed change, then the change cannot land.",
+    "unit_id": "u0014"
+  },
+  "nodejs-governance:u0014:s01": {
+    "digest": "9461088179b15b58496080093cafbcdfe2969ca439bb186a2608c087f154b8ed",
+    "end": 153,
+    "origin_offset": 1974,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 74,
+    "text": "The exception is if the TSC votes to approve the change despite the opposition.",
+    "unit_id": "u0014"
+  },
+  "nodejs-governance:u0014:s02": {
+    "digest": "56bdcd61938d7f33174cc468eaa7f03abdb44bfe6f059db54e39340b70b32026",
+    "end": 196,
+    "origin_offset": 2054,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 154,
+    "text": "Usually, involving the TSC is unnecessary.",
+    "unit_id": "u0014"
+  },
+  "nodejs-governance:u0014:s03": {
+    "digest": "3a64b4235c327ec609f9fa04006b5accf01ecacfec3836380cf565160b49d731",
+    "end": 285,
+    "origin_offset": 2097,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 197,
+    "text": "Often, discussions or further changes result in collaborators removing their opposition.",
+    "unit_id": "u0014"
+  },
+  "nodejs-governance:u0015:s00": {
+    "digest": "9e6b578a1404ecc9974d24c219692d2304b5b3cc2d31fd45fc0ae412ac451967",
+    "end": 4,
+    "origin_offset": 2187,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "See:",
+    "unit_id": "u0015"
+  },
+  "nodejs-governance:u0016:s00": {
+    "digest": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
+    "end": 1,
+    "origin_offset": 2193,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "*",
+    "unit_id": "u0016"
+  },
+  "nodejs-governance:u0016:s01": {
+    "digest": "62b2c791e136e24e9f9586ce4c5cd09613411bfe668515dadc87279df9313168",
+    "end": 139,
+    "origin_offset": 2195,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 2,
+    "text": "[List of collaborators](./README.md#current-project-team-members) * [A guide for collaborators](./doc/contributing/collaborator-guide.md)",
+    "unit_id": "u0016"
+  },
+  "nodejs-governance:u0017:s00": {
+    "digest": "56dc6d47737d155afddefda1af20c40c901353c222d01e70b7b4e021f2e4f548",
+    "end": 3,
+    "origin_offset": 2334,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "###",
+    "unit_id": "u0017"
+  },
+  "nodejs-governance:u0017:s01": {
+    "digest": "e32148a7e1fc514917f9344f17fc72b140c9f46e3e5095678b0c0b373ec3c159",
+    "end": 27,
+    "origin_offset": 2338,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 4,
+    "text": "Collaborator activities",
+    "unit_id": "u0017"
+  },
+  "nodejs-governance:u0018:s00": {
+    "digest": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
+    "end": 1,
+    "origin_offset": 2363,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "*",
+    "unit_id": "u0018"
+  },
+  "nodejs-governance:u0018:s01": {
+    "digest": "940932b7eadbbd10492530d60e1aa818fe1434c0f384d2847537a24fa2acb0b6",
+    "end": 223,
+    "origin_offset": 2365,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 2,
+    "text": "Helping users and novice contributors * Contributing code and documentation changes that improve the project * Reviewing and commenting on issues and pull requests * Participation in working groups * Merging pull requests",
+    "unit_id": "u0018"
+  },
+  "nodejs-governance:u0019:s00": {
+    "digest": "24df40e642826e21912d9b68e31746bf53397aa813a2009ee30dc6cd60171f62",
+    "end": 81,
+    "origin_offset": 2588,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "The TSC can remove inactive collaborators or provide them with _emeritus_ status.",
+    "unit_id": "u0019"
+  },
+  "nodejs-governance:u0019:s01": {
+    "digest": "0adcfa2dc379d6a4734255eec69477927d011c6eca9f1fa89fda215c707d1066",
+    "end": 145,
+    "origin_offset": 2670,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 82,
+    "text": "Emeriti may request that the TSC restore them to active status.",
+    "unit_id": "u0019"
+  },
+  "nodejs-governance:u0020:s00": {
+    "digest": "e1a2b5b92cec268cf9cfcc536617d15591faaaa371cb7017cb8cc1c82ef327be",
+    "end": 200,
+    "origin_offset": 2735,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "A collaborator is automatically made emeritus (and removed from active collaborator status) if it has been more than 12 months since the collaborator has authored or approved a commit that has landed.",
+    "unit_id": "u0020"
+  },
+  "nodejs-governance:u0021:s00": {
+    "digest": "3104118e9443577e342f5a76626284a794b14611658177e45d3a2d6731a2257f",
+    "end": 31,
+    "origin_offset": 2937,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "## Technical Steering Committee",
+    "unit_id": "u0021"
+  },
+  "nodejs-governance:u0022:s00": {
+    "digest": "becf2e3732916d3c39e4137b67d90152958ba910a942dcc2367541fcd85015a2",
+    "end": 75,
+    "origin_offset": 2970,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "A subset of the collaborators forms the Technical Steering Committee (TSC).",
+    "unit_id": "u0022"
+  },
+  "nodejs-governance:u0022:s01": {
+    "digest": "5c46958cb47baa0059fc435345c5bd27cd5cf57c80c956109f4e63716995afc0",
+    "end": 133,
+    "origin_offset": 3046,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 76,
+    "text": "The TSC has final authority over this project, including:",
+    "unit_id": "u0022"
+  },
+  "nodejs-governance:u0023:s00": {
+    "digest": "50b7e779ad99687297b6d13a02bd02170d58ad8a0a3a4bed28ea6e5b784952cd",
+    "end": 189,
+    "origin_offset": 3105,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "* Technical direction * Project governance and process (including this policy) * Contribution policy * GitHub repository hosting * Conduct guidelines * Maintaining the list of collaborators",
+    "unit_id": "u0023"
+  },
+  "nodejs-governance:u0024:s00": {
+    "digest": "2a51d0c52752f17e01c560eef41cff4e886b95084228849dac837ecfc7d3976e",
+    "end": 101,
+    "origin_offset": 3296,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "The current list of TSC members is in [the project README](./README.md#current-project-team-members).",
+    "unit_id": "u0024"
+  },
+  "nodejs-governance:u0025:s00": {
+    "digest": "fe2b7250cb4452af2c0891a43630bc0b285ca73e28d70ccf883d7db669045192",
+    "end": 54,
+    "origin_offset": 3399,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "The [TSC Charter][] governs the operations of the TSC.",
+    "unit_id": "u0025"
+  },
+  "nodejs-governance:u0025:s01": {
+    "digest": "a1cf029c3b94296c096cc792d44d86177a6b374ea659dcf00d4c92cbc6bf1b92",
+    "end": 149,
+    "origin_offset": 3454,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 55,
+    "text": "All changes to the Charter need approval by the OpenJS Foundation Cross-Project Council (CPC).",
+    "unit_id": "u0025"
+  },
+  "nodejs-governance:u0026:s00": {
+    "digest": "56dc6d47737d155afddefda1af20c40c901353c222d01e70b7b4e021f2e4f548",
+    "end": 3,
+    "origin_offset": 3550,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "###",
+    "unit_id": "u0026"
+  },
+  "nodejs-governance:u0026:s01": {
+    "digest": "29b7f66e193e4fe7ce269c592bfeb1f2b13565264007f3ce5a4cfdfc2650cb39",
+    "end": 16,
+    "origin_offset": 3554,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 4,
+    "text": "TSC meetings",
+    "unit_id": "u0026"
+  },
+  "nodejs-governance:u0027:s00": {
+    "digest": "d8e4ae183949eeb4b867c631fd84cf7e8ce98163d902fa196c5ef9a3cfa8e61a",
+    "end": 41,
+    "origin_offset": 3568,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "The TSC meets in a video conference call.",
+    "unit_id": "u0027"
+  },
+  "nodejs-governance:u0027:s01": {
+    "digest": "4681f8ff17decd76bd5126f5966e5625af2b75ba18d702d6b2a4daad45a6f13a",
+    "end": 96,
+    "origin_offset": 3610,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 42,
+    "text": "Each year, the TSC elects a chair to run the meetings.",
+    "unit_id": "u0027"
+  },
+  "nodejs-governance:u0027:s02": {
+    "digest": "be9dc56379a823229c475c4f2e805b1b51f024a50ef9fe5b1aaf326c770b96b5",
+    "end": 156,
+    "origin_offset": 3665,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 97,
+    "text": "The TSC streams its meetings for public viewing on YouTube.",
+    "unit_id": "u0027"
+  },
+  "nodejs-governance:u0028:s00": {
+    "digest": "9741ce5bb78b6e273418b0d61e6b5fcb4df4ebab78ef97362ef10cbefdd3927b",
+    "end": 67,
+    "origin_offset": 3726,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "TSC meetings may consist of a public portion and a private portion.",
+    "unit_id": "u0028"
+  },
+  "nodejs-governance:u0028:s01": {
+    "digest": "6e9c64b32783d148af5c52fe044fd92bb821a32c92bed3c285ecab071ca3b65e",
+    "end": 207,
+    "origin_offset": 3794,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 68,
+    "text": "The private portion is used to discuss sensitive topics, such as personnel issues, security vulnerabilities, or other confidential matters.",
+    "unit_id": "u0028"
+  },
+  "nodejs-governance:u0028:s02": {
+    "digest": "60021003d4f40f1873205536838540af7f3ef4288aac86b862d0eda106154796",
+    "end": 410,
+    "origin_offset": 3934,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 208,
+    "text": "Private discussions should be avoided as much as possible, and the TSC should strive to keep discussions in the public portion of the meeting, but there are times when private discussions are necessary.",
+    "unit_id": "u0028"
+  },
+  "nodejs-governance:u0029:s00": {
+    "digest": "0b6370923796ed510224667db939569991af965fc5449e7cac347439c9e66dc5",
+    "end": 54,
+    "origin_offset": 4138,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "The TSC agenda includes issues that are at an impasse.",
+    "unit_id": "u0029"
+  },
+  "nodejs-governance:u0029:s01": {
+    "digest": "3b10006c69ebc2af6926799e1f892f7b8e8cb6521a8c7438887f5eee11aeb0c6",
+    "end": 123,
+    "origin_offset": 4193,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 55,
+    "text": "The intention of the agenda is not to review or approve all patches.",
+    "unit_id": "u0029"
+  },
+  "nodejs-governance:u0029:s02": {
+    "digest": "67e10954c0e4e4a7f18ee3e8889bb5aa71cfaaae0fdbc7de9b5419b040df2320",
+    "end": 175,
+    "origin_offset": 4262,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 124,
+    "text": "Collaborators review and approve patches on GitHub.",
+    "unit_id": "u0029"
+  },
+  "nodejs-governance:u0029:s03": {
+    "digest": "0ff65bc77306726c364fdb93122842b7e32a2fdbd3eefaf9cdc4c2b0c98618ee",
+    "end": 304,
+    "origin_offset": 4314,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 176,
+    "text": "The preference is to minimize the need for TSC meetings to make decisions that can otherwise be made by collaborators on GitHub.",
+    "unit_id": "u0029"
+  },
+  "nodejs-governance:u0030:s00": {
+    "digest": "37af8bc7c948707519858b65c8328fc323a906343914a10e403e32a0e9110df0",
+    "end": 84,
+    "origin_offset": 4444,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "Any community member can create a GitHub issue asking that the TSC review something.",
+    "unit_id": "u0030"
+  },
+  "nodejs-governance:u0030:s01": {
+    "digest": "63ca4895fed50a709841e02039dcf7fce76bc5e1b677de558780eb0f80f08072",
+    "end": 174,
+    "origin_offset": 4529,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 85,
+    "text": "If consensus-seeking fails for an issue, a collaborator may apply the `tsc-agenda` label.",
+    "unit_id": "u0030"
+  },
+  "nodejs-governance:u0030:s02": {
+    "digest": "1a378e71bee96ebf22064a62ecedeba74921da328251c540fe4419faf364d1b2",
+    "end": 218,
+    "origin_offset": 4619,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 175,
+    "text": "That will add it to the TSC meeting agenda.",
+    "unit_id": "u0030"
+  },
+  "nodejs-governance:u0031:s00": {
+    "digest": "bd61bb37974c1f4f59e2a36d4da50b524cbf51d0d7ac7d5caea4a7dddb48dff3",
+    "end": 89,
+    "origin_offset": 4664,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "Before each TSC meeting, the meeting chair will share the agenda with members of the TSC.",
+    "unit_id": "u0031"
+  },
+  "nodejs-governance:u0031:s01": {
+    "digest": "360ced9e6a2a3030a5a138e81449925ab04f71d173f8a3fc797634b52ced9c42",
+    "end": 168,
+    "origin_offset": 4754,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 90,
+    "text": "TSC members can also add items to the agenda at the beginning of each meeting.",
+    "unit_id": "u0031"
+  },
+  "nodejs-governance:u0031:s02": {
+    "digest": "d15e073d11002f7303eb9c830cabf490081cc0ca67992ca8279d57e4a55b3d45",
+    "end": 227,
+    "origin_offset": 4833,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 169,
+    "text": "The meeting chair and the TSC cannot veto or remove items.",
+    "unit_id": "u0031"
+  },
+  "nodejs-governance:u0032:s00": {
+    "digest": "d36c796def35a97f6a0372856d8a38a22909711d814b9d158fa510fe5ef74122",
+    "end": 120,
+    "origin_offset": 4893,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "The TSC may invite people to take part in a non-voting capacity in either the public or private portions of the meeting.",
+    "unit_id": "u0032"
+  },
+  "nodejs-governance:u0033:s00": {
+    "digest": "60ba64c43b5877072e55d61b44226d0ec99fa18b85388ed1ccd5cc3cb7797ee8",
+    "end": 155,
+    "origin_offset": 5015,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "During the public portion of the meeting, the TSC chair ensures that someone takes minutes that include a summary of the discussion and any decisions made.",
+    "unit_id": "u0033"
+  },
+  "nodejs-governance:u0033:s01": {
+    "digest": "79dc002a5e1acda6b5aa26ea7e84cc4eb5e4201d583e3e9b5bfe396a2a5e1bec",
+    "end": 294,
+    "origin_offset": 5171,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 156,
+    "text": "After the meeting, the TSC chair ensures that someone opens a public pull request with the minutes from the public portion of the meeting.",
+    "unit_id": "u0033"
+  },
+  "nodejs-governance:u0034:s00": {
+    "digest": "25304d93be47b5daed81b15709eecad10e1ad0ea9afe5a24818dec170af34b10",
+    "end": 150,
+    "origin_offset": 5311,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "The public portion of the TSC meeting is expected to be recorded and made available for live streaming during the meeting or download by anyone after.",
+    "unit_id": "u0034"
+  },
+  "nodejs-governance:u0034:s01": {
+    "digest": "302697264ce38003b4e104b82a1abaeafed0bdbdbee4b76d59549fe00f43fdc0",
+    "end": 272,
+    "origin_offset": 5462,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 151,
+    "text": "This expectation is to be announced to all participants at the start of the each meeting before the recording is started.",
+    "unit_id": "u0034"
+  },
+  "nodejs-governance:u0034:s02": {
+    "digest": "28d73c3919a48508ebb404c2204fc50ff299584312888eeceaa6f4b710a26a4f",
+    "end": 401,
+    "origin_offset": 5584,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 273,
+    "text": "Continued participation in the public portion of the meeting after this announcement is interpreted as consent to the recording.",
+    "unit_id": "u0034"
+  },
+  "nodejs-governance:u0035:s00": {
+    "digest": "ea03895ace27ab45796ce17845841ff37b684182191d2b3589b8da0ac417bb0e",
+    "end": 287,
+    "origin_offset": 5714,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "For the private portion of the meeting, the TSC chair ensures that someone produces a summary of the discussions, gets it reviewed by the attendees, and shares it to all the TSC members once approved by the attendees via a private discussion channel such as the TSC private mailing list.",
+    "unit_id": "u0035"
+  },
+  "nodejs-governance:u0035:s01": {
+    "digest": "a1502d59e38fd74a298276ed17de4a213bb615b9059ceeb5705bb82835a37e0b",
+    "end": 400,
+    "origin_offset": 6002,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 288,
+    "text": "The summary may be made public if there is consensus within the TSC and the non-TSC attendees to make it public.",
+    "unit_id": "u0035"
+  },
+  "nodejs-governance:u0036:s00": {
+    "digest": "04cd5dd6e947535355a7f841a63ad25564dc19dbb5993e8d29658935a75d2bb6",
+    "end": 279,
+    "origin_offset": 6116,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "Recording the private portion of a meeting or maintaining or publishing a detailed transcript is only permitted when all participants present during the private portion of the meeting explicitly agree to the recording and/or transcript, in order to comply to privacy regulations.",
+    "unit_id": "u0036"
+  },
+  "nodejs-governance:u0037:s00": {
+    "digest": "cb235c71161dd1442864a8367490c4e77d0b09921969a4660d2a6dd54a99f699",
+    "end": 188,
+    "origin_offset": 6397,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "All discussions made during meetings are considered provisional, receiving no objections from folks at the TSC meeting to take an action is not equivalent to the TSC endorsing that action.",
+    "unit_id": "u0037"
+  },
+  "nodejs-governance:u0038:s00": {
+    "digest": "8e2cca99af25bed9e9cadce2df338cdc3196fd22defe9a2a8a152525b3ccbc9a",
+    "end": 148,
+    "origin_offset": 6587,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "If a quorum of TSC voting members is present, it is possible to call for an explicit vote, and take the vote immediately if there are no objections.",
+    "unit_id": "u0038"
+  },
+  "nodejs-governance:u0038:s01": {
+    "digest": "91f8878fe3dbd1e9164ad1d1790406ec86cf15530306e2366fd29539020ee0f8",
+    "end": 311,
+    "origin_offset": 6736,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 149,
+    "text": "The decision is considered confirmed once the rest of the TSC voting members have been informed and no objection for taking that vote has been raised in 48 hours.",
+    "unit_id": "u0038"
+  },
+  "nodejs-governance:u0038:s02": {
+    "digest": "9dde56ab66a8498a5e9a6a9a09d63dff0ae8dee6689e78781cdb03cd8315c21c",
+    "end": 426,
+    "origin_offset": 6899,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 312,
+    "text": "To clarify, TSC voting members can object to the vote taking place during the meeting, but not to the vote itself.",
+    "unit_id": "u0038"
+  },
+  "nodejs-governance:u0039:s00": {
+    "digest": "8be6729c43602b4cf8083777559e1def5615c2a871d332bc499f40c7dd8de460",
+    "end": 182,
+    "origin_offset": 7015,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "For discussions outside of meetings, the TSC uses [the TSC issue tracker](https://github.com/nodejs/TSC/issues) for public issues, and the private TSC email list for private matters.",
+    "unit_id": "u0039"
+  },
+  "nodejs-governance:u0039:s01": {
+    "digest": "8d7f6fac0be4d221e51662eb6a0b0d3f25a3930b2bf03f5016767a4af09a771e",
+    "end": 237,
+    "origin_offset": 7198,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 183,
+    "text": "The process for public issues in the issue tracker is:",
+    "unit_id": "u0039"
+  },
+  "nodejs-governance:u0040:s00": {
+    "digest": "6e6ad534a6df407c59eb07256456cbf37db557e015b5dcefa57d6121f55842f6",
+    "end": 89,
+    "origin_offset": 7254,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "* A TSC member opens an issue explaining the proposal/issue and @-mentions @nodejs/tsc. *",
+    "unit_id": "u0040"
+  },
+  "nodejs-governance:u0040:s01": {
+    "digest": "901fce0056700ea843276b6b770ac9c6543e62a0dbb4055772f5806affbb89b9",
+    "end": 218,
+    "origin_offset": 7346,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 90,
+    "text": "The proposal passes if, after 72 hours, there are two or more TSC voting member approvals and no TSC voting member opposition. *",
+    "unit_id": "u0040"
+  },
+  "nodejs-governance:u0040:s02": {
+    "digest": "586779cf3b41929f5798a1d607aab2864118159fb9c429ab3be70387146c0065",
+    "end": 346,
+    "origin_offset": 7477,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 219,
+    "text": "If there is an extended impasse, a TSC member may ask for the issue to be added to the TSC agenda, or make a motion for a vote.",
+    "unit_id": "u0040"
+  },
+  "nodejs-governance:u0041:s00": {
+    "digest": "76a71fbef8a8339fcbcaff8c9aadfb85c834bc3cc0c07069a5ebb2eea3d90d68",
+    "end": 2,
+    "origin_offset": 7608,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "##",
+    "unit_id": "u0041"
+  },
+  "nodejs-governance:u0041:s01": {
+    "digest": "687af4203169e99ff5120f757bc4131d8a79b4b2f374edaabbed5ef55235743e",
+    "end": 27,
+    "origin_offset": 7611,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 3,
+    "text": "Collaborator nominations",
+    "unit_id": "u0041"
+  },
+  "nodejs-governance:u0042:s00": {
+    "digest": "56dc6d47737d155afddefda1af20c40c901353c222d01e70b7b4e021f2e4f548",
+    "end": 3,
+    "origin_offset": 7637,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "###",
+    "unit_id": "u0042"
+  },
+  "nodejs-governance:u0042:s01": {
+    "digest": "48a6ddab184cfebe4c3cd0a7df1dcf1b552aa06e81e146cdeeaeed5bf1d7b7da",
+    "end": 35,
+    "origin_offset": 7641,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 4,
+    "text": "Who can nominate Collaborators?",
+    "unit_id": "u0042"
+  },
+  "nodejs-governance:u0043:s00": {
+    "digest": "abe73c2194912d3099191bf0697f127d88af7750fcc8130ed367f6fa35c57421",
+    "end": 69,
+    "origin_offset": 7674,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "Existing Collaborators can nominate someone to become a Collaborator.",
+    "unit_id": "u0043"
+  },
+  "nodejs-governance:u0044:s00": {
+    "digest": "56dc6d47737d155afddefda1af20c40c901353c222d01e70b7b4e021f2e4f548",
+    "end": 3,
+    "origin_offset": 7745,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "###",
+    "unit_id": "u0044"
+  },
+  "nodejs-governance:u0044:s01": {
+    "digest": "687271121301bac512dbb97cb1b9c615955b023ddd5ee14d0744f462fd874df5",
+    "end": 18,
+    "origin_offset": 7749,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 4,
+    "text": "Ideal Nominees",
+    "unit_id": "u0044"
+  },
+  "nodejs-governance:u0045:s00": {
+    "digest": "b3bfafb032161f06121dd5b63e220f5c7a70ddd50471d3c9fd41b28e4f936aad",
+    "end": 92,
+    "origin_offset": 7765,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "Nominees should have significant and valuable contributions across the Node.js organization.",
+    "unit_id": "u0045"
+  },
+  "nodejs-governance:u0046:s00": {
+    "digest": "610b4765bc4f7c53fe2cf4b11cbda012e72156156e8c400cfa332d976f8ed993",
+    "end": 21,
+    "origin_offset": 7859,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "Contributions can be:",
+    "unit_id": "u0046"
+  },
+  "nodejs-governance:u0047:s00": {
+    "digest": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
+    "end": 1,
+    "origin_offset": 7882,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "*",
+    "unit_id": "u0047"
+  },
+  "nodejs-governance:u0047:s01": {
+    "digest": "6543cb31d1135da2c0dd7c6a0d7ed1653d1e6c4d89c8d3a8b6e2be33b489b3bf",
+    "end": 24,
+    "origin_offset": 7884,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 2,
+    "text": "Opening pull requests.",
+    "unit_id": "u0047"
+  },
+  "nodejs-governance:u0047:s02": {
+    "digest": "e8baee804713e87b5c790d78fb9a54505cf59b03167a68fd46c462fb2febb280",
+    "end": 70,
+    "origin_offset": 7907,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 25,
+    "text": "* Comments and reviews. * Opening new issues.",
+    "unit_id": "u0047"
+  },
+  "nodejs-governance:u0047:s03": {
+    "digest": "cfb6d1c47885f982ae84f201dd437fe8c0bc114336c9eb51a454c13f3ca08cb0",
+    "end": 160,
+    "origin_offset": 7953,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 71,
+    "text": "* Participation in other projects, teams, and working groups of the Node.js organization.",
+    "unit_id": "u0047"
+  },
+  "nodejs-governance:u0048:s00": {
+    "digest": "a3526a64cbdd9b6166eef9872ed7fc1e482f595c7576f8124feff70027e1ab72",
+    "end": 183,
+    "origin_offset": 8046,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "Collaborators should be people volunteering to do unglamorous work because it's the right thing to do, they find the work itself satisfying, and they care about Node.js and its users.",
+    "unit_id": "u0048"
+  },
+  "nodejs-governance:u0048:s01": {
+    "digest": "a52fbd282cd2af1c0f9a718487dde54a6e9831966d45cce3573beb9af8252344",
+    "end": 430,
+    "origin_offset": 8230,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 184,
+    "text": "People should get collaborator status because they're doing work and are likely to continue doing work where having the abilities that come with collaborator status are helpful (abilities like starting CI jobs, reviewing and approving PRs, etc.).",
+    "unit_id": "u0048"
+  },
+  "nodejs-governance:u0048:s02": {
+    "digest": "80db2aefa8bdfd89cfc3fe083394fcbffdab145975ad83eebcbf23012fd2e118",
+    "end": 546,
+    "origin_offset": 8477,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 431,
+    "text": "That will usually--but, very importantly, not always--be work involving committing to the `nodejs/node` repository.",
+    "unit_id": "u0048"
+  },
+  "nodejs-governance:u0048:s03": {
+    "digest": "d0938abfdf4cf0973444f557812d5be926a7f1d668366ff8fd670af13b1b8e8d",
+    "end": 716,
+    "origin_offset": 8593,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 547,
+    "text": "For an example of an exception, someone working primarily on the website might benefit from being able to start Jenkins CI jobs to test changes to documentation tooling.",
+    "unit_id": "u0048"
+  },
+  "nodejs-governance:u0048:s04": {
+    "digest": "3ac1aeddea0edb62061890eac43cde682538e2bdf2c185dc6d5d48cb9cd52996",
+    "end": 847,
+    "origin_offset": 8763,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 717,
+    "text": "That, along with signals indicating commitment to Node.js, personal integrity, etc., should be enough for a successful nomination.",
+    "unit_id": "u0048"
+  },
+  "nodejs-governance:u0049:s00": {
+    "digest": "927c638c67abce62577dcb5de6948b27bb92e6d534ff46319bd7d575e27b10a2",
+    "end": 136,
+    "origin_offset": 8895,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "It is important to understand that potential collaborators may have vastly different areas and levels of expertise, interest, and skill.",
+    "unit_id": "u0049"
+  },
+  "nodejs-governance:u0049:s01": {
+    "digest": "daae621950a09b7b4cda1809521f348ae8b1f07a7f770085da88fc5693a2914f",
+    "end": 293,
+    "origin_offset": 9032,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 137,
+    "text": "The Node.js project is large and complex, and it is not expected that every collaborator will have the same level of expertise in every area of the project.",
+    "unit_id": "u0049"
+  },
+  "nodejs-governance:u0049:s02": {
+    "digest": "daac647b0cf0139c466d625bd21977a1a145d0d7ea8e7c88604b2260e7e84b62",
+    "end": 490,
+    "origin_offset": 9189,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 294,
+    "text": "The complexity or \"sophistication\" of an individual’s contributions, or even their relative engineering \"skill\" level, are not primary factors in determining whether they should be a collaborator.",
+    "unit_id": "u0049"
+  },
+  "nodejs-governance:u0049:s03": {
+    "digest": "6e5e8bde180266e4b7323e2f780a84ed50c9d2effafd83b5dac19b1e0104a528",
+    "end": 815,
+    "origin_offset": 9386,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 491,
+    "text": "The primary factors do include the quality of their contributions (do the contributions make sense, do they add value, do they follow documented guidelines, are they authentic and well-intentioned, etc.), their commitment to the project, can their judgement be trusted, and do they have the ability to work well with others.",
+    "unit_id": "u0049"
+  },
+  "nodejs-governance:u0050:s00": {
+    "digest": "c4a3b90d0d3210c35be2d9e93e9ed6810a037bdaba1aeccaa8498a8d5eddf1dc",
+    "end": 4,
+    "origin_offset": 9712,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "####",
+    "unit_id": "u0050"
+  },
+  "nodejs-governance:u0050:s01": {
+    "digest": "7b67b21a9a16ce0f051b1b2f894c231804f6af7ed9dc740e4fc5fd30349e493a",
+    "end": 37,
+    "origin_offset": 9717,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 5,
+    "text": "The Authenticity of Contributors",
+    "unit_id": "u0050"
+  },
+  "nodejs-governance:u0051:s00": {
+    "digest": "672e4f33763f5b2b0a1aad59b84b54fd3f8bf279b6679cd8b50b6b018c0f2754",
+    "end": 11,
+    "origin_offset": 9751,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "The Node.js",
+    "unit_id": "u0051"
+  },
+  "nodejs-governance:u0051:s01": {
+    "digest": "38b4a8b783a40e108cd4482eea7cda1465d444eac3f6568edad4791a8de03c0b",
+    "end": 138,
+    "origin_offset": 9763,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 12,
+    "text": "project does not require that contributors use their legal names or provide any personal information verifying their identity.",
+    "unit_id": "u0051"
+  },
+  "nodejs-governance:u0052:s00": {
+    "digest": "86286bb42ee234897f6ebf8d77f9e0144539a5832b633c85dc1961fbbab1ed89",
+    "end": 163,
+    "origin_offset": 9891,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "It is not uncommon for malicious actors to attempt to gain commit access to open-source projects in order to inject malicious code or for other nefarious purposes.",
+    "unit_id": "u0052"
+  },
+  "nodejs-governance:u0052:s01": {
+    "digest": "cffa92a822420863123f671ab20c5a79184f738c6db6454aa1dc58a311f0015f",
+    "end": 272,
+    "origin_offset": 10055,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 164,
+    "text": "The Node.js project has a number of mechanisms in place to prevent this, but it is important to be vigilant.",
+    "unit_id": "u0052"
+  },
+  "nodejs-governance:u0052:s02": {
+    "digest": "069ff76542e62879242e5b326a14d0f26ecddd6488bf9769cb21be78da2dcf8e",
+    "end": 366,
+    "origin_offset": 10164,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 273,
+    "text": "If you have concerns about the authenticity of a contributor, please raise them with the TSC.",
+    "unit_id": "u0052"
+  },
+  "nodejs-governance:u0052:s03": {
+    "digest": "1b3e23409d9d5d586cebbdbea718934aefd983e03eae483a42058a0a52d82d24",
+    "end": 518,
+    "origin_offset": 10258,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 367,
+    "text": "Anyone nominating a new collaborator should take reasonable steps to verify that the contributions of the nominee are authentic and made in good faith.",
+    "unit_id": "u0052"
+  },
+  "nodejs-governance:u0052:s04": {
+    "digest": "eeb06b11c6df355d2cc9a9430fad34acf398d870131387e5ac031eed140e732d",
+    "end": 564,
+    "origin_offset": 10410,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 519,
+    "text": "This is not always easy, but it is important.",
+    "unit_id": "u0052"
+  },
+  "nodejs-governance:u0053:s00": {
+    "digest": "56dc6d47737d155afddefda1af20c40c901353c222d01e70b7b4e021f2e4f548",
+    "end": 3,
+    "origin_offset": 10457,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "###",
+    "unit_id": "u0053"
+  },
+  "nodejs-governance:u0053:s01": {
+    "digest": "14dd0e4d0cd2895425b02067a34eebba1f13c6e26bc5ef72b64751f6813d0641",
+    "end": 33,
+    "origin_offset": 10461,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 4,
+    "text": "Nominating a new Collaborator",
+    "unit_id": "u0053"
+  },
+  "nodejs-governance:u0054:s00": {
+    "digest": "f66c795dfba74ff0af8b86831ca8d796521811a96d98c2f97cd3b14dfea8a078",
+    "end": 31,
+    "origin_offset": 10492,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "To nominate a new Collaborator:",
+    "unit_id": "u0054"
+  },
+  "nodejs-governance:u0055:s00": {
+    "digest": "c977dbe785221d34114d345fdf8ff4e18bb4af66750751dbea29407f9738735f",
+    "end": 2,
+    "origin_offset": 10525,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "1.",
+    "unit_id": "u0055"
+  },
+  "nodejs-governance:u0055:s01": {
+    "digest": "896db953a606a40b6e0058c98ed3390321036eecc3f6a80e9d5609bd402b7845",
+    "end": 103,
+    "origin_offset": 10528,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 3,
+    "text": "**Optional but strongly recommended**: open a [discussion in the nodejs/collaborators][] repository.",
+    "unit_id": "u0055"
+  },
+  "nodejs-governance:u0055:s02": {
+    "digest": "027ca1edb400dc292a375e6d66a229865936424e5766c5e8284a60c7fe891f86",
+    "end": 180,
+    "origin_offset": 10632,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 104,
+    "text": "Provide a summary of the nominee's contributions (see below for an example).",
+    "unit_id": "u0055"
+  },
+  "nodejs-governance:u0055:s03": {
+    "digest": "29c8177f26b2af0496d6034721e14007bc49fa239feaf455d81b774386d91b83",
+    "end": 222,
+    "origin_offset": 10712,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 181,
+    "text": "2. **Optional but strongly recommended**:",
+    "unit_id": "u0055"
+  },
+  "nodejs-governance:u0055:s04": {
+    "digest": "e080be828831bc1bfb81960ec875c88edb803c566f65c1d82837d5cdb95d6f18",
+    "end": 486,
+    "origin_offset": 10754,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 223,
+    "text": "After sufficient wait time (e.g. 72 hours), if the nomination proposal has received some support and no explicit block, and any questions/concerns have been addressed, add a comment in the private discussion stating you're planning on opening a public issue, e.g.",
+    "unit_id": "u0055"
+  },
+  "nodejs-governance:u0055:s05": {
+    "digest": "2bc6c76044c5e46900eba2d46077325d85c0a51b774f89627631ef3b4a78c940",
+    "end": 625,
+    "origin_offset": 11030,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 487,
+    "text": "\"I see a number of approvals and no block, I'll be opening a public nomination issue if I don't hear any objections in the next 72 hours\".",
+    "unit_id": "u0055"
+  },
+  "nodejs-governance:u0055:s06": {
+    "digest": "5b2ef49736ede898794285262c20f4a28b253e75e87fabc65697a3b69abd7cf1",
+    "end": 667,
+    "origin_offset": 11172,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 626,
+    "text": "3. **Optional but strongly recommended**:",
+    "unit_id": "u0055"
+  },
+  "nodejs-governance:u0055:s07": {
+    "digest": "a819da0996df382abe093767b66468d73b13d873549af827c1a69046571a456c",
+    "end": 751,
+    "origin_offset": 11214,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 668,
+    "text": "Privately contact the nominee to make sure they're comfortable with the nomination.",
+    "unit_id": "u0055"
+  },
+  "nodejs-governance:u0055:s08": {
+    "digest": "56612fa482d2508e689308613c57bebed798acb94b44421cd6234e557ab5b533",
+    "end": 803,
+    "origin_offset": 11301,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 752,
+    "text": "4. Open an issue in the [nodejs/node][] repository.",
+    "unit_id": "u0055"
+  },
+  "nodejs-governance:u0055:s09": {
+    "digest": "027ca1edb400dc292a375e6d66a229865936424e5766c5e8284a60c7fe891f86",
+    "end": 880,
+    "origin_offset": 11353,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 804,
+    "text": "Provide a summary of the nominee's contributions (see below for an example).",
+    "unit_id": "u0055"
+  },
+  "nodejs-governance:u0055:s10": {
+    "digest": "5805b3c62b1dfb4e40a2067718840a477e27981375ca9f73c08ce234e1a27db3",
+    "end": 975,
+    "origin_offset": 11433,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 881,
+    "text": "Mention @nodejs/collaborators in the issue to notify other collaborators about the nomination.",
+    "unit_id": "u0055"
+  },
+  "nodejs-governance:u0056:s00": {
+    "digest": "7f9d21b7aab2ee63ed5b19195170fb0370255d1d077afb6ca09e4d5439e2e2ca",
+    "end": 261,
+    "origin_offset": 11535,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "The _Optional but strongly recommended_ steps are optional in the sense that skipping them would not invalidate the nomination, but it could put the nominee in a very awkward situation if a nomination they didn't ask for pops out of nowhere only to be rejected.",
+    "unit_id": "u0056"
+  },
+  "nodejs-governance:u0056:s01": {
+    "digest": "f971b5360d42b520aa65631afca1140207d5bf359b084b16c0e658808a0a02eb",
+    "end": 364,
+    "origin_offset": 11797,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 262,
+    "text": "Do not skip those steps unless you're absolutely certain the nominee is fine with the public scrutiny.",
+    "unit_id": "u0056"
+  },
+  "nodejs-governance:u0057:s00": {
+    "digest": "b3ae707fb0282682fa0814fc5cabc80db4e5c2869b5cd05a9a2ef344672f1354",
+    "end": 33,
+    "origin_offset": 11901,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "Example of list of contributions:",
+    "unit_id": "u0057"
+  },
+  "nodejs-governance:u0058:s00": {
+    "digest": "8928bbb96a41859f93882c91d503b5bab5005f60af2c4743b3dc32c100bf15fe",
+    "end": 188,
+    "origin_offset": 11936,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "* Commits in the [nodejs/node][] repository. * Use the link `https://github.com/nodejs/node/commits?author=GITHUB_ID` * Pull requests and issues opened in the [nodejs/node][] repository. *",
+    "unit_id": "u0058"
+  },
+  "nodejs-governance:u0058:s01": {
+    "digest": "587b32d63b2ecbc880fca93a3ec556f6c1e7561677de1261adf3b278772ed6ce",
+    "end": 551,
+    "origin_offset": 12129,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 189,
+    "text": "Use the link `https://github.com/nodejs/node/issues?q=author:GITHUB_ID` * Comments on pull requests and issues in the [nodejs/node][] repository * Use the link `https://github.com/nodejs/node/issues?q=commenter:GITHUB_ID` * Reviews on pull requests in the [nodejs/node][] repository * Use the link `https://github.com/nodejs/node/pulls?q=reviewed-by:GITHUB_ID` *",
+    "unit_id": "u0058"
+  },
+  "nodejs-governance:u0058:s02": {
+    "digest": "522093d47f7972c3aea06c27d276d6128046c599e9fd4cd431c6d425ac19be06",
+    "end": 1028,
+    "origin_offset": 12496,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 552,
+    "text": "Help provided to end-users and novice contributors * Pull requests and issues opened throughout the Node.js organization * Use the link `https://github.com/search?q=author:GITHUB_ID+org:nodejs` * Comments on pull requests and issues throughout the Node.js organization * Use the link `https://github.com/search?q=commenter:GITHUB_ID+org:nodejs` * Participation in other projects, teams, and working groups of the Node.js organization * Other participation in the wider Node.js",
+    "unit_id": "u0058"
+  },
+  "nodejs-governance:u0058:s03": {
+    "digest": "f354ee99e2bc863ce19d80b843353476394ebc3530a51c9290d629065bacc3b3",
+    "end": 1038,
+    "origin_offset": 12980,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 1029,
+    "text": "community",
+    "unit_id": "u0058"
+  },
+  "nodejs-governance:u0059:s00": {
+    "digest": "02e3fb885d554618fc24e95a2ae4137f8bb0a81f6957c9ee64246ebb3acf85a0",
+    "end": 107,
+    "origin_offset": 12991,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "The nomination passes if no collaborators oppose it (as described in the following section) after one week.",
+    "unit_id": "u0059"
+  },
+  "nodejs-governance:u0059:s01": {
+    "digest": "652801cc63b28483cae9b12a6d9a59238f2bfa2b44ddb0234b3a2d8dfbea11df",
+    "end": 227,
+    "origin_offset": 13099,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 108,
+    "text": "In the case of an objection, the TSC is responsible for working with the individuals involved and finding a resolution.",
+    "unit_id": "u0059"
+  },
+  "nodejs-governance:u0059:s02": {
+    "digest": "b85149d867816cd3700287fb91e45b2c9fd946ffec50e9346635d9566412b6ef",
+    "end": 441,
+    "origin_offset": 13219,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 228,
+    "text": "The TSC may, following typical TSC consensus seeking processes, choose to advance a nomination that has otherwise failed to reach a natural consensus or clear path forward even if there are outstanding objections.",
+    "unit_id": "u0059"
+  },
+  "nodejs-governance:u0059:s03": {
+    "digest": "a5ab602eddfc02fde6bf642b6394aba8f93753719982bc4788d179082ebb621d",
+    "end": 582,
+    "origin_offset": 13433,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 442,
+    "text": "The TSC may also choose to prevent a nomination from advancing if the TSC determines that any objections have not been adequately addressed.",
+    "unit_id": "u0059"
+  },
+  "nodejs-governance:u0060:s00": {
+    "digest": "c4a3b90d0d3210c35be2d9e93e9ed6810a037bdaba1aeccaa8498a8d5eddf1dc",
+    "end": 4,
+    "origin_offset": 13575,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "####",
+    "unit_id": "u0060"
+  },
+  "nodejs-governance:u0060:s01": {
+    "digest": "c73bc55db67e5bbff14706804b099482d75730d45231e01e14c0cac6787bee10",
+    "end": 44,
+    "origin_offset": 13580,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 5,
+    "text": "How to review a collaborator nomination",
+    "unit_id": "u0060"
+  },
+  "nodejs-governance:u0061:s00": {
+    "digest": "9f7f2e8840a1430badb517f6d760a2015c7edec972d2ef3804fa0cc8401c605e",
+    "end": 97,
+    "origin_offset": 13621,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "A collaborator nomination can be reviewed in the same way one would review a PR adding a feature:",
+    "unit_id": "u0061"
+  },
+  "nodejs-governance:u0062:s00": {
+    "digest": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
+    "end": 1,
+    "origin_offset": 13720,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "*",
+    "unit_id": "u0062"
+  },
+  "nodejs-governance:u0062:s01": {
+    "digest": "d8c231184a89efbdb0b342f615215b702529a355199dee7b10f56afe7d47beed",
+    "end": 75,
+    "origin_offset": 13722,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 2,
+    "text": "If you see the nomination as something positive to the project, say so! *",
+    "unit_id": "u0062"
+  },
+  "nodejs-governance:u0062:s02": {
+    "digest": "60f62aed252fec61f0da8685c2d9b14a0e390ae36194003301456f640ac9cb5f",
+    "end": 211,
+    "origin_offset": 13796,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 76,
+    "text": "If you are neutral, or feel you don't know enough to have an informed opinion, it's certainly OK to not interact with the nomination. *",
+    "unit_id": "u0062"
+  },
+  "nodejs-governance:u0062:s03": {
+    "digest": "c4c29d3d28e757d7213d11621cb0a4d1560862405cab8a5d822c1a65a2ecf0e8",
+    "end": 317,
+    "origin_offset": 13934,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 212,
+    "text": "If you think the nomination was made too soon, or can be detrimental to the project, share your concerns.",
+    "unit_id": "u0062"
+  },
+  "nodejs-governance:u0062:s04": {
+    "digest": "b4cb98125685062aea41b09c673bc4d3ea134b3493cbdfc18dda68e20f2bc2ad",
+    "end": 382,
+    "origin_offset": 14042,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 318,
+    "text": "See the section \"How to oppose a collaborator nomination\" below.",
+    "unit_id": "u0062"
+  },
+  "nodejs-governance:u0063:s00": {
+    "digest": "15cddc782257c7c53f0f035f75bc0756f5e5ee9181e2de2a8a1ba71e08266515",
+    "end": 323,
+    "origin_offset": 14110,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "Our goal is to keep gate-keeping at a minimal, but it cannot be zero since being a collaborator requires trust (collaborators can start CI jobs, use their veto, push commits, etc.), so what's the minimal amount is subjective, and there will be cases where collaborators disagree on whether a nomination should move forward.",
+    "unit_id": "u0063"
+  },
+  "nodejs-governance:u0064:s00": {
+    "digest": "c7e89600032042d91304caa1e374cfb4da7e53f1b0cd6fc29281c3504a64d9d0",
+    "end": 141,
+    "origin_offset": 14435,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "Refrain from discussing or debating aspects of the nomination process itself directly within a nomination private discussion or public issue.",
+    "unit_id": "u0064"
+  },
+  "nodejs-governance:u0064:s01": {
+    "digest": "8d35a402e2defe2fafeb368598ff247b6483080ef8bb0d2b69d84b88727bf8e2",
+    "end": 228,
+    "origin_offset": 14577,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 142,
+    "text": "Such discussions can derail and frustrate the nomination causing unnecessary friction.",
+    "unit_id": "u0064"
+  },
+  "nodejs-governance:u0064:s02": {
+    "digest": "9a94c19385cc098f30484b27586cd501f21d6b19311f923b28b39696d4a1bafc",
+    "end": 292,
+    "origin_offset": 14664,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 229,
+    "text": "Move such discussions to a separate issue or discussion thread.",
+    "unit_id": "u0064"
+  },
+  "nodejs-governance:u0065:s00": {
+    "digest": "9d56858ab62ca2d6de624b262a3d7b522403026982a01b6b4f82e46f0146ee51",
+    "end": 5,
+    "origin_offset": 14729,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "#####",
+    "unit_id": "u0065"
+  },
+  "nodejs-governance:u0065:s01": {
+    "digest": "8f49c9d437900921d6c8ba8ef1eb3a0b21c5b1f93e70fc5d6ddbd9917adaaa90",
+    "end": 45,
+    "origin_offset": 14735,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 6,
+    "text": "How to oppose a collaborator nomination",
+    "unit_id": "u0065"
+  },
+  "nodejs-governance:u0066:s00": {
+    "digest": "ee71e86a7ee7be9856573be582bd359f505e94a9f6f2a0a770a1d973e07aa92f",
+    "end": 136,
+    "origin_offset": 14776,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "An important rule of thumb is that the nomination process is intended to be biased strongly towards implicit approval of the nomination.",
+    "unit_id": "u0066"
+  },
+  "nodejs-governance:u0066:s01": {
+    "digest": "66bb5b60a8e0321f37c5ee4f60dcdc572b027d7831489249c52b0629a4304bd8",
+    "end": 296,
+    "origin_offset": 14913,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 137,
+    "text": "This means discussion and review around the proposal should be more geared towards \"I have reasons to say no...\" as opposed to \"Give me reasons to say yes...\".",
+    "unit_id": "u0066"
+  },
+  "nodejs-governance:u0067:s00": {
+    "digest": "a0977decf1523381486a571dd32800c6f97816ddbfe8aead8409d9dd30381ec3",
+    "end": 150,
+    "origin_offset": 15074,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "Given that there is no \"Request for changes\" feature in discussions and issues, try to be explicit when your comment is expressing a blocking concern.",
+    "unit_id": "u0067"
+  },
+  "nodejs-governance:u0067:s01": {
+    "digest": "cbf175d1f288c494ae43a2524c5d6aa9eda1c49209885457ef9bde07cf9ee068",
+    "end": 226,
+    "origin_offset": 15225,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 151,
+    "text": "Similarly, once the blocking concern has been addressed, explicitly say so.",
+    "unit_id": "u0067"
+  },
+  "nodejs-governance:u0068:s00": {
+    "digest": "7a4cb208700fd06640dc286fddf349f3c561db73f47efe47572b531c447d674d",
+    "end": 146,
+    "origin_offset": 15302,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "Explicit opposition would typically be signaled as some form of clear and unambiguous comment like, \"I don't believe this nomination should pass\".",
+    "unit_id": "u0068"
+  },
+  "nodejs-governance:u0068:s01": {
+    "digest": "def20ff4c70ae25f93cc3168c5b857fa3e9522835c9fde78080d9a51b16876f1",
+    "end": 370,
+    "origin_offset": 15449,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 147,
+    "text": "Asking clarifying questions or expressing general concerns is not the same as explicit opposition; however, a best effort should be made to answer such questions or addressing those concerns before advancing the nomination.",
+    "unit_id": "u0068"
+  },
+  "nodejs-governance:u0069:s00": {
+    "digest": "abb52a47844ac34dea3a529117415820397938d785037f9d9f71e637db7adcfb",
+    "end": 38,
+    "origin_offset": 15674,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "Opposition does not need to be public.",
+    "unit_id": "u0069"
+  },
+  "nodejs-governance:u0069:s01": {
+    "digest": "c2ec1a357eb813d20e8370180724ab843fb78be4eae421b58a21506ee8c2b7da",
+    "end": 185,
+    "origin_offset": 15713,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 39,
+    "text": "Ideally, the comment showing opposition, and any discussion thereof, should be done in the private discussion _before_ the public issue is opened.",
+    "unit_id": "u0069"
+  },
+  "nodejs-governance:u0069:s02": {
+    "digest": "3b2573da582d4785a5fdbc02b043e124d99515058019b56f08bea5d872cecff1",
+    "end": 371,
+    "origin_offset": 15860,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 186,
+    "text": "Opposition _should_ be paired with clear suggestions for positive, concrete, and unambiguous next steps that the nominee can take to overcome the objection and allow it to move forward.",
+    "unit_id": "u0069"
+  },
+  "nodejs-governance:u0069:s03": {
+    "digest": "03bfb86df9c16733e60a612b756a9ccca698d692738523a89b28e92cc6310942",
+    "end": 552,
+    "origin_offset": 16046,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 372,
+    "text": "While such suggestions are technically optional, they are _strongly encouraged_ to prevent the nomination from stalling indefinitely or objections from being overridden by the TSC.",
+    "unit_id": "u0069"
+  },
+  "nodejs-governance:u0070:s00": {
+    "digest": "50aaab1b593eb334fb33a73f952ec7b43702df80a65f03df2ed18c589f2d6680",
+    "end": 112,
+    "origin_offset": 16228,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "Remember that all private discussions about a nomination will be visible to the nominee once they are onboarded.",
+    "unit_id": "u0070"
+  },
+  "nodejs-governance:u0071:s00": {
+    "digest": "56dc6d47737d155afddefda1af20c40c901353c222d01e70b7b4e021f2e4f548",
+    "end": 3,
+    "origin_offset": 16342,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "###",
+    "unit_id": "u0071"
+  },
+  "nodejs-governance:u0071:s01": {
+    "digest": "a2198f472ce2fbee82a5546090a5dd896b1da3bb678e8963d19eaa03e08ca092",
+    "end": 14,
+    "origin_offset": 16346,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 4,
+    "text": "Onboarding",
+    "unit_id": "u0071"
+  },
+  "nodejs-governance:u0072:s00": {
+    "digest": "429db4d8f44a142ff70d89b885142f6933e2ef249354a85cdde7ff4d28621e86",
+    "end": 72,
+    "origin_offset": 16358,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "After the nomination passes, a TSC member onboards the new collaborator.",
+    "unit_id": "u0072"
+  },
+  "nodejs-governance:u0072:s01": {
+    "digest": "9f566d28e2f9984db240a783e480aa9b6225edc52c4da79c5525cd487dd506f9",
+    "end": 155,
+    "origin_offset": 16431,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 73,
+    "text": "See [the onboarding guide](./onboarding.md) for details of the onboarding process.",
+    "unit_id": "u0072"
+  },
+  "nodejs-governance:u0073:s00": {
+    "digest": "76a71fbef8a8339fcbcaff8c9aadfb85c834bc3cc0c07069a5ebb2eea3d90d68",
+    "end": 2,
+    "origin_offset": 16515,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "##",
+    "unit_id": "u0073"
+  },
+  "nodejs-governance:u0073:s01": {
+    "digest": "15ddf87e110b8b9d5d1ddfa0eaf1adda48d62ff6e68d435abe85d562807c07cb",
+    "end": 28,
+    "origin_offset": 16518,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 3,
+    "text": "Consensus seeking process",
+    "unit_id": "u0073"
+  },
+  "nodejs-governance:u0074:s00": {
+    "digest": "ca670806ff9cbb2890c1c88106234d5142e45ddd8f8796de3d90a13884420c04",
+    "end": 86,
+    "origin_offset": 16545,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "The TSC follows a [Consensus Seeking][] decision-making model per the [TSC Charter][].",
+    "unit_id": "u0074"
+  },
+  "nodejs-governance:u0075:s00": {
+    "digest": "7cd0c7cfc324462aa234a5b74ccbf2cfd5140cc9160d46d4ab9ee6158d69676a",
+    "end": 84,
+    "origin_offset": 16633,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 0,
+    "text": "[Consensus Seeking]: https://en.wikipedia.org/wiki/Consensus-seeking_decision-making",
+    "unit_id": "u0075"
+  },
+  "nodejs-governance:u0075:s01": {
+    "digest": "46f4ea99fabfbfad780255af3d3c94d9b04cab6990624a4078fbf06c90e11584",
+    "end": 154,
+    "origin_offset": 16718,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 85,
+    "text": "[TSC Charter]: https://github.com/nodejs/TSC/blob/HEAD/TSC-Charter.md",
+    "unit_id": "u0075"
+  },
+  "nodejs-governance:u0075:s02": {
+    "digest": "c25e575937e7e4ca3d06936d68a6c78848856611bc71612a68242f2db9e27ad5",
+    "end": 330,
+    "origin_offset": 16788,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 155,
+    "text": "[discussion in the nodejs/collaborators]: https://github.com/nodejs/collaborators/discussions/categories/collaborator-nominations [nodejs/help]: https://github.com/nodejs/help",
+    "unit_id": "u0075"
+  },
+  "nodejs-governance:u0075:s03": {
+    "digest": "73793316f55df3877de6dab523cdb45c067452615fafa6f80b766190629926d9",
+    "end": 376,
+    "origin_offset": 16964,
+    "path": "",
+    "source_id": "nodejs-governance",
+    "start": 331,
+    "text": "[nodejs/node]: https://github.com/nodejs/node",
+    "unit_id": "u0075"
+  }
+}

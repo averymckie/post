@@ -1,0 +1,4142 @@
+{
+  "tsc-2023-11-08:u0000:s00": {
+    "digest": "703216a3384ddd3e0e37642ec2185a11c8ed64f1fa3fe146149b31bd4edba125",
+    "end": 44,
+    "origin_offset": 0,
+    "path": "",
+    "source_id": "tsc-2023-11-08",
+    "start": 0,
+    "text": "# Node.js Technical Steering Committee (TSC)",
+    "unit_id": "u0000"
+  },
+  "tsc-2023-11-08:u0000:s01": {
+    "digest": "fd04907faaaf8815a53e06180e7774f34c93e19f39839e0872556b8ca639cce5",
+    "end": 63,
+    "origin_offset": 45,
+    "path": "",
+    "source_id": "tsc-2023-11-08",
+    "start": 45,
+    "text": "Meeting 2023-11-08",
+    "unit_id": "u0000"
+  },
+  "tsc-2023-11-08:u0001:s00": {
+    "digest": "76a71fbef8a8339fcbcaff8c9aadfb85c834bc3cc0c07069a5ebb2eea3d90d68",
+    "end": 2,
+    "origin_offset": 65,
+    "path": "",
+    "source_id": "tsc-2023-11-08",
+    "start": 0,
+    "text": "##",
+    "unit_id": "u0001"
+  },
+  "tsc-2023-11-08:u0001:s01": {
+    "digest": "9024c197d84940e47ff6aa631b7711c4cbff4e7fb2fe1a574a3592b662983a0d",
+    "end": 8,
+    "origin_offset": 68,
+    "path": "",
+    "source_id": "tsc-2023-11-08",
+    "start": 3,
+    "text": "Links",
+    "unit_id": "u0001"
+  },
+  "tsc-2023-11-08:u0002:s00": {
+    "digest": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
+    "end": 1,
+    "origin_offset": 75,
+    "path": "",
+    "source_id": "tsc-2023-11-08",
+    "start": 0,
+    "text": "*",
+    "unit_id": "u0002"
+  },
+  "tsc-2023-11-08:u0002:s01": {
+    "digest": "8c17095161e1ba8b3758b9a999374cef2906bac24f257571035827a744a67a61",
+    "end": 16,
+    "origin_offset": 77,
+    "path": "",
+    "source_id": "tsc-2023-11-08",
+    "start": 2,
+    "text": "**Recording**:",
+    "unit_id": "u0002"
+  },
+  "tsc-2023-11-08:u0002:s02": {
+    "digest": "8f9032d4371a6ae042a7007905386efe909a6940141ae83ff012eaaff94b558c",
+    "end": 112,
+    "origin_offset": 92,
+    "path": "",
+    "source_id": "tsc-2023-11-08",
+    "start": 17,
+    "text": "<Not available, did not stream> * **GitHub Issue**: <https://github.com/nodejs/TSC/issues/1468>",
+    "unit_id": "u0002"
+  },
+  "tsc-2023-11-08:u0003:s00": {
+    "digest": "76a71fbef8a8339fcbcaff8c9aadfb85c834bc3cc0c07069a5ebb2eea3d90d68",
+    "end": 2,
+    "origin_offset": 189,
+    "path": "",
+    "source_id": "tsc-2023-11-08",
+    "start": 0,
+    "text": "##",
+    "unit_id": "u0003"
+  },
+  "tsc-2023-11-08:u0003:s01": {
+    "digest": "43f9b89c0b9d22d8110ead813ea3949f20592a8bfc3c777d2d49e64da3b0cc9b",
+    "end": 10,
+    "origin_offset": 192,
+    "path": "",
+    "source_id": "tsc-2023-11-08",
+    "start": 3,
+    "text": "Present",
+    "unit_id": "u0003"
+  },
+  "tsc-2023-11-08:u0004:s00": {
+    "digest": "25a88e387cf63e402150a9448974425a73306958e95669bb8063a59b976375a5",
+    "end": 251,
+    "origin_offset": 201,
+    "path": "",
+    "source_id": "tsc-2023-11-08",
+    "start": 0,
+    "text": "* Antoine du Hamel @aduh95 (voting member) * Gireesh Punathil @gireeshpunathil (voting member) * Moshe Atlow @MoLow (voting member) * Darshan Sen @RaisinTen (voting member) * Richard Lau @richardlau (voting member) * Robert Nagy @ronag (voting member)",
+    "unit_id": "u0004"
+  },
+  "tsc-2023-11-08:u0005:s00": {
+    "digest": "76a71fbef8a8339fcbcaff8c9aadfb85c834bc3cc0c07069a5ebb2eea3d90d68",
+    "end": 2,
+    "origin_offset": 454,
+    "path": "",
+    "source_id": "tsc-2023-11-08",
+    "start": 0,
+    "text": "##",
+    "unit_id": "u0005"
+  },
+  "tsc-2023-11-08:u0005:s01": {
+    "digest": "0fdf485f5bfd3762467100246df7a6ce45c3aa687c1645276e6e87240aa37199",
+    "end": 9,
+    "origin_offset": 457,
+    "path": "",
+    "source_id": "tsc-2023-11-08",
+    "start": 3,
+    "text": "Agenda",
+    "unit_id": "u0005"
+  },
+  "tsc-2023-11-08:u0006:s00": {
+    "digest": "56dc6d47737d155afddefda1af20c40c901353c222d01e70b7b4e021f2e4f548",
+    "end": 3,
+    "origin_offset": 465,
+    "path": "",
+    "source_id": "tsc-2023-11-08",
+    "start": 0,
+    "text": "###",
+    "unit_id": "u0006"
+  },
+  "tsc-2023-11-08:u0006:s01": {
+    "digest": "fe02680f247961a1369a66f681f990ec1e4a8708a2e84871019a93a7287ae7dd",
+    "end": 17,
+    "origin_offset": 469,
+    "path": "",
+    "source_id": "tsc-2023-11-08",
+    "start": 4,
+    "text": "Announcements",
+    "unit_id": "u0006"
+  },
+  "tsc-2023-11-08:u0007:s00": {
+    "digest": "ecd4852c625bbf2532320099f40f18be77319870d65f96764e70a1f2a82eb85b",
+    "end": 33,
+    "origin_offset": 484,
+    "path": "",
+    "source_id": "tsc-2023-11-08",
+    "start": 0,
+    "text": "### CPC and Board Meeting Updates",
+    "unit_id": "u0007"
+  },
+  "tsc-2023-11-08:u0008:s00": {
+    "digest": "e95afd50602dd2434c47fdf351431b44ec5a331197fd5e44065542fa701daf5c",
+    "end": 109,
+    "origin_offset": 519,
+    "path": "",
+    "source_id": "tsc-2023-11-08",
+    "start": 0,
+    "text": "*Extracted from **tsc-agenda** labeled issues and pull requests from the **nodejs org** prior to the meeting.",
+    "unit_id": "u0008"
+  },
+  "tsc-2023-11-08:u0009:s00": {
+    "digest": "3e093fc7d248afd5b1464ad6f901f0c45cd2417c37d244d12e04473f96888632",
+    "end": 15,
+    "origin_offset": 630,
+    "path": "",
+    "source_id": "tsc-2023-11-08",
+    "start": 0,
+    "text": "### nodejs/node",
+    "unit_id": "u0009"
+  },
+  "tsc-2023-11-08:u0010:s00": {
+    "digest": "aaa55e2884def225e35a310ffb91fcc4245e0fc99c3b77c43973c28340b28f41",
+    "end": 114,
+    "origin_offset": 647,
+    "path": "",
+    "source_id": "tsc-2023-11-08",
+    "start": 0,
+    "text": "* doc: move deprecated utils to runtime deprecation [#50488](https://github.com/nodejs/node/pull/50488) * darshan:",
+    "unit_id": "u0010"
+  },
+  "tsc-2023-11-08:u0010:s01": {
+    "digest": "2358ab1eb261a71a58f5a580245397e6501073e9b5649b7a36ec0bf4cf10c876",
+    "end": 638,
+    "origin_offset": 764,
+    "path": "",
+    "source_id": "tsc-2023-11-08",
+    "start": 115,
+    "text": "It’s not causing any maintenance burdens AFAIK, so it should be alright to keep around so that we don’t risk breaking any userland code * ask ronag to elaborate on the objection in the next sitting(ronag was not in at the time this was taken up) * lib: hide `navigator` behind a flag [#50412](https://github.com/nodejs/node/pull/50412) * antoine has an alternative PR opened that is expected more likely to get consensus * test: set test-fs-watch as flaky [#50250](https://github.com/nodejs/node/pull/50250) * tsc is aware.",
+    "unit_id": "u0010"
+  },
+  "tsc-2023-11-08:u0010:s02": {
+    "digest": "ce21642a08c7e61c03d7cf38823ca086be38056414b938dd63ebff930266f96a",
+    "end": 1086,
+    "origin_offset": 1296,
+    "path": "",
+    "source_id": "tsc-2023-11-08",
+    "start": 639,
+    "text": "* gireesh: personally in favor of fixing CI flakes as issues become harder to reproduce and troubleshoot when those come from the field / production * antoine: flaky tests are a problem, maybe the TSC can brainstorm a solution * richard: a focussed effort is required to address the CI flakes * deps,doc,lib,src,test: add experimental web storage [#50169](https://github.com/nodejs/node/pull/50169) * richard: contention is on inclusion of sqlite.",
+    "unit_id": "u0010"
+  },
+  "tsc-2023-11-08:u0010:s03": {
+    "digest": "03929fe1f48e2fe99ff03bd4c699c32feaf4916cea2a9c8087bf3d2c211b993b",
+    "end": 1226,
+    "origin_offset": 1750,
+    "path": "",
+    "source_id": "tsc-2023-11-08",
+    "start": 1087,
+    "text": "bring objections on the table for discussion and resolution * robert: the larger issue is whether a Storage API makes sense in core or not?",
+    "unit_id": "u0010"
+  },
+  "tsc-2023-11-08:u0010:s04": {
+    "digest": "70f47764f99dfa9bf4b5c209bf9190cea3126ede00a8d6cfaae206bf9fc1f5db",
+    "end": 1366,
+    "origin_offset": 1892,
+    "path": "",
+    "source_id": "tsc-2023-11-08",
+    "start": 1227,
+    "text": "how much complexity, how much memory footprint this will introduce, what implications to security, upgrade path, compile /link maintenance?",
+    "unit_id": "u0010"
+  },
+  "tsc-2023-11-08:u0010:s05": {
+    "digest": "14e6585c99e07ad27b375874dd8aeb7bd2ca596305598c8ef635c7f43719b687",
+    "end": 1803,
+    "origin_offset": 2032,
+    "path": "",
+    "source_id": "tsc-2023-11-08",
+    "start": 1367,
+    "text": "* robert: we have seen a pattern of APIs with sub-optimal capabilities already, so this may not needs be an exception: not a super great idea, but no strong objection. * continue to wait for feedback from @nodejs/web-standards * richard is going to make update in the PR * Revert \"doc: promote fetch/webstreams from experimental to stable\" [#49867](https://github.com/nodejs/node/pull/49867) * robert: already discussed in the last TSC.",
+    "unit_id": "u0010"
+  },
+  "tsc-2023-11-08:u0010:s06": {
+    "digest": "7af49642abc7fd6594e258f5c4daea63be09910b5bf29a3eeff33af16e96d689",
+    "end": 1861,
+    "origin_offset": 2475,
+    "path": "",
+    "source_id": "tsc-2023-11-08",
+    "start": 1804,
+    "text": "wait for a week to see what Kafra says, remove the label.",
+    "unit_id": "u0010"
+  },
+  "tsc-2023-11-08:u0010:s07": {
+    "digest": "865dc6c9e78f90bb01920c5a42c7254a31e2b9a2d90fabb42880492656d4586c",
+    "end": 1872,
+    "origin_offset": 2535,
+    "path": "",
+    "source_id": "tsc-2023-11-08",
+    "start": 1862,
+    "text": "* antoine:",
+    "unit_id": "u0010"
+  },
+  "tsc-2023-11-08:u0010:s08": {
+    "digest": "26aacb45c8a468ca5b1029bef074d556cdc74067dcf6a38424e7065935f7853d",
+    "end": 1927,
+    "origin_offset": 2546,
+    "path": "",
+    "source_id": "tsc-2023-11-08",
+    "start": 1873,
+    "text": "Let’s ask the author if they want a vote from the TSC.",
+    "unit_id": "u0010"
+  },
+  "tsc-2023-11-08:u0010:s09": {
+    "digest": "f14c37c47e7bb2f5d70c45c814f4fadd2c62411663a80b9ddcddc00f322b4e25",
+    "end": 2213,
+    "origin_offset": 2601,
+    "path": "",
+    "source_id": "tsc-2023-11-08",
+    "start": 1928,
+    "text": "I think it’s only fair if they want to make up their case in a TSC meeting to convince us otherwise * The env var `NODE_V8_COVERAGE` intermittently causes the process to hang [#49344](https://github.com/nodejs/node/issues/49344) * no progress, nothing new, needs pending investigation.",
+    "unit_id": "u0010"
+  },
+  "tsc-2023-11-08:u0010:s10": {
+    "digest": "01742d2338115cc59fbf830d75207eadbf889db6c2aab549ed8b1476f1560234",
+    "end": 2374,
+    "origin_offset": 2889,
+    "path": "",
+    "source_id": "tsc-2023-11-08",
+    "start": 2214,
+    "text": "Defer. * Support for file-system based persistent code cache in user-land module loaders [#47472](https://github.com/nodejs/node/issues/47472) * did not discuss",
+    "unit_id": "u0010"
+  },
+  "tsc-2023-11-08:u0011:s00": {
+    "digest": "0414a019d334d726f0abaa1702a0620ca5c0a8ae59a049e05dc019a6fc3f5f53",
+    "end": 14,
+    "origin_offset": 3053,
+    "path": "",
+    "source_id": "tsc-2023-11-08",
+    "start": 0,
+    "text": "### nodejs/TSC",
+    "unit_id": "u0011"
+  },
+  "tsc-2023-11-08:u0012:s00": {
+    "digest": "a99ae58203e89e3f7d9477f7ccc674609cc7e003a5e2b3fc95a0e32fab2ca28a",
+    "end": 164,
+    "origin_offset": 3069,
+    "path": "",
+    "source_id": "tsc-2023-11-08",
+    "start": 0,
+    "text": "* Changes to our nomination process [#1467](https://github.com/nodejs/TSC/issues/1467) * continue to participate in the discussion: offline and in the next sitting.",
+    "unit_id": "u0012"
+  },
+  "tsc-2023-11-08:u0012:s01": {
+    "digest": "bc629fbd8b915980abf707a54bae1c8943098b3790507d37395b1c6e8d0434e3",
+    "end": 267,
+    "origin_offset": 3236,
+    "path": "",
+    "source_id": "tsc-2023-11-08",
+    "start": 165,
+    "text": "* Automating Flaky Test Detection [#1458](https://github.com/nodejs/TSC/issues/1458) * did not discuss",
+    "unit_id": "u0012"
+  },
+  "tsc-2023-11-08:u0013:s00": {
+    "digest": "029ab7a521fc38afe97655ab7eec58ca1b464f45977d0d0755891b5febd2a1d5",
+    "end": 16,
+    "origin_offset": 3342,
+    "path": "",
+    "source_id": "tsc-2023-11-08",
+    "start": 0,
+    "text": "### nodejs/admin",
+    "unit_id": "u0013"
+  },
+  "tsc-2023-11-08:u0014:s00": {
+    "digest": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
+    "end": 1,
+    "origin_offset": 3360,
+    "path": "",
+    "source_id": "tsc-2023-11-08",
+    "start": 0,
+    "text": "*",
+    "unit_id": "u0014"
+  },
+  "tsc-2023-11-08:u0014:s01": {
+    "digest": "208a7903a070fdd8040b5d43acc339fdb55dbf46c332cf1bb8e3ef7f52d5fe56",
+    "end": 377,
+    "origin_offset": 3362,
+    "path": "",
+    "source_id": "tsc-2023-11-08",
+    "start": 2,
+    "text": "Have a mascot [#828](https://github.com/nodejs/admin/issues/828) * did not discuss * Create `nodejs/socket` repository for Node.js implementation of Cloudflare's Socket API [#826](https://github.com/nodejs/admin/issues/826) * did not discuss * Update meeting times [#1469](https://github.com/nodejs/TSC/issues/1469) * call for action everyone: for updating the meeting times.",
+    "unit_id": "u0014"
+  },
+  "tsc-2023-11-08:u0014:s02": {
+    "digest": "5d69c39f36be82d0f573a5da6451fc51e7a99f1a1df8b8b66677ca15a665c1bd",
+    "end": 480,
+    "origin_offset": 3744,
+    "path": "",
+    "source_id": "tsc-2023-11-08",
+    "start": 378,
+    "text": "even if your availability does not change, make an update so chair knows that it has been attended to.",
+    "unit_id": "u0014"
+  },
+  "tsc-2023-11-08:u0015:s00": {
+    "digest": "76a71fbef8a8339fcbcaff8c9aadfb85c834bc3cc0c07069a5ebb2eea3d90d68",
+    "end": 2,
+    "origin_offset": 3848,
+    "path": "",
+    "source_id": "tsc-2023-11-08",
+    "start": 0,
+    "text": "##",
+    "unit_id": "u0015"
+  },
+  "tsc-2023-11-08:u0015:s01": {
+    "digest": "457d7a7c1c29ea807d7b54ae821428e8218bc8d75f5f61c36ef1ac17ec3cac4a",
+    "end": 24,
+    "origin_offset": 3851,
+    "path": "",
+    "source_id": "tsc-2023-11-08",
+    "start": 3,
+    "text": "Strategic Initiatives",
+    "unit_id": "u0015"
+  },
+  "tsc-2023-11-08:u0016:s00": {
+    "digest": "76a71fbef8a8339fcbcaff8c9aadfb85c834bc3cc0c07069a5ebb2eea3d90d68",
+    "end": 2,
+    "origin_offset": 3874,
+    "path": "",
+    "source_id": "tsc-2023-11-08",
+    "start": 0,
+    "text": "##",
+    "unit_id": "u0016"
+  },
+  "tsc-2023-11-08:u0016:s01": {
+    "digest": "3daaed66ed149c285905afcb9e343a59aad75ebdf76a8989468a2c2e565be042",
+    "end": 20,
+    "origin_offset": 3877,
+    "path": "",
+    "source_id": "tsc-2023-11-08",
+    "start": 3,
+    "text": "Upcoming Meetings",
+    "unit_id": "u0016"
+  },
+  "tsc-2023-11-08:u0017:s00": {
+    "digest": "d0dd77062f7e143636478b85b16dda0153d7f59e3ae151cbbb3d6593bfd24df3",
+    "end": 61,
+    "origin_offset": 3896,
+    "path": "",
+    "source_id": "tsc-2023-11-08",
+    "start": 0,
+    "text": "* **Node.js Project Calendar**: <https://nodejs.org/calendar>",
+    "unit_id": "u0017"
+  },
+  "tsc-2023-12-06:u0000:s00": {
+    "digest": "703216a3384ddd3e0e37642ec2185a11c8ed64f1fa3fe146149b31bd4edba125",
+    "end": 44,
+    "origin_offset": 0,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 0,
+    "text": "# Node.js Technical Steering Committee (TSC)",
+    "unit_id": "u0000"
+  },
+  "tsc-2023-12-06:u0000:s01": {
+    "digest": "fec892bc225711f01ea6e54b3cc39f7787750305d7707e976ee568b8a5f539ed",
+    "end": 63,
+    "origin_offset": 45,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 45,
+    "text": "Meeting 2023-12-06",
+    "unit_id": "u0000"
+  },
+  "tsc-2023-12-06:u0001:s00": {
+    "digest": "76a71fbef8a8339fcbcaff8c9aadfb85c834bc3cc0c07069a5ebb2eea3d90d68",
+    "end": 2,
+    "origin_offset": 65,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 0,
+    "text": "##",
+    "unit_id": "u0001"
+  },
+  "tsc-2023-12-06:u0001:s01": {
+    "digest": "9024c197d84940e47ff6aa631b7711c4cbff4e7fb2fe1a574a3592b662983a0d",
+    "end": 8,
+    "origin_offset": 68,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 3,
+    "text": "Links",
+    "unit_id": "u0001"
+  },
+  "tsc-2023-12-06:u0002:s00": {
+    "digest": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
+    "end": 1,
+    "origin_offset": 75,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 0,
+    "text": "*",
+    "unit_id": "u0002"
+  },
+  "tsc-2023-12-06:u0002:s01": {
+    "digest": "dbb33bba3ae3fd6406e41b10a1b3d5f6fa8eefa96d0d13d910b7041fd1a6d518",
+    "end": 126,
+    "origin_offset": 77,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 2,
+    "text": "**Recording**: <https://www.youtube.com/watch?v=Yp_3pz_Mwvs> * **GitHub Issue**: <https://github.com/nodejs/TSC/issues/1478>",
+    "unit_id": "u0002"
+  },
+  "tsc-2023-12-06:u0003:s00": {
+    "digest": "76a71fbef8a8339fcbcaff8c9aadfb85c834bc3cc0c07069a5ebb2eea3d90d68",
+    "end": 2,
+    "origin_offset": 204,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 0,
+    "text": "##",
+    "unit_id": "u0003"
+  },
+  "tsc-2023-12-06:u0003:s01": {
+    "digest": "43f9b89c0b9d22d8110ead813ea3949f20592a8bfc3c777d2d49e64da3b0cc9b",
+    "end": 10,
+    "origin_offset": 207,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 3,
+    "text": "Present",
+    "unit_id": "u0003"
+  },
+  "tsc-2023-12-06:u0004:s00": {
+    "digest": "07060503e4759532fec93918a484844cd3b964d180585c96c44c1608bff49d88",
+    "end": 425,
+    "origin_offset": 216,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 0,
+    "text": "* Antoine du Hamel @aduh95 (voting member) * Ruben Bridgewater @BridgeAR (voting member) * Gireesh Punathil @gireeshpunathil (voting member) * Joyee Cheung @joyeecheung (voting member) * Michael Dawson @mhdawson (voting member) * Moshe Atlow @MoLow (voting member) * Richard Lau @richardlau (voting member) * Robert Nagy @ronag (voting member) * Ruy Adorno @ruyadorno (voting member) * Tobias Nießen @tniessen (voting member)",
+    "unit_id": "u0004"
+  },
+  "tsc-2023-12-06:u0005:s00": {
+    "digest": "76a71fbef8a8339fcbcaff8c9aadfb85c834bc3cc0c07069a5ebb2eea3d90d68",
+    "end": 2,
+    "origin_offset": 643,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 0,
+    "text": "##",
+    "unit_id": "u0005"
+  },
+  "tsc-2023-12-06:u0005:s01": {
+    "digest": "0fdf485f5bfd3762467100246df7a6ce45c3aa687c1645276e6e87240aa37199",
+    "end": 9,
+    "origin_offset": 646,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 3,
+    "text": "Agenda",
+    "unit_id": "u0005"
+  },
+  "tsc-2023-12-06:u0006:s00": {
+    "digest": "56dc6d47737d155afddefda1af20c40c901353c222d01e70b7b4e021f2e4f548",
+    "end": 3,
+    "origin_offset": 654,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 0,
+    "text": "###",
+    "unit_id": "u0006"
+  },
+  "tsc-2023-12-06:u0006:s01": {
+    "digest": "fe02680f247961a1369a66f681f990ec1e4a8708a2e84871019a93a7287ae7dd",
+    "end": 17,
+    "origin_offset": 658,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 4,
+    "text": "Announcements",
+    "unit_id": "u0006"
+  },
+  "tsc-2023-12-06:u0007:s00": {
+    "digest": "ecd4852c625bbf2532320099f40f18be77319870d65f96764e70a1f2a82eb85b",
+    "end": 33,
+    "origin_offset": 673,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 0,
+    "text": "### CPC and Board Meeting Updates",
+    "unit_id": "u0007"
+  },
+  "tsc-2023-12-06:u0008:s00": {
+    "digest": "e95afd50602dd2434c47fdf351431b44ec5a331197fd5e44065542fa701daf5c",
+    "end": 109,
+    "origin_offset": 708,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 0,
+    "text": "*Extracted from **tsc-agenda** labeled issues and pull requests from the **nodejs org** prior to the meeting.",
+    "unit_id": "u0008"
+  },
+  "tsc-2023-12-06:u0009:s00": {
+    "digest": "95f4e5977b1f64af3eb14553861e49625a5e765ca81903fd4395ec5f6e5fd6a2",
+    "end": 156,
+    "origin_offset": 819,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 0,
+    "text": "* Michael - CPC discussion updates to the Travel fund, if you are interested please check out the issue or comment on updated proposal when it is published.",
+    "unit_id": "u0009"
+  },
+  "tsc-2023-12-06:u0010:s00": {
+    "digest": "3e093fc7d248afd5b1464ad6f901f0c45cd2417c37d244d12e04473f96888632",
+    "end": 15,
+    "origin_offset": 977,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 0,
+    "text": "### nodejs/node",
+    "unit_id": "u0010"
+  },
+  "tsc-2023-12-06:u0011:s00": {
+    "digest": "966ef0df5c246074a7128f1144c08311f1038ee76354a76b5bf424b88eb42740",
+    "end": 539,
+    "origin_offset": 994,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 0,
+    "text": "* lib: promote process.binding/_tickCallback to runtime deprecation [#50687](https://github.com/nodejs/node/pull/50687) * Discussed a few weeks ago, Joyee had suggested that we follow earlier suggestion for Anna in terms of doing it incrementally. * James had said in last meeting, he agrees it makes sense to defer a bit, still have some time to figure out if we should do it incrementally * Discussed if we should have a vote. * Joyee will open TSC issue to get gather info and with goal of turning that into a set of options for a vote.",
+    "unit_id": "u0011"
+  },
+  "tsc-2023-12-06:u0012:s00": {
+    "digest": "44f0935cba460f624db24e92c73f2a1554a34d1becac536f869d823d2befd55d",
+    "end": 246,
+    "origin_offset": 1549,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 0,
+    "text": "* Seeking approval to use the Node.js logo on the WinterCG website [#50668](https://github.com/nodejs/node/issues/50668) * Agreed this can be dropped from agenda as no objections in issue and its moving forward and there is sufficient FYI to TSC.",
+    "unit_id": "u0012"
+  },
+  "tsc-2023-12-06:u0013:s00": {
+    "digest": "0414a019d334d726f0abaa1702a0620ca5c0a8ae59a049e05dc019a6fc3f5f53",
+    "end": 14,
+    "origin_offset": 1799,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 0,
+    "text": "### nodejs/TSC",
+    "unit_id": "u0013"
+  },
+  "tsc-2023-12-06:u0014:s00": {
+    "digest": "9ffb9664c1235d3968b24fa7a4703933934f16478199181ee04619d94e85cd69",
+    "end": 75,
+    "origin_offset": 1815,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 0,
+    "text": "* Update meeting times [#1469](https://github.com/nodejs/TSC/issues/1469) *",
+    "unit_id": "u0014"
+  },
+  "tsc-2023-12-06:u0014:s01": {
+    "digest": "1769428346317fd4dda7405a8102b281b33101cda84d3a91e2000c7ae2a72ab1",
+    "end": 218,
+    "origin_offset": 1893,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 76,
+    "text": "Unless there are objections in meeting lets move to the times suggested in <https://github.com/nodejs/TSC/issues/1469#issuecomment-1834589713>",
+    "unit_id": "u0014"
+  },
+  "tsc-2023-12-06:u0014:s02": {
+    "digest": "605cc8f251dd236b13850af3759690f1ff27df9926dcf9fdfd08164d10da8ddf",
+    "end": 316,
+    "origin_offset": 2036,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 219,
+    "text": "which are 15 and 16 UTC * No objections to the times 15 and 16 in TSC meeting today, will action.",
+    "unit_id": "u0014"
+  },
+  "tsc-2023-12-06:u0015:s00": {
+    "digest": "029ab7a521fc38afe97655ab7eec58ca1b464f45977d0d0755891b5febd2a1d5",
+    "end": 16,
+    "origin_offset": 2137,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 0,
+    "text": "### nodejs/admin",
+    "unit_id": "u0015"
+  },
+  "tsc-2023-12-06:u0016:s00": {
+    "digest": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
+    "end": 1,
+    "origin_offset": 2155,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 0,
+    "text": "*",
+    "unit_id": "u0016"
+  },
+  "tsc-2023-12-06:u0016:s01": {
+    "digest": "6dc65ebf974a5b6989d23d7497faa04599b7e78ccc16e287fd08a87ab2a15c57",
+    "end": 145,
+    "origin_offset": 2157,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 2,
+    "text": "Have a mascot [#828](https://github.com/nodejs/admin/issues/828) * Agreed to remove from the agenda until there is a question for the TSC again",
+    "unit_id": "u0016"
+  },
+  "tsc-2023-12-06:u0017:s00": {
+    "digest": "07fd9fbc113c4d5ed9568c4a39cd9de1e95abbecee34efd733d4535a9b99545e",
+    "end": 142,
+    "origin_offset": 2304,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 0,
+    "text": "* Create `nodejs/socket` repository for Node.js implementation of Cloudflare's Socket API [#826](https://github.com/nodejs/admin/issues/826) *",
+    "unit_id": "u0017"
+  },
+  "tsc-2023-12-06:u0017:s01": {
+    "digest": "16f9c426ef2f332580ee029495fedd6d7dafd4313bd35c0247bea4db9a0b0c4a",
+    "end": 237,
+    "origin_offset": 2449,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 143,
+    "text": "Does this still need to be on agenda, seems like in short term consensus is not to pull it in.",
+    "unit_id": "u0017"
+  },
+  "tsc-2023-12-06:u0017:s02": {
+    "digest": "d05e6921d770a76239eb4045c3dd992a9480f37e592f5585fd1752e7bac2b975",
+    "end": 320,
+    "origin_offset": 2544,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 238,
+    "text": "Probably does not need to be on agenda unless TSC members want to advocate for it.",
+    "unit_id": "u0017"
+  },
+  "tsc-2023-12-06:u0017:s03": {
+    "digest": "61a04f1894721cb39e57713f68c61165be0ee84972166e4c9d0c400dcc95200e",
+    "end": 621,
+    "origin_offset": 2629,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 321,
+    "text": "* Commented last week that it should be in WinterCG repo, or somewhere else. * For TSC, it starts by being published under namespace for individual/org until it is part of the standard * Some concern raised over taking over socket namespace at this point, better to wait until there are more signals.",
+    "unit_id": "u0017"
+  },
+  "tsc-2023-12-06:u0017:s04": {
+    "digest": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
+    "end": 623,
+    "origin_offset": 2936,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 622,
+    "text": "*",
+    "unit_id": "u0017"
+  },
+  "tsc-2023-12-06:u0017:s05": {
+    "digest": "fceb25a84c719346b626fd3da5180a852a6e52cb489160d8ba72e9f261fd08dc",
+    "end": 775,
+    "origin_offset": 2938,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 624,
+    "text": "Michael proposed we remove from agenda, add feedback to the issue that we believe consensus is that it’s too early to consider pulling it into the org.",
+    "unit_id": "u0017"
+  },
+  "tsc-2023-12-06:u0017:s06": {
+    "digest": "ee09f875c6e4109b86493910bdf71ea5d390dfc4dd7de95cc93552222d9fc4b4",
+    "end": 837,
+    "origin_offset": 3090,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 776,
+    "text": "Please re-add to org if you would like to advocate otherwise.",
+    "unit_id": "u0017"
+  },
+  "tsc-2023-12-06:u0018:s00": {
+    "digest": "5022415a84798d17bbaca542a180d2f6ed472292d2a88c0807c59b1e20b8a0aa",
+    "end": 93,
+    "origin_offset": 3153,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 0,
+    "text": "* Events / Collaborator Summits for 2024 [#814](https://github.com/nodejs/admin/issues/814) *",
+    "unit_id": "u0018"
+  },
+  "tsc-2023-12-06:u0018:s01": {
+    "digest": "a1b2e6ec296248178a2140ad32b883ec19ba7c3cddefbb4ace6930ddd27e2ee3",
+    "end": 210,
+    "origin_offset": 3249,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 94,
+    "text": "Michael had sent email get see who was interested, discussion has mostly been about proposals from Matteo and Joyee.",
+    "unit_id": "u0018"
+  },
+  "tsc-2023-12-06:u0018:s02": {
+    "digest": "0be11c733782d6fe064ff5a3fa5bd309b5fb3daf35f9ef9402035a2de14874c0",
+    "end": 417,
+    "origin_offset": 3368,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 211,
+    "text": "* Joyee just need to decide the when/where and how many people we are expecting * Proposed dates are April 3-4 in advance of CityJS London, plan to have 30-40 people and possibly break out room for 10-20. *",
+    "unit_id": "u0018"
+  },
+  "tsc-2023-12-06:u0018:s03": {
+    "digest": "6254c553215ceb2eb46df48f35f8c68bb47aee8b8a90a19ef3167456f19f57da",
+    "end": 630,
+    "origin_offset": 3579,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 418,
+    "text": "No questions/concerns on that from TSC members in the meeting * Michael, also good to think about where we might have the second one, and if there is a conference in NA that it would make sense to collocate with.",
+    "unit_id": "u0018"
+  },
+  "tsc-2023-12-06:u0019:s00": {
+    "digest": "76a71fbef8a8339fcbcaff8c9aadfb85c834bc3cc0c07069a5ebb2eea3d90d68",
+    "end": 2,
+    "origin_offset": 3795,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 0,
+    "text": "##",
+    "unit_id": "u0019"
+  },
+  "tsc-2023-12-06:u0019:s01": {
+    "digest": "457d7a7c1c29ea807d7b54ae821428e8218bc8d75f5f61c36ef1ac17ec3cac4a",
+    "end": 24,
+    "origin_offset": 3798,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 3,
+    "text": "Strategic Initiatives",
+    "unit_id": "u0019"
+  },
+  "tsc-2023-12-06:u0020:s00": {
+    "digest": "b607cd7284054f32c232cb1b7caddaba6d5bdb12bbc5e65fe9105d29b58fc6d8",
+    "end": 24,
+    "origin_offset": 3821,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 0,
+    "text": "* Antoine - Core promise",
+    "unit_id": "u0020"
+  },
+  "tsc-2023-12-06:u0020:s01": {
+    "digest": "aa52b3b273d724e1c63231de6ac9779fbd1855d9de973a30e34d2c2e1452dec2",
+    "end": 77,
+    "origin_offset": 3846,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 25,
+    "text": "APIs, - no update, may not make sense to keep alive.",
+    "unit_id": "u0020"
+  },
+  "tsc-2023-12-06:u0020:s02": {
+    "digest": "5db3d1b6f699acbbd264b3cb2d5482cf8859fb036de9072558123c9b2dc82039",
+    "end": 117,
+    "origin_offset": 3899,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 78,
+    "text": "Only Child process lacks a promise API.",
+    "unit_id": "u0020"
+  },
+  "tsc-2023-12-06:u0020:s03": {
+    "digest": "40fb6f29bebe8f2145e7e8a5a2c1aed7c16aa6dc5bcdf608044bb03cbbd221e9",
+    "end": 341,
+    "origin_offset": 3941,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 118,
+    "text": "* Formal call for volunteers to propose API for child process * Joyee - Startup Snapshot - PR to allow configuration, still needs more code reviews <https://github.com/nodejs/node/pull/50453> * Michael - Next-10 - No update",
+    "unit_id": "u0020"
+  },
+  "tsc-2023-12-06:u0021:s00": {
+    "digest": "76a71fbef8a8339fcbcaff8c9aadfb85c834bc3cc0c07069a5ebb2eea3d90d68",
+    "end": 2,
+    "origin_offset": 4166,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 0,
+    "text": "##",
+    "unit_id": "u0021"
+  },
+  "tsc-2023-12-06:u0021:s01": {
+    "digest": "3daaed66ed149c285905afcb9e343a59aad75ebdf76a8989468a2c2e565be042",
+    "end": 20,
+    "origin_offset": 4169,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 3,
+    "text": "Upcoming Meetings",
+    "unit_id": "u0021"
+  },
+  "tsc-2023-12-06:u0022:s00": {
+    "digest": "d0dd77062f7e143636478b85b16dda0153d7f59e3ae151cbbb3d6593bfd24df3",
+    "end": 61,
+    "origin_offset": 4188,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 0,
+    "text": "* **Node.js Project Calendar**: <https://nodejs.org/calendar>",
+    "unit_id": "u0022"
+  },
+  "tsc-2023-12-06:u0023:s00": {
+    "digest": "92082b4382f54ee059322fa42876c180ec8a8915ca42cd90e6b347b0eee4a598",
+    "end": 79,
+    "origin_offset": 4251,
+    "path": "",
+    "source_id": "tsc-2023-12-06",
+    "start": 0,
+    "text": "Click `+GoogleCalendar` at the bottom right to add to your own Google calendar.",
+    "unit_id": "u0023"
+  },
+  "tsc-2024-01-10:u0000:s00": {
+    "digest": "703216a3384ddd3e0e37642ec2185a11c8ed64f1fa3fe146149b31bd4edba125",
+    "end": 44,
+    "origin_offset": 0,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 0,
+    "text": "# Node.js Technical Steering Committee (TSC)",
+    "unit_id": "u0000"
+  },
+  "tsc-2024-01-10:u0000:s01": {
+    "digest": "c24052b3821fe3b5dc6b4590ead63d72b00844bb198d1ea479d48c44473e5cfa",
+    "end": 63,
+    "origin_offset": 45,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 45,
+    "text": "Meeting 2024-01-10",
+    "unit_id": "u0000"
+  },
+  "tsc-2024-01-10:u0001:s00": {
+    "digest": "76a71fbef8a8339fcbcaff8c9aadfb85c834bc3cc0c07069a5ebb2eea3d90d68",
+    "end": 2,
+    "origin_offset": 65,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 0,
+    "text": "##",
+    "unit_id": "u0001"
+  },
+  "tsc-2024-01-10:u0001:s01": {
+    "digest": "9024c197d84940e47ff6aa631b7711c4cbff4e7fb2fe1a574a3592b662983a0d",
+    "end": 8,
+    "origin_offset": 68,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 3,
+    "text": "Links",
+    "unit_id": "u0001"
+  },
+  "tsc-2024-01-10:u0002:s00": {
+    "digest": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
+    "end": 1,
+    "origin_offset": 75,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 0,
+    "text": "*",
+    "unit_id": "u0002"
+  },
+  "tsc-2024-01-10:u0002:s01": {
+    "digest": "69a04e297b97ace49cc7750660b034db80c06b7979a0de8f88b06fe529a504be",
+    "end": 126,
+    "origin_offset": 77,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 2,
+    "text": "**Recording**: <https://www.youtube.com/watch?v=m8dtXhOPDO0> * **GitHub Issue**: <https://github.com/nodejs/TSC/issues/1489>",
+    "unit_id": "u0002"
+  },
+  "tsc-2024-01-10:u0003:s00": {
+    "digest": "76a71fbef8a8339fcbcaff8c9aadfb85c834bc3cc0c07069a5ebb2eea3d90d68",
+    "end": 2,
+    "origin_offset": 204,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 0,
+    "text": "##",
+    "unit_id": "u0003"
+  },
+  "tsc-2024-01-10:u0003:s01": {
+    "digest": "43f9b89c0b9d22d8110ead813ea3949f20592a8bfc3c777d2d49e64da3b0cc9b",
+    "end": 10,
+    "origin_offset": 207,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 3,
+    "text": "Present",
+    "unit_id": "u0003"
+  },
+  "tsc-2024-01-10:u0004:s00": {
+    "digest": "1f4fb439fd4a5de82fe719c51368226231f9e0cb53638c4e8e70338f95a72c16",
+    "end": 145,
+    "origin_offset": 216,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 0,
+    "text": "* Yagiz Nizipli @anonrig (voting member) * Geoffrey Booth @GeoffreyBooth (voting member) * Joyee Cheung @joyeecheung (voting member) * Chengzhong",
+    "unit_id": "u0004"
+  },
+  "tsc-2024-01-10:u0004:s01": {
+    "digest": "bbba926fbf3724508178fcdf3f31a04ea91a0b3fd86bcb1259e4c9889e17e14f",
+    "end": 418,
+    "origin_offset": 362,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 146,
+    "text": "Wu @legendecas (voting member) * Matteo Collina @mcollina (voting member) * Michael Dawson @mhdawson (voting member) * Moshe Atlow @MoLow (voting member) * Richard Lau @richardlau (voting member) * Robert Nagy @ronag (voting member) * Ruy Adorno @ruyadorno (voting member)",
+    "unit_id": "u0004"
+  },
+  "tsc-2024-01-10:u0005:s00": {
+    "digest": "76a71fbef8a8339fcbcaff8c9aadfb85c834bc3cc0c07069a5ebb2eea3d90d68",
+    "end": 2,
+    "origin_offset": 636,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 0,
+    "text": "##",
+    "unit_id": "u0005"
+  },
+  "tsc-2024-01-10:u0005:s01": {
+    "digest": "0fdf485f5bfd3762467100246df7a6ce45c3aa687c1645276e6e87240aa37199",
+    "end": 9,
+    "origin_offset": 639,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 3,
+    "text": "Agenda",
+    "unit_id": "u0005"
+  },
+  "tsc-2024-01-10:u0006:s00": {
+    "digest": "56dc6d47737d155afddefda1af20c40c901353c222d01e70b7b4e021f2e4f548",
+    "end": 3,
+    "origin_offset": 647,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 0,
+    "text": "###",
+    "unit_id": "u0006"
+  },
+  "tsc-2024-01-10:u0006:s01": {
+    "digest": "fe02680f247961a1369a66f681f990ec1e4a8708a2e84871019a93a7287ae7dd",
+    "end": 17,
+    "origin_offset": 651,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 4,
+    "text": "Announcements",
+    "unit_id": "u0006"
+  },
+  "tsc-2024-01-10:u0007:s00": {
+    "digest": "9979f0b0b0445a50120f70173f4d04a1d54b6fa9f202b26680ef3e9c22b3053b",
+    "end": 10,
+    "origin_offset": 666,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 0,
+    "text": "* Richard,",
+    "unit_id": "u0007"
+  },
+  "tsc-2024-01-10:u0007:s01": {
+    "digest": "745c86be9ec4d05054a6bd99fcfc07bbf9fd847dc4ffefa565ec25721e17bd75",
+    "end": 46,
+    "origin_offset": 677,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 11,
+    "text": "Ulises did a release for Node.js 20",
+    "unit_id": "u0007"
+  },
+  "tsc-2024-01-10:u0008:s00": {
+    "digest": "ecd4852c625bbf2532320099f40f18be77319870d65f96764e70a1f2a82eb85b",
+    "end": 33,
+    "origin_offset": 714,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 0,
+    "text": "### CPC and Board Meeting Updates",
+    "unit_id": "u0008"
+  },
+  "tsc-2024-01-10:u0009:s00": {
+    "digest": "e95afd50602dd2434c47fdf351431b44ec5a331197fd5e44065542fa701daf5c",
+    "end": 109,
+    "origin_offset": 749,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 0,
+    "text": "*Extracted from **tsc-agenda** labeled issues and pull requests from the **nodejs org** prior to the meeting.",
+    "unit_id": "u0009"
+  },
+  "tsc-2024-01-10:u0010:s00": {
+    "digest": "398fccc6edd40da346efca2c790bd5d9d11641fc9e82c14376c969e4f3180261",
+    "end": 42,
+    "origin_offset": 860,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 0,
+    "text": "* Travel fund is most relevant discussion.",
+    "unit_id": "u0010"
+  },
+  "tsc-2024-01-10:u0010:s01": {
+    "digest": "7cd352750bab3128911742f2dd642fd3c6fac233120aa7107eac87d93d14c10d",
+    "end": 99,
+    "origin_offset": 903,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 43,
+    "text": "Board has asked that the rules for the fund be revamped.",
+    "unit_id": "u0010"
+  },
+  "tsc-2024-01-10:u0010:s02": {
+    "digest": "52f76c6c8f79e37bd60033c2cc3e009efadc192f3d86bca39a3b6345b78f531b",
+    "end": 163,
+    "origin_offset": 962,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 100,
+    "text": "Things are progressing fast as we want to have them in place. *",
+    "unit_id": "u0010"
+  },
+  "tsc-2024-01-10:u0010:s03": {
+    "digest": "e6431451ba11f97f12317d3f023564d303e1f972862f66253eea6cdf70c22111",
+    "end": 251,
+    "origin_offset": 1026,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 164,
+    "text": "Still waiting on news on the room for collaborator summit in London * Track for Node.js",
+    "unit_id": "u0010"
+  },
+  "tsc-2024-01-10:u0010:s04": {
+    "digest": "6f9a71658c681a29e752a8984ee29fa3df9f511aa35aa1e753a10aabb9f6a12d",
+    "end": 303,
+    "origin_offset": 1116,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 252,
+    "text": "is still in play, conference has room for the track",
+    "unit_id": "u0010"
+  },
+  "tsc-2024-01-10:u0011:s00": {
+    "digest": "3e093fc7d248afd5b1464ad6f901f0c45cd2417c37d244d12e04473f96888632",
+    "end": 15,
+    "origin_offset": 1169,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 0,
+    "text": "### nodejs/node",
+    "unit_id": "u0011"
+  },
+  "tsc-2024-01-10:u0012:s00": {
+    "digest": "0dcbfc2ba1b4c594255ef7ad0750ad1ff851e42a11ec61ec00f2f11e0b30f3b5",
+    "end": 101,
+    "origin_offset": 1186,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 0,
+    "text": "* Revisiting `globalThis` as an `EventTarget` [#51372](https://github.com/nodejs/node/issues/51372) *",
+    "unit_id": "u0012"
+  },
+  "tsc-2024-01-10:u0012:s01": {
+    "digest": "5491a4f04b073f503dc0ab58575e1ba447447f902b21ac7f8b476f32665f0500",
+    "end": 144,
+    "origin_offset": 1290,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 102,
+    "text": "No clear conclusion in the discussion yet.",
+    "unit_id": "u0012"
+  },
+  "tsc-2024-01-10:u0012:s02": {
+    "digest": "2b3e2003812554b90ccd690c7b90b3dff67b9d9dcec26afd29ca7cb19574fdb1",
+    "end": 214,
+    "origin_offset": 1333,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 145,
+    "text": "On agenda because the TSC will need to make a Decision at some point.",
+    "unit_id": "u0012"
+  },
+  "tsc-2024-01-10:u0012:s03": {
+    "digest": "7e0336cfe5440a27bce35866e3e38af0d1405ea3d513d8a67647b9e2e2bfa005",
+    "end": 270,
+    "origin_offset": 1407,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 215,
+    "text": "Not yet at that point but will likely end up in a vote.",
+    "unit_id": "u0012"
+  },
+  "tsc-2024-01-10:u0012:s04": {
+    "digest": "b098b09e398b50069216afd9c54271c945ba30cd59be95a8cc82cfb4a4a65413",
+    "end": 334,
+    "origin_offset": 1464,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 271,
+    "text": "It is SemVer major PR so will need to make decision by Feb ish.",
+    "unit_id": "u0012"
+  },
+  "tsc-2024-01-10:u0013:s00": {
+    "digest": "61d10026359ffb5291dec77a31a9257644fcfc3e07f9709c28d5d71a94ac88ec",
+    "end": 119,
+    "origin_offset": 1533,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 0,
+    "text": "* Inconsistent behavior of nextTick and queueMicrotask [#51156](https://github.com/nodejs/node/issues/51156) * Robert -",
+    "unit_id": "u0013"
+  },
+  "tsc-2024-01-10:u0013:s01": {
+    "digest": "6e60388803da4c9157103eb61c8aaa1e57c1a4c696dfa3e34d53dd904ec58815",
+    "end": 475,
+    "origin_offset": 1655,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 120,
+    "text": "Have not had too much time to pursue, but have opened a few PRs which are progressing * Second one is to add as experimental, Matteo what did you see with breakage * Matteo, from what I saw breakage was extensive * Robert the only way forward is to add another new API, deprecate next tick to discourage future use. * Can remove from agenda at this point.",
+    "unit_id": "u0013"
+  },
+  "tsc-2024-01-10:u0014:s00": {
+    "digest": "5d9f5c3d28b151e677c3131f9c4ef294eff8fd09b6ad5ac36922474cb854574e",
+    "end": 283,
+    "origin_offset": 2034,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 0,
+    "text": "* enable corepack by default [#50963](https://github.com/nodejs/node/issues/50963) * Yagiz, have not seen to many changes needed for a while so seems stable, likely that we should make a decision on making it stable or if that is not going to enable by default then we should remove.",
+    "unit_id": "u0014"
+  },
+  "tsc-2024-01-10:u0014:s01": {
+    "digest": "763511f11f7dbb925b815e053151476661cb05440e5315d8e4d62d66e899f97c",
+    "end": 464,
+    "origin_offset": 2328,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 284,
+    "text": "If we don’t enable by default then we don’t have a path to removing npm. * Matteo, shipping a package manager by default is one of the key elements of what made Node.js successful.",
+    "unit_id": "u0014"
+  },
+  "tsc-2024-01-10:u0014:s02": {
+    "digest": "f78d070a7f41e17d1a3e64aef3618d4b33971ebc1af22a3ea522f8deebabaeee",
+    "end": 519,
+    "origin_offset": 2515,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 465,
+    "text": "Don’t see a good technical reason to migrate them out.",
+    "unit_id": "u0014"
+  },
+  "tsc-2024-01-10:u0014:s03": {
+    "digest": "14c657edd017abd2476a96f7574c6c1bdfcbd77c601a84d8d9ddbcc5e4755545",
+    "end": 576,
+    "origin_offset": 2570,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 520,
+    "text": "Advantage of shipping npm, is on stability of the build.",
+    "unit_id": "u0014"
+  },
+  "tsc-2024-01-10:u0014:s04": {
+    "digest": "011b8cd7f8da9aa2fe6f5e7c12de4f11b3bb24dd4b849a3bf4195b7e1cc56396",
+    "end": 806,
+    "origin_offset": 2631,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 577,
+    "text": "One issue is loss of repeatable builds * Michael, main point is if goal of people in making stable is a step towards removing npm, then that is the discussion we should have versus making it stable and kicking that down the road.",
+    "unit_id": "u0014"
+  },
+  "tsc-2024-01-10:u0014:s05": {
+    "digest": "eba4f3b5204aad75bc6d86a14c203ba97dc6a785895ff49c3d10cb9204760386",
+    "end": 882,
+    "origin_offset": 2873,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 807,
+    "text": "* Yagiz, recommend that we either remove npm or add other package managers.",
+    "unit_id": "u0014"
+  },
+  "tsc-2024-01-10:u0014:s06": {
+    "digest": "64ae1cbb7bccb088b25b38e5d998c731c7402f902ff4144b1fc99506c2ed109b",
+    "end": 1202,
+    "origin_offset": 2951,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 883,
+    "text": "* Robert, whatever we do, removing npm is not an option, then leads do we discuss adding package manager managers * Yagiz why can we not remove npm * Geoffrey, would be large breaking change * Robert, not worth it for political issue * Yagiz, should we not reduce the bundle size * Richard, unlikely to get a consensus.",
+    "unit_id": "u0014"
+  },
+  "tsc-2024-01-10:u0014:s07": {
+    "digest": "21a9bbd63f99e38b1e8dd42700efbe122f2b1b751104682f052ae615fb754318",
+    "end": 1230,
+    "origin_offset": 3285,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 1203,
+    "text": "We will likely need a vote.",
+    "unit_id": "u0014"
+  },
+  "tsc-2024-01-10:u0014:s08": {
+    "digest": "cfe79e5c0e9252f0c21a2d5589d565967e5ce97c74f29ecd7be15194f63576bf",
+    "end": 1310,
+    "origin_offset": 3315,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 1231,
+    "text": "* Matteo, propose we remove npm from corepack, then enable corepack by default.",
+    "unit_id": "u0014"
+  },
+  "tsc-2024-01-10:u0014:s09": {
+    "digest": "7fdfa0a7170b01ca639f9aebdc433926d67c9b1821e149f899996f27661c396f",
+    "end": 1380,
+    "origin_offset": 3395,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 1311,
+    "text": "If we Have a vote lets vote on removing npm, versus vote on corepack.",
+    "unit_id": "u0014"
+  },
+  "tsc-2024-01-10:u0014:s10": {
+    "digest": "ebae8bad4b247cd1e976448e119315713bb660c042bd368581adbf03c691cac9",
+    "end": 1465,
+    "origin_offset": 3471,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 1381,
+    "text": "* Geoffrey, if the goal is to offer bundle size, don’t we offer additional binaries.",
+    "unit_id": "u0014"
+  },
+  "tsc-2024-01-10:u0014:s11": {
+    "digest": "1fef35977bcba0d3cced42e90c4b17df2389ace7c97ed0b580aba50d456b8959",
+    "end": 1724,
+    "origin_offset": 3558,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 1466,
+    "text": "* Yagiz, if vote is removal of npm it should include alternative of adding more package managers * Robert, does it even makes sense to have corepack if we are not going to remove npm * Matteo, if you enable corepack, then typing pnpm it just works its great.",
+    "unit_id": "u0014"
+  },
+  "tsc-2024-01-10:u0014:s12": {
+    "digest": "a75504a87bf85fc814e82f238d84d821c38e5f131b5ac099fd7587b888affe26",
+    "end": 1807,
+    "origin_offset": 3825,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 1725,
+    "text": "But when using corepack you don’t get a clear picture of the match between Node.js",
+    "unit_id": "u0014"
+  },
+  "tsc-2024-01-10:u0014:s13": {
+    "digest": "dd6cdd6c550dd28c6090d7a0406367f1fb43d312037f0374bffcd9936225e50d",
+    "end": 1838,
+    "origin_offset": 3912,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 1808,
+    "text": "and package manager installed.",
+    "unit_id": "u0014"
+  },
+  "tsc-2024-01-10:u0014:s14": {
+    "digest": "a2aec861d19569212973e3847142092d3795f0a0c5c23a2d6782fd2ce99b1225",
+    "end": 1892,
+    "origin_offset": 3949,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 1839,
+    "text": "* Richard, the issue around not knowing what you get.",
+    "unit_id": "u0014"
+  },
+  "tsc-2024-01-10:u0014:s15": {
+    "digest": "8eb70ac4643a8228624df294684394aa923713ac5900281d7a8d39b15f52fbbf",
+    "end": 1944,
+    "origin_offset": 4003,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 1893,
+    "text": "Original version only installed a specific version.",
+    "unit_id": "u0014"
+  },
+  "tsc-2024-01-10:u0014:s16": {
+    "digest": "285d019bf81a19479117554670a19930e55581343ea3aa358a229cb1a6bc7bce",
+    "end": 1999,
+    "origin_offset": 4059,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 1945,
+    "text": "The project requested that it pull in latest. * Vote *",
+    "unit_id": "u0014"
+  },
+  "tsc-2024-01-10:u0014:s17": {
+    "digest": "28bae7f76155569fff2e29a661fa7d3a5e59baed5bf065229f1aac8c14bff1e3",
+    "end": 2048,
+    "origin_offset": 4120,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 2000,
+    "text": "We agree our goal is to remove npm from Node.js:",
+    "unit_id": "u0014"
+  },
+  "tsc-2024-01-10:u0014:s18": {
+    "digest": "ab7fc7e47b9cafe878484991af1ab9763edae3fd1c619c0fb92c130faa5a65c9",
+    "end": 2131,
+    "origin_offset": 4171,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 2049,
+    "text": "Yes/No * If we are not going to remove npm, should corepack be included in Node.js",
+    "unit_id": "u0014"
+  },
+  "tsc-2024-01-10:u0014:s19": {
+    "digest": "25cde54b9c32f35bc17fdf5fe3b650a7c91c7e6bce297b704b9d83bfe512743b",
+    "end": 2184,
+    "origin_offset": 4258,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 2132,
+    "text": "Yes/No * Should we enable corepack by default today:",
+    "unit_id": "u0014"
+  },
+  "tsc-2024-01-10:u0014:s20": {
+    "digest": "1b0e4d31aaf991e5a5278cb2187296241e42122a6b78af8049c926945e43efb9",
+    "end": 2252,
+    "origin_offset": 4315,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 2185,
+    "text": "Yes/No * Geoffrey, we don’t necessarily need to rush into decision.",
+    "unit_id": "u0014"
+  },
+  "tsc-2024-01-10:u0014:s21": {
+    "digest": "02465d7205d9e55ccac48a67cca09e3d06d14a7674174e083dca72be715cfd6a",
+    "end": 2299,
+    "origin_offset": 4385,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 2253,
+    "text": "Would be good to get how popular is corepack *",
+    "unit_id": "u0014"
+  },
+  "tsc-2024-01-10:u0014:s22": {
+    "digest": "ef90bd193fdbecc67f4f553d76293013f088f31318cee8669bfc6221116dd984",
+    "end": 2654,
+    "origin_offset": 4438,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 2300,
+    "text": "Ruy, definitely going to be a large breaking change * Geoffrey, the person who wants to champion removal of npm should write up proposal and then we vote on that. * Ruy, has been mentioned that distributing npm as are of corepack might not be legally ok. * Michael, probably should not make corepack stable until we resolve issue around direction on npm.",
+    "unit_id": "u0014"
+  },
+  "tsc-2024-01-10:u0015:s00": {
+    "digest": "e0a80b7ba8f5d023c6ab8afd7adb0aaad8ec0b8d045db998afa99751df5a9960",
+    "end": 160,
+    "origin_offset": 4804,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 0,
+    "text": "* lib: promote process.binding/_tickCallback to runtime deprecation [#50687](https://github.com/nodejs/node/pull/50687) * Joyee has issue, please jump in there.",
+    "unit_id": "u0015"
+  },
+  "tsc-2024-01-10:u0015:s01": {
+    "digest": "432f6ab42cc0ba87ccbdba7ab059dfaa4a1ceb1e22580ab145dfcdde91219c64",
+    "end": 204,
+    "origin_offset": 4967,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 161,
+    "text": "<https://github.com/nodejs/TSC/issues/1482>",
+    "unit_id": "u0015"
+  },
+  "tsc-2024-01-10:u0016:s00": {
+    "digest": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
+    "end": 1,
+    "origin_offset": 5012,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 0,
+    "text": "*",
+    "unit_id": "u0016"
+  },
+  "tsc-2024-01-10:u0016:s01": {
+    "digest": "84e79e5afad6c5a76d17285d256f46c35a86fcb5d6fd495cba67661d657df4ca",
+    "end": 207,
+    "origin_offset": 5014,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 2,
+    "text": "The env var `NODE_V8_COVERAGE` intermittently causes the process to hang [#49344](https://github.com/nodejs/node/issues/49344) * Richard, there is a PR that addresses this on main. * Issue should be fixed.",
+    "unit_id": "u0016"
+  },
+  "tsc-2024-01-10:u0017:s00": {
+    "digest": "6ffaa08899c4376b2225f683ead90da2cb4000925f258e6592962d4d3db4175c",
+    "end": 615,
+    "origin_offset": 5225,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 0,
+    "text": "* lib: rewrite AsyncLocalStorage without async_hooks [#48528](https://github.com/nodejs/node/pull/48528) * Requires a patch to V8, the V8 teams reluctant to accept the patch * Joyee - ask was whether we could float the patch * Feedback in the PR seems to be that we should wait until V8 accepts in upstream * Chengzhong, V8 team has discussed removing the API it uses, so there would be more we’d have to float. * Michael, seems very risk to float a large patch especially if underlying APIs it needs are Removed * Geoffrey, what is the alternative? * Joyee, people are working on AsyncContext * Geoffrey, but when?",
+    "unit_id": "u0017"
+  },
+  "tsc-2024-01-10:u0017:s01": {
+    "digest": "6711575caf1a15007f15301c7ea17e8b0729ef83690d7f2cb4ae09669b29fbc1",
+    "end": 721,
+    "origin_offset": 5865,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 616,
+    "text": "* Chengzhong, hoping to make progress in 2024 * Geoffrey, if it seems promising then waiting makes sense.",
+    "unit_id": "u0017"
+  },
+  "tsc-2024-01-10:u0018:s00": {
+    "digest": "029ab7a521fc38afe97655ab7eec58ca1b464f45977d0d0755891b5febd2a1d5",
+    "end": 16,
+    "origin_offset": 5972,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 0,
+    "text": "### nodejs/admin",
+    "unit_id": "u0018"
+  },
+  "tsc-2024-01-10:u0019:s00": {
+    "digest": "5022415a84798d17bbaca542a180d2f6ed472292d2a88c0807c59b1e20b8a0aa",
+    "end": 93,
+    "origin_offset": 5990,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 0,
+    "text": "* Events / Collaborator Summits for 2024 [#814](https://github.com/nodejs/admin/issues/814) *",
+    "unit_id": "u0019"
+  },
+  "tsc-2024-01-10:u0019:s01": {
+    "digest": "2211486125c741150826e0cb468f0ef4843f700ad48f4af5374098693fc3f9cb",
+    "end": 108,
+    "origin_offset": 6086,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 94,
+    "text": "No update yet.",
+    "unit_id": "u0019"
+  },
+  "tsc-2024-01-10:u0020:s00": {
+    "digest": "76a71fbef8a8339fcbcaff8c9aadfb85c834bc3cc0c07069a5ebb2eea3d90d68",
+    "end": 2,
+    "origin_offset": 6102,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 0,
+    "text": "##",
+    "unit_id": "u0020"
+  },
+  "tsc-2024-01-10:u0020:s01": {
+    "digest": "457d7a7c1c29ea807d7b54ae821428e8218bc8d75f5f61c36ef1ac17ec3cac4a",
+    "end": 24,
+    "origin_offset": 6105,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 3,
+    "text": "Strategic Initiatives",
+    "unit_id": "u0020"
+  },
+  "tsc-2024-01-10:u0021:s00": {
+    "digest": "76a71fbef8a8339fcbcaff8c9aadfb85c834bc3cc0c07069a5ebb2eea3d90d68",
+    "end": 2,
+    "origin_offset": 6128,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 0,
+    "text": "##",
+    "unit_id": "u0021"
+  },
+  "tsc-2024-01-10:u0021:s01": {
+    "digest": "3daaed66ed149c285905afcb9e343a59aad75ebdf76a8989468a2c2e565be042",
+    "end": 20,
+    "origin_offset": 6131,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 3,
+    "text": "Upcoming Meetings",
+    "unit_id": "u0021"
+  },
+  "tsc-2024-01-10:u0022:s00": {
+    "digest": "d0dd77062f7e143636478b85b16dda0153d7f59e3ae151cbbb3d6593bfd24df3",
+    "end": 61,
+    "origin_offset": 6150,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 0,
+    "text": "* **Node.js Project Calendar**: <https://nodejs.org/calendar>",
+    "unit_id": "u0022"
+  },
+  "tsc-2024-01-10:u0023:s00": {
+    "digest": "92082b4382f54ee059322fa42876c180ec8a8915ca42cd90e6b347b0eee4a598",
+    "end": 79,
+    "origin_offset": 6213,
+    "path": "",
+    "source_id": "tsc-2024-01-10",
+    "start": 0,
+    "text": "Click `+GoogleCalendar` at the bottom right to add to your own Google calendar.",
+    "unit_id": "u0023"
+  },
+  "tsc-2024-01-17:u0000:s00": {
+    "digest": "703216a3384ddd3e0e37642ec2185a11c8ed64f1fa3fe146149b31bd4edba125",
+    "end": 44,
+    "origin_offset": 0,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 0,
+    "text": "# Node.js Technical Steering Committee (TSC)",
+    "unit_id": "u0000"
+  },
+  "tsc-2024-01-17:u0000:s01": {
+    "digest": "39b0b53504450f70d43eb667ab08d2eeb3d7d8ad56d26ee0e36326c7d29d3acd",
+    "end": 63,
+    "origin_offset": 45,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 45,
+    "text": "Meeting 2024-01-17",
+    "unit_id": "u0000"
+  },
+  "tsc-2024-01-17:u0001:s00": {
+    "digest": "76a71fbef8a8339fcbcaff8c9aadfb85c834bc3cc0c07069a5ebb2eea3d90d68",
+    "end": 2,
+    "origin_offset": 65,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 0,
+    "text": "##",
+    "unit_id": "u0001"
+  },
+  "tsc-2024-01-17:u0001:s01": {
+    "digest": "9024c197d84940e47ff6aa631b7711c4cbff4e7fb2fe1a574a3592b662983a0d",
+    "end": 8,
+    "origin_offset": 68,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 3,
+    "text": "Links",
+    "unit_id": "u0001"
+  },
+  "tsc-2024-01-17:u0002:s00": {
+    "digest": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
+    "end": 1,
+    "origin_offset": 75,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 0,
+    "text": "*",
+    "unit_id": "u0002"
+  },
+  "tsc-2024-01-17:u0002:s01": {
+    "digest": "9c94d1be7594879e83016dae27851743a262f2bb6bbb452a996175168fd14f5d",
+    "end": 119,
+    "origin_offset": 77,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 2,
+    "text": "**Recording**: <https://youtube.com/live/00oahsrkFTU> * **GitHub Issue**: <https://github.com/nodejs/TSC/issues/1492>",
+    "unit_id": "u0002"
+  },
+  "tsc-2024-01-17:u0003:s00": {
+    "digest": "76a71fbef8a8339fcbcaff8c9aadfb85c834bc3cc0c07069a5ebb2eea3d90d68",
+    "end": 2,
+    "origin_offset": 196,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 0,
+    "text": "##",
+    "unit_id": "u0003"
+  },
+  "tsc-2024-01-17:u0003:s01": {
+    "digest": "43f9b89c0b9d22d8110ead813ea3949f20592a8bfc3c777d2d49e64da3b0cc9b",
+    "end": 10,
+    "origin_offset": 199,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 3,
+    "text": "Present",
+    "unit_id": "u0003"
+  },
+  "tsc-2024-01-17:u0004:s00": {
+    "digest": "b05c5a976180a4f30cc386edd8124e659456a3c02c9858c170a29d593a4df441",
+    "end": 638,
+    "origin_offset": 208,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 0,
+    "text": "* Antoine du Hamel @aduh95 (voting member) * Yagiz Nizipli @anonrig (voting member) * Benjamin Gruenbaum @benjamingr (voting member) * Ruben Bridgewater @BridgeAR (voting member) * Geoffrey Booth @GeoffreyBooth (voting member) * Gireesh Punathil @gireeshpunathil (voting member) * Chengzhong Wu @legendecas (voting member) * Matteo Collina @mcollina (voting member) * Michael Dawson @mhdawson (voting member) * Richard Lau @richardlau (voting member) * Ruy Adorno @ruyadorno (voting member) * Michaël Zasso @targos (voting member) * Claudio Wunder (Guest) * Steven @styfle (Guest) * Darcy Clarke @darcyclarke (Guest) * Maël Nison @arcanis",
+    "unit_id": "u0004"
+  },
+  "tsc-2024-01-17:u0004:s01": {
+    "digest": "6446b13844fd7996246868d3504af829dc030fa64b89f2dab51bf84e0fe300ad",
+    "end": 646,
+    "origin_offset": 847,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 639,
+    "text": "(Guest)",
+    "unit_id": "u0004"
+  },
+  "tsc-2024-01-17:u0005:s00": {
+    "digest": "76a71fbef8a8339fcbcaff8c9aadfb85c834bc3cc0c07069a5ebb2eea3d90d68",
+    "end": 2,
+    "origin_offset": 856,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 0,
+    "text": "##",
+    "unit_id": "u0005"
+  },
+  "tsc-2024-01-17:u0005:s01": {
+    "digest": "0fdf485f5bfd3762467100246df7a6ce45c3aa687c1645276e6e87240aa37199",
+    "end": 9,
+    "origin_offset": 859,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 3,
+    "text": "Agenda",
+    "unit_id": "u0005"
+  },
+  "tsc-2024-01-17:u0006:s00": {
+    "digest": "56dc6d47737d155afddefda1af20c40c901353c222d01e70b7b4e021f2e4f548",
+    "end": 3,
+    "origin_offset": 867,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 0,
+    "text": "###",
+    "unit_id": "u0006"
+  },
+  "tsc-2024-01-17:u0006:s01": {
+    "digest": "fe02680f247961a1369a66f681f990ec1e4a8708a2e84871019a93a7287ae7dd",
+    "end": 17,
+    "origin_offset": 871,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 4,
+    "text": "Announcements",
+    "unit_id": "u0006"
+  },
+  "tsc-2024-01-17:u0007:s00": {
+    "digest": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
+    "end": 1,
+    "origin_offset": 886,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 0,
+    "text": "*",
+    "unit_id": "u0007"
+  },
+  "tsc-2024-01-17:u0007:s01": {
+    "digest": "832fd2ee6b0b7e17490a35673149ee180820e3af1d98e7f65ee124e066aa8f66",
+    "end": 28,
+    "origin_offset": 888,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 2,
+    "text": "No announcements this week",
+    "unit_id": "u0007"
+  },
+  "tsc-2024-01-17:u0008:s00": {
+    "digest": "ecd4852c625bbf2532320099f40f18be77319870d65f96764e70a1f2a82eb85b",
+    "end": 33,
+    "origin_offset": 916,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 0,
+    "text": "### CPC and Board Meeting Updates",
+    "unit_id": "u0008"
+  },
+  "tsc-2024-01-17:u0009:s00": {
+    "digest": "e95afd50602dd2434c47fdf351431b44ec5a331197fd5e44065542fa701daf5c",
+    "end": 109,
+    "origin_offset": 951,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 0,
+    "text": "*Extracted from **tsc-agenda** labeled issues and pull requests from the **nodejs org** prior to the meeting.",
+    "unit_id": "u0009"
+  },
+  "tsc-2024-01-17:u0010:s00": {
+    "digest": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
+    "end": 1,
+    "origin_offset": 1062,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 0,
+    "text": "*",
+    "unit_id": "u0010"
+  },
+  "tsc-2024-01-17:u0010:s01": {
+    "digest": "45b0c87c20f51ed8e887bdc611aa3097d05a8c2dbd2d23619a55c29a46fd0eef",
+    "end": 16,
+    "origin_offset": 1064,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 2,
+    "text": "From Claudio *",
+    "unit_id": "u0010"
+  },
+  "tsc-2024-01-17:u0010:s02": {
+    "digest": "a7874734c6bc3ba9d7edc4428bb382e77d2b9b78ec6b1bdea46f19ec58e32c10",
+    "end": 208,
+    "origin_offset": 1081,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 17,
+    "text": "We're closing in on finishing the Travel Fund Rework * Same for the CoC rework * We're applying the Foundation (OpenJS) to Google Season of Docs -- to have Node.js as a participating project.",
+    "unit_id": "u0010"
+  },
+  "tsc-2024-01-17:u0011:s00": {
+    "digest": "3e093fc7d248afd5b1464ad6f901f0c45cd2417c37d244d12e04473f96888632",
+    "end": 15,
+    "origin_offset": 1278,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 0,
+    "text": "### nodejs/node",
+    "unit_id": "u0011"
+  },
+  "tsc-2024-01-17:u0012:s00": {
+    "digest": "791f8efb3defd5b5eb9df75dc9ecbfe23091e3f6c5502a00cd65f5c118a630c4",
+    "end": 155,
+    "origin_offset": 1295,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 0,
+    "text": "* enable corepack by default [#50963](https://github.com/nodejs/node/issues/50963) * Antoine - issue opened last month, asking if we can enable by default.",
+    "unit_id": "u0012"
+  },
+  "tsc-2024-01-17:u0012:s01": {
+    "digest": "460b07a387450b21db2af96d97343226bb378b13baea3b3f1882a95c889ade33",
+    "end": 316,
+    "origin_offset": 1453,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 156,
+    "text": "Quite a few discussions that have come from that, one being the integration of npm. * Darcy - <https://github.com/nodejs/node/pull/35398#issuecomment-700314358>",
+    "unit_id": "u0012"
+  },
+  "tsc-2024-01-17:u0012:s02": {
+    "digest": "1720b22e3eb9b4b994e31d0b516a8da95e0328bed3636a60d5492069104c7d9d",
+    "end": 394,
+    "origin_offset": 1620,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 317,
+    "text": "included a number of questions that would be answered before we would unflag.",
+    "unit_id": "u0012"
+  },
+  "tsc-2024-01-17:u0012:s03": {
+    "digest": "7d095f52ef05732f9093f0dcfa2f507c31ce0d8f04b47a4e6bad0f48fd12ddc4",
+    "end": 576,
+    "origin_offset": 1702,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 395,
+    "text": "Would consider that a blocker to unflagging. * Mael - as package manager for yarn, has definitely solved the problem they had before in terms of using the package manager that they.",
+    "unit_id": "u0012"
+  },
+  "tsc-2024-01-17:u0012:s04": {
+    "digest": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
+    "end": 578,
+    "origin_offset": 1896,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 577,
+    "text": "*",
+    "unit_id": "u0012"
+  },
+  "tsc-2024-01-17:u0012:s05": {
+    "digest": "e120bc8bda20985a682c7d62080496c7fe776bad416943fea482fa8997e7c0bd",
+    "end": 1283,
+    "origin_offset": 1898,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 579,
+    "text": "Michael, one option not discussed too much, mark stable but still require corepack enable, * Mael might be ok, but what is the point of forcing the extra command * Michael to try to make sure they know they are enable auto install of software for them * Darcy - link that shows registry traffic * Sharing some data sourced from the public npm team statements: <https://github-production-user-asset-6210df.s3.amazonaws.com/459713/297423226-1d18f2dc-1deb-457b-8a14-5f512921f8cc.png> * there was almost a 50/50 split at one point, which shows that blockers of consumption might not have been there original * Steven - data shows us that people are using different package managers, the problem was not that.",
+    "unit_id": "u0012"
+  },
+  "tsc-2024-01-17:u0012:s06": {
+    "digest": "4e369b8a4215da0a10876558aaf6ae6740961f9838ab9c7d4a64f7e3f144d855",
+    "end": 1428,
+    "origin_offset": 2633,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 1284,
+    "text": "The problem that corepack is solving is helping a new user get up and running Faster. * Steven to answer the question about corepack by default.",
+    "unit_id": "u0012"
+  },
+  "tsc-2024-01-17:u0012:s07": {
+    "digest": "c7bdaade5264f996decf86c9af97b33b95120e2e0fa238eb083f336d4a478a5f",
+    "end": 1458,
+    "origin_offset": 2782,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 1429,
+    "text": "Seems like it should be easy.",
+    "unit_id": "u0012"
+  },
+  "tsc-2024-01-17:u0012:s08": {
+    "digest": "02d6d7d6d15c4fe08ae65b564e828260d587de171e424f84d01e98f7c2ec6031",
+    "end": 1611,
+    "origin_offset": 2814,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 1459,
+    "text": "Because it’s not enable by default Vercel does not have it enabled by default * the official [@action/setup-node](https://github.com/actions/setup-node)",
+    "unit_id": "u0012"
+  },
+  "tsc-2024-01-17:u0012:s09": {
+    "digest": "6ea37e691f2e12f6a5ed4de8ee1f93067b974a98fabacaf065f9951405dc1041",
+    "end": 1678,
+    "origin_offset": 2969,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 1612,
+    "text": "where it will not be enabled because it is not enabled by default.",
+    "unit_id": "u0012"
+  },
+  "tsc-2024-01-17:u0012:s10": {
+    "digest": "b7db435e06173a7e01bd6075929e53aa2ea02741eff7a57278b58e57483f802b",
+    "end": 1830,
+    "origin_offset": 3036,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 1679,
+    "text": "There have been [multiple PRs](https://github.com/actions/setup-node/pulls?q=is%3Apr+corepack) to add support for corepack but still waiting on stable.",
+    "unit_id": "u0012"
+  },
+  "tsc-2024-01-17:u0012:s11": {
+    "digest": "0fc88a9a19ef3c7a92d72d987503e5b061294cc897747f9bbc9c953e5a43042b",
+    "end": 1940,
+    "origin_offset": 3190,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 1831,
+    "text": "* value is that people who don’t even know they are using it, will use it when contributing to a new project.",
+    "unit_id": "u0012"
+  },
+  "tsc-2024-01-17:u0012:s12": {
+    "digest": "10fd6376febd2e6e09697802e63b49b762419803109bb22bfd33e1bcb23c30ab",
+    "end": 2183,
+    "origin_offset": 3302,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 1941,
+    "text": "* avoids the issue with multiple ways to install causing broken `PATH` - see [example](https://twitter.com/galstar/status/1745172635674169663) * Claudio may be bad example but in terms of how many people use IE simply because its the Default.",
+    "unit_id": "u0012"
+  },
+  "tsc-2024-01-17:u0012:s13": {
+    "digest": "398a298c35489b7ce6c5f038208e7f2587fa63c3ea2a095fd3e92e049a49ddbe",
+    "end": 2220,
+    "origin_offset": 3548,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 2184,
+    "text": "More inclined if adopted by default.",
+    "unit_id": "u0012"
+  },
+  "tsc-2024-01-17:u0012:s14": {
+    "digest": "3ce7eae83454dad84913cd9a52eaadafc2ab383f0920f06feb639b4f47f9f6e6",
+    "end": 2349,
+    "origin_offset": 3586,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 2221,
+    "text": "Data might be different if others were enabled by Default. * Darcy, only going to be aware of package managers that is aware of.",
+    "unit_id": "u0012"
+  },
+  "tsc-2024-01-17:u0012:s15": {
+    "digest": "84c9ffa11fbe37e3189a9ee9e4d12ed883ebc63b3980d1ade67672db86f9270a",
+    "end": 2474,
+    "origin_offset": 3717,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 2350,
+    "text": "Don’t think its going to help with creating opportunities for package managers, more see it as locking in the existing ones.",
+    "unit_id": "u0012"
+  },
+  "tsc-2024-01-17:u0012:s16": {
+    "digest": "7d69ac0574f960fdd8f017456176325c159e157191432f3b5567804b32d26c7c",
+    "end": 2626,
+    "origin_offset": 3847,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 2475,
+    "text": "The 50/50 at one point supports this * Yagiz, disagree with the lock-in, not enabling the same level of competitive advantage is a main concern for me.",
+    "unit_id": "u0012"
+  },
+  "tsc-2024-01-17:u0012:s17": {
+    "digest": "74315a9b5550d570826ee75f90bd7c760e39251869242f3cb7f6c2ae71a58eca",
+    "end": 2705,
+    "origin_offset": 4001,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 2627,
+    "text": "If all of them were shipped at the same time, then numbers might be Different.",
+    "unit_id": "u0012"
+  },
+  "tsc-2024-01-17:u0012:s18": {
+    "digest": "a079f606ff0814f8850166a55464314a53666687cc99f061e6f2c1df0b243a63",
+    "end": 2842,
+    "origin_offset": 4083,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 2706,
+    "text": "Alternative to enabling corepack would be to install all of them. * Mael, disagree that it would be locking in the package manager list.",
+    "unit_id": "u0012"
+  },
+  "tsc-2024-01-17:u0012:s19": {
+    "digest": "7fb429c04b289291f4e744c3ed666d7680a1c9649e12072b7a736008e9fd8e10",
+    "end": 2911,
+    "origin_offset": 4220,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 2843,
+    "text": "Any other package manager could advocate to being added to the list.",
+    "unit_id": "u0012"
+  },
+  "tsc-2024-01-17:u0012:s20": {
+    "digest": "de1658338b00e889424b1d4299d15e72e28a377ed5f3e5c8124b439a7af47277",
+    "end": 2948,
+    "origin_offset": 4292,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 2912,
+    "text": "Not being shipped as part of Node.js",
+    "unit_id": "u0012"
+  },
+  "tsc-2024-01-17:u0012:s21": {
+    "digest": "9608e715851d6d4d85ade535120becb8ac37121db6e5d0216924dc3533077751",
+    "end": 2985,
+    "origin_offset": 4329,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 2949,
+    "text": "has caused lots of issues over time.",
+    "unit_id": "u0012"
+  },
+  "tsc-2024-01-17:u0012:s22": {
+    "digest": "21ab4e0458446dcf52e0e69479815773c1d28b8faebdd9bce8668d6420f7e6d2",
+    "end": 3159,
+    "origin_offset": 4368,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 2986,
+    "text": "* Geoffrey, concern is that we ship both npm and corepack, npm taking firm stand on not including npm, if its enabled by default, then people will ask why it’s not included.",
+    "unit_id": "u0012"
+  },
+  "tsc-2024-01-17:u0012:s23": {
+    "digest": "14bb0edfec859d700f807fb743f7dc2e59e2e8f32fbac420e135b8a5827372e8",
+    "end": 3398,
+    "origin_offset": 4545,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 3160,
+    "text": "Could we add to npm, check of package manager, and spit out error saying using the wrong one. * Matteo, want to state the obvious, npm is the default, and it’s the golden standard since all other package managers are npm registry clients.",
+    "unit_id": "u0012"
+  },
+  "tsc-2024-01-17:u0012:s24": {
+    "digest": "f0cb50b1bca233e13aac941e2e495a2103a7503e4373cb73579ed551cd86b50e",
+    "end": 3699,
+    "origin_offset": 4788,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 3399,
+    "text": "It is, maintained by the people who maintain the registry so corepack is not going to change that. * Antoine, another advantage, because npm client is default we get problem reports * Darcy, to add on to Matteo’s comment about npm being the “official” registry client, it has a paid team to maintain.",
+    "unit_id": "u0012"
+  },
+  "tsc-2024-01-17:u0012:s25": {
+    "digest": "fa9703538e70872bdcbe66d10e072b31db2b8663d70dd2aab740efb32c3da6db",
+    "end": 3803,
+    "origin_offset": 5093,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 3700,
+    "text": "npm does self regulate, respected engines, it will warn or error if the package manager does not match.",
+    "unit_id": "u0012"
+  },
+  "tsc-2024-01-17:u0012:s26": {
+    "digest": "89edf8461f3671191fe5bb877d031e7d90de599b9c66704fa46bfc6f5c41f998",
+    "end": 4071,
+    "origin_offset": 5199,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 3804,
+    "text": "Data shows it has not prevented other managers from entering a competing products. * Ruy, concerned it’s too much scope to pull into the runtime, Ruy, maybe adding other package managers to other containers might be a better way than building into the runtime Itself.",
+    "unit_id": "u0012"
+  },
+  "tsc-2024-01-17:u0012:s27": {
+    "digest": "0c5afa74948a3c7c5b6fe7ae169ba3d67b241d7291f25c6fb08eedff59c377f3",
+    "end": 4094,
+    "origin_offset": 5473,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 4072,
+    "text": "Anecdotal correlation:",
+    "unit_id": "u0012"
+  },
+  "tsc-2024-01-17:u0012:s28": {
+    "digest": "c7df59dd2977ba0225314a57312cd0d3858f6f8298ffc20b05f5cad97b44df33",
+    "end": 4396,
+    "origin_offset": 5496,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 4095,
+    "text": "Yarn v1 is currently shipped with our Docker image and it’s also the leading package manager showing up in data shared by the npm registry team. * Steven, the whole anti-competitive nature, but key problem it solves it choosing the right version of the package manager which the other tools don’t fix.",
+    "unit_id": "u0012"
+  },
+  "tsc-2024-01-17:u0012:s29": {
+    "digest": "0bec95435b97a3f08529ee4371c6039efc97b27c007bab43543e6fb1ed78ac02",
+    "end": 4729,
+    "origin_offset": 5802,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 4397,
+    "text": "Seems like this has been overlooked * lib: promote process.binding/_tickCallback to runtime deprecation [#50687](https://github.com/nodejs/node/pull/50687) * skipped not enough time this week * lib: rewrite AsyncLocalStorage without async_hooks [#48528](https://github.com/nodejs/node/pull/48528) * skipped not enough time this week",
+    "unit_id": "u0012"
+  },
+  "tsc-2024-01-17:u0013:s00": {
+    "digest": "029ab7a521fc38afe97655ab7eec58ca1b464f45977d0d0755891b5febd2a1d5",
+    "end": 16,
+    "origin_offset": 6142,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 0,
+    "text": "### nodejs/admin",
+    "unit_id": "u0013"
+  },
+  "tsc-2024-01-17:u0014:s00": {
+    "digest": "12def415d2cb05422b266bbad02783dd254180ce7dfde59bf8c9a9590209e031",
+    "end": 536,
+    "origin_offset": 6160,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 0,
+    "text": "* Redesign of Node.js Website [#818](https://github.com/nodejs/admin/issues/818) * Claudio Wanted to give a quick overview and have space for some discussion on key questions/concerns * Claudio, showed what the flagged (not visible) version of the home page shows * Michael, does it work across all platforms, Claudio, yes. * Michael, would it make sense to add another line after the “Downloads …” which says something like Downloads for other platforms are available here” * Geoffrey, we need to change/agree on description of Node.js",
+    "unit_id": "u0014"
+  },
+  "tsc-2024-01-17:u0014:s01": {
+    "digest": "4af24f75ae6c0bfa642052133a4cc5b9e9916d98cd4c9b109c9694e480169771",
+    "end": 627,
+    "origin_offset": 6715,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 537,
+    "text": "before landing * Claudio, learn section, moving a bunch of the guides over to new section.",
+    "unit_id": "u0014"
+  },
+  "tsc-2024-01-17:u0014:s02": {
+    "digest": "5b1099a8df2d75baeba67c8a2725d4f017e7b5f724efe7472f4ecc94f1a5cc9f",
+    "end": 680,
+    "origin_offset": 6809,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 628,
+    "text": "Plan is to release website mid this year, * Claudio,",
+    "unit_id": "u0014"
+  },
+  "tsc-2024-01-17:u0014:s03": {
+    "digest": "72f3046b2a83177643291e8230d4333d0ff8832945ba9926cc7dc521e5a18fbf",
+    "end": 885,
+    "origin_offset": 6868,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 681,
+    "text": "Took us through many of the pages, likely separate meeting on the downloads page. * working on adding search bar * Events / Collaborator Summits for 2024 [#814](https://github.com/nodejs/admin/issues/814)",
+    "unit_id": "u0014"
+  },
+  "tsc-2024-01-17:u0015:s00": {
+    "digest": "76a71fbef8a8339fcbcaff8c9aadfb85c834bc3cc0c07069a5ebb2eea3d90d68",
+    "end": 2,
+    "origin_offset": 7076,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 0,
+    "text": "##",
+    "unit_id": "u0015"
+  },
+  "tsc-2024-01-17:u0015:s01": {
+    "digest": "bb8795cec287826e8eae15cb38e5cf33c044775616125e5568a0f756d9b1f4f6",
+    "end": 44,
+    "origin_offset": 7079,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 3,
+    "text": "Strategic Initiatives * skipped this week",
+    "unit_id": "u0015"
+  },
+  "tsc-2024-01-17:u0016:s00": {
+    "digest": "76a71fbef8a8339fcbcaff8c9aadfb85c834bc3cc0c07069a5ebb2eea3d90d68",
+    "end": 2,
+    "origin_offset": 7122,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 0,
+    "text": "##",
+    "unit_id": "u0016"
+  },
+  "tsc-2024-01-17:u0016:s01": {
+    "digest": "3daaed66ed149c285905afcb9e343a59aad75ebdf76a8989468a2c2e565be042",
+    "end": 20,
+    "origin_offset": 7125,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 3,
+    "text": "Upcoming Meetings",
+    "unit_id": "u0016"
+  },
+  "tsc-2024-01-17:u0017:s00": {
+    "digest": "d0dd77062f7e143636478b85b16dda0153d7f59e3ae151cbbb3d6593bfd24df3",
+    "end": 61,
+    "origin_offset": 7144,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 0,
+    "text": "* **Node.js Project Calendar**: <https://nodejs.org/calendar>",
+    "unit_id": "u0017"
+  },
+  "tsc-2024-01-17:u0018:s00": {
+    "digest": "92082b4382f54ee059322fa42876c180ec8a8915ca42cd90e6b347b0eee4a598",
+    "end": 79,
+    "origin_offset": 7207,
+    "path": "",
+    "source_id": "tsc-2024-01-17",
+    "start": 0,
+    "text": "Click `+GoogleCalendar` at the bottom right to add to your own Google calendar.",
+    "unit_id": "u0018"
+  },
+  "tsc-2024-02-07:u0000:s00": {
+    "digest": "703216a3384ddd3e0e37642ec2185a11c8ed64f1fa3fe146149b31bd4edba125",
+    "end": 44,
+    "origin_offset": 0,
+    "path": "",
+    "source_id": "tsc-2024-02-07",
+    "start": 0,
+    "text": "# Node.js Technical Steering Committee (TSC)",
+    "unit_id": "u0000"
+  },
+  "tsc-2024-02-07:u0000:s01": {
+    "digest": "e7aa314e60950a4a50484c962c7ce16966e1f2b9467116fd50ca64c9e3f6686d",
+    "end": 63,
+    "origin_offset": 45,
+    "path": "",
+    "source_id": "tsc-2024-02-07",
+    "start": 45,
+    "text": "Meeting 2024-02-07",
+    "unit_id": "u0000"
+  },
+  "tsc-2024-02-07:u0001:s00": {
+    "digest": "76a71fbef8a8339fcbcaff8c9aadfb85c834bc3cc0c07069a5ebb2eea3d90d68",
+    "end": 2,
+    "origin_offset": 65,
+    "path": "",
+    "source_id": "tsc-2024-02-07",
+    "start": 0,
+    "text": "##",
+    "unit_id": "u0001"
+  },
+  "tsc-2024-02-07:u0001:s01": {
+    "digest": "9024c197d84940e47ff6aa631b7711c4cbff4e7fb2fe1a574a3592b662983a0d",
+    "end": 8,
+    "origin_offset": 68,
+    "path": "",
+    "source_id": "tsc-2024-02-07",
+    "start": 3,
+    "text": "Links",
+    "unit_id": "u0001"
+  },
+  "tsc-2024-02-07:u0002:s00": {
+    "digest": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
+    "end": 1,
+    "origin_offset": 75,
+    "path": "",
+    "source_id": "tsc-2024-02-07",
+    "start": 0,
+    "text": "*",
+    "unit_id": "u0002"
+  },
+  "tsc-2024-02-07:u0002:s01": {
+    "digest": "71999d8e69d24c7c28e28f36fbf67a6fa20a41be96a8bf76a65bef84383e1d92",
+    "end": 239,
+    "origin_offset": 77,
+    "path": "",
+    "source_id": "tsc-2024-02-07",
+    "start": 2,
+    "text": "**Recording**: <https://www.youtube.com/watch?v=dWRtrO4kwr4> * **GitHub Issue**: <https://github.com/nodejs/TSC/issues/1500> * **Minutes Google Doc**: <https://docs.google.com/document/d/1iMJTrGC1T8QW5pmVGcRwzwAhP1xr8728tpPSJKfcdRw/edit>",
+    "unit_id": "u0002"
+  },
+  "tsc-2024-02-07:u0003:s00": {
+    "digest": "76a71fbef8a8339fcbcaff8c9aadfb85c834bc3cc0c07069a5ebb2eea3d90d68",
+    "end": 2,
+    "origin_offset": 316,
+    "path": "",
+    "source_id": "tsc-2024-02-07",
+    "start": 0,
+    "text": "##",
+    "unit_id": "u0003"
+  },
+  "tsc-2024-02-07:u0003:s01": {
+    "digest": "43f9b89c0b9d22d8110ead813ea3949f20592a8bfc3c777d2d49e64da3b0cc9b",
+    "end": 10,
+    "origin_offset": 319,
+    "path": "",
+    "source_id": "tsc-2024-02-07",
+    "start": 3,
+    "text": "Present",
+    "unit_id": "u0003"
+  },
+  "tsc-2024-02-07:u0004:s00": {
+    "digest": "3875b819c2d1b3ff085151ca1930d2b6a3b548512fc5f5be05b1a6a815fab5ee",
+    "end": 373,
+    "origin_offset": 328,
+    "path": "",
+    "source_id": "tsc-2024-02-07",
+    "start": 0,
+    "text": "* Antoine du Hamel @aduh95 (voting member) * Chengzhong Wu @legendecas (voting member) * Joyee Cheung @joyeecheung (voting member) * Matteo Collina @mcollina (voting member) * Moshe Atlow @MoLow (voting member) * Richard Lau @richardlau (voting member) * Paolo Insogna @ShogunPanda (invited) * Ruy Adorno @ruyadorno (voting member) * Tobias Nießen @tniessen (voting member)",
+    "unit_id": "u0004"
+  },
+  "tsc-2024-02-07:u0005:s00": {
+    "digest": "76a71fbef8a8339fcbcaff8c9aadfb85c834bc3cc0c07069a5ebb2eea3d90d68",
+    "end": 2,
+    "origin_offset": 703,
+    "path": "",
+    "source_id": "tsc-2024-02-07",
+    "start": 0,
+    "text": "##",
+    "unit_id": "u0005"
+  },
+  "tsc-2024-02-07:u0005:s01": {
+    "digest": "0fdf485f5bfd3762467100246df7a6ce45c3aa687c1645276e6e87240aa37199",
+    "end": 9,
+    "origin_offset": 706,
+    "path": "",
+    "source_id": "tsc-2024-02-07",
+    "start": 3,
+    "text": "Agenda",
+    "unit_id": "u0005"
+  },
+  "tsc-2024-02-07:u0006:s00": {
+    "digest": "56dc6d47737d155afddefda1af20c40c901353c222d01e70b7b4e021f2e4f548",
+    "end": 3,
+    "origin_offset": 714,
+    "path": "",
+    "source_id": "tsc-2024-02-07",
+    "start": 0,
+    "text": "###",
+    "unit_id": "u0006"
+  },
+  "tsc-2024-02-07:u0006:s01": {
+    "digest": "fe02680f247961a1369a66f681f990ec1e4a8708a2e84871019a93a7287ae7dd",
+    "end": 17,
+    "origin_offset": 718,
+    "path": "",
+    "source_id": "tsc-2024-02-07",
+    "start": 4,
+    "text": "Announcements",
+    "unit_id": "u0006"
+  },
+  "tsc-2024-02-07:u0007:s00": {
+    "digest": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
+    "end": 1,
+    "origin_offset": 733,
+    "path": "",
+    "source_id": "tsc-2024-02-07",
+    "start": 0,
+    "text": "*",
+    "unit_id": "u0007"
+  },
+  "tsc-2024-02-07:u0007:s01": {
+    "digest": "120733cb92bf59f4459ce57b178d99e99cf34e5af80554b0f22ac1a042ecae85",
+    "end": 159,
+    "origin_offset": 735,
+    "path": "",
+    "source_id": "tsc-2024-02-07",
+    "start": 2,
+    "text": "Paolo joining as invited guest due to TSC nomination * Collaborator Summit in London on the 3rd and 4th of April 2024 confirmed * Security releases tomorrow!",
+    "unit_id": "u0007"
+  },
+  "tsc-2024-02-07:u0008:s00": {
+    "digest": "ecd4852c625bbf2532320099f40f18be77319870d65f96764e70a1f2a82eb85b",
+    "end": 33,
+    "origin_offset": 894,
+    "path": "",
+    "source_id": "tsc-2024-02-07",
+    "start": 0,
+    "text": "### CPC and Board Meeting Updates",
+    "unit_id": "u0008"
+  },
+  "tsc-2024-02-07:u0009:s00": {
+    "digest": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
+    "end": 1,
+    "origin_offset": 929,
+    "path": "",
+    "source_id": "tsc-2024-02-07",
+    "start": 0,
+    "text": "*",
+    "unit_id": "u0009"
+  },
+  "tsc-2024-02-07:u0009:s01": {
+    "digest": "f5a637211cc643169de879485584b4a7b7e93c33df37df00e1b0476e6e3eb539",
+    "end": 19,
+    "origin_offset": 931,
+    "path": "",
+    "source_id": "tsc-2024-02-07",
+    "start": 2,
+    "text": "Nothing to report",
+    "unit_id": "u0009"
+  },
+  "tsc-2024-02-07:u0010:s00": {
+    "digest": "d7fc19acd56c8d7e882c2a515464c53f332bdce344ee6c0ba9e98e9490fc24ba",
+    "end": 110,
+    "origin_offset": 950,
+    "path": "",
+    "source_id": "tsc-2024-02-07",
+    "start": 0,
+    "text": "\\*Extracted from **tsc-agenda** labeled issues and pull requests from the **nodejs org** prior to the meeting.",
+    "unit_id": "u0010"
+  },
+  "tsc-2024-02-07:u0011:s00": {
+    "digest": "cbf3696b4df0540a81181d1d019d6451514905a31db8cb7d3b8f2939991a6776",
+    "end": 17,
+    "origin_offset": 1062,
+    "path": "",
+    "source_id": "tsc-2024-02-07",
+    "start": 0,
+    "text": "#### nodejs/admin",
+    "unit_id": "u0011"
+  },
+  "tsc-2024-02-07:u0012:s00": {
+    "digest": "5dcd63c0e1829610df1f0c234718e05e8d66d7c7e650dd3fb5e04a667ffd121b",
+    "end": 80,
+    "origin_offset": 1081,
+    "path": "",
+    "source_id": "tsc-2024-02-07",
+    "start": 0,
+    "text": "* Redesign of Node.js Website [#818](https://github.com/nodejs/admin/issues/818)",
+    "unit_id": "u0012"
+  },
+  "tsc-2024-02-07:u0012:s01": {
+    "digest": "15f5e71580d8ff44ff0c5d104980a694a871d5b835ef00eddc05c57bebc5f0d9",
+    "end": 116,
+    "origin_offset": 1164,
+    "path": "",
+    "source_id": "tsc-2024-02-07",
+    "start": 81,
+    "text": "Discussed last week, label removed.",
+    "unit_id": "u0012"
+  },
+  "tsc-2024-02-07:u0012:s02": {
+    "digest": "42a8f57fc7055eadf7fb0e0fe6c9b3fdab19642e5a9bafaf18049f499fbbd87c",
+    "end": 125,
+    "origin_offset": 1202,
+    "path": "",
+    "source_id": "tsc-2024-02-07",
+    "start": 117,
+    "text": "Richard:",
+    "unit_id": "u0012"
+  },
+  "tsc-2024-02-07:u0012:s03": {
+    "digest": "fa2a32e25ec7c5d1c1d4f09b3cb051d37e5723099dbb2a594777120c3e1d2881",
+    "end": 202,
+    "origin_offset": 1211,
+    "path": "",
+    "source_id": "tsc-2024-02-07",
+    "start": 126,
+    "text": "One Node.js “internet” test broken by website page being moved and retitled.",
+    "unit_id": "u0012"
+  },
+  "tsc-2024-02-07:u0012:s04": {
+    "digest": "f87b94b78c56ae0febcffd58cafe6d7d3c2d42ca0b2c224114a6321ad77d181a",
+    "end": 273,
+    "origin_offset": 1288,
+    "path": "",
+    "source_id": "tsc-2024-02-07",
+    "start": 203,
+    "text": "PR has been opened to fix: <https://github.com/nodejs/node/pull/51693>",
+    "unit_id": "u0012"
+  },
+  "tsc-2024-02-07:u0013:s00": {
+    "digest": "01bfc5f5fcc3110ca097d82eea9e89a5cdb306be0473495947f010a795c33a72",
+    "end": 91,
+    "origin_offset": 1360,
+    "path": "",
+    "source_id": "tsc-2024-02-07",
+    "start": 0,
+    "text": "* Events / Collaborator Summits for 2024 [#814](https://github.com/nodejs/admin/issues/814)",
+    "unit_id": "u0013"
+  },
+  "tsc-2024-02-07:u0014:s00": {
+    "digest": "da58f49a1d6389920bd5af34b3b5afab091f6e6acba26a4c393fd63b0894a3b4",
+    "end": 19,
+    "origin_offset": 1453,
+    "path": "",
+    "source_id": "tsc-2024-02-07",
+    "start": 0,
+    "text": "#### nodejs/next-10",
+    "unit_id": "u0014"
+  },
+  "tsc-2024-02-07:u0015:s00": {
+    "digest": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
+    "end": 1,
+    "origin_offset": 1474,
+    "path": "",
+    "source_id": "tsc-2024-02-07",
+    "start": 0,
+    "text": "*",
+    "unit_id": "u0015"
+  },
+  "tsc-2024-02-07:u0015:s01": {
+    "digest": "6798db1503e4e640ecf80156acf34cb81f599bb389d0298484a0f20086ae6892",
+    "end": 104,
+    "origin_offset": 1476,
+    "path": "",
+    "source_id": "tsc-2024-02-07",
+    "start": 2,
+    "text": "Deep Dive: Advocacy and promotion for the project [#247](https://github.com/nodejs/next-10/issues/247)",
+    "unit_id": "u0015"
+  },
+  "tsc-2024-02-07:u0016:s00": {
+    "digest": "76a71fbef8a8339fcbcaff8c9aadfb85c834bc3cc0c07069a5ebb2eea3d90d68",
+    "end": 2,
+    "origin_offset": 1580,
+    "path": "",
+    "source_id": "tsc-2024-02-07",
+    "start": 0,
+    "text": "##",
+    "unit_id": "u0016"
+  },
+  "tsc-2024-02-07:u0016:s01": {
+    "digest": "457d7a7c1c29ea807d7b54ae821428e8218bc8d75f5f61c36ef1ac17ec3cac4a",
+    "end": 24,
+    "origin_offset": 1583,
+    "path": "",
+    "source_id": "tsc-2024-02-07",
+    "start": 3,
+    "text": "Strategic Initiatives",
+    "unit_id": "u0016"
+  },
+  "tsc-2024-02-07:u0017:s00": {
+    "digest": "76a71fbef8a8339fcbcaff8c9aadfb85c834bc3cc0c07069a5ebb2eea3d90d68",
+    "end": 2,
+    "origin_offset": 1606,
+    "path": "",
+    "source_id": "tsc-2024-02-07",
+    "start": 0,
+    "text": "##",
+    "unit_id": "u0017"
+  },
+  "tsc-2024-02-07:u0017:s01": {
+    "digest": "3daaed66ed149c285905afcb9e343a59aad75ebdf76a8989468a2c2e565be042",
+    "end": 20,
+    "origin_offset": 1609,
+    "path": "",
+    "source_id": "tsc-2024-02-07",
+    "start": 3,
+    "text": "Upcoming Meetings",
+    "unit_id": "u0017"
+  },
+  "tsc-2024-02-07:u0018:s00": {
+    "digest": "d0dd77062f7e143636478b85b16dda0153d7f59e3ae151cbbb3d6593bfd24df3",
+    "end": 61,
+    "origin_offset": 1628,
+    "path": "",
+    "source_id": "tsc-2024-02-07",
+    "start": 0,
+    "text": "* **Node.js Project Calendar**: <https://nodejs.org/calendar>",
+    "unit_id": "u0018"
+  },
+  "tsc-2024-02-07:u0019:s00": {
+    "digest": "92082b4382f54ee059322fa42876c180ec8a8915ca42cd90e6b347b0eee4a598",
+    "end": 79,
+    "origin_offset": 1691,
+    "path": "",
+    "source_id": "tsc-2024-02-07",
+    "start": 0,
+    "text": "Click `+GoogleCalendar` at the bottom right to add to your own Google calendar.",
+    "unit_id": "u0019"
+  },
+  "tsc-2025-01-08:u0000:s00": {
+    "digest": "703216a3384ddd3e0e37642ec2185a11c8ed64f1fa3fe146149b31bd4edba125",
+    "end": 44,
+    "origin_offset": 0,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 0,
+    "text": "# Node.js Technical Steering Committee (TSC)",
+    "unit_id": "u0000"
+  },
+  "tsc-2025-01-08:u0000:s01": {
+    "digest": "b6e95c5dc7d9b380949a2a311a09d44e80a20c258918862367ba4383ca955419",
+    "end": 63,
+    "origin_offset": 45,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 45,
+    "text": "Meeting 2025-01-08",
+    "unit_id": "u0000"
+  },
+  "tsc-2025-01-08:u0001:s00": {
+    "digest": "76a71fbef8a8339fcbcaff8c9aadfb85c834bc3cc0c07069a5ebb2eea3d90d68",
+    "end": 2,
+    "origin_offset": 65,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 0,
+    "text": "##",
+    "unit_id": "u0001"
+  },
+  "tsc-2025-01-08:u0001:s01": {
+    "digest": "9024c197d84940e47ff6aa631b7711c4cbff4e7fb2fe1a574a3592b662983a0d",
+    "end": 8,
+    "origin_offset": 68,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 3,
+    "text": "Links",
+    "unit_id": "u0001"
+  },
+  "tsc-2025-01-08:u0002:s00": {
+    "digest": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
+    "end": 1,
+    "origin_offset": 75,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 0,
+    "text": "*",
+    "unit_id": "u0002"
+  },
+  "tsc-2025-01-08:u0002:s01": {
+    "digest": "5d9bd577455a288eec3fb2cf0e6817b71f86812a3db4a30e1461d62eac9f3b3e",
+    "end": 119,
+    "origin_offset": 77,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 2,
+    "text": "**Recording**: <https://youtube.com/live/trwFNI-Y0qE> * **GitHub Issue**: <https://github.com/nodejs/TSC/issues/1670>",
+    "unit_id": "u0002"
+  },
+  "tsc-2025-01-08:u0003:s00": {
+    "digest": "76a71fbef8a8339fcbcaff8c9aadfb85c834bc3cc0c07069a5ebb2eea3d90d68",
+    "end": 2,
+    "origin_offset": 196,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 0,
+    "text": "##",
+    "unit_id": "u0003"
+  },
+  "tsc-2025-01-08:u0003:s01": {
+    "digest": "43f9b89c0b9d22d8110ead813ea3949f20592a8bfc3c777d2d49e64da3b0cc9b",
+    "end": 10,
+    "origin_offset": 199,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 3,
+    "text": "Present",
+    "unit_id": "u0003"
+  },
+  "tsc-2025-01-08:u0004:s00": {
+    "digest": "ddf84f147dc5b0b45d0bf9b3856d2b131b6f44bf95872be6b8c1847e078470e9",
+    "end": 673,
+    "origin_offset": 208,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 0,
+    "text": "* Antoine du Hamel @aduh95 (voting member) * Yagiz Nizipli @anonrig (voting member) * Ruben Bridgewater @BridgeAR (voting member) * Gireesh Punathil @gireeshpunathil (voting member) * James Snell @jasnell (voting member) * Joyee Cheung @joyeecheung (voting member) * Marco Ippolito @marco-ippolito (voting member) * Matteo Collina @mcollina (voting member) * Michael Dawson @mhdawson (voting member) * Rafael Gonzaga @RafaelGSS (voting member) * Richard Lau @richardlau (voting member) * Robert Nagy @ronag (voting member) a *Ruy Adorno @ruyadorno (voting member) * Paolo Insogna @ShogunPanda (voting member) * Brie (gueest for smartos discussion) * Jean, Burellier @sheplu",
+    "unit_id": "u0004"
+  },
+  "tsc-2025-01-08:u0004:s01": {
+    "digest": "d3f66cc360e20019aa910bc1e0078ce00ca7d1894999b3916e7caf8fb9a1a921",
+    "end": 749,
+    "origin_offset": 882,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 674,
+    "text": "(Guest for Summit discussion) * Bryan English (Guest for summit discussion)",
+    "unit_id": "u0004"
+  },
+  "tsc-2025-01-08:u0005:s00": {
+    "digest": "76a71fbef8a8339fcbcaff8c9aadfb85c834bc3cc0c07069a5ebb2eea3d90d68",
+    "end": 2,
+    "origin_offset": 959,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 0,
+    "text": "##",
+    "unit_id": "u0005"
+  },
+  "tsc-2025-01-08:u0005:s01": {
+    "digest": "0fdf485f5bfd3762467100246df7a6ce45c3aa687c1645276e6e87240aa37199",
+    "end": 9,
+    "origin_offset": 962,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 3,
+    "text": "Agenda",
+    "unit_id": "u0005"
+  },
+  "tsc-2025-01-08:u0006:s00": {
+    "digest": "56dc6d47737d155afddefda1af20c40c901353c222d01e70b7b4e021f2e4f548",
+    "end": 3,
+    "origin_offset": 970,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 0,
+    "text": "###",
+    "unit_id": "u0006"
+  },
+  "tsc-2025-01-08:u0006:s01": {
+    "digest": "fe02680f247961a1369a66f681f990ec1e4a8708a2e84871019a93a7287ae7dd",
+    "end": 17,
+    "origin_offset": 974,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 4,
+    "text": "Announcements",
+    "unit_id": "u0006"
+  },
+  "tsc-2025-01-08:u0007:s00": {
+    "digest": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
+    "end": 1,
+    "origin_offset": 989,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 0,
+    "text": "*",
+    "unit_id": "u0007"
+  },
+  "tsc-2025-01-08:u0007:s01": {
+    "digest": "292106cc9b45236d66ed431b4445fca6a14967e18092dff6fdfde437f82482bb",
+    "end": 29,
+    "origin_offset": 991,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 2,
+    "text": "No announcements this week.",
+    "unit_id": "u0007"
+  },
+  "tsc-2025-01-08:u0008:s00": {
+    "digest": "56dc6d47737d155afddefda1af20c40c901353c222d01e70b7b4e021f2e4f548",
+    "end": 3,
+    "origin_offset": 1020,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 0,
+    "text": "###",
+    "unit_id": "u0008"
+  },
+  "tsc-2025-01-08:u0008:s01": {
+    "digest": "7971dd7526694c6ae3f2db570e44bfaa79cf30a63067a47f161b6e62c5426ef8",
+    "end": 13,
+    "origin_offset": 1024,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 4,
+    "text": "Reminders",
+    "unit_id": "u0008"
+  },
+  "tsc-2025-01-08:u0009:s00": {
+    "digest": "fb26593c513936e6eb1d8e4182f021abb568cafb3ff9b10412b537bb25403201",
+    "end": 180,
+    "origin_offset": 1035,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 0,
+    "text": "* Remember to nominate people for the [contributor spotlight](https://github.com/nodejs/node/blob/main/doc/contributing/reconizing-contributors.md#bi-monthly-contributor-spotlight)",
+    "unit_id": "u0009"
+  },
+  "tsc-2025-01-08:u0010:s00": {
+    "digest": "ecd4852c625bbf2532320099f40f18be77319870d65f96764e70a1f2a82eb85b",
+    "end": 33,
+    "origin_offset": 1217,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 0,
+    "text": "### CPC and Board Meeting Updates",
+    "unit_id": "u0010"
+  },
+  "tsc-2025-01-08:u0011:s00": {
+    "digest": "e95afd50602dd2434c47fdf351431b44ec5a331197fd5e44065542fa701daf5c",
+    "end": 109,
+    "origin_offset": 1252,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 0,
+    "text": "*Extracted from **tsc-agenda** labeled issues and pull requests from the **nodejs org** prior to the meeting.",
+    "unit_id": "u0011"
+  },
+  "tsc-2025-01-08:u0012:s00": {
+    "digest": "b2de87e50cfa56caa4bba5a4058aef724e185552745f417c0f12f8a2ace7d871",
+    "end": 75,
+    "origin_offset": 1363,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 0,
+    "text": "* Matteo, github security fund is important part, we have issue to discuss.",
+    "unit_id": "u0012"
+  },
+  "tsc-2025-01-08:u0013:s00": {
+    "digest": "02cc6184d9163ea7548c7f181fed4290a98b83c00b0b1cf46efdd4690414baec",
+    "end": 28,
+    "origin_offset": 1440,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 0,
+    "text": "### openjs-foundation/summit",
+    "unit_id": "u0013"
+  },
+  "tsc-2025-01-08:u0014:s00": {
+    "digest": "b128b8915a78afc5cab2e21fc4e4dc3010617c0212d0e2521ef2f1ba716da321",
+    "end": 200,
+    "origin_offset": 1470,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 0,
+    "text": "* Node.js Collaborator Summit 2025 / Paris [#433](https://github.com/openjs-foundation/summit/issues/433) * Joyee * better result from the summit query for Paris, 21 people so far, 30 total responses.",
+    "unit_id": "u0014"
+  },
+  "tsc-2025-01-08:u0014:s01": {
+    "digest": "bf0c456286f5575eebf84f60af6b44349c0321b1ce16116a50742cfca2cd3a7c",
+    "end": 480,
+    "origin_offset": 1681,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 201,
+    "text": "* will need to request about 20k from the travel fund * looks promising, we should do it * April 1, 2 is better than other dates * Matteo * fundamental question is looking at travel fund, 20k is high, if we plan to have second one with JSConf.us, there might not be enough funds.",
+    "unit_id": "u0014"
+  },
+  "tsc-2025-01-08:u0014:s02": {
+    "digest": "2b2eae63763694455763c857317a2233fb27c3388c6adabd136d19b90215c68d",
+    "end": 528,
+    "origin_offset": 1981,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 481,
+    "text": "Not convinced we’ll get as much funding for it.",
+    "unit_id": "u0014"
+  },
+  "tsc-2025-01-08:u0014:s03": {
+    "digest": "60c83ecc5a47b6b6c49ce9324cd753743791902e7af97888b3d1a0fa9e7eec15",
+    "end": 659,
+    "origin_offset": 2035,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 529,
+    "text": "It’s ⅓ of the collaborator summit budget for all of the project * Joyee, do we know how much budget we have for the first quarter.",
+    "unit_id": "u0014"
+  },
+  "tsc-2025-01-08:u0014:s04": {
+    "digest": "6f1770e8c09dc6fd6d1e504b51cb27f92de64ce68dc866dd27418a86c1718095",
+    "end": 707,
+    "origin_offset": 2174,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 660,
+    "text": "* Matteo, was fully booked, but not fully used.",
+    "unit_id": "u0014"
+  },
+  "tsc-2025-01-08:u0014:s05": {
+    "digest": "3f29ef1803731f1867b3c18ebd68b9dfff0499c45884d38b19bc67216e855095",
+    "end": 752,
+    "origin_offset": 2226,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 708,
+    "text": "* General agreement that we should go ahead.",
+    "unit_id": "u0014"
+  },
+  "tsc-2025-01-08:u0014:s06": {
+    "digest": "3722bf70f7c9b3540b05ed36a9ce737c565279b4a1421d35a8a14cb17a5ca12a",
+    "end": 940,
+    "origin_offset": 2271,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 753,
+    "text": "Matteo just wanted to flag that there are quite a few people identifying that they need travel funding. * Matteo will take action to let Ben/Robin know there may be an influx of requests.",
+    "unit_id": "u0014"
+  },
+  "tsc-2025-01-08:u0014:s07": {
+    "digest": "c5d2faa2f55edefff2d75a82b4e395d0e9b94f00986fda01b016b1634237b18f",
+    "end": 1331,
+    "origin_offset": 2469,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 941,
+    "text": "There may need to be some feedback from the project on which to approve/prioritize * Date would be April 1 and 2 * Joyee, next question is which venue. * Jean, working on Sandolfi on booking auditorium * Bryan, we will have more people if it is a the Datadog location * Joyee, impression is that Bryan has gotten further along, and may be better for the summit versus the Sandolfi location.",
+    "unit_id": "u0014"
+  },
+  "tsc-2025-01-08:u0014:s08": {
+    "digest": "aee6a17d2286fe3334916c650916841efd22167d30d4734acbc89ba755d70b55",
+    "end": 1446,
+    "origin_offset": 2902,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 1332,
+    "text": "* Bryan has booked largest meeting room in Datadog Paris office which is ~40 people, typically in classroom style.",
+    "unit_id": "u0014"
+  },
+  "tsc-2025-01-08:u0014:s09": {
+    "digest": "d81a7879e5ddf64cf0c2729dd7e87b7032bd9888c54b6cb48734a93f7d88aac4",
+    "end": 1535,
+    "origin_offset": 3033,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 1447,
+    "text": "* Matteo, can it have tables, Bryan yes, by default they are chairs with desks attached.",
+    "unit_id": "u0014"
+  },
+  "tsc-2025-01-08:u0014:s10": {
+    "digest": "916bf6066a052706f8d8e4694fc42b4cfefcbd9ea5c7e8a0832dbc1e2a1397e2",
+    "end": 1579,
+    "origin_offset": 3132,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 1536,
+    "text": "Actual tables is probably possible as well.",
+    "unit_id": "u0014"
+  },
+  "tsc-2025-01-08:u0014:s11": {
+    "digest": "0e0e80299573018376e6ec23b1e957ce4919e872328e08885407d4b556884dd0",
+    "end": 1696,
+    "origin_offset": 3184,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 1580,
+    "text": "* Michael has been good to another break out room from parallel sessions * Bryan, security will be relatively tight.",
+    "unit_id": "u0014"
+  },
+  "tsc-2025-01-08:u0014:s12": {
+    "digest": "e60327fc4c9a7ec6a8acca44c960ee20d165039471376f0cc0a989672a5755ff",
+    "end": 1761,
+    "origin_offset": 3309,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 1697,
+    "text": "Bathrooms just outside, but otherwise an escort Would be needed.",
+    "unit_id": "u0014"
+  },
+  "tsc-2025-01-08:u0014:s13": {
+    "digest": "4e8e785b357c78935e333855e9311b68d84aeadb48cfc04d80bfe7928fc350e7",
+    "end": 2015,
+    "origin_offset": 3384,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 1762,
+    "text": "There are also a few terraces off the room that might work for smaller conversations. * Joyee, so agreement is to use DataDog location. * Many thanks to both DataDog and Sandolfi for volunteering locations * Jean, want to have a meetup after the summit?",
+    "unit_id": "u0014"
+  },
+  "tsc-2025-01-08:u0014:s14": {
+    "digest": "f57aca6d1a7a58676398096cedf12737afc2f243a3395acfc169f54b5107ce7f",
+    "end": 2088,
+    "origin_offset": 3660,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 2016,
+    "text": "Joyee that sounds like a good idea * 20 minute ride on the subway away z",
+    "unit_id": "u0014"
+  },
+  "tsc-2025-01-08:u0015:s00": {
+    "digest": "3e093fc7d248afd5b1464ad6f901f0c45cd2417c37d244d12e04473f96888632",
+    "end": 15,
+    "origin_offset": 3742,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 0,
+    "text": "### nodejs/node",
+    "unit_id": "u0015"
+  },
+  "tsc-2025-01-08:u0016:s00": {
+    "digest": "52b014d434b30a8a1ee626dbe0df9431b059022667156d63d4cb437a2e4c9adf",
+    "end": 102,
+    "origin_offset": 3759,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 0,
+    "text": "* doc: change smartos support type to experimental [#56220](https://github.com/nodejs/node/pull/56220)",
+    "unit_id": "u0016"
+  },
+  "tsc-2025-01-08:u0017:s00": {
+    "digest": "b0371bb82c9adc58065658d871d00d0c1d48d953e63b96dbaf64735b96d1461c",
+    "end": 261,
+    "origin_offset": 3863,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 0,
+    "text": "* src: implement whatwg's URLPattern spec [#56452](https://github.com/nodejs/node/pull/56452) * Yagiz, WhatWG spec is implemented by a number of runtimes and browsers, currently blocked by Matteo for perf issues * Matteo, not really usable for backend runtimes.",
+    "unit_id": "u0017"
+  },
+  "tsc-2025-01-08:u0017:s01": {
+    "digest": "9a39a9dbf0e2dc0cced2a200f23772d8bd7cc8fc3fa0dfaee46f5a444346ec04",
+    "end": 361,
+    "origin_offset": 4137,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 262,
+    "text": "* many people believe its a bad pattern * The fundamental question is if we should really add this?",
+    "unit_id": "u0017"
+  },
+  "tsc-2025-01-08:u0017:s02": {
+    "digest": "6489e0cb64ce59ba5a497f6aa97fb5b961b91648c3369dee8023bb6517f95ddf",
+    "end": 484,
+    "origin_offset": 4241,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 362,
+    "text": "The other parts of the spec were added due to massive usage in the ecosystem, not sure that really applies in this case. *",
+    "unit_id": "u0017"
+  },
+  "tsc-2025-01-08:u0017:s03": {
+    "digest": "f43331f2929f1c26d5c14a36b55d35bea6b94a3410fa0043966313d9fd5934a2",
+    "end": 624,
+    "origin_offset": 4380,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 485,
+    "text": "There is also a proposal from Deno to add a better option, that allows more flexibility in handling patterns and making it run much faster.",
+    "unit_id": "u0017"
+  },
+  "tsc-2025-01-08:u0017:s04": {
+    "digest": "910bb623072452408a7ff44be8864262ad35a5a914531fa56e5fbda607cdfa72",
+    "end": 881,
+    "origin_offset": 4528,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 625,
+    "text": "* Robert, adding it does not necessarily mean we are promoting it * Half if not more of the web apis are not necessarily good for back end and are slow so not necessarily a blocker in this case to be consistent with how we decided on Adding other Web APIs.",
+    "unit_id": "u0017"
+  },
+  "tsc-2025-01-08:u0017:s05": {
+    "digest": "e41e86fc720045b3eef510da308619d62786d15d7a70f45111e0806c9b25da92",
+    "end": 1101,
+    "origin_offset": 4803,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 882,
+    "text": "* Yagiz, have not yet optimized, and have not looked at adding URLPatternList. * James, want to add support to the idea that it’s not great for back end, and is slow, but those are not reasons to not include in Node.js.",
+    "unit_id": "u0017"
+  },
+  "tsc-2025-01-08:u0017:s06": {
+    "digest": "3bd801922df15c9a94293c48b1f3ef3e97b7c78d1daa09a8976e94a8195e21c0",
+    "end": 1155,
+    "origin_offset": 5030,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 1102,
+    "text": "We’ve added other APIs which are in the same category",
+    "unit_id": "u0017"
+  },
+  "tsc-2025-01-08:u0018:s00": {
+    "digest": "a5349f87e65f46d03d3ae0eba46a72f235127bb066617baa72c3fed29a5a45cf",
+    "end": 114,
+    "origin_offset": 5089,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 0,
+    "text": "* fs: enable chunked reading for large files in readFileHandle [#56022](https://github.com/nodejs/node/pull/56022)",
+    "unit_id": "u0018"
+  },
+  "tsc-2025-01-08:u0019:s00": {
+    "digest": "bc3802e8aa3dfea5895a0821d868f681bd954f0d4085bb2c818b365695729df1",
+    "end": 78,
+    "origin_offset": 5205,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 0,
+    "text": "* test: improve zlib tests [#55716](https://github.com/nodejs/node/pull/55716)",
+    "unit_id": "u0019"
+  },
+  "tsc-2025-01-08:u0020:s00": {
+    "digest": "0414a019d334d726f0abaa1702a0620ca5c0a8ae59a049e05dc019a6fc3f5f53",
+    "end": 14,
+    "origin_offset": 5285,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 0,
+    "text": "### nodejs/TSC",
+    "unit_id": "u0020"
+  },
+  "tsc-2025-01-08:u0021:s00": {
+    "digest": "7d15a6854f4aaaa45d9c02118f01e3c49611c3cd8e08783cfbaaa2e00a24894b",
+    "end": 105,
+    "origin_offset": 5301,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 0,
+    "text": "*Submit application for GitHub Secure Open Source Fund [#1671](https://github.com/nodejs/TSC/issues/1671)",
+    "unit_id": "u0021"
+  },
+  "tsc-2025-01-08:u0022:s00": {
+    "digest": "db2b05747936f5c7d8d1b81b0b3b17db638151d320a21ea795ffb360123daedb",
+    "end": 249,
+    "origin_offset": 5408,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 0,
+    "text": "* Matteo, $ go into GitHub sponsor, * Agreed that we submit, summary is in <https://github.com/nodejs/TSC/issues/1671#issuecomment-2578440199> * Ruben, maybe we should open to other collaborators * Open issue, ping collaborators with 1 day deadline.",
+    "unit_id": "u0022"
+  },
+  "tsc-2025-01-08:u0023:s00": {
+    "digest": "69649766d0f16ca2e49d1b678d3c0753e3f28f1b58213f0023f1bfb1e698d092",
+    "end": 132,
+    "origin_offset": 5661,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 0,
+    "text": "* Status of smartOS support and what future holds [#1663](https://github.com/nodejs/TSC/issues/1663) * skipped as we ran out of time",
+    "unit_id": "u0023"
+  },
+  "tsc-2025-01-08:u0024:s00": {
+    "digest": "1c4eb3af815f3fcee9aec1233b0d6af9fa89290866ed65f4b7d480e570ebcbaf",
+    "end": 159,
+    "origin_offset": 5797,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 0,
+    "text": "* Clarify the Charter so that contractors are explicity counted as affialiated [#1650](https://github.com/nodejs/TSC/pull/1650) * skipped as we ran out of time",
+    "unit_id": "u0024"
+  },
+  "tsc-2025-01-08:u0025:s00": {
+    "digest": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
+    "end": 1,
+    "origin_offset": 5960,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 0,
+    "text": "*",
+    "unit_id": "u0025"
+  },
+  "tsc-2025-01-08:u0025:s01": {
+    "digest": "609f1dfe2b3a30323d054fa59782f7a069186ffed9e782508d019a736673f223",
+    "end": 118,
+    "origin_offset": 5962,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 2,
+    "text": "Let's talk about the CI situation [#1614](https://github.com/nodejs/TSC/issues/1614) * skipped as we ran out of time",
+    "unit_id": "u0025"
+  },
+  "tsc-2025-01-08:u0026:s00": {
+    "digest": "69bd07cf1cb01d86127430a0eeccc3cd14122cb9c566cc7d572e0cd7275111ff",
+    "end": 152,
+    "origin_offset": 6082,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 0,
+    "text": "* Open OpenCollective and Github Sponsors for Node.js [#1553](https://github.com/nodejs/TSC/issues/1553) * Michael, meeting Ben, to figure out logistics",
+    "unit_id": "u0026"
+  },
+  "tsc-2025-01-08:u0027:s00": {
+    "digest": "76a71fbef8a8339fcbcaff8c9aadfb85c834bc3cc0c07069a5ebb2eea3d90d68",
+    "end": 2,
+    "origin_offset": 6238,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 0,
+    "text": "##",
+    "unit_id": "u0027"
+  },
+  "tsc-2025-01-08:u0027:s01": {
+    "digest": "fd948a73c3a4af41567a6022a5dfcc766bafbe5bffd72861184d763f28bff22d",
+    "end": 56,
+    "origin_offset": 6241,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 3,
+    "text": "Strategic Initiatives * skipped as we ran out of time",
+    "unit_id": "u0027"
+  },
+  "tsc-2025-01-08:u0028:s00": {
+    "digest": "76a71fbef8a8339fcbcaff8c9aadfb85c834bc3cc0c07069a5ebb2eea3d90d68",
+    "end": 2,
+    "origin_offset": 6296,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 0,
+    "text": "##",
+    "unit_id": "u0028"
+  },
+  "tsc-2025-01-08:u0028:s01": {
+    "digest": "3daaed66ed149c285905afcb9e343a59aad75ebdf76a8989468a2c2e565be042",
+    "end": 20,
+    "origin_offset": 6299,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 3,
+    "text": "Upcoming Meetings",
+    "unit_id": "u0028"
+  },
+  "tsc-2025-01-08:u0029:s00": {
+    "digest": "d0dd77062f7e143636478b85b16dda0153d7f59e3ae151cbbb3d6593bfd24df3",
+    "end": 61,
+    "origin_offset": 6318,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 0,
+    "text": "* **Node.js Project Calendar**: <https://nodejs.org/calendar>",
+    "unit_id": "u0029"
+  },
+  "tsc-2025-01-08:u0030:s00": {
+    "digest": "92082b4382f54ee059322fa42876c180ec8a8915ca42cd90e6b347b0eee4a598",
+    "end": 79,
+    "origin_offset": 6381,
+    "path": "",
+    "source_id": "tsc-2025-01-08",
+    "start": 0,
+    "text": "Click `+GoogleCalendar` at the bottom right to add to your own Google calendar.",
+    "unit_id": "u0030"
+  },
+  "tsc-2025-02-05:u0000:s00": {
+    "digest": "703216a3384ddd3e0e37642ec2185a11c8ed64f1fa3fe146149b31bd4edba125",
+    "end": 44,
+    "origin_offset": 0,
+    "path": "",
+    "source_id": "tsc-2025-02-05",
+    "start": 0,
+    "text": "# Node.js Technical Steering Committee (TSC)",
+    "unit_id": "u0000"
+  },
+  "tsc-2025-02-05:u0000:s01": {
+    "digest": "2f31f51c8c7d38b86d300a74eec987fbcac4342023b455efa621e536489abaaa",
+    "end": 63,
+    "origin_offset": 45,
+    "path": "",
+    "source_id": "tsc-2025-02-05",
+    "start": 45,
+    "text": "Meeting 2025-02-05",
+    "unit_id": "u0000"
+  },
+  "tsc-2025-02-05:u0001:s00": {
+    "digest": "76a71fbef8a8339fcbcaff8c9aadfb85c834bc3cc0c07069a5ebb2eea3d90d68",
+    "end": 2,
+    "origin_offset": 65,
+    "path": "",
+    "source_id": "tsc-2025-02-05",
+    "start": 0,
+    "text": "##",
+    "unit_id": "u0001"
+  },
+  "tsc-2025-02-05:u0001:s01": {
+    "digest": "9024c197d84940e47ff6aa631b7711c4cbff4e7fb2fe1a574a3592b662983a0d",
+    "end": 8,
+    "origin_offset": 68,
+    "path": "",
+    "source_id": "tsc-2025-02-05",
+    "start": 3,
+    "text": "Links",
+    "unit_id": "u0001"
+  },
+  "tsc-2025-02-05:u0002:s00": {
+    "digest": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
+    "end": 1,
+    "origin_offset": 75,
+    "path": "",
+    "source_id": "tsc-2025-02-05",
+    "start": 0,
+    "text": "*",
+    "unit_id": "u0002"
+  },
+  "tsc-2025-02-05:u0002:s01": {
+    "digest": "c095b78a1c8f9752c31f0493f25587604ae7d72ed0419d2c672a1de5ba8d9fa5",
+    "end": 126,
+    "origin_offset": 77,
+    "path": "",
+    "source_id": "tsc-2025-02-05",
+    "start": 2,
+    "text": "**Recording**: <https://www.youtube.com/watch?v=VU7PZUGRNnc> * **GitHub Issue**: <https://github.com/nodejs/TSC/issues/1683>",
+    "unit_id": "u0002"
+  },
+  "tsc-2025-02-05:u0003:s00": {
+    "digest": "76a71fbef8a8339fcbcaff8c9aadfb85c834bc3cc0c07069a5ebb2eea3d90d68",
+    "end": 2,
+    "origin_offset": 204,
+    "path": "",
+    "source_id": "tsc-2025-02-05",
+    "start": 0,
+    "text": "##",
+    "unit_id": "u0003"
+  },
+  "tsc-2025-02-05:u0003:s01": {
+    "digest": "43f9b89c0b9d22d8110ead813ea3949f20592a8bfc3c777d2d49e64da3b0cc9b",
+    "end": 10,
+    "origin_offset": 207,
+    "path": "",
+    "source_id": "tsc-2025-02-05",
+    "start": 3,
+    "text": "Present",
+    "unit_id": "u0003"
+  },
+  "tsc-2025-02-05:u0004:s00": {
+    "digest": "ee19824e1d8117b7632244ea2f9e133c3336a14bad75f8f3c39b6a021febe2d5",
+    "end": 257,
+    "origin_offset": 216,
+    "path": "",
+    "source_id": "tsc-2025-02-05",
+    "start": 0,
+    "text": "* Antoine du Hamel @aduh95 (voting member) * Joyee Cheung @joyeecheung (voting member) * Marco Ippolito @marco-ippolito (voting member) * Michael Dawson @mhdawson (voting member) * Richard Lau @richardlau (voting member) * Robert Nagy @ronag (voting member)",
+    "unit_id": "u0004"
+  },
+  "tsc-2025-02-05:u0005:s00": {
+    "digest": "76a71fbef8a8339fcbcaff8c9aadfb85c834bc3cc0c07069a5ebb2eea3d90d68",
+    "end": 2,
+    "origin_offset": 475,
+    "path": "",
+    "source_id": "tsc-2025-02-05",
+    "start": 0,
+    "text": "##",
+    "unit_id": "u0005"
+  },
+  "tsc-2025-02-05:u0005:s01": {
+    "digest": "0fdf485f5bfd3762467100246df7a6ce45c3aa687c1645276e6e87240aa37199",
+    "end": 9,
+    "origin_offset": 478,
+    "path": "",
+    "source_id": "tsc-2025-02-05",
+    "start": 3,
+    "text": "Agenda",
+    "unit_id": "u0005"
+  },
+  "tsc-2025-02-05:u0006:s00": {
+    "digest": "56dc6d47737d155afddefda1af20c40c901353c222d01e70b7b4e021f2e4f548",
+    "end": 3,
+    "origin_offset": 486,
+    "path": "",
+    "source_id": "tsc-2025-02-05",
+    "start": 0,
+    "text": "###",
+    "unit_id": "u0006"
+  },
+  "tsc-2025-02-05:u0006:s01": {
+    "digest": "fe02680f247961a1369a66f681f990ec1e4a8708a2e84871019a93a7287ae7dd",
+    "end": 17,
+    "origin_offset": 490,
+    "path": "",
+    "source_id": "tsc-2025-02-05",
+    "start": 4,
+    "text": "Announcements",
+    "unit_id": "u0006"
+  },
+  "tsc-2025-02-05:u0007:s00": {
+    "digest": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
+    "end": 1,
+    "origin_offset": 505,
+    "path": "",
+    "source_id": "tsc-2025-02-05",
+    "start": 0,
+    "text": "*",
+    "unit_id": "u0007"
+  },
+  "tsc-2025-02-05:u0007:s01": {
+    "digest": "292106cc9b45236d66ed431b4445fca6a14967e18092dff6fdfde437f82482bb",
+    "end": 29,
+    "origin_offset": 507,
+    "path": "",
+    "source_id": "tsc-2025-02-05",
+    "start": 2,
+    "text": "No announcements this week.",
+    "unit_id": "u0007"
+  },
+  "tsc-2025-02-05:u0008:s00": {
+    "digest": "56dc6d47737d155afddefda1af20c40c901353c222d01e70b7b4e021f2e4f548",
+    "end": 3,
+    "origin_offset": 536,
+    "path": "",
+    "source_id": "tsc-2025-02-05",
+    "start": 0,
+    "text": "###",
+    "unit_id": "u0008"
+  },
+  "tsc-2025-02-05:u0008:s01": {
+    "digest": "7971dd7526694c6ae3f2db570e44bfaa79cf30a63067a47f161b6e62c5426ef8",
+    "end": 13,
+    "origin_offset": 540,
+    "path": "",
+    "source_id": "tsc-2025-02-05",
+    "start": 4,
+    "text": "Reminders",
+    "unit_id": "u0008"
+  },
+  "tsc-2025-02-05:u0009:s00": {
+    "digest": "fb26593c513936e6eb1d8e4182f021abb568cafb3ff9b10412b537bb25403201",
+    "end": 180,
+    "origin_offset": 551,
+    "path": "",
+    "source_id": "tsc-2025-02-05",
+    "start": 0,
+    "text": "* Remember to nominate people for the [contributor spotlight](https://github.com/nodejs/node/blob/main/doc/contributing/reconizing-contributors.md#bi-monthly-contributor-spotlight)",
+    "unit_id": "u0009"
+  },
+  "tsc-2025-02-05:u0010:s00": {
+    "digest": "ecd4852c625bbf2532320099f40f18be77319870d65f96764e70a1f2a82eb85b",
+    "end": 33,
+    "origin_offset": 733,
+    "path": "",
+    "source_id": "tsc-2025-02-05",
+    "start": 0,
+    "text": "### CPC and Board Meeting Updates",
+    "unit_id": "u0010"
+  },
+  "tsc-2025-02-05:u0011:s00": {
+    "digest": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
+    "end": 1,
+    "origin_offset": 768,
+    "path": "",
+    "source_id": "tsc-2025-02-05",
+    "start": 0,
+    "text": "*",
+    "unit_id": "u0011"
+  },
+  "tsc-2025-02-05:u0011:s01": {
+    "digest": "330f319303f3385d58587bb89331b7aec0443f706f8ed4a0ae87716d7f208073",
+    "end": 22,
+    "origin_offset": 770,
+    "path": "",
+    "source_id": "tsc-2025-02-05",
+    "start": 2,
+    "text": "No updates this week",
+    "unit_id": "u0011"
+  },
+  "tsc-2025-02-05:u0012:s00": {
+    "digest": "e95afd50602dd2434c47fdf351431b44ec5a331197fd5e44065542fa701daf5c",
+    "end": 109,
+    "origin_offset": 792,
+    "path": "",
+    "source_id": "tsc-2025-02-05",
+    "start": 0,
+    "text": "*Extracted from **tsc-agenda** labeled issues and pull requests from the **nodejs org** prior to the meeting.",
+    "unit_id": "u0012"
+  },
+  "tsc-2025-02-05:u0013:s00": {
+    "digest": "3e093fc7d248afd5b1464ad6f901f0c45cd2417c37d244d12e04473f96888632",
+    "end": 15,
+    "origin_offset": 903,
+    "path": "",
+    "source_id": "tsc-2025-02-05",
+    "start": 0,
+    "text": "### nodejs/node",
+    "unit_id": "u0013"
+  },
+  "tsc-2025-02-05:u0014:s00": {
+    "digest": "b8c9c7a3cd44d02904215d83fd46e37219cfdfc568274d3817575c37b3135e56",
+    "end": 148,
+    "origin_offset": 920,
+    "path": "",
+    "source_id": "tsc-2025-02-05",
+    "start": 0,
+    "text": "* Deadlock at process shutdown [#54918](https://github.com/nodejs/node/issues/54918) * Matteo reached out to Ben, let’s leave on agenda to next week",
+    "unit_id": "u0014"
+  },
+  "tsc-2025-02-05:u0015:s00": {
+    "digest": "0414a019d334d726f0abaa1702a0620ca5c0a8ae59a049e05dc019a6fc3f5f53",
+    "end": 14,
+    "origin_offset": 1072,
+    "path": "",
+    "source_id": "tsc-2025-02-05",
+    "start": 0,
+    "text": "### nodejs/TSC",
+    "unit_id": "u0015"
+  },
+  "tsc-2025-02-05:u0016:s00": {
+    "digest": "f9ad52c7d868cdcc34c89fcdac26f938bb311078ebec2652147093246758e9e1",
+    "end": 189,
+    "origin_offset": 1088,
+    "path": "",
+    "source_id": "tsc-2025-02-05",
+    "start": 0,
+    "text": "* Plan for Collab Summit before/after JSConfUS [#1654](https://github.com/nodejs/TSC/issues/1654) * Discussed last week, consensus seems to be that we move forward with the plan proposed. *",
+    "unit_id": "u0016"
+  },
+  "tsc-2025-02-05:u0016:s01": {
+    "digest": "d69a5c1462f0d013af8481bd12d1f339efdac8045c66596f5ba12116ad460003",
+    "end": 260,
+    "origin_offset": 1282,
+    "path": "",
+    "source_id": "tsc-2025-02-05",
+    "start": 190,
+    "text": "Michael commented on the issue to that effect and removed from agenda.",
+    "unit_id": "u0016"
+  },
+  "tsc-2025-02-05:u0017:s00": {
+    "digest": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
+    "end": 1,
+    "origin_offset": 1354,
+    "path": "",
+    "source_id": "tsc-2025-02-05",
+    "start": 0,
+    "text": "*",
+    "unit_id": "u0017"
+  },
+  "tsc-2025-02-05:u0017:s01": {
+    "digest": "07eb9f882b7088f3f77a62ed3679cce16db487a54df1c8de385e67d7b7e10964",
+    "end": 221,
+    "origin_offset": 1356,
+    "path": "",
+    "source_id": "tsc-2025-02-05",
+    "start": 2,
+    "text": "Let's talk about the CI situation [#1614](https://github.com/nodejs/TSC/issues/1614) * Richard, new V8 landed last week, that invalidates caches, so that causes generally longer build times, that should now be resolved.",
+    "unit_id": "u0017"
+  },
+  "tsc-2025-02-05:u0018:s00": {
+    "digest": "76a71fbef8a8339fcbcaff8c9aadfb85c834bc3cc0c07069a5ebb2eea3d90d68",
+    "end": 2,
+    "origin_offset": 1583,
+    "path": "",
+    "source_id": "tsc-2025-02-05",
+    "start": 0,
+    "text": "##",
+    "unit_id": "u0018"
+  },
+  "tsc-2025-02-05:u0018:s01": {
+    "digest": "457d7a7c1c29ea807d7b54ae821428e8218bc8d75f5f61c36ef1ac17ec3cac4a",
+    "end": 24,
+    "origin_offset": 1586,
+    "path": "",
+    "source_id": "tsc-2025-02-05",
+    "start": 3,
+    "text": "Strategic Initiatives",
+    "unit_id": "u0018"
+  },
+  "tsc-2025-02-05:u0019:s00": {
+    "digest": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
+    "end": 1,
+    "origin_offset": 1609,
+    "path": "",
+    "source_id": "tsc-2025-02-05",
+    "start": 0,
+    "text": "*",
+    "unit_id": "u0019"
+  },
+  "tsc-2025-02-05:u0019:s01": {
+    "digest": "e1be97aa4dc394c4979e651306e7ec73d3c951ffb713fbe4c3c0605e15fed0f7",
+    "end": 223,
+    "origin_offset": 1611,
+    "path": "",
+    "source_id": "tsc-2025-02-05",
+    "start": 2,
+    "text": "Antoine, core promises, no update * Joyee, startup snapshot, no update * Next-10, planning for survey before the collaborator summit in April, if you are interested there will be PRs for questions, etc sometime this week.",
+    "unit_id": "u0019"
+  },
+  "tsc-2025-02-05:u0020:s00": {
+    "digest": "76a71fbef8a8339fcbcaff8c9aadfb85c834bc3cc0c07069a5ebb2eea3d90d68",
+    "end": 2,
+    "origin_offset": 1836,
+    "path": "",
+    "source_id": "tsc-2025-02-05",
+    "start": 0,
+    "text": "##",
+    "unit_id": "u0020"
+  },
+  "tsc-2025-02-05:u0020:s01": {
+    "digest": "3daaed66ed149c285905afcb9e343a59aad75ebdf76a8989468a2c2e565be042",
+    "end": 20,
+    "origin_offset": 1839,
+    "path": "",
+    "source_id": "tsc-2025-02-05",
+    "start": 3,
+    "text": "Upcoming Meetings",
+    "unit_id": "u0020"
+  },
+  "tsc-2025-02-05:u0021:s00": {
+    "digest": "d0dd77062f7e143636478b85b16dda0153d7f59e3ae151cbbb3d6593bfd24df3",
+    "end": 61,
+    "origin_offset": 1858,
+    "path": "",
+    "source_id": "tsc-2025-02-05",
+    "start": 0,
+    "text": "* **Node.js Project Calendar**: <https://nodejs.org/calendar>",
+    "unit_id": "u0021"
+  },
+  "tsc-2025-02-05:u0022:s00": {
+    "digest": "92082b4382f54ee059322fa42876c180ec8a8915ca42cd90e6b347b0eee4a598",
+    "end": 79,
+    "origin_offset": 1921,
+    "path": "",
+    "source_id": "tsc-2025-02-05",
+    "start": 0,
+    "text": "Click `+GoogleCalendar` at the bottom right to add to your own Google calendar.",
+    "unit_id": "u0022"
+  },
+  "tsc-2025-03-05:u0000:s00": {
+    "digest": "703216a3384ddd3e0e37642ec2185a11c8ed64f1fa3fe146149b31bd4edba125",
+    "end": 44,
+    "origin_offset": 0,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 0,
+    "text": "# Node.js Technical Steering Committee (TSC)",
+    "unit_id": "u0000"
+  },
+  "tsc-2025-03-05:u0000:s01": {
+    "digest": "050b4d5d0237504b039c01e5e0fb7d5e17c8b55b093ace6ffe0f322347eef5e3",
+    "end": 63,
+    "origin_offset": 45,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 45,
+    "text": "Meeting 2025-03-05",
+    "unit_id": "u0000"
+  },
+  "tsc-2025-03-05:u0001:s00": {
+    "digest": "76a71fbef8a8339fcbcaff8c9aadfb85c834bc3cc0c07069a5ebb2eea3d90d68",
+    "end": 2,
+    "origin_offset": 65,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 0,
+    "text": "##",
+    "unit_id": "u0001"
+  },
+  "tsc-2025-03-05:u0001:s01": {
+    "digest": "9024c197d84940e47ff6aa631b7711c4cbff4e7fb2fe1a574a3592b662983a0d",
+    "end": 8,
+    "origin_offset": 68,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 3,
+    "text": "Links",
+    "unit_id": "u0001"
+  },
+  "tsc-2025-03-05:u0002:s00": {
+    "digest": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
+    "end": 1,
+    "origin_offset": 75,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 0,
+    "text": "*",
+    "unit_id": "u0002"
+  },
+  "tsc-2025-03-05:u0002:s01": {
+    "digest": "72685acac0e3f009baa152725cff3335bbc734f236504fb784e8bd30704d49a9",
+    "end": 126,
+    "origin_offset": 77,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 2,
+    "text": "**Recording**: <https://www.youtube.com/watch?v=jFB-IVB7kcI> * **GitHub Issue**: <https://github.com/nodejs/TSC/issues/1693>",
+    "unit_id": "u0002"
+  },
+  "tsc-2025-03-05:u0003:s00": {
+    "digest": "76a71fbef8a8339fcbcaff8c9aadfb85c834bc3cc0c07069a5ebb2eea3d90d68",
+    "end": 2,
+    "origin_offset": 204,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 0,
+    "text": "##",
+    "unit_id": "u0003"
+  },
+  "tsc-2025-03-05:u0003:s01": {
+    "digest": "43f9b89c0b9d22d8110ead813ea3949f20592a8bfc3c777d2d49e64da3b0cc9b",
+    "end": 10,
+    "origin_offset": 207,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 3,
+    "text": "Present",
+    "unit_id": "u0003"
+  },
+  "tsc-2025-03-05:u0004:s00": {
+    "digest": "b3d608b32c786f2b4e80aefbb3efa82f939d4ddfa6d5c2f12c3ca1d3b21cb4ee",
+    "end": 472,
+    "origin_offset": 216,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 0,
+    "text": "* Antoine du Hamel @aduh95 (voting member) * Chengzhong Wu @legendecas (voting member) * Joyee Cheung @joyeecheung (voting member) * Marco Ippolito @marco-ippolito (voting member) * Michael Dawson @mhdawson (voting member) * Richard Lau @richardlau (voting member) * Robert Nagy @ronag (voting member) * Ruben Bridgewater @BridgeAR (voting member) * Ruy Adorno @ruyadorno (voting member) * Paolo Insogna @ShogunPanda (voting member) * Michaël Zasso @targos (voting member)",
+    "unit_id": "u0004"
+  },
+  "tsc-2025-03-05:u0005:s00": {
+    "digest": "76a71fbef8a8339fcbcaff8c9aadfb85c834bc3cc0c07069a5ebb2eea3d90d68",
+    "end": 2,
+    "origin_offset": 690,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 0,
+    "text": "##",
+    "unit_id": "u0005"
+  },
+  "tsc-2025-03-05:u0005:s01": {
+    "digest": "0fdf485f5bfd3762467100246df7a6ce45c3aa687c1645276e6e87240aa37199",
+    "end": 9,
+    "origin_offset": 693,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 3,
+    "text": "Agenda",
+    "unit_id": "u0005"
+  },
+  "tsc-2025-03-05:u0006:s00": {
+    "digest": "56dc6d47737d155afddefda1af20c40c901353c222d01e70b7b4e021f2e4f548",
+    "end": 3,
+    "origin_offset": 701,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 0,
+    "text": "###",
+    "unit_id": "u0006"
+  },
+  "tsc-2025-03-05:u0006:s01": {
+    "digest": "fe02680f247961a1369a66f681f990ec1e4a8708a2e84871019a93a7287ae7dd",
+    "end": 17,
+    "origin_offset": 705,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 4,
+    "text": "Announcements",
+    "unit_id": "u0006"
+  },
+  "tsc-2025-03-05:u0007:s00": {
+    "digest": "6011a358f7b3b77e3fecd3c73f1bad4bdb80e65f2cf5eb144fe505fb3da89927",
+    "end": 29,
+    "origin_offset": 720,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 0,
+    "text": "* no announcements this week.",
+    "unit_id": "u0007"
+  },
+  "tsc-2025-03-05:u0008:s00": {
+    "digest": "56dc6d47737d155afddefda1af20c40c901353c222d01e70b7b4e021f2e4f548",
+    "end": 3,
+    "origin_offset": 751,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 0,
+    "text": "###",
+    "unit_id": "u0008"
+  },
+  "tsc-2025-03-05:u0008:s01": {
+    "digest": "7971dd7526694c6ae3f2db570e44bfaa79cf30a63067a47f161b6e62c5426ef8",
+    "end": 13,
+    "origin_offset": 755,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 4,
+    "text": "Reminders",
+    "unit_id": "u0008"
+  },
+  "tsc-2025-03-05:u0009:s00": {
+    "digest": "fb26593c513936e6eb1d8e4182f021abb568cafb3ff9b10412b537bb25403201",
+    "end": 180,
+    "origin_offset": 766,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 0,
+    "text": "* Remember to nominate people for the [contributor spotlight](https://github.com/nodejs/node/blob/main/doc/contributing/reconizing-contributors.md#bi-monthly-contributor-spotlight)",
+    "unit_id": "u0009"
+  },
+  "tsc-2025-03-05:u0010:s00": {
+    "digest": "ecd4852c625bbf2532320099f40f18be77319870d65f96764e70a1f2a82eb85b",
+    "end": 33,
+    "origin_offset": 948,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 0,
+    "text": "### CPC and Board Meeting Updates",
+    "unit_id": "u0010"
+  },
+  "tsc-2025-03-05:u0011:s00": {
+    "digest": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
+    "end": 1,
+    "origin_offset": 983,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 0,
+    "text": "*",
+    "unit_id": "u0011"
+  },
+  "tsc-2025-03-05:u0011:s01": {
+    "digest": "d8df3bd72454383dca918b998c9b7337d099fb99f2ad77ed00e4d7e0a307e2c6",
+    "end": 21,
+    "origin_offset": 985,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 2,
+    "text": "No update this week",
+    "unit_id": "u0011"
+  },
+  "tsc-2025-03-05:u0012:s00": {
+    "digest": "e95afd50602dd2434c47fdf351431b44ec5a331197fd5e44065542fa701daf5c",
+    "end": 109,
+    "origin_offset": 1006,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 0,
+    "text": "*Extracted from **tsc-agenda** labeled issues and pull requests from the **nodejs org** prior to the meeting.",
+    "unit_id": "u0012"
+  },
+  "tsc-2025-03-05:u0013:s00": {
+    "digest": "3e093fc7d248afd5b1464ad6f901f0c45cd2417c37d244d12e04473f96888632",
+    "end": 15,
+    "origin_offset": 1117,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 0,
+    "text": "### nodejs/node",
+    "unit_id": "u0013"
+  },
+  "tsc-2025-03-05:u0014:s00": {
+    "digest": "ae289872d23c4c41390beefe2a85f5677d705941dc195f143239a3db76217761",
+    "end": 106,
+    "origin_offset": 1134,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 0,
+    "text": "* Deadlock at process shutdown [#54918](https://github.com/nodejs/node/issues/54918) * no update this week",
+    "unit_id": "u0014"
+  },
+  "tsc-2025-03-05:u0015:s00": {
+    "digest": "a40d12398d7571a61e68638b0e582e6f3db3c2b7fb5d51c7bd5d130c01c21f83",
+    "end": 21,
+    "origin_offset": 1244,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 0,
+    "text": "### nodejs/nodejs.org",
+    "unit_id": "u0015"
+  },
+  "tsc-2025-03-05:u0016:s00": {
+    "digest": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
+    "end": 1,
+    "origin_offset": 1267,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 0,
+    "text": "*",
+    "unit_id": "u0016"
+  },
+  "tsc-2025-03-05:u0016:s01": {
+    "digest": "e9695319c3ed556a6d6268d419f66b1dad94919263daa5bc936d0c95792fbb21",
+    "end": 113,
+    "origin_offset": 1269,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 2,
+    "text": "Talk about how Node.js is funded - fund maintainers [#6626](https://github.com/nodejs/nodejs.org/issues/6626) *",
+    "unit_id": "u0016"
+  },
+  "tsc-2025-03-05:u0016:s02": {
+    "digest": "764025be874e269e93dcb46733ae749a711947dbf115e288580611f15a0301fd",
+    "end": 320,
+    "origin_offset": 1383,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 114,
+    "text": "We have turned on OpenCollective and GitHub sponsors and documented where how we would spend funds - <https://github.com/nodejs/TSC/blob/main/Nodejs-Funding-Sources.md> * agreed to remove tsc-agenda for now",
+    "unit_id": "u0016"
+  },
+  "tsc-2025-03-05:u0017:s00": {
+    "digest": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
+    "end": 1,
+    "origin_offset": 1593,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 0,
+    "text": "*",
+    "unit_id": "u0017"
+  },
+  "tsc-2025-03-05:u0017:s01": {
+    "digest": "67ab0bbd830dcc44c5a7354d18f94688a7e257a24d2b634af50f9f74ab82727f",
+    "end": 24,
+    "origin_offset": 1595,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 2,
+    "text": "Talk about how Node.js",
+    "unit_id": "u0017"
+  },
+  "tsc-2025-03-05:u0017:s02": {
+    "digest": "c059a6c965f567c1a6adde567b9ef1e7c1824cbc8805d380a6a919fecaaf8402",
+    "end": 265,
+    "origin_offset": 1618,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 25,
+    "text": "is funded - foundation and company support [#6625](https://github.com/nodejs/nodejs.org/issues/6625) * Discussion on sponsors page on Nodejs.org - <https://github.com/nodejs/nodejs.org/discussions/7477> * agreed to remove tsc-agenda for now",
+    "unit_id": "u0017"
+  },
+  "tsc-2025-03-05:u0018:s00": {
+    "digest": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
+    "end": 1,
+    "origin_offset": 1864,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 0,
+    "text": "*",
+    "unit_id": "u0018"
+  },
+  "tsc-2025-03-05:u0018:s01": {
+    "digest": "ac67d067646bba1fddd96ae75f2ea43a85959ceef0b01968ffeaa18f7e12f70a",
+    "end": 221,
+    "origin_offset": 1866,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 2,
+    "text": "Test runner matching every .ts and .js if glob is not provided - <https://github.com/nodejs/node/issues/56546> * side effect of enabling TSC support by default, broke some users, will have same problem with 22 backport.",
+    "unit_id": "u0018"
+  },
+  "tsc-2025-03-05:u0018:s02": {
+    "digest": "db53a98981a04755e3e52eea20bff5f1feb07355fe8c4c94aa5c873d336f9cef",
+    "end": 312,
+    "origin_offset": 2094,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 222,
+    "text": "* already a fair number of differences in test runner between the LTS versions, current. *",
+    "unit_id": "u0018"
+  },
+  "tsc-2025-03-05:u0018:s03": {
+    "digest": "d4c6b2c1a331defa7a539ef4879a0bc088d0852b1e59a53ec5e8b246d04e0ae1",
+    "end": 1089,
+    "origin_offset": 2187,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 313,
+    "text": "A few suggestions in terms of how to address * If we want to backport, we need to agree on a solution * FYI as there is no solution that does not cause some group some pain. * Michael tradeoff is between users of 22 having to opt in, versus breaking people when it automatically includes TS files * Joyee seems that that auto match behaviour does not seem desirable anyway so does not seem like we should backport * Marco, would be an option, but some people mentioned they do include both. * Joyee still comes down to using with glob, can we backport so that not included by default * Marco, likely to be backported in April so no rush but please review and comment * Michael Z, I assume when you say it searches everything I assume you mean it does not include node_modules.",
+    "unit_id": "u0018"
+  },
+  "tsc-2025-03-05:u0018:s04": {
+    "digest": "ebf6d63409df9c834d254c98ca7c073502c19e911a566a5de4eff68960f0c718",
+    "end": 1184,
+    "origin_offset": 2992,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 1090,
+    "text": "Looking at the code that may not be true and it would run tests in the node_modules directory.",
+    "unit_id": "u0018"
+  },
+  "tsc-2025-03-05:u0018:s05": {
+    "digest": "d055a8368f970f96e18e7770ab92846063cf77b90971fa2ae4e568abc2edbeb8",
+    "end": 1424,
+    "origin_offset": 3093,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 1185,
+    "text": "* Richard, a bit worried if we discuss backporting globs to Node.js 20, seems like we have already pulled back more than normal due to require esm which is good, but other things are being proposed just because we are doing a SemVer minor.",
+    "unit_id": "u0018"
+  },
+  "tsc-2025-03-05:u0018:s06": {
+    "digest": "cd7ab56291bd5f4e36aee94781ffb5cdb8a9890760e3e4341ddce54dee83b5fd",
+    "end": 1471,
+    "origin_offset": 3341,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 1425,
+    "text": "Want to be careful about what we pull into 20.",
+    "unit_id": "u0018"
+  },
+  "tsc-2025-03-05:u0019:s00": {
+    "digest": "0414a019d334d726f0abaa1702a0620ca5c0a8ae59a049e05dc019a6fc3f5f53",
+    "end": 14,
+    "origin_offset": 3393,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 0,
+    "text": "### nodejs/TSC",
+    "unit_id": "u0019"
+  },
+  "tsc-2025-03-05:u0020:s00": {
+    "digest": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
+    "end": 1,
+    "origin_offset": 3409,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 0,
+    "text": "*",
+    "unit_id": "u0020"
+  },
+  "tsc-2025-03-05:u0020:s01": {
+    "digest": "80288facd6003ecc95d42261669120c201bd9b739a74134a5f1ac63ffbf78f48",
+    "end": 160,
+    "origin_offset": 3411,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 2,
+    "text": "Let's talk about the CI situation [#1614](https://github.com/nodejs/TSC/issues/1614) * talked about shutdown problem before, nothing other specific to discuss",
+    "unit_id": "u0020"
+  },
+  "tsc-2025-03-05:u0021:s00": {
+    "digest": "35346e785f34b189eef2556dd6e91c97f37f0285d1fec7197eb15af88bfa3b05",
+    "end": 114,
+    "origin_offset": 3573,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 0,
+    "text": "* Open Corepack Vote [#1527](https://github.com/nodejs/TSC/pull/1527) * Marco, added the agenda tag to this one. *",
+    "unit_id": "u0021"
+  },
+  "tsc-2025-03-05:u0021:s01": {
+    "digest": "a13c5073ee9f163d5b841575dc322ece4540617e8b09c249811a2e0c07917a96",
+    "end": 190,
+    "origin_offset": 3694,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 115,
+    "text": "Something broke in corepack and we had to do a release in all LTS versions.",
+    "unit_id": "u0021"
+  },
+  "tsc-2025-03-05:u0021:s02": {
+    "digest": "b2f595bac94847be6b0a0b81806ecb83358b2103973a1e6aca06e027d4cedf3c",
+    "end": 218,
+    "origin_offset": 3770,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 191,
+    "text": "We are still working on 20.",
+    "unit_id": "u0021"
+  },
+  "tsc-2025-03-05:u0021:s03": {
+    "digest": "e334872b735470ae2b7be07a173cc1aaec50c985e360f489524921882760686e",
+    "end": 309,
+    "origin_offset": 3804,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 219,
+    "text": "Work around was for people to do corepack install which turned out not to be a huge issue.",
+    "unit_id": "u0021"
+  },
+  "tsc-2025-03-05:u0021:s04": {
+    "digest": "e6d146ea15c238a115d0a234dc46a86fad498bb1e16b1866937e0b8457b9b069",
+    "end": 532,
+    "origin_offset": 3905,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 310,
+    "text": "* Based on how people could easily install corepack to address issue, its probably a good time to consider if we can remove it as it has been demonstrated people can work around, and that there is a burden in including it.",
+    "unit_id": "u0021"
+  },
+  "tsc-2025-03-05:u0021:s05": {
+    "digest": "f31506d6a995746bba81ca1b7e4013d0b45d1f0c435666ae8769506d4cce05c2",
+    "end": 664,
+    "origin_offset": 4142,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 533,
+    "text": "* Michael Zasso (in chat): <https://github.com/nodejs/package-maintenance/blob/main/docs/version-management/proposal-next-steps.md>",
+    "unit_id": "u0021"
+  },
+  "tsc-2025-03-05:u0021:s06": {
+    "digest": "68abe178ef17de0d660fab35211869c28c340692652808a9d7a0078b7548d817",
+    "end": 752,
+    "origin_offset": 4274,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 665,
+    "text": "AFAIK the vote was postponed until package maintenance team determines it's good to go.",
+    "unit_id": "u0021"
+  },
+  "tsc-2025-03-05:u0021:s07": {
+    "digest": "bf2ffac7662375007f0fa8f916adfbf314624d553d9627c69f2b094393541ec9",
+    "end": 914,
+    "origin_offset": 4362,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 753,
+    "text": "But it seems that the initiative lost its momentum * Michael anybody in the meeting who object or need more time to consider before agreeing it can move forward.",
+    "unit_id": "u0021"
+  },
+  "tsc-2025-03-05:u0021:s08": {
+    "digest": "b18de1fff8bae8fbc3016dcd29c7b478599031d7c99912cd1525dbd8c313aaf2",
+    "end": 979,
+    "origin_offset": 4534,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 915,
+    "text": "* Nobody in the meeting raised their hand * Marco’s plan is to *",
+    "unit_id": "u0021"
+  },
+  "tsc-2025-03-05:u0021:s09": {
+    "digest": "3971f4593c96a72d20782cd96aaacfdaef2c821713209be1caec5d3324b0bb34",
+    "end": 1083,
+    "origin_offset": 4609,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 980,
+    "text": "At mention the package maintenance team in the issue * Land the PR if there are no objections on Monday",
+    "unit_id": "u0021"
+  },
+  "tsc-2025-03-05:u0022:s00": {
+    "digest": "8967b39ec58096a7dc56bd57b3af7dcf82c2011f0ecc542a05f349e1b06a6f3e",
+    "end": 22,
+    "origin_offset": 4720,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 0,
+    "text": "### nodejs/security-wg",
+    "unit_id": "u0022"
+  },
+  "tsc-2025-03-05:u0023:s00": {
+    "digest": "32c888e30e376d6e979670d1e9c8bf36c01cd1272d6efb83a474f8bd6b713268",
+    "end": 40,
+    "origin_offset": 4744,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 0,
+    "text": "* Update on CVEs for EOL Release Lines –",
+    "unit_id": "u0023"
+  },
+  "tsc-2025-03-05:u0023:s01": {
+    "digest": "179be598492c2d102180f3606b7010febdf13dd9f8a7ab65a239537880dc1313",
+    "end": 183,
+    "origin_offset": 4785,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 41,
+    "text": "MITRE Removal & Next Steps [#1443](https://github.com/nodejs/security-wg/issues/1443) * <https://github.com/nodejs/nodejs.org/pull/7537/files>",
+    "unit_id": "u0023"
+  },
+  "tsc-2025-03-05:u0024:s00": {
+    "digest": "76a71fbef8a8339fcbcaff8c9aadfb85c834bc3cc0c07069a5ebb2eea3d90d68",
+    "end": 2,
+    "origin_offset": 4931,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 0,
+    "text": "##",
+    "unit_id": "u0024"
+  },
+  "tsc-2025-03-05:u0024:s01": {
+    "digest": "457d7a7c1c29ea807d7b54ae821428e8218bc8d75f5f61c36ef1ac17ec3cac4a",
+    "end": 24,
+    "origin_offset": 4934,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 3,
+    "text": "Strategic Initiatives",
+    "unit_id": "u0024"
+  },
+  "tsc-2025-03-05:u0025:s00": {
+    "digest": "975c09fc9f23bf1b93d61cf07dcffeefe227d4166096feb1a90a0320cbd4bd2d",
+    "end": 476,
+    "origin_offset": 4957,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 0,
+    "text": "* Michael Zasso - V8 currency, please help me as there are many issues in the build System * <https://github.com/nodejs/node/pull/57114> * issues on windows, smart os and arm * Richard found out why the V8 CI was broken and opened a PR to fix it * Chengzhong has identified issue related to workers planning to submit patch to v8 * Antoine - core promise apis - no update * Joyee - startup snapshot - no update * Next-10 - survey now planned for after the collaborator summit.",
+    "unit_id": "u0025"
+  },
+  "tsc-2025-03-05:u0026:s00": {
+    "digest": "76a71fbef8a8339fcbcaff8c9aadfb85c834bc3cc0c07069a5ebb2eea3d90d68",
+    "end": 2,
+    "origin_offset": 5444,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 0,
+    "text": "##",
+    "unit_id": "u0026"
+  },
+  "tsc-2025-03-05:u0026:s01": {
+    "digest": "3daaed66ed149c285905afcb9e343a59aad75ebdf76a8989468a2c2e565be042",
+    "end": 20,
+    "origin_offset": 5447,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 3,
+    "text": "Upcoming Meetings",
+    "unit_id": "u0026"
+  },
+  "tsc-2025-03-05:u0027:s00": {
+    "digest": "d0dd77062f7e143636478b85b16dda0153d7f59e3ae151cbbb3d6593bfd24df3",
+    "end": 61,
+    "origin_offset": 5466,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 0,
+    "text": "* **Node.js Project Calendar**: <https://nodejs.org/calendar>",
+    "unit_id": "u0027"
+  },
+  "tsc-2025-03-05:u0028:s00": {
+    "digest": "92082b4382f54ee059322fa42876c180ec8a8915ca42cd90e6b347b0eee4a598",
+    "end": 79,
+    "origin_offset": 5529,
+    "path": "",
+    "source_id": "tsc-2025-03-05",
+    "start": 0,
+    "text": "Click `+GoogleCalendar` at the bottom right to add to your own Google calendar.",
+    "unit_id": "u0028"
+  }
+}

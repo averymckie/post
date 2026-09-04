@@ -1,0 +1,45 @@
+{
+ "digest": "50eb80166c955055f3b483e174ff4cbe33216d892ae519183301cc586d7c12d6",
+ "rows": [
+  [
+   "nodejs-governance:u0031:s00#e10",
+   "share",
+   1
+  ],
+  [
+   "nodejs-governance:u0040:s01#e11",
+   "be",
+   4
+  ],
+  [
+   "nodejs-governance:u0055:s04#e4",
+   "time",
+   2
+  ],
+  [
+   "nodejs-governance:u0055:s04#e33",
+   "add",
+   4
+  ],
+  [
+   "nodejs-governance:u0059:s00#e19",
+   "week",
+   1
+  ],
+  [
+   "nodejs-governance:u0063:s00#e23",
+   "require",
+   1
+  ],
+  [
+   "nodejs-governance:u0068:s01#e29",
+   "address",
+   3
+  ],
+  [
+   "nodejs-governance:u0068:s01#e33",
+   "advance",
+   3
+  ]
+ ]
+}

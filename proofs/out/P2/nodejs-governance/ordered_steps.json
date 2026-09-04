@@ -1,0 +1,61 @@
+{
+ "cycle": [],
+ "forced": [
+  [
+   "nodejs-governance:u0020:s00#e25",
+   "nodejs-governance:u0020:s00#e19"
+  ],
+  [
+   "nodejs-governance:u0031:s00#e10",
+   "nodejs-governance:u0031:s00#e4"
+  ],
+  [
+   "nodejs-governance:u0033:s01#e3",
+   "nodejs-governance:u0033:s01#e8"
+  ],
+  [
+   "nodejs-governance:u0040:s01#e8",
+   "nodejs-governance:u0040:s01#e11"
+  ],
+  [
+   "nodejs-governance:u0055:s04#e4",
+   "nodejs-governance:u0055:s04#e33"
+  ],
+  [
+   "nodejs-governance:u0059:s00#e19",
+   "nodejs-governance:u0059:s00#e7"
+  ],
+  [
+   "nodejs-governance:u0063:s00#e23",
+   "nodejs-governance:u0063:s00#e18"
+  ],
+  [
+   "nodejs-governance:u0068:s01#e29",
+   "nodejs-governance:u0068:s01#e33"
+  ],
+  [
+   "nodejs-governance:u0070:s00#e18",
+   "nodejs-governance:u0070:s00#e11"
+  ]
+ ],
+ "order": [
+  "nodejs-governance:u0020:s00#e25",
+  "nodejs-governance:u0020:s00#e19",
+  "nodejs-governance:u0031:s00#e10",
+  "nodejs-governance:u0031:s00#e4",
+  "nodejs-governance:u0033:s01#e3",
+  "nodejs-governance:u0033:s01#e8",
+  "nodejs-governance:u0040:s01#e8",
+  "nodejs-governance:u0040:s01#e11",
+  "nodejs-governance:u0055:s04#e4",
+  "nodejs-governance:u0055:s04#e33",
+  "nodejs-governance:u0059:s00#e19",
+  "nodejs-governance:u0059:s00#e7",
+  "nodejs-governance:u0063:s00#e23",
+  "nodejs-governance:u0063:s00#e18",
+  "nodejs-governance:u0068:s01#e29",
+  "nodejs-governance:u0068:s01#e33",
+  "nodejs-governance:u0070:s00#e18",
+  "nodejs-governance:u0070:s00#e11"
+ ]
+}

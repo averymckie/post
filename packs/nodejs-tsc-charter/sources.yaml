@@ -1,0 +1,12 @@
+pack: nodejs-tsc-charter
+sources:
+  - id: nodejs-tsc-charter
+    title: Node.js Technical Steering Committee Charter
+    file: sources/tsc-TSC-Charter.md
+    sha256: 09e24e665ebf59f6b184bb0cde9b16070f890aa22a11e060f0ce6687f027ca12
+    kind: text
+    url: https://raw.githubusercontent.com/nodejs/TSC/main/TSC-Charter.md
+    fetched_from: https://raw.githubusercontent.com/nodejs/TSC/main/TSC-Charter.md
+    repository: https://github.com/nodejs/TSC
+    retrieved: "2026-09-04"
+    license: per the repository's LICENSE

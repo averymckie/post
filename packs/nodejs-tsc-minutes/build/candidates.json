@@ -1,0 +1,3884 @@
+[
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-11-08:u0000:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-11-08:u0000:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-11-08:u0001:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-11-08:u0001:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-11-08:u0002:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-11-08:u0002:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'available' is ADJ, not a predicate",
+    "sentence_id": "tsc-2023-11-08:u0002:s02"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-11-08:u0003:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-11-08:u0003:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-11-08:u0004:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-11-08:u0005:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-11-08:u0005:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-11-08:u0006:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-11-08:u0006:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-11-08:u0007:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-11-08:u0008:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-11-08:u0009:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'doc' is NOUN, not a predicate",
+    "sentence_id": "tsc-2023-11-08:u0010:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2023-11-08:u0010:s01#e47,tsc-2023-11-08:u0010:s01#x41)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'ronag' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2023-11-08:u0010:s01"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2023-11-08:u0010:s01#e4,tsc-2023-11-08:u0010:s01#x1)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'It' at token 1 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2023-11-08:u0010:s01"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2023-11-08:u0010:s01#e14,tsc-2023-11-08:u0010:s01#x1)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'It' at token 1 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2023-11-08:u0010:s01"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2023-11-08:u0010:s01#e29,tsc-2023-11-08:u0010:s01#x1)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'It' at token 1 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2023-11-08:u0010:s01"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2023-11-08:u0010:s01#e71,tsc-2023-11-08:u0010:s01#x70)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'antoine' at token 70 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2023-11-08:u0010:s01"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2023-11-08:u0010:s01#e82,tsc-2023-11-08:u0010:s01#x70)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'antoine' at token 70 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2023-11-08:u0010:s01"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2023-11-08:u0010:s01#e23,tsc-2023-11-08:u0010:s01#x20)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 20 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2023-11-08:u0010:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2023-11-08:u0010:s02#e83,tsc-2023-11-08:u0010:s02#x80)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'contention' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2023-11-08:u0010:s02"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2023-11-08:u0010:s02#e34,tsc-2023-11-08:u0010:s02#x2)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'gireesh' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2023-11-08:u0010:s02"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2023-11-08:u0010:s02#e21,tsc-2023-11-08:u0010:s02#x2)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'gireesh' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2023-11-08:u0010:s02"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2023-11-08:u0010:s04#e11,tsc-2023-11-08:u0010:s03#x5)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'table' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2023-11-08:u0010:s04"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2023-11-08:u0010:s05#e20,tsc-2023-11-08:u0010:s03#x5)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'table' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2023-11-08:u0010:s05"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'robert' is NOUN, not a predicate",
+    "sentence_id": "tsc-2023-11-08:u0010:s05"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2023-11-08:u0010:s05#e6,tsc-2023-11-08:u0010:s05#x4)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 4 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2023-11-08:u0010:s05"
+  },
+  {
+    "atom_ids": [
+      "patient(tsc-2023-11-08:u0010:s06#e9,tsc-2023-11-08:u0010:s06#x7)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'what' at token 7 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2023-11-08:u0010:s06"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-11-08:u0010:s07"
+  },
+  {
+    "atom_ids": [
+      "patient(tsc-2023-11-08:u0010:s08#e1,tsc-2023-11-08:u0010:s08#x2)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'’s' at token 2 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2023-11-08:u0010:s08"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2023-11-08:u0010:s09#e2,tsc-2023-11-08:u0010:s09#x44)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'progress' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2023-11-08:u0010:s09"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2023-11-08:u0010:s09#e6,tsc-2023-11-08:u0010:s03#x5)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'table' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2023-11-08:u0010:s09"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2023-11-08:u0010:s09#e2,tsc-2023-11-08:u0010:s09#x1)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'I' at token 1 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2023-11-08:u0010:s09"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2023-11-08:u0010:s09#e31,tsc-2023-11-08:u0010:s09#x28)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'NODE_V8_COVERAGE' at token 28 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2023-11-08:u0010:s09"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2023-11-08:u0010:s09#e49,tsc-2023-11-08:u0010:s09#x46)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'nothing' at token 46 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2023-11-08:u0010:s09"
+  },
+  {
+    "atom_ids": [
+      "patient(tsc-2023-11-08:u0010:s09#e20,tsc-2023-11-08:u0010:s09#x21)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'us' at token 21 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2023-11-08:u0010:s09"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2023-11-08:u0010:s10#e28,tsc-2023-11-08:u0010:s10#x4)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'support' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2023-11-08:u0010:s10"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-11-08:u0011:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'Changes' is NOUN, not a predicate",
+    "sentence_id": "tsc-2023-11-08:u0012:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2023-11-08:u0012:s01#e15,tsc-2023-11-08:u0012:s01#x5)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'detection' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2023-11-08:u0012:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-11-08:u0013:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-11-08:u0014:s00"
+  },
+  {
+    "atom_ids": [
+      "patient(tsc-2023-11-08:u0014:s01#e54,tsc-2023-11-08:u0014:s01#x57)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'everyone' at token 57 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2023-11-08:u0014:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2023-11-08:u0014:s02#e7,tsc-2023-11-08:u0014:s02#x4)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'availability' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2023-11-08:u0014:s02"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2023-11-08:u0014:s02#e14,tsc-2023-11-08:u0014:s02#x13)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'chair' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2023-11-08:u0014:s02"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-11-08:u0015:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-11-08:u0015:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-11-08:u0016:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-11-08:u0016:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-11-08:u0017:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-12-06:u0000:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-12-06:u0000:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-12-06:u0001:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-12-06:u0001:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-12-06:u0002:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-12-06:u0002:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-12-06:u0003:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-12-06:u0003:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-12-06:u0004:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-12-06:u0005:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-12-06:u0005:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-12-06:u0006:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-12-06:u0006:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-12-06:u0007:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-12-06:u0008:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2023-12-06:u0009:s00#e15,tsc-2023-12-06:u0009:s00#x13)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'you' at token 13 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2023-12-06:u0009:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2023-12-06:u0009:s00#e17,tsc-2023-12-06:u0009:s00#x13)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'you' at token 13 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2023-12-06:u0009:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-12-06:u0010:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'lib' is NOUN, not a predicate",
+    "sentence_id": "tsc-2023-12-06:u0011:s00"
+  },
+  {
+    "atom_ids": [
+      "patient(tsc-2023-12-06:u0011:s00#e35,tsc-2023-12-06:u0011:s00#x36)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'it' at token 36 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2023-12-06:u0011:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2023-12-06:u0011:s00#e50,tsc-2023-12-06:u0011:s00#x49)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'it' at token 49 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2023-12-06:u0011:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2023-12-06:u0011:s00#e58,tsc-2023-12-06:u0011:s00#x49)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'it' at token 49 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2023-12-06:u0011:s00"
+  },
+  {
+    "atom_ids": [
+      "patient(tsc-2023-12-06:u0011:s00#e67,tsc-2023-12-06:u0011:s00#x68)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'it' at token 68 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2023-12-06:u0011:s00"
+  },
+  {
+    "atom_ids": [
+      "patient(tsc-2023-12-06:u0011:s00#e93,tsc-2023-12-06:u0011:s00#x94)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 94 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2023-12-06:u0011:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2023-12-06:u0011:s00#e27,tsc-2023-12-06:u0011:s00#x26)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 26 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2023-12-06:u0011:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2023-12-06:u0011:s00#e67,tsc-2023-12-06:u0011:s00#x65)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 65 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2023-12-06:u0011:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2023-12-06:u0011:s00#e75,tsc-2023-12-06:u0011:s00#x73)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 73 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2023-12-06:u0011:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2023-12-06:u0012:s00#e38,tsc-2023-12-06:u0012:s00#x40)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'fyi' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2023-12-06:u0012:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-12-06:u0013:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-12-06:u0014:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2023-12-06:u0014:s01#e3,tsc-2023-12-06:u0014:s01#x4)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'objection' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2023-12-06:u0014:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2023-12-06:u0014:s01#e8,tsc-2023-12-06:u0014:s01#x4)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'objection' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2023-12-06:u0014:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2023-12-06:u0014:s01#e12,tsc-2023-12-06:u0014:s01#x4)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'objection' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2023-12-06:u0014:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2023-12-06:u0014:s02#e6,tsc-2023-12-06:u0014:s01#x4)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'objection' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2023-12-06:u0014:s02"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2023-12-06:u0014:s02#e9,tsc-2023-12-06:u0014:s01#x4)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'objection' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2023-12-06:u0014:s02"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2023-12-06:u0014:s02#e22,tsc-2023-12-06:u0014:s01#x4)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'objection' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2023-12-06:u0014:s02"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-12-06:u0015:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-12-06:u0016:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2023-12-06:u0016:s01#e20,tsc-2023-12-06:u0016:s01#x22)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'question' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2023-12-06:u0016:s01"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2023-12-06:u0017:s01#e4,tsc-2023-12-06:u0017:s01#x2)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'this' at token 2 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2023-12-06:u0017:s01"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2023-12-06:u0017:s01#e10,tsc-2023-12-06:u0017:s01#x2)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'this' at token 2 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2023-12-06:u0017:s01"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2023-12-06:u0017:s01#e19,tsc-2023-12-06:u0017:s01#x2)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'this' at token 2 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2023-12-06:u0017:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2023-12-06:u0017:s02#e12,tsc-2023-12-06:u0017:s02#x11)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'member' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2023-12-06:u0017:s02"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2023-12-06:u0017:s03#e11,tsc-2023-12-06:u0017:s02#x11)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'member' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2023-12-06:u0017:s03"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2023-12-06:u0017:s03#e14,tsc-2023-12-06:u0017:s02#x11)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'member' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2023-12-06:u0017:s03"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2023-12-06:u0017:s03#e22,tsc-2023-12-06:u0017:s02#x11)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'member' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2023-12-06:u0017:s03"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2023-12-06:u0017:s03#e35,tsc-2023-12-06:u0017:s02#x11)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'member' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2023-12-06:u0017:s03"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2023-12-06:u0017:s03#e57,tsc-2023-12-06:u0017:s03#x59)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'signal' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2023-12-06:u0017:s03"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-12-06:u0017:s04"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2023-12-06:u0017:s05#e17,tsc-2023-12-06:u0017:s05#x16)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'consensus' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2023-12-06:u0017:s05"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2023-12-06:u0017:s05#e22,tsc-2023-12-06:u0017:s05#x16)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'consensus' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2023-12-06:u0017:s05"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2023-12-06:u0017:s05#e15,tsc-2023-12-06:u0017:s05#x14)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 14 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2023-12-06:u0017:s05"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2023-12-06:u0017:s05#e4,tsc-2023-12-06:u0017:s05#x3)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 3 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2023-12-06:u0017:s05"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2023-12-06:u0017:s05#e8,tsc-2023-12-06:u0017:s05#x3)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 3 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2023-12-06:u0017:s05"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2023-12-06:u0017:s06#e9,tsc-2023-12-06:u0017:s06#x7)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'you' at token 7 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2023-12-06:u0017:s06"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-12-06:u0018:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2023-12-06:u0018:s02#e17,tsc-2023-12-06:u0018:s02#x15)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 15 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2023-12-06:u0018:s02"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2023-12-06:u0018:s03#e40,tsc-2023-12-06:u0018:s03#x27)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'one' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2023-12-06:u0018:s03"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'questions' is NOUN, not a predicate",
+    "sentence_id": "tsc-2023-12-06:u0018:s03"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2023-12-06:u0018:s03#e24,tsc-2023-12-06:u0018:s03#x22)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 22 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2023-12-06:u0018:s03"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-12-06:u0019:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-12-06:u0019:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-12-06:u0020:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'update' is NOUN, not a predicate",
+    "sentence_id": "tsc-2023-12-06:u0020:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-12-06:u0021:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-12-06:u0021:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2023-12-06:u0022:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-10:u0000:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-10:u0000:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-10:u0001:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-10:u0001:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-10:u0002:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-10:u0002:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-10:u0003:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-10:u0003:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-10:u0004:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-10:u0004:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-10:u0005:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-10:u0005:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-10:u0006:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-10:u0006:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-10:u0007:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-10:u0008:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-10:u0009:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-10:u0010:s00#e7,tsc-2024-01-10:u0010:s00#x3)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'fund' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-10:u0010:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-10:u0010:s01#e3,tsc-2024-01-10:u0010:s01#x1)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'board' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-10:u0010:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-10:u0010:s02#e3,tsc-2024-01-10:u0010:s02#x1)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'thing' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-10:u0010:s02"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-10:u0010:s02#e7,tsc-2024-01-10:u0010:s02#x6)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 6 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-10:u0010:s02"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-10:u0011:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-10:u0012:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-10:u0012:s04#e5,tsc-2023-12-06:u0012:s00#x40)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'fyi' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-10:u0012:s04"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-10:u0012:s04#e8,tsc-2023-12-06:u0012:s00#x40)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'fyi' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-10:u0012:s04"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-10:u0013:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-10:u0013:s01#e44,tsc-2024-01-10:u0013:s01#x42)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'breakage' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-10:u0013:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-10:u0013:s01#e18,tsc-2024-01-10:u0013:s01#x15)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'pr' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-10:u0013:s01"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-10:u0013:s01#e41,tsc-2024-01-10:u0013:s01#x40)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'I' at token 40 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-10:u0013:s01"
+  },
+  {
+    "atom_ids": [
+      "patient(tsc-2024-01-10:u0013:s01#e32,tsc-2024-01-10:u0013:s01#x29)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'what' at token 29 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-10:u0013:s01"
+  },
+  {
+    "atom_ids": [
+      "patient(tsc-2024-01-10:u0013:s01#e3,tsc-2024-01-10:u0013:s01#x39)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'what' at token 39 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-10:u0013:s01"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-10:u0013:s01#e32,tsc-2024-01-10:u0013:s01#x31)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'you' at token 31 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-10:u0013:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-10:u0014:s00#e45,tsc-2023-12-06:u0014:s01#x4)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'objection' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-10:u0014:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-10:u0014:s00#e33,tsc-2024-01-10:u0014:s00#x31)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 31 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-10:u0014:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-10:u0014:s00#e37,tsc-2024-01-10:u0014:s00#x31)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 31 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-10:u0014:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-10:u0014:s00#e53,tsc-2024-01-10:u0014:s00#x51)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 51 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-10:u0014:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-10:u0014:s01#e5,tsc-2024-01-10:u0014:s01#x2)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 2 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-10:u0014:s01"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-10:u0014:s01#e12,tsc-2024-01-10:u0014:s01#x9)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 9 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-10:u0014:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-10:u0014:s03#e8,tsc-2024-01-10:u0014:s03#x1)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'advantage' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-10:u0014:s03"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-10:u0014:s04#e32,tsc-2024-01-10:u0014:s03#x1)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'advantage' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-10:u0014:s04"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-10:u0014:s04#e35,tsc-2024-01-10:u0014:s04#x33)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 33 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-10:u0014:s04"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-10:u0014:s05#e8,tsc-2024-01-10:u0014:s05#x6)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 6 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-10:u0014:s05"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-10:u0014:s05#e11,tsc-2024-01-10:u0014:s05#x6)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 6 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-10:u0014:s05"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-10:u0014:s06#e19,tsc-2024-01-10:u0014:s06#x18)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 18 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-10:u0014:s06"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-10:u0014:s06#e30,tsc-2024-01-10:u0014:s06#x28)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 28 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-10:u0014:s06"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-10:u0014:s06#e44,tsc-2024-01-10:u0014:s06#x28)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 28 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-10:u0014:s06"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-10:u0014:s06#e6,tsc-2024-01-10:u0014:s06#x5)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 5 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-10:u0014:s06"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-10:u0014:s06#e55,tsc-2024-01-10:u0014:s06#x53)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 53 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-10:u0014:s06"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-10:u0014:s07#e4,tsc-2024-01-10:u0014:s07#x1)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'We' at token 1 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-10:u0014:s07"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'Matteo' is NOUN, not a predicate",
+    "sentence_id": "tsc-2024-01-10:u0014:s08"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-10:u0014:s08#e6,tsc-2024-01-10:u0014:s08#x5)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 5 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-10:u0014:s08"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'vote' is NOUN, not a predicate",
+    "sentence_id": "tsc-2024-01-10:u0014:s09"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-10:u0014:s09#e3,tsc-2024-01-10:u0014:s09#x2)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 2 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-10:u0014:s09"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-10:u0014:s10#e16,tsc-2024-01-10:u0014:s10#x15)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 15 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-10:u0014:s10"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-10:u0014:s11#e25,tsc-2024-01-10:u0014:s11#x18)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'manager' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-10:u0014:s11"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-10:u0014:s11#e51,tsc-2024-01-10:u0014:s11#x18)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'manager' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-10:u0014:s11"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-10:u0014:s11#e54,tsc-2024-01-10:u0014:s11#x18)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'manager' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-10:u0014:s11"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-10:u0014:s11#e12,tsc-2024-01-10:u0014:s08#x7)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'npm' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-10:u0014:s11"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-10:u0014:s11#e34,tsc-2024-01-10:u0014:s11#x31)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 31 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-10:u0014:s11"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-10:u0014:s11#e43,tsc-2024-01-10:u0014:s11#x42)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'you' at token 42 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-10:u0014:s11"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-10:u0014:s12#e8,tsc-2024-01-10:u0014:s12#x5)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'you' at token 5 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-10:u0014:s12"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-10:u0014:s13#e4,tsc-2024-01-10:u0014:s13#x3)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'manager' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-10:u0014:s13"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'Richard' is PROPN, not a predicate",
+    "sentence_id": "tsc-2024-01-10:u0014:s14"
+  },
+  {
+    "atom_ids": [
+      "patient(tsc-2024-01-10:u0014:s14#e8,tsc-2024-01-10:u0014:s14#x9)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'what' at token 9 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-10:u0014:s14"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-10:u0014:s14#e11,tsc-2024-01-10:u0014:s14#x10)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'you' at token 10 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-10:u0014:s14"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'version' is NOUN, not a predicate",
+    "sentence_id": "tsc-2024-01-10:u0014:s15"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-10:u0014:s16#e3,tsc-2024-01-10:u0014:s16#x2)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'project' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-10:u0014:s16"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-10:u0014:s16#e11,tsc-2024-01-10:u0014:s16#x2)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'project' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-10:u0014:s16"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-10:u0014:s17#e2,tsc-2024-01-10:u0014:s17#x1)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'We' at token 1 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-10:u0014:s17"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'Yes' is INTJ, not a predicate",
+    "sentence_id": "tsc-2024-01-10:u0014:s18"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-10:u0014:s18#e9,tsc-2024-01-10:u0014:s18#x6)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 6 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-10:u0014:s18"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-10:u0014:s19#e7,tsc-2024-01-10:u0014:s19#x6)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 6 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-10:u0014:s19"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-10:u0014:s20#e11,tsc-2024-01-10:u0014:s20#x7)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 7 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-10:u0014:s20"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-10:u0014:s22#e24,tsc-2024-01-10:u0014:s22#x15)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'person' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-10:u0014:s22"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-10:u0014:s22#e30,tsc-2024-01-10:u0014:s22#x29)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 29 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-10:u0014:s22"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-10:u0014:s22#e64,tsc-2024-01-10:u0014:s22#x63)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 63 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-10:u0014:s22"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'lib' is NOUN, not a predicate",
+    "sentence_id": "tsc-2024-01-10:u0015:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-10:u0015:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-10:u0016:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-10:u0016:s01#e23,tsc-2024-01-10:u0016:s01#x25)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'pr' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-10:u0016:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-10:u0016:s01#e27,tsc-2024-01-10:u0016:s01#x25)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'pr' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-10:u0016:s01"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-10:u0016:s01#e8,tsc-2024-01-10:u0016:s01#x5)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'NODE_V8_COVERAGE' at token 5 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-10:u0016:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-10:u0017:s00#e33,tsc-2024-01-10:u0017:s00#x23)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'team' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-10:u0017:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-10:u0017:s00#e63,tsc-2024-01-10:u0017:s00#x61)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'team' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-10:u0017:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-10:u0017:s00#e68,tsc-2024-01-10:u0017:s00#x61)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'team' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-10:u0017:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-10:u0017:s00#e73,tsc-2024-01-10:u0017:s00#x61)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'team' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-10:u0017:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'lib' is NOUN, not a predicate",
+    "sentence_id": "tsc-2024-01-10:u0017:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-10:u0017:s00#e37,tsc-2024-01-10:u0017:s00#x35)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 35 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-10:u0017:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-10:u0017:s00#e45,tsc-2024-01-10:u0017:s00#x49)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 49 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-10:u0017:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-10:u0017:s00#e77,tsc-2024-01-10:u0017:s00#x75)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 75 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-10:u0017:s00"
+  },
+  {
+    "atom_ids": [
+      "patient(tsc-2024-01-10:u0017:s00#e99,tsc-2024-01-10:u0017:s00#x103)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'what' at token 103 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-10:u0017:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-10:u0017:s01#e15,tsc-2024-01-10:u0017:s01#x7)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'progress' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-10:u0017:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'Chengzhong' is NOUN, not a predicate",
+    "sentence_id": "tsc-2024-01-10:u0017:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-10:u0018:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-10:u0019:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-10:u0019:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-10:u0020:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-10:u0020:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-10:u0021:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-10:u0021:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-10:u0022:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-17:u0000:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-17:u0000:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-17:u0001:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-17:u0001:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-17:u0002:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-17:u0002:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-17:u0003:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-17:u0003:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-17:u0004:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-17:u0004:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-17:u0005:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-17:u0005:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-17:u0006:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-17:u0006:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-17:u0007:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-17:u0007:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-17:u0008:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-17:u0009:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-17:u0010:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-17:u0010:s01"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-17:u0010:s02#e3,tsc-2024-01-17:u0010:s02#x1)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'We' at token 1 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-17:u0010:s02"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-17:u0010:s02#e6,tsc-2024-01-17:u0010:s02#x1)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'We' at token 1 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-17:u0010:s02"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-17:u0010:s02#e33,tsc-2024-01-17:u0010:s02#x1)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'We' at token 1 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-17:u0010:s02"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-17:u0010:s02#e20,tsc-2024-01-17:u0010:s02#x18)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'We' at token 18 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-17:u0010:s02"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-17:u0011:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-17:u0012:s00#e24,tsc-2024-01-17:u0012:s00#x22)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 22 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-17:u0012:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-17:u0012:s01#e7,tsc-2023-12-06:u0012:s00#x40)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'fyi' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-17:u0012:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'discussions' is NOUN, not a predicate",
+    "sentence_id": "tsc-2024-01-17:u0012:s01"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-17:u0012:s02#e13,tsc-2024-01-17:u0012:s02#x11)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 11 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-17:u0012:s02"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-17:u0012:s03#e34,tsc-2024-01-17:u0012:s03#x32)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'manager' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-17:u0012:s03"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-17:u0012:s04"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-17:u0012:s05#e22,tsc-2024-01-17:u0012:s05#x19)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'Mael' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-17:u0012:s05"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-17:u0012:s05#e57,tsc-2024-01-17:u0012:s05#x19)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'Mael' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-17:u0012:s05"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-17:u0012:s05#e89,tsc-2024-01-17:u0012:s05#x63)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'data' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-17:u0012:s05"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-17:u0012:s05#e98,tsc-2024-01-17:u0012:s05#x103)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'data' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-17:u0012:s05"
+  },
+  {
+    "atom_ids": [
+      "patient(tsc-2024-01-17:u0012:s05#e104,tsc-2024-01-17:u0012:s05#x105)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'us' at token 105 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-17:u0012:s05"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-17:u0012:s05#e28,tsc-2024-01-17:u0012:s05#x25)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'what' at token 25 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-17:u0012:s05"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-17:u0012:s07#e6,tsc-2024-01-17:u0012:s06#x23)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'question' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-17:u0012:s07"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-17:u0012:s08#e5,tsc-2024-01-17:u0012:s06#x23)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'question' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-17:u0012:s08"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-17:u0012:s11#e3,tsc-2024-01-17:u0012:s11#x2)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'value' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-17:u0012:s11"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-17:u0012:s12#e28,tsc-2024-01-17:u0012:s12#x24)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'Claudio' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-17:u0012:s12"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-17:u0012:s12#e43,tsc-2024-01-17:u0012:s12#x24)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'Claudio' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-17:u0012:s12"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-17:u0012:s13"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-17:u0012:s14#e4,tsc-2024-01-17:u0012:s14#x1)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'data' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-17:u0012:s14"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-17:u0012:s14#e16,tsc-2024-01-17:u0012:s14#x1)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'data' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-17:u0012:s14"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-17:u0012:s14#e25,tsc-2024-01-17:u0012:s14#x22)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'manager' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-17:u0012:s14"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-17:u0012:s15#e6,tsc-2024-01-17:u0012:s14#x22)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'manager' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-17:u0012:s15"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-17:u0012:s15#e10,tsc-2024-01-17:u0012:s14#x22)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'manager' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-17:u0012:s15"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-17:u0012:s17#e16,tsc-2024-01-17:u0012:s17#x13)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'number' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-17:u0012:s17"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-17:u0012:s18#e21,tsc-2024-01-17:u0012:s17#x13)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'number' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-17:u0012:s18"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-17:u0012:s19#e6,tsc-2024-01-17:u0012:s19#x4)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'manager' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-17:u0012:s19"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-17:u0012:s22#e5,tsc-2024-01-17:u0012:s22#x4)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'concern' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-17:u0012:s22"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-17:u0012:s22#e10,tsc-2024-01-17:u0012:s22#x4)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'concern' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-17:u0012:s22"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-17:u0012:s22#e12,tsc-2024-01-17:u0012:s22#x4)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'concern' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-17:u0012:s22"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'Geoffrey' is NOUN, not a predicate",
+    "sentence_id": "tsc-2024-01-17:u0012:s22"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-17:u0012:s23#e50,tsc-2024-01-17:u0012:s23#x46)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'manager' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-17:u0012:s23"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-17:u0012:s23#e34,tsc-2024-01-17:u0012:s23#x31)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'npm' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-17:u0012:s23"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-17:u0012:s23#e41,tsc-2024-01-17:u0012:s23#x31)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'npm' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-17:u0012:s23"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-17:u0012:s23#e3,tsc-2024-01-17:u0012:s23#x2)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 2 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-17:u0012:s23"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-17:u0012:s23#e7,tsc-2024-01-17:u0012:s23#x2)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 2 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-17:u0012:s23"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-17:u0012:s23#e25,tsc-2024-01-17:u0012:s23#x2)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 2 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-17:u0012:s23"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-17:u0012:s24#e31,tsc-2024-01-17:u0012:s24#x29)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'client' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-17:u0012:s24"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-17:u0012:s24#e60,tsc-2024-01-17:u0012:s24#x47)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'npm' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-17:u0012:s24"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-17:u0012:s24#e33,tsc-2024-01-17:u0012:s24#x32)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 32 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-17:u0012:s24"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-17:u0012:s25#e20,tsc-2024-01-17:u0012:s25#x17)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'manager' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-17:u0012:s25"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-17:u0012:s25#e11,tsc-2024-01-17:u0012:s24#x47)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'npm' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-17:u0012:s25"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-17:u0012:s25#e4,tsc-2024-01-17:u0012:s25#x3)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'self' at token 3 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-17:u0012:s25"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-17:u0012:s26#e2,tsc-2024-01-17:u0012:s26#x1)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'data' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-17:u0012:s26"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-17:u0012:s26#e6,tsc-2024-01-17:u0012:s26#x1)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'data' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-17:u0012:s26"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-17:u0012:s26#e23,tsc-2024-01-17:u0012:s26#x8)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'manager' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-17:u0012:s26"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-17:u0012:s27"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-17:u0012:s28#e17,tsc-2024-01-17:u0012:s26#x36)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'manager' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-17:u0012:s28"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-17:u0012:s28#e41,tsc-2024-01-17:u0012:s26#x36)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'manager' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-17:u0012:s28"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-17:u0012:s28#e43,tsc-2024-01-17:u0012:s26#x36)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'manager' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-17:u0012:s28"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-17:u0013:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-17:u0014:s00#e54,tsc-2024-01-10:u0014:s22#x42)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'npm' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-17:u0014:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2024-01-17:u0014:s00#e81,tsc-2024-01-10:u0014:s22#x42)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'npm' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2024-01-17:u0014:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-17:u0014:s00#e89,tsc-2024-01-17:u0014:s00#x82)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'something' at token 82 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-17:u0014:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-17:u0014:s00#e96,tsc-2024-01-17:u0014:s00#x95)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 95 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-17:u0014:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2024-01-17:u0014:s00#e100,tsc-2024-01-17:u0014:s00#x95)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 95 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-17:u0014:s00"
+  },
+  {
+    "atom_ids": [
+      "patient(tsc-2024-01-17:u0014:s00#e54,tsc-2024-01-17:u0014:s00#x36)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'what' at token 36 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-17:u0014:s00"
+  },
+  {
+    "atom_ids": [
+      "patient(tsc-2024-01-17:u0014:s03#e1,tsc-2024-01-17:u0014:s03#x2)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'us' at token 2 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2024-01-17:u0014:s03"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-17:u0015:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-17:u0015:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-17:u0016:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-17:u0016:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-01-17:u0017:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-02-07:u0000:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-02-07:u0000:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-02-07:u0001:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-02-07:u0001:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-02-07:u0002:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-02-07:u0002:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-02-07:u0003:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-02-07:u0003:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-02-07:u0004:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-02-07:u0005:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-02-07:u0005:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-02-07:u0006:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-02-07:u0006:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-02-07:u0007:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-02-07:u0008:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-02-07:u0009:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-02-07:u0009:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-02-07:u0010:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-02-07:u0011:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-02-07:u0012:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-02-07:u0012:s02"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-02-07:u0012:s03"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-02-07:u0013:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-02-07:u0014:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-02-07:u0015:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-02-07:u0015:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-02-07:u0016:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-02-07:u0016:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-02-07:u0017:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-02-07:u0017:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2024-02-07:u0018:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-01-08:u0000:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-01-08:u0000:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-01-08:u0001:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-01-08:u0001:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-01-08:u0002:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-01-08:u0002:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-01-08:u0003:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-01-08:u0003:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-01-08:u0004:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-01-08:u0005:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-01-08:u0005:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-01-08:u0006:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-01-08:u0006:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-01-08:u0007:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-01-08:u0007:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-01-08:u0008:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-01-08:u0008:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-01-08:u0010:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-01-08:u0011:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2025-01-08:u0012:s00#e12,tsc-2025-01-08:u0012:s00#x11)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 11 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-01-08:u0012:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-01-08:u0013:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-01-08:u0014:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-01-08:u0014:s01#e27,tsc-2025-01-08:u0014:s01#x22)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'April' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-01-08:u0014:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-01-08:u0014:s01#e37,tsc-2025-01-08:u0014:s01#x35)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'question' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-01-08:u0014:s01"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2025-01-08:u0014:s01#e19,tsc-2025-01-08:u0014:s01#x17)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 17 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-01-08:u0014:s01"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2025-01-08:u0014:s01#e49,tsc-2025-01-08:u0014:s01#x48)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 48 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-01-08:u0014:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'convinced' is ADJ, not a predicate",
+    "sentence_id": "tsc-2025-01-08:u0014:s02"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2025-01-08:u0014:s02#e5,tsc-2025-01-08:u0014:s02#x3)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 3 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-01-08:u0014:s02"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-01-08:u0014:s03#e3,tsc-2025-01-08:u0014:s01#x53)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'one' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-01-08:u0014:s03"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2025-01-08:u0014:s03#e19,tsc-2025-01-08:u0014:s03#x18)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 18 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-01-08:u0014:s03"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2025-01-08:u0014:s03#e24,tsc-2025-01-08:u0014:s03#x23)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 23 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-01-08:u0014:s03"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'agreement' is NOUN, not a predicate",
+    "sentence_id": "tsc-2025-01-08:u0014:s05"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2025-01-08:u0014:s05#e7,tsc-2025-01-08:u0014:s05#x5)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 5 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-01-08:u0014:s05"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-01-08:u0014:s06#e33,tsc-2025-01-08:u0014:s06#x35)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'influx' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-01-08:u0014:s06"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-01-08:u0014:s07#e21,tsc-2025-01-08:u0014:s07#x18)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'Date' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-01-08:u0014:s07"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-01-08:u0014:s07#e26,tsc-2025-01-08:u0014:s07#x18)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'Date' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-01-08:u0014:s07"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-01-08:u0014:s07#e62,tsc-2025-01-08:u0014:s07#x61)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'impression' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-01-08:u0014:s07"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-01-08:u0014:s07#e32,tsc-2025-01-08:u0014:s07#x29)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'question' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-01-08:u0014:s07"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-01-08:u0014:s07#e35,tsc-2025-01-08:u0014:s07#x29)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'question' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-01-08:u0014:s07"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-01-08:u0014:s07#e57,tsc-2025-01-08:u0014:s07#x29)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'question' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-01-08:u0014:s07"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-01-08:u0014:s07#e59,tsc-2025-01-08:u0014:s07#x29)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'question' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-01-08:u0014:s07"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2025-01-08:u0014:s07#e48,tsc-2025-01-08:u0014:s07#x46)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 46 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-01-08:u0014:s07"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-01-08:u0014:s08#e15,tsc-2025-01-08:u0014:s07#x61)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'impression' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-01-08:u0014:s08"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-01-08:u0014:s09#e6,tsc-2025-01-08:u0014:s07#x61)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'impression' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-01-08:u0014:s09"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'Matteo' is PROPN, not a predicate",
+    "sentence_id": "tsc-2025-01-08:u0014:s09"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-01-08:u0014:s10#e5,tsc-2025-01-08:u0014:s10#x2)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'table' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-01-08:u0014:s10"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-01-08:u0014:s11#e21,tsc-2025-01-08:u0014:s11#x17)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'security' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-01-08:u0014:s11"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'Bathroom' is PROPN, not a predicate",
+    "sentence_id": "tsc-2025-01-08:u0014:s12"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-01-08:u0014:s13#e2,tsc-2025-01-08:u0014:s13#x6)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'terrace' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-01-08:u0014:s13"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-01-08:u0014:s13#e12,tsc-2025-01-08:u0014:s13#x6)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'terrace' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-01-08:u0014:s13"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-01-08:u0014:s14#e7,tsc-2025-01-08:u0014:s14#x11)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'ride' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-01-08:u0014:s14"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-01-08:u0014:s14#e3,tsc-2025-01-08:u0014:s13#x6)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'terrace' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-01-08:u0014:s14"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-01-08:u0015:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'doc' is NOUN, not a predicate",
+    "sentence_id": "tsc-2025-01-08:u0016:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-01-08:u0017:s01#e9,tsc-2025-01-08:u0017:s00#x24)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'number' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-01-08:u0017:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-01-08:u0017:s01#e14,tsc-2025-01-08:u0017:s01#x13)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'question' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-01-08:u0017:s01"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2025-01-08:u0017:s01#e19,tsc-2025-01-08:u0017:s01#x16)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 16 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-01-08:u0017:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-01-08:u0017:s03#e2,tsc-2025-01-08:u0017:s03#x5)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'proposal' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-01-08:u0017:s03"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-01-08:u0017:s03#e15,tsc-2025-01-08:u0017:s03#x5)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'proposal' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-01-08:u0017:s03"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-01-08:u0017:s04#e26,tsc-2025-01-08:u0017:s04#x15)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'Half' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-01-08:u0017:s04"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-01-08:u0017:s04#e32,tsc-2025-01-08:u0017:s04#x15)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'Half' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-01-08:u0017:s04"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-01-08:u0017:s04#e9,tsc-2025-01-08:u0017:s03#x5)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'proposal' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-01-08:u0017:s04"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2025-01-08:u0017:s04#e12,tsc-2025-01-08:u0017:s04#x10)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 10 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-01-08:u0017:s04"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2025-01-08:u0017:s04#e47,tsc-2025-01-08:u0017:s04#x46)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 46 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-01-08:u0017:s04"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-01-08:u0017:s05#e31,tsc-2025-01-08:u0017:s05#x23)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'support' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-01-08:u0017:s05"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-01-08:u0017:s05#e44,tsc-2025-01-08:u0017:s05#x23)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'support' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-01-08:u0017:s05"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-01-08:u0017:s06#e11,tsc-2025-01-08:u0017:s05#x23)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'support' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-01-08:u0017:s06"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2025-01-08:u0017:s06#e3,tsc-2025-01-08:u0017:s06#x1)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'We' at token 1 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-01-08:u0017:s06"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-01-08:u0018:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'test' is NOUN, not a predicate",
+    "sentence_id": "tsc-2025-01-08:u0019:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-01-08:u0020:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-01-08:u0021:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-01-08:u0022:s00#e21,tsc-2025-01-08:u0022:s00#x16)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'summary' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-01-08:u0022:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2025-01-08:u0022:s00#e14,tsc-2025-01-08:u0022:s00#x13)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 13 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-01-08:u0022:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2025-01-08:u0022:s00#e29,tsc-2025-01-08:u0022:s00#x27)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 27 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-01-08:u0022:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-01-08:u0023:s00#e17,tsc-2025-01-08:u0023:s00#x2)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'status' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-01-08:u0023:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2025-01-08:u0023:s00#e20,tsc-2025-01-08:u0023:s00#x19)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 19 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-01-08:u0023:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-01-08:u0024:s00#e9,tsc-2025-01-08:u0024:s00#x7)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'contractor' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-01-08:u0024:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-01-08:u0024:s00#e20,tsc-2025-01-08:u0024:s00#x9)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'explicity' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-01-08:u0024:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2025-01-08:u0024:s00#e23,tsc-2025-01-08:u0024:s00#x22)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 22 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-01-08:u0024:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-01-08:u0025:s00"
+  },
+  {
+    "atom_ids": [
+      "patient(tsc-2025-01-08:u0025:s01#e1,tsc-2025-01-08:u0025:s01#x2)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "\"'s\" at token 2 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-01-08:u0025:s01"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2025-01-08:u0025:s01#e18,tsc-2025-01-08:u0025:s01#x17)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 17 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-01-08:u0025:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'Open' is PROPN, not a predicate",
+    "sentence_id": "tsc-2025-01-08:u0026:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-01-08:u0027:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'Initiatives' is NOUN, not a predicate",
+    "sentence_id": "tsc-2025-01-08:u0027:s01"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2025-01-08:u0027:s01#e7,tsc-2025-01-08:u0027:s01#x6)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 6 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-01-08:u0027:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-01-08:u0028:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-01-08:u0028:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-01-08:u0029:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-02-05:u0000:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-02-05:u0000:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-02-05:u0001:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-02-05:u0001:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-02-05:u0002:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-02-05:u0002:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-02-05:u0003:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-02-05:u0003:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-02-05:u0004:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-02-05:u0005:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-02-05:u0005:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-02-05:u0006:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-02-05:u0006:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-02-05:u0007:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-02-05:u0007:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-02-05:u0008:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-02-05:u0008:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-02-05:u0010:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-02-05:u0011:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-02-05:u0011:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-02-05:u0012:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-02-05:u0013:s00"
+  },
+  {
+    "atom_ids": [
+      "patient(tsc-2025-02-05:u0014:s00#e19,tsc-2025-02-05:u0014:s00#x20)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'’s' at token 20 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-02-05:u0014:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-02-05:u0015:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2025-02-05:u0016:s00#e27,tsc-2025-02-05:u0016:s00#x26)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 26 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-02-05:u0016:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-02-05:u0017:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-02-05:u0017:s01#e19,tsc-2025-02-05:u0017:s01#x18)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'v8' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-02-05:u0017:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-02-05:u0017:s01#e24,tsc-2025-02-05:u0017:s01#x18)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'v8' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-02-05:u0017:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-02-05:u0017:s01#e29,tsc-2025-02-05:u0017:s01#x18)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'v8' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-02-05:u0017:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-02-05:u0017:s01#e32,tsc-2025-02-05:u0017:s01#x18)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'v8' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-02-05:u0017:s01"
+  },
+  {
+    "atom_ids": [
+      "patient(tsc-2025-02-05:u0017:s01#e1,tsc-2025-02-05:u0017:s01#x2)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "\"'s\" at token 2 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-02-05:u0017:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-02-05:u0018:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-02-05:u0018:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-02-05:u0019:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-02-05:u0019:s01#e38,tsc-2025-02-05:u0019:s01#x4)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'promise' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-02-05:u0019:s01"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2025-02-05:u0019:s01#e34,tsc-2025-02-05:u0019:s01#x32)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'you' at token 32 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-02-05:u0019:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-02-05:u0020:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-02-05:u0020:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-02-05:u0021:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-03-05:u0000:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-03-05:u0000:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-03-05:u0001:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-03-05:u0001:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-03-05:u0002:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-03-05:u0002:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-03-05:u0003:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-03-05:u0003:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-03-05:u0004:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-03-05:u0005:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-03-05:u0005:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-03-05:u0006:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-03-05:u0006:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-03-05:u0007:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-03-05:u0008:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-03-05:u0008:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-03-05:u0010:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-03-05:u0011:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-03-05:u0012:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-03-05:u0013:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'Deadlock' is NOUN, not a predicate",
+    "sentence_id": "tsc-2025-03-05:u0014:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-03-05:u0015:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-03-05:u0016:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2025-03-05:u0016:s02#e3,tsc-2025-03-05:u0016:s02#x1)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'We' at token 1 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-03-05:u0016:s02"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2025-03-05:u0016:s02#e10,tsc-2025-03-05:u0016:s02#x1)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'We' at token 1 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-03-05:u0016:s02"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2025-03-05:u0016:s02#e15,tsc-2025-03-05:u0016:s02#x13)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 13 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-03-05:u0016:s02"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2025-03-05:u0016:s02#e22,tsc-2025-03-05:u0016:s02#x13)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 13 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-03-05:u0016:s02"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-03-05:u0017:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-03-05:u0018:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-03-05:u0018:s02"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-03-05:u0018:s03#e146,tsc-2025-03-05:u0018:s03#x127)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'April' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-03-05:u0018:s03"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-03-05:u0018:s03#e155,tsc-2025-03-05:u0018:s03#x127)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'April' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-03-05:u0018:s03"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-03-05:u0018:s03#e72,tsc-2025-03-05:u0018:s03#x69)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'behaviour' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-03-05:u0018:s03"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-03-05:u0018:s03#e78,tsc-2025-03-05:u0018:s03#x69)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'behaviour' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-03-05:u0018:s03"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-03-05:u0018:s03#e28,tsc-2025-03-05:u0018:s03#x30)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'solution' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-03-05:u0018:s03"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-03-05:u0018:s03#e34,tsc-2025-03-05:u0018:s03#x30)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'solution' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-03-05:u0018:s03"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-03-05:u0018:s03#e59,tsc-2025-03-05:u0018:s03#x30)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'solution' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-03-05:u0018:s03"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2025-03-05:u0018:s03#e141,tsc-2025-03-05:u0018:s03#x140)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'I' at token 140 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-03-05:u0018:s03"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2025-03-05:u0018:s03#e149,tsc-2025-03-05:u0018:s03#x148)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'I' at token 148 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-03-05:u0018:s03"
+  },
+  {
+    "atom_ids": [
+      "patient(tsc-2025-03-05:u0018:s03#e146,tsc-2025-03-05:u0018:s03#x147)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'everything' at token 147 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-03-05:u0018:s03"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2025-03-05:u0018:s03#e112,tsc-2025-03-05:u0018:s03#x111)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 111 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-03-05:u0018:s03"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2025-03-05:u0018:s03#e116,tsc-2025-03-05:u0018:s03#x111)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 111 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-03-05:u0018:s03"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2025-03-05:u0018:s03#e122,tsc-2025-03-05:u0018:s03#x111)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 111 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-03-05:u0018:s03"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2025-03-05:u0018:s03#e13,tsc-2025-03-05:u0018:s03#x12)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 12 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-03-05:u0018:s03"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2025-03-05:u0018:s03#e18,tsc-2025-03-05:u0018:s03#x17)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 17 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-03-05:u0018:s03"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2025-03-05:u0018:s03#e82,tsc-2025-03-05:u0018:s03#x80)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 80 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-03-05:u0018:s03"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2025-03-05:u0018:s03#e144,tsc-2025-03-05:u0018:s03#x143)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'you' at token 143 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-03-05:u0018:s03"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2025-03-05:u0018:s03#e151,tsc-2025-03-05:u0018:s03#x150)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'you' at token 150 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-03-05:u0018:s03"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-03-05:u0018:s04#e9,tsc-2025-03-05:u0018:s03#x127)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'April' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-03-05:u0018:s04"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-03-05:u0018:s04#e13,tsc-2025-03-05:u0018:s03#x127)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'April' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-03-05:u0018:s04"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-03-05:u0018:s05#e32,tsc-2025-03-05:u0018:s03#x127)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'April' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-03-05:u0018:s05"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'worried' is ADJ, not a predicate",
+    "sentence_id": "tsc-2025-03-05:u0018:s05"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2025-03-05:u0018:s05#e21,tsc-2025-03-05:u0018:s05#x18)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 18 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-03-05:u0018:s05"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2025-03-05:u0018:s05#e44,tsc-2025-03-05:u0018:s05#x42)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 42 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-03-05:u0018:s05"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2025-03-05:u0018:s05#e9,tsc-2025-03-05:u0018:s05#x8)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 8 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-03-05:u0018:s05"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2025-03-05:u0018:s06#e8,tsc-2025-03-05:u0018:s06#x7)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 7 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-03-05:u0018:s06"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-03-05:u0018:s06#e1,tsc-2025-03-05:u0018:s06#x6)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'what' at token 6 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-03-05:u0018:s06"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-03-05:u0019:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-03-05:u0020:s00"
+  },
+  {
+    "atom_ids": [
+      "patient(tsc-2025-03-05:u0020:s01#e1,tsc-2025-03-05:u0020:s01#x2)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "\"'s\" at token 2 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-03-05:u0020:s01"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2025-03-05:u0021:s01#e2,tsc-2025-03-05:u0021:s01#x1)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'Something' at token 1 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-03-05:u0021:s01"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2025-03-05:u0021:s01#e7,tsc-2025-03-05:u0021:s01#x6)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 6 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-03-05:u0021:s01"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2025-03-05:u0021:s02#e4,tsc-2025-03-05:u0021:s02#x1)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'We' at token 1 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-03-05:u0021:s02"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2025-03-05:u0021:s03#e11,tsc-2025-03-05:u0021:s03#x10)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'which' at token 10 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-03-05:u0021:s03"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-03-05:u0021:s04#e39,tsc-2025-03-05:u0021:s04#x41)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'burden' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-03-05:u0021:s04"
+  },
+  {
+    "atom_ids": [
+      "patient(tsc-2025-03-05:u0021:s04#e24,tsc-2025-03-05:u0021:s04#x25)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'it' at token 25 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-03-05:u0021:s04"
+  },
+  {
+    "atom_ids": [
+      "patient(tsc-2025-03-05:u0021:s04#e30,tsc-2025-03-05:u0021:s04#x27)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'it' at token 27 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-03-05:u0021:s04"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2025-03-05:u0021:s04#e24,tsc-2025-03-05:u0021:s04#x22)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'we' at token 22 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-03-05:u0021:s04"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-03-05:u0021:s05"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-03-05:u0021:s07#e29,tsc-2025-03-05:u0021:s04#x41)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'burden' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-03-05:u0021:s07"
+  },
+  {
+    "atom_ids": [
+      "agent(tsc-2025-03-05:u0021:s08#e6,tsc-2025-03-05:u0021:s08#x2)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'Nobody' at token 2 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-03-05:u0021:s08"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-03-05:u0021:s09#e16,tsc-2025-03-05:u0021:s09#x18)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'objection' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-03-05:u0021:s09"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-03-05:u0022:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-03-05:u0023:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-03-05:u0023:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-03-05:u0024:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-03-05:u0024:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(tsc-2025-03-05:u0025:s00#e87,tsc-2025-03-05:u0025:s00#x77)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'snapshot' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "tsc-2025-03-05:u0025:s00"
+  },
+  {
+    "atom_ids": [
+      "patient(tsc-2025-03-05:u0025:s00#e9,tsc-2025-03-05:u0025:s00#x10)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'me' at token 10 has no matching antecedent in its unit",
+    "sentence_id": "tsc-2025-03-05:u0025:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-03-05:u0026:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-03-05:u0026:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "tsc-2025-03-05:u0027:s00"
+  }
+]

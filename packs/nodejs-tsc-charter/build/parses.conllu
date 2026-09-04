@@ -1,0 +1,1736 @@
+# sent_id = nodejs-tsc-charter:u0000:s00
+# text = # Technical Steering Committee (TSC) Charter
+1	#	#	SYM	NN	Number=Sing	2	compound	_	TokenRange=0:1
+2	Technical	technical	ADJ	JJ	Degree=Pos	4	amod	_	TokenRange=2:11
+3	Steering	steering	PROPN	NNP	Number=Sing	4	compound	_	TokenRange=12:20
+4	Committee	committee	PROPN	NNP	Number=Sing	8	compound	_	TokenRange=21:30
+5	(	(	PUNCT	-LRB-	_	6	punct	_	SpaceAfter=No|TokenRange=31:32
+6	TSC	TSC	PROPN	NNP	Number=Sing	4	appos	_	SpaceAfter=No|TokenRange=32:35
+7	)	)	PUNCT	-RRB-	_	6	punct	_	TokenRange=35:36
+8	Charter	Charter	PROPN	NNP	Number=Sing	0	root	_	SpacesAfter=\n|TokenRange=37:44
+
+# sent_id = nodejs-tsc-charter:u0001:s00
+# text = ## Section
+1	##	##	PUNCT	.	_	2	punct	_	TokenRange=0:2
+2	Section	section	NOUN	NN	Number=Sing	0	root	_	TokenRange=3:10
+
+# sent_id = nodejs-tsc-charter:u0001:s01
+# text = 1.
+1	1	1	X	LS	_	0	root	_	SpaceAfter=No|TokenRange=11:12
+2	.	.	PUNCT	.	_	1	punct	_	TokenRange=12:13
+
+# sent_id = nodejs-tsc-charter:u0001:s02
+# text = Guiding Principle
+1	Guiding	guide	VERB	VBG	VerbForm=Ger	0	root	_	TokenRange=14:21
+2	Principle	principle	PROPN	NNP	Number=Sing	1	obj	_	SpacesAfter=\n|TokenRange=22:31
+
+# sent_id = nodejs-tsc-charter:u0002:s00
+# text = The Node.js project is part of the OpenJS Foundation.
+1	The	the	DET	DT	Definite=Def|PronType=Art	3	det	_	TokenRange=0:3
+2	Node.js	Node.js	PROPN	NNP	Number=Sing	3	compound	_	TokenRange=4:11
+3	project	project	NOUN	NN	Number=Sing	5	nsubj	_	TokenRange=12:19
+4	is	be	AUX	VBZ	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	5	cop	_	TokenRange=20:22
+5	part	part	NOUN	NN	Number=Sing	0	root	_	TokenRange=23:27
+6	of	of	ADP	IN	_	9	case	_	TokenRange=28:30
+7	the	the	DET	DT	Definite=Def|PronType=Art	9	det	_	TokenRange=31:34
+8	OpenJS	OpenJS	ADJ	JJ	Degree=Pos	9	amod	_	TokenRange=35:41
+9	Foundation	foundation	NOUN	NN	Number=Sing	5	nmod	_	SpaceAfter=No|TokenRange=42:52
+10	.	.	PUNCT	.	_	5	punct	_	TokenRange=52:53
+
+# sent_id = nodejs-tsc-charter:u0002:s01
+# text = The project operates transparently, openly, collaboratively, and ethically.
+1	The	the	DET	DT	Definite=Def|PronType=Art	2	det	_	TokenRange=54:57
+2	project	project	NOUN	NN	Number=Sing	3	nsubj	_	TokenRange=58:65
+3	operates	operate	VERB	VBZ	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	0	root	_	TokenRange=66:74
+4	transparently	transparently	ADV	RB	_	3	advmod	_	SpaceAfter=No|TokenRange=75:88
+5	,	,	PUNCT	,	_	3	punct	_	TokenRange=88:89
+6	openly	openly	ADV	RB	_	8	advmod	_	SpaceAfter=No|TokenRange=90:96
+7	,	,	PUNCT	,	_	8	punct	_	TokenRange=96:97
+8	collaboratively	collaboratively	ADV	RB	_	3	advmod	_	SpaceAfter=No|TokenRange=98:113
+9	,	,	PUNCT	,	_	11	punct	_	TokenRange=113:114
+10	and	and	CCONJ	CC	_	11	cc	_	TokenRange=115:118
+11	ethically	ethically	ADV	RB	_	8	conj	_	SpaceAfter=No|TokenRange=119:128
+12	.	.	PUNCT	.	_	3	punct	_	TokenRange=128:129
+
+# sent_id = nodejs-tsc-charter:u0002:s02
+# text = Project proposals, timelines, and status must not merely be open, but also easily visible to outsiders.
+1	Project	project	NOUN	NN	Number=Sing	2	compound	_	TokenRange=130:137
+2	proposals	proposal	NOUN	NNS	Number=Plur	12	nsubj	_	SpaceAfter=No|TokenRange=138:147
+3	,	,	PUNCT	,	_	4	punct	_	TokenRange=147:148
+4	timelines	timeline	NOUN	NNS	Number=Plur	2	conj	_	SpaceAfter=No|TokenRange=149:158
+5	,	,	PUNCT	,	_	7	punct	_	TokenRange=158:159
+6	and	and	CCONJ	CC	_	7	cc	_	TokenRange=160:163
+7	status	status	NOUN	NN	Number=Sing	2	conj	_	TokenRange=164:170
+8	must	must	AUX	MD	VerbForm=Fin	12	aux	_	TokenRange=171:175
+9	not	not	PART	RB	_	12	advmod	_	TokenRange=176:179
+10	merely	merely	ADV	RB	_	12	advmod	_	TokenRange=180:186
+11	be	be	AUX	VB	VerbForm=Inf	12	cop	_	TokenRange=187:189
+12	open	open	ADJ	JJ	Degree=Pos	0	root	_	SpaceAfter=No|TokenRange=190:194
+13	,	,	PUNCT	,	_	17	punct	_	TokenRange=194:195
+14	but	but	CCONJ	CC	_	17	cc	_	TokenRange=196:199
+15	also	also	ADV	RB	_	17	advmod	_	TokenRange=200:204
+16	easily	easily	ADV	RB	_	17	advmod	_	TokenRange=205:211
+17	visible	visible	ADJ	JJ	Degree=Pos	12	conj	_	TokenRange=212:219
+18	to	to	ADP	IN	_	19	case	_	TokenRange=220:222
+19	outsiders	outsider	NOUN	NNS	Number=Plur	17	obl	_	SpaceAfter=No|TokenRange=223:232
+20	.	.	PUNCT	.	_	12	punct	_	SpacesAfter=\n|TokenRange=232:233
+
+# sent_id = nodejs-tsc-charter:u0003:s00
+# text = ## Section 2. Evolution of OpenJS Foundation Governance
+1	##	##	PUNCT	.	_	2	punct	_	TokenRange=0:2
+2	Section	section	NOUN	NN	Number=Sing	0	root	_	TokenRange=3:10
+3	2	2	NUM	CD	NumType=Card	2	nummod	_	SpaceAfter=No|TokenRange=11:12
+4	.	.	PUNCT	.	_	2	punct	_	TokenRange=12:13
+5	Evolution	evolution	NOUN	NN	Number=Sing	2	appos	_	TokenRange=14:23
+6	of	of	ADP	IN	_	9	case	_	TokenRange=24:26
+7	OpenJS	OpenJS	PROPN	NNP	Number=Sing	9	compound	_	TokenRange=27:33
+8	Foundation	foundation	PROPN	NNP	Number=Sing	9	compound	_	TokenRange=34:44
+9	Governance	Governance	PROPN	NNP	Number=Sing	5	nmod	_	SpacesAfter=\n|TokenRange=45:55
+
+# sent_id = nodejs-tsc-charter:u0004:s00
+# text = Most large, complex open source communities have both a business and a technical governance model.
+1	Most	most	ADJ	JJS	Degree=Sup	8	amod	_	TokenRange=0:4
+2	large	large	ADJ	JJ	Degree=Pos	8	amod	_	SpaceAfter=No|TokenRange=5:10
+3	,	,	PUNCT	,	_	8	punct	_	TokenRange=10:11
+4	complex	complex	ADJ	JJ	Degree=Pos	7	amod	_	TokenRange=12:19
+5	open	open	ADJ	JJ	Degree=Pos	7	amod	_	TokenRange=20:24
+6	source	source	NOUN	NN	Number=Sing	7	compound	_	TokenRange=25:31
+7	communities	communities	NOUN	NNS	Number=Plur	8	nsubj	_	TokenRange=32:43
+8	have	have	VERB	VBP	Mood=Ind|Tense=Pres|VerbForm=Fin	0	root	_	TokenRange=44:48
+9	both	both	CCONJ	CC	_	11	cc:preconj	_	TokenRange=49:53
+10	a	a	DET	DT	Definite=Ind|PronType=Art	11	det	_	TokenRange=54:55
+11	business	business	NOUN	NN	Number=Sing	8	obj	_	TokenRange=56:64
+12	and	and	CCONJ	CC	_	16	cc	_	TokenRange=65:68
+13	a	a	DET	DT	Definite=Ind|PronType=Art	16	det	_	TokenRange=69:70
+14	technical	technical	ADJ	JJ	Degree=Pos	16	amod	_	TokenRange=71:80
+15	governance	governance	NOUN	NN	Number=Sing	16	compound	_	TokenRange=81:91
+16	model	model	NOUN	NN	Number=Sing	11	conj	_	SpaceAfter=No|TokenRange=92:97
+17	.	.	PUNCT	.	_	8	punct	_	TokenRange=97:98
+
+# sent_id = nodejs-tsc-charter:u0004:s01
+# text = Technical leadership for the projects within the OpenJS Foundation is delegated to the projects through their project charters by the OpenJS Cross Project Council (CPC).
+1	Technical	technical	ADJ	JJ	Degree=Pos	2	amod	_	TokenRange=99:108
+2	leadership	leadership	NOUN	NN	Number=Sing	11	nsubj:pass	_	TokenRange=109:119
+3	for	for	ADP	IN	_	5	case	_	TokenRange=120:123
+4	the	the	DET	DT	Definite=Def|PronType=Art	5	det	_	TokenRange=124:127
+5	projects	project	NOUN	NNS	Number=Plur	2	nmod	_	TokenRange=128:136
+6	within	within	ADP	IN	_	9	case	_	TokenRange=137:143
+7	the	the	DET	DT	Definite=Def|PronType=Art	9	det	_	TokenRange=144:147
+8	OpenJS	Openj	NOUN	NN	Number=Sing	9	compound	_	TokenRange=148:154
+9	Foundation	foundation	NOUN	NN	Number=Sing	5	nmod	_	TokenRange=155:165
+10	is	be	AUX	VBZ	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	11	aux:pass	_	TokenRange=166:168
+11	delegated	delegate	VERB	VBN	Tense=Past|VerbForm=Part|Voice=Pass	0	root	_	TokenRange=169:178
+12	to	to	ADP	IN	_	14	case	_	TokenRange=179:181
+13	the	the	DET	DT	Definite=Def|PronType=Art	14	det	_	TokenRange=182:185
+14	projects	project	NOUN	NNS	Number=Plur	11	obl	_	TokenRange=186:194
+15	through	through	ADP	IN	_	18	case	_	TokenRange=195:202
+16	their	they	PRON	PRP$	Number=Plur|Person=3|Poss=Yes|PronType=Prs	18	nmod:poss	_	TokenRange=203:208
+17	project	project	NOUN	NN	Number=Sing	18	compound	_	TokenRange=209:216
+18	charters	charter	NOUN	NNS	Number=Plur	14	nmod	_	TokenRange=217:225
+19	by	by	ADP	IN	_	24	case	_	TokenRange=226:228
+20	the	the	DET	DT	Definite=Def|PronType=Art	24	det	_	TokenRange=229:232
+21	OpenJS	OpenJS	PROPN	NNP	Number=Sing	24	compound	_	TokenRange=233:239
+22	Cross	Cross	PROPN	NNP	Number=Sing	24	compound	_	TokenRange=240:245
+23	Project	project	PROPN	NNP	Number=Sing	24	compound	_	TokenRange=246:253
+24	Council	Council	PROPN	NNP	Number=Sing	18	nmod	_	TokenRange=254:261
+25	(	(	PUNCT	-LRB-	_	26	punct	_	SpaceAfter=No|TokenRange=262:263
+26	CPC	CPC	PROPN	NNP	Number=Sing	24	appos	_	SpaceAfter=No|TokenRange=263:266
+27	)	)	PUNCT	-RRB-	_	26	punct	_	SpaceAfter=No|TokenRange=266:267
+28	.	.	PUNCT	.	_	11	punct	_	TokenRange=267:268
+
+# sent_id = nodejs-tsc-charter:u0004:s02
+# text = In the case of the Node.js project, it is delegated to the Node.js Technical Steering Committee (“TSC”).
+1	In	in	ADP	IN	_	3	case	_	TokenRange=269:271
+2	the	the	DET	DT	Definite=Def|PronType=Art	3	det	_	TokenRange=272:275
+3	case	case	NOUN	NN	Number=Sing	11	obl	_	TokenRange=276:280
+4	of	of	ADP	IN	_	7	case	_	TokenRange=281:283
+5	the	the	DET	DT	Definite=Def|PronType=Art	7	det	_	TokenRange=284:287
+6	Node.js	Node.js	PROPN	NNP	Number=Sing	7	compound	_	TokenRange=288:295
+7	project	project	NOUN	NN	Number=Sing	3	nmod	_	SpaceAfter=No|TokenRange=296:303
+8	,	,	PUNCT	,	_	11	punct	_	TokenRange=303:304
+9	it	it	PRON	PRP	Case=Nom|Gender=Neut|Number=Sing|Person=3|PronType=Prs	11	nsubj:pass	_	TokenRange=305:307
+10	is	be	AUX	VBZ	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	11	aux:pass	_	TokenRange=308:310
+11	delegated	delegate	VERB	VBN	Tense=Past|VerbForm=Part|Voice=Pass	0	root	_	TokenRange=311:320
+12	to	to	ADP	IN	_	17	case	_	TokenRange=321:323
+13	the	the	DET	DT	Definite=Def|PronType=Art	17	det	_	TokenRange=324:327
+14	Node.js	Node.js	PROPN	NNP	Number=Sing	17	compound	_	TokenRange=328:335
+15	Technical	technical	PROPN	NNP	Number=Sing	17	compound	_	TokenRange=336:345
+16	Steering	steer	PROPN	NNP	Number=Sing	15	flat	_	TokenRange=346:354
+17	Committee	Committee	PROPN	NNP	Number=Sing	11	obl	_	TokenRange=355:364
+18	(	(	PUNCT	-LRB-	_	20	punct	_	SpaceAfter=No|TokenRange=365:366
+19	“	"	PUNCT	``	_	20	punct	_	SpaceAfter=No|TokenRange=366:367
+20	TSC	Tsc	NOUN	NN	Number=Sing	17	appos	_	SpaceAfter=No|TokenRange=367:370
+21	”	"	PUNCT	''	_	20	punct	_	SpaceAfter=No|TokenRange=370:371
+22	)	)	PUNCT	-RRB-	_	20	punct	_	SpaceAfter=No|TokenRange=371:372
+23	.	.	PUNCT	.	_	11	punct	_	TokenRange=372:373
+
+# sent_id = nodejs-tsc-charter:u0004:s03
+# text = OpenJS Foundation’s business leadership is the Board of Directors (the “Board”).
+1	OpenJS	Openjs	PROPN	NNP	Number=Sing	5	nmod:poss	_	TokenRange=374:380
+2	Foundation	foundation	PROPN	NNP	Number=Sing	1	flat	_	SpaceAfter=No|TokenRange=381:391
+3	’s	's	PART	POS	_	1	case	_	TokenRange=391:393
+4	business	business	NOUN	NN	Number=Sing	5	compound	_	TokenRange=394:402
+5	leadership	leadership	NOUN	NN	Number=Sing	8	nsubj	_	TokenRange=403:413
+6	is	be	AUX	VBZ	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	8	cop	_	TokenRange=414:416
+7	the	the	DET	DT	Definite=Def|PronType=Art	8	det	_	TokenRange=417:420
+8	Board	board	NOUN	NN	Number=Sing	0	root	_	TokenRange=421:426
+9	of	of	ADP	IN	_	10	case	_	TokenRange=427:429
+10	Directors	director	NOUN	NNS	Number=Plur	8	nmod	_	TokenRange=430:439
+11	(	(	PUNCT	-LRB-	_	10	punct	_	SpaceAfter=No|TokenRange=440:441
+12	the	the	DET	DT	Definite=Def|PronType=Art	14	det	_	TokenRange=441:444
+13	“	"	PUNCT	``	_	14	punct	_	SpaceAfter=No|TokenRange=445:446
+14	Board	board	NOUN	NN	Number=Sing	10	appos	_	SpaceAfter=No|TokenRange=446:451
+15	”	"	PUNCT	''	_	14	punct	_	SpaceAfter=No|TokenRange=451:452
+16	)	)	PUNCT	-RRB-	_	14	punct	_	SpaceAfter=No|TokenRange=452:453
+17	.	.	PUNCT	.	_	8	punct	_	SpacesAfter=\n|TokenRange=453:454
+
+# sent_id = nodejs-tsc-charter:u0005:s00
+# text = This charter can only be amended with the approval of the CPC.
+1	This	this	DET	DT	Number=Sing|PronType=Dem	2	det	_	TokenRange=0:4
+2	charter	charter	NOUN	NN	Number=Sing	6	nsubj:pass	_	TokenRange=5:12
+3	can	can	AUX	MD	VerbForm=Fin	6	aux	_	TokenRange=13:16
+4	only	only	ADV	RB	_	6	advmod	_	TokenRange=17:21
+5	be	be	AUX	VB	VerbForm=Inf	6	aux:pass	_	TokenRange=22:24
+6	amended	amend	VERB	VBN	Tense=Past|VerbForm=Part|Voice=Pass	0	root	_	TokenRange=25:32
+7	with	with	ADP	IN	_	9	case	_	TokenRange=33:37
+8	the	the	DET	DT	Definite=Def|PronType=Art	9	det	_	TokenRange=38:41
+9	approval	approval	NOUN	NN	Number=Sing	6	obl	_	TokenRange=42:50
+10	of	of	ADP	IN	_	12	case	_	TokenRange=51:53
+11	the	the	DET	DT	Definite=Def|PronType=Art	12	det	_	TokenRange=54:57
+12	CPC	Cpc	NOUN	NN	Number=Sing	9	nmod	_	SpaceAfter=No|TokenRange=58:61
+13	.	.	PUNCT	.	_	6	punct	_	SpacesAfter=\n|TokenRange=61:62
+
+# sent_id = nodejs-tsc-charter:u0006:s00
+# text = ## Section
+1	##	##	PUNCT	.	_	2	punct	_	TokenRange=0:2
+2	Section	section	NOUN	NN	Number=Sing	0	root	_	TokenRange=3:10
+
+# sent_id = nodejs-tsc-charter:u0006:s01
+# text = 3.
+1	3	3	X	LS	_	0	root	_	SpaceAfter=No|TokenRange=11:12
+2	.	.	PUNCT	.	_	1	punct	_	TokenRange=12:13
+
+# sent_id = nodejs-tsc-charter:u0006:s02
+# text = Establishment of the TSC
+1	Establishment	establishment	NOUN	NN	Number=Sing	0	root	_	TokenRange=14:27
+2	of	of	ADP	IN	_	4	case	_	TokenRange=28:30
+3	the	the	DET	DT	Definite=Def|PronType=Art	4	det	_	TokenRange=31:34
+4	TSC	TSC	PROPN	NNP	Number=Sing	1	nmod	_	SpacesAfter=\n|TokenRange=35:38
+
+# sent_id = nodejs-tsc-charter:u0007:s00
+# text = TSC members can be either _regular_ members or _voting_ members.
+1	TSC	Tsc	NOUN	NN	Number=Sing	2	compound	_	TokenRange=0:3
+2	members	member	NOUN	NNS	Number=Plur	7	nsubj	_	TokenRange=4:11
+3	can	can	AUX	MD	VerbForm=Fin	7	aux	_	TokenRange=12:15
+4	be	be	AUX	VB	VerbForm=Inf	7	cop	_	TokenRange=16:18
+5	either	either	CCONJ	CC	_	7	cc:preconj	_	TokenRange=19:25
+6	_regular_	_regular_	SYM	NFP	_	7	punct	_	TokenRange=26:35
+7	members	member	NOUN	NNS	Number=Plur	0	root	_	TokenRange=36:43
+8	or	or	CCONJ	CC	_	9	cc	_	TokenRange=44:46
+9	_voting	_vot	VERB	VBG	VerbForm=Ger	7	conj	_	SpaceAfter=No|TokenRange=47:54
+10	_	_	SYM	NFP	_	11	punct	_	TokenRange=54:55
+11	members	member	NOUN	NNS	Number=Plur	9	obj	_	SpaceAfter=No|TokenRange=56:63
+12	.	.	PUNCT	.	_	7	punct	_	TokenRange=63:64
+
+# sent_id = nodejs-tsc-charter:u0007:s01
+# text = Regular members can attend meetings and participate in TSC discussions, but do not vote.
+1	Regular	regular	ADJ	JJ	Degree=Pos	2	amod	_	TokenRange=65:72
+2	members	members	NOUN	NNS	Number=Plur	4	nsubj	_	TokenRange=73:80
+3	can	can	AUX	MD	VerbForm=Fin	4	aux	_	TokenRange=81:84
+4	attend	attend	VERB	VB	VerbForm=Inf	0	root	_	TokenRange=85:91
+5	meetings	meeting	NOUN	NNS	Number=Plur	4	obj	_	TokenRange=92:100
+6	and	and	CCONJ	CC	_	7	cc	_	TokenRange=101:104
+7	participate	participate	VERB	VB	VerbForm=Inf	4	conj	_	TokenRange=105:116
+8	in	in	ADP	IN	_	10	case	_	TokenRange=117:119
+9	TSC	Tsc	NOUN	NN	Number=Sing	10	compound	_	TokenRange=120:123
+10	discussions	discussion	NOUN	NNS	Number=Plur	7	obl	_	SpaceAfter=No|TokenRange=124:135
+11	,	,	PUNCT	,	_	15	punct	_	TokenRange=135:136
+12	but	but	CCONJ	CC	_	15	cc	_	TokenRange=137:140
+13	do	do	AUX	VBP	Mood=Ind|Tense=Pres|VerbForm=Fin	15	aux	_	TokenRange=141:143
+14	not	not	PART	RB	_	15	advmod	_	TokenRange=144:147
+15	vote	vote	VERB	VB	VerbForm=Inf	4	conj	_	SpaceAfter=No|TokenRange=148:152
+16	.	.	PUNCT	.	_	4	punct	_	TokenRange=152:153
+
+# sent_id = nodejs-tsc-charter:u0007:s02
+# text = Voting members can do everything regular members can do, and also have the ability to cast votes when consensus is not reached on an issue.
+1	Voting	voting	NOUN	NN	Number=Sing	2	compound	_	TokenRange=154:160
+2	members	member	NOUN	NNS	Number=Plur	4	nsubj	_	TokenRange=161:168
+3	can	can	AUX	MD	VerbForm=Fin	4	aux	_	TokenRange=169:172
+4	do	do	VERB	VB	VerbForm=Inf	0	root	_	TokenRange=173:175
+5	everything	everything	PRON	NN	Number=Sing	4	obj	_	TokenRange=176:186
+6	regular	regular	ADJ	JJ	Degree=Pos	7	amod	_	TokenRange=187:194
+7	members	member	NOUN	NNS	Number=Plur	9	nsubj	_	TokenRange=195:202
+8	can	can	AUX	MD	VerbForm=Fin	9	aux	_	TokenRange=203:206
+9	do	do	VERB	VB	VerbForm=Inf	5	acl:relcl	_	SpaceAfter=No|TokenRange=207:209
+10	,	,	PUNCT	,	_	13	punct	_	TokenRange=209:210
+11	and	and	CCONJ	CC	_	13	cc	_	TokenRange=211:214
+12	also	also	ADV	RB	_	13	advmod	_	TokenRange=215:219
+13	have	have	VERB	VBP	Mood=Ind|Tense=Pres|VerbForm=Fin	4	conj	_	TokenRange=220:224
+14	the	the	DET	DT	Definite=Def|PronType=Art	15	det	_	TokenRange=225:228
+15	ability	ability	NOUN	NN	Number=Sing	13	obj	_	TokenRange=229:236
+16	to	to	PART	TO	_	17	mark	_	TokenRange=237:239
+17	cast	cast	VERB	VB	VerbForm=Inf	15	acl	_	TokenRange=240:244
+18	votes	vote	NOUN	NNS	Number=Plur	17	obj	_	TokenRange=245:250
+19	when	when	ADV	WRB	PronType=Int	23	mark	_	TokenRange=251:255
+20	consensus	consensus	NOUN	NN	Number=Sing	23	nsubj:pass	_	TokenRange=256:265
+21	is	be	AUX	VBZ	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	23	aux:pass	_	TokenRange=266:268
+22	not	not	PART	RB	_	23	advmod	_	TokenRange=269:272
+23	reached	reach	VERB	VBN	Tense=Past|VerbForm=Part|Voice=Pass	17	advcl	_	TokenRange=273:280
+24	on	on	ADP	IN	_	26	case	_	TokenRange=281:283
+25	an	a	DET	DT	Definite=Ind|PronType=Art	26	det	_	TokenRange=284:286
+26	issue	issue	NOUN	NN	Number=Sing	23	obl	_	SpaceAfter=No|TokenRange=287:292
+27	.	.	PUNCT	.	_	4	punct	_	SpacesAfter=\n|TokenRange=292:293
+
+# sent_id = nodejs-tsc-charter:u0008:s00
+# text = TSC memberships are not time-limited.
+1	TSC	Tsc	NOUN	NN	Number=Sing	2	compound	_	TokenRange=0:3
+2	memberships	memberships	NOUN	NNS	Number=Plur	7	nsubj	_	TokenRange=4:15
+3	are	be	AUX	VBP	Mood=Ind|Tense=Pres|VerbForm=Fin	7	cop	_	TokenRange=16:19
+4	not	not	PART	RB	_	5	advmod	_	TokenRange=20:23
+5	time	time	NOUN	NN	Number=Sing	7	obl:npmod	_	SpaceAfter=No|TokenRange=24:28
+6	-	-	PUNCT	HYPH	_	5	punct	_	SpaceAfter=No|TokenRange=28:29
+7	limited	limit	ADJ	JJ	Degree=Pos	0	root	_	SpaceAfter=No|TokenRange=29:36
+8	.	.	PUNCT	.	_	7	punct	_	TokenRange=36:37
+
+# sent_id = nodejs-tsc-charter:u0008:s01
+# text = There is no maximum size of the TSC.
+1	There	there	PRON	EX	_	2	expl	_	TokenRange=38:43
+2	is	be	VERB	VBZ	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	0	root	_	TokenRange=44:46
+3	no	no	DET	DT	_	5	det	_	TokenRange=47:49
+4	maximum	maximum	ADJ	JJ	Degree=Pos	5	amod	_	TokenRange=50:57
+5	size	size	NOUN	NN	Number=Sing	2	nsubj	_	TokenRange=58:62
+6	of	of	ADP	IN	_	8	case	_	TokenRange=63:65
+7	the	the	DET	DT	Definite=Def|PronType=Art	8	det	_	TokenRange=66:69
+8	TSC	Tsc	NOUN	NN	Number=Sing	5	nmod	_	SpaceAfter=No|TokenRange=70:73
+9	.	.	PUNCT	.	_	2	punct	_	TokenRange=73:74
+
+# sent_id = nodejs-tsc-charter:u0008:s02
+# text = The TSC must have at least four voting members.
+1	The	the	DET	DT	Definite=Def|PronType=Art	2	det	_	TokenRange=75:78
+2	TSC	Tsc	NOUN	NN	Number=Sing	4	nsubj	_	TokenRange=79:82
+3	must	must	AUX	MD	VerbForm=Fin	4	aux	_	TokenRange=83:87
+4	have	have	VERB	VB	VerbForm=Inf	0	root	_	TokenRange=88:92
+5	at	at	ADV	RB	_	6	case	_	TokenRange=93:95
+6	least	least	ADV	RBS	Degree=Sup	7	nmod	_	TokenRange=96:101
+7	four	four	NUM	CD	NumType=Card	9	nummod	_	TokenRange=102:106
+8	voting	voting	NOUN	NN	Number=Sing	9	compound	_	TokenRange=107:113
+9	members	member	NOUN	NNS	Number=Plur	4	obj	_	SpaceAfter=No|TokenRange=114:121
+10	.	.	PUNCT	.	_	4	punct	_	SpacesAfter=\n|TokenRange=121:122
+
+# sent_id = nodejs-tsc-charter:u0009:s00
+# text = There is no specific set of requirements or qualifications for TSC membership beyond these rules.
+1	There	there	PRON	EX	_	2	expl	_	TokenRange=0:5
+2	is	be	VERB	VBZ	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	0	root	_	TokenRange=6:8
+3	no	no	DET	DT	_	5	det	_	TokenRange=9:11
+4	specific	specific	ADJ	JJ	Degree=Pos	5	amod	_	TokenRange=12:20
+5	set	set	NOUN	NN	Number=Sing	2	nsubj	_	TokenRange=21:24
+6	of	of	ADP	IN	_	7	case	_	TokenRange=25:27
+7	requirements	requirement	NOUN	NNS	Number=Plur	5	nmod	_	TokenRange=28:40
+8	or	or	CCONJ	CC	_	9	cc	_	TokenRange=41:43
+9	qualifications	qualification	NOUN	NNS	Number=Plur	7	conj	_	TokenRange=44:58
+10	for	for	ADP	IN	_	12	case	_	TokenRange=59:62
+11	TSC	TSC	PROPN	NNP	Number=Sing	12	compound	_	TokenRange=63:66
+12	membership	membership	NOUN	NN	Number=Sing	7	nmod	_	TokenRange=67:77
+13	beyond	beyond	ADP	IN	_	15	case	_	TokenRange=78:84
+14	these	these	DET	DT	Number=Plur|PronType=Dem	15	det	_	TokenRange=85:90
+15	rules	rule	NOUN	NNS	Number=Plur	12	nmod	_	SpaceAfter=No|TokenRange=91:96
+16	.	.	PUNCT	.	_	2	punct	_	TokenRange=96:97
+
+# sent_id = nodejs-tsc-charter:u0009:s01
+# text = The TSC may add additional voting members to the TSC by a standard TSC motion.
+1	The	the	DET	DT	Definite=Def|PronType=Art	2	det	_	TokenRange=98:101
+2	TSC	Tsc	NOUN	NN	Number=Sing	4	nsubj	_	TokenRange=102:105
+3	may	may	AUX	MD	VerbForm=Fin	4	aux	_	TokenRange=106:109
+4	add	add	VERB	VB	VerbForm=Inf	0	root	_	TokenRange=110:113
+5	additional	additional	ADJ	JJ	Degree=Pos	7	amod	_	TokenRange=114:124
+6	voting	voting	NOUN	NN	Number=Sing	7	compound	_	TokenRange=125:131
+7	members	member	NOUN	NNS	Number=Plur	4	obj	_	TokenRange=132:139
+8	to	to	ADP	IN	_	10	case	_	TokenRange=140:142
+9	the	the	DET	DT	Definite=Def|PronType=Art	10	det	_	TokenRange=143:146
+10	TSC	Tsc	NOUN	NN	Number=Sing	7	nmod	_	TokenRange=147:150
+11	by	by	ADP	IN	_	15	case	_	TokenRange=151:153
+12	a	a	DET	DT	Definite=Ind|PronType=Art	15	det	_	TokenRange=154:155
+13	standard	standard	ADJ	JJ	Degree=Pos	15	amod	_	TokenRange=156:164
+14	TSC	Tsc	NOUN	NN	Number=Sing	15	compound	_	TokenRange=165:168
+15	motion	motion	NOUN	NN	Number=Sing	4	obl	_	SpaceAfter=No|TokenRange=169:175
+16	.	.	PUNCT	.	_	4	punct	_	TokenRange=175:176
+
+# sent_id = nodejs-tsc-charter:u0009:s02
+# text = A TSC member can be removed from the TSC by voluntary resignation or by a standard TSC motion.
+1	A	a	DET	DT	Definite=Ind|PronType=Art	3	det	_	TokenRange=177:178
+2	TSC	Tsc	NOUN	NN	Number=Sing	3	compound	_	TokenRange=179:182
+3	member	member	NOUN	NN	Number=Sing	6	nsubj:pass	_	TokenRange=183:189
+4	can	can	AUX	MD	VerbForm=Fin	6	aux	_	TokenRange=190:193
+5	be	be	AUX	VB	VerbForm=Inf	6	aux:pass	_	TokenRange=194:196
+6	removed	remove	VERB	VBN	Tense=Past|VerbForm=Part|Voice=Pass	0	root	_	TokenRange=197:204
+7	from	from	ADP	IN	_	9	case	_	TokenRange=205:209
+8	the	the	DET	DT	Definite=Def|PronType=Art	9	det	_	TokenRange=210:213
+9	TSC	Tsc	NOUN	NN	Number=Sing	6	obl	_	TokenRange=214:217
+10	by	by	ADP	IN	_	12	case	_	TokenRange=218:220
+11	voluntary	voluntary	NOUN	NN	Number=Sing	12	compound	_	TokenRange=221:230
+12	resignation	resignation	NOUN	NN	Number=Sing	9	nmod	_	TokenRange=231:242
+13	or	or	CCONJ	CC	_	18	cc	_	TokenRange=243:245
+14	by	by	ADP	IN	_	18	case	_	TokenRange=246:248
+15	a	a	DET	DT	Definite=Ind|PronType=Art	18	det	_	TokenRange=249:250
+16	standard	standard	ADJ	JJ	Degree=Pos	18	amod	_	TokenRange=251:259
+17	TSC	Tsc	NOUN	NN	Number=Sing	18	compound	_	TokenRange=260:263
+18	motion	motion	NOUN	NN	Number=Sing	9	conj	_	SpaceAfter=No|TokenRange=264:270
+19	.	.	PUNCT	.	_	6	punct	_	TokenRange=270:271
+
+# sent_id = nodejs-tsc-charter:u0009:s03
+# text = A standard TSC motion can be used to change a regular TSC member to a voting TSC member, or to change a voting TSC member to a regular TSC member.
+1	A	a	DET	DT	Definite=Ind|PronType=Art	4	det	_	TokenRange=272:273
+2	standard	standard	ADJ	JJ	Degree=Pos	4	amod	_	TokenRange=274:282
+3	TSC	Tsc	NOUN	NN	Number=Sing	4	compound	_	TokenRange=283:286
+4	motion	motion	NOUN	NN	Number=Sing	7	nsubj:pass	_	TokenRange=287:293
+5	can	can	AUX	MD	VerbForm=Fin	7	aux	_	TokenRange=294:297
+6	be	be	AUX	VB	VerbForm=Inf	7	aux:pass	_	TokenRange=298:300
+7	used	use	VERB	VBN	Tense=Past|VerbForm=Part|Voice=Pass	0	root	_	TokenRange=301:305
+8	to	to	PART	TO	_	9	mark	_	TokenRange=306:308
+9	change	change	VERB	VB	VerbForm=Inf	7	xcomp	_	TokenRange=309:315
+10	a	a	DET	DT	Definite=Ind|PronType=Art	13	det	_	TokenRange=316:317
+11	regular	regular	ADJ	JJ	Degree=Pos	13	amod	_	TokenRange=318:325
+12	TSC	Tsc	NOUN	NN	Number=Sing	13	compound	_	TokenRange=326:329
+13	member	member	NOUN	NN	Number=Sing	9	obj	_	TokenRange=330:336
+14	to	to	ADP	IN	_	18	case	_	TokenRange=337:339
+15	a	a	DET	DT	Definite=Ind|PronType=Art	18	det	_	TokenRange=340:341
+16	voting	voting	NOUN	NN	Number=Sing	18	compound	_	TokenRange=342:348
+17	TSC	Tsc	NOUN	NN	Number=Sing	18	compound	_	TokenRange=349:352
+18	member	member	NOUN	NN	Number=Sing	13	nmod	_	SpaceAfter=No|TokenRange=353:359
+19	,	,	PUNCT	,	_	22	punct	_	TokenRange=359:360
+20	or	or	CCONJ	CC	_	22	cc	_	TokenRange=361:363
+21	to	to	PART	TO	_	22	mark	_	TokenRange=364:366
+22	change	change	VERB	VB	VerbForm=Inf	9	conj	_	TokenRange=367:373
+23	a	a	DET	DT	Definite=Ind|PronType=Art	26	det	_	TokenRange=374:375
+24	voting	voting	NOUN	NN	Number=Sing	26	compound	_	TokenRange=376:382
+25	TSC	Tsc	NOUN	NN	Number=Sing	26	compound	_	TokenRange=383:386
+26	member	member	NOUN	NN	Number=Sing	22	obj	_	TokenRange=387:393
+27	to	to	ADP	IN	_	31	case	_	TokenRange=394:396
+28	a	a	DET	DT	Definite=Ind|PronType=Art	31	det	_	TokenRange=397:398
+29	regular	regular	ADJ	JJ	Degree=Pos	31	amod	_	TokenRange=399:406
+30	TSC	Tsc	NOUN	NN	Number=Sing	31	compound	_	TokenRange=407:410
+31	member	member	NOUN	NN	Number=Sing	22	obl	_	SpaceAfter=No|TokenRange=411:417
+32	.	.	PUNCT	.	_	7	punct	_	SpacesAfter=\n|TokenRange=417:418
+
+# sent_id = nodejs-tsc-charter:u0010:s00
+# text = In order to ensure adequate representation of the interests of diverse stakeholders, no more than one-fourth of the TSC voting membership may be affiliated with the same company/entity.
+1	In	in	ADP	IN	_	4	mark	_	TokenRange=0:2
+2	order	order	NOUN	NN	Number=Sing	1	fixed	_	TokenRange=3:8
+3	to	to	PART	TO	_	4	mark	_	TokenRange=9:11
+4	ensure	ensure	VERB	VB	VerbForm=Inf	15	advcl	_	TokenRange=12:18
+5	adequate	adequate	ADJ	JJ	Degree=Pos	6	amod	_	TokenRange=19:27
+6	representation	representation	NOUN	NN	Number=Sing	4	obj	_	TokenRange=28:42
+7	of	of	ADP	IN	_	9	case	_	TokenRange=43:45
+8	the	the	DET	DT	Definite=Def|PronType=Art	9	det	_	TokenRange=46:49
+9	interests	interest	NOUN	NNS	Number=Plur	6	nmod	_	TokenRange=50:59
+10	of	of	ADP	IN	_	12	case	_	TokenRange=60:62
+11	diverse	diverse	ADJ	JJ	Degree=Pos	12	amod	_	TokenRange=63:70
+12	stakeholders	stakeholder	NOUN	NNS	Number=Plur	9	nmod	_	SpaceAfter=No|TokenRange=71:83
+13	,	,	PUNCT	,	_	15	punct	_	TokenRange=83:84
+14	no	no	ADV	RB	_	15	advmod	_	TokenRange=85:87
+15	more	more	ADJ	JJR	Degree=Cmp	0	root	_	TokenRange=88:92
+16	than	than	ADP	IN	_	19	case	_	TokenRange=93:97
+17	one	one	NUM	CD	NumType=Card	19	nummod	_	SpaceAfter=No|TokenRange=98:101
+18	-	-	PUNCT	HYPH	_	19	punct	_	SpaceAfter=No|TokenRange=101:102
+19	fourth	fourth	NOUN	NN	Number=Sing	15	obl	_	TokenRange=102:108
+20	of	of	ADP	IN	_	24	case	_	TokenRange=109:111
+21	the	the	DET	DT	Definite=Def|PronType=Art	24	det	_	TokenRange=112:115
+22	TSC	TSC	PROPN	NNP	Number=Sing	24	compound	_	TokenRange=116:119
+23	voting	voting	NOUN	NN	Number=Sing	24	compound	_	TokenRange=120:126
+24	membership	membership	NOUN	NN	Number=Sing	19	nmod	_	TokenRange=127:137
+25	may	may	AUX	MD	VerbForm=Fin	27	aux	_	TokenRange=138:141
+26	be	be	AUX	VB	VerbForm=Inf	27	aux:pass	_	TokenRange=142:144
+27	affiliated	affiliate	VERB	VBN	Tense=Past|VerbForm=Part|Voice=Pass	15	advcl	_	TokenRange=145:155
+28	with	with	ADP	IN	_	31	case	_	TokenRange=156:160
+29	the	the	DET	DT	Definite=Def|PronType=Art	31	det	_	TokenRange=161:164
+30	same	same	ADJ	JJ	Degree=Pos	31	amod	_	TokenRange=165:169
+31	company	company	NOUN	NN	Number=Sing	27	obl	_	SpaceAfter=No|TokenRange=170:177
+32	/	/	PUNCT	,	_	33	cc	_	SpaceAfter=No|TokenRange=177:178
+33	entity	entity	NOUN	NN	Number=Sing	31	conj	_	SpaceAfter=No|TokenRange=178:184
+34	.	.	PUNCT	.	_	15	punct	_	TokenRange=184:185
+
+# sent_id = nodejs-tsc-charter:u0010:s01
+# text = If a change in TSC voting membership or a change of affiliation by a TSC voting member creates a situation where more than one-fourth of the TSC voting membership are affiliated with the same company/entity, then the situation must be immediately remedied by the removal of voting member status from one or more TSC voting members affiliated with the over-represented company.
+1	If	if	SCONJ	IN	_	18	mark	_	TokenRange=186:188
+2	a	a	DET	DT	Definite=Ind|PronType=Art	3	det	_	TokenRange=189:190
+3	change	change	NOUN	NN	Number=Sing	18	nsubj	_	TokenRange=191:197
+4	in	in	ADP	IN	_	7	case	_	TokenRange=198:200
+5	TSC	TSC	PROPN	NNP	Number=Sing	7	compound	_	TokenRange=201:204
+6	voting	vote	NOUN	NN	Number=Sing	7	compound	_	TokenRange=205:211
+7	membership	membership	NOUN	NN	Number=Sing	3	nmod	_	TokenRange=212:222
+8	or	or	CCONJ	CC	_	10	cc	_	TokenRange=223:225
+9	a	a	DET	DT	Definite=Ind|PronType=Art	10	det	_	TokenRange=226:227
+10	change	change	NOUN	NN	Number=Sing	3	conj	_	TokenRange=228:234
+11	of	of	ADP	IN	_	12	case	_	TokenRange=235:237
+12	affiliation	affiliation	NOUN	NN	Number=Sing	10	nmod	_	TokenRange=238:249
+13	by	by	ADP	IN	_	17	case	_	TokenRange=250:252
+14	a	a	DET	DT	Definite=Ind|PronType=Art	17	det	_	TokenRange=253:254
+15	TSC	TSC	PROPN	NNP	Number=Sing	17	compound	_	TokenRange=255:258
+16	voting	voting	NOUN	NN	Number=Sing	17	compound	_	TokenRange=259:265
+17	member	member	NOUN	NN	Number=Sing	3	nmod	_	TokenRange=266:272
+18	creates	create	VERB	VBZ	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	47	advcl	_	TokenRange=273:280
+19	a	a	DET	DT	Definite=Ind|PronType=Art	20	det	_	TokenRange=281:282
+20	situation	situation	NOUN	NN	Number=Sing	18	obj	_	TokenRange=283:292
+21	where	where	ADV	WRB	PronType=Rel	26	advmod	_	TokenRange=293:298
+22	more	more	ADJ	JJR	Degree=Cmp	24	advmod	_	TokenRange=299:303
+23	than	than	ADP	IN	_	22	fixed	_	TokenRange=304:308
+24	one	one	NUM	CD	NumType=Card	26	nummod	_	SpaceAfter=No|TokenRange=309:312
+25	-	-	PUNCT	HYPH	_	26	punct	_	SpaceAfter=No|TokenRange=312:313
+26	fourth	fourth	NOUN	NN	Number=Sing	33	nsubj:pass	_	TokenRange=313:319
+27	of	of	ADP	IN	_	31	case	_	TokenRange=320:322
+28	the	the	DET	DT	Definite=Def|PronType=Art	31	det	_	TokenRange=323:326
+29	TSC	TSC	PROPN	NNP	Number=Sing	31	compound	_	TokenRange=327:330
+30	voting	voting	NOUN	NN	Number=Sing	31	compound	_	TokenRange=331:337
+31	membership	membership	NOUN	NN	Number=Sing	26	nmod	_	TokenRange=338:348
+32	are	be	AUX	VBP	Mood=Ind|Tense=Pres|VerbForm=Fin	33	aux:pass	_	TokenRange=349:352
+33	affiliated	affiliate	VERB	VBN	Tense=Past|VerbForm=Part|Voice=Pass	20	acl:relcl	_	TokenRange=353:363
+34	with	with	ADP	IN	_	37	case	_	TokenRange=364:368
+35	the	the	DET	DT	Definite=Def|PronType=Art	37	det	_	TokenRange=369:372
+36	same	same	ADJ	JJ	Degree=Pos	37	amod	_	TokenRange=373:377
+37	company	company	NOUN	NN	Number=Sing	33	obl	_	SpaceAfter=No|TokenRange=378:385
+38	/	/	PUNCT	,	_	39	cc	_	SpaceAfter=No|TokenRange=385:386
+39	entity	entity	NOUN	NN	Number=Sing	37	conj	_	SpaceAfter=No|TokenRange=386:392
+40	,	,	PUNCT	,	_	47	punct	_	TokenRange=392:393
+41	then	then	ADV	RB	PronType=Dem	47	advmod	_	TokenRange=394:398
+42	the	the	DET	DT	Definite=Def|PronType=Art	43	det	_	TokenRange=399:402
+43	situation	situation	NOUN	NN	Number=Sing	47	nsubj:pass	_	TokenRange=403:412
+44	must	must	AUX	MD	VerbForm=Fin	47	aux	_	TokenRange=413:417
+45	be	be	AUX	VB	VerbForm=Inf	47	aux:pass	_	TokenRange=418:420
+46	immediately	immediately	ADV	RB	_	47	advmod	_	TokenRange=421:432
+47	remedied	remedy	VERB	VBN	Tense=Past|VerbForm=Part|Voice=Pass	0	root	_	TokenRange=433:441
+48	by	by	ADP	IN	_	50	case	_	TokenRange=442:444
+49	the	the	DET	DT	Definite=Def|PronType=Art	50	det	_	TokenRange=445:448
+50	removal	removal	NOUN	NN	Number=Sing	47	obl	_	TokenRange=449:456
+51	of	of	ADP	IN	_	54	case	_	TokenRange=457:459
+52	voting	voting	NOUN	NN	Number=Sing	53	compound	_	TokenRange=460:466
+53	member	member	NOUN	NN	Number=Sing	54	compound	_	TokenRange=467:473
+54	status	status	NOUN	NN	Number=Sing	50	nmod	_	TokenRange=474:480
+55	from	from	ADP	IN	_	56	case	_	TokenRange=481:485
+56	one	one	NUM	CD	NumType=Card	61	nummod	_	TokenRange=486:489
+57	or	or	CCONJ	CC	_	58	cc	_	TokenRange=490:492
+58	more	more	ADJ	JJR	Degree=Cmp	56	conj	_	TokenRange=493:497
+59	TSC	TSC	NOUN	NN	Number=Sing	61	compound	_	TokenRange=498:501
+60	voting	voting	NOUN	NN	Number=Sing	61	compound	_	TokenRange=502:508
+61	members	member	NOUN	NNS	Number=Plur	47	nmod	_	TokenRange=509:516
+62	affiliated	affiliate	VERB	VBN	Tense=Past|VerbForm=Part	61	acl	_	TokenRange=517:527
+63	with	with	ADP	IN	_	66	case	_	TokenRange=528:532
+64	the	the	DET	DT	Definite=Def|PronType=Art	66	det	_	TokenRange=533:536
+65	over-represented	over-represented	ADJ	JJ	Degree=Pos	66	amod	_	TokenRange=537:553
+66	company	company	NOUN	NN	Number=Sing	62	obl	_	SpaceAfter=No|TokenRange=554:561
+67	.	.	PUNCT	.	_	47	punct	_	SpacesAfter=\n|TokenRange=561:562
+
+# sent_id = nodejs-tsc-charter:u0011:s00
+# text = The TSC shall meet regularly using tools that enable participation by the community (e.g. weekly on a Google Hangout On Air, or through any other appropriate means selected by the TSC).
+1	The	the	DET	DT	Definite=Def|PronType=Art	2	det	_	TokenRange=0:3
+2	TSC	Tsc	NOUN	NN	Number=Sing	4	nsubj	_	TokenRange=4:7
+3	shall	shall	AUX	MD	VerbForm=Fin	4	aux	_	TokenRange=8:13
+4	meet	meet	VERB	VB	VerbForm=Inf	0	root	_	TokenRange=14:18
+5	regularly	regularly	ADV	RB	_	4	advmod	_	TokenRange=19:28
+6	using	use	VERB	VBG	VerbForm=Ger	4	advcl	_	TokenRange=29:34
+7	tools	tool	NOUN	NNS	Number=Plur	6	obj	_	TokenRange=35:40
+8	that	that	PRON	WDT	PronType=Rel	9	nsubj	_	TokenRange=41:45
+9	enable	enable	VERB	VBP	Mood=Ind|Tense=Pres|VerbForm=Fin	7	acl:relcl	_	TokenRange=46:52
+10	participation	participation	NOUN	NN	Number=Sing	9	obj	_	TokenRange=53:66
+11	by	by	ADP	IN	_	13	case	_	TokenRange=67:69
+12	the	the	DET	DT	Definite=Def|PronType=Art	13	det	_	TokenRange=70:73
+13	community	community	NOUN	NN	Number=Sing	10	nmod	_	TokenRange=74:83
+14	(	(	PUNCT	-LRB-	_	16	punct	_	SpaceAfter=No|TokenRange=84:85
+15	e.g.	e.g.	ADV	RB	_	16	advmod	_	TokenRange=85:89
+16	weekly	weekly	ADJ	JJ	Degree=Pos	4	parataxis	_	TokenRange=90:96
+17	on	on	ADP	IN	_	20	case	_	TokenRange=97:99
+18	a	a	DET	DT	Definite=Ind|PronType=Art	20	det	_	TokenRange=100:101
+19	Google	Google	PROPN	NNP	Number=Sing	20	compound	_	TokenRange=102:108
+20	Hangout	hangout	PROPN	NNP	Number=Sing	16	obl	_	TokenRange=109:116
+21	On	on	ADP	IN	_	22	case	_	TokenRange=117:119
+22	Air	air	PROPN	NNP	Number=Sing	20	nmod	_	SpaceAfter=No|TokenRange=120:123
+23	,	,	PUNCT	,	_	29	punct	_	TokenRange=123:124
+24	or	or	CCONJ	CC	_	29	cc	_	TokenRange=125:127
+25	through	through	ADP	IN	_	29	case	_	TokenRange=128:135
+26	any	any	DET	DT	_	29	det	_	TokenRange=136:139
+27	other	other	ADJ	JJ	Degree=Pos	29	amod	_	TokenRange=140:145
+28	appropriate	appropriate	ADJ	JJ	Degree=Pos	29	amod	_	TokenRange=146:157
+29	means	mean	NOUN	NNS	Number=Plur	16	conj	_	TokenRange=158:163
+30	selected	select	VERB	VBN	Tense=Past|VerbForm=Part	29	acl	_	TokenRange=164:172
+31	by	by	ADP	IN	_	33	case	_	TokenRange=173:175
+32	the	the	DET	DT	Definite=Def|PronType=Art	33	det	_	TokenRange=176:179
+33	TSC	Tsc	NOUN	NN	Number=Sing	30	obl	_	SpaceAfter=No|TokenRange=180:183
+34	)	)	PUNCT	-RRB-	_	16	punct	_	SpaceAfter=No|TokenRange=183:184
+35	.	.	PUNCT	.	_	4	punct	_	TokenRange=184:185
+
+# sent_id = nodejs-tsc-charter:u0011:s01
+# text = The meeting shall be directed by the TSC Chairperson.
+1	The	the	DET	DT	Definite=Def|PronType=Art	2	det	_	TokenRange=186:189
+2	meeting	meeting	NOUN	NN	Number=Sing	5	nsubj:pass	_	TokenRange=190:197
+3	shall	shall	AUX	MD	VerbForm=Fin	5	aux	_	TokenRange=198:203
+4	be	be	AUX	VB	VerbForm=Inf	5	aux:pass	_	TokenRange=204:206
+5	directed	direct	VERB	VBN	Tense=Past|VerbForm=Part|Voice=Pass	0	root	_	TokenRange=207:215
+6	by	by	ADP	IN	_	9	case	_	TokenRange=216:218
+7	the	the	DET	DT	Definite=Def|PronType=Art	9	det	_	TokenRange=219:222
+8	TSC	TSC	PROPN	NNP	Number=Sing	9	compound	_	TokenRange=223:226
+9	Chairperson	Chairperson	PROPN	NNP	Number=Sing	5	obl	_	SpaceAfter=No|TokenRange=227:238
+10	.	.	PUNCT	.	_	5	punct	_	TokenRange=238:239
+
+# sent_id = nodejs-tsc-charter:u0011:s02
+# text = Responsibility for directing individual meetings may be delegated by the TSC Chairperson to any other TSC voting member.
+1	Responsibility	responsibility	NOUN	NN	Number=Sing	8	nsubj:pass	_	TokenRange=240:254
+2	for	for	SCONJ	IN	_	3	mark	_	TokenRange=255:258
+3	directing	direct	VERB	VBG	VerbForm=Ger	1	acl	_	TokenRange=259:268
+4	individual	individual	ADJ	JJ	Degree=Pos	5	amod	_	TokenRange=269:279
+5	meetings	meeting	NOUN	NNS	Number=Plur	3	obj	_	TokenRange=280:288
+6	may	may	AUX	MD	VerbForm=Fin	8	aux	_	TokenRange=289:292
+7	be	be	AUX	VB	VerbForm=Inf	8	aux:pass	_	TokenRange=293:295
+8	delegated	delegate	VERB	VBN	Tense=Past|VerbForm=Part|Voice=Pass	0	root	_	TokenRange=296:305
+9	by	by	ADP	IN	_	12	case	_	TokenRange=306:308
+10	the	the	DET	DT	Definite=Def|PronType=Art	12	det	_	TokenRange=309:312
+11	TSC	TSC	PROPN	NNP	Number=Sing	12	compound	_	TokenRange=313:316
+12	Chairperson	chairperson	PROPN	NNP	Number=Sing	8	obl	_	TokenRange=317:328
+13	to	to	ADP	IN	_	18	case	_	TokenRange=329:331
+14	any	any	DET	DT	_	18	det	_	TokenRange=332:335
+15	other	other	ADJ	JJ	Degree=Pos	18	amod	_	TokenRange=336:341
+16	TSC	Tsc	NOUN	NN	Number=Sing	18	compound	_	TokenRange=342:345
+17	voting	voting	NOUN	NN	Number=Sing	18	compound	_	TokenRange=346:352
+18	member	member	NOUN	NN	Number=Sing	8	obl	_	SpaceAfter=No|TokenRange=353:359
+19	.	.	PUNCT	.	_	8	punct	_	TokenRange=359:360
+
+# sent_id = nodejs-tsc-charter:u0011:s03
+# text = Minutes or an appropriate recording shall be taken and made available to the community through accessible public postings.
+1	Minutes	Minutes	NOUN	NNS	Number=Plur	8	nsubj:pass	_	TokenRange=361:368
+2	or	or	CCONJ	CC	_	5	cc	_	TokenRange=369:371
+3	an	a	DET	DT	Definite=Ind|PronType=Art	5	det	_	TokenRange=372:374
+4	appropriate	appropriate	ADJ	JJ	Degree=Pos	5	amod	_	TokenRange=375:386
+5	recording	recording	NOUN	NN	Number=Sing	1	conj	_	TokenRange=387:396
+6	shall	shall	AUX	MD	VerbForm=Fin	8	aux	_	TokenRange=397:402
+7	be	be	AUX	VB	VerbForm=Inf	8	aux:pass	_	TokenRange=403:405
+8	taken	take	VERB	VBN	Tense=Past|VerbForm=Part|Voice=Pass	0	root	_	TokenRange=406:411
+9	and	and	CCONJ	CC	_	10	cc	_	TokenRange=412:415
+10	made	make	VERB	VBN	Tense=Past|VerbForm=Part	8	conj	_	TokenRange=416:420
+11	available	available	ADJ	JJ	Degree=Pos	10	xcomp	_	TokenRange=421:430
+12	to	to	ADP	IN	_	14	case	_	TokenRange=431:433
+13	the	the	DET	DT	Definite=Def|PronType=Art	14	det	_	TokenRange=434:437
+14	community	community	NOUN	NN	Number=Sing	8	obl	_	TokenRange=438:447
+15	through	through	ADP	IN	_	18	case	_	TokenRange=448:455
+16	accessible	accessible	ADJ	JJ	Degree=Pos	18	amod	_	TokenRange=456:466
+17	public	public	ADJ	JJ	Degree=Pos	18	amod	_	TokenRange=467:473
+18	postings	posting	NOUN	NNS	Number=Plur	14	nmod	_	SpaceAfter=No|TokenRange=474:482
+19	.	.	PUNCT	.	_	8	punct	_	SpacesAfter=\n|TokenRange=482:483
+
+# sent_id = nodejs-tsc-charter:u0012:s00
+# text = TSC voting members are expected to regularly participate in TSC activities.
+1	TSC	Tsc	NOUN	NN	Number=Sing	3	compound	_	TokenRange=0:3
+2	voting	voting	NOUN	NN	Number=Sing	3	compound	_	TokenRange=4:10
+3	members	member	NOUN	NNS	Number=Plur	5	nsubj:pass	_	TokenRange=11:18
+4	are	be	AUX	VBP	Mood=Ind|Tense=Pres|VerbForm=Fin	5	aux:pass	_	TokenRange=19:22
+5	expected	expect	VERB	VBN	Tense=Past|VerbForm=Part|Voice=Pass	0	root	_	TokenRange=23:31
+6	to	to	PART	TO	_	8	mark	_	TokenRange=32:34
+7	regularly	regularly	ADV	RB	_	8	advmod	_	TokenRange=35:44
+8	participate	participate	VERB	VB	VerbForm=Inf	5	xcomp	_	TokenRange=45:56
+9	in	in	ADP	IN	_	11	case	_	TokenRange=57:59
+10	TSC	TSC	PROPN	NNP	Number=Sing	11	compound	_	TokenRange=60:63
+11	activities	activity	NOUN	NNS	Number=Plur	8	obl	_	SpaceAfter=No|TokenRange=64:74
+12	.	.	PUNCT	.	_	5	punct	_	SpacesAfter=\n|TokenRange=74:75
+
+# sent_id = nodejs-tsc-charter:u0013:s00
+# text = A TSC voting member is automatically converted to a TSC regular member if they do not participate in three consecutive TSC votes.
+1	A	a	DET	DT	Definite=Ind|PronType=Art	4	det	_	TokenRange=0:1
+2	TSC	Tsc	NOUN	NN	Number=Sing	4	compound	_	TokenRange=2:5
+3	voting	voting	NOUN	NN	Number=Sing	4	compound	_	TokenRange=6:12
+4	member	member	NOUN	NN	Number=Sing	7	nsubj:pass	_	TokenRange=13:19
+5	is	be	AUX	VBZ	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	7	aux:pass	_	TokenRange=20:22
+6	automatically	automatically	ADV	RB	_	7	advmod	_	TokenRange=23:36
+7	converted	convert	VERB	VBN	Tense=Past|VerbForm=Part|Voice=Pass	0	root	_	TokenRange=37:46
+8	to	to	ADP	IN	_	12	case	_	TokenRange=47:49
+9	a	a	DET	DT	Definite=Ind|PronType=Art	12	det	_	TokenRange=50:51
+10	TSC	TSC	PROPN	NNP	Number=Sing	12	compound	_	TokenRange=52:55
+11	regular	regular	ADJ	JJ	Degree=Pos	12	amod	_	TokenRange=56:63
+12	member	member	NOUN	NN	Number=Sing	7	obl	_	TokenRange=64:70
+13	if	if	SCONJ	IN	_	17	mark	_	TokenRange=71:73
+14	they	they	PRON	PRP	Case=Nom|Number=Plur|Person=3|PronType=Prs	17	nsubj	_	TokenRange=74:78
+15	do	do	AUX	VBP	Mood=Ind|Tense=Pres|VerbForm=Fin	17	aux	_	TokenRange=79:81
+16	not	not	PART	RB	_	17	advmod	_	TokenRange=82:85
+17	participate	participate	VERB	VB	VerbForm=Inf	7	advcl	_	TokenRange=86:97
+18	in	in	ADP	IN	_	22	case	_	TokenRange=98:100
+19	three	three	NUM	CD	NumType=Card	22	nummod	_	TokenRange=101:106
+20	consecutive	consecutive	ADJ	JJ	Degree=Pos	22	amod	_	TokenRange=107:118
+21	TSC	Tsc	NOUN	NN	Number=Sing	22	compound	_	TokenRange=119:122
+22	votes	vote	NOUN	NNS	Number=Plur	17	obl	_	SpaceAfter=No|TokenRange=123:128
+23	.	.	PUNCT	.	_	7	punct	_	SpacesAfter=\n|TokenRange=128:129
+
+# sent_id = nodejs-tsc-charter:u0014:s00
+# text = ## Section
+1	##	##	PUNCT	.	_	2	punct	_	TokenRange=0:2
+2	Section	section	NOUN	NN	Number=Sing	0	root	_	TokenRange=3:10
+
+# sent_id = nodejs-tsc-charter:u0014:s01
+# text = 4.
+1	4	4	X	LS	_	0	root	_	SpaceAfter=No|TokenRange=11:12
+2	.	.	PUNCT	.	_	1	punct	_	TokenRange=12:13
+
+# sent_id = nodejs-tsc-charter:u0014:s02
+# text = Responsibilities of the TSC
+1	Responsibilities	responsibility	NOUN	NNS	Number=Plur	0	root	_	TokenRange=14:30
+2	of	of	ADP	IN	_	4	case	_	TokenRange=31:33
+3	the	the	DET	DT	Definite=Def|PronType=Art	4	det	_	TokenRange=34:37
+4	TSC	TSC	PROPN	NNP	Number=Sing	1	nmod	_	SpacesAfter=\n|TokenRange=38:41
+
+# sent_id = nodejs-tsc-charter:u0015:s00
+# text = Subject to such policies as may be set by the CPC, the TSC is responsible for all technical development within the Node.js project, including:
+1	Subject	subject	NOUN	NN	Number=Sing	8	nsubj:pass	_	TokenRange=0:7
+2	to	to	ADP	IN	_	4	case	_	TokenRange=8:10
+3	such	such	ADJ	JJ	Degree=Pos	4	amod	_	TokenRange=11:15
+4	policies	policy	NOUN	NNS	Number=Plur	1	nmod	_	TokenRange=16:24
+5	as	as	ADV	RB	_	8	advmod	_	TokenRange=25:27
+6	may	may	AUX	MD	VerbForm=Fin	8	aux	_	TokenRange=28:31
+7	be	be	AUX	VB	VerbForm=Inf	8	aux:pass	_	TokenRange=32:34
+8	set	set	VERB	VBN	Tense=Past|VerbForm=Part|Voice=Pass	0	root	_	TokenRange=35:38
+9	by	by	ADP	IN	_	11	case	_	TokenRange=39:41
+10	the	the	DET	DT	Definite=Def|PronType=Art	11	det	_	TokenRange=42:45
+11	CPC	Cpc	NOUN	NN	Number=Sing	8	obl	_	SpaceAfter=No|TokenRange=46:49
+12	,	,	PUNCT	,	_	8	punct	_	TokenRange=49:50
+13	the	the	DET	DT	Definite=Def|PronType=Art	14	det	_	TokenRange=51:54
+14	TSC	Tsc	NOUN	NN	Number=Sing	16	nsubj	_	TokenRange=55:58
+15	is	be	AUX	VBZ	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	16	cop	_	TokenRange=59:61
+16	responsible	responsible	ADJ	JJ	Degree=Pos	8	conj	_	TokenRange=62:73
+17	for	for	ADP	IN	_	20	case	_	TokenRange=74:77
+18	all	all	DET	DT	_	20	det	_	TokenRange=78:81
+19	technical	technical	ADJ	JJ	Degree=Pos	20	amod	_	TokenRange=82:91
+20	development	development	NOUN	NN	Number=Sing	16	obl	_	TokenRange=92:103
+21	within	within	ADP	IN	_	24	case	_	TokenRange=104:110
+22	the	the	DET	DT	Definite=Def|PronType=Art	24	det	_	TokenRange=111:114
+23	Node.js	Node.js	PROPN	NNPS	Number=Plur	24	compound	_	TokenRange=115:122
+24	project	project	NOUN	NN	Number=Sing	20	nmod	_	SpaceAfter=No|TokenRange=123:130
+25	,	,	PUNCT	,	_	8	punct	_	TokenRange=130:131
+26	including	include	VERB	VBG	VerbForm=Ger	8	conj	_	SpaceAfter=No|TokenRange=132:141
+27	:	:	PUNCT	:	_	8	punct	_	SpacesAfter=\n|TokenRange=141:142
+
+# sent_id = nodejs-tsc-charter:u0016:s00
+# text = * Setting release dates. *
+1	*	*	PUNCT	NFP	_	2	punct	_	TokenRange=0:1
+2	Setting	set	VERB	VBG	VerbForm=Ger	0	root	_	TokenRange=2:9
+3	release	release	NOUN	NN	Number=Sing	4	compound	_	TokenRange=10:17
+4	dates	date	NOUN	NNS	Number=Plur	2	obj	_	SpaceAfter=No|TokenRange=18:23
+5	.	.	PUNCT	.	_	2	punct	_	TokenRange=23:24
+6	*	*	PUNCT	NFP	_	2	punct	_	TokenRange=25:26
+
+# sent_id = nodejs-tsc-charter:u0016:s01
+# text = Release quality standards.
+1	Release	release	NOUN	NN	Number=Sing	2	compound	_	TokenRange=27:34
+2	quality	quality	NOUN	NN	Number=Sing	3	compound	_	TokenRange=35:42
+3	standards	standard	NOUN	NNS	Number=Plur	0	root	_	SpaceAfter=No|TokenRange=43:52
+4	.	.	PUNCT	.	_	3	punct	_	TokenRange=52:53
+
+# sent_id = nodejs-tsc-charter:u0016:s02
+# text = * Technical direction.
+1	*	*	PUNCT	NFP	_	3	punct	_	TokenRange=54:55
+2	Technical	technical	ADJ	JJ	Degree=Pos	3	amod	_	TokenRange=56:65
+3	direction	direction	NOUN	NN	Number=Sing	0	root	_	SpaceAfter=No|TokenRange=66:75
+4	.	.	PUNCT	.	_	3	punct	_	TokenRange=75:76
+
+# sent_id = nodejs-tsc-charter:u0016:s03
+# text = * Project governance and process. *
+1	*	*	PUNCT	NFP	_	3	punct	_	TokenRange=77:78
+2	Project	project	NOUN	NN	Number=Sing	3	compound	_	TokenRange=79:86
+3	governance	governance	NOUN	NN	Number=Sing	0	root	_	TokenRange=87:97
+4	and	and	CCONJ	CC	_	5	cc	_	TokenRange=98:101
+5	process	process	NOUN	NN	Number=Sing	3	conj	_	SpaceAfter=No|TokenRange=102:109
+6	.	.	PUNCT	.	_	3	punct	_	TokenRange=109:110
+7	*	*	PUNCT	NFP	_	3	punct	_	TokenRange=111:112
+
+# sent_id = nodejs-tsc-charter:u0016:s04
+# text = GitHub repository hosting.
+1	GitHub	GitHub	PROPN	NNP	Number=Sing	3	compound	_	TokenRange=113:119
+2	repository	repository	NOUN	NN	Number=Sing	3	compound	_	TokenRange=120:130
+3	hosting	host	NOUN	NN	Number=Sing	0	root	_	SpaceAfter=No|TokenRange=131:138
+4	.	.	PUNCT	.	_	3	punct	_	TokenRange=138:139
+
+# sent_id = nodejs-tsc-charter:u0016:s05
+# text = * Conduct guidelines. * Maintaining the list of additional Collaborators.
+1	*	*	PUNCT	NFP	_	3	punct	_	TokenRange=140:141
+2	Conduct	conduct	NOUN	NN	Number=Sing	3	compound	_	TokenRange=142:149
+3	guidelines	guideline	NOUN	NNS	Number=Plur	0	root	_	SpaceAfter=No|TokenRange=150:160
+4	.	.	PUNCT	.	_	3	punct	_	TokenRange=160:161
+5	*	*	PUNCT	NFP	_	3	punct	_	TokenRange=162:163
+6	Maintaining	maintain	VERB	VBG	VerbForm=Ger	3	acl	_	TokenRange=164:175
+7	the	the	DET	DT	Definite=Def|PronType=Art	8	det	_	TokenRange=176:179
+8	list	list	NOUN	NN	Number=Sing	6	obj	_	TokenRange=180:184
+9	of	of	ADP	IN	_	11	case	_	TokenRange=185:187
+10	additional	additional	ADJ	JJ	Degree=Pos	11	amod	_	TokenRange=188:198
+11	Collaborators	Collaborator	NOUN	NNS	Number=Plur	8	nmod	_	SpaceAfter=No|TokenRange=199:212
+12	.	.	PUNCT	.	_	3	punct	_	TokenRange=212:213
+
+# sent_id = nodejs-tsc-charter:u0016:s06
+# text = * Development process and any coding standards.
+1	*	*	PUNCT	NFP	_	3	punct	_	TokenRange=214:215
+2	Development	development	NOUN	NN	Number=Sing	3	compound	_	TokenRange=216:227
+3	process	process	NOUN	NN	Number=Sing	0	root	_	TokenRange=228:235
+4	and	and	CCONJ	CC	_	7	cc	_	TokenRange=236:239
+5	any	any	DET	DT	_	7	det	_	TokenRange=240:243
+6	coding	coding	NOUN	NN	Number=Sing	7	compound	_	TokenRange=244:250
+7	standards	standard	NOUN	NNS	Number=Plur	3	conj	_	SpaceAfter=No|TokenRange=251:260
+8	.	.	PUNCT	.	_	3	punct	_	TokenRange=260:261
+
+# sent_id = nodejs-tsc-charter:u0016:s07
+# text = * Mediating technical conflicts between Collaborators or Foundation projects.
+1	*	*	PUNCT	NFP	_	4	punct	_	TokenRange=262:263
+2	Mediating	Mediat	X	GW	_	3	advmod	_	TokenRange=264:273
+3	technical	technical	ADJ	JJ	Degree=Pos	4	amod	_	TokenRange=274:283
+4	conflicts	conflict	NOUN	NNS	Number=Plur	0	root	_	TokenRange=284:293
+5	between	between	ADP	IN	_	6	case	_	TokenRange=294:301
+6	Collaborators	Collaborator	NOUN	NNS	Number=Plur	4	nmod	_	TokenRange=302:315
+7	or	or	CCONJ	CC	_	9	cc	_	TokenRange=316:318
+8	Foundation	foundation	NOUN	NN	Number=Sing	9	compound	_	TokenRange=319:329
+9	projects	project	NOUN	NNS	Number=Plur	6	conj	_	SpaceAfter=No|TokenRange=330:338
+10	.	.	PUNCT	.	_	4	punct	_	SpacesAfter=\n|TokenRange=338:339
+
+# sent_id = nodejs-tsc-charter:u0017:s00
+# text = The TSC will define Node.js
+1	The	the	DET	DT	Definite=Def|PronType=Art	2	det	_	TokenRange=0:3
+2	TSC	Tsc	NOUN	NN	Number=Sing	4	nsubj	_	TokenRange=4:7
+3	will	will	AUX	MD	VerbForm=Fin	4	aux	_	TokenRange=8:12
+4	define	define	VERB	VB	VerbForm=Inf	0	root	_	TokenRange=13:19
+5	Node.js	Node.js	PROPN	NNP	Number=Sing	4	obj	_	TokenRange=20:27
+
+# sent_id = nodejs-tsc-charter:u0017:s01
+# text = project’s release vehicles.
+1	project	project	NOUN	NN	Number=Sing	4	nmod:poss	_	SpaceAfter=No|TokenRange=28:35
+2	’s	's	PART	POS	_	1	case	_	TokenRange=35:37
+3	release	release	NOUN	NN	Number=Sing	4	compound	_	TokenRange=38:45
+4	vehicles	vehicle	NOUN	NNS	Number=Plur	0	root	_	SpaceAfter=No|TokenRange=46:54
+5	.	.	PUNCT	.	_	4	punct	_	SpacesAfter=\n|TokenRange=54:55
+
+# sent_id = nodejs-tsc-charter:u0018:s00
+# text = ## Section 5. Node.js Project Operations
+1	##	##	PUNCT	.	_	2	punct	_	TokenRange=0:2
+2	Section	section	NOUN	NN	Number=Sing	0	root	_	TokenRange=3:10
+3	5	5	NUM	CD	NumType=Card	2	nummod	_	SpaceAfter=No|TokenRange=11:12
+4	.	.	PUNCT	.	_	2	punct	_	TokenRange=12:13
+5	Node.js	Node.j	PROPN	NNPS	Number=Plur	7	compound	_	TokenRange=14:21
+6	Project	project	PROPN	NNP	Number=Sing	7	compound	_	TokenRange=22:29
+7	Operations	Operations	PROPN	NNPS	Number=Plur	2	appos	_	SpacesAfter=\n|TokenRange=30:40
+
+# sent_id = nodejs-tsc-charter:u0019:s00
+# text = The TSC will establish and maintain a development process for the Node.js project.
+1	The	the	DET	DT	Definite=Def|PronType=Art	2	det	_	TokenRange=0:3
+2	TSC	Tsc	NOUN	NN	Number=Sing	4	nsubj	_	TokenRange=4:7
+3	will	will	AUX	MD	VerbForm=Fin	4	aux	_	TokenRange=8:12
+4	establish	establish	VERB	VB	VerbForm=Inf	0	root	_	TokenRange=13:22
+5	and	and	CCONJ	CC	_	6	cc	_	TokenRange=23:26
+6	maintain	maintain	VERB	VB	VerbForm=Inf	4	conj	_	TokenRange=27:35
+7	a	a	DET	DT	Definite=Ind|PronType=Art	9	det	_	TokenRange=36:37
+8	development	development	NOUN	NN	Number=Sing	9	compound	_	TokenRange=38:49
+9	process	process	NOUN	NN	Number=Sing	6	obj	_	TokenRange=50:57
+10	for	for	ADP	IN	_	13	case	_	TokenRange=58:61
+11	the	the	DET	DT	Definite=Def|PronType=Art	13	det	_	TokenRange=62:65
+12	Node.js	Node.js	PROPN	NNPS	Number=Plur	13	compound	_	TokenRange=66:73
+13	project	project	NOUN	NN	Number=Sing	9	nmod	_	SpaceAfter=No|TokenRange=74:81
+14	.	.	PUNCT	.	_	4	punct	_	TokenRange=81:82
+
+# sent_id = nodejs-tsc-charter:u0019:s01
+# text = The development process will establish guidelines for how the developers and community will operate.
+1	The	the	DET	DT	Definite=Def|PronType=Art	3	det	_	TokenRange=83:86
+2	development	development	NOUN	NN	Number=Sing	3	compound	_	TokenRange=87:98
+3	process	process	NOUN	NN	Number=Sing	5	nsubj	_	TokenRange=99:106
+4	will	will	AUX	MD	VerbForm=Fin	5	aux	_	TokenRange=107:111
+5	establish	establish	VERB	VB	VerbForm=Inf	0	root	_	TokenRange=112:121
+6	guidelines	guideline	NOUN	NNS	Number=Plur	5	obj	_	TokenRange=122:132
+7	for	for	SCONJ	IN	_	14	mark	_	TokenRange=133:136
+8	how	how	ADV	WRB	PronType=Int	14	advmod	_	TokenRange=137:140
+9	the	the	DET	DT	Definite=Def|PronType=Art	10	det	_	TokenRange=141:144
+10	developers	developer	NOUN	NNS	Number=Plur	14	nsubj	_	TokenRange=145:155
+11	and	and	CCONJ	CC	_	12	cc	_	TokenRange=156:159
+12	community	community	NOUN	NN	Number=Sing	10	conj	_	TokenRange=160:169
+13	will	will	AUX	MD	VerbForm=Fin	14	aux	_	TokenRange=170:174
+14	operate	operate	VERB	VB	VerbForm=Inf	6	acl	_	SpaceAfter=No|TokenRange=175:182
+15	.	.	PUNCT	.	_	5	punct	_	TokenRange=182:183
+
+# sent_id = nodejs-tsc-charter:u0019:s02
+# text = It will, for example, establish appropriate timelines for TSC review (e.g. agenda items must be published at least a certain number of hours in advance of a TSC meeting).
+1	It	it	PRON	PRP	Case=Nom|Gender=Neut|Number=Sing|Person=3|PronType=Prs	2	nsubj	_	TokenRange=184:186
+2	will	will	AUX	MD	VerbForm=Fin	7	aux	_	SpaceAfter=No|TokenRange=187:191
+3	,	,	PUNCT	,	_	2	punct	_	TokenRange=191:192
+4	for	for	ADP	IN	_	5	case	_	TokenRange=193:196
+5	example	example	NOUN	NN	Number=Sing	7	obl	_	SpaceAfter=No|TokenRange=197:204
+6	,	,	PUNCT	,	_	7	punct	_	TokenRange=204:205
+7	establish	establish	VERB	VB	VerbForm=Inf	0	root	_	TokenRange=206:215
+8	appropriate	appropriate	ADJ	JJ	Degree=Pos	9	amod	_	TokenRange=216:227
+9	timelines	timeline	NOUN	NNS	Number=Plur	7	obj	_	TokenRange=228:237
+10	for	for	ADP	IN	_	12	case	_	TokenRange=238:241
+11	TSC	TSC	NOUN	NN	Number=Sing	12	compound	_	TokenRange=242:245
+12	review	review	NOUN	NN	Number=Sing	9	nmod	_	TokenRange=246:252
+13	(	(	PUNCT	-LRB-	_	19	punct	_	SpaceAfter=No|TokenRange=253:254
+14	e.g.	e.g.	X	FW	_	19	advmod	_	TokenRange=254:258
+15	agenda	agenda	NOUN	NN	Number=Sing	16	compound	_	TokenRange=259:265
+16	items	item	NOUN	NNS	Number=Plur	19	nsubj:pass	_	TokenRange=266:271
+17	must	must	AUX	MD	VerbForm=Fin	19	aux	_	TokenRange=272:276
+18	be	be	AUX	VB	VerbForm=Inf	19	aux:pass	_	TokenRange=277:279
+19	published	publish	VERB	VBN	Tense=Past|VerbForm=Part|Voice=Pass	9	parataxis	_	TokenRange=280:289
+20	at	at	ADV	RB	_	21	case	_	TokenRange=290:292
+21	least	least	ADV	RBS	Degree=Sup	22	nmod	_	TokenRange=293:298
+22	a	a	DET	DT	Definite=Ind|PronType=Art	24	det	_	TokenRange=299:300
+23	certain	certain	ADJ	JJ	Degree=Pos	24	amod	_	TokenRange=301:308
+24	number	number	NOUN	NN	Number=Sing	19	obj	_	TokenRange=309:315
+25	of	of	ADP	IN	_	26	case	_	TokenRange=316:318
+26	hours	hour	NOUN	NNS	Number=Plur	24	nmod	_	TokenRange=319:324
+27	in	in	ADP	IN	_	28	case	_	TokenRange=325:327
+28	advance	advance	NOUN	NN	Number=Sing	24	nmod	_	TokenRange=328:335
+29	of	of	ADP	IN	_	32	case	_	TokenRange=336:338
+30	a	a	DET	DT	Definite=Ind|PronType=Art	32	det	_	TokenRange=339:340
+31	TSC	TSC	NOUN	NN	Number=Sing	32	compound	_	TokenRange=341:344
+32	meeting	meeting	NOUN	NN	Number=Sing	28	nmod	_	SpaceAfter=No|TokenRange=345:352
+33	)	)	PUNCT	-RRB-	_	19	punct	_	SpaceAfter=No|TokenRange=352:353
+34	.	.	PUNCT	.	_	19	punct	_	SpacesAfter=\n|TokenRange=353:354
+
+# sent_id = nodejs-tsc-charter:u0020:s00
+# text = The TSC and entire technical community will follow any processes as may be specified by the OpenJS Foundation Board relating to the intake and license compliance review of contributions, including the OpenJS Foundation IP Policy.
+1	The	the	DET	DT	Definite=Def|PronType=Art	2	det	_	TokenRange=0:3
+2	TSC	Tsc	NOUN	NN	Number=Sing	8	nsubj	_	TokenRange=4:7
+3	and	and	CCONJ	CC	_	6	cc	_	TokenRange=8:11
+4	entire	entire	ADJ	JJ	Degree=Pos	6	amod	_	TokenRange=12:18
+5	technical	technical	ADJ	JJ	Degree=Pos	6	amod	_	TokenRange=19:28
+6	community	community	NOUN	NN	Number=Sing	2	conj	_	TokenRange=29:38
+7	will	will	AUX	MD	VerbForm=Fin	8	aux	_	TokenRange=39:43
+8	follow	follow	VERB	VB	VerbForm=Inf	0	root	_	TokenRange=44:50
+9	any	any	DET	DT	_	10	det	_	TokenRange=51:54
+10	processes	process	NOUN	NNS	Number=Plur	8	obj	_	TokenRange=55:64
+11	as	as	ADV	RB	_	14	advmod	_	TokenRange=65:67
+12	may	may	AUX	MD	VerbForm=Fin	14	aux	_	TokenRange=68:71
+13	be	be	AUX	VB	VerbForm=Inf	14	aux:pass	_	TokenRange=72:74
+14	specified	specify	VERB	VBN	Tense=Past|VerbForm=Part|Voice=Pass	8	ccomp	_	TokenRange=75:84
+15	by	by	ADP	IN	_	19	case	_	TokenRange=85:87
+16	the	the	DET	DT	Definite=Def|PronType=Art	19	det	_	TokenRange=88:91
+17	OpenJS	OpenJS	NOUN	NN	Number=Sing	19	compound	_	TokenRange=92:98
+18	Foundation	foundation	NOUN	NN	Number=Sing	19	compound	_	TokenRange=99:109
+19	Board	Board	NOUN	NN	Number=Sing	14	obl	_	TokenRange=110:115
+20	relating	relate	VERB	VBG	VerbForm=Ger	19	acl	_	TokenRange=116:124
+21	to	to	ADP	IN	_	27	case	_	TokenRange=125:127
+22	the	the	DET	DT	Definite=Def|PronType=Art	27	det	_	TokenRange=128:131
+23	intake	intake	NOUN	NN	Number=Sing	27	compound	_	TokenRange=132:138
+24	and	and	CCONJ	CC	_	25	cc	_	TokenRange=139:142
+25	license	license	NOUN	NN	Number=Sing	23	conj	_	TokenRange=143:150
+26	compliance	compliance	NOUN	NN	Number=Sing	27	compound	_	TokenRange=151:161
+27	review	review	NOUN	NN	Number=Sing	20	obl	_	TokenRange=162:168
+28	of	of	ADP	IN	_	29	case	_	TokenRange=169:171
+29	contributions	contribution	NOUN	NNS	Number=Plur	27	nmod	_	SpaceAfter=No|TokenRange=172:185
+30	,	,	PUNCT	,	_	19	punct	_	TokenRange=185:186
+31	including	include	VERB	VBG	VerbForm=Ger	36	case	_	TokenRange=187:196
+32	the	the	DET	DT	Definite=Def|PronType=Art	36	det	_	TokenRange=197:200
+33	OpenJS	Openj	PROPN	NNP	Number=Sing	34	compound	_	TokenRange=201:207
+34	Foundation	foundation	PROPN	NNP	Number=Sing	36	compound	_	TokenRange=208:218
+35	IP	ip	PROPN	NNP	Number=Sing	36	compound	_	TokenRange=219:221
+36	Policy	policy	PROPN	NNP	Number=Sing	19	nmod	_	SpaceAfter=No|TokenRange=222:228
+37	.	.	PUNCT	.	_	8	punct	_	SpacesAfter=\n|TokenRange=228:229
+
+# sent_id = nodejs-tsc-charter:u0021:s00
+# text = ## Section
+1	##	##	PUNCT	.	_	2	punct	_	TokenRange=0:2
+2	Section	section	NOUN	NN	Number=Sing	0	root	_	TokenRange=3:10
+
+# sent_id = nodejs-tsc-charter:u0021:s01
+# text = 6.
+1	6	6	X	LS	_	0	root	_	SpaceAfter=No|TokenRange=11:12
+2	.	.	PUNCT	.	_	1	punct	_	TokenRange=12:13
+
+# sent_id = nodejs-tsc-charter:u0021:s02
+# text = Elections
+1	Elections	election	NOUN	NNS	Number=Plur	0	root	_	SpacesAfter=\n|TokenRange=14:23
+
+# sent_id = nodejs-tsc-charter:u0022:s00
+# text = Leadership roles in the Node.js project will be peer elected representatives of the community.
+1	Leadership	leadership	NOUN	NN	Number=Sing	2	compound	_	TokenRange=0:10
+2	roles	role	NOUN	NNS	Number=Plur	9	nsubj	_	TokenRange=11:16
+3	in	in	ADP	IN	_	6	case	_	TokenRange=17:19
+4	the	the	DET	DT	Definite=Def|PronType=Art	6	det	_	TokenRange=20:23
+5	Node.js	Node.js	PROPN	NNP	Number=Sing	6	compound	_	TokenRange=24:31
+6	project	project	NOUN	NN	Number=Sing	2	nmod	_	TokenRange=32:39
+7	will	will	AUX	MD	VerbForm=Fin	9	aux	_	TokenRange=40:44
+8	be	be	AUX	VB	VerbForm=Inf	9	cop	_	TokenRange=45:47
+9	peer	peer	NOUN	NNS	Number=Plur	10	nsubj	_	TokenRange=48:52
+10	elected	elect	VERB	VBD	Mood=Ind|Tense=Past|VerbForm=Fin	0	root	_	TokenRange=53:60
+11	representatives	representative	NOUN	NNS	Number=Plur	10	obj	_	TokenRange=61:76
+12	of	of	ADP	IN	_	14	case	_	TokenRange=77:79
+13	the	the	DET	DT	Definite=Def|PronType=Art	14	det	_	TokenRange=80:83
+14	community	community	NOUN	NN	Number=Sing	11	nmod	_	SpaceAfter=No|TokenRange=84:93
+15	.	.	PUNCT	.	_	10	punct	_	SpacesAfter=\n|TokenRange=93:94
+
+# sent_id = nodejs-tsc-charter:u0023:s00
+# text = For election of persons (such as the TSC Chairperson), a multiple-candidate method should be used, such as:
+1	For	for	ADP	IN	_	2	case	_	TokenRange=0:3
+2	election	election	NOUN	NN	Number=Sing	20	obl	_	TokenRange=4:12
+3	of	of	ADP	IN	_	4	case	_	TokenRange=13:15
+4	persons	person	NOUN	NNS	Number=Plur	2	nmod	_	TokenRange=16:23
+5	(	(	PUNCT	-LRB-	_	2	punct	_	SpaceAfter=No|TokenRange=24:25
+6	such	such	ADJ	JJ	Degree=Pos	10	case	_	TokenRange=25:29
+7	as	as	ADP	IN	_	6	fixed	_	TokenRange=30:32
+8	the	the	DET	DT	Definite=Def|PronType=Art	10	det	_	TokenRange=33:36
+9	TSC	TSC	PROPN	NNP	Number=Sing	10	compound	_	TokenRange=37:40
+10	Chairperson	Chairperson	PROPN	NNP	Number=Sing	2	nmod	_	SpaceAfter=No|TokenRange=41:52
+11	)	)	PUNCT	-RRB-	_	2	punct	_	SpaceAfter=No|TokenRange=52:53
+12	,	,	PUNCT	,	_	20	punct	_	TokenRange=53:54
+13	a	a	DET	DT	Definite=Ind|PronType=Art	17	det	_	TokenRange=55:56
+14	multiple	multiple	ADJ	JJ	Degree=Pos	16	amod	_	SpaceAfter=No|TokenRange=57:65
+15	-	-	PUNCT	HYPH	_	16	punct	_	SpaceAfter=No|TokenRange=65:66
+16	candidate	candidate	NOUN	NN	Number=Sing	17	compound	_	TokenRange=66:75
+17	method	method	NOUN	NN	Number=Sing	20	nsubj:pass	_	TokenRange=76:82
+18	should	should	AUX	MD	VerbForm=Fin	20	aux	_	TokenRange=83:89
+19	be	be	AUX	VB	VerbForm=Inf	20	aux:pass	_	TokenRange=90:92
+20	used	use	VERB	VBN	Tense=Past|VerbForm=Part|Voice=Pass	0	root	_	SpaceAfter=No|TokenRange=93:97
+21	,	,	PUNCT	,	_	20	punct	_	TokenRange=97:98
+22	such	such	ADJ	JJ	Degree=Pos	20	amod	_	TokenRange=99:103
+23	as	as	ADP	IN	_	22	fixed	_	SpaceAfter=No|TokenRange=104:106
+24	:	:	PUNCT	:	_	20	punct	_	SpacesAfter=\n|TokenRange=106:107
+
+# sent_id = nodejs-tsc-charter:u0024:s00
+# text = * [Condorcet][] or * [Single Transferable Vote][]
+1	*	*	PUNCT	NFP	_	3	punct	_	TokenRange=0:1
+2	[	[	PUNCT	-LRB-	_	3	punct	_	SpaceAfter=No|TokenRange=2:3
+3	Condorcet	Condorcet	PROPN	NNP	Number=Sing	0	root	_	SpaceAfter=No|TokenRange=3:12
+4	]	]	PUNCT	-RRB-	_	3	punct	_	SpaceAfter=No|TokenRange=12:13
+5	[	[	PUNCT	-LRB-	_	3	punct	_	SpaceAfter=No|TokenRange=13:14
+6	]	]	PUNCT	-RRB-	_	3	punct	_	TokenRange=14:15
+7	or	or	CCONJ	CC	_	12	cc	_	TokenRange=16:18
+8	*	*	PUNCT	NFP	_	12	punct	_	TokenRange=19:20
+9	[	[	PUNCT	-LRB-	_	12	punct	_	SpaceAfter=No|TokenRange=21:22
+10	Single	single	ADJ	JJ	Degree=Pos	12	amod	_	TokenRange=22:28
+11	Transferable	transferable	ADJ	JJ	Degree=Pos	12	amod	_	TokenRange=29:41
+12	Vote	vote	NOUN	NN	Number=Sing	3	conj	_	SpaceAfter=No|TokenRange=42:46
+13	]	]	PUNCT	-RRB-	_	12	punct	_	SpaceAfter=No|TokenRange=46:47
+14	[	[	PUNCT	-LRB-	_	12	punct	_	SpaceAfter=No|TokenRange=47:48
+15	]	]	PUNCT	-RRB-	_	12	punct	_	SpacesAfter=\n|TokenRange=48:49
+
+# sent_id = nodejs-tsc-charter:u0025:s00
+# text = Multiple-candidate methods may be reduced to simple election by plurality when there are only two candidates for one position to be filled.
+1	Multiple	multiple	ADJ	JJ	Degree=Pos	3	amod	_	SpaceAfter=No|TokenRange=0:8
+2	-	-	PUNCT	HYPH	_	3	punct	_	SpaceAfter=No|TokenRange=8:9
+3	candidate	candidate	NOUN	NN	Number=Sing	4	compound	_	TokenRange=9:18
+4	methods	method	NOUN	NNS	Number=Plur	7	nsubj:pass	_	TokenRange=19:26
+5	may	may	AUX	MD	VerbForm=Fin	7	aux	_	TokenRange=27:30
+6	be	be	AUX	VB	VerbForm=Inf	7	aux:pass	_	TokenRange=31:33
+7	reduced	reduce	VERB	VBN	Tense=Past|VerbForm=Part|Voice=Pass	0	root	_	TokenRange=34:41
+8	to	to	ADP	IN	_	10	case	_	TokenRange=42:44
+9	simple	simple	ADJ	JJ	Degree=Pos	10	amod	_	TokenRange=45:51
+10	election	election	NOUN	NN	Number=Sing	7	obl	_	TokenRange=52:60
+11	by	by	ADP	IN	_	12	case	_	TokenRange=61:63
+12	plurality	plurality	NOUN	NN	Number=Sing	7	obl	_	TokenRange=64:73
+13	when	when	ADV	WRB	PronType=Int	15	mark	_	TokenRange=74:78
+14	there	there	PRON	EX	_	15	expl	_	TokenRange=79:84
+15	are	be	VERB	VBP	Mood=Ind|Tense=Pres|VerbForm=Fin	7	advcl	_	TokenRange=85:88
+16	only	only	ADV	RB	_	15	advmod	_	TokenRange=89:93
+17	two	two	NUM	CD	NumType=Card	18	nummod	_	TokenRange=94:97
+18	candidates	candidate	NOUN	NNS	Number=Plur	15	nsubj	_	TokenRange=98:108
+19	for	for	ADP	IN	_	21	case	_	TokenRange=109:112
+20	one	one	NUM	CD	NumType=Card	21	nummod	_	TokenRange=113:116
+21	position	position	NOUN	NN	Number=Sing	18	nmod	_	TokenRange=117:125
+22	to	to	PART	TO	_	24	mark	_	TokenRange=126:128
+23	be	be	AUX	VB	VerbForm=Inf	24	aux:pass	_	TokenRange=129:131
+24	filled	fill	VERB	VBN	Tense=Past|VerbForm=Part|Voice=Pass	21	acl	_	SpaceAfter=No|TokenRange=132:138
+25	.	.	PUNCT	.	_	7	punct	_	TokenRange=138:139
+
+# sent_id = nodejs-tsc-charter:u0025:s01
+# text = No election is required if there is only one candidate and no objections to the candidate's election.
+1	No	no	DET	DT	_	2	det	_	TokenRange=140:142
+2	election	election	NOUN	NN	Number=Sing	4	nsubj:pass	_	TokenRange=143:151
+3	is	be	AUX	VBZ	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	4	aux:pass	_	TokenRange=152:154
+4	required	require	VERB	VBN	Tense=Past|VerbForm=Part|Voice=Pass	0	root	_	TokenRange=155:163
+5	if	if	SCONJ	IN	_	7	mark	_	TokenRange=164:166
+6	there	there	PRON	EX	_	7	expl	_	TokenRange=167:172
+7	is	be	VERB	VBZ	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	4	advcl	_	TokenRange=173:175
+8	only	only	ADV	RB	_	7	advmod	_	TokenRange=176:180
+9	one	one	NUM	CD	NumType=Card	10	nummod	_	TokenRange=181:184
+10	candidate	candidate	NOUN	NN	Number=Sing	7	nsubj	_	TokenRange=185:194
+11	and	and	CCONJ	CC	_	13	cc	_	TokenRange=195:198
+12	no	no	DET	DT	_	13	det	_	TokenRange=199:201
+13	objections	objection	NOUN	NNS	Number=Plur	10	conj	_	TokenRange=202:212
+14	to	to	ADP	IN	_	18	case	_	TokenRange=213:215
+15	the	the	DET	DT	Definite=Def|PronType=Art	16	det	_	TokenRange=216:219
+16	candidate	candidate	NOUN	NN	Number=Sing	18	nmod:poss	_	SpaceAfter=No|TokenRange=220:229
+17	's	's	PART	POS	_	16	case	_	TokenRange=229:231
+18	election	election	NOUN	NN	Number=Sing	13	nmod	_	SpaceAfter=No|TokenRange=232:240
+19	.	.	PUNCT	.	_	4	punct	_	TokenRange=240:241
+
+# sent_id = nodejs-tsc-charter:u0025:s02
+# text = Elections shall be done within the projects by the Collaborators active in the project.
+1	Elections	election	NOUN	NNS	Number=Plur	4	nsubj:pass	_	TokenRange=242:251
+2	shall	shall	AUX	MD	VerbForm=Fin	4	aux	_	TokenRange=252:257
+3	be	be	AUX	VB	VerbForm=Inf	4	aux:pass	_	TokenRange=258:260
+4	done	do	VERB	VBN	Tense=Past|VerbForm=Part|Voice=Pass	0	root	_	TokenRange=261:265
+5	within	within	ADP	IN	_	7	case	_	TokenRange=266:272
+6	the	the	DET	DT	Definite=Def|PronType=Art	7	det	_	TokenRange=273:276
+7	projects	project	NOUN	NNS	Number=Plur	4	obl	_	TokenRange=277:285
+8	by	by	ADP	IN	_	10	case	_	TokenRange=286:288
+9	the	the	DET	DT	Definite=Def|PronType=Art	10	det	_	TokenRange=289:292
+10	Collaborators	Collaborator	NOUN	NNS	Number=Plur	7	nmod	_	TokenRange=293:306
+11	active	active	ADJ	JJ	Degree=Pos	10	amod	_	TokenRange=307:313
+12	in	in	ADP	IN	_	14	case	_	TokenRange=314:316
+13	the	the	DET	DT	Definite=Def|PronType=Art	14	det	_	TokenRange=317:320
+14	project	project	NOUN	NN	Number=Sing	11	obl	_	SpaceAfter=No|TokenRange=321:328
+15	.	.	PUNCT	.	_	4	punct	_	SpacesAfter=\n|TokenRange=328:329
+
+# sent_id = nodejs-tsc-charter:u0026:s00
+# text = The TSC voting members will elect from amongst voting TSC members a TSC Chairperson to work on building an agenda for TSC meetings and a OpenJS Cross Project Council (CPC) voting member to represent the TSC in the OpenJS Foundation for a term of one year.
+1	The	the	DET	DT	Definite=Def|PronType=Art	4	det	_	TokenRange=0:3
+2	TSC	TSC	NOUN	NN	Number=Sing	4	compound	_	TokenRange=4:7
+3	voting	voting	NOUN	NN	Number=Sing	4	compound	_	TokenRange=8:14
+4	members	member	NOUN	NNS	Number=Plur	6	nsubj	_	TokenRange=15:22
+5	will	will	AUX	MD	VerbForm=Fin	6	aux	_	TokenRange=23:27
+6	elect	elect	VERB	VB	VerbForm=Inf	0	root	_	TokenRange=28:33
+7	from	from	ADP	IN	_	11	case	_	TokenRange=34:38
+8	amongst	amongst	ADP	IN	_	11	case	_	TokenRange=39:46
+9	voting	voting	NOUN	NN	Number=Sing	10	compound	_	TokenRange=47:53
+10	TSC	Tsc	NOUN	NN	Number=Sing	11	compound	_	TokenRange=54:57
+11	members	member	NOUN	NNS	Number=Plur	6	obl	_	TokenRange=58:65
+12	a	a	DET	DT	Definite=Ind|PronType=Art	14	det	_	TokenRange=66:67
+13	TSC	TSC	PROPN	NNP	Number=Sing	14	compound	_	TokenRange=68:71
+14	Chairperson	Chairperson	PROPN	NNP	Number=Sing	11	appos	_	TokenRange=72:83
+15	to	to	PART	TO	_	16	mark	_	TokenRange=84:86
+16	work	work	VERB	VB	VerbForm=Inf	6	advcl	_	TokenRange=87:91
+17	on	on	ADP	IN	_	18	case	_	TokenRange=92:94
+18	building	building	NOUN	NN	Number=Sing	16	obl	_	TokenRange=95:103
+19	an	a	DET	DT	Definite=Ind|PronType=Art	20	det	_	TokenRange=104:106
+20	agenda	agenda	NOUN	NN	Number=Sing	16	obj	_	TokenRange=107:113
+21	for	for	ADP	IN	_	23	case	_	TokenRange=114:117
+22	TSC	TSC	PROPN	NNP	Number=Sing	23	compound	_	TokenRange=118:121
+23	meetings	meeting	NOUN	NNS	Number=Plur	20	nmod	_	TokenRange=122:130
+24	and	and	CCONJ	CC	_	34	cc	_	TokenRange=131:134
+25	a	a	DET	DT	Definite=Ind|PronType=Art	34	det	_	TokenRange=135:136
+26	OpenJS	OpenJS	PROPN	NNP	Number=Sing	29	compound	_	TokenRange=137:143
+27	Cross	Cross	PROPN	NNP	Number=Sing	29	compound	_	TokenRange=144:149
+28	Project	project	PROPN	NNP	Number=Sing	29	compound	_	TokenRange=150:157
+29	Council	Council	PROPN	NNP	Number=Sing	34	compound	_	TokenRange=158:165
+30	(	(	PUNCT	-LRB-	_	31	punct	_	SpaceAfter=No|TokenRange=166:167
+31	CPC	CPC	PROPN	NNP	Number=Sing	29	appos	_	SpaceAfter=No|TokenRange=167:170
+32	)	)	PUNCT	-RRB-	_	31	punct	_	TokenRange=170:171
+33	voting	vote	VERB	VBG	VerbForm=Ger	34	amod	_	TokenRange=172:178
+34	member	member	NOUN	NN	Number=Sing	23	conj	_	TokenRange=179:185
+35	to	to	PART	TO	_	36	mark	_	TokenRange=186:188
+36	represent	represent	VERB	VB	VerbForm=Inf	23	acl	_	TokenRange=189:198
+37	the	the	DET	DT	Definite=Def|PronType=Art	38	det	_	TokenRange=199:202
+38	TSC	Tsc	NOUN	NN	Number=Sing	36	obj	_	TokenRange=203:206
+39	in	in	ADP	IN	_	42	case	_	TokenRange=207:209
+40	the	the	DET	DT	Definite=Def|PronType=Art	42	det	_	TokenRange=210:213
+41	OpenJS	Openj	NOUN	NN	Number=Sing	42	compound	_	TokenRange=214:220
+42	Foundation	foundation	NOUN	NN	Number=Sing	36	obl	_	TokenRange=221:231
+43	for	for	ADP	IN	_	45	case	_	TokenRange=232:235
+44	a	a	DET	DT	Definite=Ind|PronType=Art	45	det	_	TokenRange=236:237
+45	term	term	NOUN	NN	Number=Sing	36	obl	_	TokenRange=238:242
+46	of	of	ADP	IN	_	48	case	_	TokenRange=243:245
+47	one	one	NUM	CD	NumType=Card	48	nummod	_	TokenRange=246:249
+48	year	year	NOUN	NN	Number=Sing	45	nmod	_	SpaceAfter=No|TokenRange=250:254
+49	.	.	PUNCT	.	_	6	punct	_	TokenRange=254:255
+
+# sent_id = nodejs-tsc-charter:u0026:s01
+# text = The Chair and voting CPC member may be (but are not required to be) the same person.
+1	The	the	DET	DT	Definite=Def|PronType=Art	2	det	_	TokenRange=256:259
+2	Chair	chair	NOUN	NN	Number=Sing	8	nsubj	_	TokenRange=260:265
+3	and	and	CCONJ	CC	_	6	cc	_	TokenRange=266:269
+4	voting	vote	NOUN	NN	Number=Sing	5	compound	_	TokenRange=270:276
+5	CPC	Cpc	NOUN	NN	Number=Sing	6	compound	_	TokenRange=277:280
+6	member	member	NOUN	NN	Number=Sing	2	conj	_	TokenRange=281:287
+7	may	may	AUX	MD	VerbForm=Fin	8	aux	_	TokenRange=288:291
+8	be	be	AUX	VB	VerbForm=Inf	13	aux:pass	_	TokenRange=292:294
+9	(	(	PUNCT	-LRB-	_	13	punct	_	SpaceAfter=No|TokenRange=295:296
+10	but	but	CCONJ	CC	_	13	cc	_	TokenRange=296:299
+11	are	be	AUX	VBP	Mood=Ind|Tense=Pres|VerbForm=Fin	13	aux:pass	_	TokenRange=300:303
+12	not	not	PART	RB	_	13	advmod	_	TokenRange=304:307
+13	required	require	VERB	VBN	Tense=Past|VerbForm=Part|Voice=Pass	0	root	_	TokenRange=308:316
+14	to	to	PART	TO	_	19	mark	_	TokenRange=317:319
+15	be	be	AUX	VB	VerbForm=Inf	19	cop	_	SpaceAfter=No|TokenRange=320:322
+16	)	)	PUNCT	-RRB-	_	19	punct	_	TokenRange=322:323
+17	the	the	DET	DT	Definite=Def|PronType=Art	19	det	_	TokenRange=324:327
+18	same	same	ADJ	JJ	Degree=Pos	19	amod	_	TokenRange=328:332
+19	person	person	NOUN	NN	Number=Sing	13	xcomp	_	SpaceAfter=No|TokenRange=333:339
+20	.	.	PUNCT	.	_	13	punct	_	TokenRange=339:340
+
+# sent_id = nodejs-tsc-charter:u0026:s02
+# text = The TSC shall hold annual elections to select a TSC Chairperson and voting CPC member; there are no limits on the number of terms a TSC Chairperson or voting CPC member may serve.
+1	The	the	DET	DT	Definite=Def|PronType=Art	2	det	_	TokenRange=341:344
+2	TSC	Tsc	NOUN	NN	Number=Sing	4	nsubj	_	TokenRange=345:348
+3	shall	shall	AUX	MD	VerbForm=Fin	4	aux	_	TokenRange=349:354
+4	hold	hold	VERB	VB	VerbForm=Inf	0	root	_	TokenRange=355:359
+5	annual	annual	ADJ	JJ	Degree=Pos	6	amod	_	TokenRange=360:366
+6	elections	election	NOUN	NNS	Number=Plur	4	obj	_	TokenRange=367:376
+7	to	to	PART	TO	_	8	mark	_	TokenRange=377:379
+8	select	select	VERB	VB	VerbForm=Inf	4	advcl	_	TokenRange=380:386
+9	a	a	DET	DT	Definite=Ind|PronType=Art	11	det	_	TokenRange=387:388
+10	TSC	Tsc	NOUN	NN	Number=Sing	11	compound	_	TokenRange=389:392
+11	Chairperson	chairperson	NOUN	NN	Number=Sing	8	obj	_	TokenRange=393:404
+12	and	and	CCONJ	CC	_	15	cc	_	TokenRange=405:408
+13	voting	voting	NOUN	NN	Number=Sing	14	compound	_	TokenRange=409:415
+14	CPC	Cpc	NOUN	NN	Number=Sing	15	compound	_	TokenRange=416:419
+15	member	member	NOUN	NN	Number=Sing	11	conj	_	SpaceAfter=No|TokenRange=420:426
+16	;	;	PUNCT	,	_	4	punct	_	TokenRange=426:427
+17	there	there	PRON	EX	_	18	expl	_	TokenRange=428:433
+18	are	be	VERB	VBP	Mood=Ind|Tense=Pres|VerbForm=Fin	4	ccomp	_	TokenRange=434:437
+19	no	no	DET	DT	_	20	det	_	TokenRange=438:440
+20	limits	limit	NOUN	NNS	Number=Plur	18	nsubj	_	TokenRange=441:447
+21	on	on	ADP	IN	_	23	case	_	TokenRange=448:450
+22	the	the	DET	DT	Definite=Def|PronType=Art	23	det	_	TokenRange=451:454
+23	number	number	NOUN	NN	Number=Sing	20	nmod	_	TokenRange=455:461
+24	of	of	ADP	IN	_	25	case	_	TokenRange=462:464
+25	terms	term	NOUN	NNS	Number=Plur	23	nmod	_	TokenRange=465:470
+26	a	a	DET	DT	Definite=Ind|PronType=Art	27	det	_	TokenRange=471:472
+27	TSC	TSC	PROPN	NNP	Number=Sing	25	appos	_	TokenRange=473:476
+28	Chairperson	Chairperson	PROPN	NNP	Number=Sing	27	flat	_	TokenRange=477:488
+29	or	or	CCONJ	CC	_	30	cc	_	TokenRange=489:491
+30	voting	vote	VERB	VBG	VerbForm=Ger	27	conj	_	TokenRange=492:498
+31	CPC	CPC	NOUN	NN	Number=Sing	32	compound	_	TokenRange=499:502
+32	member	member	NOUN	NN	Number=Sing	34	nsubj	_	TokenRange=503:509
+33	may	may	AUX	MD	VerbForm=Fin	34	aux	_	TokenRange=510:513
+34	serve	serve	VERB	VB	VerbForm=Inf	30	ccomp	_	SpaceAfter=No|TokenRange=514:519
+35	.	.	PUNCT	.	_	4	punct	_	SpacesAfter=\n|TokenRange=519:520
+
+# sent_id = nodejs-tsc-charter:u0027:s00
+# text = ## Section
+1	##	##	PUNCT	.	_	2	punct	_	TokenRange=0:2
+2	Section	section	NOUN	NN	Number=Sing	0	root	_	TokenRange=3:10
+
+# sent_id = nodejs-tsc-charter:u0027:s01
+# text = 7.
+1	7	7	X	LS	_	0	root	_	SpaceAfter=No|TokenRange=11:12
+2	.	.	PUNCT	.	_	1	punct	_	TokenRange=12:13
+
+# sent_id = nodejs-tsc-charter:u0027:s02
+# text = Voting
+1	Voting	vote	NOUN	NN	Number=Sing	0	root	_	SpacesAfter=\n|TokenRange=14:20
+
+# sent_id = nodejs-tsc-charter:u0028:s00
+# text = For internal project decisions, Collaborators shall operate under Lazy Consensus.
+1	For	for	ADP	IN	_	4	case	_	TokenRange=0:3
+2	internal	internal	ADJ	JJ	Degree=Pos	4	amod	_	TokenRange=4:12
+3	project	project	NOUN	NN	Number=Sing	4	compound	_	TokenRange=13:20
+4	decisions	decision	NOUN	NNS	Number=Plur	8	obl	_	SpaceAfter=No|TokenRange=21:30
+5	,	,	PUNCT	,	_	8	punct	_	TokenRange=30:31
+6	Collaborators	Collaborator	NOUN	NNS	Number=Plur	8	nsubj	_	TokenRange=32:45
+7	shall	shall	AUX	MD	VerbForm=Fin	8	aux	_	TokenRange=46:51
+8	operate	operate	VERB	VB	VerbForm=Inf	0	root	_	TokenRange=52:59
+9	under	under	ADP	IN	_	11	case	_	TokenRange=60:65
+10	Lazy	lazy	PROPN	NNP	Number=Sing	11	compound	_	TokenRange=66:70
+11	Consensus	consensus	PROPN	NNP	Number=Sing	8	obl	_	SpaceAfter=No|TokenRange=71:80
+12	.	.	PUNCT	.	_	8	punct	_	TokenRange=80:81
+
+# sent_id = nodejs-tsc-charter:u0028:s01
+# text = The TSC shall establish appropriate guidelines for implementing Lazy Consensus (e.g. expected notification and review time periods) within the development process.
+1	The	the	DET	DT	Definite=Def|PronType=Art	2	det	_	TokenRange=82:85
+2	TSC	Tsc	NOUN	NN	Number=Sing	4	nsubj	_	TokenRange=86:89
+3	shall	shall	AUX	MD	VerbForm=Fin	4	aux	_	TokenRange=90:95
+4	establish	establish	VERB	VB	VerbForm=Inf	0	root	_	TokenRange=96:105
+5	appropriate	appropriate	ADJ	JJ	Degree=Pos	6	amod	_	TokenRange=106:117
+6	guidelines	guideline	NOUN	NNS	Number=Plur	4	obj	_	TokenRange=118:128
+7	for	for	SCONJ	IN	_	8	mark	_	TokenRange=129:132
+8	implementing	implement	VERB	VBG	VerbForm=Ger	4	advcl	_	TokenRange=133:145
+9	Lazy	lazy	PROPN	NNP	Number=Sing	10	compound	_	TokenRange=146:150
+10	Consensus	consensus	PROPN	NNP	Number=Sing	8	obj	_	TokenRange=151:160
+11	(	(	PUNCT	-LRB-	_	13	punct	_	SpaceAfter=No|TokenRange=161:162
+12	e.g.	e.g.	X	FW	_	13	advmod	_	TokenRange=162:166
+13	expected	expect	VERB	VBN	Tense=Past|VerbForm=Part	14	amod	_	TokenRange=167:175
+14	notification	notification	NOUN	NN	Number=Sing	4	obj	_	TokenRange=176:188
+15	and	and	CCONJ	CC	_	18	cc	_	TokenRange=189:192
+16	review	review	NOUN	NN	Number=Sing	18	compound	_	TokenRange=193:199
+17	time	time	NOUN	NN	Number=Sing	18	compound	_	TokenRange=200:204
+18	periods	period	NOUN	NNS	Number=Plur	14	conj	_	SpaceAfter=No|TokenRange=205:212
+19	)	)	PUNCT	-RRB-	_	4	punct	_	TokenRange=212:213
+20	within	within	ADP	IN	_	23	case	_	TokenRange=214:220
+21	the	the	DET	DT	Definite=Def|PronType=Art	23	det	_	TokenRange=221:224
+22	development	development	NOUN	NN	Number=Sing	23	compound	_	TokenRange=225:236
+23	process	process	NOUN	NN	Number=Sing	4	obl	_	SpaceAfter=No|TokenRange=237:244
+24	.	.	PUNCT	.	_	4	punct	_	SpacesAfter=\n|TokenRange=244:245
+
+# sent_id = nodejs-tsc-charter:u0029:s00
+# text = The TSC follows a [Consensus Seeking][] decision making model among voting members.
+1	The	the	DET	DT	Definite=Def|PronType=Art	2	det	_	TokenRange=0:3
+2	TSC	Tsc	NOUN	NN	Number=Sing	3	nsubj	_	TokenRange=4:7
+3	follows	follow	VERB	VBZ	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	0	root	_	TokenRange=8:15
+4	a	a	DET	DT	Definite=Ind|PronType=Art	7	det	_	TokenRange=16:17
+5	[	[	PUNCT	-LRB-	_	7	punct	_	SpaceAfter=No|TokenRange=18:19
+6	Consensus	consensus	NOUN	NN	Number=Sing	7	compound	_	TokenRange=19:28
+7	Seeking	seek	NOUN	NN	Number=Sing	3	obj	_	SpaceAfter=No|TokenRange=29:36
+8	]	]	PUNCT	-RRB-	_	7	punct	_	SpaceAfter=No|TokenRange=36:37
+9	[	[	PUNCT	-LRB-	_	7	punct	_	SpaceAfter=No|TokenRange=37:38
+10	]	]	PUNCT	-RRB-	_	7	punct	_	TokenRange=38:39
+11	decision	decision	NOUN	NN	Number=Sing	7	appos	_	TokenRange=40:48
+12	making	make	VERB	VBG	VerbForm=Ger	11	acl	_	TokenRange=49:55
+13	model	model	NOUN	NN	Number=Sing	12	obj	_	TokenRange=56:61
+14	among	among	ADP	IN	_	16	case	_	TokenRange=62:67
+15	voting	voting	NOUN	NN	Number=Sing	16	compound	_	TokenRange=68:74
+16	members	member	NOUN	NNS	Number=Plur	12	obl	_	SpaceAfter=No|TokenRange=75:82
+17	.	.	PUNCT	.	_	3	punct	_	TokenRange=82:83
+
+# sent_id = nodejs-tsc-charter:u0029:s01
+# text = When an agenda item has appeared to reach a consensus the moderator will ask "Does anyone object?"
+1	When	when	ADV	WRB	PronType=Int	6	mark	_	TokenRange=84:88
+2	an	a	DET	DT	Definite=Ind|PronType=Art	4	det	_	TokenRange=89:91
+3	agenda	agenda	NOUN	NN	Number=Sing	4	compound	_	TokenRange=92:98
+4	item	item	NOUN	NN	Number=Sing	6	nsubj	_	TokenRange=99:103
+5	has	have	AUX	VBZ	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	6	aux	_	TokenRange=104:107
+6	appeared	appear	VERB	VBN	Tense=Past|VerbForm=Part	18	advcl	_	TokenRange=108:116
+7	to	to	PART	TO	_	8	mark	_	TokenRange=117:119
+8	reach	reach	VERB	VB	VerbForm=Inf	6	xcomp	_	TokenRange=120:125
+9	a	a	DET	DT	Definite=Ind|PronType=Art	10	det	_	TokenRange=126:127
+10	consensus	consensus	NOUN	NN	Number=Sing	8	obj	_	TokenRange=128:137
+11	the	the	DET	DT	Definite=Def|PronType=Art	12	det	_	TokenRange=138:141
+12	moderator	moderator	NOUN	NN	Number=Sing	14	nsubj	_	TokenRange=142:151
+13	will	will	AUX	MD	VerbForm=Fin	14	aux	_	TokenRange=152:156
+14	ask	ask	VERB	VB	VerbForm=Inf	10	acl:relcl	_	TokenRange=157:160
+15	"	"	PUNCT	``	_	14	punct	_	SpaceAfter=No|TokenRange=161:162
+16	Does	do	AUX	VBZ	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	18	aux	_	TokenRange=162:166
+17	anyone	anyone	PRON	NN	Number=Sing	18	nsubj	_	TokenRange=167:173
+18	object	object	VERB	VB	VerbForm=Inf	0	root	_	SpaceAfter=No|TokenRange=174:180
+19	?	?	PUNCT	.	_	18	punct	_	SpaceAfter=No|TokenRange=180:181
+20	"	"	PUNCT	''	_	18	punct	_	TokenRange=181:182
+
+# sent_id = nodejs-tsc-charter:u0029:s02
+# text = as a final call for dissent from the consensus.
+1	as	as	ADP	IN	_	4	case	_	TokenRange=183:185
+2	a	a	DET	DT	Definite=Ind|PronType=Art	4	det	_	TokenRange=186:187
+3	final	final	ADJ	JJ	Degree=Pos	4	amod	_	TokenRange=188:193
+4	call	call	NOUN	NN	Number=Sing	0	root	_	TokenRange=194:198
+5	for	for	ADP	IN	_	6	case	_	TokenRange=199:202
+6	dissent	dissent	NOUN	NN	Number=Sing	4	nmod	_	TokenRange=203:210
+7	from	from	ADP	IN	_	9	case	_	TokenRange=211:215
+8	the	the	DET	DT	Definite=Def|PronType=Art	9	det	_	TokenRange=216:219
+9	consensus	consensus	NOUN	NN	Number=Sing	6	nmod	_	SpaceAfter=No|TokenRange=220:229
+10	.	.	PUNCT	.	_	4	punct	_	SpacesAfter=\n|TokenRange=229:230
+
+# sent_id = nodejs-tsc-charter:u0030:s00
+# text = For all votes, the winning candidate option is the one that wins a simple majority of all TSC voting members in every head-to-head election against each of the other candidates.
+1	For	for	ADP	IN	_	3	case	_	TokenRange=0:3
+2	all	all	DET	DT	_	3	det	_	TokenRange=4:7
+3	votes	vote	NOUN	NNS	Number=Plur	11	obl	_	SpaceAfter=No|TokenRange=8:13
+4	,	,	PUNCT	,	_	11	punct	_	TokenRange=13:14
+5	the	the	DET	DT	Definite=Def|PronType=Art	8	det	_	TokenRange=15:18
+6	winning	win	VERB	VBG	VerbForm=Ger	8	amod	_	TokenRange=19:26
+7	candidate	candidate	NOUN	NN	Number=Sing	8	compound	_	TokenRange=27:36
+8	option	option	NOUN	NN	Number=Sing	11	nsubj	_	TokenRange=37:43
+9	is	be	AUX	VBZ	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	11	cop	_	TokenRange=44:46
+10	the	the	DET	DT	Definite=Def|PronType=Art	11	det	_	TokenRange=47:50
+11	one	one	NOUN	NN	Number=Sing	29	compound	_	TokenRange=51:54
+12	that	that	PRON	WDT	PronType=Rel	13	nsubj	_	TokenRange=55:59
+13	wins	win	VERB	VBZ	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	11	acl:relcl	_	TokenRange=60:64
+14	a	a	DET	DT	Definite=Ind|PronType=Art	16	det	_	TokenRange=65:66
+15	simple	simple	ADJ	JJ	Degree=Pos	16	amod	_	TokenRange=67:73
+16	majority	majority	NOUN	NN	Number=Sing	13	obj	_	TokenRange=74:82
+17	of	of	ADP	IN	_	21	case	_	TokenRange=83:85
+18	all	all	DET	DT	_	21	det	_	TokenRange=86:89
+19	TSC	TSC	ADJ	JJ	Degree=Pos	21	amod	_	TokenRange=90:93
+20	voting	voting	NOUN	NN	Number=Sing	21	compound	_	TokenRange=94:100
+21	members	member	NOUN	NNS	Number=Plur	16	nmod	_	TokenRange=101:108
+22	in	in	ADP	IN	_	24	case	_	TokenRange=109:111
+23	every	every	DET	DT	_	24	det	_	TokenRange=112:117
+24	head	head	NOUN	NN	Number=Sing	21	nmod	_	SpaceAfter=No|TokenRange=118:122
+25	-	-	PUNCT	HYPH	_	11	punct	_	SpaceAfter=No|TokenRange=122:123
+26	to	to	ADP	IN	_	28	case	_	SpaceAfter=No|TokenRange=123:125
+27	-	-	PUNCT	HYPH	_	28	punct	_	SpaceAfter=No|TokenRange=125:126
+28	head	head	NOUN	NN	Number=Sing	11	nmod	_	TokenRange=126:130
+29	election	election	NOUN	NN	Number=Sing	0	root	_	TokenRange=131:139
+30	against	against	ADP	IN	_	31	case	_	TokenRange=140:147
+31	each	each	DET	DT	_	29	nmod	_	TokenRange=148:152
+32	of	of	ADP	IN	_	35	case	_	TokenRange=153:155
+33	the	the	DET	DT	Definite=Def|PronType=Art	35	det	_	TokenRange=156:159
+34	other	other	ADJ	JJ	Degree=Pos	35	amod	_	TokenRange=160:165
+35	candidates	candidate	NOUN	NNS	Number=Plur	31	nmod	_	SpaceAfter=No|TokenRange=166:176
+36	.	.	PUNCT	.	_	29	punct	_	TokenRange=176:177
+
+# sent_id = nodejs-tsc-charter:u0030:s01
+# text = A TSC voting member may choose to participate in any vote through abstention.
+1	A	a	DET	DT	Definite=Ind|PronType=Art	4	det	_	TokenRange=178:179
+2	TSC	Tsc	NOUN	NN	Number=Sing	4	compound	_	TokenRange=180:183
+3	voting	voting	NOUN	NN	Number=Sing	4	compound	_	TokenRange=184:190
+4	member	member	NOUN	NN	Number=Sing	6	nsubj	_	TokenRange=191:197
+5	may	may	AUX	MD	VerbForm=Fin	6	aux	_	TokenRange=198:201
+6	choose	choose	VERB	VB	VerbForm=Inf	0	root	_	TokenRange=202:208
+7	to	to	PART	TO	_	8	mark	_	TokenRange=209:211
+8	participate	participate	VERB	VB	VerbForm=Inf	6	xcomp	_	TokenRange=212:223
+9	in	in	ADP	IN	_	11	case	_	TokenRange=224:226
+10	any	any	DET	DT	_	11	det	_	TokenRange=227:230
+11	vote	vote	NOUN	NN	Number=Sing	8	obl	_	TokenRange=231:235
+12	through	through	ADP	IN	_	13	case	_	TokenRange=236:243
+13	abstention	abstention	NOUN	NN	Number=Sing	11	nmod	_	SpaceAfter=No|TokenRange=244:254
+14	.	.	PUNCT	.	_	6	punct	_	TokenRange=254:255
+
+# sent_id = nodejs-tsc-charter:u0030:s02
+# text = As long as a vote is open, TSC voting members' choices must not be disclosed, to avoid influencing other voting members.
+1	As	as	ADV	RB	_	2	advmod	_	TokenRange=256:258
+2	long	long	ADV	RB	Degree=Pos	17	advmod	_	TokenRange=259:263
+3	as	as	ADP	IN	_	7	mark	_	TokenRange=264:266
+4	a	a	DET	DT	Definite=Ind|PronType=Art	5	det	_	TokenRange=267:268
+5	vote	vote	NOUN	NN	Number=Sing	7	nsubj	_	TokenRange=269:273
+6	is	be	AUX	VBZ	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	7	cop	_	TokenRange=274:276
+7	open	open	ADJ	JJ	Degree=Pos	2	advcl	_	SpaceAfter=No|TokenRange=277:281
+8	,	,	PUNCT	,	_	17	punct	_	TokenRange=281:282
+9	TSC	Tsc	ADJ	JJ	Degree=Pos	11	amod	_	TokenRange=283:286
+10	voting	voting	NOUN	NN	Number=Sing	11	compound	_	TokenRange=287:293
+11	members	member	NOUN	NNS	Number=Plur	13	compound	_	SpaceAfter=No|TokenRange=294:301
+12	'	'	PUNCT	''	_	11	punct	_	TokenRange=301:302
+13	choices	choice	NOUN	NNS	Number=Plur	17	nsubj:pass	_	TokenRange=303:310
+14	must	must	AUX	MD	VerbForm=Fin	17	aux	_	TokenRange=311:315
+15	not	not	PART	RB	_	17	advmod	_	TokenRange=316:319
+16	be	be	AUX	VB	VerbForm=Inf	17	aux:pass	_	TokenRange=320:322
+17	disclosed	disclose	VERB	VBN	Tense=Past|VerbForm=Part|Voice=Pass	0	root	_	SpaceAfter=No|TokenRange=323:332
+18	,	,	PUNCT	,	_	17	punct	_	TokenRange=332:333
+19	to	to	PART	TO	_	20	mark	_	TokenRange=334:336
+20	avoid	avoid	VERB	VB	VerbForm=Inf	17	advcl	_	TokenRange=337:342
+21	influencing	influence	VERB	VBG	VerbForm=Ger	20	xcomp	_	TokenRange=343:354
+22	other	other	ADJ	JJ	Degree=Pos	24	amod	_	TokenRange=355:360
+23	voting	voting	NOUN	NN	Number=Sing	24	compound	_	TokenRange=361:367
+24	members	member	NOUN	NNS	Number=Plur	21	obj	_	SpaceAfter=No|TokenRange=368:375
+25	.	.	PUNCT	.	_	17	punct	_	SpacesAfter=\n|TokenRange=375:376
+
+# sent_id = nodejs-tsc-charter:u0031:s00
+# text = All changes to this charter must be approved by the CPC.
+1	All	all	DET	DT	_	2	det	_	TokenRange=0:3
+2	changes	change	NOUN	NNS	Number=Plur	8	nsubj:pass	_	TokenRange=4:11
+3	to	to	ADP	IN	_	5	case	_	TokenRange=12:14
+4	this	this	DET	DT	Number=Sing|PronType=Dem	5	det	_	TokenRange=15:19
+5	charter	charter	NOUN	NN	Number=Sing	2	nmod	_	TokenRange=20:27
+6	must	must	AUX	MD	VerbForm=Fin	8	aux	_	TokenRange=28:32
+7	be	be	AUX	VB	VerbForm=Inf	8	aux:pass	_	TokenRange=33:35
+8	approved	approve	VERB	VBN	Tense=Past|VerbForm=Part|Voice=Pass	0	root	_	TokenRange=36:44
+9	by	by	ADP	IN	_	11	case	_	TokenRange=45:47
+10	the	the	DET	DT	Definite=Def|PronType=Art	11	det	_	TokenRange=48:51
+11	CPC	Cpc	NOUN	NN	Number=Sing	8	obl	_	SpaceAfter=No|TokenRange=52:55
+12	.	.	PUNCT	.	_	8	punct	_	SpacesAfter=\n|TokenRange=55:56
+
+# sent_id = nodejs-tsc-charter:u0032:s00
+# text = ## Section 8. Project Roles
+1	##	##	PUNCT	.	_	2	punct	_	TokenRange=0:2
+2	Section	section	NOUN	NN	Number=Sing	6	compound	_	TokenRange=3:10
+3	8	8	NUM	CD	NumType=Card	2	nummod	_	SpaceAfter=No|TokenRange=11:12
+4	.	.	PUNCT	.	_	2	punct	_	TokenRange=12:13
+5	Project	project	NOUN	NN	Number=Sing	6	compound	_	TokenRange=14:21
+6	Roles	role	NOUN	NNS	Number=Plur	0	root	_	SpacesAfter=\n|TokenRange=22:27
+
+# sent_id = nodejs-tsc-charter:u0033:s00
+# text = The Node.js git repository is maintained by the TSC and additional Collaborators who are added by the TSC on an ongoing basis.
+1	The	the	DET	DT	Definite=Def|PronType=Art	4	det	_	TokenRange=0:3
+2	Node.js	Node.js	PROPN	NNP	Number=Sing	4	compound	_	TokenRange=4:11
+3	git	git	NOUN	NN	Number=Sing	4	compound	_	TokenRange=12:15
+4	repository	repository	NOUN	NN	Number=Sing	6	nsubj:pass	_	TokenRange=16:26
+5	is	be	AUX	VBZ	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	6	aux:pass	_	TokenRange=27:29
+6	maintained	maintain	VERB	VBN	Tense=Past|VerbForm=Part|Voice=Pass	0	root	_	TokenRange=30:40
+7	by	by	ADP	IN	_	9	case	_	TokenRange=41:43
+8	the	the	DET	DT	Definite=Def|PronType=Art	9	det	_	TokenRange=44:47
+9	TSC	Tsc	PROPN	NNPS	Number=Plur	6	obl	_	TokenRange=48:51
+10	and	and	CCONJ	CC	_	12	cc	_	TokenRange=52:55
+11	additional	additional	ADJ	JJ	Degree=Pos	12	amod	_	TokenRange=56:66
+12	Collaborators	Collaborator	NOUN	NNS	Number=Plur	9	conj	_	TokenRange=67:80
+13	who	who	PRON	WP	PronType=Rel	15	nsubj:pass	_	TokenRange=81:84
+14	are	be	AUX	VBP	Mood=Ind|Tense=Pres|VerbForm=Fin	15	aux:pass	_	TokenRange=85:88
+15	added	add	VERB	VBN	Tense=Past|VerbForm=Part|Voice=Pass	12	acl:relcl	_	TokenRange=89:94
+16	by	by	ADP	IN	_	18	case	_	TokenRange=95:97
+17	the	the	DET	DT	Definite=Def|PronType=Art	18	det	_	TokenRange=98:101
+18	TSC	Tsc	NOUN	NN	Number=Sing	15	obl	_	TokenRange=102:105
+19	on	on	ADP	IN	_	22	case	_	TokenRange=106:108
+20	an	a	DET	DT	Definite=Ind|PronType=Art	22	det	_	TokenRange=109:111
+21	ongoing	ongoing	ADJ	JJ	Degree=Pos	22	amod	_	TokenRange=112:119
+22	basis	basis	NOUN	NN	Number=Sing	18	nmod	_	SpaceAfter=No|TokenRange=120:125
+23	.	.	PUNCT	.	_	6	punct	_	SpacesAfter=\n|TokenRange=125:126
+
+# sent_id = nodejs-tsc-charter:u0034:s00
+# text = Individuals making significant and valuable contributions are made Collaborators and given commit-access to the project.
+1	Individuals	individual	NOUN	NNS	Number=Plur	9	nsubj	_	TokenRange=0:11
+2	making	make	VERB	VBG	VerbForm=Ger	1	acl	_	TokenRange=12:18
+3	significant	significant	ADJ	JJ	Degree=Pos	6	amod	_	TokenRange=19:30
+4	and	and	CCONJ	CC	_	5	cc	_	TokenRange=31:34
+5	valuable	valuable	ADJ	JJ	Degree=Pos	3	conj	_	TokenRange=35:43
+6	contributions	contribution	NOUN	NNS	Number=Plur	2	obj	_	TokenRange=44:57
+7	are	be	AUX	VBP	Mood=Ind|Tense=Pres|VerbForm=Fin	9	cop	_	TokenRange=58:61
+8	made	make	ADJ	JJ	Degree=Pos	9	amod	_	TokenRange=62:66
+9	Collaborators	Collaborator	NOUN	NNS	Number=Plur	0	root	_	TokenRange=67:80
+10	and	and	CCONJ	CC	_	11	cc	_	TokenRange=81:84
+11	given	give	VERB	VBN	Tense=Past|VerbForm=Part	9	conj	_	TokenRange=85:90
+12	commit-access	commit-access	NOUN	NN	Number=Sing	11	obj	_	TokenRange=91:104
+13	to	to	ADP	IN	_	15	case	_	TokenRange=105:107
+14	the	the	DET	DT	Definite=Def|PronType=Art	15	det	_	TokenRange=108:111
+15	project	project	NOUN	NN	Number=Sing	11	obl	_	SpaceAfter=No|TokenRange=112:119
+16	.	.	PUNCT	.	_	9	punct	_	TokenRange=119:120
+
+# sent_id = nodejs-tsc-charter:u0034:s01
+# text = These individuals are identified by the TSC and their addition as Collaborators is discussed during a TSC meeting.
+1	These	these	DET	DT	Number=Plur|PronType=Dem	2	det	_	TokenRange=121:126
+2	individuals	individual	NOUN	NNS	Number=Plur	4	nsubj:pass	_	TokenRange=127:138
+3	are	be	AUX	VBP	Mood=Ind|Tense=Pres|VerbForm=Fin	4	aux:pass	_	TokenRange=139:142
+4	identified	identify	VERB	VBN	Tense=Past|VerbForm=Part|Voice=Pass	0	root	_	TokenRange=143:153
+5	by	by	ADP	IN	_	7	case	_	TokenRange=154:156
+6	the	the	DET	DT	Definite=Def|PronType=Art	7	det	_	TokenRange=157:160
+7	TSC	Tsc	NOUN	NN	Number=Sing	4	obl	_	TokenRange=161:164
+8	and	and	CCONJ	CC	_	14	cc	_	TokenRange=165:168
+9	their	they	PRON	PRP$	Number=Plur|Person=3|Poss=Yes|PronType=Prs	10	nmod:poss	_	TokenRange=169:174
+10	addition	addition	NOUN	NN	Number=Sing	14	nsubj:pass	_	TokenRange=175:183
+11	as	as	ADP	IN	_	12	case	_	TokenRange=184:186
+12	Collaborators	Collaborator	NOUN	NNS	Number=Plur	10	nmod	_	TokenRange=187:200
+13	is	be	AUX	VBZ	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	14	aux:pass	_	TokenRange=201:203
+14	discussed	discuss	VERB	VBN	Tense=Past|VerbForm=Part|Voice=Pass	4	conj	_	TokenRange=204:213
+15	during	during	ADP	IN	_	18	case	_	TokenRange=214:220
+16	a	a	DET	DT	Definite=Ind|PronType=Art	18	det	_	TokenRange=221:222
+17	TSC	Tsc	NOUN	NN	Number=Sing	18	compound	_	TokenRange=223:226
+18	meeting	meeting	NOUN	NN	Number=Sing	14	obl	_	SpaceAfter=No|TokenRange=227:234
+19	.	.	PUNCT	.	_	4	punct	_	TokenRange=234:235
+
+# sent_id = nodejs-tsc-charter:u0034:s02
+# text = Modifications of the contents of the git repository are made on a collaborative basis as defined in the development process.
+1	Modifications	Modification	NOUN	NNS	Number=Plur	10	nsubj:pass	_	TokenRange=236:249
+2	of	of	ADP	IN	_	4	case	_	TokenRange=250:252
+3	the	the	DET	DT	Definite=Def|PronType=Art	4	det	_	TokenRange=253:256
+4	contents	contents	NOUN	NNS	Number=Plur	1	nmod	_	TokenRange=257:265
+5	of	of	ADP	IN	_	8	case	_	TokenRange=266:268
+6	the	the	DET	DT	Definite=Def|PronType=Art	8	det	_	TokenRange=269:272
+7	git	git	NOUN	NN	Number=Sing	8	compound	_	TokenRange=273:276
+8	repository	repository	NOUN	NN	Number=Sing	4	nmod	_	TokenRange=277:287
+9	are	be	AUX	VBP	Mood=Ind|Tense=Pres|VerbForm=Fin	10	aux:pass	_	TokenRange=288:291
+10	made	make	VERB	VBN	Tense=Past|VerbForm=Part|Voice=Pass	0	root	_	TokenRange=292:296
+11	on	on	ADP	IN	_	14	case	_	TokenRange=297:299
+12	a	a	DET	DT	Definite=Ind|PronType=Art	14	det	_	TokenRange=300:301
+13	collaborative	collaborative	ADJ	JJ	Degree=Pos	14	amod	_	TokenRange=302:315
+14	basis	basis	NOUN	NN	Number=Sing	10	obl	_	TokenRange=316:321
+15	as	as	SCONJ	IN	_	16	mark	_	TokenRange=322:324
+16	defined	define	VERB	VBN	Tense=Past|VerbForm=Part	10	advcl	_	TokenRange=325:332
+17	in	in	ADP	IN	_	20	case	_	TokenRange=333:335
+18	the	the	DET	DT	Definite=Def|PronType=Art	20	det	_	TokenRange=336:339
+19	development	development	NOUN	NN	Number=Sing	20	compound	_	TokenRange=340:351
+20	process	process	NOUN	NN	Number=Sing	16	obl	_	SpaceAfter=No|TokenRange=352:359
+21	.	.	PUNCT	.	_	10	punct	_	SpacesAfter=\n|TokenRange=359:360
+
+# sent_id = nodejs-tsc-charter:u0035:s00
+# text = Collaborators may opt to elevate significant or controversial modifications, or modifications that have not found consensus to the TSC for discussion by assigning the `tsc-agenda` tag to a pull request or issue.
+1	Collaborators	Collaborator	NOUN	NNS	Number=Plur	3	nsubj	_	TokenRange=0:13
+2	may	may	AUX	MD	VerbForm=Fin	3	aux	_	TokenRange=14:17
+3	opt	opt	VERB	VB	VerbForm=Inf	0	root	_	TokenRange=18:21
+4	to	to	PART	TO	_	5	mark	_	TokenRange=22:24
+5	elevate	elevate	VERB	VB	VerbForm=Inf	3	xcomp	_	TokenRange=25:32
+6	significant	significant	ADJ	JJ	Degree=Pos	9	amod	_	TokenRange=33:44
+7	or	or	CCONJ	CC	_	8	cc	_	TokenRange=45:47
+8	controversial	controversial	ADJ	JJ	Degree=Pos	6	conj	_	TokenRange=48:61
+9	modifications	modification	NOUN	NNS	Number=Plur	5	obj	_	SpaceAfter=No|TokenRange=62:75
+10	,	,	PUNCT	,	_	12	punct	_	TokenRange=75:76
+11	or	or	CCONJ	CC	_	12	cc	_	TokenRange=77:79
+12	modifications	modification	NOUN	NNS	Number=Plur	3	conj	_	TokenRange=80:93
+13	that	that	PRON	WDT	PronType=Rel	16	nsubj	_	TokenRange=94:98
+14	have	have	AUX	VBP	Mood=Ind|Tense=Pres|VerbForm=Fin	16	aux	_	TokenRange=99:103
+15	not	not	PART	RB	_	16	advmod	_	TokenRange=104:107
+16	found	find	VERB	VBN	Tense=Past|VerbForm=Part	12	acl:relcl	_	TokenRange=108:113
+17	consensus	consensus	NOUN	NN	Number=Sing	16	obj	_	TokenRange=114:123
+18	to	to	ADP	IN	_	20	case	_	TokenRange=124:126
+19	the	the	DET	DT	Definite=Def|PronType=Art	20	det	_	TokenRange=127:130
+20	TSC	Tsc	NOUN	NN	Number=Sing	17	nmod	_	TokenRange=131:134
+21	for	for	ADP	IN	_	22	case	_	TokenRange=135:138
+22	discussion	discussion	NOUN	NN	Number=Sing	20	nmod	_	TokenRange=139:149
+23	by	by	SCONJ	IN	_	24	mark	_	TokenRange=150:152
+24	assigning	assign	VERB	VBG	VerbForm=Ger	16	advcl	_	TokenRange=153:162
+25	the	the	DET	DT	Definite=Def|PronType=Art	26	det	_	TokenRange=163:166
+26	`tsc-agenda	`tsc-agenda	NOUN	NN	Number=Sing	28	compound	_	SpaceAfter=No|TokenRange=167:178
+27	`	`	PUNCT	``	_	26	punct	_	TokenRange=178:179
+28	tag	tag	NOUN	NN	Number=Sing	24	obj	_	TokenRange=180:183
+29	to	to	ADP	IN	_	32	case	_	TokenRange=184:186
+30	a	a	DET	DT	Definite=Ind|PronType=Art	32	det	_	TokenRange=187:188
+31	pull	pull	NOUN	NN	Number=Sing	32	compound	_	TokenRange=189:193
+32	request	request	NOUN	NN	Number=Sing	24	obl	_	TokenRange=194:201
+33	or	or	CCONJ	CC	_	34	cc	_	TokenRange=202:204
+34	issue	issue	NOUN	NN	Number=Sing	32	conj	_	SpaceAfter=No|TokenRange=205:210
+35	.	.	PUNCT	.	_	3	punct	_	TokenRange=210:211
+
+# sent_id = nodejs-tsc-charter:u0035:s01
+# text = When consensus cannot be reached, the TSC voting members should serve as the final arbiter by casting a vote.
+1	When	when	ADV	WRB	PronType=Int	6	mark	_	TokenRange=212:216
+2	consensus	consensus	NOUN	NN	Number=Sing	6	nsubj:pass	_	TokenRange=217:226
+3	can	can	AUX	MD	VerbForm=Fin	6	aux	_	SpaceAfter=No|TokenRange=227:230
+4	not	not	PART	RB	_	6	advmod	_	TokenRange=230:233
+5	be	be	AUX	VB	VerbForm=Inf	6	aux:pass	_	TokenRange=234:236
+6	reached	reach	VERB	VBN	Tense=Past|VerbForm=Part|Voice=Pass	13	advcl	_	SpaceAfter=No|TokenRange=237:244
+7	,	,	PUNCT	,	_	13	punct	_	TokenRange=244:245
+8	the	the	DET	DT	Definite=Def|PronType=Art	11	det	_	TokenRange=246:249
+9	TSC	TSC	PROPN	NNP	Number=Sing	11	compound	_	TokenRange=250:253
+10	voting	voting	NOUN	NN	Number=Sing	11	compound	_	TokenRange=254:260
+11	members	member	NOUN	NNS	Number=Plur	13	nsubj	_	TokenRange=261:268
+12	should	should	AUX	MD	VerbForm=Fin	13	aux	_	TokenRange=269:275
+13	serve	serve	VERB	VB	VerbForm=Inf	0	root	_	TokenRange=276:281
+14	as	as	ADP	IN	_	17	case	_	TokenRange=282:284
+15	the	the	DET	DT	Definite=Def|PronType=Art	17	det	_	TokenRange=285:288
+16	final	final	ADJ	JJ	Degree=Pos	17	amod	_	TokenRange=289:294
+17	arbiter	arbiter	NOUN	NN	Number=Sing	13	obl	_	TokenRange=295:302
+18	by	by	SCONJ	IN	_	19	mark	_	TokenRange=303:305
+19	casting	cast	VERB	VBG	VerbForm=Ger	13	advcl	_	TokenRange=306:313
+20	a	a	DET	DT	Definite=Ind|PronType=Art	21	det	_	TokenRange=314:315
+21	vote	vote	NOUN	NN	Number=Sing	19	obj	_	SpaceAfter=No|TokenRange=316:320
+22	.	.	PUNCT	.	_	13	punct	_	TokenRange=320:321
+
+# sent_id = nodejs-tsc-charter:u0035:s02
+# text = The TSC will maintain and publish a list of current Collaborators, as well as a development process guide for Collaborators and Contributors looking to participate in the development effort.
+1	The	the	DET	DT	Definite=Def|PronType=Art	2	det	_	TokenRange=322:325
+2	TSC	Tsc	NOUN	NN	Number=Sing	4	nsubj	_	TokenRange=326:329
+3	will	will	AUX	MD	VerbForm=Fin	4	aux	_	TokenRange=330:334
+4	maintain	maintain	VERB	VB	VerbForm=Inf	0	root	_	TokenRange=335:343
+5	and	and	CCONJ	CC	_	6	cc	_	TokenRange=344:347
+6	publish	publish	VERB	VB	VerbForm=Inf	4	conj	_	TokenRange=348:355
+7	a	a	DET	DT	Definite=Ind|PronType=Art	8	det	_	TokenRange=356:357
+8	list	list	NOUN	NN	Number=Sing	6	obj	_	TokenRange=358:362
+9	of	of	ADP	IN	_	11	case	_	TokenRange=363:365
+10	current	current	ADJ	JJ	Degree=Pos	11	amod	_	TokenRange=366:373
+11	Collaborators	Collaborator	NOUN	NNS	Number=Plur	8	nmod	_	SpaceAfter=No|TokenRange=374:387
+12	,	,	PUNCT	,	_	4	punct	_	TokenRange=387:388
+13	as	as	ADV	RB	_	19	cc	_	TokenRange=389:391
+14	well	well	ADV	RB	Degree=Pos	13	fixed	_	TokenRange=392:396
+15	as	as	ADP	IN	_	13	fixed	_	TokenRange=397:399
+16	a	a	DET	DT	Definite=Ind|PronType=Art	19	det	_	TokenRange=400:401
+17	development	development	NOUN	NN	Number=Sing	18	compound	_	TokenRange=402:413
+18	process	process	NOUN	NN	Number=Sing	19	compound	_	TokenRange=414:421
+19	guide	guide	NOUN	NN	Number=Sing	4	conj	_	TokenRange=422:427
+20	for	for	ADP	IN	_	21	case	_	TokenRange=428:431
+21	Collaborators	Collaborators	NOUN	NNS	Number=Plur	19	nmod	_	TokenRange=432:445
+22	and	and	CCONJ	CC	_	23	cc	_	TokenRange=446:449
+23	Contributors	Contributors	NOUN	NNS	Number=Plur	21	conj	_	TokenRange=450:462
+24	looking	look	VERB	VBG	VerbForm=Ger	4	acl	_	TokenRange=463:470
+25	to	to	PART	TO	_	26	mark	_	TokenRange=471:473
+26	participate	participate	VERB	VB	VerbForm=Inf	24	xcomp	_	TokenRange=474:485
+27	in	in	ADP	IN	_	30	case	_	TokenRange=486:488
+28	the	the	DET	DT	Definite=Def|PronType=Art	30	det	_	TokenRange=489:492
+29	development	development	NOUN	NN	Number=Sing	30	compound	_	TokenRange=493:504
+30	effort	effort	NOUN	NN	Number=Sing	26	obl	_	SpaceAfter=No|TokenRange=505:511
+31	.	.	PUNCT	.	_	4	punct	_	SpacesAfter=\n|TokenRange=511:512
+
+# sent_id = nodejs-tsc-charter:u0036:s00
+# text = ## Section 9.
+1	##	##	PUNCT	.	_	2	punct	_	TokenRange=0:2
+2	Section	section	NOUN	NN	Number=Sing	0	root	_	TokenRange=3:10
+3	9	9	NUM	CD	NumType=Card	2	nummod	_	SpaceAfter=No|TokenRange=11:12
+4	.	.	PUNCT	.	_	2	punct	_	TokenRange=12:13
+
+# sent_id = nodejs-tsc-charter:u0036:s01
+# text = Definitions
+1	Definitions	definition	NOUN	NNS	Number=Plur	0	root	_	SpacesAfter=\n|TokenRange=14:25
+
+# sent_id = nodejs-tsc-charter:u0037:s00
+# text = * **Contributors**: contribute code or other artifacts, but do not have the right to commit to the code base.
+1	*	*	PUNCT	NFP	_	3	punct	_	TokenRange=0:1
+2	**	**	PUNCT	NFP	_	3	punct	_	SpaceAfter=No|TokenRange=2:4
+3	Contributors	Contributor	NOUN	NNS	Number=Plur	0	root	_	SpaceAfter=No|TokenRange=4:16
+4	**:	**:	PUNCT	.	_	3	punct	_	TokenRange=16:19
+5	contribute	contribute	NOUN	NN	Number=Sing	6	compound	_	TokenRange=20:30
+6	code	code	NOUN	NN	Number=Sing	3	conj	_	TokenRange=31:35
+7	or	or	CCONJ	CC	_	9	cc	_	TokenRange=36:38
+8	other	other	ADJ	JJ	Degree=Pos	9	amod	_	TokenRange=39:44
+9	artifacts	artifact	NOUN	NNS	Number=Plur	3	conj	_	SpaceAfter=No|TokenRange=45:54
+10	,	,	PUNCT	,	_	14	punct	_	TokenRange=54:55
+11	but	but	CCONJ	CC	_	14	cc	_	TokenRange=56:59
+12	do	do	AUX	VBP	Mood=Ind|Tense=Pres|VerbForm=Fin	14	aux	_	TokenRange=60:62
+13	not	not	PART	RB	_	14	advmod	_	TokenRange=63:66
+14	have	have	VERB	VB	VerbForm=Inf	3	conj	_	TokenRange=67:71
+15	the	the	DET	DT	Definite=Def|PronType=Art	16	det	_	TokenRange=72:75
+16	right	right	NOUN	NN	Number=Sing	14	obj	_	TokenRange=76:81
+17	to	to	PART	TO	_	18	mark	_	TokenRange=82:84
+18	commit	commit	VERB	VB	VerbForm=Inf	16	acl	_	TokenRange=85:91
+19	to	to	ADP	IN	_	22	case	_	TokenRange=92:94
+20	the	the	DET	DT	Definite=Def|PronType=Art	22	det	_	TokenRange=95:98
+21	code	code	NOUN	NN	Number=Sing	22	compound	_	TokenRange=99:103
+22	base	base	NOUN	NN	Number=Sing	18	obl	_	SpaceAfter=No|TokenRange=104:108
+23	.	.	PUNCT	.	_	3	punct	_	TokenRange=108:109
+
+# sent_id = nodejs-tsc-charter:u0037:s01
+# text = Contributors work with the project’s Collaborators to have code committed to the code base.
+1	Contributors	Contributor	NOUN	NNS	Number=Plur	2	nsubj	_	TokenRange=110:122
+2	work	work	VERB	VBP	Mood=Ind|Tense=Pres|VerbForm=Fin	0	root	_	TokenRange=123:127
+3	with	with	ADP	IN	_	7	case	_	TokenRange=128:132
+4	the	the	DET	DT	Definite=Def|PronType=Art	5	det	_	TokenRange=133:136
+5	project	project	NOUN	NN	Number=Sing	7	nmod:poss	_	SpaceAfter=No|TokenRange=137:144
+6	’s	's	PART	POS	_	5	case	_	TokenRange=144:146
+7	Collaborators	Collaborator	NOUN	NNS	Number=Plur	2	obl	_	TokenRange=147:160
+8	to	to	PART	TO	_	9	mark	_	TokenRange=161:163
+9	have	have	VERB	VB	VerbForm=Inf	2	advcl	_	TokenRange=164:168
+10	code	code	NOUN	NN	Number=Sing	9	obj	_	TokenRange=169:173
+11	committed	committed	VERB	VBN	Tense=Past|VerbForm=Part	10	acl	_	TokenRange=174:183
+12	to	to	ADP	IN	_	15	case	_	TokenRange=184:186
+13	the	the	DET	DT	Definite=Def|PronType=Art	15	det	_	TokenRange=187:190
+14	code	code	NOUN	NN	Number=Sing	15	compound	_	TokenRange=191:195
+15	base	base	NOUN	NN	Number=Sing	11	obl	_	SpaceAfter=No|TokenRange=196:200
+16	.	.	PUNCT	.	_	2	punct	_	TokenRange=200:201
+
+# sent_id = nodejs-tsc-charter:u0037:s02
+# text = A Contributor may be promoted to a Collaborator by the TSC.
+1	A	a	DET	DT	Definite=Ind|PronType=Art	2	det	_	TokenRange=202:203
+2	Contributor	contributor	NOUN	NN	Number=Sing	5	nsubj:pass	_	TokenRange=204:215
+3	may	may	AUX	MD	VerbForm=Fin	5	aux	_	TokenRange=216:219
+4	be	be	AUX	VB	VerbForm=Inf	5	aux:pass	_	TokenRange=220:222
+5	promoted	promote	VERB	VBN	Tense=Past|VerbForm=Part|Voice=Pass	0	root	_	TokenRange=223:231
+6	to	to	ADP	IN	_	8	case	_	TokenRange=232:234
+7	a	a	DET	DT	Definite=Ind|PronType=Art	8	det	_	TokenRange=235:236
+8	Collaborator	Collaborator	NOUN	NN	Number=Sing	5	obl	_	TokenRange=237:249
+9	by	by	ADP	IN	_	11	case	_	TokenRange=250:252
+10	the	the	DET	DT	Definite=Def|PronType=Art	11	det	_	TokenRange=253:256
+11	TSC	Tsc	NOUN	NN	Number=Sing	8	nmod	_	SpaceAfter=No|TokenRange=257:260
+12	.	.	PUNCT	.	_	5	punct	_	TokenRange=260:261
+
+# sent_id = nodejs-tsc-charter:u0037:s03
+# text = Contributors should rarely be encumbered by the TSC and never by the CPC or OpenJS Foundation Board.
+1	Contributors	Contributor	NOUN	NNS	Number=Plur	5	nsubj:pass	_	TokenRange=262:274
+2	should	should	AUX	MD	VerbForm=Fin	5	aux	_	TokenRange=275:281
+3	rarely	rarely	ADV	RB	_	5	advmod	_	TokenRange=282:288
+4	be	be	AUX	VB	VerbForm=Inf	5	aux:pass	_	TokenRange=289:291
+5	encumbered	encumber	VERB	VBN	Tense=Past|VerbForm=Part|Voice=Pass	0	root	_	TokenRange=292:302
+6	by	by	ADP	IN	_	8	case	_	TokenRange=303:305
+7	the	the	DET	DT	Definite=Def|PronType=Art	8	det	_	TokenRange=306:309
+8	TSC	Tsc	PROPN	NNPS	Number=Plur	5	obl	_	TokenRange=310:313
+9	and	and	CCONJ	CC	_	17	cc	_	TokenRange=314:317
+10	never	never	ADV	RB	_	17	advmod	_	TokenRange=318:323
+11	by	by	ADP	IN	_	17	case	_	TokenRange=324:326
+12	the	the	DET	DT	Definite=Def|PronType=Art	17	det	_	TokenRange=327:330
+13	CPC	CPC	PROPN	NNP	Number=Sing	16	compound	_	TokenRange=331:334
+14	or	or	CCONJ	CC	_	15	cc	_	TokenRange=335:337
+15	OpenJS	OpenJS	PROPN	NNP	Number=Sing	13	conj	_	TokenRange=338:344
+16	Foundation	foundation	PROPN	NNP	Number=Sing	17	compound	_	TokenRange=345:355
+17	Board	Board	PROPN	NNP	Number=Sing	8	conj	_	SpaceAfter=No|TokenRange=356:361
+18	.	.	PUNCT	.	_	5	punct	_	SpacesAfter=\n|TokenRange=361:362
+
+# sent_id = nodejs-tsc-charter:u0038:s00
+# text = * **Project**: a technical collaboration effort, e.g. a subsystem, that is organized through the project creation process and approved by the TSC.
+1	*	*	PUNCT	NFP	_	3	punct	_	TokenRange=0:1
+2	**	**	PUNCT	NFP	_	3	punct	_	SpaceAfter=No|TokenRange=2:4
+3	Project	project	NOUN	NN	Number=Sing	0	root	_	SpaceAfter=No|TokenRange=4:11
+4	**:	**:	PUNCT	.	_	3	punct	_	TokenRange=11:14
+5	a	a	DET	DT	Definite=Ind|PronType=Art	8	det	_	TokenRange=15:16
+6	technical	technical	ADJ	JJ	Degree=Pos	8	amod	_	TokenRange=17:26
+7	collaboration	collaboration	NOUN	NN	Number=Sing	8	compound	_	TokenRange=27:40
+8	effort	effort	NOUN	NN	Number=Sing	3	appos	_	SpaceAfter=No|TokenRange=41:47
+9	,	,	PUNCT	,	_	8	punct	_	TokenRange=47:48
+10	e.g.	e.g.	X	FW	_	12	case	_	TokenRange=49:53
+11	a	a	DET	DT	Definite=Ind|PronType=Art	12	det	_	TokenRange=54:55
+12	subsystem	subsystem	NOUN	NN	Number=Sing	8	nmod	_	SpaceAfter=No|TokenRange=56:65
+13	,	,	PUNCT	,	_	8	punct	_	TokenRange=65:66
+14	that	that	PRON	DT	Number=Sing|PronType=Dem	16	nsubj:pass	_	TokenRange=67:71
+15	is	be	AUX	VBZ	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	16	aux:pass	_	TokenRange=72:74
+16	organized	organize	VERB	VBN	Tense=Past|VerbForm=Part|Voice=Pass	8	parataxis	_	TokenRange=75:84
+17	through	through	ADP	IN	_	21	case	_	TokenRange=85:92
+18	the	the	DET	DT	Definite=Def|PronType=Art	21	det	_	TokenRange=93:96
+19	project	project	NOUN	NN	Number=Sing	21	compound	_	TokenRange=97:104
+20	creation	creation	NOUN	NN	Number=Sing	21	compound	_	TokenRange=105:113
+21	process	process	NOUN	NN	Number=Sing	16	obl	_	TokenRange=114:121
+22	and	and	CCONJ	CC	_	23	cc	_	TokenRange=122:125
+23	approved	approve	VERB	VBN	Tense=Past|VerbForm=Part	21	conj	_	TokenRange=126:134
+24	by	by	ADP	IN	_	26	case	_	TokenRange=135:137
+25	the	the	DET	DT	Definite=Def|PronType=Art	26	det	_	TokenRange=138:141
+26	TSC	Tsc	NOUN	NN	Number=Sing	23	obl	_	SpaceAfter=No|TokenRange=142:145
+27	.	.	PUNCT	.	_	8	punct	_	SpacesAfter=\n|TokenRange=145:146
+
+# sent_id = nodejs-tsc-charter:u0039:s00
+# text = [Condorcet]: https://en.wikipedia.org/wiki/Condorcet_method
+1	[	[	PUNCT	-LRB-	_	2	punct	_	SpaceAfter=No|TokenRange=0:1
+2	Condorcet	Condorcet	PROPN	NNP	Number=Sing	0	root	_	SpaceAfter=No|TokenRange=1:10
+3	]	]	PUNCT	-RRB-	_	2	punct	_	SpaceAfter=No|TokenRange=10:11
+4	:	:	PUNCT	:	_	2	punct	_	TokenRange=11:12
+5	https://en.wikipedia.org/wiki/Condorcet_method	https://en.wikipedia.org/wiki/Condorcet_method	INTJ	UH	_	2	discourse	_	TokenRange=13:59
+
+# sent_id = nodejs-tsc-charter:u0039:s01
+# text = [Consensus Seeking]: https://en.wikipedia.org/wiki/Consensus-seeking_decision-making
+1	[	[	PUNCT	-LRB-	_	3	punct	_	SpaceAfter=No|TokenRange=60:61
+2	Consensus	consensus	ADJ	JJ	Degree=Pos|Typo=Yes	3	amod	_	TokenRange=61:70
+3	Seeking	seeking	NOUN	NN	Number=Sing	0	root	_	SpaceAfter=No|TokenRange=71:78
+4	]	]	PUNCT	-RRB-	_	3	punct	_	SpaceAfter=No|TokenRange=78:79
+5	:	:	PUNCT	:	_	3	punct	_	TokenRange=79:80
+6	https://en.wikipedia.org/wiki/Consensus-seeking_decision-making	https://en.wikipedia.org/wiki/Consensus-seeking_decision-mak	VERB	VBG	VerbForm=Ger	3	acl	_	TokenRange=81:144
+
+# sent_id = nodejs-tsc-charter:u0039:s02
+# text = [Single Transferable Vote]: https://en.wikipedia.org/wiki/Single_transferable_vote
+1	[	[	PUNCT	-LRB-	_	4	punct	_	SpaceAfter=No|TokenRange=145:146
+2	Single	single	ADJ	JJ	Degree=Pos	4	amod	_	TokenRange=146:152
+3	Transferable	transferable	ADJ	JJ	Degree=Pos	4	amod	_	TokenRange=153:165
+4	Vote	vote	NOUN	NN	Number=Sing	0	root	_	SpaceAfter=No|TokenRange=166:170
+5	]	]	PUNCT	-RRB-	_	4	punct	_	SpaceAfter=No|TokenRange=170:171
+6	:	:	PUNCT	:	_	4	punct	_	TokenRange=171:172
+7	https://en.wikipedia.org/wiki/Single_transferable_vote	https://en.wikipedia.org/wiki/Single_transferable_vote	X	ADD	_	4	appos	_	SpacesAfter=\n|TokenRange=173:227
+

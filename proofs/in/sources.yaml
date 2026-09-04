@@ -1,0 +1,22 @@
+inputs:
+  - file: receipt.xes
+    title: Receipt phase of an environmental permit application process (WABO), CoSeLoG project, as redistributed in pm4py-core tests/input_data
+    sha256: 68db5ea68726096978809a6d8503bba333303dbaac457354b8733b5b198f8d39
+    fetched_from: https://raw.githubusercontent.com/pm4py/pm4py-core/release/tests/input_data/receipt.xes
+    origin: https://doi.org/10.4121/uuid:a07386a5-7be3-4367-9535-70bc9e77dbe6
+    retrieved: "2026-09-04"
+    license: per the origin
+  - file: receipt.csv
+    title: Receipt phase of an environmental permit application process (WABO), CoSeLoG project, as redistributed in pm4py-core tests/input_data
+    sha256: 8d00a7d15e02796ae262336d304a7265a158956e8914aeb8ee2242f37d778854
+    fetched_from: https://raw.githubusercontent.com/pm4py/pm4py-core/release/tests/input_data/receipt.csv
+    origin: https://doi.org/10.4121/uuid:a07386a5-7be3-4367-9535-70bc9e77dbe6
+    retrieved: "2026-09-04"
+    license: per the origin
+  - file: node-README.md
+    title: Node.js README, TSC voting members roster
+    sha256: a827d82a9a84e574870971e702fb362baa03851c903879108befa04f9e3be901
+    fetched_from: https://raw.githubusercontent.com/nodejs/node/main/README.md
+    origin: https://github.com/nodejs/node
+    retrieved: "2026-09-04"
+    license: per the origin

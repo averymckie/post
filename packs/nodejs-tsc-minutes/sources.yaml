@@ -1,0 +1,82 @@
+pack: nodejs-tsc-minutes
+sources:
+  - id: tsc-2023-11-08
+    title: Node.js TSC Meeting 2023-11-08
+    file: sources/tsc-2023-11-08.md
+    sha256: 4823394e10848a8de5f807181c88c58bf073a2ed705d74ac8c21073a6b815c94
+    kind: text
+    url: https://raw.githubusercontent.com/nodejs/TSC/main/meetings/2023-11-08.md
+    fetched_from: https://raw.githubusercontent.com/nodejs/TSC/main/meetings/2023-11-08.md
+    repository: https://github.com/nodejs/TSC
+    retrieved: "2026-09-04"
+    license: per the repository's LICENSE
+  - id: tsc-2023-12-06
+    title: Node.js TSC Meeting 2023-12-06
+    file: sources/tsc-2023-12-06.md
+    sha256: 8d1a15f6b02a0c6a9df1b53afc13c478bd124d331b963b780166d9ef621c70aa
+    kind: text
+    url: https://raw.githubusercontent.com/nodejs/TSC/main/meetings/2023-12-06.md
+    fetched_from: https://raw.githubusercontent.com/nodejs/TSC/main/meetings/2023-12-06.md
+    repository: https://github.com/nodejs/TSC
+    retrieved: "2026-09-04"
+    license: per the repository's LICENSE
+  - id: tsc-2024-01-10
+    title: Node.js TSC Meeting 2024-01-10
+    file: sources/tsc-2024-01-10.md
+    sha256: 19fd98915b44212808fef8deaf23203cfa49f813c249a293ab76f9cc342a01b0
+    kind: text
+    url: https://raw.githubusercontent.com/nodejs/TSC/main/meetings/2024-01-10.md
+    fetched_from: https://raw.githubusercontent.com/nodejs/TSC/main/meetings/2024-01-10.md
+    repository: https://github.com/nodejs/TSC
+    retrieved: "2026-09-04"
+    license: per the repository's LICENSE
+  - id: tsc-2024-01-17
+    title: Node.js TSC Meeting 2024-01-17
+    file: sources/tsc-2024-01-17.md
+    sha256: 2cf8552b41ef2e9ab05f83f20ed679f54bb52e8f98e0b61a3fd925cff5c7c793
+    kind: text
+    url: https://raw.githubusercontent.com/nodejs/TSC/main/meetings/2024-01-17.md
+    fetched_from: https://raw.githubusercontent.com/nodejs/TSC/main/meetings/2024-01-17.md
+    repository: https://github.com/nodejs/TSC
+    retrieved: "2026-09-04"
+    license: per the repository's LICENSE
+  - id: tsc-2024-02-07
+    title: Node.js TSC Meeting 2024-02-07
+    file: sources/tsc-2024-02-07.md
+    sha256: 98e8362e0277af5a59fb15efb559aeefbce2395ebc892108bc9bb34bce0216c0
+    kind: text
+    url: https://raw.githubusercontent.com/nodejs/TSC/main/meetings/2024-02-07.md
+    fetched_from: https://raw.githubusercontent.com/nodejs/TSC/main/meetings/2024-02-07.md
+    repository: https://github.com/nodejs/TSC
+    retrieved: "2026-09-04"
+    license: per the repository's LICENSE
+  - id: tsc-2025-01-08
+    title: Node.js TSC Meeting 2025-01-08
+    file: sources/tsc-2025-01-08.md
+    sha256: 0b01aaee8f40ace7e118d91594bc70be9c9212d00192ff54eede6c66d15e04b5
+    kind: text
+    url: https://raw.githubusercontent.com/nodejs/TSC/main/meetings/2025-01-08.md
+    fetched_from: https://raw.githubusercontent.com/nodejs/TSC/main/meetings/2025-01-08.md
+    repository: https://github.com/nodejs/TSC
+    retrieved: "2026-09-04"
+    license: per the repository's LICENSE
+  - id: tsc-2025-02-05
+    title: Node.js TSC Meeting 2025-02-05
+    file: sources/tsc-2025-02-05.md
+    sha256: 0feb061748daba3d19e6a9e10f6f662e32188c7c178362ef900fa973706aa9a3
+    kind: text
+    url: https://raw.githubusercontent.com/nodejs/TSC/main/meetings/2025-02-05.md
+    fetched_from: https://raw.githubusercontent.com/nodejs/TSC/main/meetings/2025-02-05.md
+    repository: https://github.com/nodejs/TSC
+    retrieved: "2026-09-04"
+    license: per the repository's LICENSE
+  - id: tsc-2025-03-05
+    title: Node.js TSC Meeting 2025-03-05
+    file: sources/tsc-2025-03-05.md
+    sha256: 2a70a73b3991f48505093f59ecf022c4d42542696f1b38e7d4c044cd22deb07d
+    kind: text
+    url: https://raw.githubusercontent.com/nodejs/TSC/main/meetings/2025-03-05.md
+    fetched_from: https://raw.githubusercontent.com/nodejs/TSC/main/meetings/2025-03-05.md
+    repository: https://github.com/nodejs/TSC
+    retrieved: "2026-09-04"
+    license: per the repository's LICENSE

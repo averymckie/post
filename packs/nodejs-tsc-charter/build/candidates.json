@@ -1,0 +1,416 @@
+[
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "nodejs-tsc-charter:u0000:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "nodejs-tsc-charter:u0001:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "nodejs-tsc-charter:u0001:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(nodejs-tsc-charter:u0002:s00#e5,nodejs-tsc-charter:u0002:s00#x3)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'project' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "nodejs-tsc-charter:u0002:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(nodejs-tsc-charter:u0002:s01#e3,nodejs-tsc-charter:u0002:s01#x2)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'project' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "nodejs-tsc-charter:u0002:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(nodejs-tsc-charter:u0002:s02#e12,nodejs-tsc-charter:u0002:s02#x2)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'proposal' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "nodejs-tsc-charter:u0002:s02"
+  },
+  {
+    "atom_ids": [
+      "theme(nodejs-tsc-charter:u0002:s02#e17,nodejs-tsc-charter:u0002:s02#x2)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'proposal' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "nodejs-tsc-charter:u0002:s02"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "nodejs-tsc-charter:u0003:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(nodejs-tsc-charter:u0004:s03#e8,nodejs-tsc-charter:u0004:s03#x5)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'leadership' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "nodejs-tsc-charter:u0004:s03"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "nodejs-tsc-charter:u0006:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "nodejs-tsc-charter:u0006:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "nodejs-tsc-charter:u0006:s02"
+  },
+  {
+    "atom_ids": [
+      "patient(nodejs-tsc-charter:u0007:s02#e4,nodejs-tsc-charter:u0007:s02#x5)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'everything' at token 5 has no matching antecedent in its unit",
+    "sentence_id": "nodejs-tsc-charter:u0007:s02"
+  },
+  {
+    "atom_ids": [
+      "theme(nodejs-tsc-charter:u0008:s00#e7,nodejs-tsc-charter:u0008:s00#x2)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'memberships' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "nodejs-tsc-charter:u0008:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(nodejs-tsc-charter:u0008:s01#e2,nodejs-tsc-charter:u0008:s01#x5)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'size' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "nodejs-tsc-charter:u0008:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(nodejs-tsc-charter:u0009:s00#e2,nodejs-tsc-charter:u0009:s00#x5)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'set' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "nodejs-tsc-charter:u0009:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'more' is ADJ, not a predicate",
+    "sentence_id": "nodejs-tsc-charter:u0010:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(nodejs-tsc-charter:u0011:s00#e9,nodejs-tsc-charter:u0011:s00#x8)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 8 has no matching antecedent in its unit",
+    "sentence_id": "nodejs-tsc-charter:u0011:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "nodejs-tsc-charter:u0014:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "nodejs-tsc-charter:u0014:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "nodejs-tsc-charter:u0014:s02"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "nodejs-tsc-charter:u0016:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "nodejs-tsc-charter:u0016:s02"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "nodejs-tsc-charter:u0016:s03"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "nodejs-tsc-charter:u0016:s04"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'guidelines' is NOUN, not a predicate",
+    "sentence_id": "nodejs-tsc-charter:u0016:s05"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "nodejs-tsc-charter:u0016:s06"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "nodejs-tsc-charter:u0016:s07"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "nodejs-tsc-charter:u0017:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "nodejs-tsc-charter:u0018:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(nodejs-tsc-charter:u0019:s01#e14,nodejs-tsc-charter:u0019:s01#x10)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'developer' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "nodejs-tsc-charter:u0019:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(nodejs-tsc-charter:u0019:s02#e2,nodejs-tsc-charter:u0019:s01#x10)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'developer' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "nodejs-tsc-charter:u0019:s02"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "nodejs-tsc-charter:u0021:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "nodejs-tsc-charter:u0021:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "nodejs-tsc-charter:u0021:s02"
+  },
+  {
+    "atom_ids": [
+      "theme(nodejs-tsc-charter:u0022:s00#e9,nodejs-tsc-charter:u0022:s00#x2)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'role' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "nodejs-tsc-charter:u0022:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "nodejs-tsc-charter:u0024:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(nodejs-tsc-charter:u0025:s00#e15,nodejs-tsc-charter:u0025:s00#x18)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'candidate' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "nodejs-tsc-charter:u0025:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(nodejs-tsc-charter:u0025:s01#e7,nodejs-tsc-charter:u0025:s01#x10)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'candidate' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "nodejs-tsc-charter:u0025:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(nodejs-tsc-charter:u0026:s01#e8,nodejs-tsc-charter:u0026:s01#x2)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'chair' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "nodejs-tsc-charter:u0026:s01"
+  },
+  {
+    "atom_ids": [
+      "theme(nodejs-tsc-charter:u0026:s02#e18,nodejs-tsc-charter:u0026:s02#x20)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'limit' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "nodejs-tsc-charter:u0026:s02"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "nodejs-tsc-charter:u0027:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "nodejs-tsc-charter:u0027:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "nodejs-tsc-charter:u0027:s02"
+  },
+  {
+    "atom_ids": [
+      "theme(nodejs-tsc-charter:u0029:s01#e14,nodejs-tsc-charter:u0029:s01#x12)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'moderator' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "nodejs-tsc-charter:u0029:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "nodejs-tsc-charter:u0029:s02"
+  },
+  {
+    "atom_ids": [
+      "theme(nodejs-tsc-charter:u0030:s00#e11,nodejs-tsc-charter:u0030:s00#x8)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'option' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "nodejs-tsc-charter:u0030:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(nodejs-tsc-charter:u0030:s00#e13,nodejs-tsc-charter:u0030:s00#x8)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'option' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "nodejs-tsc-charter:u0030:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'election' is NOUN, not a predicate",
+    "sentence_id": "nodejs-tsc-charter:u0030:s00"
+  },
+  {
+    "atom_ids": [
+      "theme(nodejs-tsc-charter:u0030:s02#e7,nodejs-tsc-charter:u0030:s02#x5)"
+    ],
+    "code": "ANIMACY_BY_VERB_SELECTION",
+    "detail": "subject 'vote' is never the agent of a transitive event in the corpus; clingo routed it to theme",
+    "sentence_id": "nodejs-tsc-charter:u0030:s02"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "nodejs-tsc-charter:u0032:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(nodejs-tsc-charter:u0035:s00#e16,nodejs-tsc-charter:u0035:s00#x13)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 13 has no matching antecedent in its unit",
+    "sentence_id": "nodejs-tsc-charter:u0035:s00"
+  },
+  {
+    "atom_ids": [
+      "agent(nodejs-tsc-charter:u0035:s00#e24,nodejs-tsc-charter:u0035:s00#x13)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 13 has no matching antecedent in its unit",
+    "sentence_id": "nodejs-tsc-charter:u0035:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "nodejs-tsc-charter:u0036:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "nodejs-tsc-charter:u0036:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'Contributors' is NOUN, not a predicate",
+    "sentence_id": "nodejs-tsc-charter:u0037:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "FRAGMENT",
+    "detail": "root 'Project' is NOUN, not a predicate",
+    "sentence_id": "nodejs-tsc-charter:u0038:s00"
+  },
+  {
+    "atom_ids": [
+      "patient(nodejs-tsc-charter:u0038:s00#e16,nodejs-tsc-charter:u0038:s00#x14)"
+    ],
+    "code": "UNRESOLVED_PRONOUN",
+    "detail": "'that' at token 14 has no matching antecedent in its unit",
+    "sentence_id": "nodejs-tsc-charter:u0038:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "nodejs-tsc-charter:u0039:s00"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "nodejs-tsc-charter:u0039:s01"
+  },
+  {
+    "atom_ids": [],
+    "code": "NO_EVENT",
+    "detail": "no event was compiled from this sentence",
+    "sentence_id": "nodejs-tsc-charter:u0039:s02"
+  }
+]

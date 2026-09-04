@@ -1,0 +1,12 @@
+pack: nodejs-governance
+sources:
+  - id: nodejs-governance
+    title: Node.js Project Governance
+    file: sources/GOVERNANCE.md
+    sha256: 3587ff5eb743982d88d985d5526752abbc82b7e31c2f2de02b1988299a397535
+    kind: text
+    url: https://raw.githubusercontent.com/nodejs/node/main/GOVERNANCE.md
+    fetched_from: https://raw.githubusercontent.com/nodejs/node/main/GOVERNANCE.md
+    repository: https://github.com/nodejs/node
+    retrieved: "2026-09-04"
+    license: per the repository's LICENSE

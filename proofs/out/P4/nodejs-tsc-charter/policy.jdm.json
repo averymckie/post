@@ -1,0 +1,27 @@
+{
+ "contentType": "application/vnd.gorules.decision",
+ "nodes": [
+  {"id": "in", "type": "inputNode", "name": "request", "position": {"x": 0, "y": 0}},
+  {"id": "dt", "type": "decisionTableNode", "name": "required actions", "position": {"x": 0, "y": 0},
+   "content": {"hitPolicy": "first",
+    "inputs": [{"id": "i1", "name": "action", "field": "action"}],
+    "outputs": [{"id": "o1", "name": "required", "field": "required"}, {"id": "o2", "name": "rule", "field": "rule"}],
+    "rules": [
+     {"_id": "r1", "_description": "must not merely be open", "i1": "\"open\"", "o1": "true", "o2": "'r1'"},
+     {"_id": "r2", "_description": "must have", "i1": "\"have\"", "o1": "true", "o2": "'r2'"},
+     {"_id": "r3", "_description": "must be immediately remedied", "i1": "\"remedy\"", "o1": "true", "o2": "'r3'"},
+     {"_id": "r4", "_description": "shall meet", "i1": "\"meet\"", "o1": "true", "o2": "'r4'"},
+     {"_id": "r5", "_description": "shall be directed", "i1": "\"direct\"", "o1": "true", "o2": "'r5'"},
+     {"_id": "r6", "_description": "shall be taken", "i1": "\"take\"", "o1": "true", "o2": "'r6'"},
+     {"_id": "r7", "_description": "must be published", "i1": "\"publish\"", "o1": "true", "o2": "'r7'"},
+     {"_id": "r8", "_description": "shall be done", "i1": "\"do\"", "o1": "true", "o2": "'r8'"},
+     {"_id": "r9", "_description": "shall hold", "i1": "\"hold\"", "o1": "true", "o2": "'r9'"},
+     {"_id": "r10", "_description": "shall operate", "i1": "\"operate\"", "o1": "true", "o2": "'r10'"},
+     {"_id": "r11", "_description": "shall establish", "i1": "\"establish\"", "o1": "true", "o2": "'r11'"},
+     {"_id": "r12", "_description": "must not be disclosed", "i1": "\"disclose\"", "o1": "true", "o2": "'r12'"},
+     {"_id": "r13", "_description": "must be approved", "i1": "\"approve\"", "o1": "true", "o2": "'r13'"}
+    ]}},
+  {"id": "out", "type": "outputNode", "name": "decision", "position": {"x": 0, "y": 0}}
+ ],
+ "edges": [{"id": "e1", "sourceId": "in", "targetId": "dt", "type": "edge"}, {"id": "e2", "sourceId": "dt", "targetId": "out", "type": "edge"}]
+}

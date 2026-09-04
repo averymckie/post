@@ -1,0 +1,16 @@
+{
+ "contentType": "application/vnd.gorules.decision",
+ "nodes": [
+  {"id": "in", "type": "inputNode", "name": "meeting", "position": {"x": 0, "y": 0}},
+  {"id": "dt", "type": "decisionTableNode", "name": "simple majority of all TSC voting members", "position": {"x": 0, "y": 0},
+   "content": {"hitPolicy": "first",
+    "inputs": [{"id": "i1", "name": "present voting members", "field": "present"}],
+    "outputs": [{"id": "o1", "name": "majority reachable", "field": "majority_reachable"}, {"id": "o2", "name": "rule", "field": "rule"}],
+    "rules": [
+     {"_id": "r1", "_description": "For all votes, the winning candidate option is the one that wins a simple majority of all TSC voting members in every head-to-head election against each of the other candidates.", "i1": ">= 10", "o1": "true", "o2": "'r1'"},
+     {"_id": "r2", "_description": "For all votes, the winning candidate option is the one that wins a simple majority of all TSC voting members in every head-to-head election against each of the other candidates.", "i1": "", "o1": "false", "o2": "'r2'"}
+    ]}},
+  {"id": "out", "type": "outputNode", "name": "decision", "position": {"x": 0, "y": 0}}
+ ],
+ "edges": [{"id": "e1", "sourceId": "in", "targetId": "dt", "type": "edge"}, {"id": "e2", "sourceId": "dt", "targetId": "out", "type": "edge"}]
+}

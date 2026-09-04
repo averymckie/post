@@ -1,0 +1,952 @@
+{
+  "nodejs-tsc-charter:u0000:s00": {
+    "digest": "76fc4e99ff89be9a80e3b90212567393f7daa287c90d9eda78fb8d66b5c3f926",
+    "end": 44,
+    "origin_offset": 0,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 0,
+    "text": "# Technical Steering Committee (TSC) Charter",
+    "unit_id": "u0000"
+  },
+  "nodejs-tsc-charter:u0001:s00": {
+    "digest": "324f1c46119288c8d1af0172e696c2c94cfb682b1feb34154d4a5ca49c5b3c81",
+    "end": 10,
+    "origin_offset": 46,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 0,
+    "text": "## Section",
+    "unit_id": "u0001"
+  },
+  "nodejs-tsc-charter:u0001:s01": {
+    "digest": "c977dbe785221d34114d345fdf8ff4e18bb4af66750751dbea29407f9738735f",
+    "end": 13,
+    "origin_offset": 57,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 11,
+    "text": "1.",
+    "unit_id": "u0001"
+  },
+  "nodejs-tsc-charter:u0001:s02": {
+    "digest": "83a9fad2e79245df9ebd2e15be4e4c308ee878731ee2df0a0bf1ac4f23066faa",
+    "end": 31,
+    "origin_offset": 60,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 14,
+    "text": "Guiding Principle",
+    "unit_id": "u0001"
+  },
+  "nodejs-tsc-charter:u0002:s00": {
+    "digest": "09b520912c3eb848f583db051e398ad7d2bf93c5adaa18d8aa4da7b595bd6317",
+    "end": 53,
+    "origin_offset": 79,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 0,
+    "text": "The Node.js project is part of the OpenJS Foundation.",
+    "unit_id": "u0002"
+  },
+  "nodejs-tsc-charter:u0002:s01": {
+    "digest": "12b9783eee6447d87d818334d0902752ad08df687001d1b0d26b76d5f76a1b45",
+    "end": 129,
+    "origin_offset": 133,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 54,
+    "text": "The project operates transparently, openly, collaboratively, and ethically.",
+    "unit_id": "u0002"
+  },
+  "nodejs-tsc-charter:u0002:s02": {
+    "digest": "fd961fc86153ca8ebadeaf542a852266c05420294aec24c8ef0fdc11e606de31",
+    "end": 233,
+    "origin_offset": 209,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 130,
+    "text": "Project proposals, timelines, and status must not merely be open, but also easily visible to outsiders.",
+    "unit_id": "u0002"
+  },
+  "nodejs-tsc-charter:u0003:s00": {
+    "digest": "8f8b21dddad050ed50911b771e7e082208a458dc48c5d2e1713b15bd201f52db",
+    "end": 55,
+    "origin_offset": 314,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 0,
+    "text": "## Section 2. Evolution of OpenJS Foundation Governance",
+    "unit_id": "u0003"
+  },
+  "nodejs-tsc-charter:u0004:s00": {
+    "digest": "c533dc0a6ec853c92608ea158c773df09c05d785f0817590406a246140138259",
+    "end": 98,
+    "origin_offset": 371,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 0,
+    "text": "Most large, complex open source communities have both a business and a technical governance model.",
+    "unit_id": "u0004"
+  },
+  "nodejs-tsc-charter:u0004:s01": {
+    "digest": "4762d9de1add604b27f0d5dd2ee756f7b68af8932d849ebd52a43ba758c35d37",
+    "end": 268,
+    "origin_offset": 470,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 99,
+    "text": "Technical leadership for the projects within the OpenJS Foundation is delegated to the projects through their project charters by the OpenJS Cross Project Council (CPC).",
+    "unit_id": "u0004"
+  },
+  "nodejs-tsc-charter:u0004:s02": {
+    "digest": "326a7e72e665a3eb6c9257bd888ead02f42620e2a29f0fccc7ae8f9c23ff6370",
+    "end": 373,
+    "origin_offset": 640,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 269,
+    "text": "In the case of the Node.js project, it is delegated to the Node.js Technical Steering Committee (“TSC”).",
+    "unit_id": "u0004"
+  },
+  "nodejs-tsc-charter:u0004:s03": {
+    "digest": "e14cb876943fe1113d30e1599707ab0187bbcaeed6b8de6ed9152fb36fb0aeb2",
+    "end": 454,
+    "origin_offset": 745,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 374,
+    "text": "OpenJS Foundation’s business leadership is the Board of Directors (the “Board”).",
+    "unit_id": "u0004"
+  },
+  "nodejs-tsc-charter:u0005:s00": {
+    "digest": "23718a0ca52fa0a4829ed0c55604aafe99d7826b7d08f47d905224aa1b5efed6",
+    "end": 62,
+    "origin_offset": 827,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 0,
+    "text": "This charter can only be amended with the approval of the CPC.",
+    "unit_id": "u0005"
+  },
+  "nodejs-tsc-charter:u0006:s00": {
+    "digest": "324f1c46119288c8d1af0172e696c2c94cfb682b1feb34154d4a5ca49c5b3c81",
+    "end": 10,
+    "origin_offset": 891,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 0,
+    "text": "## Section",
+    "unit_id": "u0006"
+  },
+  "nodejs-tsc-charter:u0006:s01": {
+    "digest": "267c23695b6e8fc29bd88b9f5d1962d3d208fa9c2fafd974614e6ab3b84fa55c",
+    "end": 13,
+    "origin_offset": 902,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 11,
+    "text": "3.",
+    "unit_id": "u0006"
+  },
+  "nodejs-tsc-charter:u0006:s02": {
+    "digest": "2dc2b6ceb84aaeeb23a2ac89f1ccd67e9e24337b3ea9807d802691519da7d60f",
+    "end": 38,
+    "origin_offset": 905,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 14,
+    "text": "Establishment of the TSC",
+    "unit_id": "u0006"
+  },
+  "nodejs-tsc-charter:u0007:s00": {
+    "digest": "1a29c3754c824c1fd69e73789a12ff45f4e2e31d1e21216b0d0c0cb151c812af",
+    "end": 64,
+    "origin_offset": 931,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 0,
+    "text": "TSC members can be either _regular_ members or _voting_ members.",
+    "unit_id": "u0007"
+  },
+  "nodejs-tsc-charter:u0007:s01": {
+    "digest": "365505d1cbe3b5f51d25074ede7a411b471bca57328bf26d891a3eed93487c45",
+    "end": 153,
+    "origin_offset": 996,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 65,
+    "text": "Regular members can attend meetings and participate in TSC discussions, but do not vote.",
+    "unit_id": "u0007"
+  },
+  "nodejs-tsc-charter:u0007:s02": {
+    "digest": "ea0545fc9b6ce24ef2bd725dd700d67fe9e5e5b6ebb583bffa2791f4e4c37c4f",
+    "end": 293,
+    "origin_offset": 1085,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 154,
+    "text": "Voting members can do everything regular members can do, and also have the ability to cast votes when consensus is not reached on an issue.",
+    "unit_id": "u0007"
+  },
+  "nodejs-tsc-charter:u0008:s00": {
+    "digest": "32672580cc9242ec48313c6d32f7030af87608f908b8af4a073529f80fdc37fd",
+    "end": 37,
+    "origin_offset": 1226,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 0,
+    "text": "TSC memberships are not time-limited.",
+    "unit_id": "u0008"
+  },
+  "nodejs-tsc-charter:u0008:s01": {
+    "digest": "a3aec5a9f8898db5d15c6877a328c37cd80bb0712edb864f62a48f0f71af7a6d",
+    "end": 74,
+    "origin_offset": 1264,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 38,
+    "text": "There is no maximum size of the TSC.",
+    "unit_id": "u0008"
+  },
+  "nodejs-tsc-charter:u0008:s02": {
+    "digest": "613c46edc34440b49542eac5079bc52ca30da9b4df6f9ebcca0d689cc29454db",
+    "end": 122,
+    "origin_offset": 1301,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 75,
+    "text": "The TSC must have at least four voting members.",
+    "unit_id": "u0008"
+  },
+  "nodejs-tsc-charter:u0009:s00": {
+    "digest": "7887b2e182534f21693661e4ab97fbc000712a6fc021359cff684dcb444f24ec",
+    "end": 97,
+    "origin_offset": 1350,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 0,
+    "text": "There is no specific set of requirements or qualifications for TSC membership beyond these rules.",
+    "unit_id": "u0009"
+  },
+  "nodejs-tsc-charter:u0009:s01": {
+    "digest": "1e6695b727f831f395a47d9be1d6c44b3531a4450667aa49d38d5dbd8cfe30dd",
+    "end": 176,
+    "origin_offset": 1448,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 98,
+    "text": "The TSC may add additional voting members to the TSC by a standard TSC motion.",
+    "unit_id": "u0009"
+  },
+  "nodejs-tsc-charter:u0009:s02": {
+    "digest": "d778b6bfa9bfdf166fa3cb767127522732f59c7f879ca8e9464e923aa42bfd3b",
+    "end": 271,
+    "origin_offset": 1527,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 177,
+    "text": "A TSC member can be removed from the TSC by voluntary resignation or by a standard TSC motion.",
+    "unit_id": "u0009"
+  },
+  "nodejs-tsc-charter:u0009:s03": {
+    "digest": "c9809ca5ab09d42deefb43e9f041d9b10b7e927a2c1531dccc45cbf53b63d3e4",
+    "end": 418,
+    "origin_offset": 1622,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 272,
+    "text": "A standard TSC motion can be used to change a regular TSC member to a voting TSC member, or to change a voting TSC member to a regular TSC member.",
+    "unit_id": "u0009"
+  },
+  "nodejs-tsc-charter:u0010:s00": {
+    "digest": "f432de1280d3bffe6317c6febd92e83d1351b05f57d60318f8a3da041072fc1b",
+    "end": 185,
+    "origin_offset": 1770,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 0,
+    "text": "In order to ensure adequate representation of the interests of diverse stakeholders, no more than one-fourth of the TSC voting membership may be affiliated with the same company/entity.",
+    "unit_id": "u0010"
+  },
+  "nodejs-tsc-charter:u0010:s01": {
+    "digest": "ed8476b8d5815f374b4eb996e59b8b4f7b4765a12c02b59e8dd2cbc1ac0b5bac",
+    "end": 562,
+    "origin_offset": 1956,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 186,
+    "text": "If a change in TSC voting membership or a change of affiliation by a TSC voting member creates a situation where more than one-fourth of the TSC voting membership are affiliated with the same company/entity, then the situation must be immediately remedied by the removal of voting member status from one or more TSC voting members affiliated with the over-represented company.",
+    "unit_id": "u0010"
+  },
+  "nodejs-tsc-charter:u0011:s00": {
+    "digest": "1117b7d8010ff1a9bdf57818ec09ac40cecf0b421b8f5214ef526d81ee971943",
+    "end": 185,
+    "origin_offset": 2334,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 0,
+    "text": "The TSC shall meet regularly using tools that enable participation by the community (e.g. weekly on a Google Hangout On Air, or through any other appropriate means selected by the TSC).",
+    "unit_id": "u0011"
+  },
+  "nodejs-tsc-charter:u0011:s01": {
+    "digest": "561730a484e6d316de64c815154d8157bf378ad709402c57c0427a51ac8bc6bc",
+    "end": 239,
+    "origin_offset": 2520,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 186,
+    "text": "The meeting shall be directed by the TSC Chairperson.",
+    "unit_id": "u0011"
+  },
+  "nodejs-tsc-charter:u0011:s02": {
+    "digest": "088ce2524a5cf31b26465c2853a3a07ccf8965092b2d2421b524caa8218c2e38",
+    "end": 360,
+    "origin_offset": 2574,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 240,
+    "text": "Responsibility for directing individual meetings may be delegated by the TSC Chairperson to any other TSC voting member.",
+    "unit_id": "u0011"
+  },
+  "nodejs-tsc-charter:u0011:s03": {
+    "digest": "2f18150889626527f5fb35dbab98cbfbbc233b3b640664131ea88e2b5c41a57b",
+    "end": 483,
+    "origin_offset": 2695,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 361,
+    "text": "Minutes or an appropriate recording shall be taken and made available to the community through accessible public postings.",
+    "unit_id": "u0011"
+  },
+  "nodejs-tsc-charter:u0012:s00": {
+    "digest": "667a5d962b136d35065ed0b79431861f031d067dd522cff0d2f9fd5b4ae95695",
+    "end": 75,
+    "origin_offset": 2819,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 0,
+    "text": "TSC voting members are expected to regularly participate in TSC activities.",
+    "unit_id": "u0012"
+  },
+  "nodejs-tsc-charter:u0013:s00": {
+    "digest": "8b16cb9037f0f6fe188d67f3067a35dc39f63bc724af99f6a73931f79663a773",
+    "end": 129,
+    "origin_offset": 2896,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 0,
+    "text": "A TSC voting member is automatically converted to a TSC regular member if they do not participate in three consecutive TSC votes.",
+    "unit_id": "u0013"
+  },
+  "nodejs-tsc-charter:u0014:s00": {
+    "digest": "324f1c46119288c8d1af0172e696c2c94cfb682b1feb34154d4a5ca49c5b3c81",
+    "end": 10,
+    "origin_offset": 3027,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 0,
+    "text": "## Section",
+    "unit_id": "u0014"
+  },
+  "nodejs-tsc-charter:u0014:s01": {
+    "digest": "23f663630e2f28250c09d7a0c370f55eebf635772f9ce27e46797ab8ef297f4b",
+    "end": 13,
+    "origin_offset": 3038,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 11,
+    "text": "4.",
+    "unit_id": "u0014"
+  },
+  "nodejs-tsc-charter:u0014:s02": {
+    "digest": "251354bc5821de45e639ff6ed054836e967e84a9654ecaf7c3012c03d0ceb545",
+    "end": 41,
+    "origin_offset": 3041,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 14,
+    "text": "Responsibilities of the TSC",
+    "unit_id": "u0014"
+  },
+  "nodejs-tsc-charter:u0015:s00": {
+    "digest": "6ca8c701feb9aaef217b648810d06aec251018bcaf35b0c442cf36b23f35868e",
+    "end": 142,
+    "origin_offset": 3070,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 0,
+    "text": "Subject to such policies as may be set by the CPC, the TSC is responsible for all technical development within the Node.js project, including:",
+    "unit_id": "u0015"
+  },
+  "nodejs-tsc-charter:u0016:s00": {
+    "digest": "0de16e897478dc9970f93be17934c31fa1d7182364d1c54058474e1259bc4683",
+    "end": 26,
+    "origin_offset": 3214,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 0,
+    "text": "* Setting release dates. *",
+    "unit_id": "u0016"
+  },
+  "nodejs-tsc-charter:u0016:s01": {
+    "digest": "15a88b3babedaa2735990e1e623b51dbf26ed7f21c15e90a6ca7b507dc289400",
+    "end": 53,
+    "origin_offset": 3241,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 27,
+    "text": "Release quality standards.",
+    "unit_id": "u0016"
+  },
+  "nodejs-tsc-charter:u0016:s02": {
+    "digest": "3f5e26dd9db574801e87def5b95a12d4a2101d29427ad9d5118887bd3ce4c2fe",
+    "end": 76,
+    "origin_offset": 3268,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 54,
+    "text": "* Technical direction.",
+    "unit_id": "u0016"
+  },
+  "nodejs-tsc-charter:u0016:s03": {
+    "digest": "c33db45f966758d52c59e5551cd7cbd5df003deee9d9123721fd2570e11fae4f",
+    "end": 112,
+    "origin_offset": 3291,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 77,
+    "text": "* Project governance and process. *",
+    "unit_id": "u0016"
+  },
+  "nodejs-tsc-charter:u0016:s04": {
+    "digest": "f520bc3b019e58759489047999af2159f9018e46396eeee406a0cc2463a87075",
+    "end": 139,
+    "origin_offset": 3327,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 113,
+    "text": "GitHub repository hosting.",
+    "unit_id": "u0016"
+  },
+  "nodejs-tsc-charter:u0016:s05": {
+    "digest": "158ce90b23514de3f203599c8e4ee88abce0de30756d52d7704636714fc17509",
+    "end": 213,
+    "origin_offset": 3354,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 140,
+    "text": "* Conduct guidelines. * Maintaining the list of additional Collaborators.",
+    "unit_id": "u0016"
+  },
+  "nodejs-tsc-charter:u0016:s06": {
+    "digest": "14ab55359bd1a04b209cb606c0014fde8c8857e319892518e1f7280ecdffb698",
+    "end": 261,
+    "origin_offset": 3428,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 214,
+    "text": "* Development process and any coding standards.",
+    "unit_id": "u0016"
+  },
+  "nodejs-tsc-charter:u0016:s07": {
+    "digest": "bc9f6b8f81254ff45b2feaef2150a7ab01d2ee15472e3ba2d621c25e40aab125",
+    "end": 339,
+    "origin_offset": 3476,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 262,
+    "text": "* Mediating technical conflicts between Collaborators or Foundation projects.",
+    "unit_id": "u0016"
+  },
+  "nodejs-tsc-charter:u0017:s00": {
+    "digest": "88d917a68c5b28262614148c676a30be596f80363f3e566b65445f48b92d9a0f",
+    "end": 27,
+    "origin_offset": 3557,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 0,
+    "text": "The TSC will define Node.js",
+    "unit_id": "u0017"
+  },
+  "nodejs-tsc-charter:u0017:s01": {
+    "digest": "d833db71a69272c4d1d4126fb0421362d0b8c551efd9e3379e6eef031dabb87c",
+    "end": 55,
+    "origin_offset": 3585,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 28,
+    "text": "project’s release vehicles.",
+    "unit_id": "u0017"
+  },
+  "nodejs-tsc-charter:u0018:s00": {
+    "digest": "14eede25e895d336971de28d83427e9daf706e32617bc5d203b166e2a80637b9",
+    "end": 40,
+    "origin_offset": 3614,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 0,
+    "text": "## Section 5. Node.js Project Operations",
+    "unit_id": "u0018"
+  },
+  "nodejs-tsc-charter:u0019:s00": {
+    "digest": "3c2d051aa0d3088aaf68ed8dc384ba5eda67d048bc11bdac7435932ba34e2374",
+    "end": 82,
+    "origin_offset": 3656,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 0,
+    "text": "The TSC will establish and maintain a development process for the Node.js project.",
+    "unit_id": "u0019"
+  },
+  "nodejs-tsc-charter:u0019:s01": {
+    "digest": "026d3f7d2f8dfece838a974e727a5a8666b0f5299c99e7a99f559079f796b5eb",
+    "end": 183,
+    "origin_offset": 3739,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 83,
+    "text": "The development process will establish guidelines for how the developers and community will operate.",
+    "unit_id": "u0019"
+  },
+  "nodejs-tsc-charter:u0019:s02": {
+    "digest": "db8e256bf97ee51f20c3caef75a2b20b6c8419c55efc5ca282fd3a050cad2317",
+    "end": 354,
+    "origin_offset": 3840,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 184,
+    "text": "It will, for example, establish appropriate timelines for TSC review (e.g. agenda items must be published at least a certain number of hours in advance of a TSC meeting).",
+    "unit_id": "u0019"
+  },
+  "nodejs-tsc-charter:u0020:s00": {
+    "digest": "be228e75e6bd8dd5bfaffa53d4c5f6e016e8a4767d5b89f5d9f44cda53ce176d",
+    "end": 229,
+    "origin_offset": 4012,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 0,
+    "text": "The TSC and entire technical community will follow any processes as may be specified by the OpenJS Foundation Board relating to the intake and license compliance review of contributions, including the OpenJS Foundation IP Policy.",
+    "unit_id": "u0020"
+  },
+  "nodejs-tsc-charter:u0021:s00": {
+    "digest": "324f1c46119288c8d1af0172e696c2c94cfb682b1feb34154d4a5ca49c5b3c81",
+    "end": 10,
+    "origin_offset": 4243,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 0,
+    "text": "## Section",
+    "unit_id": "u0021"
+  },
+  "nodejs-tsc-charter:u0021:s01": {
+    "digest": "d80edd7fb074b51d1fbf46a3dcf5cae5237ceb888dcdd8bd1b7df117d53afdc4",
+    "end": 13,
+    "origin_offset": 4254,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 11,
+    "text": "6.",
+    "unit_id": "u0021"
+  },
+  "nodejs-tsc-charter:u0021:s02": {
+    "digest": "56ac9256e35acf7b7f72788785dfbe9525b73e93ec97963a0d363c54419529f2",
+    "end": 23,
+    "origin_offset": 4257,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 14,
+    "text": "Elections",
+    "unit_id": "u0021"
+  },
+  "nodejs-tsc-charter:u0022:s00": {
+    "digest": "6a139821f7f2f698cb08d8f35bce376d75b139fcb2b6a3a3c2e615a97544be84",
+    "end": 94,
+    "origin_offset": 4268,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 0,
+    "text": "Leadership roles in the Node.js project will be peer elected representatives of the community.",
+    "unit_id": "u0022"
+  },
+  "nodejs-tsc-charter:u0023:s00": {
+    "digest": "35a7ef2495c16ea7d7c64e1884c64321971762e9fc07a40cd30aefc68bd84d24",
+    "end": 107,
+    "origin_offset": 4364,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 0,
+    "text": "For election of persons (such as the TSC Chairperson), a multiple-candidate method should be used, such as:",
+    "unit_id": "u0023"
+  },
+  "nodejs-tsc-charter:u0024:s00": {
+    "digest": "69a17c5ae2d25c9add10c771de124d199015ee9d3812bcf600216e56053cad7c",
+    "end": 49,
+    "origin_offset": 4473,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 0,
+    "text": "* [Condorcet][] or * [Single Transferable Vote][]",
+    "unit_id": "u0024"
+  },
+  "nodejs-tsc-charter:u0025:s00": {
+    "digest": "1d5cabf1ff5942ddb6dd5f88de23c116e853d187e8a857d063c74ea4c71dd4d8",
+    "end": 139,
+    "origin_offset": 4524,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 0,
+    "text": "Multiple-candidate methods may be reduced to simple election by plurality when there are only two candidates for one position to be filled.",
+    "unit_id": "u0025"
+  },
+  "nodejs-tsc-charter:u0025:s01": {
+    "digest": "50a77974b088baa63544f8cf179330ed725f0f1ace3c331ef157a8df947425da",
+    "end": 241,
+    "origin_offset": 4664,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 140,
+    "text": "No election is required if there is only one candidate and no objections to the candidate's election.",
+    "unit_id": "u0025"
+  },
+  "nodejs-tsc-charter:u0025:s02": {
+    "digest": "e0c528908eb8888538ff32cca84974a41c444505e8cca2cd9b80250ac26dd2f0",
+    "end": 329,
+    "origin_offset": 4766,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 242,
+    "text": "Elections shall be done within the projects by the Collaborators active in the project.",
+    "unit_id": "u0025"
+  },
+  "nodejs-tsc-charter:u0026:s00": {
+    "digest": "779c88f57bbd86094b8e4841d56b5e00515870bc127256ac80e6abc5525ec178",
+    "end": 255,
+    "origin_offset": 4855,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 0,
+    "text": "The TSC voting members will elect from amongst voting TSC members a TSC Chairperson to work on building an agenda for TSC meetings and a OpenJS Cross Project Council (CPC) voting member to represent the TSC in the OpenJS Foundation for a term of one year.",
+    "unit_id": "u0026"
+  },
+  "nodejs-tsc-charter:u0026:s01": {
+    "digest": "e54008d67eadca6e058e80f1eb7c81b8edf55f4e24da681b1b1d636c9e2de287",
+    "end": 340,
+    "origin_offset": 5111,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 256,
+    "text": "The Chair and voting CPC member may be (but are not required to be) the same person.",
+    "unit_id": "u0026"
+  },
+  "nodejs-tsc-charter:u0026:s02": {
+    "digest": "2b729ff37ba8d08c0c94ae8acded25b6f2a3c04116a61472dabb2c46200c0a01",
+    "end": 520,
+    "origin_offset": 5196,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 341,
+    "text": "The TSC shall hold annual elections to select a TSC Chairperson and voting CPC member; there are no limits on the number of terms a TSC Chairperson or voting CPC member may serve.",
+    "unit_id": "u0026"
+  },
+  "nodejs-tsc-charter:u0027:s00": {
+    "digest": "324f1c46119288c8d1af0172e696c2c94cfb682b1feb34154d4a5ca49c5b3c81",
+    "end": 10,
+    "origin_offset": 5377,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 0,
+    "text": "## Section",
+    "unit_id": "u0027"
+  },
+  "nodejs-tsc-charter:u0027:s01": {
+    "digest": "a50aa8b9a9806899e1d67d0d09c1ce40221cb0dffc52483e8e6da18ff1753a38",
+    "end": 13,
+    "origin_offset": 5388,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 11,
+    "text": "7.",
+    "unit_id": "u0027"
+  },
+  "nodejs-tsc-charter:u0027:s02": {
+    "digest": "aca2f665db08be74b5be7d3cfd993885c36774be830d4dcfd49f382f8c25e85a",
+    "end": 20,
+    "origin_offset": 5391,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 14,
+    "text": "Voting",
+    "unit_id": "u0027"
+  },
+  "nodejs-tsc-charter:u0028:s00": {
+    "digest": "c5c0c7a1bf2f0d069950baa2193796aa3904b849a1caf34be81ba1ab057bb354",
+    "end": 81,
+    "origin_offset": 5399,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 0,
+    "text": "For internal project decisions, Collaborators shall operate under Lazy Consensus.",
+    "unit_id": "u0028"
+  },
+  "nodejs-tsc-charter:u0028:s01": {
+    "digest": "adefdeabadf9c8f4df9c6777b278fc5e2439a30c49d48e850d79d674f8756af6",
+    "end": 245,
+    "origin_offset": 5481,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 82,
+    "text": "The TSC shall establish appropriate guidelines for implementing Lazy Consensus (e.g. expected notification and review time periods) within the development process.",
+    "unit_id": "u0028"
+  },
+  "nodejs-tsc-charter:u0029:s00": {
+    "digest": "8588797488464637340c28bb6689afeb6189b0abc2bbdbe1aca323ea4b2424b0",
+    "end": 83,
+    "origin_offset": 5646,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 0,
+    "text": "The TSC follows a [Consensus Seeking][] decision making model among voting members.",
+    "unit_id": "u0029"
+  },
+  "nodejs-tsc-charter:u0029:s01": {
+    "digest": "d78af26b564c0ae329289684bf97faf58f1e574667e0a1982b825be635d0f770",
+    "end": 182,
+    "origin_offset": 5730,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 84,
+    "text": "When an agenda item has appeared to reach a consensus the moderator will ask \"Does anyone object?\"",
+    "unit_id": "u0029"
+  },
+  "nodejs-tsc-charter:u0029:s02": {
+    "digest": "6cd724cd47960bb6cec9ed37b42b47084a06388960f0e594b4c01246af76de24",
+    "end": 230,
+    "origin_offset": 5829,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 183,
+    "text": "as a final call for dissent from the consensus.",
+    "unit_id": "u0029"
+  },
+  "nodejs-tsc-charter:u0030:s00": {
+    "digest": "6ec18b1af2f4abd59e30b3478ec93291a9f0155391a4e316ed09a27a213a3a7b",
+    "end": 177,
+    "origin_offset": 5878,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 0,
+    "text": "For all votes, the winning candidate option is the one that wins a simple majority of all TSC voting members in every head-to-head election against each of the other candidates.",
+    "unit_id": "u0030"
+  },
+  "nodejs-tsc-charter:u0030:s01": {
+    "digest": "e9907a63adb52d38bd018ab9191cc47d8d7bb4e2c52c2aa7b1a770a955ce88cd",
+    "end": 255,
+    "origin_offset": 6056,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 178,
+    "text": "A TSC voting member may choose to participate in any vote through abstention.",
+    "unit_id": "u0030"
+  },
+  "nodejs-tsc-charter:u0030:s02": {
+    "digest": "a1969ed67292031b44c3d32e22e2e1ed6d6b5ab4c00f6ccfd51574bbf6e29711",
+    "end": 376,
+    "origin_offset": 6134,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 256,
+    "text": "As long as a vote is open, TSC voting members' choices must not be disclosed, to avoid influencing other voting members.",
+    "unit_id": "u0030"
+  },
+  "nodejs-tsc-charter:u0031:s00": {
+    "digest": "8f2a3c9412c3102bc9a13d250e9eda35be83b5c3e60752810aa3a0204d44cf0b",
+    "end": 56,
+    "origin_offset": 6256,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 0,
+    "text": "All changes to this charter must be approved by the CPC.",
+    "unit_id": "u0031"
+  },
+  "nodejs-tsc-charter:u0032:s00": {
+    "digest": "a10f46d6ced728b15077db4d3ec41acf5fe70fa6e75f1be055405206cb2c74dc",
+    "end": 27,
+    "origin_offset": 6314,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 0,
+    "text": "## Section 8. Project Roles",
+    "unit_id": "u0032"
+  },
+  "nodejs-tsc-charter:u0033:s00": {
+    "digest": "dc193162a8d96fbf27f956c6dd9cec0bb000d0533e6563df0cca76f5c416b480",
+    "end": 126,
+    "origin_offset": 6343,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 0,
+    "text": "The Node.js git repository is maintained by the TSC and additional Collaborators who are added by the TSC on an ongoing basis.",
+    "unit_id": "u0033"
+  },
+  "nodejs-tsc-charter:u0034:s00": {
+    "digest": "0bf0336514d387d5f8c9299dcd6adbabb65335175fdaf5b3b47c2ed327250ddc",
+    "end": 120,
+    "origin_offset": 6471,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 0,
+    "text": "Individuals making significant and valuable contributions are made Collaborators and given commit-access to the project.",
+    "unit_id": "u0034"
+  },
+  "nodejs-tsc-charter:u0034:s01": {
+    "digest": "ac77283a8d56d11c23c79c6a23404b4bef3bc068b95fea13deda0dc98def8852",
+    "end": 235,
+    "origin_offset": 6592,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 121,
+    "text": "These individuals are identified by the TSC and their addition as Collaborators is discussed during a TSC meeting.",
+    "unit_id": "u0034"
+  },
+  "nodejs-tsc-charter:u0034:s02": {
+    "digest": "9c2c392a1f1483811896587c7fbe979f0f206e03d6b925e3873dbd4af810a64f",
+    "end": 360,
+    "origin_offset": 6707,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 236,
+    "text": "Modifications of the contents of the git repository are made on a collaborative basis as defined in the development process.",
+    "unit_id": "u0034"
+  },
+  "nodejs-tsc-charter:u0035:s00": {
+    "digest": "a470d1cc1c2c01a025d50c8d184fa52a7020134caf0c75d0b1a99f98a9ae9ff3",
+    "end": 211,
+    "origin_offset": 6833,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 0,
+    "text": "Collaborators may opt to elevate significant or controversial modifications, or modifications that have not found consensus to the TSC for discussion by assigning the `tsc-agenda` tag to a pull request or issue.",
+    "unit_id": "u0035"
+  },
+  "nodejs-tsc-charter:u0035:s01": {
+    "digest": "d74b0712b50d7443f8e1dc6006de7251793c1b04c46613532628f0fe41fd0d67",
+    "end": 321,
+    "origin_offset": 7045,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 212,
+    "text": "When consensus cannot be reached, the TSC voting members should serve as the final arbiter by casting a vote.",
+    "unit_id": "u0035"
+  },
+  "nodejs-tsc-charter:u0035:s02": {
+    "digest": "c5e12cbac8f9337f5cd696da5df6b70d181302ec1e6f0dfe04b404cfbfff83f8",
+    "end": 512,
+    "origin_offset": 7155,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 322,
+    "text": "The TSC will maintain and publish a list of current Collaborators, as well as a development process guide for Collaborators and Contributors looking to participate in the development effort.",
+    "unit_id": "u0035"
+  },
+  "nodejs-tsc-charter:u0036:s00": {
+    "digest": "c6d9727914059c27d5ce54773e046316f25d3bfaee650e8f8ee3dfc17480b3da",
+    "end": 13,
+    "origin_offset": 7347,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 0,
+    "text": "## Section 9.",
+    "unit_id": "u0036"
+  },
+  "nodejs-tsc-charter:u0036:s01": {
+    "digest": "8775bbb39cb0805e30a731b00808ae5b246fcde24b445f1734656bf34ac5e2af",
+    "end": 25,
+    "origin_offset": 7361,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 14,
+    "text": "Definitions",
+    "unit_id": "u0036"
+  },
+  "nodejs-tsc-charter:u0037:s00": {
+    "digest": "d64f50eafd107230c34b8d5117604469f2038b40c807c19a601e3d880459a96c",
+    "end": 109,
+    "origin_offset": 7374,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 0,
+    "text": "* **Contributors**: contribute code or other artifacts, but do not have the right to commit to the code base.",
+    "unit_id": "u0037"
+  },
+  "nodejs-tsc-charter:u0037:s01": {
+    "digest": "4a2ce3a8f52ccf16f5fe99d00d1f0b0318906c8a52736bbafb7d990f1251c8f4",
+    "end": 201,
+    "origin_offset": 7486,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 110,
+    "text": "Contributors work with the project’s Collaborators to have code committed to the code base.",
+    "unit_id": "u0037"
+  },
+  "nodejs-tsc-charter:u0037:s02": {
+    "digest": "0c6656fedf4bff9cab769a72efe1c06c39a10d1429a52b412cec17152d10bda5",
+    "end": 261,
+    "origin_offset": 7580,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 202,
+    "text": "A Contributor may be promoted to a Collaborator by the TSC.",
+    "unit_id": "u0037"
+  },
+  "nodejs-tsc-charter:u0037:s03": {
+    "digest": "247aa0f45224dcda77919b6f70d21dd2214d96c58800a000393caf8624e6a312",
+    "end": 362,
+    "origin_offset": 7642,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 262,
+    "text": "Contributors should rarely be encumbered by the TSC and never by the CPC or OpenJS Foundation Board.",
+    "unit_id": "u0037"
+  },
+  "nodejs-tsc-charter:u0038:s00": {
+    "digest": "ae2f4fa77739804f361d84325afabef475870dff0eccc39050f0ce23f7a6d66b",
+    "end": 146,
+    "origin_offset": 7746,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 0,
+    "text": "* **Project**: a technical collaboration effort, e.g. a subsystem, that is organized through the project creation process and approved by the TSC.",
+    "unit_id": "u0038"
+  },
+  "nodejs-tsc-charter:u0039:s00": {
+    "digest": "e8108f90a25f5d9fb982b1fe1279b81538f4911a4fa1d85b6690265d29c4ef03",
+    "end": 59,
+    "origin_offset": 7898,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 0,
+    "text": "[Condorcet]: https://en.wikipedia.org/wiki/Condorcet_method",
+    "unit_id": "u0039"
+  },
+  "nodejs-tsc-charter:u0039:s01": {
+    "digest": "7cd0c7cfc324462aa234a5b74ccbf2cfd5140cc9160d46d4ab9ee6158d69676a",
+    "end": 144,
+    "origin_offset": 7958,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 60,
+    "text": "[Consensus Seeking]: https://en.wikipedia.org/wiki/Consensus-seeking_decision-making",
+    "unit_id": "u0039"
+  },
+  "nodejs-tsc-charter:u0039:s02": {
+    "digest": "701dd1569a11255da1e4a30d1f7afaa537de1e693bd0de1d46b19f80d3fbb8ea",
+    "end": 227,
+    "origin_offset": 8043,
+    "path": "",
+    "source_id": "nodejs-tsc-charter",
+    "start": 145,
+    "text": "[Single Transferable Vote]: https://en.wikipedia.org/wiki/Single_transferable_vote",
+    "unit_id": "u0039"
+  }
+}
