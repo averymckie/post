@@ -897,6 +897,7 @@ def s_majority_policy(ctx: dict[str, Any]) -> None:
     p = ctx["dir"] / "policy.jdm.json"
     p.write_text(jdm, encoding="utf-8")
     ctx["decision"] = zen.ZenEngine().create_decision(jdm)
+    ctx["majority"] = majority
     ctx["files"] = [p]
     ctx["shows"].append(f'roster: {total} voting members (nodejs/node README, retrieved 2026-09-04); majority = {majority}; rule quoted from the charter: "{quote[:90]}..."')
 
@@ -1422,6 +1423,7 @@ def dfg(label: str) -> dict[str, Any]:
     ctx = dict(RESULTS[("log", label)])
     ctx["dir"] = out_dir("P23", label)
     run(proof, label, ctx)
+    RESULTS[("dfg", label)] = ctx
     return ctx
 
 
@@ -1689,6 +1691,857 @@ def workbook_roundtrip(label: str) -> dict[str, Any]:
     return ctx
 
 
+# ----------------------------------------------------------------------------
+# P31 .. P40
+# ----------------------------------------------------------------------------
+
+
+def s_attendance_chart(ctx: dict[str, Any]) -> None:
+    import plotly.graph_objects as go
+    import plotly.io as pio
+
+    rows = ctx["decision_rows"][1:]
+    fig = go.Figure()
+    fig.add_bar(x=[r[0] for r in rows], y=[r[1] for r in rows], name="voting members present")
+    fig.add_hline(y=ctx["majority"], line_dash="dash", annotation_text=f"simple majority = {ctx['majority']}")
+    fig.update_layout(title="TSC voting members present per meeting, against the charter's simple majority", xaxis_tickangle=-45)
+    p = ctx["dir"] / "attendance.html"
+    pio.write_html(fig, str(p), include_plotlyjs="cdn", full_html=True, div_id="chart")
+    ctx["files"] = [p]
+    ctx["shows"] = [f"{len(rows)} bars, threshold line at {ctx['majority']}"]
+
+
+def attendance_chart() -> dict[str, Any]:
+    proof = Proof(
+        "P31",
+        "decisions -> chart -> page",
+        ["decisions (P13)"],
+        [Step("chart", "plotly.graph_objects.Figure; add_bar; add_hline", s_attendance_chart), Step("page", "plotly.io.write_html(full_html, div_id)", lambda c: None)],
+        "page",
+    )
+    src = RESULTS[("decisions", "majority")]
+    ctx = {"dir": out_dir("P31", "majority"), "decision_rows": src["decision_rows"], "majority": src["majority"]}
+    run(proof, "majority", ctx)
+    return ctx
+
+
+def s_coverage_matrix(ctx: dict[str, Any]) -> None:
+    import duckdb
+
+    con = duckdb.connect()
+    con.execute("create table tag(meeting varchar, action varchar)")
+    con.executemany("insert into tag values (?, ?)", [(t["sentence_id"].split(":")[0], ctx["lemma"].get(t["step"], "?")) for t in ctx["tags"] if not t["tie"]])
+    counts = con.execute("select meeting, action, count(*) from tag group by meeting, action").fetchall()
+    meetings = sorted({m for m, _, _ in counts})
+    actions = sorted({a for _, a, _ in counts})
+    cell = {(m, a): n for m, a, n in counts}
+    rows = [["action"] + meetings] + [[a] + [cell.get((m, a), 0) for m in meetings] for a in actions]
+    p = workbook(ctx["dir"] / "coverage_matrix.xlsx", {"matrix": rows})
+    ctx["files"] = [p]
+    ctx["shows"] = [f"matrix {len(actions)} actions x {len(meetings)} meetings", f"row {rows[1][0]}: {rows[1][1:]}"]
+
+
+def coverage_matrix() -> dict[str, Any]:
+    proof = Proof(
+        "P32",
+        "tagged actions -> coverage matrix -> workbook",
+        ["tagged actions (P26)"],
+        [Step("measure", "duckdb: count per (meeting, action); one row per action, one column per meeting", s_coverage_matrix), Step("tabulate", "openpyxl.Workbook.save", lambda c: None)],
+        "coverage matrix",
+    )
+    src = RESULTS[("tagged steps", "nodejs-tsc-charter")]
+    ctx = {"dir": out_dir("P32", "charter+minutes"), "tags": src["tags"], "lemma": src["lemma"]}
+    run(proof, "charter+minutes", ctx)
+    return ctx
+
+
+def s_never_discussed(ctx: dict[str, Any]) -> None:
+    import clingo
+
+    prog = [f"step({lit(e)})." for e in ctx["order"]]
+    prog += [f"tag({lit(t['sentence_id'])},{lit(t['step'])})." for t in ctx["tags"] if not t["tie"]]
+    prog.append("discussed(E) :- tag(_,E).")
+    prog.append("never(E) :- step(E), not discussed(E).")
+    prog.append("lines(E,N) :- step(E), N = #count{ L : tag(L,E) }.")
+    prog.append("#show never/1. #show lines/2.")
+    ctl = clingo.Control(["0"])
+    ctl.add("base", [], "\n".join(prog))
+    ctl.ground([("base", [])])
+    syms: list[Any] = []
+    ctl.solve(on_model=lambda m: syms.extend(m.symbols(shown=True)))
+    never = sorted(s.arguments[0].string for s in syms if s.name == "never")
+    lines = {s.arguments[0].string: s.arguments[1].number for s in syms if s.name == "lines"}
+    rows = [["step", "step_lemma", "minutes_lines", "never_discussed"]] + [[e, ctx["lemma"].get(e, "?"), lines.get(e, 0), e in never] for e in ctx["order"]]
+    p = workbook(ctx["dir"] / "never_discussed.xlsx", {"steps": rows})
+    ctx["files"] = [p]
+    ctx["shows"] = [f"steps never discussed {len(never)} of {len(ctx['order'])}: {', '.join(ctx['lemma'].get(e, '?') for e in never)}"]
+
+
+def never_discussed(label_steps: str) -> dict[str, Any]:
+    proof = Proof(
+        "P33",
+        "ordered steps, tagged steps -> undiscussed steps -> workbook",
+        ["ordered steps (P2), tagged steps (P10)"],
+        [Step("complement", "clingo: never(E) :- step(E), not discussed(E)", s_never_discussed), Step("tabulate", "openpyxl.Workbook.save", lambda c: None)],
+        "undiscussed steps",
+    )
+    src = RESULTS[("tagged steps", label_steps)]
+    ctx = {"dir": out_dir("P33", label_steps), "tags": src["tags"], "lemma": src["lemma"], "order": src["order"]}
+    run(proof, label_steps, ctx)
+    return ctx
+
+
+WOFLAN = r"""
+import json, sys
+import pm4py
+from pm4py.objects.petri_net.importer import importer as pnml_importer
+net, im, fm = pnml_importer.apply(sys.argv[1])
+sound, diag = pm4py.check_soundness(net, im, fm)
+keep = {str(getattr(k, "value", k)).split(".")[-1]: (v if isinstance(v, (bool, int, float, str)) else str(v)[:300]) for k, v in diag.items()}
+print("RESULT " + json.dumps({"sound": bool(sound), "diagnostics": keep}))
+"""
+WOFLAN_BUDGET = 420
+
+
+def s_soundness(ctx: dict[str, Any]) -> None:
+    """woflan in a subprocess under a time budget; the verdict is memoized on the net's digest."""
+    import subprocess
+
+    import pm4py
+
+    net, im, fm = ctx["net"]
+    pnml = ctx["dir"] / "process.pnml"
+    if not pnml.exists():
+        pm4py.write_pnml(net, im, fm, str(pnml))
+    digest = sha256_file(pnml)
+    out = ctx["dir"] / "soundness.json"
+    res: dict[str, Any] | None = None
+    if out.exists():
+        prev = json.loads(out.read_text(encoding="utf-8"))
+        if prev.get("pnml_sha256") == digest and prev.get("seconds_budget") == WOFLAN_BUDGET:
+            res = prev
+    if res is None:
+        try:
+            r = subprocess.run([sys.executable, "-c", WOFLAN, str(pnml)], capture_output=True, text=True, timeout=WOFLAN_BUDGET)
+            line = [l for l in r.stdout.splitlines() if l.startswith("RESULT ")][-1]
+            res = json.loads(line[len("RESULT "):])
+        except subprocess.TimeoutExpired:
+            res = {"sound": None, "undecided": f"woflan did not finish within {WOFLAN_BUDGET} s"}
+        res["pnml_sha256"] = digest
+        res["seconds_budget"] = WOFLAN_BUDGET
+        write_json(out, res)
+    ctx["files"] = [out] if pnml in ctx.get("files", []) else [pnml, out]
+    verdict = res["sound"] if res.get("sound") is not None else res.get("undecided")
+    ctx["shows"] = [f"sound: {verdict}", *[f"{k}: {v}" for k, v in list(res.get("diagnostics", {}).items())[:4]]]
+
+
+def soundness_discovered(label: str) -> dict[str, Any]:
+    proof = Proof(
+        "P34",
+        "process model -> soundness proof",
+        ["process model (P8, discovered)"],
+        [Step("soundness proof", "pm4py.check_soundness (woflan): workflow net, liveness, boundedness", s_soundness)],
+        "soundness proof",
+    )
+    ctx = {"dir": out_dir("P34", label), "net": RESULTS[("log", label)]["net"]}
+    run(proof, label, ctx)
+    return ctx
+
+
+def s_bpmn_to_net(ctx: dict[str, Any]) -> None:
+    import pm4py
+
+    bpmn = pm4py.read_bpmn(str(ctx["bpmn_path"]))
+    net, im, fm = pm4py.convert_to_petri_net(bpmn)
+    ctx["net"] = (net, im, fm)
+    p = ctx["dir"] / "process.pnml"
+    pm4py.write_pnml(net, im, fm, str(p))
+    ctx["files"] = [p]
+    ctx["shows"] = [f"read back {len(bpmn.get_nodes())} bpmn nodes; petri net places {len(net.places)}, transitions {len(net.transitions)}"]
+
+
+def s_soundness_append(ctx: dict[str, Any]) -> None:
+    files, shows = ctx["files"], ctx["shows"]
+    s_soundness(ctx)
+    ctx["files"] = files + ctx["files"]
+    ctx["shows"] = shows + ctx["shows"]
+
+
+def soundness_from_order(label: str) -> dict[str, Any]:
+    proof = Proof(
+        "P35",
+        "process -> petri net -> soundness proof",
+        ["process (P5)"],
+        [
+            Step("read", "pm4py.read_bpmn", s_bpmn_to_net),
+            Step("petri net", "pm4py.convert_to_petri_net; pm4py.write_pnml", lambda c: None),
+            Step("soundness proof", "pm4py.check_soundness (woflan)", s_soundness_append),
+        ],
+        "soundness proof",
+    )
+    ctx = {"dir": out_dir("P35", label), "bpmn_path": RESULTS[("process", label)]["files"][0]}
+    run(proof, label, ctx)
+    return ctx
+
+
+def s_variants(ctx: dict[str, Any]) -> None:
+    import pm4py
+
+    v = pm4py.get_variants_as_tuples(ctx["log"])
+    items = sorted(((k, (n if isinstance(n, int) else len(n))) for k, n in v.items()), key=lambda kv: (-kv[1], kv[0]))
+    rows = [["cases", "length", "variant"]] + [[n, len(k), " -> ".join(k)] for k, n in items]
+    p = workbook(ctx["dir"] / "variants.xlsx", {"variants": rows})
+    ctx["files"] = [p]
+    ctx["shows"] = [f"variants {len(items)}; most common ({items[0][1]} cases): {' -> '.join(items[0][0])[:110]}"]
+
+
+def variants(label: str) -> dict[str, Any]:
+    proof = Proof(
+        "P36",
+        "log -> variants -> workbook",
+        ["log (P8)"],
+        [Step("variants", "pm4py.get_variants_as_tuples", s_variants), Step("tabulate", "openpyxl.Workbook.save", lambda c: None)],
+        "variants",
+    )
+    ctx = {"dir": out_dir("P36", label), "log": RESULTS[("log", label)]["log"]}
+    run(proof, label, ctx)
+    return ctx
+
+
+def s_rdf(ctx: dict[str, Any]) -> None:
+    import rdflib
+    from rdflib import Literal, Namespace, RDF, URIRef
+
+    EX = Namespace("https://example.org/proofs/")
+    g = rdflib.Graph()
+    g.bind("ex", EX)
+
+    def u(s: str) -> URIRef:
+        return URIRef(EX + s.replace("#", "/"))
+
+    for a in ctx["atoms"]:
+        if a.predicate == "event":
+            g.add((u(a.args[0]), RDF.type, EX.Event))
+            g.add((u(a.args[0]), EX.lemma, Literal(a.args[1])))
+            g.add((u(a.args[0]), EX.sentence, Literal(a.sentence_id)))
+        elif a.predicate in ("agent", "patient", "theme"):
+            g.add((u(a.args[0]), EX[a.predicate], u(a.args[1])))
+            g.add((u(a.args[1]), EX.quote, Literal(a.quote)))
+        elif a.predicate in ("obligatory", "negated"):
+            g.add((u(a.args[0]), EX[a.predicate], Literal(True)))
+        elif a.predicate == "precedes":
+            g.add((u(a.args[0]), EX.precedes, u(a.args[1])))
+    p = ctx["dir"] / "facts.ttl"
+    g.serialize(destination=str(p), format="turtle")
+    q = """PREFIX ex: <https://example.org/proofs/>
+SELECT ?e ?lemma ?who WHERE { ?e a ex:Event ; ex:lemma ?lemma ; ex:obligatory true ; ex:agent ?x . ?x ex:quote ?who } ORDER BY ?e"""
+    res = [[str(r.e).replace(str(EX), ""), str(r.lemma), str(r.who)] for r in g.query(q)]
+    rows = [["event", "lemma", "who"]] + res
+    p2 = workbook(ctx["dir"] / "sparql_required_actions.xlsx", {"required": rows})
+    (ctx["dir"] / "query.sparql").write_text(q + "\n", encoding="utf-8")
+    ctx["files"] = [p, p2, ctx["dir"] / "query.sparql"]
+    ctx["shows"] = [f"triples {len(g)}; obligatory events with an agent {len(res)}", *[f"{r[1]} by {r[2]}" for r in res[:3]]]
+
+
+def rdf(label: str) -> dict[str, Any]:
+    proof = Proof(
+        "P37",
+        "facts -> knowledge graph -> query results -> workbook",
+        ["facts (P1)"],
+        [
+            Step("knowledge graph", "rdflib.Graph.add; Graph.serialize(format='turtle')", s_rdf),
+            Step("query", "rdflib.Graph.query (SPARQL)", lambda c: None),
+            Step("tabulate", "openpyxl.Workbook.save", lambda c: None),
+        ],
+        "query results",
+    )
+    ctx = {"dir": out_dir("P37", label), "atoms": RESULTS[("facts", label)]["atoms"]}
+    run(proof, label, ctx)
+    return ctx
+
+
+def s_kuzu(ctx: dict[str, Any]) -> None:
+    import shutil
+    import tempfile
+
+    import kuzu
+
+    tmp = Path(tempfile.mkdtemp())
+    db = kuzu.Database(str(tmp / "db"))
+    con = kuzu.Connection(db)
+    schema = [
+        "CREATE NODE TABLE Event(id STRING, lemma STRING, obligatory BOOLEAN, negated BOOLEAN, sentence STRING, PRIMARY KEY(id))",
+        "CREATE NODE TABLE Arg(id STRING, quote STRING, PRIMARY KEY(id))",
+        "CREATE REL TABLE AGENT(FROM Event TO Arg)",
+        "CREATE REL TABLE PATIENT(FROM Event TO Arg)",
+        "CREATE REL TABLE THEME(FROM Event TO Arg)",
+        "CREATE REL TABLE PRECEDES(FROM Event TO Event)",
+    ]
+    for s in schema:
+        con.execute(s)
+    atoms = ctx["atoms"]
+    obl = {a.args[0] for a in atoms if a.predicate == "obligatory"}
+    neg = {a.args[0] for a in atoms if a.predicate == "negated"}
+    for a in atoms:
+        if a.predicate == "event":
+            con.execute("CREATE (:Event {id: $id, lemma: $lemma, obligatory: $o, negated: $n, sentence: $s})", {"id": a.args[0], "lemma": a.args[1], "o": a.args[0] in obl, "n": a.args[0] in neg, "s": a.sentence_id})
+    seen: set[str] = set()
+    for a in atoms:
+        if a.predicate in ("agent", "patient", "theme") and a.args[1] not in seen:
+            seen.add(a.args[1])
+            con.execute("CREATE (:Arg {id: $id, quote: $q})", {"id": a.args[1], "q": a.quote})
+    for a in atoms:
+        if a.predicate in ("agent", "patient", "theme"):
+            con.execute(f"MATCH (e:Event {{id: $e}}), (x:Arg {{id: $x}}) CREATE (e)-[:{a.predicate.upper()}]->(x)", {"e": a.args[0], "x": a.args[1]})
+        elif a.predicate == "precedes":
+            con.execute("MATCH (a:Event {id: $a}), (b:Event {id: $b}) CREATE (a)-[:PRECEDES]->(b)", {"a": a.args[0], "b": a.args[1]})
+    q1 = "MATCH (e:Event)-[:AGENT]->(x:Arg) WHERE e.obligatory RETURN e.id, e.lemma, x.quote ORDER BY e.id"
+    q2 = "MATCH (a:Event)-[:PRECEDES]->(b:Event) RETURN a.lemma, b.lemma, a.id, b.id ORDER BY a.id, b.id"
+    r1 = con.execute(q1).get_all()
+    r2 = con.execute(q2).get_all()
+    p = workbook(ctx["dir"] / "cypher_results.xlsx", {"required_with_agent": [["event", "lemma", "who"]] + r1, "precedes": [["before", "after", "before_id", "after_id"]] + r2})
+    (ctx["dir"] / "queries.cypher").write_text("\n".join(schema + [q1, q2]) + "\n", encoding="utf-8")
+    shutil.rmtree(tmp, ignore_errors=True)
+    ctx["files"] = [p, ctx["dir"] / "queries.cypher"]
+    ctx["shows"] = [f"events {len([a for a in atoms if a.predicate == 'event'])}, args {len(seen)}; obligatory events with an agent {len(r1)}; precedes edges {len(r2)}", *[f"{r[1]} by {r[2]}" for r in r1[:2]], *[f"{r[0]} precedes {r[1]}" for r in r2[:2]]]
+
+
+def graph_db(label: str) -> dict[str, Any]:
+    proof = Proof(
+        "P38",
+        "facts -> graph database -> query results -> workbook",
+        ["facts (P1)"],
+        [
+            Step("graph database", "kuzu.Database; kuzu.Connection.execute: CREATE NODE TABLE, CREATE REL TABLE, CREATE", s_kuzu),
+            Step("query", "kuzu.Connection.execute (Cypher MATCH); QueryResult.get_all", lambda c: None),
+            Step("tabulate", "openpyxl.Workbook.save", lambda c: None),
+        ],
+        "query results",
+    )
+    ctx = {"dir": out_dir("P38", label), "atoms": RESULTS[("facts", label)]["atoms"]}
+    run(proof, label, ctx)
+    return ctx
+
+
+def s_site(ctx: dict[str, Any]) -> None:
+    import shutil
+
+    from mkdocs.commands.build import build
+    from mkdocs.config import load_config
+
+    d = ctx["dir"]
+    docs = d / "docs"
+    if docs.exists():
+        shutil.rmtree(docs)
+    docs.mkdir(parents=True)
+    o = ctx["ordering"]
+    atoms = ctx["atoms"]
+    lemma = {a.args[0]: a.args[1] for a in atoms if a.predicate == "event"}
+    sent = {ps.sentence.id: ps.sentence.text for ps in ctx["parsed"]}
+    idx = [f"# {ctx['label']}: ordered steps", "", "| # | step | sentence |", "|---|---|---|"]
+    bar = "\\|"
+    for i, e in enumerate(o.order, 1):
+        text = sent.get(e.split("#")[0], "").replace("|", bar)
+        idx.append(f"| {i} | {lemma.get(e, '?')} `{e.split(':', 1)[1]}` | {text} |")
+    idx += ["", "## forced precedence", "", "| before | after |", "|---|---|"] + [f"| {lemma.get(a, '?')} | {lemma.get(b, '?')} |" for a, b in o.forced]
+    (docs / "index.md").write_text("\n".join(idx) + "\n", encoding="utf-8")
+    f = ["# facts", "", "| predicate | args | quote |", "|---|---|---|"]
+    for a in atoms:
+        args = " ".join(x.split("#")[-1] for x in a.args)
+        f.append(f"| {a.predicate} | {args} | {a.quote.replace('|', bar)} |")
+    (docs / "facts.md").write_text("\n".join(f) + "\n", encoding="utf-8")
+    cfg = d / "mkdocs.yml"
+    cfg.write_text(f"site_name: {ctx['label']}\ndocs_dir: docs\nsite_dir: site\nuse_directory_urls: false\nnav:\n  - steps: index.md\n  - facts: facts.md\n", encoding="utf-8")
+    build(load_config(str(cfg)))
+    site = d / "site"
+    for junk in ("sitemap.xml", "sitemap.xml.gz"):
+        (site / junk).unlink(missing_ok=True)
+    ctx["files"] = [site / "index.html", site / "facts.html"]
+    ctx["shows"] = [f"pages {len(list(site.glob('*.html')))}; index rows {len(o.order)}; facts rows {len(atoms)}"]
+
+
+def site(label: str) -> dict[str, Any]:
+    proof = Proof(
+        "P39",
+        "ordered steps, facts -> pages -> site",
+        ["ordered steps (P2), facts (P1)"],
+        [
+            Step("pages", "markdown tables written from the rows", s_site),
+            Step("site", "mkdocs.config.load_config; mkdocs.commands.build.build", lambda c: None),
+        ],
+        "site",
+    )
+    src = RESULTS[("ordered steps", label)]
+    ctx = {"dir": out_dir("P39", label), "ordering": src["ordering"], "atoms": src["atoms"], "parsed": src["parsed"], "label": label}
+    run(proof, label, ctx)
+    return ctx
+
+
+def s_doc_roundtrip(ctx: dict[str, Any]) -> None:
+    import docx
+    from csv_diff import compare
+
+    d = docx.Document(str(ctx["docx"]))
+    back = []
+    for para in d.paragraphs:
+        m = re.match(r"^(\d+)\. (.+?)  \[(.+)\]$", para.text)
+        if m:
+            back.append({"position": m.group(1), "lemma": m.group(2), "id": m.group(3)})
+    o = ctx["ordering"]
+    lemma = {a.args[0]: a.args[1] for a in ctx["atoms"] if a.predicate == "event"}
+    fwd = [{"position": str(i), "lemma": lemma.get(e, "?"), "id": e} for i, e in enumerate(o.order, 1)]
+    diff = compare({r["id"]: r for r in fwd}, {r["id"]: r for r in back})
+    same = sha256_json(fwd) == sha256_json(back)
+    p = write_json(ctx["dir"] / "roundtrip.json", {"digest_forward": sha256_json(fwd), "digest_back": sha256_json(back), "match": same, "changed": diff["changed"][:5], "added": diff["added"][:5], "removed": diff["removed"][:5]})
+    ctx["files"] = [p]
+    ctx["shows"] = [f"steps read back {len(back)} of {len(fwd)}; match {same}; changed {len(diff['changed'])}, added {len(diff['added'])}, removed {len(diff['removed'])}"]
+
+
+def document_roundtrip(label: str) -> dict[str, Any]:
+    proof = Proof(
+        "P40",
+        "document -> steps' -> digest' ; digest', digest -> match",
+        ["document (P15), ordered steps (P2)"],
+        [
+            Step("read paragraphs", "docx.Document; Document.paragraphs", s_doc_roundtrip),
+            Step("seal", "json.dumps sort_keys; hashlib.sha256", lambda c: None),
+            Step("compare", "csv_diff.compare", lambda c: None),
+        ],
+        "match, or the differing cell",
+    )
+    src = RESULTS[("ordered steps", label)]
+    ctx = {"dir": out_dir("P40", label), "docx": OUT / "P15" / label / "ordered_steps.docx", "ordering": src["ordering"], "atoms": src["atoms"]}
+    run(proof, label, ctx)
+    return ctx
+
+
+# ----------------------------------------------------------------------------
+# P41 .. P50
+# ----------------------------------------------------------------------------
+
+
+def s_bpmn_3d(ctx: dict[str, Any]) -> None:
+    import networkx as nx
+    import plotly.graph_objects as go
+    import plotly.io as pio
+
+    o = ctx["ordering"]
+    lemma = {a.args[0]: a.args[1] for a in ctx["atoms"] if a.predicate == "event"}
+    G = nx.DiGraph()
+    G.add_nodes_from(o.order)
+    G.add_edges_from(o.forced)
+    layers = list(nx.topological_generations(G))
+    pos: dict[str, tuple[int, int, int]] = {}
+    for li, layer in enumerate(layers):
+        for ni, n in enumerate(sorted(layer)):
+            unit = int(re.search(r":u(\d+):", n).group(1))
+            pos[n] = (li, ni, unit)
+    fig = go.Figure()
+    for a, b in o.forced:
+        fig.add_trace(go.Scatter3d(x=[pos[a][0], pos[b][0]], y=[pos[a][1], pos[b][1]], z=[pos[a][2], pos[b][2]], mode="lines", line={"color": "gray"}, showlegend=False))
+    fig.add_trace(
+        go.Scatter3d(
+            x=[pos[n][0] for n in o.order], y=[pos[n][1] for n in o.order], z=[pos[n][2] for n in o.order], mode="markers+text",
+            text=[lemma.get(n, "?") for n in o.order], textposition="top center", marker={"size": 6}, showlegend=False,
+        )
+    )
+    fig.update_layout(title=f"{ctx['label']}: forced order in three axes", scene={"xaxis_title": "layer (earlier to later)", "yaxis_title": "position in layer", "zaxis_title": "unit of the source text"})
+    p = ctx["dir"] / "process_3d.html"
+    pio.write_html(fig, str(p), include_plotlyjs="cdn", full_html=True, div_id="chart")
+    ctx["files"] = [p]
+    ctx["shows"] = [f"nodes {len(pos)}, edges {len(o.forced)}, layers {len(layers)}; z = source unit index"]
+
+
+def bpmn_3d(label: str) -> dict[str, Any]:
+    proof = Proof(
+        "P41",
+        "ordered steps -> layers -> 3D process page",
+        ["ordered steps (P2)"],
+        [
+            Step("layers", "networkx.topological_generations; z from the source unit of each step", s_bpmn_3d),
+            Step("draw", "plotly.graph_objects.Scatter3d (lines, markers+text)", lambda c: None),
+            Step("page", "plotly.io.write_html(full_html, div_id)", lambda c: None),
+        ],
+        "3D process page",
+    )
+    src = RESULTS[("ordered steps", label)]
+    ctx = {"dir": out_dir("P41", label), "ordering": src["ordering"], "atoms": src["atoms"], "label": label}
+    run(proof, label, ctx)
+    return ctx
+
+
+POLICY_PAGE = """<!doctype html><html><head><meta charset="utf-8"><title>{{ title }}</title>
+<style>body{font-family:system-ui,sans-serif;max-width:60rem;margin:2rem auto;padding:0 1rem;color:#222}
+table{border-collapse:collapse;width:100%}td,th{border:1px solid #ccc;padding:.4rem .6rem;vertical-align:top;text-align:left}
+th{background:#f4f4f4}.rule{color:#555;font-size:.9em}.yes{color:#0a6}.no{color:#c33}</style></head><body>
+<h1>{{ title }}</h1>
+<p>{{ subtitle }}</p>
+<table><tr><th>if</th><th>then</th><th>because</th></tr>
+{% for r in rules %}<tr><td>{{ r.if }}</td><td>{{ r.then }}</td><td class="rule">{{ r.because }}</td></tr>
+{% endfor %}</table>
+{% if cases %}<h2>applied</h2><table><tr>{% for h in case_header %}<th>{{ h }}</th>{% endfor %}</tr>
+{% for c in cases %}<tr>{% for v in c %}<td class="{{ 'yes' if v is true else ('no' if v is false else '') }}">{{ v }}</td>{% endfor %}</tr>
+{% endfor %}</table>{% endif %}
+</body></html>
+"""
+
+
+def s_policy_page(ctx: dict[str, Any]) -> None:
+    import jinja2
+
+    jdm = json.loads(Path(ctx["jdm_path"]).read_text(encoding="utf-8"))
+    dt = next(n for n in jdm["nodes"] if n["type"] == "decisionTableNode")
+    inputs = {i["id"]: i["name"] for i in dt["content"]["inputs"]}
+    outputs = {o["id"]: o["name"] for o in dt["content"]["outputs"]}
+    rules = []
+    for r in dt["content"]["rules"]:
+        conds = [f"{inputs[k]} {v}" for k, v in r.items() if k in inputs and v]
+        outs = [f"{outputs[k]} = {v.strip(chr(39))}" for k, v in r.items() if k in outputs]
+        rules.append({"if": " and ".join(conds) or "otherwise", "then": "; ".join(outs), "because": r.get("_description", "")})
+    html = jinja2.Environment(autoescape=True).from_string(POLICY_PAGE).render(
+        title=ctx["title"], subtitle=ctx["subtitle"], rules=rules, cases=ctx.get("cases", []), case_header=ctx.get("case_header", [])
+    )
+    p = ctx["dir"] / "policy.html"
+    p.write_text(html, encoding="utf-8")
+    ctx["files"] = [p]
+    ctx["shows"] = [f"rules {len(rules)}; first: if {rules[0]['if']} then {rules[0]['then']}"]
+
+
+def policy_page(label: str) -> dict[str, Any]:
+    proof = Proof(
+        "P42",
+        "policy -> readable policy page",
+        ["policy (P4 or P13), decisions (P13)"],
+        [
+            Step("read table", "json.loads of the GoRules JDM; inputs, outputs, rules, rule descriptions", s_policy_page),
+            Step("page", "jinja2.Environment(autoescape).from_string(...).render -> html", lambda c: None),
+        ],
+        "policy page",
+    )
+    if label == "majority":
+        src = RESULTS[("decisions", "majority")]
+        ctx = {
+            "dir": out_dir("P42", label), "jdm_path": src["files"][0], "title": "Can a vote carry at this meeting?",
+            "subtitle": "The rule is the charter's sentence, rendered as a table; the cases are the eight meetings' attendance.",
+            "cases": src["decision_rows"][1:], "case_header": src["decision_rows"][0],
+        }
+    else:
+        src = RESULTS[("policy", label)]
+        ctx = {"dir": out_dir("P42", label), "jdm_path": src["files"][0], "title": f"{label}: required actions", "subtitle": "Each row is an obligation found in the text; the quote is the sentence it came from."}
+    run(proof, label, ctx)
+    return ctx
+
+
+def s_heatmap(ctx: dict[str, Any]) -> None:
+    import plotly.express as px
+    import plotly.io as pio
+
+    con = duck_events(ctx["rows"])
+    res = con.execute(
+        """
+        with seq as (select case_id, activity, department, ts, lag(ts) over (partition by case_id order by ts) as prev from ev)
+        select department, activity, round(avg(epoch(ts - prev))/3600, 2) as mean_hours
+        from seq where prev is not null group by department, activity order by department, activity
+        """
+    ).fetchall()
+    deps = sorted({r[0] for r in res})
+    acts = sorted({r[1] for r in res})
+    cell = {(d, a): h for d, a, h in res}
+    z = [[cell.get((d, a)) for a in acts] for d in deps]
+    fig = px.imshow(z, x=acts, y=deps, labels={"x": "activity", "y": "department", "color": "mean hours since previous event"}, title="waiting time by department and activity, receipt phase", aspect="auto")
+    fig.update_layout(xaxis_tickangle=-45)
+    p = ctx["dir"] / "heatmap.html"
+    pio.write_html(fig, str(p), include_plotlyjs="cdn", full_html=True, div_id="chart")
+    p2 = workbook(ctx["dir"] / "heatmap.xlsx", {"mean_hours": [["department"] + acts] + [[d] + row for d, row in zip(deps, z)]})
+    ctx["files"] = [p, p2]
+    ctx["shows"] = [f"{len(deps)} departments x {len(acts)} activities", *[f"{r[0]} / {r[1]}: {r[2]} h" for r in sorted(res, key=lambda r: -(r[2] or 0))[:3]]]
+
+
+def heatmap(label: str) -> dict[str, Any]:
+    proof = Proof(
+        "P43",
+        "records -> measured cells -> heatmap page",
+        ["records (P6)"],
+        [
+            Step("measure", "duckdb: avg(epoch(ts - lag(ts))) per department and activity", s_heatmap),
+            Step("chart", "plotly.express.imshow", lambda c: None),
+            Step("page", "plotly.io.write_html(full_html, div_id)", lambda c: None),
+        ],
+        "heatmap page",
+    )
+    ctx = {"dir": out_dir("P43", label), "rows": RESULTS[("records", label)]["rows"]}
+    run(proof, label, ctx)
+    return ctx
+
+
+def s_who_what(ctx: dict[str, Any]) -> None:
+    import duckdb
+
+    atoms = ctx["atoms"]
+    lemma = {a.args[0]: a.args[1] for a in atoms if a.predicate == "event"}
+    obl = {a.args[0] for a in atoms if a.predicate == "obligatory"}
+    con = duckdb.connect()
+    con.execute("create table t(who varchar, what varchar)")
+    con.executemany("insert into t values (?, ?)", [(a.quote.lower(), lemma.get(a.args[0], "?")) for a in atoms if a.predicate == "agent" and a.args[0] in obl])
+    res = con.execute("select who, what, count(*) as n from t group by who, what order by n desc, who, what").fetchall()
+    whos = sorted({r[0] for r in res})
+    whats = sorted({r[1] for r in res})
+    cell = {(w, x): n for w, x, n in res}
+    rows = [["who \\ must"] + whats] + [[w] + [cell.get((w, x), 0) for x in whats] for w in whos]
+    p = workbook(ctx["dir"] / "who_must_what.xlsx", {"matrix": rows, "pairs": [["who", "must", "count"]] + [list(r) for r in res]})
+    ctx["files"] = [p]
+    ctx["shows"] = [f"{len(whos)} actors x {len(whats)} required actions", *[f"{r[0]} must {r[1]} ({r[2]})" for r in res[:3]]]
+
+
+def who_must_what(label: str) -> dict[str, Any]:
+    proof = Proof(
+        "P44",
+        "facts -> actor by action matrix -> workbook",
+        ["facts (P1)"],
+        [Step("measure", "duckdb: count per (agent quote, event lemma) over obligatory events", s_who_what), Step("tabulate", "openpyxl.Workbook.save", lambda c: None)],
+        "actor by action matrix",
+    )
+    ctx = {"dir": out_dir("P44", label), "atoms": RESULTS[("facts", label)]["atoms"]}
+    run(proof, label, ctx)
+    return ctx
+
+
+def s_timeline(ctx: dict[str, Any]) -> None:
+    import plotly.graph_objects as go
+    import plotly.io as pio
+
+    pts = collections.Counter()
+    for t in ctx["tags"]:
+        if not t["tie"]:
+            pts[(t["sentence_id"].split(":")[0].replace("tsc-", ""), ctx["lemma"].get(t["step"], "?"))] += 1
+    xs = [k[0] for k in pts]
+    ys = [k[1] for k in pts]
+    sizes = [6 + 3 * n for n in pts.values()]
+    fig = go.Figure(go.Scatter(x=xs, y=ys, mode="markers", marker={"size": sizes}, text=[f"{n} lines" for n in pts.values()]))
+    fig.update_layout(title="which governance steps each TSC meeting discussed", xaxis_title="meeting", yaxis_title="step")
+    p = ctx["dir"] / "timeline.html"
+    pio.write_html(fig, str(p), include_plotlyjs="cdn", full_html=True, div_id="chart")
+    ctx["files"] = [p]
+    ctx["shows"] = [f"points {len(pts)}; meetings {len(set(xs))}, steps {len(set(ys))}"]
+
+
+def timeline(label_steps: str) -> dict[str, Any]:
+    proof = Proof(
+        "P45",
+        "tagged steps -> timeline page",
+        ["tagged steps (P10)"],
+        [Step("measure", "count of lines per (meeting, step)", s_timeline), Step("chart", "plotly.graph_objects.Scatter (marker size = lines)", lambda c: None), Step("page", "plotly.io.write_html", lambda c: None)],
+        "timeline page",
+    )
+    src = RESULTS[("tagged steps", label_steps)]
+    ctx = {"dir": out_dir("P45", label_steps), "tags": src["tags"], "lemma": src["lemma"]}
+    run(proof, label_steps, ctx)
+    return ctx
+
+
+def s_bottlenecks(ctx: dict[str, Any]) -> None:
+    import duckdb
+
+    con = duckdb.connect()
+    con.execute("create table dfg(a varchar, b varchar, n integer)")
+    con.executemany("insert into dfg values (?, ?, ?)", [tuple(r) for r in ctx["dfg_rows"][1:]])
+    con.execute("create table wait(activity varchar, events integer, mean_hours double)")
+    con.executemany("insert into wait values (?, ?, ?)", [(r[0], r[1], r[2]) for r in ctx["measured"][1:]])
+    res = con.execute(
+        "select d.a, d.b, d.n, w.mean_hours from dfg d join wait w on w.activity = d.b where w.mean_hours is not null order by w.mean_hours desc, d.n desc limit 25"
+    ).fetchall()
+    rows = [["from", "to", "cases", "mean_hours_waiting_into_to"]] + [list(r) for r in res]
+    p = workbook(ctx["dir"] / "bottlenecks.xlsx", {"bottlenecks": rows})
+    ctx["files"] = [p]
+    ctx["shows"] = [f"{r[0]} -> {r[1]}: {r[2]} cases, {r[3]} h" for r in res[:3]]
+
+
+def bottlenecks(label: str) -> dict[str, Any]:
+    proof = Proof(
+        "P46",
+        "directly-follows graph, measured steps -> bottlenecks -> workbook",
+        ["directly-follows graph (P23), measured steps (P12)"],
+        [Step("key", "duckdb: join edges to the waiting time of their target activity", s_bottlenecks), Step("rank", "duckdb: order by mean hours desc", lambda c: None), Step("tabulate", "openpyxl.Workbook.save", lambda c: None)],
+        "bottlenecks",
+    )
+    ctx = {"dir": out_dir("P46", label), "dfg_rows": RESULTS[("dfg", label)]["dfg_rows"], "measured": RESULTS[("measured activities", "receipt-xes+receipt-csv")]["measured"]}
+    run(proof, label, ctx)
+    return ctx
+
+
+AT_RISK_JDM = """{
+ "contentType": "application/vnd.gorules.decision",
+ "nodes": [
+  {"id": "in", "type": "inputNode", "name": "case", "position": {"x": 0, "y": 0}},
+  {"id": "dt", "type": "decisionTableNode", "name": "open case past its department's mean", "position": {"x": 0, "y": 0},
+   "content": {"hitPolicy": "first",
+    "inputs": [{"id": "i1", "name": "department", "field": "department"}, {"id": "i2", "name": "elapsed days", "field": "elapsed_days"}],
+    "outputs": [{"id": "o1", "name": "at risk", "field": "at_risk"}, {"id": "o2", "name": "rule", "field": "rule"}],
+    "rules": [
+{% for d in deps %}     {"_id": "r{{ loop.index }}", "_description": "open longer than the {{ d.department }} mean of {{ d.mean_days }} days (P22)", "i1": {{ (d.department|tojson)|tojson }}, "i2": "> {{ d.mean_days }}", "o1": "true", "o2": "'r{{ loop.index }}'"},
+{% endfor %}     {"_id": "r0", "_description": "otherwise", "i1": "", "i2": "", "o1": "false", "o2": "'r0'"}
+    ]}},
+  {"id": "out", "type": "outputNode", "name": "decision", "position": {"x": 0, "y": 0}}
+ ],
+ "edges": [{"id": "e1", "sourceId": "in", "targetId": "dt", "type": "edge"}, {"id": "e2", "sourceId": "dt", "targetId": "out", "type": "edge"}]
+}
+"""
+
+
+def s_at_risk(ctx: dict[str, Any]) -> None:
+    import datetime as _dt
+
+    import jinja2
+    import zen
+
+    con = duck_events(ctx["rows"])
+    deps = con.execute(
+        "with c as (select case_id, any_value(department) d, min(ts) f, max(ts) l from ev group by case_id) select d, round(avg(epoch(l - f))/86400, 2) from c group by d order by d"
+    ).fetchall()
+    end = con.execute("select max(ts) from ev").fetchone()[0]
+    opens = con.execute(
+        "with c as (select case_id, any_value(department) d, any_value(enddate) e, max(ts) l from ev group by case_id) select case_id, d, round(epoch(? - l)/86400, 2) from c where e = '' order by case_id", [end]
+    ).fetchall()
+    jdm = jinja2.Environment().from_string(AT_RISK_JDM).render(deps=[{"department": d, "mean_days": m} for d, m in deps])
+    p = ctx["dir"] / "policy.jdm.json"
+    p.write_text(jdm, encoding="utf-8")
+    dec = zen.ZenEngine().create_decision(jdm)
+    rows = [["case", "department", "elapsed_days_at_log_end", "at_risk", "rule"]]
+    for c, d, el in opens:
+        r = dec.evaluate({"department": d, "elapsed_days": el})["result"]
+        rows.append([c, d, el, r["at_risk"], r["rule"]])
+    p2 = workbook(ctx["dir"] / "at_risk.xlsx", {"open_cases": rows})
+    n = sum(1 for r in rows[1:] if r[3])
+    ctx["files"] = [p, p2]
+    ctx["shows"] = [f"log ends {end.date() if hasattr(end, 'date') else end}; open cases {len(opens)}; at risk {n}", f"department means {deps[:3]}", f"first rows {rows[1:3]}"]
+
+
+def at_risk(label: str) -> dict[str, Any]:
+    proof = Proof(
+        "P47",
+        "records, measured groups -> decision table -> decisions -> workbook",
+        ["records (P6), measured groups (P22)"],
+        [
+            Step("measure", "duckdb: department mean duration; elapsed days of each open case at the log's end", s_at_risk),
+            Step("decision table", "jinja2 render: one rule per department, threshold = its mean -> GoRules JDM", lambda c: None),
+            Step("evaluate", "zen.ZenEngine.create_decision; zen.ZenDecision.evaluate per open case", lambda c: None),
+            Step("tabulate", "openpyxl.Workbook.save", lambda c: None),
+        ],
+        "decisions",
+    )
+    ctx = {"dir": out_dir("P47", label), "rows": RESULTS[("records", label)]["rows"]}
+    run(proof, label, ctx)
+    return ctx
+
+
+def s_checklist(ctx: dict[str, Any]) -> None:
+    import docx
+
+    sent = {ps.sentence.id: ps.sentence.text for ps in ctx["parsed"]}
+    d = docx.Document()
+    d.add_heading(f"{ctx['label']}: checklist of required actions", 1)
+    seen: set[str] = set()
+    n = 0
+    for r in ctx["required"]:
+        key = (r["sentence_id"], r["action"])
+        if key in seen:
+            continue
+        seen.add(key)
+        d.add_paragraph(f"☐  {r['action']}")
+        d.add_paragraph(sent.get(r["sentence_id"], ""), style="Intense Quote")
+        n += 1
+    p = ctx["dir"] / "checklist.docx"
+    d.save(p)
+    ctx["files"] = [p]
+    ctx["shows"] = [f"checklist items {n}"]
+
+
+def checklist(label: str) -> dict[str, Any]:
+    proof = Proof(
+        "P48",
+        "required actions -> checklist document",
+        ["required actions (P4), facts (P1)"],
+        [Step("write", "docx.Document; add_paragraph with a box glyph per required action and its sentence; docx.document.Document.save", s_checklist)],
+        "checklist document",
+    )
+    ctx = dict(RESULTS[("policy", label)])
+    ctx["dir"] = out_dir("P48", label)
+    run(proof, label, ctx)
+    return ctx
+
+
+def s_cross_document(ctx: dict[str, Any]) -> None:
+    import clingo
+
+    prog = [f"req({lit(lbl)},{lit(r['action'])})." for lbl, reqs in ctx["required"].items() for r in reqs]
+    prog.append("both(A) :- req(D1,A), req(D2,A), D1 < D2.")
+    prog.append("only(D,A) :- req(D,A), not both(A).")
+    prog.append("#show both/1. #show only/2.")
+    ctl = clingo.Control(["0"])
+    ctl.add("base", [], "\n".join(prog))
+    ctl.ground([("base", [])])
+    syms: list[Any] = []
+    ctl.solve(on_model=lambda m: syms.extend(m.symbols(shown=True)))
+    both = sorted(s.arguments[0].string for s in syms if s.name == "both")
+    only = sorted((s.arguments[0].string, s.arguments[1].string) for s in syms if s.name == "only")
+    rows = [["action", "in"]] + [[a, "both"] for a in both] + [[a, d] for d, a in only]
+    p = workbook(ctx["dir"] / "cross_document.xlsx", {"required_actions": rows})
+    ctx["files"] = [p]
+    ctx["shows"] = [f"required in both documents: {both}", f"only in one: {len(only)}"]
+
+
+def cross_document(labels: list[str]) -> dict[str, Any]:
+    proof = Proof(
+        "P49",
+        "required actions, required actions -> shared and unshared actions -> workbook",
+        ["required actions of two documents (P4)"],
+        [Step("key", "clingo: join on the action lemma across documents", s_cross_document), Step("tabulate", "openpyxl.Workbook.save", lambda c: None)],
+        "shared and unshared actions",
+    )
+    ctx = {"dir": out_dir("P49", "+".join(labels)), "required": {l: RESULTS[("policy", l)]["required"] for l in labels}}
+    run(proof, "+".join(labels), ctx)
+    return ctx
+
+
+def s_site_roundtrip(ctx: dict[str, Any]) -> None:
+    import lxml.html
+    from csv_diff import compare
+
+    doc = lxml.html.fromstring(Path(ctx["index"]).read_text(encoding="utf-8"))
+    table = doc.xpath("//table")[0]
+    back = []
+    for tr in table.xpath(".//tr")[1:]:
+        cells = [" ".join(td.text_content().split()) for td in tr.xpath("./td")]
+        m = re.match(r"^(.+?) (\S+)$", cells[1])
+        back.append({"position": cells[0], "lemma": m.group(1), "id": m.group(2)})
+    o = ctx["ordering"]
+    lemma = {a.args[0]: a.args[1] for a in ctx["atoms"] if a.predicate == "event"}
+    fwd = [{"position": str(i), "lemma": lemma.get(e, "?"), "id": e.split(":", 1)[1]} for i, e in enumerate(o.order, 1)]
+    diff = compare({r["id"]: r for r in fwd}, {r["id"]: r for r in back})
+    same = sha256_json(fwd) == sha256_json(back)
+    p = write_json(ctx["dir"] / "roundtrip.json", {"digest_forward": sha256_json(fwd), "digest_back": sha256_json(back), "match": same, "changed": diff["changed"][:5], "added": diff["added"][:5], "removed": diff["removed"][:5]})
+    ctx["files"] = [p]
+    ctx["shows"] = [f"rows read back {len(back)} of {len(fwd)}; match {same}; changed {len(diff['changed'])}"]
+
+
+def site_roundtrip(label: str) -> dict[str, Any]:
+    proof = Proof(
+        "P50",
+        "site -> steps' -> digest' ; digest', digest -> match",
+        ["site (P39), ordered steps (P2)"],
+        [
+            Step("read page", "lxml.html.fromstring; xpath over the steps table", s_site_roundtrip),
+            Step("seal", "json.dumps sort_keys; hashlib.sha256", lambda c: None),
+            Step("compare", "csv_diff.compare", lambda c: None),
+        ],
+        "match, or the differing cell",
+    )
+    src = RESULTS[("ordered steps", label)]
+    ctx = {"dir": out_dir("P50", label), "index": OUT / "P39" / label / "site" / "index.html", "ordering": src["ordering"], "atoms": src["atoms"]}
+    run(proof, label, ctx)
+    return ctx
+
+
 def main() -> None:
     for label in ["usc5-552-doj", "nodejs-tsc-charter", "nodejs-governance"]:
         door_one(label)
@@ -1732,6 +2585,31 @@ def main() -> None:
     execute_process("usc5-552-doj")
     execute_process("nodejs-governance")
     workbook_roundtrip("usc5-552-doj")
+    attendance_chart()
+    coverage_matrix()
+    never_discussed("nodejs-governance")
+    soundness_discovered("receipt-xes")
+    soundness_from_order("usc5-552-doj")
+    soundness_from_order("nodejs-governance")
+    variants("receipt-xes")
+    rdf("usc5-552-doj")
+    rdf("nodejs-tsc-charter")
+    graph_db("usc5-552-doj")
+    site("usc5-552-doj")
+    document_roundtrip("usc5-552-doj")
+    bpmn_3d("usc5-552-doj")
+    bpmn_3d("nodejs-governance")
+    policy_page("majority")
+    policy_page("usc5-552-doj")
+    heatmap("receipt-csv")
+    who_must_what("usc5-552-doj")
+    timeline("nodejs-governance")
+    bottlenecks("receipt-xes")
+    at_risk("receipt-csv")
+    checklist("nodejs-tsc-charter")
+    checklist("usc5-552-doj")
+    cross_document(["nodejs-tsc-charter", "nodejs-governance"])
+    site_roundtrip("usc5-552-doj")
     seal_all()
     write_md()
     print(f"proofs {len(PROOFS)}; wrote {MD.relative_to(ROOT)}")
