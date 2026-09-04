@@ -1,0 +1,644 @@
+
+Core Interactive Charting and Visualization
+	•	plotly (plotly.express, plotly.graph_objects, plotly.io): Interactive charting engine and HTML generator.
+	•	kaleido: Static image export engine for Plotly figures (PNG, SVG, PDF).
+	•	altair: Declarative statistical visualization library based on Vega-Lite.
+	•	pyecharts: Python bindings for Apache ECharts.
+	•	bokeh: Interactive visualization library targeting modern web browsers.
+	•	hvplot: High-level plotting API built on HoloViews, Bokeh, and Panel.
+	•	holoviews: Declarative data analysis and visualization library.
+	•	datashader: Rasterization pipeline for rendering large datasets.
+	•	matplotlib: Foundational 2D plotting library.
+	•	seaborn: Statistical data visualization built on Matplotlib.
+	•	lets-plot: Multiplatform grammar of graphics plotting library.
+	•	plotnine: Implementation of the grammar of graphics based on ggplot2.
+	•	cellestial: Single-cell data visualization library using Lets-Plot.
+	•	pygal: Dynamic SVG chart generation library.
+	•	d3blocks: D3-based interactive visualizations (chords, sankeys, packing).
+	•	cutecharts: Hand-drawn, sketchy chart library based on chart.xkcd.
+	•	py-roughviz: Python wrapper for the roughViz sketchy charting library.
+	•	pycirclize: Circular layout visualization library for Circos-style plots.
+	•	openchord: Chord diagram generator using drawsvg.
+	•	mpl-chord-diagram: Circular chord diagram library using Matplotlib.
+	•	ridgeplot: Ridgeline plot generator built on Plotly.
+	•	joypy: Ridgeline and joyplot generator built on Matplotlib.
+	•	july: Calendar heatmap generator styled like contribution graphs.
+	•	pywaffle: Waffle and pictogram chart generator.
+	•	upsetplot: Visualizer for complex intersections using UpSet plots.
+	•	matplotlib-venn: Two-set and three-set Venn diagram generator.
+	•	arcplot: Arc diagram visualization library.
+	•	hiveplot: Implementation of Krzywinski hive plot layouts.
+	•	PyComplexHeatmap: Complex annotated heatmap library.
+	•	marsilea: Composable visual canvas for multi-track data matrices.
+	•	highcharts-core, highcharts-gantt, highcharts-stock, highcharts-maps: Highcharts wrappers for Python.
+	•	floweaver: Multidimensional Sankey flow visualization.
+	•	alluvial: Bipartite alluvial diagram generator.
+Web Applications, Dashboards, and UI Frameworks
+	•	streamlit: Rapid web application and data dashboard framework.
+	•	dash: Web application framework for Python built on Plotly, React, and Flask.
+	•	panel: High-level app and dashboard toolkit from HoloViz.
+	•	nicegui: Python-based UI framework built on FastAPI and Vue.
+	•	gradio: Web interface builder for machine learning models and demos.
+	•	shiny (shiny for python): Reactive web application framework.
+	•	solara: Pure Python web framework using React-style declarative components.
+	•	voila: Renderer for Jupyter notebooks as standalone web applications.
+	•	taipy: Full-stack framework for enterprise applications and dashboards.
+	•	fasthtml (cjm-fasthtml-jsonschema): Pure Python web framework and schema-driven form generator.
+	•	pysheets-app: Browser-based spreadsheet UI executing Python cells.
+Office Automation, Document Generation, and Format Conversion
+	•	python-docx: Reader and writer for Microsoft Word (.docx) files.
+	•	docwow: Round-trip converter between Word and HTML.
+	•	html-for-docx (html4docx): HTML fragment parser and converter for docx files.
+	•	html2docx: Legacy HTML to docx conversion utility.
+	•	mammoth: Word (.docx) to clean HTML converter.
+	•	spire.doc: Commercial document engine for docx and HTML conversion.
+	•	openpyxl: Excel (.xlsx) file reader and writer supporting styles and templates.
+	•	xlsxwriter: High-performance Excel file writer supporting native charts.
+	•	tablepyxl: Converter from HTML tables directly into openpyxl sheets.
+	•	htmxl: Jinja-style HTML template parser to Excel workbooks.
+	•	xlwings: Live Excel automation bridge and report generator.
+	•	python-pptx: Creator and editor for PowerPoint (.pptx) presentations.
+	•	office-oxide: Rust-backed parser for Microsoft Office formats to text/Markdown.
+	•	firecrawl-anydoc: Document to Markdown parser.
+	•	undoc: Office document parser emitting Markdown, text, and JSON.
+	•	docling: Document parser for PDFs and Office files.
+	•	markitdown: Document to Markdown conversion tool.
+	•	quarto: Multi-format publishing engine CLI (HTML, PDF, docx, pptx).
+	•	nbconvert: Jupyter notebook converter across multiple formats.
+	•	jinja2: Template engine for Python.
+	•	reportlab: Programmatic PDF creation library.
+	•	fpdf2: Lightweight programmatic PDF generator.
+	•	borb: Object-oriented PDF creation and modification library.
+	•	weasyprint: Visual rendering engine from HTML/CSS to PDF.
+	•	playwright: Headless browser automation library.
+	•	pdfkit: HTML to PDF converter using wkhtmltopdf.
+	•	ironpress: HTML to PDF tool.
+	•	pymupdf (fitz): PDF and document parser and renderer.
+	•	pypdf: Pure Python PDF manipulation library.
+	•	pypdfium2: PDFium bindings for PDF extraction and rendering.
+Publication Tables and Data Grids
+	•	great-tables: Formatted publication table engine.
+	•	dash-ag-grid: Integration of AG Grid for Dash applications.
+	•	itables: Interactive HTML data tables for DataFrames.
+	•	reactable-py: Python port of R reactable for interactive tables.
+	•	pygwalker: Visual data exploration interface in the style of Tableau.
+	•	mitosheet: Interactive spreadsheet interface inside Jupyter and Dash.
+	•	tabulate: Plain-text, Markdown, and HTML table formatter.
+	•	pretty_html_table: Formatted HTML table generator from pandas DataFrames.
+	•	table-compositor: Multi-table styled HTML report builder.
+	•	dataframe_image: Exporter of pandas DataFrames to static images.
+Data Manipulation, Readers, and Hubs
+	•	pandas: Tabular data analysis and manipulation library.
+	•	polars: High-performance DataFrame library implemented in Rust.
+	•	pyexcel: Unified wrapper for reading and writing multi-format spreadsheets.
+	•	tablib: Dataset library with export capabilities for tabular data.
+	•	tableconv: Universal table format conversion tool.
+	•	iterabledata: Streaming conversion utility across data formats.
+	•	rows: Tabular data processor supporting SQL queries.
+	•	petl: Extraction, transformation, and loading toolkit.
+	•	agate: Data analysis library optimized for humans.
+	•	pytablereader: Tabular data loader supporting multiple sources.
+	•	pytablewriter: Structured tabular output writer.
+	•	visidata: Terminal-based spreadsheet and data exploration environment.
+	•	duckdb: In-process SQL OLAP database management system.
+	•	dasel: Query and modification tool across JSON, YAML, TOML, XML, and CSV.
+	•	convpandas: Converter utility between CSV and XLSX.
+	•	filewitch: Conversion utility for spreadsheet formats.
+	•	tabxlsx: Bidirectional XLSX and CSV converter.
+	•	all2md: File converter to Markdown.
+	•	py-excel-rs: Rust-accelerated Excel and CSV library.
+	•	csvkit: Suite of command-line tools for working with CSV files.
+	•	pandas-xlsx-tables: Helper for writing real Excel Table objects from DataFrames.
+	•	xlsx2csv: Streaming converter from XLSX to CSV.
+	•	python-calamine: Rust-backed reader for Excel and ODS formats.
+	•	fastexcel: Calamine-based Excel reader engine for Python.
+	•	xlrd: Legacy Excel (.xls) file reader.
+	•	pyxlsb: Binary Excel (.xlsb) file parser.
+	•	odfpy: OpenDocument format manipulation library.
+	•	pyexcel-ods3: ODS spreadsheet parser plugin.
+	•	spire-xls: Commercial spreadsheet processing and conversion library.
+	•	xlsx2html: XLSX workbook to HTML converter preserving cell formatting.
+	•	csvtotable: Standalone searchable HTML table generator from CSVs.
+	•	csv2html: Basic CSV to HTML table converter.
+	•	csv2md: Basic CSV to Markdown table converter.
+	•	xlsx2md: Basic XLSX to Markdown table converter.
+	•	pyarrow: Apache Arrow bindings for columnar data storage.
+	•	fastparquet: Pure-Python Parquet format reader and writer.
+	•	datasette: Multi-tool ecosystem for publishing data as interactive APIs and UIs.
+	•	sqlite-utils: CLI and library for manipulating SQLite databases.
+	•	csv-diff: Structural diff tool for CSV tables.
+	•	daff: Alignment and diff tool for tabular data.
+Logic, Constraints, SMT, SAT, and Expert Systems
+	•	python-sat (pysat, pysat.examples.rc2): SAT solvers and MaxSAT algorithms.
+	•	python-dd: Binary and multi-valued decision diagram library.
+	•	z3-solver: High-performance SMT solver from Microsoft Research.
+	•	pysmt: Solver-agnostic library for SMT formulas and solving.
+	•	cvc5: Automated theorem prover and SMT solver.
+	•	clingo: Answer Set Programming system.
+	•	clorm: Object-relational mapping library for Clingo facts.
+	•	cpmpy: Constraint programming and modeling environment in Python.
+	•	python-constraint2: Finite-domain constraint satisfaction problem solver.
+	•	exact: Exact model counting and knowledge compilation engine.
+	•	pysdd: Sentential Decision Diagram compiler.
+	•	pyapproxmc: Approximate model counter.
+	•	pyDatalog: Logic programming engine with Datalog syntax for Python.
+	•	souffle: Datalog compilation and evaluation engine.
+	•	typedlogic: Translation bridge from typed Python logic to Soufflé, Clingo, and Z3.
+	•	owlready2: Ontology-oriented programming library using OWL and Description Logics.
+	•	rdflib: RDF library for working with semantic web graphs.
+	•	owlrl: Rule-based reasoning engine for OWL 2 RL.
+	•	pyreason: Temporal and annotated logic reasoning engine over graphs.
+	•	pyswip: Python bridge to SWI-Prolog.
+	•	kanren: Relational programming and miniKanren engine.
+	•	problog: Probabilistic logic programming system.
+	•	deepproblog: Probabilistic logic programming integrated with deep learning.
+	•	ltn (Logic Tensor Networks): Integration of First-Order Logic into neural tensor graphs.
+	•	lnn (Logical Neural Networks): Recurrent neural networks parameterized with logic bounds.
+	•	DeepLog: Neural-symbolic logic execution framework.
+	•	decreasoner: Discrete Event Calculus solver.
+	•	amrlib: Abstract Meaning Representation parsing library.
+	•	amr-logic-converter: Translator from AMR graphs to First-Order Logic formulas.
+	•	penman: Graph serialization library for AMR structures.
+	•	nltk: Natural language toolkit containing logic and theorem-proving interfaces.
+	•	vampire: Automated theorem prover for first-order logic.
+	•	eprover: Equational theorem prover for first-order logic.
+	•	model-checker: Countermodel and model checker via SMT.
+	•	reasoning-core: Automated logic reasoning dataset and evaluation pipeline.
+	•	tptp-utils: Utilities for manipulation of TPTP logic formats.
+	•	experta: Rule-based expert system library based on CLIPS.
+	•	durable-rules: Polyglot rules engine utilizing the Rete algorithm.
+	•	business-rules: Minimal rule engine for Python business logic.
+	•	pyknow: Legacy expert system library precursor to Experta.
+Planning, Scheduling, Optimization, and Numerical Solvers
+	•	unified-planning: Unified Python library for automated planning frameworks.
+	•	fast-downward: Classical planning system bindings.
+	•	tarski: Planning domain and problem specification framework.
+	•	ortools: Google Operations Research tools for linear, integer, routing, and CP-SAT problems.
+	•	pyjobshop: Job-shop scheduling framework built on OR-Tools.
+	•	alns: Adaptive Large Neighborhood Search framework for combinatorial optimization.
+	•	pulp: Linear programming modeler and solver interface.
+	•	pyomo: Algebraic modeling language for complex optimization problems.
+	•	cvxpy: Modeling language for convex optimization problems.
+	•	scipy: Scientific computing library containing optimization, stats, and spatial modules.
+	•	highspy: High-performance linear and mixed-integer programming solver.
+	•	cvxopt: Convex optimization library.
+	•	gekko: Optimization suite for dynamic systems and differential equations.
+	•	scikit-decide: Framework for reinforcement learning and sequential decision-making.
+	•	criticalpath: Critical Path Method project scheduling library.
+	•	se-lib: Systems engineering library covering PERT, DSM, and system dynamics.
+	•	pydsm: Design Structure Matrix modeling library.
+Graph Analytics, Process Mining, and Simulation
+	•	networkx: Comprehensive network and graph analysis library.
+	•	igraph: High-performance graph analysis package.
+	•	graph-tool: C++ accelerated network analysis and layout library.
+	•	rustworkx: High-performance graph library implemented in Rust.
+	•	osmnx: Street network and spatial graph modeling tool.
+	•	pyvis: Interactive network graph visualization library.
+	•	d3graph: D3-based force-directed network graph generator.
+	•	iplotx: High-level graph plotting interface across network backends.
+	•	dash-cytoscape: Cytoscape.js component for Dash applications.
+	•	ipycytoscape: Cytoscape.js widget for Jupyter notebooks.
+	•	graphistry: WebGL-accelerated visual graph explorer.
+	•	ipysigma: Interactive graph visualizer for Jupyter using Sigma.js.
+	•	netgraph: Publication-quality network visualization library for Matplotlib.
+	•	clingraph: Visual graph visualizer for Clingo ASP facts.
+	•	xclingo: Explanation and proof tree generator for Answer Set Programs.
+	•	graphviz (pygraphviz): Graphviz DOT layout and drawing interface.
+	•	pm4py: Process mining library supporting Petri nets, BPMN, and event logs.
+	•	r4pm: Rust-accelerated process mining library.
+	•	simpn: Timed and colored Petri net simulator.
+	•	snakes: General-purpose Petri net modeling environment.
+	•	simpy: Process-based discrete-event simulation framework.
+	•	salabim: Discrete-event simulation and statistical animation library.
+	•	most-queue: Queueing theory computation and simulation suite.
+	•	queueing-tool: Queueing network simulator.
+	•	simprocesd: Manufacturing process and production line simulator.
+	•	python-control: Control systems library supporting Bode, Nyquist, and LQR analysis.
+	•	slycot: Numerical routines for control and system theory.
+	•	do-mpc: Model predictive control platform.
+	•	casadi: Symbolic framework for algorithmic differentiation and optimal control.
+	•	pysd: System dynamics simulation tool for Vensim and XMILE models.
+Quality Engineering, Reliability, Statistics, and DOE
+	•	mqrpy: Quality engineering toolkit for capability, MSA, SPC, and ANOVA.
+	•	daspi: Quality engineering visualizer for capability, Gage R and R, and SPC.
+	•	qda-toolkit: Statistical process control charts library (I-MR, X-bar, CUSUM, EWMA).
+	•	manufacturing: Process capability index (Cpk, Ppk) evaluation library.
+	•	statprocon: Process behavior chart (XmR) calculation library.
+	•	spc-plotly: Plotly-native implementation of statistical process control charts.
+	•	pyshewhart: Shewhart control chart library supporting Western Electric rules.
+	•	pypetb: Statistical capability and Gage R and R analysis library.
+	•	GageRnR: ANOVA-based Measurement Systems Analysis library.
+	•	sckit-msa: Measurement systems analysis package.
+	•	sixsigmaspc: Statistical process control charting package.
+	•	pydoe: Design of Experiments library for factorial and optimal designs.
+	•	dexpy: Optimal experimental design library.
+	•	bofire: Bayesian optimization and experimental design framework.
+	•	reliability: Reliability engineering, Weibull analysis, and block diagrams.
+	•	lifelines: Survival analysis library for time-to-event data.
+	•	fmdtools: Failure Modes and Effects Analysis (FMEA) and resilience simulation.
+	•	statsmodels: Statistical modeling, hypothesis tests, and econometrics.
+	•	pingouin: Statistical analysis package for ANOVA, regression, and pairwise tests.
+	•	sktime: Time series analysis and forecasting framework.
+	•	prophet: Automated time series forecasting library.
+	•	darts: Unified time series forecasting suite.
+	•	pmdarima: Automated ARIMA modeling library.
+	•	pymc: Probabilistic programming and Bayesian modeling library.
+	•	numpyro: JAX-backed probabilistic programming framework.
+	•	arviz: Exploratory analysis and diagnostics for Bayesian models.
+	•	causalpy: Causal inference for quasi-experimental data.
+	•	dowhy: Causal inference engine utilizing graphical causal models.
+	•	pgmpy: Probabilistic graphical models library.
+	•	pathmc: Structural causal model engine built on PyMC.
+Policy Engines, Forms, Permissions, and Orchestration
+	•	zen-engine: Decision table and decision graph evaluation engine.
+	•	spiffworkflow: BPMN and DMN workflow execution engine.
+	•	bkflow-dmn: Decision Model and Notation evaluation library.
+	•	ruly-dmn: DMN XML execution library.
+	•	rulebricks: SDK for hosted decision tables.
+	•	decisionrules: Client SDK for cloud decision tables.
+	•	pydantic: Data validation and settings management using type annotations.
+	•	pyxform: Tool to convert Excel forms into ODK/XLSForm definitions.
+	•	pycasbin: Authorization library supporting ACL, RBAC, and ABAC.
+	•	openfga: Fine-grained relationship-based authorization engine SDK.
+	•	cerbos: Policy-based access control engine client.
+	•	growthbook: Feature flagging and A/B testing SDK.
+	•	unleash-client-python: Client library for Unleash feature toggle service.
+	•	flagsmith: Feature flag and remote configuration SDK.
+	•	prefect: Workflow orchestration and data pipeline engine.
+	•	dagster: Data orchestration platform.
+	•	temporalio: Durable workflow orchestration engine SDK.
+	•	django-viewflow: Business process management for Django.
+2D and 3D Graphic Design, Typography, Vector Canvas, and Layout
+	•	skia-python: Python bindings for the Skia 2D graphics engine.
+	•	pycairo: Python bindings for the Cairo 2D vector graphics library.
+	•	pixie-python: 2D vector drawing and rendering library.
+	•	drawsvg: Programmatic vector canvas builder for SVG and raster formats.
+	•	svg.py: Strongly typed SVG generation library.
+	•	svg-python: Component-based SVG generation package.
+	•	svglab: SVG optimization, parsing, and modification library.
+	•	svglib: SVG file parser and converter to ReportLab objects.
+	•	cairosvg: SVG to PNG, PDF, and PostScript converter.
+	•	puresvg: Pure Python SVG rasterizer without native C dependencies.
+	•	rough: Vector generator for hand-drawn, sketchy graphics.
+	•	drawbot-skia: Cross-platform 2D graphics library implementing the DrawBot API.
+	•	drawBot: Programmatic 2D typography and graphic design environment.
+	•	coldtype: Programmatic typography, variable fonts, and vector animation engine.
+	•	generativepy: Generative vector graphics and animation library using Cairo.
+	•	PyX: PostScript, PDF, and SVG drawing package with TeX integration.
+	•	flat: Generative 2D layout, typography, and page generation library.
+	•	aggdraw: Anti-Grain Geometry drawing interface over Pillow images.
+	•	omnicanvas: Generic canvas layer for multi-format vector output.
+	•	pictex: CSS flexbox-based 2D layout and image generator.
+	•	html2pic: HTML and CSS image rendering engine using PicTex.
+	•	stretchable: Taffy-based CSS block, flex, and grid layout calculator.
+	•	PageBot: Page design and typographic composition engine.
+	•	fontTools: Library for manipulating OpenType and TrueType fonts.
+	•	uharfbuzz: Python bindings for the HarfBuzz text-shaping engine.
+	•	freetype-py: FreeType font rasterization bindings.
+	•	skia-pathops: Path boolean operation toolkit.
+	•	blackrenderer: Rendering engine for OpenType COLR and CPAL color fonts.
+	•	fontmake: Font compilation pipeline from source formats to OTF and TTF.
+	•	pixel-font-builder: Builder for bitmap and pixel fonts.
+	•	fontfyi: Google Fonts metadata and font pairing utility.
+	•	typogrify: Typographic formatting and punctuation beautifier.
+	•	vtracer: Image raster-to-vector tracing library.
+	•	vectalab: High-fidelity vectorization utility.
+	•	vpype: Vector graphics optimization and processing utility for plotters.
+	•	vsketch: Processing-style generative vector sketching library.
+	•	pysvgenius: Vector optimization and generation toolkit.
+	•	cadvectorgraphics: CAD to clean 2D vector SVG conversion tool.
+	•	pillow: Imaging Library for raster image processing.
+	•	opencv-python: Computer vision and image processing library.
+	•	scikit-image: Algorithms for scientific image processing.
+	•	wand: Ctypes-based interface to ImageMagick.
+	•	imageio: Library for reading and writing image and video data.
+	•	qrcode: QR code image generation library.
+	•	python-barcode: Linear barcode generator.
+	•	segno: QR code and Micro QR code generation library.
+	•	pyStrich: Barcode generation library covering 1D and 2D standards.
+	•	manim (manimce, manim-slides): Programmatic mathematical animation engine.
+	•	animageo: Geometry animation generator translating GeoGebra to Manim.
+	•	glaxnimate: Vector animation program supporting Lottie and SVG.
+	•	schemdraw: Electrical circuit, logic gate, and schematic drawing library.
+	•	diagrams: Cloud architecture diagramming library.
+	•	blockdiag, seqdiag, actdiag, nwdiag: Diagram generators from plain text.
+	•	sympy: Symbolic mathematics library with LaTeX equation rendering.
+	•	vedo: 3D visual analysis and mesh manipulation library based on VTK.
+	•	pyvista: VTK-backed 3D visualization and mesh analysis library.
+	•	geovista: Cartographic and geospatial mesh visualization built on PyVista.
+	•	fastplotlib: GPU-accelerated plotting library built on WGPU and PyGFX.
+	•	pygfx: Render engine using the WGPU standard.
+	•	trame: Interactive web platform for scientific 3D visualization.
+	•	vispy: High-performance interactive OpenGL data visualization library.
+	•	glumpy: OpenGL-based scientific visualization library.
+	•	solidpython: OpenSCAD solid modeling generator.
+	•	cadquery: Parametric 3D CAD modeling framework based on OpenCascade.
+	•	build123d: Code-driven 2D and 3D parametric CAD framework.
+	•	numpy-stl: Library for reading and writing STL mesh files.
+	•	voxelmap: Voxel modeling and 3D mapping library from NumPy arrays.
+	•	topogmesh: GeoTIFF elevation mesh generator for 3D printing.
+Geospatial and Cartography
+	•	shapely: Manipulation and analysis of planar geometric objects.
+	•	geopandas: Spatial data manipulation extending pandas.
+	•	folium: Leaflet.js interactive map visualization library.
+	•	pydeck: Large-scale spatial visualization library built on Deck.gl.
+	•	keplergl: Jupyter widget for geospatial data analysis with Kepler.gl.
+	•	contextily: Contextual basemap retrieval for spatial plots.
+	•	xyzservices: Metadata repository for XYZ web map tile providers.
+	•	prettymapp: Postcard-style vector map generator from OpenStreetMap.
+	•	prettymaps: Aesthetic cartographic map generator using OpenStreetMap data.
+	•	pybeautymaps: Artistic map generation library.
+	•	lonboard: High-performance geospatial vector visualizer using Arrow and Deck.gl.
+	•	eomaps: Interactive map creation library based on Cartopy and Matplotlib.
+	•	pygmt: Python interface to Generic Mapping Tools.
+	•	map_maker: Map generation utility from WKT and GeoJSON files.
+	•	maptoposter: Map poster generator supporting multiple themes.
+	•	gpxtrackposter: GPX track visualizer and poster generator.
+Themes, Styles, Palettes, and Visual Styling
+	•	scienceplots: Matplotlib style definitions for IEEE, Nature, and Science journals.
+	•	mplscience: Matplotlib configuration for scientific publication graphics.
+	•	sciplot: Publication style and LaTeX typography wrapper for Matplotlib.
+	•	stylia: Scientific journal and slide formatting theme manager.
+	•	plotperfect: Standardized publication plotting styles from NASA-IMPACT.
+	•	pypubfigs: Colorblind-safe publication themes and utilities.
+	•	mplstyles: Collection of curated Matplotlib stylesheets.
+	•	qbstyles: QuantumBlack design system styling for Matplotlib.
+	•	opinionated: Opinionated graphics styling library based on hrbrthemes.
+	•	pyplot-themes: Matplotlib port of popular visualization and newsroom themes.
+	•	matplotx: Stylesheet manager and typographic layout modifier for Matplotlib.
+	•	catppuccin (mplcatppuccin): Palette and style definitions for the Catppuccin color system.
+	•	mplcyberpunk: Cyberpunk neon styling and glow effects for Matplotlib.
+	•	aquarel: Matplotlib theme and stylesheet customizer.
+	•	highlight_text: Mixed-style and inline colored text annotation helper.
+	•	adjustText: Automatic label placement and collision avoidance library.
+	•	cmap: Universally accessible colormap library for multiple plotting backends.
+	•	cmcrameri: Perceptually uniform scientific colormaps developed by Fabio Crameri.
+	•	cmasher: Perceptually uniform and color-vision-deficiency safe colormaps.
+	•	colorcet: Perceptually uniform colormap collection by Peter Kovesi.
+	•	cmocean: Oceanographic and scientific colormaps.
+	•	cmyt: Colormaps designed for astrophysical and scientific analysis.
+	•	colormaps: Unified access library across multiple scientific color maps.
+	•	scicolor: Scientific and fine-art palette collection.
+	•	palettable: Library of color palettes from ColorBrewer, Tableau, and Wes Anderson.
+	•	colorspace: HCL-based color palette creation and color space manipulation.
+	•	met-brewer: Color palettes derived from Metropolitan Museum of Art exhibits.
+	•	wesanderson: Color palettes inspired by Wes Anderson films.
+	•	distinctipy: Algorithmic generator of visually distinct colors.
+	•	colour: Science-focused color conversion and colorimetric analysis library.
+	•	colorspacious: Color appearance modeling and conversion library.
+	•	colormath: Color calculation and Delta E delta evaluation library.
+	•	dash-bootstrap-templates: Plotly figure templates matched to Bootswatch themes.
+	•	vizro: Dashboard design system and template framework from McKinsey.
+	•	turbo-themes: Design token and theme definitions for data visualization.
+	•	feedzai-altair-theme: Enterprise product visual theme for Altair charts.
+	•	feffery-antd-charts: Ant Design charting suite integration for Dash.
+	•	feffery-infographic: Ant Design infographic layout wrapper for Dash.
+	•	wbpyplot: Official World Bank styling and palette theme for Matplotlib.
+	•	clean-business-chart: International Business Communication Standards (IBCS) charts.
+Specialized Domains and Ritual Visualizations
+	•	Financial and Market Visualizations:
+	•	mplfinance: Specialized financial charting library for OHLC and candlestick charts.
+	•	quantstats: Quantitative portfolio analytics and tear sheet generator.
+	•	pyfolio: Portfolio and risk analytics performance tear sheet library.
+	•	finplot: High-performance finance charting engine built on PyQt.
+	•	mplchart: Declarative technical analysis charting library.
+	•	perspective-python: Fast streaming analytical data grid and charting engine.
+	•	finSankey: Cashflow and balance sheet Sankey visualizer.
+	•	lightweight-charts: Python interface for TradingView Lightweight Charts.
+	•	wrchart: Polars-native financial charting library for candlestick alternatives.
+	•	streamlit-lightweight-charts-v5: Streamlit component for TradingView visualizers.
+	•	pfund-plot: Financial trading visualizer for multi-asset strategies.
+	•	quantlib: Quantitative finance and derivatives pricing library.
+	•	numpy-financial: Standard financial formulas library.
+	•	Linguistics, NLP, and Text Metrics:
+	•	spacy: Industrial-strength natural language processing and dependency visualization.
+	•	stanza: Stanford NLP pipeline and syntactic dependency tree viewer.
+	•	dependency2tree: Syntactic dependency tree generator from CoNLL-U format.
+	•	wordcloud: Word cloud image generator.
+	•	scattertext: Visualization of word usage differentiation across corpora.
+	•	Machine Learning Model Interpretability:
+	•	yellowbrick: Machine learning diagnostic and evaluation visualizer.
+	•	scikit-plot: Standard visual evaluation metrics for scikit-learn classifiers.
+	•	shap: Game-theoretic model explainability and feature contribution plots.
+	•	dtreeviz: Decision tree visualizer and model inspector.
+	•	embedding-atlas: High-dimensional embedding and cluster exploration tool.
+	•	Biology, Medicine, Astronomy, and Science:
+	•	forestplot: Meta-analysis and clinical odds ratio forest plot generator.
+	•	bioinfokit: Bioinformatics data analysis and visualization (volcano, Manhattan plots).
+	•	scanpy: Single-cell transcriptome analysis and visualization library.
+	•	starplot: Programmatic celestial chart and planisphere generator.
+	•	kerykeion: Astrological and natal chart vector generator.
+	•	skyfield: High-precision celestial ephemerides and position calculator.
+	•	astroquery: Astronomical database querying toolkit.
+	•	wcsaxes: World Coordinate System plotting module for astronomical images.
+	•	reproject: Astronomical image spatial reprojection library.
+	•	astropy: Core library for astronomy calculations and data structures.
+	•	APLpy: Astronomical plotting library built on Matplotlib.
+	•	dplpy: Dendrochronology and tree-ring series analysis library.
+	•	pyGenomeTracks: Track-based genomic visualization tool.
+	•	CoolBox: Genomic data visualizer supporting Hi-C and genomic annotations.
+	•	HiCExplorer: Hi-C chromosome conformation data analysis and plotting.
+	•	mplhep: Styling and helper routines for High Energy Physics plots.
+	•	uproot: High Energy Physics ROOT file reader in pure Python.
+	•	rdkit: Cheminformatics and molecular structure visualization library.
+	•	cosmolkit: Molecular depiction and representation framework.
+	•	wqchartpy: Water chemistry visualizer (Piper, Durov, and Stiff diagrams).
+	•	biblium: Bibliometric and citation network analysis library.
+	•	Accessibility and Data Sonification:
+	•	maidr: Multimodal data visualization tool supporting braille, sonification, and AI descriptions.
+	•	sonipy: Data sonification library mapping point parameters to pitch and time.
+	•	strauss: Sonification framework for astronomical and analytical datasets.
+	•	Astronify: Sound translation library for time-series data.
+	•	sonecules: Molecular structure sonification tool.
+	•	audio-plot-lib: Audio plotting and data listening tool.
+	•	miditime: Time-series data converter into standard MIDI files.
+	•	ddpy: Data-driven MIDI note generator from DataFrame metrics.
+	•	py_midicsv: Bidirectional CSV and standard MIDI file converter.
+	•	sonify: CSV data to playable audio synthesizer.
+	•	libsonare: MIDI event sequencer and audio processor.
+	•	pretty_midi: MIDI processing and score modification utility.
+	•	music21: Computational musicology and symbolic music analysis toolkit.
+	•	verovio: Music encoding and notation engraving engine.
+	•	Sports Analytics and Motion:
+	•	mplsoccer: Football pitch visualization and event data plotting library.
+	•	sportypy: Regulation surface drawing library for major sports leagues.
+	•	bar-chart-race: Animated bar chart race generator for ranked metrics.
+	•	Physical Fabrication, Craft, and Games:
+	•	pyembroidery: Machine embroidery file parser, editor, and writer.
+	•	stitch-generator: Embroidery path and stitch pattern generation library.
+	•	knit-script: Programmatic DSL compiler for automated knitting machines.
+	•	knit-graphs: Graph data structure representing knitted textile loops.
+	•	knitout-interpreter: Interpreter for knitting machine bytecode.
+	•	knitout-to-dat-python: Knitting code converter for industrial flat-knitting hardware.
+	•	pyxstitch: Cross-stitch pattern generator from images and pixel matrices.
+	•	pathy-svg: Spatial heatmap generator onto custom anatomical SVG templates.
+	•	brickmos: BrickLink building block mosaic generator and bill of materials compiler.
+	•	legopic: LEGO mosaic image generator.
+	•	decksmith: Tabletop trading card game generator from tabular schemas.
+	•	playing-card-gen: Print-sheet and card layout generator from decklists.
+	•	qure: Secure QR-encoded identification badge generation library.
+	•	pysvglabel: Parametric label sheet printer using SVG templates and CSV inputs.
+	•	py-svg-card-gen: SVG trading card generator from tabular rows.
+	•	familytree: Genealogical descendant and ancestor poster generator.
+	•	python-gedcom: GEDCOM genealogy file parser.
+	•	simple-gedcom: Lightweight GEDCOM file parser.
+	•	ged2dot: Converter from GEDCOM files to Graphviz DOT graphs.
+	•	chess: Chess logic engine with native SVG board rendering.
+	•	pycrossword: Crossword puzzle grid generator and publisher.
+	•	comicsol: Storyboard table to lettered comic page compositor.
+	•	One-Shot Automated Explorers, Profilers, and Generators:
+	•	csvglow: Automated single-file HTML dashboard builder from tabular files.
+	•	datavzrd: Interactive HTML report generator with integrated Vega histograms.
+	•	plotgen: Command-line interface for generating Plotly figures from tables.
+	•	charted: Command-line SVG chart generator.
+	•	timelineviz: Timeline visualizer handling multi-segment broken-axis dates.
+	•	graphedexcel: Dependency graph generator mapping formula links across spreadsheet cells.
+	•	ydata-profiling: Exploratory data analysis and HTML summary report generator.
+	•	sweetviz: Visual exploratory data analysis and target comparison reporter.
+	•	dataprep: Data preparation and visual profiling library.
+	•	autoviz: Automated visualization selector from tabular inputs.
+	•	lux: Intelligent data exploration and automated chart recommendation tool.
+	•	dtale: Interactive web client for analyzing pandas DataFrames.
+	•	report-creator: HTML report and dashboard creator supporting DataFrames and charts.
+	•	datapane: Standalone HTML report and document builder.
+	•	pptgen: Programmatic PowerPoint generation engine.
+	•	crunch-uml: Spreadsheet-driven UML, class, and OpenAPI model generator.
+	•	graphable: CSV and JSON table converter to Mermaid, D2, and PlantUML.
+	•	pyArchimate: Enterprise architecture modeler with ArchiMate CSV integration.
+	•	elegantt: Task schedule table to Gantt chart PNG visualizer.
+	•	lida: Automated grammar-agnostic chart and infographic generator.
+	•	wigglystuff: Notebook widget collection for interactive array exploration.
+	•	Piltdown: Braille, ASCII, and Unicode terminal visualizer.
+	•	textcharts: Terminal-based ASCII chart generator.
+	•	termgraph: Command-line tool for plotting data in the terminal.
+	•	plotext: Terminal-based data visualization library mirroring Plotly syntax.
+	•	bashplotlib: Command-line plotting library written in Python.
+
+Universal Converters and Multi-Format Hubs
+	•	pandoc (pypandoc, pypandoc-binary): Universal document converter handling dozens of markup formats.
+	•	quarto: Multi-language publishing system for documents and slides.
+	•	all2md: Bidirectional Markdown converter for Office and web formats.
+	•	md-exporter (markdown-exporter): Markdown exporter targeting Office, images, PDFs, and Jira.
+	•	convert-markdown: Markdown and code execution parser targeting PDF, Word, and PowerPoint.
+	•	foliant: Modular document generator producing PDF, Docx, EPUB, and TeX from Markdown.
+PDF and Print Generation
+	•	markdown-pdf (PyMuPDF): PDF generator supporting sections, bookmarks, and diagram plugins.
+	•	md2pdf (markd2pdf, md2weasypdf): CSS styled PDF generator using WeasyPrint.
+	•	pdfmarq: ReportLab backed Markdown to PDF renderer supporting math and Mermaid.
+	•	ironpress: Rust backed Markdown to PDF renderer operating entirely server side.
+	•	pymdtools: Suite containing PDF generation via pdfkit and wkhtmltopdf.
+	•	mark-2-pdf: PDF and Word generator orchestrating Playwright and Pandoc.
+	•	mdxport: Social card, slide, and PDF generator utilizing the Typst engine.
+	•	md-typ-pdf: Markdown to PDF compiler passing through Typst.
+	•	rinohtype: Python document processor rendering structured text and Markdown to PDF.
+Presentations and Slide Decks
+	•	md2pptx: PowerPoint generator mapping Markdown elements to template slides.
+	•	marp (marp-cli): Presentation ecosystem converting Markdown to HTML, PDF, and PowerPoint.
+	•	mkslides: Slide generator converting Markdown to Reveal.js presentations.
+	•	mkdocs-revealjs: MkDocs plugin for Reveal.js presentation generation.
+	•	reveal-md: CLI tool converting Markdown files into Reveal.js slideshows.
+	•	lookatme: Interactive terminal based Markdown presentation tool.
+	•	hovercraft: Presentation generator merging Markdown with Impress.js.
+Static Sites, CMS, and HTML Renderers
+	•	mkdocs: Static site generator targeted at project documentation.
+	•	sphinx (MyST): Documentation generator parsing Markdown into HTML and PDF.
+	•	jupyter-book: Publication tool for building books and documents from computational material.
+	•	pelican: Static site generator processing Markdown and reST into HTML.
+	•	nikola: Static site and blog generator.
+	•	lektor: Flexible static content management system.
+	•	grip: Local preview server rendering GitHub flavored Markdown.
+	•	markdown (markdown2, mistune): Core Python Markdown to HTML string parsers.
+	•	markdown-it-py: Python port of markdown-it for extensible HTML parsing.
+	•	mistletoe: Pure Python AST based Markdown parser and renderer.
+	•	marko: Extensible Markdown parser and HTML renderer.
+	•	readme-renderer: PyPI official renderer for converting Markdown to safe HTML.
+Books and E-Publishing
+	•	mdbook: Utility to create modern online books from Markdown files.
+	•	ebooklib: EPUB format generation library.
+	•	md2book: Directory compiler mapping Markdown files to PDF, EPUB, and MOBI.
+Images, Posters, and Visual Layouts
+	•	markdown-svg (mdsvg): Markdown to SVG text wrapper operating entirely independently.
+	•	mkposters: Generator for two column academic posters from Markdown files.
+	•	imgkit: Wrapper for wkhtmltoimage converting HTML and Markdown strings to images.
+	•	html2image: Headless browser wrapper for screenshotting HTML and Markdown outputs.
+Diagrams and Graphical Elements
+	•	mermaid (CLI): Diagram and flowchart generator reading Markdown syntax.
+	•	kroki: Unified API for creating diagrams from textual descriptions.
+	•	mdit-py-plugins: Plugin collection for rendering diagrams and math in Markdown-it.
+	•	pymdown-extensions: Extension pack for Python Markdown including superfences for diagrams.
+	•	markdown-it-typst: Typst code block renderer producing inline SVG diagrams.
+	•	quarto-typst-render: Quarto extension for Typst inline rendering.
+	•	markmap: Visualization tool converting Markdown documents into interactive mindmaps.
+Wikis, Ticketing, and Proprietary Markup
+	•	md2cf: Script and library to convert and upload Markdown documents to Confluence.
+	•	markdown-to-confluence: Publisher mapping local Markdown files to Confluence pages.
+	•	markdownify: Bidirectional HTML to Markdown converter.
+Code, Notebooks, and Project Structures
+	•	jupytext: Bidirectional converter between Jupyter notebooks and Markdown text.
+	•	project-to-markdown: Repository serializer and deserializer mapping directory structures to Markdown.
+	•	nbconvert: Format conversion utility for transforming Jupyter notebooks into Markdown, HTML, or PDF.
+Terminal and TUI Visualization
+	•	rich: Rich text and formatting library capable of rendering Markdown directly in the terminal console.
+	•	mdv: Terminal based Markdown viewer and formatter.
+
+Docs as Code — Site Generators and Publishing Engines •	mkdocs: Markdown-first static site generator for project documentation. •	mkdocs-material: Material Design theme and documentation framework for MkDocs. •	zensical: Successor static site generator from the Material for MkDocs team; reads existing mkdocs.yml. •	sphinx: Documentation generator producing HTML, PDF, ePub, man pages, and Texinfo from reST or Markdown. •	myst-parser: MyST Markdown parser that lets Sphinx consume Markdown with full Sphinx features. •	quarto: Multi-format scientific publishing engine for HTML, PDF, docx, and slides from Markdown and notebooks. •	jupyter-book: Publication tool for building books and computational documents from Markdown and notebooks. •	pelican: Static site generator processing Markdown and reStructuredText into HTML. •	nikola: Static site and blog generator supporting Markdown, reST, and Jupyter. •	lektor: Flexible static content management system with a visual admin UI. •	mdbook: Utility for creating modern online books from Markdown files. •	antora: Modular multi-repository documentation site generator based on AsciiDoc. •	asciidoctor: Text processor and publishing toolchain converting AsciiDoc to HTML, PDF, EPUB, and more. •	docToolchain: Docs-as-code toolchain for architecture documentation, often paired with arc42 and AsciiDoc. •	foliant: Modular document generator producing PDF, Docx, EPUB, and TeX from Markdown. •	portray: Zero-config Python project documentation site generator wrapping pdocs and MkDocs. •	teedoc: Simple static website, document, and blog generator. •	typmill: Self-hosted Markdown CMS publishing documentation as websites, PDFs, and eBooks. •	grip: Local preview server rendering GitHub-flavored Markdown. •	docusaurus: React/MDX documentation site generator with versioning and i18n (Node). •	vitepress: Vue-powered Markdown documentation site generator. •	vuepress: Vue-based static site generator for project docs. •	astro-starlight: Astro documentation framework with Pagefind search and island architecture. •	nextra: Next.js-based documentation and blog framework using MDX. •	docsify: Client-side Markdown documentation site generator with no build step. •	vocs: Documentation framework with search and versioning. •	hugo: High-performance Go static site generator commonly used for docs sites. •	zola: Fast Rust static site generator with Tera templates. •	eleventy (11ty): JavaScript static site generator with flexible templating. •	jekyll: Ruby static site generator with native GitHub Pages support. •	gitbook: Markdown documentation platform and CLI for books and knowledge bases. •	honkit: Open-source GitBook legacy fork for building books from Markdown. •	slate: Static API documentation generator originally from the GitBook/Ruby lineage. •	doctave: Batteries-included developer documentation site generator. •	readthedocs: Hosted CI/CD documentation platform for Sphinx and MkDocs projects. •	mike: Versioned MkDocs documentation publisher using Git branches and tags. •	backstage-techdocs: Backstage plugin wrapping MkDocs for inner-source documentation portals. •	mkdocs-monorepo-plugin: Builds multiple documentation folders into one MkDocs site. •	mkdocs-multirepo-plugin: Aggregates documentation from multiple Git repositories into one site. •	yamp: Yet Another Multirepo Plugin for MkDocs. •	mkdocs-merge: Merges source trees of multiple MkDocs sites into one. •	mkdocs-simple-plugin: Builds documentation that lives beside source code into an MkDocs site.
+API Documentation Generators (Code to Docs) •	pydoc: Standard-library HTML and text documentation browser driven by docstrings. •	pdoc: Zero-config API documentation generator with live reload, type annotations, and Google/NumPy docstrings. •	pdoc3: Fork of pdoc with Markdown, LaTeX math, and reST directive support. •	pydoctor: Static-analysis API documentation generator (Twisted/epydoc successor) with zope.interface awareness. •	mkdocstrings: MkDocs plugin that injects API documentation from source into Markdown pages. •	mkdocstrings-python: Python handler for mkdocstrings built on Griffe. •	griffe: Static and dynamic signature extractor used to generate API docs and detect breaking changes. •	quartodoc: Quarto-based Python API reference generator using Griffe and Markdown. •	great-docs: Quarto documentation site generator covering API, CLI, changelog, and landing pages. •	lazydocs: Markdown API documentation generator from Google-style Python docstrings. •	pydoc-markdown: Static docstring-to-Markdown converter using docspec (MkDocs/Hugo/Docusaurus renderers). •	markdown-doc: Markdown documentation generator from Python modules, classes, and type annotations. •	markdowndocs: Lightweight Markdown documentation generator from docstrings and source. •	automacdoc: Automatic documentation generator targeting MkDocs pages. •	mkapi: MkDocs plugin generating API pages from Python docstrings. •	mkautodoc: Python-Markdown extension for autodoc-style object insertion. •	mkdocs-autoapi: MkDocs plugin that auto-generates API reference pages from source trees. •	mkdocs-api-autonav: Autogenerated API navigation for MkDocs reference sections. •	inari: MkDocs plugin that renders docstrings inside Markdown. •	mktheapidocs: Numpydoc-oriented Markdown API documentation plugin. •	mkdocs-yaarg-plugin: Yet Another API Reference Generator for MkDocs. •	mkdocs-apidescribed-plugin: API documentation plugin for Python programs in MkDocs. •	sphinx.ext.autodoc: Sphinx extension that pulls documentation from live Python objects. •	sphinx.ext.autosummary: Sphinx extension that generates summary tables and stub pages from modules. •	sphinx-autodoc-typehints: Sphinx extension rendering PEP 484 type hints in signatures. •	sphinx-autoapi: Language-agnostic Sphinx autodoc alternative using static analysis. •	sphinx-apidoc: CLI that generates Sphinx source files from a Python package tree. •	numpydoc: Sphinx extension and docstring standard for scientific Python APIs. •	llmdocgen: LLM-backed multi-language documentation comment generator. •	doxygen: Multi-language documentation system (C/C++/Python/Java and others) with Graphviz diagrams. •	mkdoxy: MkDocs plugin embedding Doxygen-generated API documentation. •	naturaldocs: Multi-language documentation generator supporting 21 languages. •	docco: Literate-programming-style documentation generator from source comments. •	jsdoc: API documentation generator for JavaScript. •	typedoc: TypeScript API documentation generator; usable from MkDocs via mkdocs-typedoc. •	documentation.js: JavaScript API documentation generator with Markdown output. •	yard: Ruby documentation tool. •	exdoc: Elixir documentation generator. •	phpdocumentor: PHP API documentation generator. •	apigen: Clean API documentation generator from PHP source. •	javadoc: Standard Java API documentation generator.
+OpenAPI, AsyncAPI, and Specs as Code •	swagger-ui: Interactive OpenAPI documentation renderer. •	mkdocs-swagger-ui-tag: MkDocs plugin embedding Swagger UI in pages. •	mkdocs-render-swagger-plugin: Renders OpenAPI schemas with Swagger UI inside MkDocs. •	redoc: OpenAPI-first three-panel API documentation renderer. •	rapidoc: Embeddable OpenAPI 3 documentation viewer. •	spectree / flask-pydantic-spec: Annotation-driven OpenAPI generation and request validation. •	openapi-markdown: Generates Markdown API documentation from an OpenAPI specification. •	widdershins: Converts OpenAPI specifications into Slate/Shins Markdown. •	mkdocs-click: Documents Click command-line interfaces inside MkDocs. •	mkdocs-typer / mkdocs-typer2: Documents Typer CLIs inside MkDocs. •	sphinx-click: Sphinx extension documenting Click applications. •	sphinx-argparse / sphinx-argparse-cli: Sphinx extensions documenting argparse CLIs. •	typer-cli / typer docs: Typer utilities for generating CLI reference docs. •	neoteroi-mkdocs: MkDocs OpenAPI docs plus cards, timelines, contribs, and project boards. •	spectral: JSON/YAML linter for OpenAPI, AsyncAPI, and overlay style guides. •	prance: OpenAPI parser and resolver for Python. •	openapi-core: OpenAPI validation and request/response unmarshalling. •	apispec: Pluggable OpenAPI specification generator for Python web frameworks. •	flasgger: Flask + Swagger/OpenAPI documentation generator. •	fastapi: Web framework that emits OpenAPI docs automatically via Swagger UI and ReDoc. •	asyncapi-python: Python tooling around AsyncAPI event specifications. •	jsonschema: JSON Schema validation library used by many spec-as-code pipelines. •	datamodel-code-generator: Generates Pydantic models from OpenAPI and JSON Schema.
+Markdown, reStructuredText, AsciiDoc, and Markup Engines •	markdown (Python-Markdown): Extensible Markdown-to-HTML parser. •	markdown2: Fast Markdown-to-HTML converter ported from markdown.pl. •	mistune: Fast Markdown parser with renderer plugins. •	markdown-it-py: Python port of markdown-it for CommonMark-compatible parsing. •	mistletoe: Pure-Python AST-based Markdown parser and renderer. •	marko: Extensible Markdown parser with multiple renderers. •	commonmark: Pure-Python CommonMark specification implementation. •	cmarkgfm: CMark GitHub-Flavored Markdown bindings. •	pymdown-extensions: Large suite of Python-Markdown extensions (superfences, tabbed, task lists, critic, keys). •	mdit-py-plugins: Plugin collection for markdown-it-py including math and containers. •	myst-nb: MyST parser for Jupyter notebooks used by Jupyter Book and Sphinx. •	docutils: reStructuredText parser and publishing system underlying Sphinx. •	recommonmark: Legacy CommonMark bridge for Sphinx (superseded by MyST). •	rstcheck: Linter and syntax checker for reStructuredText. •	pandoc / pypandoc / pypandoc-binary: Universal document converter across Markdown, reST, HTML, Docx, PDF, and more. •	asciidoc: Original AsciiDoc processor. •	asciidoctor-pdf: PDF backend for Asciidoctor. •	markdownify: HTML-to-Markdown converter. •	html2text: HTML to Markdown/plain-text converter. •	mdformat: Opinionated Markdown formatter (Black for Markdown). •	mdformat-gfm / mdformat-tables / mdformat-frontmatter: mdformat plugins for GFM, tables, and YAML front matter. •	remark / remark-cli: JavaScript Markdown processor ecosystem (lint, format, transform). •	unified / rehype / recma: Syntax-tree processing pipeline used by MDX toolchains. •	mdx: Markdown + JSX format used by Docusaurus and Nextra. •	markdoc: Stripe’s Markdown-based document format with custom tags. •	djot: Strict, predictable lightweight markup language related to CommonMark.
+Sphinx Themes, Extensions, and Builders •	furo: Clean modern Sphinx theme. •	sphinx-book-theme: Book-style Sphinx theme used by Jupyter Book. •	pydata-sphinx-theme: Theme used by NumPy, pandas, and the PyData stack. •	sphinx-rtd-theme: Read the Docs theme for Sphinx. •	alabaster: Default Sphinx theme. •	sphinx-imaterial: Material-inspired Sphinx theme. •	shibuya: Elegant responsive Sphinx theme. •	piccolo-theme: Minimal modern Sphinx theme. •	sphinx-autobuild: Live-reload development server for Sphinx. •	sphinx-design: Cards, grids, dropdowns, and tab components for Sphinx. •	sphinx-copybutton: Adds a copy button to code blocks. •	sphinx-tabs: Tabbed content extension for Sphinx. •	sphinxcontrib-mermaid: Mermaid diagram support in Sphinx. •	sphinxcontrib-plantuml: PlantUML diagram support in Sphinx. •	sphinxcontrib-bibtex: BibTeX citation support. •	sphinx.ext.intersphinx: Cross-project inventory linking. •	sphinx.ext.napoleon: Google and NumPy docstring support in Sphinx. •	sphinx.ext.todo: Todo note collection. •	sphinx.ext.viewcode: Source-code pages linked from API docs. •	sphinx.ext.doctest: Runs doctest examples inside documentation. •	sphinx-gallery: Builds example galleries from Python scripts. •	nbsphinx: Executes and embeds Jupyter notebooks in Sphinx. •	sphinx-hoverxref: Hover tooltips for cross-references. •	sphinx-multiproject: Multi-project Sphinx documentation builds. •	sphinx-multiversion: Versioned Sphinx documentation builder. •	sphinx-versioned-docs: Alternative versioned Sphinx documentation plugin.
+MkDocs Themes and High-Value Plugins •	mkdocs-bootswatch: Bootswatch themes for MkDocs. •	mkdocs-bootstrap / mkdocs-theme-bootstrap4: Bootstrap themes. •	mkdocs-cinder: Cinder theme. •	mkdocs-dracula-theme: Dracula theme. •	mkdocs-terminal: Terminal-styled MkDocs theme. •	mkdocs-shadcn: shadcn-inspired MkDocs theme. •	mkdocs-gitbook: GitBook-like MkDocs theme. •	mkdocs-windmill / mkdocs-windmill-dark: Windmill themes. •	mkdocs-awesome-pages-plugin / awesome-nav: Navigation titles and ordering without a full nav tree. •	mkdocs-literate-nav: Navigation defined as Markdown lists. •	mkdocs-gen-files: Generates documentation files at build time from Python scripts. •	mkdocs-section-index: Allows a section index page instead of a bare directory. •	mkdocs-autorefs: Automatic cross-page reference links. •	mkdocs-redirects: Page redirect rules. •	mkdocs-static-i18n: Internationalization via parallel translated Markdown trees. •	mkdocs-git-revision-date-localized-plugin: Localized last-updated dates from Git. •	mkdocs-git-authors-plugin: Displays Git authors per page. •	mkdocs-git-committers-plugin-2: Contributor lists from Git history. •	mkdocs-include-markdown-plugin: Includes Markdown snippets from other files. •	markdown-include / mdx_include: Python-Markdown include extensions. •	mkdocs-macros-plugin: Jinja2 variables and macros inside Markdown. •	mkdocs-minify-plugin / mkdocs-minify-html-plugin: HTML/CSS/JS minification. •	mkdocs-with-pdf / mkdocs-pdf-export-plugin / mkdocs-print-site-plugin / mkpdfs-mkdocs: PDF and print-site exporters. •	mkdocs-glightbox: Image lightbox plugin. •	mkdocs-mermaid2-plugin: Mermaid diagram rendering. •	mkdocs-kroki-plugin: Kroki diagram rendering. •	mkdocs-d2-plugin: D2 diagram rendering. •	mkdocs-drawio-exporter: Draw.io diagram export. •	mkdocs-table-reader-plugin: Inserts tables from CSV/Excel. •	mkdocs-jupyter: Embeds and executes Jupyter notebooks in MkDocs. •	mkdocs-bibtex: Citation management from BibTeX. •	mkdocs-htmlproofer-plugin / mkdocs-linkcheck: Link validation. •	mkdocs-swagger-plugin: Renders Swagger/OpenAPI into docs. •	mkdocs-llmstxt: Generates an llms.txt file from the documentation site. •	pymdownx.superfences / pymdownx.tabbed / pymdownx.details: Common Material/MkDocs Markdown extensions for diagrams, tabs, and collapsible blocks.
+Presentations as Code •	marp / marp-cli: Markdown-to-slides ecosystem targeting HTML, PDF, and PowerPoint. •	md2pptx: PowerPoint generator mapping Markdown elements onto template slides. •	mkslides: Markdown-to-Reveal.js slide generator. •	reveal-md: CLI converting Markdown files into Reveal.js slideshows. •	mkdocs-revealjs: MkDocs plugin for Reveal.js presentations. •	lookatme: Interactive terminal Markdown presentation tool. •	hovercraft: Markdown presentations using Impress.js. •	jupyter-reveal / rise: Live Reveal.js slides from Jupyter notebooks. •	quarto (revealjs format): Quarto slide decks from Markdown and notebooks. •	manim-slides: Slide interface over Manim animations. •	python-pptx: Programmatic PowerPoint creation and editing. •	pptgen: Programmatic PowerPoint generation engine.
+Diagrams as Code •	mermaid: Markdown-inspired diagram language for flowcharts, sequence, class, Gantt, ER, and C4. •	plantuml: Keyword-based UML and non-UML diagram generator. •	d2: Declarative diagram language with strong auto-layout. •	graphviz / pygraphviz / pydot: DOT language layout and rendering. •	diagrams: Python cloud-architecture diagram library (Mingrammer). •	kroki: Unified HTTP API rendering many text-to-diagram languages. •	structurizr / structurizr-python: C4 model DSL and workspace tooling. •	c4-diagrams: Python DSL for C4 model diagrams with PlantUML, Mermaid, and D2 backends. •	blockdiag / seqdiag / actdiag / nwdiag: Plain-text diagram generators. •	schemdraw: Electrical circuit and schematic drawing from Python. •	markmap: Markdown-to-mindmap converter. •	nomnoml: UML diagram language often served through Kroki. •	wavedrom: Digital timing diagram language. •	svgbob: ASCII-art to SVG diagram converter. •	ditaa: ASCII diagrams to bitmap graphics. •	erd: Entity-relationship diagrams from text. •	dbml / dbdiagram: Database markup language for ER diagrams. •	bytefield-svg: Protocol packet-layout diagrams from text. •	packetdiag: Network packet diagram generator from the blockdiag family. •	railroad-diagrams: Parser railroad diagrams from a Python DSL. •	graphable: CSV/JSON to Mermaid, D2, and PlantUML converter. •	clingraph: Visualizer for Clingo ASP facts as graphs. •	pyvis / netgraph / iplotx: Network visualization libraries used in architecture docs.
+Architecture Documentation as Code •	arc42: Architecture documentation template commonly implemented in AsciiDoc or Markdown. •	doctoolchain: Automation around arc42, AsciiDoc, and diagram generation. •	c4-model: Context, Container, Component, Code documentation method. •	structurizr-lite / structurizr-cli: Local and CLI Structurizr workspace renderers. •	like-c4: Language and tooling for C4-like architecture-as-code. •	pyarchimate: Enterprise architecture modeler with ArchiMate CSV integration. •	adr-tools: Command-line helper for Architecture Decision Records. •	log4brains: Architecture knowledge base and ADR manager from Markdown. •	adr-viewer: HTML viewer for Architecture Decision Records. •	mkdocs-material-adr: ADR presentation plugin for Material for MkDocs. •	eac / architecture-decision-records: Various Markdown ADR templates (MADR, Nygard). •	crunch-uml: Spreadsheet-driven UML, class, and OpenAPI model generator.
+Docs Quality, Linting, Coverage, and Testing •	vale: Fast, style-guide-driven prose linter for docs-as-code repos. •	alex: Inclusive-language linter for documentation. •	write-good: Naive readability linter for English prose. •	proselint: Linter for English prose style. •	pymarkdownlnt: Markdown linter implemented in Python. •	markdownlint / pymarkdown: Markdown style linters (Node and Python ecosystems). •	pyspelling: Spell checker wired into Python documentation builds. •	codespell: Common-misspelling checker used in docs and source. •	rstcheck: reStructuredText syntax and role checker. •	pydocstyle: PEP 257 docstring convention checker. •	pydoclint: Fast docstring-vs-signature consistency linter (Google, NumPy, Sphinx styles). •	darglint / darglint2: Docstring argument linter (largely superseded by pydoclint). •	docformatter: Automatic PEP 257 docstring formatter. •	interrogate: Docstring coverage measurement. •	numpydoc validation: Numpydoc section validation hooks. •	mktestdocs: Runs pytest against Markdown files and docstring examples. •	xdoctest: Better doctest runner that can collect examples from docstrings and Markdown. •	doctest: Standard-library executable documentation examples. •	sybil: Extracts and tests examples from documentation and Markdown. •	pytest-examples: Tests code examples embedded in documentation. •	lychee: Fast parallel link checker. •	htmltest: HTML link and integrity tester for published docs. •	linkchecker: Site-wide link crawler. •	markdown-link-check: Checks links inside Markdown files. •	doc8: Style checker for Sphinx/reST documentation. •	sphinx-lint: Sphinx-specific documentation linter.
+Document Conversion, Ingestion, and Multi-Format Hubs •	pandoc: Universal markup converter used as the backbone of many docs-as-code pipelines. •	quarto: Multi-language publishing system for documents, books, websites, and slides. •	nbconvert: Jupyter notebook converter to Markdown, HTML, PDF, and slides. •	jupytext: Bidirectional converter between notebooks and Markdown/percent scripts. •	docling: Document parser for PDFs and Office files emitting Markdown and structured JSON. •	markitdown: Document-to-Markdown conversion tool. •	mammoth: Word (.docx) to clean HTML converter. •	firecrawl-anydoc / anydoc: Fast Office/PDF/CSV to GitHub-flavored Markdown converter. •	undoc: Office document parser emitting Markdown, text, and JSON. •	office-oxide: Rust-backed parser for Microsoft Office formats to text/Markdown. •	all2md: Bidirectional Markdown converter for Office and web formats. •	md-exporter / markdown-exporter: Markdown exporter targeting Office, images, PDFs, and Jira. •	convert-markdown: Markdown and code-execution parser targeting PDF, Word, and PowerPoint. •	weasyprint: HTML/CSS to PDF rendering engine. •	playwright: Headless browser used for high-fidelity HTML-to-PDF and screenshot docs. •	pdfkit: HTML to PDF converter using wkhtmltopdf. •	pymupdf (fitz): PDF parser and renderer often used for Markdown-PDF pipelines. •	reportlab / fpdf2 / borb: Programmatic PDF libraries used by docs exporters. •	rinohtype: Python document processor rendering structured text and Markdown to PDF. •	md2pdf / markdown-pdf / pdfmarq / ironpress / mdxport / md-typ-pdf: Markdown-to-PDF tool family. •	md2cf / markdown-to-confluence: Publishers mapping local Markdown to Confluence pages. •	ebooklib: EPUB generation library. •	md2book: Directory compiler mapping Markdown trees to PDF, EPUB, and MOBI.
+Notebooks, Literate Programming, and Executable Docs •	jupyter: Computational notebook format widely used as a docs-as-code source. •	jupyterlab: Next-generation notebook UI. •	voila: Renders notebooks as standalone web applications. •	nbdev: Literate programming system that generates libraries and docs from notebooks. •	quarto (computational): Executes Python, R, and Julia chunks inside Markdown documents. •	papermill: Parameterized notebook execution for report generation. •	jupytext: Pairs notebooks with Markdown for Git-friendly literate docs. •	mystmd: MyST Markdown CLI for computational documents. •	ploomber: Pipeline system that can emit notebook and Markdown reports.
+Wikis, Knowledge Bases, and Hosted Docs-as-Code Platforms •	gollum: Git-backed wiki engine with multi-markup support. •	wiki.js: Node-based wiki that can store Markdown in Git. •	outline: Team knowledge base with Markdown and API export. •	bookstack: Hierarchical docs platform with Markdown and WYSIWYG. •	dokuwiki: File-based wiki often used for internal docs-as-code-ish workflows. •	logseq / obsidian: Local-first Markdown knowledge graphs frequently published as docs sites. •	foam: VS Code knowledge-base workflow on plain Markdown and Git. •	dendron: Hierarchical Markdown knowledge base for VS Code. •	quartz: Publish Obsidian-style digital gardens with Astro. •	gitbook (hosted): Git-synced documentation platform. •	mintlify: Docs-as-code platform with MDX authoring and AI writing agents. •	readme.com: API developer-hub platform with spec-driven reference docs. •	fern: OpenAPI-in, SDKs-and-docs-out generator. •	redocly: OpenAPI documentation platform and CLI. •	stoplight: API design and documentation platform. •	bump.sh: API documentation and changelog platform from OpenAPI/AsyncAPI. •	document360 / clickhelp: Component-content and help-center platforms used beside docs-as-code.
+Search, Preview Cards, and Doc Site Add-ons •	pagefind: Fully static search index for documentation sites. •	typesense / meilisearch: Typo-tolerant search engines commonly placed in front of docs. •	mkdocs-material social plugin: Social-card image generator for documentation pages. •	sphinxext-opengraph: Open Graph metadata for Sphinx pages. •	algolia-docsearch: Hosted documentation search crawler used by many OSS docs sites.
+Related As-Code Families Often Combined with Docs •	policy-as-code: zen-engine, pycasbin, openfga, cerbos, opa/regorio (see also attached Policy Engines section). •	infrastructure-as-code: terraform, opentofu, pulumi, ansible, nix, cdk, cloudformation. •	configuration-as-code: pydantic-settings, dynaconf, hydra, jsonnet, cue, dhall. •	pipeline-as-code: github-actions, gitlab-ci, pre-commit, prefect, dagster, temporalio. •	forms-as-code: pyxform, jsonforms, rjsf, cjm-fasthtml-jsonschema. •	tests-as-code / executable specs: pytest, behave, cucumber, hypothesis, schemathesis. •	spec-driven-development: openspec and similar tools that treat specifications as the source of truth for code and docs. •	prompt-as-code / skills-as-code: SKILL.md, AGENTS.md, CLAUDE.md, and MCP document skills used as versioned agent documentation.
+A few bounds so the list stays honest:
+•  MkDocs has 300+ catalogued themes/plugins. Only the ones that actually change a docs-as-code workflow are listed. The full catalog is mkdocs/catalog.
+•  Several engines that dominate real docs-as-code work are not Python packages (Docusaurus, VitePress, Hugo, Antora, mdBook, Vale, Mermaid, PlantUML). They are included because “every docs-as-code library” is incomplete without them.
+•  Charting, Office automation, PDF engines, and generic converters from the attached file are not duplicated unless they are specifically used as documentation publishers.
+l
+Doing the exhaustive second pass: MkDocs catalog, Sphinx extensions, and the other as-code families. Everything goes in this message.Second pass. All of it is in this message.
+MkDocs Catalog — Theming • mkdocs-material: Material Design documentation theme and plugin framework. • zensical: Material-for-MkDocs successor that reads existing mkdocs.yml. • mkdocs-cinder: Clean responsive MkDocs theme. • mkdocs-bootswatch: Bootswatch theme pack (cerulean, cosmo, cyborg, darkly, flatly, journal, litera, lumen, lux, materia, minty, pulse, sandstone, simplex, slate, solar, spacelab, superhero, united, yeti). • mkdocs-shadcn: shadcn-styled MkDocs theme with search and Excalidraw extras. • mkdocs-terminal: Monospace terminal theme. • mkdocs-dracula-theme: Dracula dark theme. • mkdocs-bootstrap: Bootstrap theme. • mkdocs-theme-bootstrap4: Vanilla Bootstrap 4 theme with blockquote and table plugins. • mkdocs-windmill: Navigation-focused usable theme. • mkdocs-windmill-dark: Dark Windmill variant. • mkdocs-custommill: Customizable Windmill fork. • mkdocs-simple-blog: Blog-oriented MkDocs theme. • mkdocs-zettelkasten: Card/zettel theme and plugin. • lantana: Lantana HTML theme. • mkdocs-torillic: D&D-inspired TTRPG notes theme. • mkdocs-kpn: KPN corporate theme. • mkdocs-swan: CERN SWAN theme. • mkdocs-curriculum-vitae: Minimal CV/resume theme. • mkdocs-gitbook: GitBook lookalike theme. • mkdocs-landing: Personal landing-page theme. • mkdocs-ivory: Ivory theme. • mkdocs-nature: Nature theme. • mkdocs-github: GitHub-like theme. • mkdocs-alabaster: Alabaster port for MkDocs. • mkdocs-bootstrap386: 1980s DOS Bootstrap theme. • mkdocs-moonstone: Documentation theme. • mkdocs-risonia-theme: w3.css theme with color schemes. • mkdocs-theme-topdf: Print/PDF theme using paged.js. • mkdocs-docskimmer: Accessible skimmable theme. • mkdocs-rtl: RTL Material-based theme. • mkdocs-cluster: Another Bootstrap theme.
+MkDocs Catalog — API Documentation Building • mkdocstrings: Inject API docs from source into Markdown pages. • mkdocstrings-python: Python handler for mkdocstrings via Griffe. • mkdocstrings-crystal: Crystal handler. • mkdocstrings-matlab: MATLAB handler. • mkdocstrings-vba: VBA handler. • mkdocstrings-shell: Shell-script handler. • mkapi: API pages from Python docstrings. • neoteroi-mkdocs: OpenAPI docs plus cards, timelines, contribs, projects, spanned tables. • mkdocs-click: Documents Click CLIs. • mkdocs-typer: Documents Typer CLIs as a Markdown extension. • mkdocs-typer2: Documents Typer CLIs as a plugin. • mkdoxy: Doxygen comments and snippets inside MkDocs. • doxygen (mkdocs plugin): Doxygen plugin for MkDocs. • mkdocs-api-autonav: Autogenerated API navigation. • mkdocs-autoapi: Automatic API reference generation. • mkautodoc: Autodoc-style Markdown extension. • mktheapidocs: Numpydoc to MkDocs-friendly Markdown. • inari: Write docstrings in Markdown and render them. • automacdoc: Automatic MkDocs documentation generation. • mkdocs-typedoc: Embed TypeDoc output. • mkdocs-apidescribed-plugin: API docs for Python programs. • mkdocs-yaarg-plugin: Yet Another API Reference Generator. • mkdocs-azure-pipelines: Docs from Azure Pipelines YAML. • mkdocs-pipeline-visualizer: Docs from Tekton pipelines and tasks. • mkdocs-material-adr: Architecture Decision Records on Material. • ansible-document / ansible-mkdocs: Auto-generate Ansible role documentation.
+MkDocs Catalog — Blogging • mkdocs-rss-plugin: RSS feeds from created/updated pages using git log and front matter. • mkdocs-blogging-plugin: Blogging feature pack. • mkdocs-publisher (pub-blog): Blog engine with categories, tags, and archive. • mkdocs-newsletter: Newsletters from repository changes. • mkdocs-blog-plugin: Simple blog section inside a docs site. • python-mkblog: Parses a blog/ directory on top of docs/. • andyoakley/mkdocs-blog: Early MkDocs blogging plugin.
+MkDocs Catalog — Charts, Images, Tables, and Graphs • mkdocs-glightbox: GLightbox image zoom. • plantuml-markdown: PlantUML in Python-Markdown. • mkdocs-mermaid2-plugin: Mermaid graphs. • mkdocs-mermaid-plugin: Older Mermaid plugin. • mkdocs-kroki-plugin: Kroki diagrams. • mkdocs-panzoom-plugin: Pan and zoom on images and Mermaid/D2 diagrams. • mkdocs-puml: Inline PlantUML. • mkdocs-build-plantuml-plugin: Generate PlantUML images as files. • mkdocs-table-reader-plugin: Insert CSV/Excel tables with a Markdown tag. • mkdocs-video: Video embedding. • markdown-blockdiag: blockdiag diagrams. • mkdocs-charts-plugin: Vega-Lite plots from data. • mkdocs-drawio-exporter: Export Draw.io diagrams at build time. • mkdocs-d2-plugin: Embed D2 diagrams. • oembedpy: Render rich URL embeds via oEmbed. • lightgallery: Lightbox Markdown extension. • mkdocs-diagrams: Render Mingrammer diagrams files. • mkdocs-obsidian-interactive-graph-plugin: Obsidian-style interactive graph. • termage: SVG from arbitrary Python code in docs. • mkdocs-img2fig-plugin: Convert images to figure elements. • docutools: Dev-centric MkDocs tool pack (find-pages, custom-dir, blacklist, page-tree, stats, replacements). • markdown-captions: Image captions. • markdown-svgbob: svgbob ASCII-to-SVG diagrams. • mkdocs-matplotlib: Render Matplotlib figures in pages. • mkdocs-resize-images: Resize images at build time. • mkdocs-bpmn-js: BPMN diagrams. • mkdocs-badges: Status badges. • mkdocs-plotly-plugin: Plotly charts. • mkdocs-wavedrom-plugin: WaveDrom timing diagrams. • mkdocs-graphviz: Graphviz Markdown extension. • markdown-aafigure: aafigure diagrams. • mkdocs-thumbnails: Auto-generated thumbnails. • pico8-mkdocs-plugin: Pico-8 web player. • markdown-figcap: Figure and figcaption handling. • mkdocs-plugin-inline-svg-mod: Inline SVG. • mkdocs-import-statement-plugin: Import statements in pages. • mkdocs-sequence-js-plugin: Sequence.js diagrams. • mkdocs-image-formatter-plugin: Image formatting helpers.
+MkDocs Catalog — Code Execution, Variables, and Templating • mkdocs-macros-plugin: Jinja2 variables and macros in Markdown. • mkdocs-markdownextradata-plugin: Extra variables from YAML/JSON data files. • markdown-exec: Execute code blocks and embed their output. • mkdocs-jupyter: Embed and execute Jupyter notebooks. • mkdocs-jupyterlite: Embed interactive notebooks via JupyterLite. • mkdocs-codeyaml-plugin: Multiple YAML configs. • jinja2sandbox: Enable the Jinja2 sandbox. • mkdocs-protobuf: Render protobuf messages. • pymdownx.snippets: Snippet includes via PyMdown. • markdown-include: Include other Markdown files. • mdx_include: Include local or remote files. • mkdocs-include-markdown-plugin: Include Markdown snippets. • mkdocs-exclude: Exclude files or trees from output. • mkdocs-file-filter-plugin: Include/exclude with globs, regexes, gitignore-style rules. • mkdocs-gen-files: Generate files at build time from Python scripts. • mkdocs-simple-hooks: Define hooks without writing a plugin package. • markdown-env: Environment-variable substitution. • mkdocs-markdown-filter: Custom Markdown filters. • pyembed-markdown: Embed rich content from URLs. • mkdocs-user-defined-values: User-defined replacement values. • mkdocs-version-annotations: Version-difference admonitions. • termage: Execute Python in docs and emit SVG.
+MkDocs Catalog — Git Repos and Info • mkdocs-git-revision-date-localized-plugin: Localized last-updated dates from Git. • mkdocs-git-revision-date-plugin: Revision date from Git per file. • mkdocs-git-authors-plugin: Git authors of a page. • mkdocs-git-committers-plugin: Last commit and contributor list. • mkdocs-git-committers-plugin-2: Maintained committers plugin. • mkdocs-git-latest-changes-plugin: Recently modified pages from the Git log. • mkdocs-document-dates: Creation time, last update, authors, email. • mkdocs-recently-updated-docs: Recently updated document list. • mkdocs-github-changelog: Changelog from GitHub releases. • mkdocs-latest-release-plugin: Inject latest Git release tag. • mkdocs-branchcustomization-plugin: Per-branch MkDocs options. • mdx-gh-links: GitHub link Markdown extension.
+MkDocs Catalog — HTML Processing and CSS Styling • mkdocs-minify-plugin: Minify HTML before write. • mkdocs-minify-html-plugin: Fast HTML/JS/CSS minifier. • mkdocs-publisher (pub-minifier / pub-social): Minification plus social-card helpers. • mkdocs-enumerate-headings-plugin: Enumerate headings across the site. • mkdocs-add-number-plugin: Number h1–h6 and nav items. • mkdocs-extra-sass-plugin: Sass/SCSS stylesheets. • mkdocs-link-embeds-plugin: Rich link cards with images. • mkdocs-safe-text-plugin: Safe text editing helpers. • mkdocs-bootstrap-tables-plugin: Bootstrap classes on tables. • mkdocs-add-teaser: First paragraph as meta description. • mkdocs-toggle-sidebar-plugin: Toggle nav and TOC sidebars. • mkdocs-ai-summary: AI page summaries. • mkdocs-pygments: Extra Pygments highlighting themes. • mk-append-to-head: Append strings to page . • mkdocs-docstyler-plugin: Alternative stylesheets for custom themes.
+MkDocs Catalog — Integrations • mkdocs-swagger-ui-tag: Embed Swagger UI. • mkdocs-render-swagger-plugin: Render OpenAPI with Swagger UI. • mkdocs-swagger-plugin: Render Swagger into docs. • mkdocs-llmstxt: Generate /llms.txt. • mkdocs-coverage: Embed coverage HTML reports. • mkdocs-publisher (pub-obsidian): Obsidian wiki links, callouts, backlinks. • mkdocs-asciinema-player: Asciinema terminal recordings. • foliantcontrib.mkdocs: Foliant MkDocs backend. • mkdocs-mcp: Serve docs as an MCP server. • mkdocs-copy-to-llm: Copy-to-LLM button on code blocks. • mkdocs-factsheet: Overviews from YAML microservice descriptions. • mkdocs-licenseinfo: Dependency license visualization. • mkdocs-vercel-pw-plugin: Password-protect Vercel-deployed sites.
+MkDocs Catalog — Internationalization • mkdocs-static-i18n: i18n via parallel translated Markdown trees. • mkdocs-mdpo-plugin: Translation via PO files. • mkdocs-translations: Internationalization plugin.
+MkDocs Catalog — Links and References • mkdocs-redirects: Page redirects. • mkdocs-bibtex: BibTeX citations. • mkdocs-htmlproofer-plugin: Validate URLs in rendered HTML. • mkdocs-autorefs: Automatic cross-page links. • mkdocs-open-in-new-tab: Open external links and PDFs in a new tab. • mkdocs-autolinks-plugin: Relative links between Markdown pages. • mkdocs-site-urls: site: relative URLs. • mkdocs-ezlinks-plugin: Easier inter-page linking. • mkdocs-link-marker: Mark external links and mailto. • mkdocs-ezglossary-plugin: Glossary support. • mkdocs-alias-plugin: Custom page aliases. • mkdocs-roamlinks-plugin: Roam-style relative links. • mkdocs-unused-files: Find orphaned files. • autolink-references-mkdocs-plugin: GitHub-style autolink references. • mkdocs-abs-rel-plugin: Absolute to relative links. • mkdocs-tooltipster-links-plugin: Hover previews of linked pages. • mkdocs-backlinks-section-plugin: Backlink section on each page. • mkdocs-issues-plugin: GitHub/GitLab issue, PR, and discussion state. • mkdocs-argref-plugin: GitHub-style argument/issue autolinks. • mkdocs-webcontext-plugin: Web-context-aware absolute paths. • mkdocs-addresses: Build correct relative paths for images, links, anchors. • mkdocs-emailprotect: Obscure emails from harvesters. • mkdocs-altlink-plugin: Simplified internal links. • mdx-wikilink-plus: Wikilink Markdown extension.
+MkDocs Catalog — Markdown Extensions • pymdown-extensions: Superfences, tabbed, tasklist, critic, keys, betterem, caret, mark, tilde, smartsymbols, snippets, inlinehilite, highlight, superfences mermaid fence. • python-markdown-math: LaTeX math via mdx_math. • mkdocs-callouts: Obsidian callouts to admonitions. • markdown-callouts: Classier admonition syntax including GitHub callouts. • mdx-truly-sane-lists: Sane nested list indentation. • markdown-full-yaml-metadata: Full YAML metadata extension. • markdown-inline-graphviz-extension: Inline Graphviz. • MarkdownSuperscript / MarkdownSubscript: Super/subscript. • mdx-breakless-lists: List wrapping without forced breaks. • pyembed-markdown: URL embeds. • markdown-include: File includes. • mdx_truly_sane_lists: Alternate sane-list implementation. • markdown-checklist: GitHub-style task lists. • mdx-gh-links: GitHub cross-links. • mdx-wikilink-plus: Wikilinks. • markdown-extra: PHP Markdown Extra features via Python-Markdown extra. • admonition / attr_list / def_list / footnotes / md_in_html / toc / tables / sane_lists / smarty / codehilite / abbr / meta / nl2br / wikilinks: Built-in Python-Markdown extensions used by MkDocs.
+MkDocs Catalog — Navigation and Page Building • awesome-nav / mkdocs-awesome-pages-plugin: Nav titles and order without a full YAML tree. • mkdocs-encryptcontent-plugin: AES encrypt/decrypt Markdown content. • mkdocs-literate-nav: Navigation as Markdown lists. • mkdocs-publisher (pub-meta): Nav from file metadata with publication status. • mkdocs-nav-weight: Weight-based Markdownic navigation. • mkdocs-section-index: Clickable section index pages. • mkdocs-gallery: Sphinx-gallery equivalent for MkDocs. • mkdocs-pagetree-plugin: Human-readable page tree. • mkdocs-live-edit-plugin: Edit pages from the browser. • mkdocs-categories-plugin: Wiki page categories. • mkdocs-breadcrumbs-plugin: Location-based breadcrumbs. • mkrefs: Semantic reference pages from a knowledge graph. • mkdocs-include-dir-to-nav: Include a directory in navigation. • toc-sidebar: TOC sidebar helpers. • mkdocs-nav-enhancements: Nav tweaks. • mkdocs-authors-plugin: Per-page authors. • mkdocs-schema-reader: Generate pages from schemas. • mkdocs-title-casing-plugin: Title case normalization. • mkdocs-select-files: Select which files enter the build. • mkdocs-navsorted-plugin: Sorted navigation. • octadocs-adr: Architecture Decision Record blueprint for Octadocs.
+MkDocs Catalog — Quality Checks • mkdocs-spellcheck: Spell-check Markdown content. • mktestdocs: Run pytest against Markdown files and docstrings. • mkdocs-linkcheck: Async Markdown URL checker. • mkdocs-code-validator: Validate fenced code blocks against actions. • mkdocs-test: Framework for testing MkDocs projects. • mkdocs-codecheck: Validate code samples found in the tree.
+MkDocs Catalog — Search and TOC • mkdocs-localsearch: Make built-in search work on file://. • mkdocs-exclude-search: Exclude chapters from the search index. • mkdocs-material tags plugin: Tags from YAML metadata. • extract_listings: Page of all listings plus listing search. • mkdocs-task-collector: Collect tasks and notes into a list.
+MkDocs Catalog — Site Conversion • mkdocs-with-pdf: Single PDF from the whole site. • mkdocs-pdf-export-plugin: Per-page PDF export. • mkdocs-print-site-plugin: Combined print/PDF page. • mkdocs-exporter: Export individual pages or the whole site. • mkpdfs-mkdocs: MkDocs to PDF. • mkdocs-pandoc / mkdocs-combine: MkDocs to Pandoc (legacy; use maintained forks). • mkdocs-pdf-with-js: PDF with rendered JavaScript. • mk2pdf-export: Pandoc-based PDF export fork. • mkdocs-zip-folders: Zip configured folders into the site. • mkdocs-helm: Turn the docs site into a Helm repository. • mkdocs-autozip: Auto-zip document source.
+MkDocs Catalog — Site Building and Management • mike: Versioned MkDocs docs via Git. • techdocs-core: Backstage TechDocs plugin wrapper. • mkdocs-monorepo-plugin: Multiple docs folders, one site. • mkdocs-multirepo-plugin: Multiple repos, one site. • mkdocs-simple-plugin: Docs that live beside source code. • mkdocs-publisher (pub-debugger): Build/serve logger. • mkdocs-versioning: Versioned MkDocs sites. • mkdocs-same-dir: Allow mkdocs.yml beside the docs. • mkdocs-merge: Merge multiple MkDocs sources. • mkdocs-exclude-unused-files: Drop orphaned static files. • mkdocs-note: Note boxes. • yamp: Yet Another Multirepo Plugin. • mkdocs-auto-refresh-build-pages: Refresh build pages on updates. • mkdocs_exclude_tagged_files: Exclude by front-matter tags. • mkdocs-required-frontmatter-plugin: Enforce required front matter. • mkdocs-no-sitemap: Disable sitemap generation. • mkdocs-progress: Detailed build progress. • mkdocs-new-features-notifier: Flag newly added documentation pages.
+MkDocs Catalog — Snippets and Includes • mkdocs-include-markdown-plugin: Markdown includer. • markdown-include: Python-Markdown include extension. • mkdocs-meta-descriptions-plugin: Meta descriptions from first paragraphs. • mkdocs-codeinclude-plugin: Include source snippets. • mkdocs-external-markdown-plugin: Embed Markdown from a URL. • mdx_include: Local/remote file includes. • mkdocs-snippet-plugin: Inject snippets from a Git repo file. • mkdocs-gitsnippet-plugin: Inject snippet or full Markdown from a remote Git repo.
+Sphinx — Built-in Extensions • sphinx.ext.autodoc: Import modules and render docstrings. • sphinx.ext.autosummary: Summary tables and stub pages. • sphinx.ext.napoleon: Google and NumPy docstring styles. • sphinx.ext.intersphinx: Cross-project object inventories. • sphinx.ext.viewcode: Source pages linked from API objects. • sphinx.ext.doctest: Run doctest snippets during the build. • sphinx.ext.todo: Collect todo directives. • sphinx.ext.coverage: Measure docstring coverage. • sphinx.ext.graphviz: DOT diagrams. • sphinx.ext.inheritance_diagram: Class inheritance graphs. • sphinx.ext.ifconfig: Conditional content. • sphinx.ext.imgmath / sphinx.ext.mathjax / sphinx.ext.imgconverter: Math and image conversion. • sphinx.ext.linkcode: Custom source-code links. • sphinx.ext.duration: Build-time duration report. • sphinx.ext.extlinks: Short external-link aliases. • sphinx.ext.githubpages: .nojekyll for GitHub Pages. • sphinx.ext.autosectionlabel: Auto labels for sections.
+Sphinx — High-Use Third-Party Extensions • myst-parser: MyST Markdown for Sphinx. • myst-nb: MyST notebooks for Sphinx and Jupyter Book. • sphinx-autodoc-typehints: Render PEP 484 type hints. • sphinx-autoapi: Static-analysis autodoc that does not import the package. • sphinx-click: Document Click CLIs. • sphinx-argparse / sphinx-argparse-cli: Document argparse CLIs. • sphinx-autobuild: Live-reload Sphinx server. • sphinx-copybutton: Copy button on code blocks. • sphinx-design: Cards, grids, dropdowns, tabs, badges. • sphinx-tabs: Tabbed content. • sphinx-togglebutton / sphinx-togglebutton: Collapsible content. • sphinxcontrib-mermaid: Mermaid diagrams. • sphinxcontrib-plantuml: PlantUML diagrams. • sphinxcontrib-bibtex: BibTeX citations. • sphinxcontrib-httpdomain: HTTP/REST API domain. • sphinxcontrib-openapi: OpenAPI rendering. • sphinxcontrib-redoc: ReDoc in Sphinx. • sphinxcontrib-programoutput: Capture command output into docs. • sphinxcontrib-spelling: Spell checking. • sphinxcontrib-jquery: jQuery helper used by older themes. • sphinx-gallery: Example galleries from Python scripts. • nbsphinx: Execute and embed Jupyter notebooks. • sphinx-hoverxref: Hover tooltips on references. • sphinx-notfound-page: Themed 404 pages. • sphinxext-opengraph: Open Graph metadata. • sphinx-prompt: Unselectable shell/REPL prompts. • sphinxemoji: Emoji codes. • sphinx-favicon: Favicon helper. • sphinx-last-updated-by-git: Last-updated from Git. • sphinx-gitstamp: Git timestamps. • sphinx-multiversion / sphinx-versioned-docs / sphinxcontrib-versioning: Versioned docs. • sphinx-multiproject: Multi-project builds. • breathe: Doxygen XML bridge into Sphinx. • exhale: Higher-level C++ API docs on top of Breathe. • hawkmoth: Autodoc for C. • javasphinx: Java domain. • sphinx-fortran-extension: Fortran domain. • sphinx-needs: Requirements, traces, and need objects. • sphinx-test-reports: Test-result reporting. • sphinx-collections: Collect external files into the build. • sphinx-jsonschema: JSON Schema renderer. • sphinx-terraform: Terraform module docs. • sphinxcontrib-mermaid / sphinxcontrib-drawio / sphinxcontrib-youtube / sphinxcontrib-video / sphinxcontrib-svg2pdfconverter: Media and diagram helpers. • sphinxcontrib-napoleon: Standalone Napoleon (now built in). • numpydoc: NumPy docstring standard and Sphinx extension. • scanpydoc: Maintainable numpydoc helpers. • releases: Changelog generation. • sphinx-issues: GitHub/GitLab issue roles. • sphinx-toolbox: Bundle of small Sphinx utilities. • sphinx-remove-toctrees: Hide toctrees from HTML. • sphinx-sitemap: sitemap.xml generator. • sphinx-reredirects: Redirects. • sphinx-lint: Sphinx documentation linter. • doc8: reST style checker used with Sphinx trees.
+Sphinx — Themes • alabaster: Default Sphinx theme. • sphinx-rtd-theme: Read the Docs theme. • furo: Clean modern theme. • pydata-sphinx-theme: PyData/NumPy/pandas theme. • sphinx-book-theme: Book theme used by Jupyter Book. • shibuya: Elegant responsive theme. • piccolo-theme: Minimal modern theme. • sphinx-imaterial: Material-inspired theme. • sphinx-wagtail-theme: Wagtail theme. • qiskit-sphinx-theme: Qiskit ecosystem theme. • insegel: Minimal Read the Docs-oriented theme. • divio-docs-theme: Divio theme. • sphinx-typlog-theme: Typlog theme. • sphinx-modern-theme: Bootstrap modern theme. • sphinx-press-theme: VuePress-inspired theme. • karma-sphinx-theme: Dark theme. • groundwork-sphinx-theme: groundwork theme. • sphinx-readable-theme: Readable theme. • cloud-sptheme: Cloud Sphinx theme. • sphinx-bootstrap-theme: Bootstrap theme. • pygments-compatible academic themes via mplscience/scienceplots stacks for figure styling inside Sphinx sites.
+Infrastructure as Code • terraform: Declarative multi-cloud provisioning in HCL. • opentofu: Linux Foundation Terraform fork, MPL-licensed HCL IaC. • pulumi: IaC in Python, TypeScript, Go, C#, Java, YAML. • cdktf: CDK for Terraform (deprecated path; existing stacks still exist). • aws-cdk / aws-cdk-lib: AWS Cloud Development Kit compiling to CloudFormation. • aws-cdk.aws-lambda etc.: Per-service CDK constructs. • cloudformation: AWS-native JSON/YAML templates. • azure-resource-manager / arm-templates: Azure native JSON templates. • bicep: Azure DSL that compiles to ARM. • google-cloud-deployment-manager: GCP native templates. • google-cloud-infrastructure-manager: Terraform-based GCP managed IaC. • crossplane: Kubernetes-native control plane and IaC. • ansible: Agentless configuration management and orchestration. • ansible-core / ansible-collections: Ansible runtime and content collections. • chef / cinc: Ruby infrastructure automation (Cinc is the community fork). • puppet / openvox: Configuration management (OpenVox is the community fork). • salt / saltstack: Event-driven remote execution and config. • packer: VM and container image builds as code. • vagrant: Local VM development environments as code. • docker / docker-compose / compose-spec: Container and compose files as code. • kubernetes yaml / kustomize / helm: Cluster desired-state as code. • helmfile: Helm release orchestration as code. • argo-cd: GitOps continuous delivery for Kubernetes. • flux: GitOps toolkit for Kubernetes. • dagger: CI/CD pipelines as code in real languages. • terramate: Stacks, code generation, and orchestration around Terraform/OpenTofu. • terragrunt: DRY wrapper around Terraform/OpenTofu. • atlantis: Terraform pull-request automation. • spacelift / env0 / scalr: Commercial IaC orchestration platforms. • pulumi-aws / pulumi-azure-native / pulumi-gcp / pulumi-kubernetes: Provider libraries. • boto3 / azure-identity / google-cloud-*: Cloud SDKs often used beside IaC, not substitutes for it. • nix / nixos / nixops / devenv / flox: Reproducible systems and dev environments as code. • guix: Alternative functional package/system as code. • pulumi automation api: Embed Pulumi engines inside Python programs.
+Policy as Code, Authorization as Code • open-policy-agent (opa): General-purpose policy engine; policies in Rego. • conftest: OPA/Rego tests against config files in CI. • gatekeeper: OPA constraints for Kubernetes admission. • kyverno: Kubernetes-native policy as YAML plus CEL. • hashiCorp sentinel: Policy as code inside the HashiCorp/IBM suite. • pulumi-policy: Policies in Python/TypeScript/Rego over Pulumi resources. • checkov: Static policy-as-code scanner for Terraform, CloudFormation, Kubernetes, Docker. • tfsec / trivy: IaC and container misconfiguration scanners. • terrascan: Policy as code over IaC with Rego. • kics: Keeping Infrastructure as Code Secure scanner. • cedar / cedarpy: Amazon Cedar authorization language and Python bindings. • amazon-verified-permissions: Managed Cedar authorization service. • osohq / oso: Authorization as code library. • pycasbin: ACL/RBAC/ABAC authorization library. • casbin: Multi-language authorization library Casbin wraps. • openfga: Zanzibar-style relationship-based authorization. • authzed / spiceDB: Google Zanzibar-inspired authorization systems. • cerbos: Policy-based access-control engine. • permit.io: Authorization platform with policy as code. • opal: Policy and data plane for OPA/Cedar. • zen-engine: Decision tables and decision graphs. • spiffworkflow: BPMN and DMN workflow engine. • bkflow-dmn / ruly-dmn: DMN evaluation libraries. • rulebricks / decisionrules: Hosted decision-table SDKs. • durable-rules: Rete rules engine. • experta / pyknow: CLIPS-style expert systems. • business-rules: Minimal Python rule engine.
+Configuration as Code • pydantic-settings: Typed settings from env, dotenv, secrets, CLI. • dynaconf: Layered configuration for Python apps. • hydra: Composable experiment/config system from Meta. • omegaconf: YAML/dataclass config objects used by Hydra. • dynaconf / python-decouple / environs / django-environ: Env-driven config loaders. • jsonnet: Data templating language for config. • cue: Constrained configuration language. • dhall: Typed programmable configuration language. • starlark: Deterministic Python-like config language (Bazel, CUE-adjacent workflows). • bazel / pants / buck2 / please: Build-as-code systems. • pre-commit: Git hook pipelines as YAML code.
+GitOps, Pipelines as Code, and CI • github-actions: Workflows as YAML in .github/workflows. • gitlab-ci: Pipelines as .gitlab-ci.yml. • buildkite / circleci / azure-pipelines: Pipeline-as-code CI systems. • tekton: Kubernetes-native pipelines as CRDs. • prefect / dagster / temporalio / airflow: Workflow orchestration as code. • dbt: Analytics transformation as code. • great-expectations / soda / pandera: Data quality as code. • sqlmesh / sqllineage: SQL transformation and lineage as code.
+Secrets, Feature Flags, and Runtime Config as Code • sops: Encrypted secrets in Git. • git-crypt: Transparent repo encryption. • sealed-secrets: Encrypted Kubernetes secrets for GitOps. • external-secrets: Sync secrets from vaults into clusters. • vault / openbao: Secrets engines often driven as code. • growthbook / unleash-client-python / flagsmith: Feature flags as code/config.
+Tests as Code and Specs as Code • pytest: Test-as-code baseline. • hypothesis: Property-based tests as executable specs. • behave / pytest-bdd / lettuce: Gherkin BDD as code. • schemathesis: Property-based tests from OpenAPI specs. • dredd: Contract tests from API descriptions. • pact-python: Consumer-driven contract testing. • openspec / spec-driven-development toolkits: Specs as the source of truth for code and docs.
+Forms, Decisions, and Architecture as Code • pyxform: Excel forms to ODK/XLSForm. • jsonforms / rjsf: JSON Schema forms. • cjm-fasthtml-jsonschema: Schema-driven FastHTML forms. • arc42: Architecture documentation template as Markdown/AsciiDoc. • structurizr / c4-diagrams / like-c4: Architecture models as code. • adr-tools / log4brains / madr: Architecture Decision Records as Markdown.
+Where this still is not literally every package on PyPI • Awesome-Sphinx tracks on the order of 600 Sphinx-related packages. The list above is the working set plus the named catalog, not every abandoned sphinxcontrib-* upload. • The MkDocs catalog is the 300-project curated set. That is the closest thing to “every MkDocs plugin.” • IaC/policy ecosystems include hundreds of Terraform providers and Ansible collections. Those are plugins to the engines above, not separate docs-as-code libraries.
+If you want a third pass, the only remaining slice that is still finite and useful is Terraform providers / Ansible collections / Sphinx contrib scraped from PyPI classifiers. Say which of those three.
+Third pass: pulling Terraform providers, Ansible collections, and Sphinx packages from the registries so the list can go in this message.Third pass. Official and shipped sets first, then the partner/community layer. Registry scale is called out so this is not pretending 7,127 Terraform providers all fit here.
+Terraform Official Providers (hashicorp/*) • hashicorp/aws: AWS resources (EC2, VPC, S3, IAM, RDS, EKS, Lambda, and the rest of the AWS API surface). • hashicorp/awscc: AWS Cloud Control API provider; covers services the classic AWS provider does not yet model. • hashicorp/azurerm: Azure Resource Manager resources. • hashicorp/azuread: Azure Active Directory / Entra ID. • hashicorp/azurestack: Azure Stack Hub. • hashicorp/google: Google Cloud GA resources (GCE, GKE, GCS, BigQuery, Cloud SQL, IAM). • hashicorp/google-beta: Google Cloud preview / beta resources. • hashicorp/kubernetes: Kubernetes core objects (Deployments, Services, RBAC, CRDs as generic manifests). • hashicorp/helm: Helm releases against a cluster. • hashicorp/vsphere: VMware vSphere VMs, datacenters, networks, datastores. • hashicorp/vault: HashiCorp Vault mounts, policies, auth methods, secrets engines. • hashicorp/consul: Consul services, intentions, ACLs, KV. • hashicorp/nomad: Nomad jobs, ACLs, volumes. • hashicorp/boundary: HashiCorp Boundary scopes, targets, credentials. • hashicorp/tfe: HCP Terraform / TFE orgs, workspaces, teams, vars, policy sets. • hashicorp/hcp: HashiCorp Cloud Platform HVNs, clusters, peering. • hashicorp/random: Random IDs, passwords, shuffles, pet names. • hashicorp/null: Null resources and provisioner-shaped side effects. • hashicorp/local: Local files and sensitive files. • hashicorp/tls: TLS certs, keys, self-signed CAs, cert requests. • hashicorp/http: HTTP GET data source for generic endpoints. • hashicorp/time: Time offsets, rotators, static timestamps, sleeping. • hashicorp/archive: Zip/tar file archives. • hashicorp/cloudinit: cloud-init MIME configs. • hashicorp/external: Shell out to an external program as a data source. • hashicorp/dns: DNS record lookups. • hashicorp/ad: On-prem Active Directory objects. • hashicorp/terraform: Terraform-specific data (built-in terraform.io provider family; remote state lives here historically).
+Terraform Partner Providers people actually use • cloudflare/cloudflare: Zones, records, WAF, Zero Trust, Workers. • datadog/datadog: Monitors, dashboards, SLOs, synthetics. • grafana/grafana: Grafana Cloud and OSS dashboards, folders, alert rules. • gitlabhq/gitlab: GitLab projects, groups, runners, variables. • integrations/github: GitHub repos, teams, files, Actions environments. • azure/azapi: Generic Azure ARM API escape hatch beside azurerm. • oracle/oci: Oracle Cloud Infrastructure. • ibm-cloud/ibm: IBM Cloud resources. • linode/linode: Akamai Linode instances and networking. • digitalocean/digitalocean: Droplets, VPCs, Kubernetes, Spaces. • hetznercloud/hcloud: Hetzner Cloud servers, firewalls, load balancers. • ovh/ovh: OVHcloud public cloud and domains. • tencentcloudstack/tencentcloud: Tencent Cloud. • alicloud/alicloud: Alibaba Cloud. • snowflake-labs/snowflake: Snowflake warehouses, databases, grants. • confluentinc/confluent: Confluent Cloud Kafka clusters and topics. • mongodb/mongodbatlas: MongoDB Atlas projects, clusters, users. • elastic/elasticstack: Elasticsearch / Kibana / Elastic Cloud. • newrelic/newrelic: New Relic alerts and synthetics. • pagerduty/pagerduty: Services, schedules, escalation policies. • opsgenie/opsgenie: Opsgenie teams and alerts. • okta/okta: Okta apps, groups, policies. • auth0/auth0: Auth0 tenants, clients, connections. • onelogin/onelogin: OneLogin apps and users. • launchdarkly/launchdarkly: Flags and environments. • splunk/splunk: Splunk indexes and saved searches. • sumologic/sumologic: Collectors and sources. • fastly/fastly: Fastly services and backends. • akamai/akamai: Akamai properties and edge config. • ns1/ns1: NS1 DNS. • dnsimple/dnsimple: DNSimple records. • godaddy/godaddy: GoDaddy DNS (community/partner depending on year). • vercel/vercel: Vercel projects and domains. • netlify/netlify: Netlify sites. • heroku/heroku: Heroku apps and addons. • cloudamqp/cloudamqp: CloudAMQP brokers. • aiven/aiven: Aiven Kafka, Postgres, OpenSearch. • digitalocean-adjacent vultr/vultr: Vultr instances. • upcloud/upcloud: UpCloud servers. • scaleway/scaleway: Scaleway cloud. • exoscale/exoscale: Exoscale compute. • civo/civo: Civo Kubernetes and instances. • equinix/equinix / equinix/metal: Equinix Metal / Fabric. • vsphere-adjacent vmware/vsphere-plus later vmware/*: Broadcom/VMware partner providers beyond hashicorp/vsphere. • nutanix/nutanix: Nutanix AHV and Prism. • proxmox via bpg/proxmox or Telmate/proxmox: Proxmox VE (community, de-facto standard). • dmacvicar/libvirt: KVM/libvirt. • kreuzwerker/docker: Docker provider after HashiCorp transferred it. • gavinbunney/kubectl: kubectl apply-shaped Kubernetes manifests. • alekc/kubectl: Maintained kubectl provider fork. • hashicorp-adjacent rancher2: Rancher clusters and projects (rancher/rancher2). • fluxcd/flux: Flux GitOps objects. • istio / cilium / kong partner providers: Service-mesh and gateway APIs as resources. • databricks/databricks: Workspaces, jobs, clusters, Unity Catalog. • snowflake, dbt-cloud, prefecthq/prefect, dagster-io related partner/community providers: Data-platform as code. • circleci/circleci, buildkite/buildkite: CI as code next to GitHub/GitLab providers. • 1password/onepassword: 1Password items and vaults. • bitwarden community providers: Secret lookup. • sops-related providers and external-secrets operators: Encrypted-secret workflows. • opa / styra DAS providers: Policy attachments. • spotinst/spotinst, castai/castai, pingcap/tidbcloud: Cost and specialty platforms.
+Terraform Registry remainder • Public registry size as of late August 2026: 7,127 providers and 23,548 modules. • Official tier is the ~30 hashicorp/* providers above. • Partner tier is vendor-maintained (Cloudflare, Datadog, GitHub, Oracle, IBM, Snowflake, …). • Community tier is everyone else. Listing all 7,127 names is a registry dump, not a library catalog. Browse: https://registry.terraform.io/browse/providers • OpenTofu uses the same provider binaries in almost all cases; source addresses stay registry.terraform.io/… unless you pin a tofu-specific mirror.
+Ansible Collections in the Community Package • ansible.builtin: Core modules, lookups, filters, connection/shell plugins shipped with ansible-core. • ansible.posix: POSIX hosts (sysctl, seboolean, authorized_key, firewalld, mount, at, patch, csh/fish shells). • ansible.windows: Windows modules beyond builtin (win_*, become, shells). • ansible.utils: IP, fact, validation, and data utilities. • ansible.netcommon: Shared network parsers, connections (network_cli, httpapi, netconf), and resource modules. • ansible.mysql / ansible.mariadb: MySQL and MariaDB database modules. • amazon.aws: Official AWS modules (ec2, s3, iam, rds, route53, elbv2, eks, lambda). • community.aws: Extra AWS modules not in amazon.aws. • azure.azcollection: Azure resource modules. • google.cloud: GCP modules. • kubernetes.core: k8s, helm, and cluster objects. • kubevirt.core: KubeVirt VMs on Kubernetes. • community.okd: OpenShift / OKD. • containers.podman: Podman pods, images, quadlets. • community.docker: Docker and docker-compose. • community.general: Catch-all community modules (packages, cloud extras, monitoring, files, system). • community.crypto: OpenSSL, ACME, certificates, keys. • community.dns: DNS zone and record modules. • community.sops: Mozilla SOPS encrypted files. • community.hashi_vault: Vault lookups and modules. • community.libvirt: libvirt/KVM. • community.vmware / vmware.vmware / vmware.vmware_rest: vSphere SOAP and REST. • community.windows: Extra Windows modules. • microsoft.ad: Active Directory. • microsoft.iis: IIS sites and app pools. • community.postgresql / community.mysql / community.mongodb / community.clickhouse / community.rabbitmq / community.proxysql / community.proxmox: Data stores and hypervisors. • community.zabbix / community.grafana / grafana.grafana / community.routeros / community.hrobot: Monitoring and edge/network OS. • community.library_inventory_filtering_v1: Inventory filtering helpers. • community.sap_libs / community.ciscosmb: SAP libs and Cisco SMB. • arista.eos / cisco.ios / cisco.iosxr / cisco.nxos / cisco.aci / cisco.meraki / cisco.mso / cisco.ucs / cisco.intersight / vyos.vyos / fortinet.fortios / fortinet.fortimanager / f5networks.f5_modules / check_point.mgmt / juniper historically via junipernetworks.junos (may cycle in/out of the package): Network OS collections. • chocolatey.chocolatey: Windows Chocolatey packages. • hetzner.hcloud / vultr.cloud / cloudscale_ch.cloud / ngine_io.cloudstack / openstack.cloud / ovirt.ovirt: Public and private cloud. • netbox.netbox: NetBox DCIM/IPAM. • theforeman.foreman: Foreman / Red Hat Satellite. • netapp.ontap / netapp.storagegrid / netapp.cloudmanager / netapp_eseries.santricity: NetApp storage. • dellemc.openmanage / dellemc.enterprise_sonic / dellemc.powerflex / dellemc.unity: Dell infrastructure. • purestorage.flasharray / purestorage.flashblade: Pure Storage. • hitachivantara.vspone_block / hitachivantara.vspone_object: Hitachi VSP. • ibm.storage_virtualize: IBM FlashSystem / SVC. • infinidat.infinibox / infoblox.nios_modules: InfiniBox and Infoblox NIOS. • inspur.ispim / ieisystem.inmanage / kaytus.ksmanage: Server BMC/out-of-band. • lowlydba.sqlserver: SQL Server. • splunk.es: Splunk Enterprise Security. • cyberark.conjur / cyberark.pas: CyberArk secrets and PAS. • telekom_mms.icinga_director: Icinga Director. • wti.remote: WTI console servers. • graphiant.naas: Graphiant NaaS. • pcg.alpaca_operator / ravendb.ravendb: Narrow application collections currently in the package.
+Ansible outside the community package (Galaxy / certified) • ansible.controller / awx.awx: Controller / AWX jobs, inventories, credentials. • ansible.platform / ansible.hub: Private Automation Hub and AAP platform. • ansible.posix is in-package; ansible.scm and execution-environment tools live around ansible-builder / ansible-navigator. • cisco.asa / cisco.dnac / cisco.ise / cisco.nso: Certified Cisco collections often installed separately. • junipernetworks.junos / paloaltonetworks.panos / frr.frr / openvswitch.openvswitch: Network vendors that rotate in and out of the community tarball. • redhat.rhel_system_roles / redhat.openshift / redhat.satellite: Red Hat certified content. • community.kubernetes: Historical; replaced by kubernetes.core. • community.azure / community.google: Historical extras largely superseded by vendor collections. • Galaxy total is thousands of namespaces. Search: https://galaxy.ansible.com/
+Sphinx Built-in Themes • alabaster: Default light theme. • sphinxdoc: Classic Sphinx documentation look. • classic / traditional / nature / haiku / pyramid / bizstyle / agogo / scrolls: Bundled HTML themes.
+Sphinx Themes from the sphinx-themes.org gallery • sphinx-rtd-theme: Read the Docs. • furo: Clean modern default for new projects. • pydata-sphinx-theme: PyData / scientific Python. • sphinx-book-theme: Executable-book layout. • shibuya: Responsive modern theme. • piccolo-theme: Minimal. • sphinx-press-theme: VuePress-inspired. • sphinx-imaterial: Material Design. • insegel / insipid: Minimal Read the Docs-adjacent themes. • sphinx-bootstrap-theme / basicstrap: Bootstrap themes. • cloud-sptheme: Cloud theme. • groundwork-sphinx-theme: groundwork. • karma-sphinx-theme: Dark theme. • sphinx-readable-theme: Readable. • sphinx-wagtail-theme: Wagtail. • sphinx-awesome-theme: Awesome theme. • sphinx-nefertiti: Nefertiti. • renku-sphinx-theme: Renku. • stanford-theme / nameko-theme / kotti-theme / hachibee-theme / maise / murray / bernard / breeze / better / yummy / sizzle / solar / sandstone / redactor / pd / pdj / conestack / documatt / adc-theme / topos / zerovm / tibas.tt / python-docs-theme: Gallery themes, many project-specific.
+Sphinxcontrib official family (shipped as separate PyPI packages) • sphinxcontrib-applehelp: Apple Help builder. • sphinxcontrib-devhelp: Devhelp builder. • sphinxcontrib-htmlhelp: HTML Help / CHM builder. • sphinxcontrib-jsmath: JS math helper. • sphinxcontrib-qthelp: Qt Help builder. • sphinxcontrib-serializinghtml: JSON/pickle HTML serializer. • sphinxcontrib-jquery: jQuery on newer Sphinx.
+Sphinx extensions worth treating as the working set • myst-parser / myst-nb: Markdown and notebooks. • sphinx-autodoc-typehints / sphinx-autoapi / numpydoc / scanpydoc: API extraction. • sphinx-click / sphinx-argparse / sphinx-argparse-cli / sphinx-argparse-cli: CLI docs. • sphinx-autobuild / sphinx-testing: Dev loop and extension tests. • sphinx-copybutton / sphinx-design / sphinx-tabs / sphinx-togglebutton / sphinx-panels (legacy) / sphinx-prompt / sphinxemoji / sphinx-favicon / sphinx-icon: Authoring UX. • sphinxcontrib-mermaid / sphinxcontrib-plantuml / sphinxcontrib-programoutput / sphinxcontrib-bibtex / sphinxcontrib-httpdomain / sphinxcontrib-openapi / sphinxcontrib-redoc / sphinxcontrib-spelling / sphinxcontrib-video / sphinxcontrib-youtube / sphinxcontrib-svg2pdfconverter / sphinxcontrib-cadquery / sphinxcontrib-visio / sphinxcontrib-autoyaml / sphinxcontrib-datatemplates / sphinxcontrib-django: Contrib domain. • breathe / exhale / hawkmoth / javasphinx / sphinx-fortran-extension / wurfapi: Non-Python languages. • nbsphinx / sphinx-gallery / sphinxcontrib-jupyter / jupinx: Examples and notebooks. • sphinx-needs / sphinx-test-reports / sphinx-collections / sphinx-emf: Requirements and traces. • sphinx-hoverxref / sphinx-notfound-page / sphinxext-opengraph / sphinx-sitemap / sphinx-reredirects / sphinx-last-updated-by-git / sphinx-gitstamp / sphinx-issues / sphinx-toolbox / sphinx-remove-toctrees / sphinx-lint / doc8: Site chrome and QA. • sphinx-multiversion / sphinx-versioned-docs / sphinxcontrib-versioning / sphinx-multiproject: Versions and monorepos. • sphinx-jsonschema / sphinx-json-schema / sphinx-terraform / sphinx-yaml-table: Structured config docs. • atsphinx-feed / sphinx-blog / sphinx-ads / sphinx-debuginfo / sphinx-extractor / sphinx-navtree / sphinx-vcs-changelog / sphinxnotes-snippet / sphinxawesome-sampdirective / nti-sphinx-questions / sphinxcontrib-proof: Narrow extensions from Awesome-Sphinx.
+Hard stops so this stays true • Terraform: 7,127 providers. Official list is complete above. Partner list is the ones used in production catalogs. Community is the long tail. • Ansible: the community-package index above is the complete shipped set from current docs.ansible.com. Galaxy is a second universe. • Sphinx: Awesome-Sphinx tracks ~600 classifier hits. sphinx-themes.org is the complete curated theme gallery. PyPI search for Framework :: Sphinx :: Extension is the live scrape if you want every abandoned sphinxcontrib-* name.
