@@ -1,5 +1,5 @@
 {
- "digest": "fe41bbb784092e6f38652659517da6929df4c0cc699e3e513cc5212bdc6d6037",
+ "digest": "97b3c46c10a2bc157da2d528ddb89af4c845983481341ba30838e64a92893e33",
  "entries": [
   {
    "file": "proofs/out/P1/nodejs-governance/facts.jsonl",
@@ -539,7 +539,7 @@
    "file": "proofs/out/P53/all/register_state.json",
    "input": "all",
    "proof": "P53",
-   "sha256": "4b8060fbc50fd705d361d66659fcb92d76239dda5718973dfbd80350f46b1467"
+   "sha256": "fda880992f5227227e1f6dcad89d4a28e0fb4b4f0dee49db13e127b6840c7ca1"
   },
   {
    "file": "proofs/out/P54/majority/truth_table.html",
@@ -578,6 +578,24 @@
    "sha256": "ca827be6f5ca0689e4f800684d1005ffb105d9db6aac3be32abd578e8e6bfa61"
   },
   {
+   "file": "proofs/out/P58/receipt-csv/working_days_to_deadline.xlsx",
+   "input": "receipt-csv",
+   "proof": "P58",
+   "sha256": "4025b71ccaf0ae7dca84bace48f2ec932874ae226d95f6f17287077ea95ef952"
+  },
+  {
+   "file": "proofs/out/P59/usc5-552-doj/obligations_by_subsection.html",
+   "input": "usc5-552-doj",
+   "proof": "P59",
+   "sha256": "e44f95f2cf3aaaf1b6b7b1b4722d2e9ff47ce828d1633aa711dc426242fa905f"
+  },
+  {
+   "file": "proofs/out/P59/usc5-552-doj/obligations_by_subsection.xlsx",
+   "input": "usc5-552-doj",
+   "proof": "P59",
+   "sha256": "276deb268bf1d0ea28ac4e4f72f6a935864f2ff0718af22568a8a689ef3673ea"
+  },
+  {
    "file": "proofs/out/P6/receipt-csv/facts.lp",
    "input": "receipt-csv",
    "proof": "P6",
@@ -588,6 +606,12 @@
    "input": "tsc-voting-members",
    "proof": "P6",
    "sha256": "02494e198a159fbb0a4553a9f23ed650d027b0e94a838828089fba92f423e839"
+  },
+  {
+   "file": "proofs/out/P60/majority/roundtrip.json",
+   "input": "majority",
+   "proof": "P60",
+   "sha256": "cae43519b49b0d42bca8ccca4e30d5d3a2db75aebbbdd3c7526707a0668fa0d4"
   },
   {
    "file": "proofs/out/P7/nodejs-tsc-minutes/facts.jsonl",

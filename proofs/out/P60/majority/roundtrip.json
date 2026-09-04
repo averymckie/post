@@ -1,0 +1,7 @@
+{
+ "match": true,
+ "monotone": true,
+ "rows": 19,
+ "threshold_from_workbook": 10,
+ "threshold_in_policy": 10
+}

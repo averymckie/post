@@ -3539,3 +3539,56 @@ instantiated on: receipt-phase events per resource per month
 proofs/out/itil/infrastructure-and-platform-management/utilization-report/utilization.xlsx sha256 e85de9fce1d4b8979ecd6b9ddb63c7ed637121276cd604954ce9f91285de6b02  reproduced
 shows: rows 48; first {"resource": "Resource01", "2010-10": 0, "2010-11": 6, "2010-12": 50, "2011-01": 24, "2011-02": 150, "2011-03": 160, "2011-04": 199, "2011-05": 94, "2011-06": 105, "2011-07": 227, "2011-08": 87, "2011-09": 83, "2011-10":
 ```
+## P58  records -> working-day clock -> the term the deadlines imply -> workbook
+
+```
+records (P6: case start and deadline dates)
+-> calendar (holidays.country_holidays('NL'); numpy.busdaycalendar(weekmask, holidays))
+-> count (numpy.busday_count(start, deadline, busdaycal))
+-> tabulate (openpyxl.Workbook.save)
+-> working days to deadline
+```
+
+**receipt-csv**
+
+```
+proofs/out/P58/receipt-csv/working_days_to_deadline.xlsx   sha256 4025b71ccaf0ae7dca84bace48f2ec932874ae226d95f6f17287077ea95ef952  registered
+shows: cases with start and deadline 1434; Dutch public holidays from the holidays library for [2010, 2011, 2012, 2013]
+shows: most common working-day terms (days: cases): [(40, 693), (38, 221), (39, 138)]
+shows: first rows [['case-10011', 'General', '2011-10-11', '2011-12-06', 56, 40], ['case-10017', 'General', '2011-10-11', '2011-12-06', 56, 40]]
+```
+
+## P59  required actions, units -> obligations per subsection -> workbook, page
+
+```
+required actions (P4), units with paths (P1)
+-> key (the unit path of each required action's sentence, cut to its first designator)
+-> measure (collections.Counter per subsection)
+-> tabulate (openpyxl.Workbook.save; plotly.express.bar; plotly.io.write_html)
+-> obligations per subsection
+```
+
+**usc5-552-doj**
+
+```
+proofs/out/P59/usc5-552-doj/obligations_by_subsection.xlsx sha256 276deb268bf1d0ea28ac4e4f72f6a935864f2ff0718af22568a8a689ef3673ea  registered
+proofs/out/P59/usc5-552-doj/obligations_by_subsection.html sha256 e44f95f2cf3aaaf1b6b7b1b4722d2e9ff47ce828d1633aa711dc426242fa905f  registered
+shows: subsections 10; heaviest (a) with 72 required actions
+```
+
+## P60  workbook -> threshold' ; threshold', policy -> match
+
+```
+the enumerated rule (P54), policy (P13)
+-> read rows (python_calamine.CalamineWorkbook.from_path; CalamineSheet.to_python)
+-> derive (the smallest input decided true; monotonicity over the whole space)
+-> compare (against the threshold rendered into the decision table)
+-> match
+```
+
+**majority**
+
+```
+proofs/out/P60/majority/roundtrip.json                     sha256 cae43519b49b0d42bca8ccca4e30d5d3a2db75aebbbdd3c7526707a0668fa0d4  registered
+shows: threshold read back 10, policy threshold 10, match True; monotone True
+```

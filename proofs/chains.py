@@ -2965,6 +2965,128 @@ def performance_map() -> dict[str, Any]:
 
 
 # ----------------------------------------------------------------------------
+# P58 .. P60
+# ----------------------------------------------------------------------------
+
+
+def s_working_days(ctx: dict[str, Any]) -> None:
+    import datetime as _dt
+
+    import holidays
+    import numpy as np
+
+    rows = ctx["rows"]
+    seen: set[str] = set()
+    cases = []
+    for r in rows:
+        c = r["case:concept:name"]
+        if c in seen or not r["case:startdate"] or not r["case:deadline"]:
+            continue
+        seen.add(c)
+        cases.append((c, r["case:department"], r["case:startdate"][:10], r["case:deadline"][:10]))
+    years = sorted({int(x[2][:4]) for x in cases} | {int(x[3][:4]) for x in cases})
+    nl = holidays.country_holidays("NL", years=years)
+    cal = np.busdaycalendar(weekmask="Mon Tue Wed Thu Fri", holidays=sorted(str(d) for d in nl))
+    out = [["case", "department", "start", "deadline", "calendar_days", "working_days_nl"]]
+    counts = collections.Counter()
+    for c, dep, a, b in cases:
+        cd = (_dt.date.fromisoformat(b) - _dt.date.fromisoformat(a)).days
+        wd = int(np.busday_count(a, b, busdaycal=cal))
+        out.append([c, dep, a, b, cd, wd])
+        counts[wd] += 1
+    p = workbook(ctx["dir"] / "working_days_to_deadline.xlsx", {"cases": out})
+    common = counts.most_common(3)
+    ctx["files"] = [p]
+    ctx["shows"] = [f"cases with start and deadline {len(cases)}; Dutch public holidays from the holidays library for {years}", f"most common working-day terms (days: cases): {common}", f"first rows {out[1:3]}"]
+
+
+def working_days() -> dict[str, Any]:
+    proof = Proof(
+        "P58",
+        "records -> working-day clock -> the term the deadlines imply -> workbook",
+        ["records (P6: case start and deadline dates)"],
+        [
+            Step("calendar", "holidays.country_holidays('NL'); numpy.busdaycalendar(weekmask, holidays)", s_working_days),
+            Step("count", "numpy.busday_count(start, deadline, busdaycal)", lambda c: None),
+            Step("tabulate", "openpyxl.Workbook.save", lambda c: None),
+        ],
+        "working days to deadline",
+    )
+    ctx = {"dir": out_dir("P58", "receipt-csv"), "rows": RESULTS[("records", "receipt-csv")]["rows"]}
+    run(proof, "receipt-csv", ctx)
+    return ctx
+
+
+def s_by_section(ctx: dict[str, Any]) -> None:
+    import plotly.express as px
+    import plotly.io as pio
+
+    src = ctx["sources"][0]
+    unit_path = {u.id: u.path for u in src.units}
+    counts = collections.Counter()
+    for r in ctx["required"]:
+        unit = r["sentence_id"].split(":")[1]
+        path = unit_path.get(unit, "")
+        top = re.match(r"^\([^)]*\)", path)
+        counts[top.group(0) if top else "(unlabelled)"] += 1
+    rows = [["subsection", "required_actions"]] + [[k, n] for k, n in sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))]
+    p = workbook(ctx["dir"] / "obligations_by_subsection.xlsx", {"by_subsection": rows})
+    fig = px.bar(x=[r[0] for r in rows[1:]], y=[r[1] for r in rows[1:]], labels={"x": "subsection", "y": "required actions"}, title="5 U.S.C. 552: required actions per subsection")
+    p2 = ctx["dir"] / "obligations_by_subsection.html"
+    pio.write_html(fig, str(p2), include_plotlyjs="cdn", full_html=True, div_id="chart")
+    ctx["files"] = [p, p2]
+    ctx["shows"] = [f"subsections {len(rows) - 1}; heaviest {rows[1][0]} with {rows[1][1]} required actions"]
+
+
+def by_section(label: str) -> dict[str, Any]:
+    proof = Proof(
+        "P59",
+        "required actions, units -> obligations per subsection -> workbook, page",
+        ["required actions (P4), units with paths (P1)"],
+        [
+            Step("key", "the unit path of each required action's sentence, cut to its first designator", s_by_section),
+            Step("measure", "collections.Counter per subsection", lambda c: None),
+            Step("tabulate", "openpyxl.Workbook.save; plotly.express.bar; plotly.io.write_html", lambda c: None),
+        ],
+        "obligations per subsection",
+    )
+    src = RESULTS[("policy", label)]
+    ctx = {"dir": out_dir("P59", label), "sources": src["sources"], "required": src["required"]}
+    run(proof, label, ctx)
+    return ctx
+
+
+def s_truth_roundtrip(ctx: dict[str, Any]) -> None:
+    import python_calamine
+
+    rows = python_calamine.CalamineWorkbook.from_path(str(ctx["xlsx"])).get_sheet_by_name("truth_table").to_python()
+    back = [(int(r[0]), bool(r[1])) for r in rows[1:]]
+    threshold_back = min(n for n, v in back if v)
+    monotone = all(v == (n >= threshold_back) for n, v in back)
+    p = write_json(ctx["dir"] / "roundtrip.json", {"threshold_from_workbook": threshold_back, "threshold_in_policy": ctx["majority"], "match": threshold_back == ctx["majority"], "monotone": monotone, "rows": len(back)})
+    ctx["files"] = [p]
+    ctx["shows"] = [f"threshold read back {threshold_back}, policy threshold {ctx['majority']}, match {threshold_back == ctx['majority']}; monotone {monotone}"]
+
+
+def truth_roundtrip() -> dict[str, Any]:
+    proof = Proof(
+        "P60",
+        "workbook -> threshold' ; threshold', policy -> match",
+        ["the enumerated rule (P54), policy (P13)"],
+        [
+            Step("read rows", "python_calamine.CalamineWorkbook.from_path; CalamineSheet.to_python", s_truth_roundtrip),
+            Step("derive", "the smallest input decided true; monotonicity over the whole space", lambda c: None),
+            Step("compare", "against the threshold rendered into the decision table", lambda c: None),
+        ],
+        "match",
+    )
+    ctx = {"dir": out_dir("P60", "majority"), "xlsx": OUT / "P54" / "majority" / "truth_table.xlsx", "majority": RESULTS[("decisions", "majority")]["majority"]}
+    run(proof, "majority", ctx)
+    return ctx
+
+
+
+# ----------------------------------------------------------------------------
 # P51 .. P53: the orchestration itself, as proofs
 # ----------------------------------------------------------------------------
 
@@ -3342,6 +3464,9 @@ def main() -> None:
     cross_engine()
     explanations()
     performance_map()
+    working_days()
+    by_section("usc5-552-doj")
+    truth_roundtrip()
     orchestration_proofs()
     counts = append_ledger()
     itil.save_register(reregister=os.environ.get("PROOFS_REREGISTER") == "1")
