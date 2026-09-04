@@ -1,0 +1,1024 @@
+@prefix ex: <https://example.org/proofs/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0001:s02/e1> a ex:Event ;
+    ex:lemma "guide" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0001:s02/x2> ;
+    ex:sentence "nodejs-tsc-charter:u0001:s02" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0002:s00/e5> a ex:Event ;
+    ex:lemma "part" ;
+    ex:sentence "nodejs-tsc-charter:u0002:s00" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0002:s00/x3> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0002:s01/e3> a ex:Event ;
+    ex:lemma "operate" ;
+    ex:sentence "nodejs-tsc-charter:u0002:s01" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0002:s01/x2> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0002:s02/e12> a ex:Event ;
+    ex:lemma "open" ;
+    ex:negated true ;
+    ex:obligatory true ;
+    ex:sentence "nodejs-tsc-charter:u0002:s02" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0002:s02/x2> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0002:s02/e17> a ex:Event ;
+    ex:lemma "visible" ;
+    ex:sentence "nodejs-tsc-charter:u0002:s02" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0002:s02/x19>,
+        <https://example.org/proofs/nodejs-tsc-charter:u0002:s02/x2> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0004:s00/e8> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0004:s00/x7> ;
+    ex:lemma "have" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0004:s00/x11> ;
+    ex:sentence "nodejs-tsc-charter:u0004:s00" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0004:s01/e11> a ex:Event ;
+    ex:lemma "delegate" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0004:s01/x2> ;
+    ex:sentence "nodejs-tsc-charter:u0004:s01" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0004:s01/x14> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0004:s02/e11> a ex:Event ;
+    ex:lemma "delegate" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0004:s01/x14> ;
+    ex:sentence "nodejs-tsc-charter:u0004:s02" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0004:s02/x17>,
+        <https://example.org/proofs/nodejs-tsc-charter:u0004:s02/x3> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0004:s03/e8> a ex:Event ;
+    ex:lemma "board" ;
+    ex:sentence "nodejs-tsc-charter:u0004:s03" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0004:s03/x5> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0005:s00/e6> a ex:Event ;
+    ex:lemma "amend" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0005:s00/x2> ;
+    ex:sentence "nodejs-tsc-charter:u0005:s00" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0005:s00/x9> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0007:s00/e7> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0007:s00/x2> ;
+    ex:lemma "member" ;
+    ex:sentence "nodejs-tsc-charter:u0007:s00" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0007:s00/e9> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0007:s00/x2> ;
+    ex:lemma "_vot" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0007:s00/x11> ;
+    ex:sentence "nodejs-tsc-charter:u0007:s00" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0007:s01/e15> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0007:s01/x2> ;
+    ex:lemma "vote" ;
+    ex:negated true ;
+    ex:sentence "nodejs-tsc-charter:u0007:s01" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0007:s01/e4> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0007:s01/x2> ;
+    ex:lemma "attend" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0007:s01/x5> ;
+    ex:sentence "nodejs-tsc-charter:u0007:s01" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0007:s01/e7> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0007:s01/x2> ;
+    ex:lemma "participate" ;
+    ex:sentence "nodejs-tsc-charter:u0007:s01" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0007:s01/x10> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0007:s02/e13> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0007:s02/x2> ;
+    ex:lemma "have" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0007:s02/x15> ;
+    ex:sentence "nodejs-tsc-charter:u0007:s02" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0007:s02/e17> a ex:Event ;
+    ex:lemma "cast" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0007:s02/x18> ;
+    ex:sentence "nodejs-tsc-charter:u0007:s02" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0007:s02/e23> a ex:Event ;
+    ex:lemma "reach" ;
+    ex:negated true ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0007:s02/x20> ;
+    ex:sentence "nodejs-tsc-charter:u0007:s02" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0007:s02/x26> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0007:s02/e4> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0007:s02/x2> ;
+    ex:lemma "do" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0007:s02/x5> ;
+    ex:sentence "nodejs-tsc-charter:u0007:s02" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0007:s02/e9> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0007:s02/x7> ;
+    ex:lemma "do" ;
+    ex:sentence "nodejs-tsc-charter:u0007:s02" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0008:s00/e7> a ex:Event ;
+    ex:lemma "limit" ;
+    ex:sentence "nodejs-tsc-charter:u0008:s00" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0008:s00/x2>,
+        <https://example.org/proofs/nodejs-tsc-charter:u0008:s00/x5> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0008:s01/e2> a ex:Event ;
+    ex:lemma "be" ;
+    ex:negated true ;
+    ex:sentence "nodejs-tsc-charter:u0008:s01" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0008:s01/x5> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0008:s02/e4> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0008:s02/x2> ;
+    ex:lemma "have" ;
+    ex:obligatory true ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0008:s02/x9> ;
+    ex:sentence "nodejs-tsc-charter:u0008:s02" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0009:s00/e2> a ex:Event ;
+    ex:lemma "be" ;
+    ex:negated true ;
+    ex:sentence "nodejs-tsc-charter:u0009:s00" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0009:s00/x5> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0009:s01/e4> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0009:s01/x2> ;
+    ex:lemma "add" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0009:s01/x7> ;
+    ex:sentence "nodejs-tsc-charter:u0009:s01" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0009:s01/x15> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0009:s02/e6> a ex:Event ;
+    ex:lemma "remove" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0009:s02/x3> ;
+    ex:sentence "nodejs-tsc-charter:u0009:s02" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0009:s02/x9> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0009:s03/e22> a ex:Event ;
+    ex:lemma "change" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0009:s03/x26>,
+        <https://example.org/proofs/nodejs-tsc-charter:u0009:s03/x4> ;
+    ex:sentence "nodejs-tsc-charter:u0009:s03" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0009:s03/x31> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0009:s03/e7> a ex:Event ;
+    ex:lemma "use" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0009:s03/x13>,
+        <https://example.org/proofs/nodejs-tsc-charter:u0009:s03/x4> ;
+    ex:sentence "nodejs-tsc-charter:u0009:s03" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0010:s00/e15> a ex:Event ;
+    ex:lemma "more" ;
+    ex:sentence "nodejs-tsc-charter:u0010:s00" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0010:s00/x19> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0010:s00/e4> a ex:Event ;
+    ex:lemma "ensure" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0010:s00/x6> ;
+    ex:sentence "nodejs-tsc-charter:u0010:s00" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0010:s01/e18> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0010:s01/x3> ;
+    ex:lemma "create" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0010:s01/x20> ;
+    ex:sentence "nodejs-tsc-charter:u0010:s01" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0010:s01/e33> a ex:Event ;
+    ex:lemma "affiliate" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0010:s01/x26> ;
+    ex:sentence "nodejs-tsc-charter:u0010:s01" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0010:s01/x37> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0010:s01/e47> a ex:Event ;
+    ex:lemma "remedy" ;
+    ex:obligatory true ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0010:s01/x43> ;
+    ex:sentence "nodejs-tsc-charter:u0010:s01" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0010:s01/x50> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0011:s00/e4> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0011:s00/x2> ;
+    ex:lemma "meet" ;
+    ex:obligatory true ;
+    ex:sentence "nodejs-tsc-charter:u0011:s00" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0011:s00/e6> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0011:s00/x2> ;
+    ex:lemma "use" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0011:s00/x7> ;
+    ex:sentence "nodejs-tsc-charter:u0011:s00" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0011:s00/e9> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0011:s00/x8> ;
+    ex:lemma "enable" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0011:s00/x10> ;
+    ex:sentence "nodejs-tsc-charter:u0011:s00" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0011:s01/e5> a ex:Event ;
+    ex:lemma "direct" ;
+    ex:obligatory true ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0011:s01/x2> ;
+    ex:sentence "nodejs-tsc-charter:u0011:s01" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0011:s01/x9> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0011:s02/e3> a ex:Event ;
+    ex:lemma "direct" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0011:s02/x5> ;
+    ex:sentence "nodejs-tsc-charter:u0011:s02" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0011:s02/e8> a ex:Event ;
+    ex:lemma "delegate" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0011:s02/x1> ;
+    ex:sentence "nodejs-tsc-charter:u0011:s02" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0011:s02/x12>,
+        <https://example.org/proofs/nodejs-tsc-charter:u0011:s02/x18> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0011:s03/e10> a ex:Event ;
+    ex:lemma "make" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0011:s03/x1> ;
+    ex:sentence "nodejs-tsc-charter:u0011:s03" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0011:s03/e8> a ex:Event ;
+    ex:lemma "take" ;
+    ex:obligatory true ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0011:s03/x1> ;
+    ex:sentence "nodejs-tsc-charter:u0011:s03" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0011:s03/x14> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0012:s00/e5> a ex:Event ;
+    ex:lemma "expect" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0012:s00/x3> ;
+    ex:sentence "nodejs-tsc-charter:u0012:s00" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0012:s00/x11> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0013:s00/e17> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0013:s00/x12> ;
+    ex:lemma "participate" ;
+    ex:negated true ;
+    ex:sentence "nodejs-tsc-charter:u0013:s00" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0013:s00/x22> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0013:s00/e7> a ex:Event ;
+    ex:lemma "convert" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0013:s00/x4> ;
+    ex:sentence "nodejs-tsc-charter:u0013:s00" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0013:s00/x12> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0015:s00/e16> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0015:s00/x14> ;
+    ex:lemma "responsible" ;
+    ex:sentence "nodejs-tsc-charter:u0015:s00" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0015:s00/x20> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0015:s00/e26> a ex:Event ;
+    ex:lemma "include" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0015:s00/x1> ;
+    ex:sentence "nodejs-tsc-charter:u0015:s00" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0015:s00/e8> a ex:Event ;
+    ex:lemma "set" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0015:s00/x1> ;
+    ex:sentence "nodejs-tsc-charter:u0015:s00" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0015:s00/x11> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0016:s00/e2> a ex:Event ;
+    ex:lemma "set" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0016:s00/x4> ;
+    ex:sentence "nodejs-tsc-charter:u0016:s00" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0016:s05/e6> a ex:Event ;
+    ex:lemma "maintain" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0016:s05/x8> ;
+    ex:sentence "nodejs-tsc-charter:u0016:s05" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0017:s00/e4> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0017:s00/x2> ;
+    ex:lemma "define" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0017:s00/x5> ;
+    ex:sentence "nodejs-tsc-charter:u0017:s00" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0019:s00/e4> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0019:s00/x2> ;
+    ex:lemma "establish" ;
+    ex:sentence "nodejs-tsc-charter:u0019:s00" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0019:s00/e6> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0019:s00/x2> ;
+    ex:lemma "maintain" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0019:s00/x9> ;
+    ex:sentence "nodejs-tsc-charter:u0019:s00" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0019:s01/e14> a ex:Event ;
+    ex:lemma "operate" ;
+    ex:sentence "nodejs-tsc-charter:u0019:s01" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0019:s01/x10> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0019:s01/e5> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0019:s01/x3> ;
+    ex:lemma "establish" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0019:s01/x6> ;
+    ex:sentence "nodejs-tsc-charter:u0019:s01" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0019:s02/e19> a ex:Event ;
+    ex:lemma "publish" ;
+    ex:obligatory true ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0019:s02/x16>,
+        <https://example.org/proofs/nodejs-tsc-charter:u0019:s02/x24> ;
+    ex:sentence "nodejs-tsc-charter:u0019:s02" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0019:s02/e2> a ex:Event ;
+    ex:lemma "will" ;
+    ex:sentence "nodejs-tsc-charter:u0019:s02" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0019:s01/x10> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0019:s02/e7> a ex:Event ;
+    ex:lemma "establish" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0019:s02/x9> ;
+    ex:sentence "nodejs-tsc-charter:u0019:s02" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0019:s02/x5> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0020:s00/e14> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0020:s00/x2> ;
+    ex:lemma "specify" ;
+    ex:sentence "nodejs-tsc-charter:u0020:s00" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0020:s00/x19> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0020:s00/e8> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0020:s00/x2> ;
+    ex:lemma "follow" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0020:s00/x10> ;
+    ex:sentence "nodejs-tsc-charter:u0020:s00" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0022:s00/e10> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0022:s00/x9> ;
+    ex:lemma "elect" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0022:s00/x11> ;
+    ex:sentence "nodejs-tsc-charter:u0022:s00" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0022:s00/e9> a ex:Event ;
+    ex:lemma "peer" ;
+    ex:sentence "nodejs-tsc-charter:u0022:s00" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0022:s00/x2> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0023:s00/e20> a ex:Event ;
+    ex:lemma "use" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0023:s00/x17> ;
+    ex:sentence "nodejs-tsc-charter:u0023:s00" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0023:s00/x2> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0025:s00/e15> a ex:Event ;
+    ex:lemma "be" ;
+    ex:sentence "nodejs-tsc-charter:u0025:s00" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0025:s00/x18> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0025:s00/e7> a ex:Event ;
+    ex:lemma "reduce" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0025:s00/x4> ;
+    ex:sentence "nodejs-tsc-charter:u0025:s00" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0025:s00/x10>,
+        <https://example.org/proofs/nodejs-tsc-charter:u0025:s00/x12> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0025:s01/e4> a ex:Event ;
+    ex:lemma "require" ;
+    ex:negated true ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0025:s01/x2> ;
+    ex:sentence "nodejs-tsc-charter:u0025:s01" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0025:s01/e7> a ex:Event ;
+    ex:lemma "be" ;
+    ex:sentence "nodejs-tsc-charter:u0025:s01" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0025:s01/x10> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0025:s02/e4> a ex:Event ;
+    ex:lemma "do" ;
+    ex:obligatory true ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0025:s02/x1> ;
+    ex:sentence "nodejs-tsc-charter:u0025:s02" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0025:s02/x7> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0026:s00/e16> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0026:s00/x4> ;
+    ex:lemma "work" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0026:s00/x20> ;
+    ex:sentence "nodejs-tsc-charter:u0026:s00" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0026:s00/x18> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0026:s00/e36> a ex:Event ;
+    ex:lemma "represent" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0026:s00/x38> ;
+    ex:sentence "nodejs-tsc-charter:u0026:s00" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0026:s00/x42>,
+        <https://example.org/proofs/nodejs-tsc-charter:u0026:s00/x45> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0026:s00/e6> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0026:s00/x4> ;
+    ex:lemma "elect" ;
+    ex:sentence "nodejs-tsc-charter:u0026:s00" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0026:s00/x11> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0026:s01/e8> a ex:Event ;
+    ex:lemma "be" ;
+    ex:sentence "nodejs-tsc-charter:u0026:s01" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0026:s01/x2> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0026:s02/e18> a ex:Event ;
+    ex:lemma "be" ;
+    ex:negated true ;
+    ex:sentence "nodejs-tsc-charter:u0026:s02" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0026:s02/x20> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0026:s02/e34> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0026:s02/x32> ;
+    ex:lemma "serve" ;
+    ex:sentence "nodejs-tsc-charter:u0026:s02" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0026:s02/e4> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0026:s02/x2> ;
+    ex:lemma "hold" ;
+    ex:obligatory true ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0026:s02/x6> ;
+    ex:sentence "nodejs-tsc-charter:u0026:s02" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0026:s02/e8> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0026:s02/x2> ;
+    ex:lemma "select" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0026:s02/x11> ;
+    ex:sentence "nodejs-tsc-charter:u0026:s02" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0028:s00/e8> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0028:s00/x6> ;
+    ex:lemma "operate" ;
+    ex:obligatory true ;
+    ex:sentence "nodejs-tsc-charter:u0028:s00" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0028:s00/x11>,
+        <https://example.org/proofs/nodejs-tsc-charter:u0028:s00/x4> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0028:s01/e4> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0028:s01/x2> ;
+    ex:lemma "establish" ;
+    ex:obligatory true ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0028:s01/x14>,
+        <https://example.org/proofs/nodejs-tsc-charter:u0028:s01/x6> ;
+    ex:sentence "nodejs-tsc-charter:u0028:s01" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0028:s01/x23> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0028:s01/e8> a ex:Event ;
+    ex:lemma "implement" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0028:s01/x10>,
+        <https://example.org/proofs/nodejs-tsc-charter:u0028:s01/x6> ;
+    ex:sentence "nodejs-tsc-charter:u0028:s01" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0029:s00/e12> a ex:Event ;
+    ex:lemma "make" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0029:s00/x13> ;
+    ex:sentence "nodejs-tsc-charter:u0029:s00" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0029:s00/x16> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0029:s00/e3> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0029:s00/x2> ;
+    ex:lemma "follow" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0029:s00/x7> ;
+    ex:sentence "nodejs-tsc-charter:u0029:s00" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0029:s01/e14> a ex:Event ;
+    ex:lemma "ask" ;
+    ex:sentence "nodejs-tsc-charter:u0029:s01" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0029:s01/x12> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0029:s01/e18> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0029:s01/x10> ;
+    ex:lemma "object" ;
+    ex:sentence "nodejs-tsc-charter:u0029:s01" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0029:s01/e6> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0029:s01/x4> ;
+    ex:lemma "appear" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0029:s01/x10> ;
+    ex:sentence "nodejs-tsc-charter:u0029:s01" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0030:s00/e11> a ex:Event ;
+    ex:lemma "one" ;
+    ex:sentence "nodejs-tsc-charter:u0030:s00" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0030:s00/x3>,
+        <https://example.org/proofs/nodejs-tsc-charter:u0030:s00/x8> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0030:s00/e13> a ex:Event ;
+    ex:lemma "win" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0030:s00/x16> ;
+    ex:sentence "nodejs-tsc-charter:u0030:s00" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0030:s00/x8> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0030:s01/e6> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0030:s01/x4> ;
+    ex:lemma "choose" ;
+    ex:sentence "nodejs-tsc-charter:u0030:s01" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0030:s01/x11> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0030:s02/e17> a ex:Event ;
+    ex:lemma "disclose" ;
+    ex:negated true ;
+    ex:obligatory true ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0030:s02/x13> ;
+    ex:sentence "nodejs-tsc-charter:u0030:s02" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0030:s02/e21> a ex:Event ;
+    ex:lemma "influence" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0030:s02/x24> ;
+    ex:sentence "nodejs-tsc-charter:u0030:s02" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0030:s02/e7> a ex:Event ;
+    ex:lemma "open" ;
+    ex:sentence "nodejs-tsc-charter:u0030:s02" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0030:s02/x5> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0031:s00/e8> a ex:Event ;
+    ex:lemma "approve" ;
+    ex:obligatory true ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0031:s00/x2> ;
+    ex:sentence "nodejs-tsc-charter:u0031:s00" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0031:s00/x11> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0033:s00/e15> a ex:Event ;
+    ex:lemma "add" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0033:s00/x9> ;
+    ex:sentence "nodejs-tsc-charter:u0033:s00" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0033:s00/x18> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0033:s00/e6> a ex:Event ;
+    ex:lemma "maintain" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0033:s00/x4> ;
+    ex:sentence "nodejs-tsc-charter:u0033:s00" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0033:s00/x9> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0034:s00/e11> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0034:s00/x1> ;
+    ex:lemma "give" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0034:s00/x12> ;
+    ex:sentence "nodejs-tsc-charter:u0034:s00" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0034:s00/x15> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0034:s00/e2> a ex:Event ;
+    ex:lemma "make" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0034:s00/x6> ;
+    ex:sentence "nodejs-tsc-charter:u0034:s00" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0034:s00/e9> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0034:s00/x1> ;
+    ex:lemma "Collaborator" ;
+    ex:sentence "nodejs-tsc-charter:u0034:s00" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0034:s01/e14> a ex:Event ;
+    ex:lemma "discuss" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0034:s01/x10> ;
+    ex:sentence "nodejs-tsc-charter:u0034:s01" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0034:s01/x18> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0034:s01/e4> a ex:Event ;
+    ex:lemma "identify" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0034:s01/x2> ;
+    ex:sentence "nodejs-tsc-charter:u0034:s01" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0034:s01/x7> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0034:s02/e10> a ex:Event ;
+    ex:lemma "make" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0034:s02/x1> ;
+    ex:sentence "nodejs-tsc-charter:u0034:s02" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0034:s02/x14> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0035:s00/e16> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0035:s00/x13> ;
+    ex:lemma "find" ;
+    ex:negated true ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0035:s00/x17> ;
+    ex:sentence "nodejs-tsc-charter:u0035:s00" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0035:s00/e24> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0035:s00/x13> ;
+    ex:lemma "assign" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0035:s00/x28> ;
+    ex:sentence "nodejs-tsc-charter:u0035:s00" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0035:s00/x32> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0035:s00/e3> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0035:s00/x1> ;
+    ex:lemma "opt" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0035:s00/x9> ;
+    ex:sentence "nodejs-tsc-charter:u0035:s00" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0035:s01/e13> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0035:s01/x11> ;
+    ex:lemma "serve" ;
+    ex:sentence "nodejs-tsc-charter:u0035:s01" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0035:s01/x17> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0035:s01/e19> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0035:s01/x11> ;
+    ex:lemma "cast" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0035:s01/x21> ;
+    ex:sentence "nodejs-tsc-charter:u0035:s01" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0035:s01/e6> a ex:Event ;
+    ex:lemma "reach" ;
+    ex:negated true ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0035:s01/x2> ;
+    ex:sentence "nodejs-tsc-charter:u0035:s01" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0035:s02/e26> a ex:Event ;
+    ex:lemma "participate" ;
+    ex:sentence "nodejs-tsc-charter:u0035:s02" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0035:s02/x30> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0035:s02/e4> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0035:s02/x2> ;
+    ex:lemma "maintain" ;
+    ex:sentence "nodejs-tsc-charter:u0035:s02" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0035:s02/e6> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0035:s02/x2> ;
+    ex:lemma "publish" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0035:s02/x8> ;
+    ex:sentence "nodejs-tsc-charter:u0035:s02" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0037:s00/e14> a ex:Event ;
+    ex:lemma "have" ;
+    ex:negated true ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0037:s00/x16> ;
+    ex:sentence "nodejs-tsc-charter:u0037:s00" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0037:s01/e2> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0037:s01/x1> ;
+    ex:lemma "work" ;
+    ex:sentence "nodejs-tsc-charter:u0037:s01" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0037:s01/x7> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0037:s01/e9> a ex:Event ;
+    ex:agent <https://example.org/proofs/nodejs-tsc-charter:u0037:s01/x1> ;
+    ex:lemma "have" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0037:s01/x10> ;
+    ex:sentence "nodejs-tsc-charter:u0037:s01" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0037:s02/e5> a ex:Event ;
+    ex:lemma "promote" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0037:s02/x2> ;
+    ex:sentence "nodejs-tsc-charter:u0037:s02" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0037:s02/x8> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0037:s03/e5> a ex:Event ;
+    ex:lemma "encumber" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0037:s03/x1> ;
+    ex:sentence "nodejs-tsc-charter:u0037:s03" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0037:s03/x8> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0038:s00/e16> a ex:Event ;
+    ex:lemma "organize" ;
+    ex:patient <https://example.org/proofs/nodejs-tsc-charter:u0038:s00/x14> ;
+    ex:sentence "nodejs-tsc-charter:u0038:s00" ;
+    ex:theme <https://example.org/proofs/nodejs-tsc-charter:u0038:s00/x21> .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0001:s02/x2> ex:quote "Guiding Principle" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0002:s00/x3> ex:quote "project is part" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0002:s01/x2> ex:quote "project operates" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0002:s02/x19> ex:quote "visible to outsiders" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0004:s00/x11> ex:quote "have both a business" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0004:s00/x7> ex:quote "communities have" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0004:s01/x2> ex:quote "leadership for the projects within the OpenJS Foundation is delegated" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0004:s02/x17> ex:quote "delegated to the Node.js Technical Steering Committee" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0004:s02/x3> ex:quote "case of the Node.js project, it is delegated" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0004:s03/x5> ex:quote "leadership is the Board" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0005:s00/x2> ex:quote "charter can only be amended" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0005:s00/x9> ex:quote "amended with the approval" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0007:s00/x11> ex:quote "_voting_ members" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0007:s01/x10> ex:quote "participate in TSC discussions" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0007:s01/x5> ex:quote "attend meetings" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0007:s02/x15> ex:quote "have the ability" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0007:s02/x18> ex:quote "cast votes" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0007:s02/x20> ex:quote "consensus is not reached" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0007:s02/x26> ex:quote "reached on an issue" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0007:s02/x5> ex:quote "do everything" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0007:s02/x7> ex:quote "members can do" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0008:s00/x2> ex:quote "memberships are not time-limited" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0008:s00/x5> ex:quote "time-limited" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0008:s01/x5> ex:quote "is no maximum size" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0008:s02/x2> ex:quote "TSC must have" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0008:s02/x9> ex:quote "have at least four voting members" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0009:s00/x5> ex:quote "is no specific set" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0009:s01/x15> ex:quote "add additional voting members to the TSC by a standard TSC motion" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0009:s01/x2> ex:quote "TSC may add" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0009:s01/x7> ex:quote "add additional voting members" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0009:s02/x3> ex:quote "member can be removed" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0009:s02/x9> ex:quote "removed from the TSC" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0009:s03/x13> ex:quote "used to change a regular TSC member" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0009:s03/x26> ex:quote "change a voting TSC member" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0009:s03/x31> ex:quote "change a voting TSC member to a regular TSC member" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0010:s00/x19> ex:quote "more than one-fourth" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0010:s00/x6> ex:quote "ensure adequate representation" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0010:s01/x20> ex:quote "creates a situation" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0010:s01/x26> ex:quote "fourth of the TSC voting membership are affiliated" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0010:s01/x3> ex:quote "change in TSC voting membership or a change of affiliation by a TSC voting member creates" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0010:s01/x37> ex:quote "affiliated with the same company" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0010:s01/x43> ex:quote "situation must be immediately remedied" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0010:s01/x50> ex:quote "remedied by the removal" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0011:s00/x10> ex:quote "enable participation" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0011:s00/x7> ex:quote "using tools" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0011:s00/x8> ex:quote "that enable" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0011:s01/x2> ex:quote "meeting shall be directed" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0011:s01/x9> ex:quote "directed by the TSC Chairperson" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0011:s02/x1> ex:quote "Responsibility for directing individual meetings may be delegated" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0011:s02/x12> ex:quote "delegated by the TSC Chairperson" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0011:s02/x18> ex:quote "delegated by the TSC Chairperson to any other TSC voting member" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0011:s02/x5> ex:quote "directing individual meetings" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0011:s03/x14> ex:quote "taken and made available to the community" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0012:s00/x11> ex:quote "expected to regularly participate in TSC activities" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0012:s00/x3> ex:quote "members are expected" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0013:s00/x22> ex:quote "participate in three consecutive TSC votes" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0013:s00/x4> ex:quote "member is automatically converted" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0015:s00/x11> ex:quote "set by the CPC" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0015:s00/x14> ex:quote "TSC is responsible" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0015:s00/x20> ex:quote "responsible for all technical development" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0016:s00/x4> ex:quote "Setting release dates" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0016:s05/x8> ex:quote "Maintaining the list" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0017:s00/x2> ex:quote "TSC will define" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0017:s00/x5> ex:quote "define Node.js" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0019:s00/x9> ex:quote "maintain a development process" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0019:s01/x3> ex:quote "process will establish" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0019:s01/x6> ex:quote "establish guidelines" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0019:s02/x16> ex:quote "items must be published" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0019:s02/x24> ex:quote "published at least a certain number" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0019:s02/x5> ex:quote "example, establish" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0019:s02/x9> ex:quote "establish appropriate timelines" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0020:s00/x10> ex:quote "follow any processes" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0020:s00/x19> ex:quote "specified by the OpenJS Foundation Board" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0022:s00/x11> ex:quote "elected representatives" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0022:s00/x2> ex:quote "roles in the Node.js project will be peer" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0022:s00/x9> ex:quote "peer elected" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0023:s00/x17> ex:quote "method should be used" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0023:s00/x2> ex:quote "election of persons (such as the TSC Chairperson), a multiple-candidate method should be used" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0025:s00/x10> ex:quote "reduced to simple election" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0025:s00/x12> ex:quote "reduced to simple election by plurality" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0025:s00/x18> ex:quote "are only two candidates" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0025:s00/x4> ex:quote "methods may be reduced" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0025:s01/x10> ex:quote "is only one candidate" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0025:s01/x2> ex:quote "election is required" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0025:s02/x1> ex:quote "Elections shall be done" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0025:s02/x7> ex:quote "done within the projects" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0026:s00/x11> ex:quote "elect from amongst voting TSC members" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0026:s00/x18> ex:quote "work on building" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0026:s00/x20> ex:quote "work on building an agenda" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0026:s00/x38> ex:quote "represent the TSC" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0026:s00/x42> ex:quote "represent the TSC in the OpenJS Foundation" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0026:s00/x45> ex:quote "represent the TSC in the OpenJS Foundation for a term" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0026:s01/x2> ex:quote "Chair and voting CPC member may be" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0026:s02/x11> ex:quote "select a TSC Chairperson" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0026:s02/x20> ex:quote "are no limits" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0026:s02/x32> ex:quote "member may serve" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0026:s02/x6> ex:quote "hold annual elections" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0028:s00/x11> ex:quote "operate under Lazy Consensus" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0028:s00/x4> ex:quote "decisions, Collaborators shall operate" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0028:s00/x6> ex:quote "Collaborators shall operate" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0028:s01/x10> ex:quote "implementing Lazy Consensus" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0028:s01/x14> ex:quote "establish appropriate guidelines for implementing Lazy Consensus (e.g. expected notification" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0028:s01/x2> ex:quote "TSC shall establish" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0028:s01/x23> ex:quote "establish appropriate guidelines for implementing Lazy Consensus (e.g. expected notification and review time periods) within the development process" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0029:s00/x13> ex:quote "making model" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0029:s00/x16> ex:quote "making model among voting members" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0029:s00/x2> ex:quote "TSC follows" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0029:s00/x7> ex:quote "follows a [Consensus Seeking" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0029:s01/x12> ex:quote "moderator will ask" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0029:s01/x4> ex:quote "item has appeared" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0030:s00/x16> ex:quote "wins a simple majority" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0030:s00/x3> ex:quote "votes, the winning candidate option is the one" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0030:s01/x11> ex:quote "choose to participate in any vote" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0030:s01/x4> ex:quote "member may choose" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0030:s02/x13> ex:quote "choices must not be disclosed" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0030:s02/x24> ex:quote "influencing other voting members" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0030:s02/x5> ex:quote "vote is open" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0031:s00/x11> ex:quote "approved by the CPC" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0031:s00/x2> ex:quote "changes to this charter must be approved" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0033:s00/x18> ex:quote "added by the TSC" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0033:s00/x4> ex:quote "repository is maintained" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0034:s00/x12> ex:quote "given commit-access" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0034:s00/x15> ex:quote "given commit-access to the project" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0034:s00/x6> ex:quote "making significant and valuable contributions" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0034:s01/x10> ex:quote "addition as Collaborators is discussed" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0034:s01/x18> ex:quote "discussed during a TSC meeting" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0034:s01/x2> ex:quote "individuals are identified" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0034:s01/x7> ex:quote "identified by the TSC" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0034:s02/x1> ex:quote "Modifications of the contents of the git repository are made" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0034:s02/x14> ex:quote "made on a collaborative basis" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0035:s00/x1> ex:quote "Collaborators may opt" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0035:s00/x17> ex:quote "found consensus" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0035:s00/x28> ex:quote "assigning the `tsc-agenda` tag" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0035:s00/x32> ex:quote "assigning the `tsc-agenda` tag to a pull request" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0035:s00/x9> ex:quote "opt to elevate significant or controversial modifications" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0035:s01/x17> ex:quote "serve as the final arbiter" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0035:s01/x2> ex:quote "consensus cannot be reached" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0035:s01/x21> ex:quote "casting a vote" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0035:s02/x30> ex:quote "participate in the development effort" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0035:s02/x8> ex:quote "publish a list" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0037:s00/x16> ex:quote "have the right" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0037:s01/x10> ex:quote "have code" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0037:s01/x7> ex:quote "work with the project’s Collaborators" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0037:s02/x2> ex:quote "Contributor may be promoted" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0037:s02/x8> ex:quote "promoted to a Collaborator" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0037:s03/x1> ex:quote "Contributors should rarely be encumbered" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0037:s03/x8> ex:quote "encumbered by the TSC" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0038:s00/x14> ex:quote "that is organized" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0038:s00/x21> ex:quote "organized through the project creation process" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0002:s02/x2> ex:quote "proposals, timelines, and status must not merely be open" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0004:s01/x14> ex:quote "delegated to the projects" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0007:s00/x2> ex:quote "members can be either _regular_ members" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0007:s02/x2> ex:quote "members can do" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0009:s03/x4> ex:quote "motion can be used" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0011:s00/x2> ex:quote "TSC shall meet" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0011:s03/x1> ex:quote "Minutes or an appropriate recording shall be taken" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0013:s00/x12> ex:quote "converted to a TSC regular member" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0015:s00/x1> ex:quote "Subject to such policies as may be set" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0019:s00/x2> ex:quote "TSC will establish" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0019:s01/x10> ex:quote "developers and community will operate" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0020:s00/x2> ex:quote "TSC and entire technical community will follow" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0026:s00/x4> ex:quote "members will elect" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0026:s02/x2> ex:quote "TSC shall hold" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0028:s01/x6> ex:quote "establish appropriate guidelines" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0029:s01/x10> ex:quote "appeared to reach a consensus" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0030:s00/x8> ex:quote "option is the one" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0033:s00/x9> ex:quote "maintained by the TSC" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0034:s00/x1> ex:quote "Individuals making significant and valuable contributions are made Collaborators" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0035:s00/x13> ex:quote "that have not found" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0035:s01/x11> ex:quote "members should serve" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0035:s02/x2> ex:quote "TSC will maintain" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0037:s01/x1> ex:quote "Contributors work" .
+
+<https://example.org/proofs/nodejs-tsc-charter:u0007:s01/x2> ex:quote "members can attend" .
+

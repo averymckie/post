@@ -1,0 +1,21 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Can a vote carry at this meeting?</title>
+<style>body{font-family:system-ui,sans-serif;max-width:60rem;margin:2rem auto;padding:0 1rem;color:#222}
+table{border-collapse:collapse;width:100%}td,th{border:1px solid #ccc;padding:.4rem .6rem;vertical-align:top;text-align:left}
+th{background:#f4f4f4}.rule{color:#555;font-size:.9em}.yes{color:#0a6}.no{color:#c33}</style></head><body>
+<h1>Can a vote carry at this meeting?</h1>
+<p>The rule is the charter&#39;s sentence, rendered as a table; the cases are the eight meetings&#39; attendance.</p>
+<table><tr><th>if</th><th>then</th><th>because</th></tr>
+<tr><td>present voting members &gt;= 10</td><td>majority reachable = true; rule = r1</td><td class="rule">For all votes, the winning candidate option is the one that wins a simple majority of all TSC voting members in every head-to-head election against each of the other candidates.</td></tr>
+<tr><td>otherwise</td><td>majority reachable = false; rule = r2</td><td class="rule">For all votes, the winning candidate option is the one that wins a simple majority of all TSC voting members in every head-to-head election against each of the other candidates.</td></tr>
+</table>
+<h2>applied</h2><table><tr><th>meeting</th><th>present_voting</th><th>majority_reachable</th></tr>
+<tr><td class="">tsc-2023-11-08</td><td class="">6</td><td class="no">False</td></tr>
+<tr><td class="">tsc-2023-12-06</td><td class="">10</td><td class="yes">True</td></tr>
+<tr><td class="">tsc-2024-01-10</td><td class="">10</td><td class="yes">True</td></tr>
+<tr><td class="">tsc-2024-01-17</td><td class="">12</td><td class="yes">True</td></tr>
+<tr><td class="">tsc-2024-02-07</td><td class="">8</td><td class="no">False</td></tr>
+<tr><td class="">tsc-2025-01-08</td><td class="">13</td><td class="yes">True</td></tr>
+<tr><td class="">tsc-2025-02-05</td><td class="">6</td><td class="no">False</td></tr>
+<tr><td class="">tsc-2025-03-05</td><td class="">11</td><td class="yes">True</td></tr>
+</table>
+</body></html>

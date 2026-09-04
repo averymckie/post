@@ -124,6 +124,95 @@ def words(text: str) -> set[str]:
     return {w for w in re.findall(r"[a-z][a-z\-']+", text.lower()) if w not in STOP and len(w) > 2}
 
 
+REF_ATTRS = ("sourceRef", "targetRef", "source", "target", "bpmnElement", "idref", "processRef")
+
+
+def canonical_xml(path: Path) -> None:
+    """Rewrite the ids of a BPMN or PNML file so that structurally equal exports are byte-equal.
+
+    pm4py names nodes with fresh uuids on every export.  Ids are recomputed here from structure
+    alone (tag, name, markings, and the neighbourhood of references, refined four times), elements
+    are ordered by those ids, and the file is written back.  Nothing semantic changes.
+    """
+    import lxml.etree as ET
+
+    tree = ET.parse(str(path))
+    root = tree.getroot()
+
+    def local(e: Any) -> str:
+        return e.tag.split("}")[-1] if isinstance(e.tag, str) else ""
+
+    elems = [e for e in root.iter() if isinstance(e.tag, str) and e.get("id")]
+    by_id = {e.get("id"): e for e in elems}
+
+    def label(e: Any) -> str:
+        n = e.get("name") or ""
+        for c in e:
+            if local(c) == "name":
+                for t in c:
+                    if local(t) == "text" and t.text:
+                        n = t.text
+            if local(c) in ("initialMarking",) and len(c) and c[0].text:
+                n += f"|init={c[0].text.strip()}"
+        return n
+
+    def refs(e: Any) -> list[tuple[str, str]]:
+        out = []
+        for a in REF_ATTRS:
+            v = e.get(a)
+            if v in by_id:
+                out.append((a, v))
+        for c in e:
+            if local(c) in ("incoming", "outgoing") and c.text and c.text.strip() in by_id:
+                out.append((local(c), c.text.strip()))
+            for a in REF_ATTRS:
+                v = c.get(a)
+                if v in by_id:
+                    out.append((f"{local(c)}.{a}", v))
+        return out
+
+    links = {e.get("id"): refs(e) for e in elems}
+    back: dict[str, list[tuple[str, str]]] = collections.defaultdict(list)
+    for src, lst in links.items():
+        for role, dst in lst:
+            back[dst].append((role, src))
+    sig = {i: hashlib.sha256(f"{local(e)}|{label(e)}".encode()).hexdigest() for i, e in by_id.items()}
+    for _ in range(4):
+        sig = {
+            i: hashlib.sha256(json.dumps([sig[i], sorted((r, sig[d]) for r, d in links[i]), sorted((r, sig[s]) for r, s in back[i])]).encode()).hexdigest()
+            for i in by_id
+        }
+    order = sorted(by_id, key=lambda i: (local(by_id[i]), sig[i]))
+    counters: dict[str, int] = collections.defaultdict(int)
+    new: dict[str, str] = {}
+    for i in order:
+        tag = local(by_id[i])
+        counters[tag] += 1
+        new[i] = f"{tag}_{counters[tag]}"
+    for e in root.iter():
+        if not isinstance(e.tag, str):
+            continue
+        if e.get("id") in new:
+            e.set("id", new[e.get("id")])
+        for a in REF_ATTRS:
+            if e.get(a) in new:
+                e.set(a, new[e.get(a)])
+        if local(e) in ("incoming", "outgoing") and e.text and e.text.strip() in new:
+            e.text = new[e.text.strip()]
+    for parent in root.iter():
+        if not isinstance(parent.tag, str):
+            continue
+        kids = list(parent)
+        if len(kids) > 1 and all(isinstance(k.tag, str) for k in kids):
+            keyed = [((local(k), k.get("id") or k.get("bpmnElement") or k.get("idref") or (k.text or "").strip()), k) for k in kids]
+            if len({k[0] for k in keyed}) == len(keyed):
+                for k in kids:
+                    parent.remove(k)
+                for _, k in sorted(keyed, key=lambda kv: kv[0]):
+                    parent.append(k)
+    tree.write(str(path), xml_declaration=True, encoding="UTF-8", pretty_print=True)
+
+
 # ----------------------------------------------------------------------------
 # door one: procedures -> facts ; facts -> ordered steps -> digest
 # ----------------------------------------------------------------------------
@@ -152,9 +241,27 @@ def s_read(ctx: dict[str, Any]) -> None:
     ctx["sources"] = sources
 
 
+CACHE = ROOT / "proofs" / "cache"
+
+
 def s_parse(ctx: dict[str, Any]) -> None:
+    """Dependency parse, memoized on (source sha256, model sha256, canon version): the same bytes parse the same way."""
+    from compiled_ai.model import ParsedSentence
+
     mp = model_path(ctx["pack"])
-    ctx["parsed"] = [ps for s in ctx["sources"] for ps in parse_source(s, mp)]
+    model_sha = sha256_file(mp)
+    parsed: list[Any] = []
+    for s in ctx["sources"]:
+        key = hashlib.sha256(f"{s.sha256}|{model_sha}|{s.canon_version}|{s.kind}|{s.id}".encode()).hexdigest()
+        cache = CACHE / "parse" / f"{key}.json"
+        if cache.exists():
+            parsed.extend(ParsedSentence.model_validate(d) for d in json.loads(cache.read_text(encoding="utf-8")))
+            continue
+        ps = parse_source(s, mp)
+        cache.parent.mkdir(parents=True, exist_ok=True)
+        cache.write_text(json.dumps([x.model_dump() for x in ps], ensure_ascii=False), encoding="utf-8")
+        parsed.extend(ps)
+    ctx["parsed"] = parsed
 
 
 def s_extract(ctx: dict[str, Any]) -> None:
@@ -428,6 +535,7 @@ def s_bpmn_from_order(ctx: dict[str, Any]) -> None:
         b.add_flow(BPMN.SequenceFlow(exit_[e], last_node))
     p = ctx["dir"] / "process.bpmn"
     bpmn_exporter.apply(b, str(p))
+    canonical_xml(p)
     ctx["bpmn"] = b
     ctx["files"] = [p]
     ctx["shows"] = [f"tasks {len(inv)}, parallel gateways {gateways}, flows {len(b.get_flows())}; first flow {lemma.get(o.forced[0][0])} -> {lemma.get(o.forced[0][1])}" if o.forced else "no forced edges"]
@@ -565,9 +673,11 @@ def s_chart(ctx: dict[str, Any]) -> None:
     net, im, fm = ctx["net"]
     p1 = ctx["dir"] / "process.pnml"
     pm4py.write_pnml(net, im, fm, str(p1))
+    canonical_xml(p1)
     b = to_bpmn.apply(net, im, fm)
     p2 = ctx["dir"] / "process.bpmn"
     bpmn_exporter.apply(b, str(p2))
+    canonical_xml(p2)
     ctx["files"] = [p1, p2]
     ctx["shows"].append(f"petri net places {len(net.places)}, transitions {len(net.transitions)}; bpmn nodes {len(b.get_nodes())}")
 
@@ -1185,6 +1295,7 @@ def s_compare(ctx: dict[str, Any]) -> None:
     same = not (diff["added"] or diff["removed"] or diff["changed"])
     p = write_json(ctx["dir"] / "compare.json", {"digest_forward": sha256_json(fwd and ctx["fwd_rows"]), "digest_back": ctx["digest_back"], "diff": diff, "match": same})
     ctx["files"] = [p]
+    RESULTS.setdefault(("roundtrips", "all"), []).append({"proof": "P19", "label": "deck", "match": bool(same), "changed": len(diff["changed"])})
     ctx["shows"].append(f"rows match: {same}; changed {len(diff['changed'])}, added {len(diff['added'])}, removed {len(diff['removed'])}")
 
 
@@ -1282,6 +1393,12 @@ def write_md() -> None:
     for name, where in DOORS:
         lines.append(f"{name:12s} {where}")
     lines += ["```", ""]
+    if ITIL_REPORT.get("practices"):
+        sys.path.insert(0, str(ROOT / "proofs"))
+        import itil
+
+        lines += itil.md_section(ITIL_REPORT)
+    lines += ["## Variations: the numbered proofs", ""]
     for pr in sorted(PROOFS, key=lambda p: int(re.sub(r"\D", "", p.pid) or 0)):
         lines += [f"## {pr.pid}  {pr.title}", "", "```"]
         for inp in pr.inputs:
@@ -1597,6 +1714,7 @@ def s_mark_executable(ctx: dict[str, Any]) -> None:
         el.tag = f"{ns}manualTask"
     p = ctx["dir"] / "process.executable.bpmn"
     t.write(str(p), xml_declaration=True, encoding="UTF-8")
+    canonical_xml(p)
     ctx["exec_path"] = p
     ctx["files"] = [p]
 
@@ -1636,6 +1754,7 @@ def s_execute(ctx: dict[str, Any]) -> None:
     rows = [["position", "task"]] + [[i + 1, name] for i, name in enumerate(trace)]
     p = workbook(ctx["dir"] / "execution_trace.xlsx", {"trace": rows})
     ctx["files"].append(p)
+    RESULTS.setdefault(("traces", "all"), {})[ctx["label"]] = list(trace)
     ctx["shows"] = [f"workflow completed: {ctx['completed']}; tasks run {len(trace)}", f"forced edges completed in order: {ok} of {len(o.forced)}", f"first tasks {trace[:4]}"]
 
 
@@ -1654,7 +1773,7 @@ def execute_process(label: str) -> dict[str, Any]:
         "execution trace",
     )
     src = RESULTS[("process", label)]
-    ctx = {"dir": out_dir("P29", label), "bpmn_path": src["files"][0], "ordering": src["ordering"]}
+    ctx = {"dir": out_dir("P29", label), "bpmn_path": src["files"][0], "ordering": src["ordering"], "label": label}
     run(proof, label, ctx)
     return ctx
 
@@ -1671,6 +1790,7 @@ def s_roundtrip(ctx: dict[str, Any]) -> None:
     same = d_f == d_b
     p = write_json(ctx["dir"] / "roundtrip.json", {"digest_forward": d_f, "digest_back": d_b, "match": same, "changed": diff["changed"][:5], "added": diff["added"][:5], "removed": diff["removed"][:5]})
     ctx["files"] = [p]
+    RESULTS.setdefault(("roundtrips", "all"), []).append({"proof": "P30", "label": "workbook", "match": bool(same), "changed": len(diff["changed"])})
     ctx["shows"] = [f"rows read back {len(back)}; digest forward {d_f[:16]}…, back {d_b[:16]}…; match {same}; changed {len(diff['changed'])}"]
 
 
@@ -1813,6 +1933,7 @@ def s_soundness(ctx: dict[str, Any]) -> None:
     pnml = ctx["dir"] / "process.pnml"
     if not pnml.exists():
         pm4py.write_pnml(net, im, fm, str(pnml))
+        canonical_xml(pnml)
     digest = sha256_file(pnml)
     out = ctx["dir"] / "soundness.json"
     res: dict[str, Any] | None = None
@@ -1832,7 +1953,8 @@ def s_soundness(ctx: dict[str, Any]) -> None:
         write_json(out, res)
     ctx["files"] = [out] if pnml in ctx.get("files", []) else [pnml, out]
     verdict = res["sound"] if res.get("sound") is not None else res.get("undecided")
-    ctx["shows"] = [f"sound: {verdict}", *[f"{k}: {v}" for k, v in list(res.get("diagnostics", {}).items())[:4]]]
+    scalars = [(k, v) for k, v in res.get("diagnostics", {}).items() if isinstance(v, (bool, int, float)) or (isinstance(v, str) and "\n" not in v and len(v) < 90)]
+    ctx["shows"] = [f"sound: {verdict}", *[f"{k}: {v}" for k, v in scalars[:4]]]
 
 
 def soundness_discovered(label: str) -> dict[str, Any]:
@@ -1856,6 +1978,7 @@ def s_bpmn_to_net(ctx: dict[str, Any]) -> None:
     ctx["net"] = (net, im, fm)
     p = ctx["dir"] / "process.pnml"
     pm4py.write_pnml(net, im, fm, str(p))
+    canonical_xml(p)
     ctx["files"] = [p]
     ctx["shows"] = [f"read back {len(bpmn.get_nodes())} bpmn nodes; petri net places {len(net.places)}, transitions {len(net.transitions)}"]
 
@@ -1926,7 +2049,8 @@ def s_rdf(ctx: dict[str, Any]) -> None:
             g.add((u(a.args[0]), EX.sentence, Literal(a.sentence_id)))
         elif a.predicate in ("agent", "patient", "theme"):
             g.add((u(a.args[0]), EX[a.predicate], u(a.args[1])))
-            g.add((u(a.args[1]), EX.quote, Literal(a.quote)))
+            if (u(a.args[1]), EX.quote, None) not in g:
+                g.add((u(a.args[1]), EX.quote, Literal(a.quote)))
         elif a.predicate in ("obligatory", "negated"):
             g.add((u(a.args[0]), EX[a.predicate], Literal(True)))
         elif a.predicate == "precedes":
@@ -1936,6 +2060,7 @@ def s_rdf(ctx: dict[str, Any]) -> None:
     q = """PREFIX ex: <https://example.org/proofs/>
 SELECT ?e ?lemma ?who WHERE { ?e a ex:Event ; ex:lemma ?lemma ; ex:obligatory true ; ex:agent ?x . ?x ex:quote ?who } ORDER BY ?e"""
     res = [[str(r.e).replace(str(EX), ""), str(r.lemma), str(r.who)] for r in g.query(q)]
+    ctx["sparql_count"] = len(res)
     rows = [["event", "lemma", "who"]] + res
     p2 = workbook(ctx["dir"] / "sparql_required_actions.xlsx", {"required": rows})
     (ctx["dir"] / "query.sparql").write_text(q + "\n", encoding="utf-8")
@@ -1957,6 +2082,7 @@ def rdf(label: str) -> dict[str, Any]:
     )
     ctx = {"dir": out_dir("P37", label), "atoms": RESULTS[("facts", label)]["atoms"]}
     run(proof, label, ctx)
+    RESULTS[("rdf", label)] = ctx
     return ctx
 
 
@@ -2003,7 +2129,8 @@ def s_kuzu(ctx: dict[str, Any]) -> None:
     (ctx["dir"] / "queries.cypher").write_text("\n".join(schema + [q1, q2]) + "\n", encoding="utf-8")
     shutil.rmtree(tmp, ignore_errors=True)
     ctx["files"] = [p, ctx["dir"] / "queries.cypher"]
-    ctx["shows"] = [f"events {len([a for a in atoms if a.predicate == 'event'])}, args {len(seen)}; obligatory events with an agent {len(r1)}; precedes edges {len(r2)}", *[f"{r[1]} by {r[2]}" for r in r1[:2]], *[f"{r[0]} precedes {r[1]}" for r in r2[:2]]]
+    sparql = ctx.get("sparql_count")
+    ctx["shows"] = [f"events {len([a for a in atoms if a.predicate == 'event'])}, args {len(seen)}; obligatory events with an agent {len(r1)}; precedes edges {len(r2)}", f"same count as the SPARQL query of P37: {sparql == len(r1)} ({sparql})", *[f"{r[1]} by {r[2]}" for r in r1[:2]], *[f"{r[0]} precedes {r[1]}" for r in r2[:2]]]
 
 
 def graph_db(label: str) -> dict[str, Any]:
@@ -2018,7 +2145,7 @@ def graph_db(label: str) -> dict[str, Any]:
         ],
         "query results",
     )
-    ctx = {"dir": out_dir("P38", label), "atoms": RESULTS[("facts", label)]["atoms"]}
+    ctx = {"dir": out_dir("P38", label), "atoms": RESULTS[("facts", label)]["atoms"], "sparql_count": RESULTS.get(("rdf", label), {}).get("sparql_count")}
     run(proof, label, ctx)
     return ctx
 
@@ -2094,6 +2221,7 @@ def s_doc_roundtrip(ctx: dict[str, Any]) -> None:
     same = sha256_json(fwd) == sha256_json(back)
     p = write_json(ctx["dir"] / "roundtrip.json", {"digest_forward": sha256_json(fwd), "digest_back": sha256_json(back), "match": same, "changed": diff["changed"][:5], "added": diff["added"][:5], "removed": diff["removed"][:5]})
     ctx["files"] = [p]
+    RESULTS.setdefault(("roundtrips", "all"), []).append({"proof": "P40", "label": "document", "match": bool(same), "changed": len(diff["changed"])})
     ctx["shows"] = [f"steps read back {len(back)} of {len(fwd)}; match {same}; changed {len(diff['changed'])}, added {len(diff['added'])}, removed {len(diff['removed'])}"]
 
 
@@ -2351,6 +2479,7 @@ def s_bottlenecks(ctx: dict[str, Any]) -> None:
         "select d.a, d.b, d.n, w.mean_hours from dfg d join wait w on w.activity = d.b where w.mean_hours is not null order by w.mean_hours desc, d.n desc limit 25"
     ).fetchall()
     rows = [["from", "to", "cases", "mean_hours_waiting_into_to"]] + [list(r) for r in res]
+    RESULTS[("bottlenecks", "all")] = [dict(zip(rows[0], r)) for r in rows[1:]]
     p = workbook(ctx["dir"] / "bottlenecks.xlsx", {"bottlenecks": rows})
     ctx["files"] = [p]
     ctx["shows"] = [f"{r[0]} -> {r[1]}: {r[2]} cases, {r[3]} h" for r in res[:3]]
@@ -2521,6 +2650,7 @@ def s_site_roundtrip(ctx: dict[str, Any]) -> None:
     same = sha256_json(fwd) == sha256_json(back)
     p = write_json(ctx["dir"] / "roundtrip.json", {"digest_forward": sha256_json(fwd), "digest_back": sha256_json(back), "match": same, "changed": diff["changed"][:5], "added": diff["added"][:5], "removed": diff["removed"][:5]})
     ctx["files"] = [p]
+    RESULTS.setdefault(("roundtrips", "all"), []).append({"proof": "P50", "label": "site", "match": bool(same), "changed": len(diff["changed"])})
     ctx["shows"] = [f"rows read back {len(back)} of {len(fwd)}; match {same}; changed {len(diff['changed'])}"]
 
 
@@ -2540,6 +2670,85 @@ def site_roundtrip(label: str) -> dict[str, Any]:
     ctx = {"dir": out_dir("P50", label), "index": OUT / "P39" / label / "site" / "index.html", "ordering": src["ordering"], "atoms": src["atoms"]}
     run(proof, label, ctx)
     return ctx
+
+
+# ----------------------------------------------------------------------------
+# the ITIL baseline (proofs/itil.yaml through proofs/itil.py)
+# ----------------------------------------------------------------------------
+
+ITIL_REPORT: dict[str, Any] = {}
+
+
+def bpmn_from_edges(rows: list[dict[str, Any]], path: Path) -> Path:
+    """A BPMN with parallel gateways from rows (before, after, before_step, after_step)."""
+    from pm4py.objects.bpmn.exporter import exporter as bpmn_exporter
+    from pm4py.objects.bpmn.obj import BPMN
+
+    edges = [(r["before"], r["after"]) for r in rows]
+    names = {}
+    for r in rows:
+        names[r["before"]] = r.get("before_step", "?")
+        names[r["after"]] = r.get("after_step", "?")
+    order = sorted(names)
+    preds, succs = collections.defaultdict(set), collections.defaultdict(set)
+    for a, c in edges:
+        preds[c].add(a)
+        succs[a].add(c)
+    b = BPMN()
+    start, end = BPMN.StartEvent(name="start"), BPMN.EndEvent(name="end")
+    b.add_node(start)
+    b.add_node(end)
+    entry, exit_ = {}, {}
+    for e in order:
+        t = BPMN.Task(name=f"{names[e]} [{e.split(':', 1)[1] if ':' in e else e}]")
+        b.add_node(t)
+        entry[e], exit_[e] = t, t
+        if len(preds[e]) > 1:
+            g = BPMN.ParallelGateway(name=f"join {e}", gateway_direction=BPMN.Gateway.Direction.CONVERGING)
+            b.add_node(g)
+            b.add_flow(BPMN.SequenceFlow(g, t))
+            entry[e] = g
+        if len(succs[e]) > 1:
+            g = BPMN.ParallelGateway(name=f"split {e}", gateway_direction=BPMN.Gateway.Direction.DIVERGING)
+            b.add_node(g)
+            b.add_flow(BPMN.SequenceFlow(t, g))
+            exit_[e] = g
+    for a, c in edges:
+        b.add_flow(BPMN.SequenceFlow(exit_[a], entry[c]))
+    sources = [e for e in order if not preds[e]]
+    sinks = [e for e in order if not succs[e]]
+    first, last = start, end
+    if len(sources) > 1:
+        first = BPMN.ParallelGateway(name="split start", gateway_direction=BPMN.Gateway.Direction.DIVERGING)
+        b.add_node(first)
+        b.add_flow(BPMN.SequenceFlow(start, first))
+    if len(sinks) > 1:
+        last = BPMN.ParallelGateway(name="join end", gateway_direction=BPMN.Gateway.Direction.CONVERGING)
+        b.add_node(last)
+        b.add_flow(BPMN.SequenceFlow(last, end))
+    for e in sources:
+        b.add_flow(BPMN.SequenceFlow(first, entry[e]))
+    for e in sinks:
+        b.add_flow(BPMN.SequenceFlow(exit_[e], last))
+    bpmn_exporter.apply(b, str(path))
+    canonical_xml(path)
+    return path
+
+
+def run_itil() -> dict[str, Any]:
+    sys.path.insert(0, str(ROOT / "proofs"))
+    import itil
+
+    helpers = {
+        "traces": RESULTS.get(("traces", "all"), {}),
+        "roundtrips": RESULTS.get(("roundtrips", "all"), []),
+        "bottlenecks": RESULTS.get(("bottlenecks", "all"), []),
+        "bpmn_from_edges": bpmn_from_edges,
+    }
+    ctx = itil.Ctx(RESULTS, helpers)
+    report = itil.run_register(ctx, ROOT / "proofs" / "itil.yaml")
+    write_json(OUT / "itil" / "report.json", report)
+    return report
 
 
 def main() -> None:
@@ -2611,8 +2820,9 @@ def main() -> None:
     cross_document(["nodejs-tsc-charter", "nodejs-governance"])
     site_roundtrip("usc5-552-doj")
     seal_all()
+    ITIL_REPORT.update(run_itil())
     write_md()
-    print(f"proofs {len(PROOFS)}; wrote {MD.relative_to(ROOT)}")
+    print(f"proofs {len(PROOFS)}; itil deliverables {sum(len(p['deliverables']) for p in ITIL_REPORT.get('practices', []))}; wrote {MD.relative_to(ROOT)}")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,7 @@
+site_name: usc5-552-doj
+docs_dir: docs
+site_dir: site
+use_directory_urls: false
+nav:
+  - steps: index.md
+  - facts: facts.md

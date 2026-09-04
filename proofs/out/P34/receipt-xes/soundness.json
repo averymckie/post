@@ -1,0 +1,17 @@
+{
+ "diagnostics": {
+  "dead_tasks": "[]",
+  "diagnostic_messages": "['Input is ok.', 'Petri Net is a workflow net.', 'Every place is covered by s-components.', 'There are no dead tasks.', 'All tasks are live.']",
+  "left": true,
+  "mcg": "MultiDiGraph with 704 nodes and 4431 edges",
+  "place_invariants": "[[[ 0.]\n  [ 0.]\n  [ 0.]\n  [ 0.]\n  [ 0.]\n  [ 0.]\n  [ 0.]\n  [ 0.]\n  [ 0.]\n  [ 0.]\n  [ 0.]\n  [ 0.]\n  [ 0.]\n  [ 0.]\n  [ 0.]\n  [ 0.]\n  [ 0.]\n  [ 0.]\n  [ 0.]\n  [ 0.]\n  [ 0.]\n  [-1.]\n  [-1.]\n  [ 1.]\n  [ 1.]\n  [ 1.]\n  [ 1.]\n  [ 1.]\n  [ 1.]\n  [ 0.]\n  [ 1.]\n  [ 0.]\n  [ 0.]\n  [ 0.]\n  [ 0.]\n  [ 0.]\n  [ 0.]\n  [ ",
+  "r_g_s_c": "MultiDiGraph with 704 nodes and 4431 edges",
+  "s_c_net": "places: [ p_10, p_11, p_12, p_13, p_16, p_17, p_18, p_19, p_20, p_21, p_22, p_23, p_24, p_25, p_26, p_27, p_28, p_29, p_3, p_30, p_31, p_32, p_33, p_34, p_35, p_36, p_37, p_38, p_39, p_4, p_40, p_42, p_43, p_44, p_46, p_49, p_5, p_50, p_52, p_6, p_8, p_9, sink, source ]\ntransitions: [ (02f88d52-f9e2",
+  "s_components": "[{source, p_6, sink, p_3, p_4, (skip_1, None), (tauSplit_2, None), (e44f8c37-9009-4683-8145-8ad3117a8a4f, 'Confirmation of receipt'), (tauJoin_3, None), (skip_55, None), (cc1eb8b7-cdc7-4b32-9e8b-1b8dad144a1d, 'T15 Print document X request unlicensed'), p_5, (ae506bdb-69b5-480a-b985-977c0d6002a8, 'T0",
+  "uncovered_places_s_component": "[]",
+  "uniform_place_invariants": "[array([[0.],\n       [0.],\n       [0.],\n       [0.],\n       [0.],\n       [0.],\n       [0.],\n       [0.],\n       [0.],\n       [0.],\n       [0.],\n       [0.],\n       [0.],\n       [0.],\n       [0.],\n       [0.],\n       [0.],\n       [0.],\n       [1.],\n       [0.],\n       [0.],\n       [0.],\n       [0.],\n"
+ },
+ "pnml_sha256": "e75e4c1e7f195eea21e50295697bf4f0d942476e98567f579c3cf9723ae91ebd",
+ "seconds_budget": 420,
+ "sound": true
+}

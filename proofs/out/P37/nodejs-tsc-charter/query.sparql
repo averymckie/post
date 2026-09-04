@@ -1,0 +1,2 @@
+PREFIX ex: <https://example.org/proofs/>
+SELECT ?e ?lemma ?who WHERE { ?e a ex:Event ; ex:lemma ?lemma ; ex:obligatory true ; ex:agent ?x . ?x ex:quote ?who } ORDER BY ?e

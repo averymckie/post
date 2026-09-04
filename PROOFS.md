@@ -176,14 +176,14 @@ ordered steps
 **usc5-552-doj**
 
 ```
-proofs/out/P5/usc5-552-doj/process.bpmn                    sha256 83082f9300f7122ff8c76c784aa1a68785af134c72f7fed5e3eeabed8e1de6fe
+proofs/out/P5/usc5-552-doj/process.bpmn                    sha256 57d47a0195fa48e6fbdd464771ba39e68f4a8af964fa5190f865e7411f291316
 shows: tasks 24, parallel gateways 2, flows 38; first flow request -> make
 ```
 
 **nodejs-governance**
 
 ```
-proofs/out/P5/nodejs-governance/process.bpmn               sha256 a8c5aba9fef35080d31b16c29e0ce69f0475014cd31f638169cbd43e855e4cb8
+proofs/out/P5/nodejs-governance/process.bpmn               sha256 d446d05dabfa30e83285d58fba8447d1b6f8a781e3262a196ece3c5dfe052dcc
 shows: tasks 18, parallel gateways 2, flows 29; first flow collaborator -> more
 ```
 
@@ -253,8 +253,8 @@ event log
 **receipt-xes**
 
 ```
-proofs/out/P8/receipt-xes/process.pnml                     sha256 3b81bfc4cf30c3f8cbc3bd51681aa8535226db7fd76dd2acf93adf65c1003113
-proofs/out/P8/receipt-xes/process.bpmn                     sha256 e60f633d515657fbf758a8d19e6a196fe318a7c7330dab078dce96966739fa7d
+proofs/out/P8/receipt-xes/process.pnml                     sha256 4a1bb1cb575c27f49fe89b644930aa020261fdd1350047428d24e024b8c94f1e
+proofs/out/P8/receipt-xes/process.bpmn                     sha256 a5fe7dba55e950afa04eb788a2df0de5a6ac01d09591809d8c7bcc1c9f84ff90
 shows: events 8577, cases 1434, activities 27
 shows: span 2010-10-02 to 2012-01-23
 shows: discovered from the first half of cases by id; start activities {'Confirmation of receipt': 717}
@@ -273,7 +273,7 @@ process, event log
 **receipt-xes**
 
 ```
-proofs/out/P9/receipt-xes/conformance.xlsx                 sha256 5790819c93d2728ab8825ac97d867b639d6a3ae465586213105cc43ab66015a7
+proofs/out/P9/receipt-xes/conformance.xlsx                 sha256 0e510617be36e849a3a4d10fca2a5052dca37e14fe99c0de8d648bd8fa38bee5
 shows: cases fit 1425 of 1434; model from the first 717 cases
 shows: first rows [['case-10011', 1.0, True, 0, 0], ['case-10017', 1.0, True, 0, 0]]
 ```
@@ -290,7 +290,7 @@ ordered steps, parsed minutes
 **nodejs-governance+nodejs-tsc-minutes**
 
 ```
-proofs/out/P10/nodejs-governance+nodejs-tsc-minutes/tagged_steps.xlsx sha256 79ce4fa400fe6455d98f7150b50da5bb8b0545d3ba34998cf35524968a18c5e1
+proofs/out/P10/nodejs-governance+nodejs-tsc-minutes/tagged_steps.xlsx sha256 e5b169582feb195f4f2280b6fca0c2e1262848abcac783c881c2a8ada90ae87f
 proofs/out/P10/nodejs-governance+nodejs-tsc-minutes/tags.jsonl sha256 00216f1e1e3eb38cb74e11d3478787ffb2cc219d093277e9fb74dec5e2389f2d
 shows: tagged sentences 78, ties 33, untagged 96
 shows: address <- "* gireesh: personally in favor of fixing CI flakes as issues become ha"  shared: address effort
@@ -311,7 +311,7 @@ tagged steps
 **nodejs-governance**
 
 ```
-proofs/out/P11/nodejs-governance/measured_steps.xlsx       sha256 f8fe378a7a43af4430b6d4e12f20ee929ad4ebbcc4fe3162084f06f30df48ecf
+proofs/out/P11/nodejs-governance/measured_steps.xlsx       sha256 dfd6e624661834de2cb96f5dffa668fce3037ba9cde66824ce2f9ef3e2b8e113
 shows: be: 40
 shows: add: 16
 shows: share: 13
@@ -321,7 +321,7 @@ shows: time: 11
 **nodejs-tsc-charter**
 
 ```
-proofs/out/P11/nodejs-tsc-charter/measured_steps.xlsx      sha256 c47f5c8d9b00930bc8cb26b281b3ba54d5d6404ca46d9dac009f7e0917eedb12
+proofs/out/P11/nodejs-tsc-charter/measured_steps.xlsx      sha256 20443e14c9f6228810f23c9a898d4735c5dbdddf1118e017fd1dbd35bb99976e
 shows: have: 31
 shows: establish: 30
 shows: direct: 15
@@ -341,7 +341,7 @@ process, records
 **receipt-xes+receipt-csv**
 
 ```
-proofs/out/P12/receipt-xes+receipt-csv/measured_activities.xlsx sha256 fac0f6bb33af3d4a9acea00e8d94b7efa3a79f674f03dfee9080c42a44727513
+proofs/out/P12/receipt-xes+receipt-csv/measured_activities.xlsx sha256 3ddbda555a9b23126beba2d6d2fe38b200e6456db52b9c85f4a07f9473f20fb7
 shows: Confirmation of receipt: events 1434, mean hours since previous None
 shows: T02 Check confirmation of receipt: events 1368, mean hours since previous 27.94
 shows: T03 Adjust confirmation of receipt: events 55, mean hours since previous 129.66
@@ -363,7 +363,7 @@ policy (charter: simple majority of all TSC voting members), records (roster; at
 
 ```
 proofs/out/P13/charter+roster+minutes/policy.jdm.json      sha256 e038135743787da6ec53bb05fbff39ff9be42b7ceba99398f9dcddb9c11428d9
-proofs/out/P13/charter+roster+minutes/decisions.xlsx       sha256 39ddf07056edfbedac92363bd6ee1e2af630aba6f1eadfd6fcc95955e96ebbab
+proofs/out/P13/charter+roster+minutes/decisions.xlsx       sha256 63ea6ded301ca9d7d1be14bd3e3dedd2e6f2bd757bc2834ecc9131508fa85391
 shows: tsc-2023-11-08: voting members present 6
 shows: tsc-2023-12-06: voting members present 10
 shows: tsc-2024-01-10: voting members present 10
@@ -390,14 +390,14 @@ ordered steps
 **usc5-552-doj**
 
 ```
-proofs/out/P14/usc5-552-doj/dependencies.pptx              sha256 21b62cb237d0a8bda395ac1e2881fc9e0dfaf09e9e960c528a5b5589130bce20
+proofs/out/P14/usc5-552-doj/dependencies.pptx              sha256 10ccd43ef3377afb1e1e892d0ebac8ff5d959492c43698dac84fb22421e15469
 shows: layers 2, boxes 24, connectors 12
 ```
 
 **nodejs-governance**
 
 ```
-proofs/out/P14/nodejs-governance/dependencies.pptx         sha256 9e393e9452337d038c0f1e8a2909a5e0b366119e798455ca3f3e4209bfe14bb5
+proofs/out/P14/nodejs-governance/dependencies.pptx         sha256 adc48e4226748f9fd205d0757aa41a465290b6f98b6dfc8337962902def713fb
 shows: layers 2, boxes 18, connectors 9
 ```
 
@@ -412,14 +412,14 @@ ordered steps
 **usc5-552-doj**
 
 ```
-proofs/out/P15/usc5-552-doj/ordered_steps.docx             sha256 5aa2363e65c8197534070c225c5fda0f3b51383f0bb6ed447fbe8ffa14d0a53b
+proofs/out/P15/usc5-552-doj/ordered_steps.docx             sha256 f99706ec269b16884af8dbef45a7277208d4372a7a885c8572e4e4c6f2d589d2
 shows: paragraphs 50, table rows 13
 ```
 
 **nodejs-governance**
 
 ```
-proofs/out/P15/nodejs-governance/ordered_steps.docx        sha256 5a98fa1036e2907f48b87aa9cbc4dd02f9ca9cd79c2bcd9d204f7abcabca7cf4
+proofs/out/P15/nodejs-governance/ordered_steps.docx        sha256 9d361f69b034842890c34dc8894d4d32e34d659e8976eb545df9d7d18c34964f
 shows: paragraphs 38, table rows 10
 ```
 
@@ -434,21 +434,21 @@ facts
 **usc5-552-doj**
 
 ```
-proofs/out/P16/usc5-552-doj/facts.xlsx                     sha256 24481ed43fd1bf84950092112f0746eadca81c284175aa135c1b406c2276988c
+proofs/out/P16/usc5-552-doj/facts.xlsx                     sha256 8709580ecd02e9fee5ffa3950eec6b8825b6f630876e00d7c90c2b9d8fcb90de
 shows: rows 1869; first agent usc5-552-doj:u0001:s00#e7 usc5-552-doj:u0001:s00#x5 "agency shall make"
 ```
 
 **nodejs-tsc-charter**
 
 ```
-proofs/out/P16/nodejs-tsc-charter/facts.xlsx               sha256 006843be61ac4cb9d35f14e02d71e39c7995b9e93839579dd9e2496ca80ca535
+proofs/out/P16/nodejs-tsc-charter/facts.xlsx               sha256 27631b41edcb375bdb8d593f78c07dcb2c680eb7564300ab6f71fa4995a1e7f2
 shows: rows 336; first event nodejs-tsc-charter:u0001:s02#e1 guide "Guiding"
 ```
 
 **nodejs-governance**
 
 ```
-proofs/out/P16/nodejs-governance/facts.xlsx                sha256 2ffbc8222d66f2dc2bbf372bb8fc17ef9076acadd3440e749fad17588eeccace
+proofs/out/P16/nodejs-governance/facts.xlsx                sha256 6bae41d3a38439864d0782bc5bc3779afc5b2b0e78d0835a1bf8357b440265ba
 shows: rows 815; first agent nodejs-governance:u0002:s00#e56 nodejs-governance:u0002:s00#x54 "Who can nominate"
 ```
 
@@ -463,8 +463,8 @@ every deliverable above
 **all**
 
 ```
-proofs/out/P17/all/digests.json                            sha256 c3d4b3cfe1c69133dc2c34e23f2503e0e8c31dfd50c3536c6ded73d5efe02638
-shows: deliverables 55; digest e307efbdc62a5f0ad3f2055c491f0c20bb1cf01e004c34c7f84258a590e2bedc
+proofs/out/P17/all/digests.json                            sha256 d1d5d7ff5c6ad011403f7af0e0bd8e16c51da7889785dabab86135372c516056
+shows: deliverables 76; digest 7e078180dc2a01ccd178ec4f264b104089cfd33997a6cd795e3c776156f5d6e4
 ```
 
 ## P18  ordered steps, parsed minutes -> tagged steps -> measured steps -> selected steps -> deck -> digest
@@ -481,7 +481,7 @@ tagged steps (P10), forced order (P2)
 **nodejs-governance+tsc-2024-01-17**
 
 ```
-proofs/out/P18/nodejs-governance+tsc-2024-01-17/deck.pptx  sha256 4b52b9119fd684609e7e6732bdc645db2cb756ee10a510c95e9b2568a9f6c423
+proofs/out/P18/nodejs-governance+tsc-2024-01-17/deck.pptx  sha256 286e17ccf7fdd27f4844e776306ddb0f3c9efb3ee141888dec3cb172ccb0004f
 proofs/out/P18/nodejs-governance+tsc-2024-01-17/digest.json sha256 b2328db5e57553bf2e78baeae9d4ab96bf46dd621ad37e82c3c6a4c1f274c684
 shows: meeting tsc-2024-01-17: steps discussed 8, forced edges among them 2
 shows: deck layers 2, boxes 8, connectors 2
@@ -520,7 +520,7 @@ tagged steps (P10), forced order (P2)
 **nodejs-governance**
 
 ```
-proofs/out/P20/nodejs-governance/conformance.xlsx          sha256 027bdb8554e012f2fdc006f7cea4cc83341e901a3c67764d4eeb34ec92b22502
+proofs/out/P20/nodejs-governance/conformance.xlsx          sha256 c8458192be3ec3b6a683ddb5be287e3bf3eeb1fd95540b110425ea870423f6f7
 shows: forced edges respected in the minutes 0, violated 2
 shows: VIOLATED tsc-2024-01-17: add discussed before time
 shows: VIOLATED tsc-2025-01-08: add discussed before time
@@ -539,7 +539,7 @@ records (receipt.csv: the rows carry case:deadline and case:enddate)
 **receipt-csv**
 
 ```
-proofs/out/P21/receipt-csv/deadlines.xlsx                  sha256 b747794df52a4a57706efbb3379f16935dd4da8a2c8ad3d11c8177e8130b8635
+proofs/out/P21/receipt-csv/deadlines.xlsx                  sha256 e1467d34b9f7cf35925ea8f403c01bca9a30dc8a32fea45057cfcee0de69c160
 shows: outcomes {'after deadline': 377, 'by deadline': 952, 'open': 105}
 shows: first rows [('case-10011', 'open'), ('case-10017', 'by deadline'), ('case-10024', 'by deadline')]
 ```
@@ -557,7 +557,7 @@ records
 **receipt-csv**
 
 ```
-proofs/out/P22/receipt-csv/by_department_and_channel.xlsx  sha256 ecb5795581c99d3c908bae5eb1f3d6d788d1a7555489090e22c14a0e87ef42db
+proofs/out/P22/receipt-csv/by_department_and_channel.xlsx  sha256 b7968ad8fb54b5fb8c19d09d3f64da5aceb4b5e19ddc66e50e6d9f8618756ef0
 shows: Customer contact: cases 29, mean days 1.66, after deadline 1
 shows: Experts: cases 15, mean days 11.32, after deadline 6
 shows: General: cases 1390, mean days 5.42, after deadline 370
@@ -577,7 +577,7 @@ log (P8)
 **receipt-xes**
 
 ```
-proofs/out/P23/receipt-xes/directly_follows.xlsx           sha256 891c5814ebe0d16cce1e2e572fc1b629182b9702da4d23c6f9c6811da0f4e8ae
+proofs/out/P23/receipt-xes/directly_follows.xlsx           sha256 460ec5e13044cf8bbb6d79d9139193e7eaffa6a0a37dba32b273c178aa155352
 proofs/out/P23/receipt-xes/directly_follows.json           sha256 947a329a7817cca79e8268d567bdec66cf9268f03b103d7ae31dddb81dc9a904
 shows: edges 99; strongest T04 Determine confirmation of receipt -> T05 Print and send confirmation of receipt (1177)
 shows: end activities [['T10 Determine necessity to stop indication', 828], ['T05 Print and send confirmation of receipt', 400]]
@@ -610,7 +610,7 @@ required actions (P4), facts (P1)
 **usc5-552-doj**
 
 ```
-proofs/out/P25/usc5-552-doj/required_actions.docx          sha256 20dc73844b6eda2e1d730452a8070fcbe449b0df4bfbd75ea18cfb138d875e79
+proofs/out/P25/usc5-552-doj/required_actions.docx          sha256 0e9281346d39f73562aa5bff6425336a951fd69b9d0115d152d4a7ce05e68940
 shows: table rows 122
 shows: agency shall make must make
 shows: agency shall separately state must state
@@ -620,7 +620,7 @@ shows: agency, in accordance with published rules, shall make must make
 **nodejs-tsc-charter**
 
 ```
-proofs/out/P25/nodejs-tsc-charter/required_actions.docx    sha256 1ff341a1edf18851e2e5d81937382ab568f004b205ff74813a1e6fb6d2654d3a
+proofs/out/P25/nodejs-tsc-charter/required_actions.docx    sha256 eb8a74661f1daf79a8cf9542fd979b06914542c1f34fa638f7a534f2d4b139d8
 shows: table rows 13
 shows:  must open
 shows: TSC must have must have
@@ -639,7 +639,7 @@ required actions (P4), parsed minutes
 **nodejs-tsc-charter+nodejs-tsc-minutes**
 
 ```
-proofs/out/P26/nodejs-tsc-charter+nodejs-tsc-minutes/tagged_steps.xlsx sha256 86f7882d295e60003c4d65c3ce5e9cafe894b3254cbb07b110fa01092ce8e65a
+proofs/out/P26/nodejs-tsc-charter+nodejs-tsc-minutes/tagged_steps.xlsx sha256 f72ba52bdb7634024dabd6e65822f9e72857672704a02d1f99cea6d24b7c2a0c
 proofs/out/P26/nodejs-tsc-charter+nodejs-tsc-minutes/tags.jsonl sha256 9f1e239f2364163034070c055de5d26c87b3539df330ecdbf717a1c603442a7f
 shows: tagged sentences 72, ties 19, untagged 102
 shows: establish <- "It’s not causing any maintenance burdens AFAIK, so it should be alrigh"  shared: consensus expected time tsc
@@ -661,7 +661,7 @@ conformance (P9), records (P6)
 **receipt-xes+receipt-csv**
 
 ```
-proofs/out/P27/receipt-xes+receipt-csv/conformance_by_group.xlsx sha256 c47d4fd9fcca8086e2ad4e35d393f160b6229113d74749db09b43990d2fe2f66
+proofs/out/P27/receipt-xes+receipt-csv/conformance_by_group.xlsx sha256 2f714e476cbf83529036a91c8ab32a072075830735c1a211cb9126068b3e6653
 shows: Customer contact: cases 29, fit 29, mean fitness 1.0
 shows: Experts: cases 15, fit 15, mean fitness 1.0
 shows: General: cases 1390, fit 1381, mean fitness 0.9999
@@ -680,7 +680,7 @@ decisions (P13), tagged actions (P26)
 **majority+charter-tags**
 
 ```
-proofs/out/P28/majority+charter-tags/decisions_with_discussion.xlsx sha256 8604c41c5f827847ab8591a19f7c1c75ce570a4b11d5976a6c68b88277c94b5c
+proofs/out/P28/majority+charter-tags/decisions_with_discussion.xlsx sha256 249e153b1b8071167599252588e14b03195e8318defb46cbe5adfa4af114a7f9
 shows: tsc-2023-11-08: majority false, required actions discussed 1: establish
 shows: tsc-2023-12-06: majority true, required actions discussed 5: direct, establish, have, open, publish
 shows: tsc-2024-01-10: majority true, required actions discussed 5: approve, do, establish, have, remedy
@@ -702,8 +702,8 @@ process (P5), forced order (P2)
 **usc5-552-doj**
 
 ```
-proofs/out/P29/usc5-552-doj/process.executable.bpmn        sha256 b630a4c41554be7954d4421a8c71157af76614e53f389297d8819c1edd251731
-proofs/out/P29/usc5-552-doj/execution_trace.xlsx           sha256 67824bf5929d40f73ec72f649811facbc130f9e0599dcc4ef2487f866fe62cda
+proofs/out/P29/usc5-552-doj/process.executable.bpmn        sha256 f10a92a5d94b2373a74258f1990d8d8bbee7c6ac687de980a6103e910489253a
+proofs/out/P29/usc5-552-doj/execution_trace.xlsx           sha256 824842dce7aab634a91443d9ea353fb2c053d97c83c84b5e71c5c7f0a72729b2
 shows: workflow completed: True; tasks run 24
 shows: forced edges completed in order: 12 of 12
 shows: first tasks ['authorize [u0131:s00#e16]', 'base [u0089:s02#e53]', 'agency [u0089:s02#e59]', 'description [u0131:s00#e44]']
@@ -712,8 +712,8 @@ shows: first tasks ['authorize [u0131:s00#e16]', 'base [u0089:s02#e53]', 'agency
 **nodejs-governance**
 
 ```
-proofs/out/P29/nodejs-governance/process.executable.bpmn   sha256 60cc794db4e0df4e77cc06d7f2ede4ac81a9ccbd553d66291edad6cd71d8df8d
-proofs/out/P29/nodejs-governance/execution_trace.xlsx      sha256 553150f3815291eeaf11c08731f67e058799a4dec62bf16cea180dc519f317ad
+proofs/out/P29/nodejs-governance/process.executable.bpmn   sha256 5b792af708eda700afe0b0e26bd6a63ccead9886863286b13fe09c580ef6164a
+proofs/out/P29/nodejs-governance/execution_trace.xlsx      sha256 e839a664bca37a1830aba6eadaf9e0acce10287dea735c94e15844e39a057c98
 shows: workflow completed: True; tasks run 18
 shows: forced edges completed in order: 9 of 9
 shows: first tasks ['address [u0068:s01#e29]', 'advance [u0068:s01#e33]', 'collaborator [u0020:s00#e25]', 'hour [u0040:s01#e8]']
@@ -734,6 +734,270 @@ workbook (P16), facts (P1)
 ```
 proofs/out/P30/usc5-552-doj/roundtrip.json                 sha256 a8f11bdab6e62f5cc18f74624aa4bcb5840327bc674962224602cb3d4a412f39
 shows: rows read back 1869; digest forward 55b30c7360337452…, back 55b30c7360337452…; match True; changed 0
+```
+
+## P31  decisions -> chart -> page
+
+```
+decisions (P13)
+-> chart (plotly.graph_objects.Figure; add_bar; add_hline)
+-> page (plotly.io.write_html(full_html, div_id))
+-> page
+```
+
+**majority**
+
+```
+proofs/out/P31/majority/attendance.html                    sha256 80b764943b5eddb180a1575ec68af0999293a318c238ab8b31aae043c17586ec
+shows: 8 bars, threshold line at 10
+```
+
+## P32  tagged actions -> coverage matrix -> workbook
+
+```
+tagged actions (P26)
+-> measure (duckdb: count per (meeting, action); one row per action, one column per meeting)
+-> tabulate (openpyxl.Workbook.save)
+-> coverage matrix
+```
+
+**charter+minutes**
+
+```
+proofs/out/P32/charter+minutes/coverage_matrix.xlsx        sha256 99bf122d73b115921b3f68edf495826240c17f3d26c84f71fe3e1486e0f2b595
+shows: matrix 9 actions x 8 meetings
+shows: row approve: [0, 0, 1, 0, 0, 0, 0, 0]
+```
+
+## P33  ordered steps, tagged steps -> undiscussed steps -> workbook
+
+```
+ordered steps (P2), tagged steps (P10)
+-> complement (clingo: never(E) :- step(E), not discussed(E))
+-> tabulate (openpyxl.Workbook.save)
+-> undiscussed steps
+```
+
+**nodejs-governance**
+
+```
+proofs/out/P33/nodejs-governance/never_discussed.xlsx      sha256 534562e3d17a9c3a5234eec28166b66f93c01449146bac76ec9f5d03780c4f32
+shows: steps never discussed 9 of 18: more, collaborator, meeting, meeting, ensure, hour, oppose, zero, onboarded
+```
+
+## P34  process model -> soundness proof
+
+```
+process model (P8, discovered)
+-> soundness proof (pm4py.check_soundness (woflan): workflow net, liveness, boundedness)
+-> soundness proof
+```
+
+**receipt-xes**
+
+```
+proofs/out/P34/receipt-xes/process.pnml                    sha256 e75e4c1e7f195eea21e50295697bf4f0d942476e98567f579c3cf9723ae91ebd
+proofs/out/P34/receipt-xes/soundness.json                  sha256 eec74566c5ddaccd1d63515e762b7a631f2f4937481101f52376ebea1f689ecb
+shows: sound: True
+shows: s_c_net: places: [ p_10, p_11, p_12, p_13, p_16, p_17, p_18, p_19, p_20, p_21, p_22, p_23, p_24, p_25, p_26, p_27, p_28, p_29, p_3, p_30, p_31, p_32, p_33, p_34, p_35, p_36, p_37, p_38, p_39, p_4, p_40, p_42, p_43, p_44, p_46, p_49, p_5, p_50, p_52, p_6, p_8, p_9, sink, source ]
+transitions: [ (02f88d52-f9e2
+shows: place_invariants: [[[ 0.]
+  [ 0.]
+  [ 0.]
+  [ 0.]
+  [ 0.]
+  [ 0.]
+  [ 0.]
+  [ 0.]
+  [ 0.]
+  [ 0.]
+  [ 0.]
+  [ 0.]
+  [ 0.]
+  [ 0.]
+  [ 0.]
+  [ 0.]
+  [ 0.]
+  [ 0.]
+  [ 0.]
+  [ 0.]
+  [ 0.]
+  [-1.]
+  [-1.]
+  [ 1.]
+  [ 1.]
+  [ 1.]
+  [ 1.]
+  [ 1.]
+  [ 1.]
+  [ 0.]
+  [ 1.]
+  [ 0.]
+  [ 0.]
+  [ 0.]
+  [ 0.]
+  [ 0.]
+  [ 0.]
+  [ 
+shows: uniform_place_invariants: [array([[0.],
+       [0.],
+       [0.],
+       [0.],
+       [0.],
+       [0.],
+       [0.],
+       [0.],
+       [0.],
+       [0.],
+       [0.],
+       [0.],
+       [0.],
+       [0.],
+       [0.],
+       [0.],
+       [0.],
+       [0.],
+       [1.],
+       [0.],
+       [0.],
+       [0.],
+       [0.],
+
+shows: s_components: [{source, p_6, sink, p_3, p_4, (skip_1, None), (tauSplit_2, None), (e44f8c37-9009-4683-8145-8ad3117a8a4f, 'Confirmation of receipt'), (tauJoin_3, None), (skip_55, None), (cc1eb8b7-cdc7-4b32-9e8b-1b8dad144a1d, 'T15 Print document X request unlicensed'), p_5, (ae506bdb-69b5-480a-b985-977c0d6002a8, 'T0
+```
+
+## P35  process -> petri net -> soundness proof
+
+```
+process (P5)
+-> read (pm4py.read_bpmn)
+-> petri net (pm4py.convert_to_petri_net; pm4py.write_pnml)
+-> soundness proof (pm4py.check_soundness (woflan))
+-> soundness proof
+```
+
+**usc5-552-doj**
+
+```
+proofs/out/P35/usc5-552-doj/process.pnml                   sha256 df4d75ccb33a6b50e3394fb377542a6fe774043ca40b3b23ef28b7ffe1d0e4ad
+proofs/out/P35/usc5-552-doj/soundness.json                 sha256 7f0efe217d243d09d2a00ad7ff51b4acf3b02bf570be0c393450528437710a4b
+shows: read back 28 bpmn nodes; petri net places 38, transitions 26
+shows: sound: woflan did not finish within 420 s
+```
+
+**nodejs-governance**
+
+```
+proofs/out/P35/nodejs-governance/process.pnml              sha256 8c2ab70bd4a9e282d854099206039a42150de0b51ff3434b91a84c78a9ef7ece
+proofs/out/P35/nodejs-governance/soundness.json            sha256 c687384fae8a44be0c6adae3c50b017000b0c92c8268435d85e182850d473426
+shows: read back 22 bpmn nodes; petri net places 29, transitions 20
+shows: sound: woflan did not finish within 420 s
+```
+
+## P36  log -> variants -> workbook
+
+```
+log (P8)
+-> variants (pm4py.get_variants_as_tuples)
+-> tabulate (openpyxl.Workbook.save)
+-> variants
+```
+
+**receipt-xes**
+
+```
+proofs/out/P36/receipt-xes/variants.xlsx                   sha256 8b4c196689661c7ea60a40ea80196634a6b460d067936f2556afb8042c9b2e81
+shows: variants 116; most common (713 cases): Confirmation of receipt -> T02 Check confirmation of receipt -> T04 Determine confirmation of receipt -> T05 P
+```
+
+## P37  facts -> knowledge graph -> query results -> workbook
+
+```
+facts (P1)
+-> knowledge graph (rdflib.Graph.add; Graph.serialize(format='turtle'))
+-> query (rdflib.Graph.query (SPARQL))
+-> tabulate (openpyxl.Workbook.save)
+-> query results
+```
+
+**usc5-552-doj**
+
+```
+proofs/out/P37/usc5-552-doj/facts.ttl                      sha256 f71d193a71bbf2f5dcab6e6a337f86445e565e0397e6cce32c890dbb1633b2de
+proofs/out/P37/usc5-552-doj/sparql_required_actions.xlsx   sha256 1f30aa012c9a18d4ae4630f9e27196cce9d99a72fbb216117a1fdc7a7b03effa
+proofs/out/P37/usc5-552-doj/query.sparql                   sha256 f5bc9ca135b1412b919c5347bc162a0ca69b5aed1839ce6cda3226489d679715
+shows: triples 4191; obligatory events with an agent 104
+shows: make by agency shall make
+shows: state by agency shall separately state
+shows: state by agency shall separately state and currently publish
+```
+
+**nodejs-tsc-charter**
+
+```
+proofs/out/P37/nodejs-tsc-charter/facts.ttl                sha256 857fcd473d295406a3ce9e1ad9ec02502856d13ecddc7080069c1f6e1327a282
+proofs/out/P37/nodejs-tsc-charter/sparql_required_actions.xlsx sha256 4eccfd89131c2ca15de3c003ab9fac75be664db5fb2026aa25d90b0964b95d73
+proofs/out/P37/nodejs-tsc-charter/query.sparql             sha256 f5bc9ca135b1412b919c5347bc162a0ca69b5aed1839ce6cda3226489d679715
+shows: triples 760; obligatory events with an agent 7
+shows: have by TSC must have
+shows: meet by TSC shall meet
+shows: meet by TSC shall meet regularly using
+```
+
+## P38  facts -> graph database -> query results -> workbook
+
+```
+facts (P1)
+-> graph database (kuzu.Database; kuzu.Connection.execute: CREATE NODE TABLE, CREATE REL TABLE, CREATE)
+-> query (kuzu.Connection.execute (Cypher MATCH); QueryResult.get_all)
+-> tabulate (openpyxl.Workbook.save)
+-> query results
+```
+
+**usc5-552-doj**
+
+```
+proofs/out/P38/usc5-552-doj/cypher_results.xlsx            sha256 9b2db14d45742d8065cc490788441dc0a1baa89154c5aa280fc43ed0c2b3796e
+proofs/out/P38/usc5-552-doj/queries.cypher                 sha256 156db773c1e21c62f110a3a99d280c0fa66b217b4d614bf36a3247bbc1440105
+shows: events 621, args 940; obligatory events with an agent 68; precedes edges 12
+shows: make by agency shall make
+shows: state by agency shall separately state
+shows: request precedes make
+shows: receipt precedes except
+```
+
+## P39  ordered steps, facts -> pages -> site
+
+```
+ordered steps (P2), facts (P1)
+-> pages (markdown tables written from the rows)
+-> site (mkdocs.config.load_config; mkdocs.commands.build.build)
+-> site
+```
+
+**usc5-552-doj**
+
+```
+proofs/out/P39/usc5-552-doj/site/index.html                sha256 c6422220006d2e3a745f7d8113b7c6ea1d569fe7cf14f7ef9b167574f16678b5
+proofs/out/P39/usc5-552-doj/site/facts.html                sha256 977568f33992fb43e5640c6edc17fbe4097d418b8c75f9c80d6367d46d05cfbc
+shows: pages 3; index rows 24; facts rows 1869
+```
+
+## P40  document -> steps' -> digest' ; digest', digest -> match
+
+```
+document (P15), ordered steps (P2)
+-> read paragraphs (docx.Document; Document.paragraphs)
+-> seal (json.dumps sort_keys; hashlib.sha256)
+-> compare (csv_diff.compare)
+-> match, or the differing cell
+```
+
+**usc5-552-doj**
+
+```
+proofs/out/P40/usc5-552-doj/roundtrip.json                 sha256 c7dd5eaa4558c9725afe526cb11feffee61dce89d0baffdcbc3801f7d5e335be
+shows: steps read back 24 of 24; match True; changed 0, added 0, removed 0
 ```
 
 ## Pins

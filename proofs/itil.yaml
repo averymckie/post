@@ -1,0 +1,1103 @@
+# The ITIL surface as data: each practice, its deliverables, and the chain that produces each one.
+# A chain is a list of [operation, parameters]; every operation is bound to library functions in proofs/itil.py.
+# instantiated_on names the real input the chain ran on; "none" means no real input of that kind is available here.
+practices:
+
+# ---------------------------------------------------------------- general management practices
+- name: Architecture management
+  group: general management
+  deliverables:
+  - name: component dependency model
+    shape: components and the dependencies between them, with the strength of each dependency
+    instantiated_on: activities and directly-follows edges of the receipt-phase log
+    chain:
+    - [dfg, {}]
+    - [sort, {by: [count], desc: true}]
+    - [workbook, {name: dependency_model}]
+  - name: architecture standards register
+    shape: the standing rules a design must satisfy, each with its source sentence
+    instantiated_on: obligations of the Node.js TSC charter
+    chain:
+    - [required_actions, {of: nodejs-tsc-charter}]
+    - [select, {fields: [unit, who, action, sentence]}]
+    - [workbook, {name: standards}]
+  - name: architecture roadmap
+    shape: steps grouped into phases in forced order
+    instantiated_on: ordered steps of the Node.js governance document
+    chain:
+    - [ordered_steps, {of: nodejs-governance}]
+    - [select, {fields: [phase, position, step, sentence]}]
+    - [page, {name: roadmap, title: "roadmap: phases of the governance steps", kind: table}]
+  - name: change impact assessment
+    shape: for each component, everything that depends on it, transitively
+    instantiated_on: forced precedence of 5 U.S.C. 552
+    chain:
+    - [forced_edges, {of: usc5-552-doj}]
+    - [clingo, {in: edge, fields: [before, after, before_step, after_step], program: "dep(A,B) :- edge(A,B,_,_). dep(A,C) :- dep(A,B), edge(B,C,_,_). name(A,N) :- edge(A,_,N,_). name(B,N) :- edge(_,B,_,N). impact(A,N,K) :- name(A,N), K = #count{ B : dep(A,B) }, K > 0.", out: impact, out_fields: [component, step, dependents]}]
+    - [sort, {by: [dependents], desc: true}]
+    - [workbook, {name: impact}]
+
+- name: Continual improvement
+  group: general management
+  deliverables:
+  - name: improvement register
+    shape: candidate improvements with where they were raised
+    instantiated_on: TSC minutes sentences whose actions include improve, fix, rework, migrate, deprecate, remove or simplify
+    chain:
+    - [minutes_sentences, {}]
+    - [filter, {where: [[lemmas, matches, "\\b(improve|fix|rework|migrate|deprecate|remove|simplify|unflag|enable)\\b"]]}]
+    - [select, {fields: [meeting, sentence_id, lemmas, sentence]}]
+    - [workbook, {name: improvement_register}]
+  - name: improvement measurement
+    shape: the measure before and after, per period
+    instantiated_on: receipt-phase cases per month, mean duration and cases after deadline
+    chain:
+    - [cases, {}]
+    - [derive, {field: late, fn: contains, of: outcome, value: after}]
+    - [group, {by: [month], aggregates: [[count, "*", cases], [avg, duration_days, mean_days], [sum, late, after_deadline]]}]
+    - [workbook, {name: measurement_by_month}]
+  - name: improvement review report
+    shape: conformance of the work to the model, per group
+    instantiated_on: receipt-phase conformance joined to case departments
+    chain:
+    - [cases, {}]
+    - [save_as, {name: cases}]
+    - [conformance, {}]
+    - [join, {with: cases, on: [[case, case]]}]
+    - [derive, {field: fit, fn: contains, of: is_fit, value: "true"}]
+    - [group, {by: [department], aggregates: [[count, "*", cases], [sum, fit, fit_cases], [avg, fitness, mean_fitness]]}]
+    - [document, {name: review_report, title: "review: fitness to the process model, per department"}]
+  - name: improvement business case
+    shape: cost and benefit of a proposed improvement
+    instantiated_on: none
+    chain:
+    - [cases, {}]
+    - [workbook, {name: business_case}]
+
+- name: Information security management
+  group: general management
+  deliverables:
+  - name: confidentiality obligations register
+    shape: obligations about withholding, exempting or protecting information, with sources
+    instantiated_on: 5 U.S.C. 552 sentences containing withhold, exempt, classified, confidential or privacy
+    chain:
+    - [required_actions, {of: usc5-552-doj}]
+    - [filter, {where: [[sentence, matches, "(?i)withh|exempt|classif|confiden|privacy"]]}]
+    - [select, {fields: [unit, who, action, sentence]}]
+    - [workbook, {name: confidentiality_obligations}]
+  - name: access control matrix
+    shape: who is required to do what
+    instantiated_on: agents and required actions of 5 U.S.C. 552
+    chain:
+    - [who_must_what, {of: usc5-552-doj}]
+    - [pivot, {row: who, col: action, value: count, fn: sum}]
+    - [workbook, {name: access_matrix}]
+  - name: prohibitions register
+    shape: what must not be done, with the sentence
+    instantiated_on: negated obligations of 5 U.S.C. 552
+    chain:
+    - [prohibitions, {of: usc5-552-doj}]
+    - [workbook, {name: prohibitions}]
+  - name: security incident report
+    shape: incidents with severity and timeline
+    instantiated_on: none
+    chain:
+    - [cases, {}]
+    - [workbook, {name: security_incidents}]
+
+- name: Knowledge management
+  group: general management
+  deliverables:
+  - name: glossary
+    shape: defined terms with their defining sentences
+    instantiated_on: definitional sentences of 5 U.S.C. 552 (mean, include, define)
+    chain:
+    - [definitions, {of: usc5-552-doj}]
+    - [select, {fields: [unit, verb, sentence]}]
+    - [workbook, {name: glossary}]
+  - name: knowledge article
+    shape: a procedure written out in order with its sources
+    instantiated_on: ordered steps of 5 U.S.C. 552
+    chain:
+    - [ordered_steps, {of: usc5-552-doj}]
+    - [document, {name: knowledge_article, title: "the statutory steps, in forced order", columns: [position, step, sentence]}]
+  - name: knowledge index
+    shape: what each source contains, counted by kind
+    instantiated_on: facts of the three procedure documents
+    chain:
+    - [facts, {of: usc5-552-doj}]
+    - [group, {by: [predicate], aggregates: [[count, "*", facts]]}]
+    - [workbook, {name: index_usc5_552}]
+  - name: frequently discussed topics
+    shape: the steps most often referred to in meetings
+    instantiated_on: governance steps tagged in TSC minutes
+    chain:
+    - [tags, {of: nodejs-governance}]
+    - [filter, {where: [[tie, eq, false]]}]
+    - [group, {by: [step_lemma], aggregates: [[count, "*", mentions], [distinct, meeting, meetings]]}]
+    - [sort, {by: [mentions], desc: true}]
+    - [workbook, {name: topics}]
+
+- name: Measurement and reporting
+  group: general management
+  deliverables:
+  - name: KPI report
+    shape: the agreed indicators per group and period
+    instantiated_on: receipt-phase cases per department
+    chain:
+    - [cases, {}]
+    - [derive, {field: late, fn: contains, of: outcome, value: after}]
+    - [group, {by: [department], aggregates: [[count, "*", cases], [avg, duration_days, mean_days], [median, duration_days, median_days], [sum, late, after_deadline]]}]
+    - [derive, {field: late_share, fn: ratio, num: after_deadline, den: cases}]
+    - [workbook, {name: kpi_report}]
+  - name: dashboard
+    shape: the indicators as a chart page
+    instantiated_on: receipt-phase events per activity
+    chain:
+    - [events, {}]
+    - [group, {by: [activity], aggregates: [[count, "*", events]]}]
+    - [page, {name: dashboard, title: "events per activity", kind: bar, x: activity, y: events}]
+  - name: scorecard
+    shape: pass or fail per period against a rule
+    instantiated_on: majority reachable per TSC meeting
+    chain:
+    - [decisions, {}]
+    - [page, {name: scorecard, title: "scorecard: could a vote carry at each meeting", kind: table}]
+  - name: measurement plan
+    shape: the clocks and durations the rules define
+    instantiated_on: TIMEX3 durations found in 5 U.S.C. 552
+    chain:
+    - [anchors, {of: usc5-552-doj}]
+    - [filter, {where: [[timex3, contains, DURATION]]}]
+    - [distinct, {fields: [span, timex3, sentence]}]
+    - [workbook, {name: measurement_plan}]
+
+- name: Organizational change management
+  group: general management
+  deliverables:
+  - name: stakeholder map
+    shape: who takes part, in what role, how often
+    instantiated_on: the Present lists of eight TSC meetings
+    chain:
+    - [participants, {}]
+    - [group, {by: [name, role], aggregates: [[count, "*", meetings]]}]
+    - [sort, {by: [meetings], desc: true}]
+    - [workbook, {name: stakeholders}]
+  - name: communication log
+    shape: announcements and updates made to the group, by date
+    instantiated_on: Announcements and update sections of the TSC minutes
+    chain:
+    - [minutes_sections, {}]
+    - [filter, {where: [[section, matches, "(?i)announce|update"]]}]
+    - [select, {fields: [meeting, section, item, link]}]
+    - [workbook, {name: communications}]
+  - name: readiness assessment
+    shape: whether the group can decide, per occasion
+    instantiated_on: majority reachable per TSC meeting
+    chain:
+    - [decisions, {}]
+    - [workbook, {name: readiness}]
+  - name: training records
+    shape: who was trained in what, when
+    instantiated_on: none
+    chain:
+    - [participants, {}]
+    - [workbook, {name: training}]
+
+- name: Portfolio management
+  group: general management
+  deliverables:
+  - name: portfolio register
+    shape: the items under consideration, with references
+    instantiated_on: agenda items with links in the TSC minutes
+    chain:
+    - [minutes_sections, {}]
+    - [filter, {where: [[links, gt, 0]]}]
+    - [select, {fields: [meeting, section, item, link]}]
+    - [workbook, {name: portfolio}]
+  - name: prioritization matrix
+    shape: items ranked by how often they recur
+    instantiated_on: links recurring across TSC meetings
+    chain:
+    - [minutes_sections, {}]
+    - [filter, {where: [[link, notnull, ""]]}]
+    - [group, {by: [link], aggregates: [[distinct, meeting, meetings], [count, "*", mentions]]}]
+    - [sort, {by: [meetings, mentions], desc: true}]
+    - [workbook, {name: prioritization}]
+  - name: portfolio review
+    shape: the items per section per meeting
+    instantiated_on: TSC minutes sections
+    chain:
+    - [minutes_sections, {}]
+    - [pivot, {row: section, col: meeting}]
+    - [page, {name: portfolio_review, title: "items per section per meeting", kind: table}]
+
+- name: Project management
+  group: general management
+  deliverables:
+  - name: project charter
+    shape: purpose, responsibilities and rules of the undertaking
+    instantiated_on: the Node.js TSC charter's obligations
+    chain:
+    - [required_actions, {of: nodejs-tsc-charter}]
+    - [document, {name: charter, title: "charter: what the TSC must do", columns: [unit, who, action, sentence]}]
+  - name: project schedule
+    shape: work packages in phases
+    instantiated_on: ordered steps of 5 U.S.C. 552 by phase
+    chain:
+    - [ordered_steps, {of: usc5-552-doj}]
+    - [select, {fields: [phase, position, step, unit]}]
+    - [workbook, {name: schedule}]
+  - name: status report
+    shape: open, closed and late work per period
+    instantiated_on: receipt-phase cases per month
+    chain:
+    - [cases, {}]
+    - [pivot, {row: month, col: outcome}]
+    - [document, {name: status_report, title: "status by month: open, by deadline, after deadline"}]
+  - name: RAID log
+    shape: risks, assumptions, issues and dependencies raised
+    instantiated_on: TSC minutes sentences mentioning risk, block, issue, depend or concern
+    chain:
+    - [minutes_sentences, {}]
+    - [filter, {where: [[sentence, matches, "(?i)\\b(risk|block|blocker|issue|depend|concern)"]]}]
+    - [select, {fields: [meeting, sentence_id, sentence]}]
+    - [workbook, {name: raid_log}]
+
+- name: Relationship management
+  group: general management
+  deliverables:
+  - name: stakeholder register
+    shape: parties, their standing and contact points
+    instantiated_on: TSC voting members joined with meeting participants
+    chain:
+    - [participants, {}]
+    - [group, {by: [handle], aggregates: [[count, "*", meetings_attended], [min, name, name]]}]
+    - [save_as, {name: attended}]
+    - [records, {of: tsc-voting-members}]
+    - [join, {with: attended, on: [[handle, handle]], how: left}]
+    - [workbook, {name: stakeholder_register}]
+  - name: decision log
+    shape: decisions taken with the meeting where they were taken
+    instantiated_on: TSC minutes sentences whose actions include agree, approve, vote, decide, resolve or consensus
+    chain:
+    - [minutes_sentences, {}]
+    - [filter, {where: [[lemmas, matches, "\\b(agree|approve|vote|decide|resolve|consensus|object)\\b"]]}]
+    - [select, {fields: [meeting, sentence_id, lemmas, sentence]}]
+    - [workbook, {name: decision_log}]
+  - name: satisfaction report
+    shape: satisfaction measured per party
+    instantiated_on: none
+    chain:
+    - [participants, {}]
+    - [workbook, {name: satisfaction}]
+
+- name: Risk management
+  group: general management
+  deliverables:
+  - name: risk register
+    shape: open items exposed beyond their group's norm
+    instantiated_on: open receipt-phase cases against their department's mean duration
+    chain:
+    - [cases, {}]
+    - [group, {by: [department], aggregates: [[avg, duration_days, mean_days]]}]
+    - [save_as, {name: means}]
+    - [cases, {}]
+    - [filter, {where: [[outcome, eq, open]]}]
+    - [join, {with: means, on: [[department, department]]}]
+    - [derive, {field: exposure, fn: ratio, num: days_since_last_event, den: mean_days}]
+    - [sort, {by: [exposure], desc: true}]
+    - [workbook, {name: risk_register}]
+  - name: risk matrix
+    shape: likelihood against impact per group
+    instantiated_on: receipt-phase departments, share late against mean duration
+    chain:
+    - [cases, {}]
+    - [derive, {field: late, fn: contains, of: outcome, value: after}]
+    - [group, {by: [department], aggregates: [[count, "*", cases], [sum, late, late_cases], [avg, duration_days, impact_days]]}]
+    - [derive, {field: likelihood, fn: ratio, num: late_cases, den: cases}]
+    - [page, {name: risk_matrix, title: "likelihood of lateness against mean duration", kind: scatter, x: likelihood, y: impact_days, size: cases}]
+  - name: risk report
+    shape: the register summarized for review
+    instantiated_on: receipt-phase departments
+    chain:
+    - [cases, {}]
+    - [derive, {field: late, fn: contains, of: outcome, value: after}]
+    - [group, {by: [department, channel], aggregates: [[count, "*", cases], [sum, late, late_cases]]}]
+    - [derive, {field: late_share, fn: ratio, num: late_cases, den: cases}]
+    - [document, {name: risk_report, title: "lateness by department and channel"}]
+
+- name: Service financial management
+  group: general management
+  deliverables:
+  - name: fee rules register
+    shape: the rules under which charges are made
+    instantiated_on: fee provisions of 5 U.S.C. 552
+    chain:
+    - [required_actions, {of: usc5-552-doj}]
+    - [filter, {where: [[sentence, matches, "(?i)\\bfee"]]}]
+    - [select, {fields: [unit, who, action, sentence]}]
+    - [workbook, {name: fee_rules}]
+  - name: budget
+    shape: planned spend per period and cost centre
+    instantiated_on: none
+    chain:
+    - [cases, {}]
+    - [workbook, {name: budget}]
+  - name: cost model
+    shape: cost per unit of service
+    instantiated_on: none
+    chain:
+    - [cases, {}]
+    - [workbook, {name: cost_model}]
+  - name: chargeback report
+    shape: charges per consumer
+    instantiated_on: none
+    chain:
+    - [cases, {}]
+    - [workbook, {name: chargeback}]
+
+- name: Strategy management
+  group: general management
+  deliverables:
+  - name: objectives register
+    shape: the standing commitments of the organization
+    instantiated_on: obligations of the Node.js governance document
+    chain:
+    - [required_actions, {of: nodejs-governance}]
+    - [select, {fields: [unit, who, action, sentence]}]
+    - [workbook, {name: objectives}]
+  - name: strategic roadmap
+    shape: phases and steps
+    instantiated_on: ordered steps of the Node.js governance document
+    chain:
+    - [ordered_steps, {of: nodejs-governance}]
+    - [group, {by: [phase], aggregates: [[count, "*", steps], [list, step, steps_in_phase]]}]
+    - [workbook, {name: strategic_roadmap}]
+  - name: strategy review
+    shape: what the leadership discussed, by topic
+    instantiated_on: charter actions tagged in TSC minutes
+    chain:
+    - [tags, {of: nodejs-tsc-charter}]
+    - [filter, {where: [[tie, eq, false]]}]
+    - [pivot, {row: step_lemma, col: meeting}]
+    - [workbook, {name: strategy_review}]
+
+- name: Supplier management
+  group: general management
+  deliverables:
+  - name: third-party obligations register
+    shape: obligations toward or from external parties
+    instantiated_on: TSC charter sentences naming the CPC or the Foundation
+    chain:
+    - [required_actions, {of: nodejs-tsc-charter}]
+    - [filter, {where: [[sentence, matches, "CPC|Foundation|Board"]]}]
+    - [select, {fields: [unit, who, action, sentence]}]
+    - [workbook, {name: third_party_obligations}]
+  - name: supplier register
+    shape: suppliers and what they supply
+    instantiated_on: none
+    chain:
+    - [events, {}]
+    - [workbook, {name: suppliers}]
+  - name: supplier performance report
+    shape: delivered against agreed, per supplier
+    instantiated_on: none
+    chain:
+    - [events, {}]
+    - [workbook, {name: supplier_performance}]
+
+- name: Workforce and talent management
+  group: general management
+  deliverables:
+  - name: roles and responsibilities
+    shape: who must do what
+    instantiated_on: agents and required actions of the TSC charter
+    chain:
+    - [who_must_what, {of: nodejs-tsc-charter}]
+    - [workbook, {name: roles}]
+  - name: attendance report
+    shape: participation per occasion
+    instantiated_on: voting members present at eight TSC meetings
+    chain:
+    - [attendance, {}]
+    - [page, {name: attendance, title: "voting members present per meeting", kind: bar, x: meeting, y: present_voting}]
+  - name: workload report
+    shape: work handled per person
+    instantiated_on: receipt-phase events per resource
+    chain:
+    - [events, {}]
+    - [group, {by: [resource], aggregates: [[count, "*", events], [distinct, case, cases], [distinct, activity, activities]]}]
+    - [sort, {by: [events], desc: true}]
+    - [workbook, {name: workload}]
+  - name: skills matrix
+    shape: people against skills
+    instantiated_on: receipt-phase resources against the activities they performed
+    chain:
+    - [events, {}]
+    - [pivot, {row: resource, col: activity}]
+    - [workbook, {name: skills_matrix}]
+
+# ---------------------------------------------------------------- service management practices
+- name: Availability management
+  group: service management
+  deliverables:
+  - name: availability requirements
+    shape: the time limits the rules impose
+    instantiated_on: durations in 5 U.S.C. 552 with their sentences
+    chain:
+    - [anchors, {of: usc5-552-doj}]
+    - [filter, {where: [[timex3, contains, DURATION]]}]
+    - [select, {fields: [span, timex3, sentence]}]
+    - [distinct, {}]
+    - [workbook, {name: availability_requirements}]
+  - name: availability report
+    shape: achieved availability per period
+    instantiated_on: share of voting members available per TSC meeting
+    chain:
+    - [decisions, {}]
+    - [derive, {field: availability, fn: ratio, num: present_voting, den: present_voting}]
+    - [select, {fields: [meeting, present_voting, majority_reachable]}]
+    - [workbook, {name: availability_report}]
+  - name: availability plan
+    shape: planned measures to keep the service available
+    instantiated_on: none
+    chain:
+    - [cases, {}]
+    - [workbook, {name: availability_plan}]
+
+- name: Business analysis
+  group: service management
+  deliverables:
+  - name: requirements catalogue
+    shape: every requirement with its source and owner
+    instantiated_on: obligations of 5 U.S.C. 552
+    chain:
+    - [required_actions, {of: usc5-552-doj}]
+    - [select, {fields: [unit, who, action, sentence]}]
+    - [workbook, {name: requirements}]
+  - name: as-is process model
+    shape: the process as performed
+    instantiated_on: receipt-phase directly-follows edges
+    chain:
+    - [dfg, {}]
+    - [workbook, {name: as_is_process}]
+  - name: gap analysis
+    shape: requirements present in one source and absent in another
+    instantiated_on: required actions of the TSC charter against the governance document
+    chain:
+    - [required_actions, {of: nodejs-tsc-charter}]
+    - [select, {fields: [action]}]
+    - [distinct, {}]
+    - [save_as, {name: charter}]
+    - [required_actions, {of: nodejs-governance}]
+    - [select, {fields: [action]}]
+    - [distinct, {}]
+    - [join, {with: charter, on: [[action, action]], how: left}]
+    - [workbook, {name: gap_analysis}]
+  - name: acceptance criteria
+    shape: each required action with its clock
+    instantiated_on: 5 U.S.C. 552 obligations joined to durations in the same sentence
+    chain:
+    - [anchors, {of: usc5-552-doj}]
+    - [filter, {where: [[timex3, contains, DURATION]]}]
+    - [save_as, {name: clocks}]
+    - [required_actions, {of: usc5-552-doj}]
+    - [join, {with: clocks, on: [[sentence_id, sentence_id]]}]
+    - [select, {fields: [unit, who, action, span, timex3, sentence]}]
+    - [workbook, {name: acceptance_criteria}]
+
+- name: Capacity and performance management
+  group: service management
+  deliverables:
+  - name: capacity plan
+    shape: demand per period and group
+    instantiated_on: receipt-phase events per month and department
+    chain:
+    - [events, {}]
+    - [derive, {field: month, fn: month, of: ts}]
+    - [pivot, {row: month, col: department}]
+    - [workbook, {name: capacity_plan}]
+  - name: performance report
+    shape: duration statistics per group
+    instantiated_on: receipt-phase cases per department
+    chain:
+    - [cases, {}]
+    - [group, {by: [department], aggregates: [[count, "*", cases], [min, duration_days, min_days], [median, duration_days, median_days], [avg, duration_days, mean_days], [max, duration_days, max_days]]}]
+    - [workbook, {name: performance_report}]
+  - name: demand trend
+    shape: cases started per month
+    instantiated_on: receipt-phase cases
+    chain:
+    - [cases, {}]
+    - [group, {by: [month], aggregates: [[count, "*", cases]]}]
+    - [page, {name: demand, title: "cases started per month", kind: line, x: month, y: cases}]
+  - name: bottleneck analysis
+    shape: the transitions with the longest waits
+    instantiated_on: receipt-phase directly-follows edges with waiting times
+    chain:
+    - [bottlenecks, {}]
+    - [workbook, {name: bottlenecks}]
+
+- name: Change enablement
+  group: service management
+  deliverables:
+  - name: change request record
+    shape: proposed changes with their reference
+    instantiated_on: pull requests referenced in TSC minutes
+    chain:
+    - [minutes_sections, {}]
+    - [filter, {where: [[link, contains, /pull/]]}]
+    - [select, {fields: [meeting, section, item, link]}]
+    - [workbook, {name: change_requests}]
+  - name: change model
+    shape: the standard steps of a change in forced order
+    instantiated_on: forced precedence of the Node.js governance document
+    chain:
+    - [forced_edges, {of: nodejs-governance}]
+    - [bpmn, {name: change_model}]
+  - name: change schedule
+    shape: changes by date
+    instantiated_on: pull requests per TSC meeting date
+    chain:
+    - [minutes_sections, {}]
+    - [filter, {where: [[link, contains, /pull/]]}]
+    - [group, {by: [meeting], aggregates: [[count, "*", changes], [list, link, links]]}]
+    - [workbook, {name: change_schedule}]
+  - name: change authority matrix
+    shape: who must authorize what
+    instantiated_on: agents and required actions of the TSC charter
+    chain:
+    - [who_must_what, {of: nodejs-tsc-charter}]
+    - [pivot, {row: who, col: action, value: count, fn: sum}]
+    - [workbook, {name: authority_matrix}]
+  - name: post-implementation review
+    shape: whether performed changes matched the model
+    instantiated_on: receipt-phase conformance per variant
+    chain:
+    - [conformance, {}]
+    - [derive, {field: fit, fn: contains, of: is_fit, value: "true"}]
+    - [group, {by: [], aggregates: [[count, "*", cases], [sum, fit, fit_cases], [avg, fitness, mean_fitness]]}]
+    - [workbook, {name: post_implementation_review}]
+
+- name: Incident management
+  group: service management
+  deliverables:
+  - name: incident record
+    shape: one row per case with category, status, timestamps and outcome
+    instantiated_on: receipt-phase cases
+    chain:
+    - [cases, {}]
+    - [select, {fields: [case, department, channel, responsible, start, end, events, duration_days, outcome]}]
+    - [workbook, {name: case_records}]
+  - name: incident model
+    shape: the standard sequence of steps
+    instantiated_on: the most common receipt-phase variant
+    chain:
+    - [variants, {}]
+    - [limit, {n: 5}]
+    - [workbook, {name: models}]
+  - name: major incident report
+    shape: the longest cases with their timeline
+    instantiated_on: the ten longest receipt-phase cases
+    chain:
+    - [cases, {}]
+    - [sort, {by: [duration_days], desc: true}]
+    - [limit, {n: 10}]
+    - [document, {name: major_cases, title: "the ten longest cases", columns: [case, department, channel, start, end, duration_days, outcome]}]
+  - name: incident status report
+    shape: open work per group
+    instantiated_on: open receipt-phase cases per department
+    chain:
+    - [cases, {}]
+    - [filter, {where: [[outcome, eq, open]]}]
+    - [group, {by: [department], aggregates: [[count, "*", open_cases], [avg, days_since_last_event, mean_days_idle]]}]
+    - [workbook, {name: status}]
+  - name: deadline breach list
+    shape: cases that ended after their deadline
+    instantiated_on: receipt-phase cases
+    chain:
+    - [cases, {}]
+    - [filter, {where: [[outcome, eq, after deadline]]}]
+    - [select, {fields: [case, department, channel, deadline, enddate, duration_days]}]
+    - [workbook, {name: breaches}]
+  - name: escalation matrix
+    shape: who hands work to whom
+    instantiated_on: receipt-phase handover-of-work network
+    chain:
+    - [handover, {}]
+    - [limit, {n: 200}]
+    - [workbook, {name: escalation}]
+
+- name: IT asset management
+  group: service management
+  deliverables:
+  - name: asset register
+    shape: the assets in use with counts of use
+    instantiated_on: receipt-phase resources and groups
+    chain:
+    - [events, {}]
+    - [group, {by: [group, resource], aggregates: [[count, "*", events], [min, ts, first_seen], [max, ts, last_seen]]}]
+    - [workbook, {name: asset_register}]
+  - name: lifecycle records
+    shape: first and last use per asset
+    instantiated_on: receipt-phase resources
+    chain:
+    - [events, {}]
+    - [group, {by: [resource], aggregates: [[min, ts, first_seen], [max, ts, last_seen], [count, "*", events]]}]
+    - [derive, {field: active_days, fn: days_between, a: first_seen, b: last_seen}]
+    - [workbook, {name: lifecycle}]
+  - name: audit reconciliation
+    shape: forward records against what was read back from the deliverables
+    instantiated_on: the reverse proofs of this file
+    chain:
+    - [roundtrips, {}]
+    - [workbook, {name: reconciliation}]
+  - name: license compliance report
+    shape: entitlements against installations
+    instantiated_on: none
+    chain:
+    - [events, {}]
+    - [workbook, {name: licenses}]
+
+- name: Monitoring and event management
+  group: service management
+  deliverables:
+  - name: event records
+    shape: every event with case, activity, time and resource
+    instantiated_on: receipt-phase events
+    chain:
+    - [events, {}]
+    - [select, {fields: [case, activity, ts, resource, department, channel]}]
+    - [workbook, {name: event_records}]
+  - name: monitoring thresholds
+    shape: the threshold per group beyond which an alert is raised
+    instantiated_on: receipt-phase department mean durations
+    chain:
+    - [cases, {}]
+    - [group, {by: [department], aggregates: [[avg, duration_days, threshold_days], [count, "*", cases]]}]
+    - [workbook, {name: thresholds}]
+  - name: alert list
+    shape: open items past threshold, decided by a rule
+    instantiated_on: open receipt-phase cases against department means
+    chain:
+    - [cases, {}]
+    - [group, {by: [department], aggregates: [[avg, duration_days, threshold_days]]}]
+    - [save_as, {name: thresholds}]
+    - [cases, {}]
+    - [filter, {where: [[outcome, eq, open]]}]
+    - [join, {with: thresholds, on: [[department, department]]}]
+    - [derive, {field: over, fn: ratio, num: days_since_last_event, den: threshold_days}]
+    - [decision_table, {name: alert, inputs: [over], outputs: [alert], rules: [{when: {over: "> 1"}, then: {alert: "true"}, because: "idle longer than the department's mean case duration (P22)"}, {when: {}, then: {alert: "false"}, because: "otherwise"}]}]
+    - [workbook, {name: alerts}]
+  - name: event correlation
+    shape: which events follow which, with counts
+    instantiated_on: receipt-phase directly-follows edges
+    chain:
+    - [dfg, {}]
+    - [workbook, {name: correlation}]
+
+- name: Problem management
+  group: service management
+  deliverables:
+  - name: problem record
+    shape: recurring failures grouped by cause candidate
+    instantiated_on: late receipt-phase cases per department and channel
+    chain:
+    - [cases, {}]
+    - [filter, {where: [[outcome, eq, after deadline]]}]
+    - [group, {by: [department, channel], aggregates: [[count, "*", late_cases], [avg, duration_days, mean_days]]}]
+    - [sort, {by: [late_cases], desc: true}]
+    - [workbook, {name: problems}]
+  - name: known error record
+    shape: paths that deviate from the model
+    instantiated_on: receipt-phase variants of cases that did not fit the model
+    chain:
+    - [conformance, {}]
+    - [filter, {where: [[is_fit, eq, false]]}]
+    - [workbook, {name: known_errors}]
+  - name: root-cause analysis
+    shape: where the waiting accumulates
+    instantiated_on: receipt-phase bottlenecks
+    chain:
+    - [bottlenecks, {}]
+    - [limit, {n: 10}]
+    - [document, {name: root_cause, title: "root cause: the ten slowest transitions"}]
+  - name: trend analysis
+    shape: failures per period
+    instantiated_on: late receipt-phase cases per month
+    chain:
+    - [cases, {}]
+    - [derive, {field: late, fn: contains, of: outcome, value: after}]
+    - [group, {by: [month], aggregates: [[count, "*", cases], [sum, late, late_cases]]}]
+    - [derive, {field: late_share, fn: ratio, num: late_cases, den: cases}]
+    - [page, {name: trend, title: "share of cases ending after deadline, per month", kind: line, x: month, y: late_share}]
+
+- name: Release management
+  group: service management
+  deliverables:
+  - name: release plan
+    shape: steps grouped into releases
+    instantiated_on: ordered steps of the Node.js governance document by phase
+    chain:
+    - [ordered_steps, {of: nodejs-governance}]
+    - [select, {fields: [phase, position, step, sentence]}]
+    - [workbook, {name: release_plan}]
+  - name: release notes
+    shape: what changed, with references
+    instantiated_on: agenda items with links in the TSC minutes
+    chain:
+    - [minutes_sections, {}]
+    - [filter, {where: [[links, gt, 0]]}]
+    - [document, {name: release_notes, title: "items with references, by meeting", columns: [meeting, section, item, link]}]
+  - name: release schedule
+    shape: releases by date
+    instantiated_on: TSC minutes sections mentioning release
+    chain:
+    - [minutes_sections, {}]
+    - [filter, {where: [[item, matches, "(?i)release|v[0-9]+\\b"]]}]
+    - [select, {fields: [meeting, section, item, link]}]
+    - [workbook, {name: release_schedule}]
+  - name: release readiness checklist
+    shape: what must be true before release
+    instantiated_on: obligations of the TSC charter
+    chain:
+    - [required_actions, {of: nodejs-tsc-charter}]
+    - [checklist, {name: readiness_checklist, title: "readiness: the charter's obligations", item: action, note: sentence}]
+
+- name: Service catalogue management
+  group: service management
+  deliverables:
+  - name: service catalogue
+    shape: the services offered with volumes
+    instantiated_on: receipt-phase activities
+    chain:
+    - [events, {}]
+    - [group, {by: [activity], aggregates: [[count, "*", events], [distinct, case, cases]]}]
+    - [workbook, {name: catalogue}]
+  - name: service descriptions
+    shape: what each term means, from the governing text
+    instantiated_on: definitional sentences of 5 U.S.C. 552
+    chain:
+    - [definitions, {of: usc5-552-doj}]
+    - [document, {name: descriptions, title: "definitions in the statute", columns: [unit, verb, sentence]}]
+  - name: request catalogue
+    shape: what can be requested through which channel
+    instantiated_on: receipt-phase activities per channel
+    chain:
+    - [events, {}]
+    - [pivot, {row: activity, col: channel}]
+    - [workbook, {name: request_catalogue}]
+
+- name: Service configuration management
+  group: service management
+  deliverables:
+  - name: configuration item register
+    shape: the items and their attributes
+    instantiated_on: receipt-phase activities, resources and groups
+    chain:
+    - [events, {}]
+    - [distinct, {fields: [activity, resource, group]}]
+    - [workbook, {name: ci_register}]
+  - name: CI relationship map
+    shape: which item relates to which, with strength
+    instantiated_on: receipt-phase directly-follows edges
+    chain:
+    - [dfg, {}]
+    - [page, {name: relationships, title: "directly-follows relationships", kind: table}]
+  - name: configuration baseline
+    shape: the sealed state of the model
+    instantiated_on: the forced order of 5 U.S.C. 552
+    chain:
+    - [ordered_steps, {of: usc5-552-doj}]
+    - [json, {name: baseline}]
+  - name: configuration verification report
+    shape: what was read back matches what was written
+    instantiated_on: the reverse proofs of this file
+    chain:
+    - [roundtrips, {}]
+    - [workbook, {name: verification}]
+
+- name: Service continuity management
+  group: service management
+  deliverables:
+  - name: business impact analysis
+    shape: volume and duration per group
+    instantiated_on: receipt-phase departments
+    chain:
+    - [cases, {}]
+    - [group, {by: [department], aggregates: [[count, "*", cases], [avg, duration_days, mean_days], [max, duration_days, max_days]]}]
+    - [workbook, {name: bia}]
+  - name: continuity plan
+    shape: the required actions in order
+    instantiated_on: 5 U.S.C. 552 required actions
+    chain:
+    - [required_actions, {of: usc5-552-doj}]
+    - [document, {name: continuity_plan, title: "required actions", columns: [unit, who, action, sentence]}]
+  - name: recovery procedure
+    shape: the ordered steps to restore
+    instantiated_on: ordered steps of 5 U.S.C. 552
+    chain:
+    - [ordered_steps, {of: usc5-552-doj}]
+    - [document, {name: recovery_procedure, title: "steps in forced order", columns: [position, phase, step, sentence]}]
+  - name: continuity test report
+    shape: the procedure executed and checked
+    instantiated_on: execution trace of the statutory process in SpiffWorkflow
+    chain:
+    - [execution_trace, {of: usc5-552-doj}]
+    - [workbook, {name: test_report}]
+
+- name: Service design
+  group: service management
+  deliverables:
+  - name: service design package
+    shape: requirements, steps and rules together
+    instantiated_on: 5 U.S.C. 552
+    chain:
+    - [required_actions, {of: usc5-552-doj}]
+    - [document, {name: design_package, title: "design package: requirements", columns: [unit, who, action, sentence]}]
+  - name: requirements traceability matrix
+    shape: each requirement traced to its source unit
+    instantiated_on: 5 U.S.C. 552 obligations per unit
+    chain:
+    - [required_actions, {of: usc5-552-doj}]
+    - [pivot, {row: unit, col: action}]
+    - [workbook, {name: traceability}]
+  - name: service blueprint
+    shape: the process with its steps and order
+    instantiated_on: forced precedence of 5 U.S.C. 552
+    chain:
+    - [forced_edges, {of: usc5-552-doj}]
+    - [bpmn, {name: blueprint}]
+
+- name: Service desk
+  group: service management
+  deliverables:
+  - name: ticket log
+    shape: contacts by channel and time
+    instantiated_on: receipt-phase cases by channel
+    chain:
+    - [cases, {}]
+    - [pivot, {row: month, col: channel}]
+    - [workbook, {name: ticket_log}]
+  - name: interaction records
+    shape: the interactions that came through the desk
+    instantiated_on: receipt-phase events on the Desk channel
+    chain:
+    - [events, {}]
+    - [filter, {where: [[channel, eq, Desk]]}]
+    - [select, {fields: [case, activity, ts, resource]}]
+    - [workbook, {name: desk_interactions}]
+  - name: knowledge suggestions
+    shape: the steps most discussed, as candidates for articles
+    instantiated_on: governance steps tagged in TSC minutes
+    chain:
+    - [tags, {of: nodejs-governance}]
+    - [filter, {where: [[tie, eq, false]]}]
+    - [group, {by: [step_lemma], aggregates: [[count, "*", lines]]}]
+    - [sort, {by: [lines], desc: true}]
+    - [limit, {n: 10}]
+    - [workbook, {name: knowledge_suggestions}]
+  - name: user communications
+    shape: what was announced, when
+    instantiated_on: Announcements sections of the TSC minutes
+    chain:
+    - [minutes_sections, {}]
+    - [filter, {where: [[section, contains, announce]]}]
+    - [select, {fields: [meeting, item]}]
+    - [workbook, {name: announcements}]
+
+- name: Service level management
+  group: service management
+  deliverables:
+  - name: service level targets
+    shape: each target with the clock the text sets
+    instantiated_on: 5 U.S.C. 552 obligations with durations in the same sentence
+    chain:
+    - [anchors, {of: usc5-552-doj}]
+    - [filter, {where: [[timex3, contains, DURATION]]}]
+    - [save_as, {name: clocks}]
+    - [required_actions, {of: usc5-552-doj}]
+    - [join, {with: clocks, on: [[sentence_id, sentence_id]]}]
+    - [select, {fields: [unit, who, action, span, timex3]}]
+    - [distinct, {}]
+    - [workbook, {name: targets}]
+  - name: service level report
+    shape: achieved against deadline per group
+    instantiated_on: receipt-phase cases per department
+    chain:
+    - [cases, {}]
+    - [pivot, {row: department, col: outcome}]
+    - [workbook, {name: service_level_report}]
+  - name: breach analysis
+    shape: breaches by channel and department
+    instantiated_on: receipt-phase cases after deadline
+    chain:
+    - [cases, {}]
+    - [filter, {where: [[outcome, eq, after deadline]]}]
+    - [pivot, {row: department, col: channel}]
+    - [workbook, {name: breach_analysis}]
+  - name: dependency map
+    shape: who depends on whom for delivery
+    instantiated_on: receipt-phase handover-of-work network
+    chain:
+    - [handover, {}]
+    - [limit, {n: 100}]
+    - [page, {name: dependency_map, title: "handover of work", kind: table}]
+
+- name: Service request management
+  group: service management
+  deliverables:
+  - name: request models
+    shape: the standard paths a request takes
+    instantiated_on: receipt-phase variants
+    chain:
+    - [variants, {}]
+    - [limit, {n: 20}]
+    - [workbook, {name: request_models}]
+  - name: fulfilment records
+    shape: closed requests with their duration
+    instantiated_on: receipt-phase cases that ended
+    chain:
+    - [cases, {}]
+    - [filter, {where: [[outcome, ne, open]]}]
+    - [select, {fields: [case, department, channel, start, end, duration_days, outcome]}]
+    - [workbook, {name: fulfilment_records}]
+  - name: fulfilment time report
+    shape: duration statistics per channel
+    instantiated_on: receipt-phase cases per channel
+    chain:
+    - [cases, {}]
+    - [filter, {where: [[outcome, ne, open]]}]
+    - [group, {by: [channel], aggregates: [[count, "*", cases], [median, duration_days, median_days], [avg, duration_days, mean_days]]}]
+    - [workbook, {name: fulfilment_time}]
+  - name: approvals log
+    shape: approvals and votes recorded
+    instantiated_on: TSC minutes sentences whose actions include approve or vote
+    chain:
+    - [minutes_sentences, {}]
+    - [filter, {where: [[lemmas, matches, "\\b(approve|vote|lgtm|merge)\\b"]]}]
+    - [select, {fields: [meeting, sentence_id, sentence]}]
+    - [workbook, {name: approvals}]
+
+- name: Service validation and testing
+  group: service management
+  deliverables:
+  - name: test plan
+    shape: what must be verified
+    instantiated_on: obligations of 5 U.S.C. 552 as a checklist
+    chain:
+    - [required_actions, {of: usc5-552-doj}]
+    - [checklist, {name: test_plan, title: "test plan: every obligation", item: action, note: sentence}]
+  - name: test cases
+    shape: ordering tests, one per forced edge
+    instantiated_on: forced precedence of 5 U.S.C. 552
+    chain:
+    - [forced_edges, {of: usc5-552-doj}]
+    - [workbook, {name: test_cases}]
+  - name: test results
+    shape: the executed order against the required order
+    instantiated_on: SpiffWorkflow execution of the statutory process
+    chain:
+    - [execution_trace, {of: usc5-552-doj}]
+    - [workbook, {name: test_results}]
+  - name: acceptance record
+    shape: reverse checks that passed
+    instantiated_on: the reverse proofs of this file
+    chain:
+    - [roundtrips, {}]
+    - [filter, {where: [[match, eq, true]]}]
+    - [workbook, {name: acceptance}]
+
+# ---------------------------------------------------------------- technical management practices
+- name: Deployment management
+  group: technical management
+  deliverables:
+  - name: deployment plan
+    shape: ordered steps with phases
+    instantiated_on: ordered steps of the Node.js governance document
+    chain:
+    - [ordered_steps, {of: nodejs-governance}]
+    - [select, {fields: [phase, position, step]}]
+    - [workbook, {name: deployment_plan}]
+  - name: deployment records
+    shape: deployments performed, with references
+    instantiated_on: TSC minutes items mentioning release, deploy or land
+    chain:
+    - [minutes_sections, {}]
+    - [filter, {where: [[item, matches, "(?i)\\b(release|deploy|land|ship)"]]}]
+    - [select, {fields: [meeting, item, link]}]
+    - [workbook, {name: deployment_records}]
+  - name: environment inventory
+    shape: the environments and who works in them
+    instantiated_on: receipt-phase groups and resources
+    chain:
+    - [events, {}]
+    - [group, {by: [group], aggregates: [[distinct, resource, resources], [count, "*", events]]}]
+    - [workbook, {name: environments}]
+  - name: rollback procedure
+    shape: the ordered steps, reversed
+    instantiated_on: ordered steps of the Node.js governance document
+    chain:
+    - [ordered_steps, {of: nodejs-governance}]
+    - [sort, {by: [position], desc: true}]
+    - [document, {name: rollback, title: "rollback: the steps in reverse order", columns: [position, step, sentence]}]
+
+- name: Infrastructure and platform management
+  group: technical management
+  deliverables:
+  - name: infrastructure inventory
+    shape: groups, resources and activity counts
+    instantiated_on: receipt-phase groups and resources
+    chain:
+    - [events, {}]
+    - [pivot, {row: group, col: activity}]
+    - [workbook, {name: infrastructure_inventory}]
+  - name: runbook
+    shape: the steps to perform, in order, with sources
+    instantiated_on: ordered steps of 5 U.S.C. 552
+    chain:
+    - [ordered_steps, {of: usc5-552-doj}]
+    - [document, {name: runbook, title: "runbook", columns: [position, phase, step, sentence]}]
+  - name: utilization report
+    shape: use per resource per period
+    instantiated_on: receipt-phase events per resource per month
+    chain:
+    - [events, {}]
+    - [derive, {field: month, fn: month, of: ts}]
+    - [pivot, {row: resource, col: month}]
+    - [workbook, {name: utilization}]
+
+- name: Software development and management
+  group: technical management
+  deliverables:
+  - name: backlog
+    shape: work items with references and where they were raised
+    instantiated_on: issues referenced in TSC minutes
+    chain:
+    - [minutes_sections, {}]
+    - [filter, {where: [[link, contains, /issues/]]}]
+    - [select, {fields: [meeting, section, item, link]}]
+    - [workbook, {name: backlog}]
+  - name: code review decisions
+    shape: approvals and objections recorded
+    instantiated_on: TSC minutes sentences whose actions include approve, object, merge or block
+    chain:
+    - [minutes_sentences, {}]
+    - [filter, {where: [[lemmas, matches, "\\b(approve|object|merge|block|revert)\\b"]]}]
+    - [select, {fields: [meeting, sentence_id, lemmas, sentence]}]
+    - [workbook, {name: review_decisions}]
+  - name: version records
+    shape: versions mentioned and when
+    instantiated_on: TSC minutes items naming a version
+    chain:
+    - [minutes_sections, {}]
+    - [filter, {where: [[item, matches, "\\bv?[0-9]+\\.[0-9]+"]]}]
+    - [select, {fields: [meeting, item, link]}]
+    - [workbook, {name: versions}]
+  - name: verification report
+    shape: what was executed and what was read back
+    instantiated_on: the execution and reverse proofs of this file
+    chain:
+    - [roundtrips, {}]
+    - [workbook, {name: verification_report}]
