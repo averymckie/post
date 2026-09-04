@@ -2288,8 +2288,73 @@
     {
      "chain": [
       [
-       "events",
+       "changelog_commits",
        {}
+      ],
+      [
+       "filter",
+       {
+        "where": [
+         [
+          "scope",
+          "eq",
+          "deps"
+         ],
+         [
+          "message",
+          "matches",
+          "^(update|upgrade|bump) "
+         ]
+        ]
+       }
+      ],
+      [
+       "derive",
+       {
+        "field": "component",
+        "fn": "word",
+        "n": 2,
+        "of": "message"
+       }
+      ],
+      [
+       "group",
+       {
+        "aggregates": [
+         [
+          "count",
+          "*",
+          "updates"
+         ],
+         [
+          "min",
+          "date",
+          "first_update"
+         ],
+         [
+          "max",
+          "date",
+          "last_update"
+         ],
+         [
+          "distinct",
+          "version",
+          "releases"
+         ]
+        ],
+        "by": [
+         "component"
+        ]
+       }
+      ],
+      [
+       "sort",
+       {
+        "by": [
+         "updates"
+        ],
+        "desc": true
+       }
       ],
       [
        "workbook",
@@ -2298,12 +2363,20 @@
        }
       ]
      ],
-     "files": [],
-     "instantiated_on": "none",
+     "files": [
+      [
+       "proofs/out/itil/supplier-management/supplier-performance-report/supplier_performance.xlsx",
+       "cd1a20a31dcec5343df3cef9b678fd8eba9310f9e7a444478cec5883e320d4ad",
+       "reproduced"
+      ]
+     ],
+     "instantiated_on": "dependency update commits in the Node.js 22 changelog",
      "name": "supplier performance report",
-     "shape": "delivered against agreed, per supplier",
-     "shows": [],
-     "status": "no real input"
+     "shape": "how often each supplied component had to be updated, and when",
+     "shows": [
+      "rows 30; first {\"component\": \"googletest\", \"updates\": 31, \"first_update\": \"2024-05-15\", \"last_update\": \"2026-05-13\", \"releases\": 13}"
+     ],
+     "status": "proven"
     }
    ],
    "group": "general management",

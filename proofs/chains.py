@@ -2784,6 +2784,187 @@ def run_itil() -> dict[str, Any]:
 
 
 # ----------------------------------------------------------------------------
+# P54 .. P57: outputs ideated from the same generators
+# ----------------------------------------------------------------------------
+
+
+def s_truth_table(ctx: dict[str, Any]) -> None:
+    dec = ctx["decision"]
+    total = ctx["total"]
+    rows = [["present_voting_members", "majority_reachable", "rule"]]
+    for n in range(0, total + 1):
+        r = dec.evaluate({"present": n})["result"]
+        rows.append([n, r["majority_reachable"], r["rule"]])
+    p = workbook(ctx["dir"] / "truth_table.xlsx", {"truth_table": rows})
+    p2 = ctx["dir"] / "truth_table.html"
+    import jinja2
+
+    sys.path.insert(0, str(ROOT / "proofs"))
+    from itil import TABLE_PAGE
+
+    p2.write_text(jinja2.Environment(autoescape=True).from_string(TABLE_PAGE).render(title=f"the whole rule: every possible attendance out of {total} voting members", cols=rows[0], rows=[dict(zip(rows[0], r)) for r in rows[1:]]), encoding="utf-8")
+    first_true = next(r[0] for r in rows[1:] if r[1])
+    ctx["files"] = [p, p2]
+    ctx["shows"] = [f"inputs enumerated {total + 1}; majority reachable from {first_true} present upward"]
+
+
+def truth_table() -> dict[str, Any]:
+    proof = Proof(
+        "P54",
+        "policy -> every possible input -> decisions -> workbook, page",
+        ["policy (P13), roster (P6)"],
+        [
+            Step("enumerate", "range over the closed input space: present voting members 0..N", s_truth_table),
+            Step("evaluate", "zen.ZenDecision.evaluate per input", lambda c: None),
+            Step("tabulate", "openpyxl.Workbook.save; jinja2 table page", lambda c: None),
+        ],
+        "the whole rule, enumerated",
+    )
+    src = RESULTS[("decisions", "majority")]
+    ctx = {"dir": out_dir("P54", "majority"), "decision": src["decision"], "total": len(src["roster"])}
+    run(proof, "majority", ctx)
+    return ctx
+
+
+DMN_TEMPLATE = """<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" id="defs" name="majority" namespace="https://example.org/proofs/">
+  <decision id="majority" name="majority reachable">
+    <decisionTable id="dt" hitPolicy="FIRST">
+      <input id="i1" label="present"><inputExpression id="ie1" typeRef="integer"><text>present</text></inputExpression></input>
+      <output id="o1" label="majority_reachable" name="majority_reachable" typeRef="boolean"/>
+      <rule id="r1"><description>{{ quote }}</description><inputEntry id="r1i1"><text>&gt;= {{ majority }}</text></inputEntry><outputEntry id="r1o1"><text>True</text></outputEntry></rule>
+      <rule id="r2"><description>otherwise</description><inputEntry id="r2i1"><text></text></inputEntry><outputEntry id="r2o1"><text>False</text></outputEntry></rule>
+    </decisionTable>
+  </decision>
+</definitions>
+"""
+
+
+def s_dmn(ctx: dict[str, Any]) -> None:
+    import types
+
+    import jinja2
+    from SpiffWorkflow.bpmn.script_engine import PythonScriptEngine
+    from SpiffWorkflow.dmn.engine.DMNEngine import DMNEngine
+    from SpiffWorkflow.dmn.parser.BpmnDmnParser import BpmnDmnParser
+
+    xml = jinja2.Environment(autoescape=True).from_string(DMN_TEMPLATE).render(majority=ctx["majority"], quote=ctx["quote"])
+    p = ctx["dir"] / "majority.dmn"
+    p.write_text(xml, encoding="utf-8")
+    parser = BpmnDmnParser()
+    parser.add_dmn_str(xml)
+    dp = parser.dmn_parsers["majority"]
+    dp.parse()
+    tables = dp.decision.decision_tables if hasattr(dp.decision, "decision_tables") else dp.decision.decisionTables
+    engine = DMNEngine(tables[0])
+    rows = [["meeting", "present_voting", "zen", "spiff_dmn", "agree"]]
+    for r in ctx["decision_rows"][1:]:
+        task = types.SimpleNamespace(data={"present": r[1]}, workflow=types.SimpleNamespace(script_engine=PythonScriptEngine()))
+        dmn = bool(engine.result(task)["majority_reachable"])
+        rows.append([r[0], r[1], bool(r[2]), dmn, bool(r[2]) == dmn])
+    p2 = workbook(ctx["dir"] / "cross_engine.xlsx", {"agreement": rows})
+    ctx["files"] = [p, p2]
+    ctx["shows"] = [f"meetings {len(rows) - 1}; engines agree on all: {all(r[4] for r in rows[1:])}", *[f"{r[0]}: present {r[1]} zen {r[2]} dmn {r[3]}" for r in rows[1:3]]]
+
+
+def cross_engine() -> dict[str, Any]:
+    proof = Proof(
+        "P55",
+        "policy -> DMN decision table -> decisions' ; decisions, decisions' -> agreement",
+        ["policy (P13), decisions (P13)"],
+        [
+            Step("compile", "jinja2 -> DMN 1.3 decision table XML with the charter sentence as the rule description", s_dmn),
+            Step("evaluate", "SpiffWorkflow.dmn.parser.BpmnDmnParser.add_dmn_str; SpiffWorkflow.dmn.engine.DMNEngine.result per meeting", lambda c: None),
+            Step("compare", "zen result against the DMN result per meeting", lambda c: None),
+            Step("tabulate", "openpyxl.Workbook.save", lambda c: None),
+        ],
+        "agreement",
+    )
+    src = RESULTS[("decisions", "majority")]
+    quote = next(ps.sentence.text for ps in src["charter_parsed"] if "simple majority of all TSC voting members" in ps.sentence.text)
+    ctx = {"dir": out_dir("P55", "majority"), "majority": src["majority"], "quote": quote, "decision_rows": src["decision_rows"]}
+    run(proof, "majority", ctx)
+    return ctx
+
+
+def s_explanations(ctx: dict[str, Any]) -> None:
+    import docx
+
+    d = docx.Document()
+    d.add_heading("Why a vote could or could not carry at each meeting", 1)
+    for r in ctx["decision_rows"][1:]:
+        verdict = "could carry" if r[2] else "could not carry"
+        d.add_heading(r[0], 2)
+        d.add_paragraph(f"{r[1]} voting members were present. The roster lists {ctx['total']} voting members, so a simple majority is {ctx['majority']}. A vote {verdict} in the room.")
+        d.add_paragraph(ctx["quote"], style="Intense Quote")
+    p = ctx["dir"] / "explanations.docx"
+    d.save(p)
+    ctx["files"] = [p]
+    ctx["shows"] = [f"meetings explained {len(ctx['decision_rows']) - 1}; each paragraph names the count, the threshold, and quotes the charter sentence"]
+
+
+def explanations() -> dict[str, Any]:
+    proof = Proof(
+        "P56",
+        "decisions, policy -> explanation document",
+        ["decisions (P13), policy (P13), roster (P6)"],
+        [Step("write", "docx.Document: one section per meeting; the numbers from the decision rows; the rule as the charter's own sentence", s_explanations)],
+        "explanation document",
+    )
+    src = RESULTS[("decisions", "majority")]
+    quote = next(ps.sentence.text for ps in src["charter_parsed"] if "simple majority of all TSC voting members" in ps.sentence.text)
+    ctx = {"dir": out_dir("P56", "majority"), "decision_rows": src["decision_rows"], "total": len(src["roster"]), "majority": src["majority"], "quote": quote}
+    run(proof, "majority", ctx)
+    return ctx
+
+
+def s_performance_map(ctx: dict[str, Any]) -> None:
+    import duckdb
+    import pandas as pd
+    import plotly.graph_objects as go
+    import plotly.io as pio
+
+    rows = ctx["rows"]
+    con = duckdb.connect()
+    con.register("ev_raw", pd.DataFrame([(r["case:concept:name"], r["concept:name"], r["time:timestamp"]) for r in rows], columns=["case_id", "activity", "ts_text"]))
+    con.execute("create table ev as select case_id, activity, cast(ts_text as timestamptz) as ts from ev_raw")
+    pos = dict(con.execute("with s as (select activity, row_number() over (partition by case_id order by ts) as n from ev) select activity, round(avg(n), 2) from s group by activity").fetchall())
+    wait = collections.defaultdict(float, {r[0]: (r[2] or 0.0) for r in ctx["measured"][1:]})
+    acts = sorted(pos)
+    order = sorted(acts, key=lambda a: pos[a])
+    y = {a: i % 6 for i, a in enumerate(order)}
+    fig = go.Figure()
+    for r in ctx["dfg_rows"][1:]:
+        a, b, n = r
+        if a in pos and b in pos:
+            fig.add_trace(go.Scatter3d(x=[pos[a], pos[b]], y=[y[a], y[b]], z=[wait[a], wait[b]], mode="lines", line={"width": 1 + min(n, 800) / 100, "color": "gray"}, showlegend=False))
+    fig.add_trace(go.Scatter3d(x=[pos[a] for a in acts], y=[y[a] for a in acts], z=[wait[a] for a in acts], mode="markers+text", text=acts, textposition="top center", marker={"size": 5}, showlegend=False))
+    fig.update_layout(title="receipt phase: activities by mean position in the case (x), waiting hours into the activity (z); edge width = frequency", scene={"xaxis_title": "mean position in case", "yaxis_title": "lane", "zaxis_title": "mean hours waiting"})
+    p = ctx["dir"] / "performance_map_3d.html"
+    pio.write_html(fig, str(p), include_plotlyjs="cdn", full_html=True, div_id="chart")
+    slowest = max(acts, key=lambda a: wait[a])
+    ctx["files"] = [p]
+    ctx["shows"] = [f"activities {len(acts)}, edges {len(ctx['dfg_rows']) - 1}; slowest to reach: {slowest} ({wait[slowest]} h)"]
+
+
+def performance_map() -> dict[str, Any]:
+    proof = Proof(
+        "P57",
+        "directly-follows graph, measured steps, records -> 3D performance map page",
+        ["directly-follows graph (P23), measured steps (P12), records (P6)"],
+        [
+            Step("position", "duckdb: mean position of each activity within its case", s_performance_map),
+            Step("draw", "plotly.graph_objects.Scatter3d: edges by frequency, z = waiting hours", lambda c: None),
+            Step("page", "plotly.io.write_html(full_html, div_id)", lambda c: None),
+        ],
+        "3D performance map page",
+    )
+    ctx = {"dir": out_dir("P57", "receipt"), "rows": RESULTS[("records", "receipt-csv")]["rows"], "measured": RESULTS[("measured activities", "receipt-xes+receipt-csv")]["measured"], "dfg_rows": RESULTS[("dfg", "receipt-xes")]["dfg_rows"]}
+    run(proof, "receipt", ctx)
+    return ctx
+
+
+
+# ----------------------------------------------------------------------------
 # P51 .. P53: the orchestration itself, as proofs
 # ----------------------------------------------------------------------------
 
@@ -2939,6 +3120,34 @@ def _ledger() -> dict[str, Any]:
     return {"sections": [], "amendments": 0, "coverage": None}
 
 
+def _recorded(text: str) -> tuple[dict[str, list[str]], dict[tuple[str, str], tuple[str, list[str]]]]:
+    """The last recorded chain per numbered proof, and the last recorded (status, body) per ITIL deliverable."""
+    chains: dict[str, list[str]] = {}
+    itil_rec: dict[tuple[str, str], tuple[str, list[str]]] = {}
+    lines = text.splitlines()
+    i = 0
+    while i < len(lines):
+        m = re.match(r"^#{2,3} (P\d+)  (.+?)(?:  \(revised chain \d+\))?$", lines[i])
+        m2 = re.match(r"^### (.+?) / (.+?)  (proven|empty|failed|no real input)(?:  \(revised \d+\))?$", lines[i])
+        if m or m2:
+            j = i + 1
+            while j < len(lines) and lines[j].strip() == "":
+                j += 1
+            block: list[str] = []
+            if j < len(lines) and lines[j].startswith("```"):
+                j += 1
+                while j < len(lines) and not lines[j].startswith("```"):
+                    block.append(lines[j])
+                    j += 1
+            if m and not (m.group(2).endswith("(further input)")):
+                chains[m.group(1)] = [l for l in block if l.startswith("-> ")]
+            if m2:
+                itil_rec[(m2.group(1), m2.group(2))] = (m2.group(3), [l for l in block if l.startswith("instantiated on:") or l.startswith("-> ")])
+            i = j
+        i += 1
+    return chains, itil_rec
+
+
 def _header() -> list[str]:
     lines = ["# Proofs", "", "```", "thing", "-> change (functions)", "-> thing", "a line naming two things is a join", "every function ran on the named input; every deliverable carries its sha256", "```", "", "## Doors", "", "```"]
     for name, where in DOORS:
@@ -2962,7 +3171,8 @@ def append_ledger() -> dict[str, int]:
     out: list[str] = []
     if not MD.exists():
         out += _header()
-    counts = {"sections": 0, "amendments": 0}
+    counts = {"sections": 0, "amendments": 0, "revisions": 0}
+    recorded_chain, recorded_itil = _recorded(MD.read_text(encoding="utf-8") if MD.exists() else "")
 
     def evidence_lines(files: list[tuple[Path, str, str]], shows: list[str]) -> list[str]:
         ls = ["```"]
@@ -2975,6 +3185,13 @@ def append_ledger() -> dict[str, int]:
 
     for pr in sorted(PROOFS, key=lambda p: int(re.sub(r"\D", "", p.pid) or 0)):
         chain_key = f"{pr.pid}|chain"
+        current_chain = [f"-> {s.change} ({s.fns})" for s in pr.steps] + [f"-> {pr.result}"]
+        if chain_key in written and recorded_chain.get(pr.pid) not in (None, current_chain):
+            n = led.setdefault("chain_revisions", {}).get(pr.pid, 0) + 1
+            led["chain_revisions"][pr.pid] = n
+            out += [f"### {pr.pid}  {pr.title}  (revised chain {n})", "", "```"] + pr.inputs + current_chain + ["```", ""]
+            recorded_chain[pr.pid] = current_chain
+            counts["revisions"] += 1
         for label, files, shows in pr.evidence:
             key = f"{pr.pid}|{label}"
             if key in written:
@@ -3007,9 +3224,17 @@ def append_ledger() -> dict[str, int]:
         for pr in ITIL_REPORT["practices"]:
             for d in pr["deliverables"]:
                 key = f"itil|{pr['name']}|{d['name']}"
+                body = [f"instantiated on: {d['instantiated_on']}"] + itil.arrows(d["chain"]) + [f"-> {d['name']}"]
                 if key in written:
-                    continue
-                out += [f"### {pr['name']} / {d['name']}  {d['status']}", "", "```"]
+                    prev = recorded_itil.get((pr["name"], d["name"]))
+                    if prev is None or prev == (d["status"], body):
+                        continue
+                    n = led.setdefault("itil_revisions", {}).get(key, 0) + 1
+                    led["itil_revisions"][key] = n
+                    out += [f"### {pr['name']} / {d['name']}  {d['status']}  (revised {n})", "", "```"]
+                    counts["revisions"] += 1
+                else:
+                    out += [f"### {pr['name']} / {d['name']}  {d['status']}", "", "```"]
                 if d["shape"]:
                     out.append(f"shape: {d['shape']}")
                 out.append(f"instantiated on: {d['instantiated_on']}")
@@ -3113,10 +3338,14 @@ def main() -> None:
     cross_document(["nodejs-tsc-charter", "nodejs-governance"])
     site_roundtrip("usc5-552-doj")
     ITIL_REPORT.update(run_itil())
+    truth_table()
+    cross_engine()
+    explanations()
+    performance_map()
     orchestration_proofs()
     counts = append_ledger()
     itil.save_register(reregister=os.environ.get("PROOFS_REREGISTER") == "1")
-    print(f"proofs {len(PROOFS)}; itil deliverables {sum(len(p['deliverables']) for p in ITIL_REPORT.get('practices', []))}; register: reproduced {sum(1 for f in itil.REGISTER if f not in itil.NEW and f not in itil.CHANGED)}, registered now {len(itil.NEW)}, changed {len(itil.CHANGED)}; ledger: sections appended {counts['sections']}, amendments {counts['amendments']}")
+    print(f"proofs {len(PROOFS)}; itil deliverables {sum(len(p['deliverables']) for p in ITIL_REPORT.get('practices', []))}; register: reproduced {sum(1 for f in itil.REGISTER if f not in itil.NEW and f not in itil.CHANGED)}, registered now {len(itil.NEW)}, changed {len(itil.CHANGED)}; ledger: sections appended {counts['sections']}, revisions {counts['revisions']}, amendments {counts['amendments']}")
 
 
 if __name__ == "__main__":

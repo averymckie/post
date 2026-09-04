@@ -409,10 +409,14 @@ practices:
     - [select, {fields: [dependency, component, location, license_heading]}]
     - [workbook, {name: suppliers}]
   - name: supplier performance report
-    shape: delivered against agreed, per supplier
-    instantiated_on: none
+    shape: how often each supplied component had to be updated, and when
+    instantiated_on: dependency update commits in the Node.js 22 changelog
     chain:
-    - [events, {}]
+    - [changelog_commits, {}]
+    - [filter, {where: [[scope, eq, deps], [message, matches, "^(update|upgrade|bump) "]]}]
+    - [derive, {field: component, fn: word, of: message, n: 2}]
+    - [group, {by: [component], aggregates: [[count, "*", updates], [min, date, first_update], [max, date, last_update], [distinct, version, releases]]}]
+    - [sort, {by: [updates], desc: true}]
     - [workbook, {name: supplier_performance}]
 
 - name: Workforce and talent management

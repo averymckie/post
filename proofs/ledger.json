@@ -116,6 +116,14 @@
   "P52|usc5-552-doj",
   "P53|all",
   "P53|chain",
+  "P54|chain",
+  "P54|majority",
+  "P55|chain",
+  "P55|majority",
+  "P56|chain",
+  "P56|majority",
+  "P57|chain",
+  "P57|receipt",
   "P5|chain",
   "P5|nodejs-governance",
   "P5|usc5-552-doj",
@@ -274,7 +282,7 @@
   "Risk management                                          3       3      0       0              0",
   "Service financial management                             4       1      0       0              3",
   "Strategy management                                      3       3      0       0              0",
-  "Supplier management                                      3       2      0       0              1",
+  "Supplier management                                      3       3      0       0              0",
   "Workforce and talent management                          4       4      0       0              0",
   "Availability management                                  3       3      0       0              0",
   "Business analysis                                        4       4      0       0              0",
@@ -296,6 +304,30 @@
   "Deployment management                                    4       4      0       0              0",
   "Infrastructure and platform management                   3       3      0       0              0",
   "Software development and management                      4       4      0       0              0",
-  "all                                                    130     123      0       0              7"
- ]
+  "all                                                    130     124      0       0              6"
+ ],
+ "chain_revisions": {
+  "P5": 1,
+  "P8": 1,
+  "P34": 1,
+  "P35": 1
+ },
+ "itil_revisions": {
+  "itil|Continual improvement|improvement measurement": 1,
+  "itil|Continual improvement|improvement review report": 1,
+  "itil|Measurement and reporting|KPI report": 1,
+  "itil|Risk management|risk register": 1,
+  "itil|Risk management|risk matrix": 1,
+  "itil|Risk management|risk report": 1,
+  "itil|Supplier management|supplier register": 1,
+  "itil|Supplier management|supplier performance report": 1,
+  "itil|Availability management|availability report": 1,
+  "itil|Availability management|availability plan": 1,
+  "itil|Capacity and performance management|capacity plan": 1,
+  "itil|Change enablement|post-implementation review": 1,
+  "itil|IT asset management|lifecycle records": 1,
+  "itil|Monitoring and event management|alert list": 1,
+  "itil|Problem management|trend analysis": 1,
+  "itil|Infrastructure and platform management|utilization report": 1
+ }
 }

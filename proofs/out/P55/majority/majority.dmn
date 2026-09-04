@@ -1,0 +1,10 @@
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" id="defs" name="majority" namespace="https://example.org/proofs/">
+  <decision id="majority" name="majority reachable">
+    <decisionTable id="dt" hitPolicy="FIRST">
+      <input id="i1" label="present"><inputExpression id="ie1" typeRef="integer"><text>present</text></inputExpression></input>
+      <output id="o1" label="majority_reachable" name="majority_reachable" typeRef="boolean"/>
+      <rule id="r1"><description>For all votes, the winning candidate option is the one that wins a simple majority of all TSC voting members in every head-to-head election against each of the other candidates.</description><inputEntry id="r1i1"><text>&gt;= 10</text></inputEntry><outputEntry id="r1o1"><text>True</text></outputEntry></rule>
+      <rule id="r2"><description>otherwise</description><inputEntry id="r2i1"><text></text></inputEntry><outputEntry id="r2o1"><text>False</text></outputEntry></rule>
+    </decisionTable>
+  </decision>
+</definitions>

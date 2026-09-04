@@ -3145,3 +3145,397 @@ proofs/out/P35/usc5-552-doj/soundness.json                             63c9dd4c1
 proofs/out/P52/receipt-xes/canonical.pnml                              cbb8e62b911aa5f2… -> 9475109f51c0c7e1…
 proofs/out/P8/receipt-xes/process.pnml                                 cbb8e62b911aa5f2… -> 9475109f51c0c7e1…
 ```
+### P5  ordered steps -> process model -> process  (revised chain 1)
+
+```
+ordered steps
+-> process model (pm4py.objects.bpmn.obj.BPMN (StartEvent, Task, EndEvent, SequenceFlow); pm4py.objects.bpmn.exporter.exporter.apply)
+-> process
+```
+
+### P8  event log -> log -> process model -> process diagram  (revised chain 1)
+
+```
+event log
+-> read (pm4py.read_xes)
+-> discover (pm4py.discover_process_tree_inductive; pm4py.convert_to_petri_net)
+-> chart (pm4py.write_pnml; pm4py.objects.conversion.wf_net.variants.to_bpmn.apply; pm4py.objects.bpmn.exporter.exporter.apply)
+-> process diagram
+```
+
+### P34  process model -> soundness proof  (revised chain 1)
+
+```
+process model (P8, discovered)
+-> soundness proof (pm4py check_wfnet; networkx.is_directed_acyclic_graph; marked-graph check; sound by construction from the process tree)
+-> soundness proof
+```
+
+### P35  process -> petri net -> soundness proof  (revised chain 1)
+
+```
+process (P5)
+-> read (pm4py.read_bpmn)
+-> petri net (pm4py.convert_to_petri_net; pm4py.write_pnml)
+-> soundness proof (pm4py check_wfnet; networkx.is_directed_acyclic_graph; marked-graph check: acyclic marked-graph workflow nets are sound)
+-> soundness proof
+```
+
+## P54  policy -> every possible input -> decisions -> workbook, page
+
+```
+policy (P13), roster (P6)
+-> enumerate (range over the closed input space: present voting members 0..N)
+-> evaluate (zen.ZenDecision.evaluate per input)
+-> tabulate (openpyxl.Workbook.save; jinja2 table page)
+-> the whole rule, enumerated
+```
+
+**majority**
+
+```
+proofs/out/P54/majority/truth_table.xlsx                   sha256 27cbadd2eb1b2ef6d555b5f43d11b7ae6b3e924ab62d79a1cda5f61ed7f0bbf3  registered
+proofs/out/P54/majority/truth_table.html                   sha256 99bf76a07e4391960cde062d843746ea550540033779306d455c75ab0ba83652  registered
+shows: inputs enumerated 19; majority reachable from 10 present upward
+```
+
+## P55  policy -> DMN decision table -> decisions' ; decisions, decisions' -> agreement
+
+```
+policy (P13), decisions (P13)
+-> compile (jinja2 -> DMN 1.3 decision table XML with the charter sentence as the rule description)
+-> evaluate (SpiffWorkflow.dmn.parser.BpmnDmnParser.add_dmn_str; SpiffWorkflow.dmn.engine.DMNEngine.result per meeting)
+-> compare (zen result against the DMN result per meeting)
+-> tabulate (openpyxl.Workbook.save)
+-> agreement
+```
+
+**majority**
+
+```
+proofs/out/P55/majority/majority.dmn                       sha256 2ab96f26abba5d4c8d5ed62a719e4cdea34e6b7f410ae328cf033f6cafc4243c  registered
+proofs/out/P55/majority/cross_engine.xlsx                  sha256 0fdb587e4572f113b9792746644d11f5459bfbf029b6ba9b71f43d569cbed108  registered
+shows: meetings 8; engines agree on all: True
+shows: tsc-2023-11-08: present 6 zen False dmn False
+shows: tsc-2023-12-06: present 10 zen True dmn True
+```
+
+## P56  decisions, policy -> explanation document
+
+```
+decisions (P13), policy (P13), roster (P6)
+-> write (docx.Document: one section per meeting; the numbers from the decision rows; the rule as the charter's own sentence)
+-> explanation document
+```
+
+**majority**
+
+```
+proofs/out/P56/majority/explanations.docx                  sha256 1eb74cd516f9735d5fd5d51138a9527a0c8fcc963717a40c3106962f50ec0c64  registered
+shows: meetings explained 8; each paragraph names the count, the threshold, and quotes the charter sentence
+```
+
+## P57  directly-follows graph, measured steps, records -> 3D performance map page
+
+```
+directly-follows graph (P23), measured steps (P12), records (P6)
+-> position (duckdb: mean position of each activity within its case)
+-> draw (plotly.graph_objects.Scatter3d: edges by frequency, z = waiting hours)
+-> page (plotly.io.write_html(full_html, div_id))
+-> 3D performance map page
+```
+
+**receipt**
+
+```
+proofs/out/P57/receipt/performance_map_3d.html             sha256 ca827be6f5ca0689e4f800684d1005ffb105d9db6aac3be32abd578e8e6bfa61  registered
+shows: activities 27, edges 99; slowest to reach: T13 Adjust document X request unlicensed (205.36 h)
+```
+
+### coverage
+
+```
+practice                                      deliverables  proven  empty  failed  no real input
+Architecture management                                  4       4      0       0              0
+Continual improvement                                    4       3      0       0              1
+Information security management                          4       4      0       0              0
+Knowledge management                                     4       4      0       0              0
+Measurement and reporting                                4       4      0       0              0
+Organizational change management                         4       3      0       0              1
+Portfolio management                                     3       3      0       0              0
+Project management                                       4       4      0       0              0
+Relationship management                                  3       2      0       0              1
+Risk management                                          3       3      0       0              0
+Service financial management                             4       1      0       0              3
+Strategy management                                      3       3      0       0              0
+Supplier management                                      3       3      0       0              0
+Workforce and talent management                          4       4      0       0              0
+Availability management                                  3       3      0       0              0
+Business analysis                                        4       4      0       0              0
+Capacity and performance management                      4       4      0       0              0
+Change enablement                                        5       5      0       0              0
+Incident management                                      6       6      0       0              0
+IT asset management                                      4       4      0       0              0
+Monitoring and event management                          4       4      0       0              0
+Problem management                                       4       4      0       0              0
+Release management                                       4       4      0       0              0
+Service catalogue management                             3       3      0       0              0
+Service configuration management                         4       4      0       0              0
+Service continuity management                            4       4      0       0              0
+Service design                                           3       3      0       0              0
+Service desk                                             4       4      0       0              0
+Service level management                                 4       4      0       0              0
+Service request management                               4       4      0       0              0
+Service validation and testing                           4       4      0       0              0
+Deployment management                                    4       4      0       0              0
+Infrastructure and platform management                   3       3      0       0              0
+Software development and management                      4       4      0       0              0
+all                                                    130     124      0       0              6
+```
+
+### Continual improvement / improvement measurement  proven  (revised 1)
+
+```
+shape: the measure before and after, per period
+instantiated on: receipt-phase cases per month, mean duration and cases after deadline
+-> cases (duckdb: one row per case from the event rows)
+-> derive field=late, fn=contains, of=outcome, value=after (duckdb expression (closed set: month, year, days_between, hours_between, contains, ratio, length, words, upper, gt, word))
+-> group by=["month"], aggregates=[["count", "*", "cases"], ["avg", "duration_days", "mean_days"], ["sum", "late", "after_deadline"]] (duckdb GROUP BY with count, sum, avg, min, max, list)
+-> workbook name=measurement_by_month (openpyxl.Workbook.save)
+-> improvement measurement
+proofs/out/itil/continual-improvement/improvement-measurement/measurement_by_month.xlsx sha256 403198098487f5be6e5379dd2aa472591ac17cbc2a0708d9973286a2db941e73  reproduced
+shows: rows 16; first {"month": "2010-10", "cases": 15, "mean_days": 10.38, "after_deadline": 10.0}
+```
+
+### Continual improvement / improvement review report  proven  (revised 1)
+
+```
+shape: conformance of the work to the model, per group
+instantiated on: receipt-phase conformance joined to case departments
+-> cases (duckdb: one row per case from the event rows)
+-> save_as name=cases (the relation kept under a name for a later join)
+-> conformance (P9: pm4py.conformance_diagnostics_token_based_replay)
+-> join with=cases, keys=[["case", "case"]] (duckdb JOIN)
+-> derive field=fit, fn=contains, of=is_fit, value=true (duckdb expression (closed set: month, year, days_between, hours_between, contains, ratio, length, words, upper, gt, word))
+-> group by=["department"], aggregates=[["count", "*", "cases"], ["sum", "fit", "fit_cases"], ["avg", "fitness", "mean_fitness"]] (duckdb GROUP BY with count, sum, avg, min, max, list)
+-> document name=review_report, title=review: fitness to the process model, per department (docx.Document; add_table; docx.document.Document.save)
+-> improvement review report
+proofs/out/itil/continual-improvement/improvement-review-report/review_report.docx sha256 d743b15186fe1bd6bf852154aed3dca1d1c0d78ac93960bbe4d79aa027ab3697  reproduced
+shows: rows 3; first {"department": "Customer contact", "cases": 29, "fit_cases": 29.0, "mean_fitness": 1.0}
+```
+
+### Measurement and reporting / KPI report  proven  (revised 1)
+
+```
+shape: the agreed indicators per group and period
+instantiated on: receipt-phase cases per department
+-> cases (duckdb: one row per case from the event rows)
+-> derive field=late, fn=contains, of=outcome, value=after (duckdb expression (closed set: month, year, days_between, hours_between, contains, ratio, length, words, upper, gt, word))
+-> group by=["department"], aggregates=[["count", "*", "cases"], ["avg", "duration_days", "mean_days"], ["median", "duration_days", "median_days"], ["sum", "late", "after_deadline"]] (duckdb GROUP BY with count, sum, avg, min, max, list)
+-> derive field=late_share, fn=ratio, num=after_deadline, den=cases (duckdb expression (closed set: month, year, days_between, hours_between, contains, ratio, length, words, upper, gt, word))
+-> workbook name=kpi_report (openpyxl.Workbook.save)
+-> KPI report
+proofs/out/itil/measurement-and-reporting/kpi-report/kpi_report.xlsx   sha256 8a39162c0d8b0552e9c44232ab184f6e2e3451854a907223984bd2ee2c36fba0  reproduced
+shows: rows 3; first {"department": "Customer contact", "cases": 29, "mean_days": 1.66, "median_days": 0.0, "after_deadline": 1.0, "late_share": 0.0345}
+```
+
+### Risk management / risk register  proven  (revised 1)
+
+```
+shape: open items exposed beyond their group's norm
+instantiated on: open receipt-phase cases against their department's mean duration
+-> cases (duckdb: one row per case from the event rows)
+-> group by=["department"], aggregates=[["avg", "duration_days", "mean_days"]] (duckdb GROUP BY with count, sum, avg, min, max, list)
+-> save_as name=means (the relation kept under a name for a later join)
+-> cases (duckdb: one row per case from the event rows)
+-> filter where=[["outcome", "eq", "open"]] (duckdb WHERE)
+-> join with=means, keys=[["department", "department"]] (duckdb JOIN)
+-> derive field=exposure, fn=ratio, num=days_since_last_event, den=mean_days (duckdb expression (closed set: month, year, days_between, hours_between, contains, ratio, length, words, upper, gt, word))
+-> sort by=["exposure"], desc=true (duckdb ORDER BY)
+-> workbook name=risk_register (openpyxl.Workbook.save)
+-> risk register
+proofs/out/itil/risk-management/risk-register/risk_register.xlsx       sha256 6870a2aa4290dba471de3fab3d07aba5fc7dd7750290df446d016678dcecfe9d  reproduced
+shows: rows 105; first {"case": "case-416", "department": "General", "channel": "Internet", "responsible": "Resource26", "start": "2010-10-20 10:56:58.348000+00:00", "end": "2010-11-08 13:07:42.360000+00:00", "events": 6, "duration_days": 19.0
+```
+
+### Risk management / risk matrix  proven  (revised 1)
+
+```
+shape: likelihood against impact per group
+instantiated on: receipt-phase departments, share late against mean duration
+-> cases (duckdb: one row per case from the event rows)
+-> derive field=late, fn=contains, of=outcome, value=after (duckdb expression (closed set: month, year, days_between, hours_between, contains, ratio, length, words, upper, gt, word))
+-> group by=["department"], aggregates=[["count", "*", "cases"], ["sum", "late", "late_cases"], ["avg", "duration_days", "impact_days"]] (duckdb GROUP BY with count, sum, avg, min, max, list)
+-> derive field=likelihood, fn=ratio, num=late_cases, den=cases (duckdb expression (closed set: month, year, days_between, hours_between, contains, ratio, length, words, upper, gt, word))
+-> page name=risk_matrix, title=likelihood of lateness against mean duration, kind=scatter, x=likelihood, y=impact_days, size=cases (plotly.express / plotly.graph_objects; plotly.io.write_html | jinja2 table page)
+-> risk matrix
+proofs/out/itil/risk-management/risk-matrix/risk_matrix.html           sha256 89bd50c2374beed820a734e6aa4fb5e5d3a8a0203de107dc2dcc1c71e091ee0d  reproduced
+shows: rows 3; first {"department": "Customer contact", "cases": 29, "late_cases": 1.0, "impact_days": 1.66, "likelihood": 0.0345}
+```
+
+### Risk management / risk report  proven  (revised 1)
+
+```
+shape: the register summarized for review
+instantiated on: receipt-phase departments
+-> cases (duckdb: one row per case from the event rows)
+-> derive field=late, fn=contains, of=outcome, value=after (duckdb expression (closed set: month, year, days_between, hours_between, contains, ratio, length, words, upper, gt, word))
+-> group by=["department", "channel"], aggregates=[["count", "*", "cases"], ["sum", "late", "late_cases"]] (duckdb GROUP BY with count, sum, avg, min, max, list)
+-> derive field=late_share, fn=ratio, num=late_cases, den=cases (duckdb expression (closed set: month, year, days_between, hours_between, contains, ratio, length, words, upper, gt, word))
+-> document name=risk_report, title=lateness by department and channel (docx.Document; add_table; docx.document.Document.save)
+-> risk report
+proofs/out/itil/risk-management/risk-report/risk_report.docx           sha256 2cf5fbb078f8b0f8f1b57ce26a1bc00e7118fe8da60aa505bf5674895a8904d5  reproduced
+shows: rows 10; first {"department": "Customer contact", "channel": "Desk", "cases": 3, "late_cases": 0.0, "late_share": 0.0}
+```
+
+### Supplier management / supplier register  proven  (revised 1)
+
+```
+shape: external components relied on, with their license
+instantiated on: Node.js maintained dependencies joined to the LICENSE register
+-> licenses (re over the Node.js LICENSE file: one row per bundled component)
+-> derive field=key, fn=upper, of=component (duckdb expression (closed set: month, year, days_between, hours_between, contains, ratio, length, words, upper, gt, word))
+-> save_as name=lic (the relation kept under a name for a later join)
+-> dependencies (re over maintaining-dependencies.md: one row per maintained dependency)
+-> derive field=key, fn=upper, of=dependency (duckdb expression (closed set: month, year, days_between, hours_between, contains, ratio, length, words, upper, gt, word))
+-> join with=lic, keys=[["key", "key"]], how=left (duckdb JOIN)
+-> select fields=["dependency", "component", "location", "license_heading"] (duckdb SELECT)
+-> workbook name=suppliers (openpyxl.Workbook.save)
+-> supplier register
+proofs/out/itil/supplier-management/supplier-register/suppliers.xlsx   sha256 8b3c044d6c55fb03ef769721906c112980ab0205690ff5273600bc0409f5d0f2  reproduced
+shows: rows 31; first {"dependency": "acorn", "component": "Acorn", "location": "deps/acorn", "license_heading": "MIT License"}
+```
+
+### Supplier management / supplier performance report  proven  (revised 1)
+
+```
+shape: how often each supplied component had to be updated, and when
+instantiated on: dependency update commits in the Node.js 22 changelog
+-> changelog_commits (re over CHANGELOG_V22.md: one row per commit with release, date, scope, message, author, CVE)
+-> filter where=[["scope", "eq", "deps"], ["message", "matches", "^(update|upgrade|bump) "]] (duckdb WHERE)
+-> derive field=component, fn=word, of=message, n=2 (duckdb expression (closed set: month, year, days_between, hours_between, contains, ratio, length, words, upper, gt, word))
+-> group by=["component"], aggregates=[["count", "*", "updates"], ["min", "date", "first_update"], ["max", "date", "last_update"], ["distinct", "version", "releases"]] (duckdb GROUP BY with count, sum, avg, min, max, list)
+-> sort by=["updates"], desc=true (duckdb ORDER BY)
+-> workbook name=supplier_performance (openpyxl.Workbook.save)
+-> supplier performance report
+proofs/out/itil/supplier-management/supplier-performance-report/supplier_performance.xlsx sha256 cd1a20a31dcec5343df3cef9b678fd8eba9310f9e7a444478cec5883e320d4ad  registered
+shows: rows 30; first {"component": "googletest", "updates": 31, "first_update": "2024-05-15", "last_update": "2026-05-13", "releases": 13}
+```
+
+### Availability management / availability report  proven  (revised 1)
+
+```
+shape: achieved availability per period
+instantiated on: share of voting members available per TSC meeting
+-> decisions (P13: zen.ZenDecision.evaluate)
+-> derive field=availability, fn=ratio, num=present_voting, den=present_voting (duckdb expression (closed set: month, year, days_between, hours_between, contains, ratio, length, words, upper, gt, word))
+-> select fields=["meeting", "present_voting", "majority_reachable"] (duckdb SELECT)
+-> workbook name=availability_report (openpyxl.Workbook.save)
+-> availability report
+proofs/out/itil/availability-management/availability-report/availability_report.xlsx sha256 3e9beefff35ce027cb13eb539e1b93736151dcd067da9396dd38f9f85bb8d121  reproduced
+shows: rows 8; first {"meeting": "tsc-2023-11-08", "present_voting": 6, "majority_reachable": false}
+```
+
+### Availability management / availability plan  proven  (revised 1)
+
+```
+shape: the windows in which each service line is supported
+instantiated on: Node.js release lines with start, LTS, maintenance and end dates
+-> release_schedule (json.loads of nodejs/Release schedule.json)
+-> derive field=supported_days, fn=days_between, a=start, b=end (duckdb expression (closed set: month, year, days_between, hours_between, contains, ratio, length, words, upper, gt, word))
+-> workbook name=availability_plan (openpyxl.Workbook.save)
+-> availability plan
+proofs/out/itil/availability-management/availability-plan/availability_plan.xlsx sha256 321680589d2b9990de07e8086547537471b38d2004dd2f07f49cda65b00824a0  reproduced
+shows: rows 27; first {"version": "v0.8", "codename": "", "start": "2012-06-25", "lts": "", "maintenance": "", "end": "2014-07-31", "supported_days": 766.0}
+```
+
+### Capacity and performance management / capacity plan  proven  (revised 1)
+
+```
+shape: demand per period and group
+instantiated on: receipt-phase events per month and department
+-> events (P6 rows as a relation)
+-> derive field=month, fn=month, of=ts (duckdb expression (closed set: month, year, days_between, hours_between, contains, ratio, length, words, upper, gt, word))
+-> pivot row=month, col=department (duckdb GROUP BY, laid out as a matrix)
+-> workbook name=capacity_plan (openpyxl.Workbook.save)
+-> capacity plan
+proofs/out/itil/capacity-and-performance-management/capacity-plan/capacity_plan.xlsx sha256 fab180bfb9e59e2b5f5d547ca78cd2690d068327e616cf76abd4ee21d85b7a74  reproduced
+shows: rows 16; first {"month": "2010-10", "Customer contact": 0, "Experts": 26, "General": 55}
+```
+
+### Change enablement / post-implementation review  proven  (revised 1)
+
+```
+shape: whether performed changes matched the model
+instantiated on: receipt-phase conformance per variant
+-> conformance (P9: pm4py.conformance_diagnostics_token_based_replay)
+-> derive field=fit, fn=contains, of=is_fit, value=true (duckdb expression (closed set: month, year, days_between, hours_between, contains, ratio, length, words, upper, gt, word))
+-> group by=[], aggregates=[["count", "*", "cases"], ["sum", "fit", "fit_cases"], ["avg", "fitness", "mean_fitness"]] (duckdb GROUP BY with count, sum, avg, min, max, list)
+-> workbook name=post_implementation_review (openpyxl.Workbook.save)
+-> post-implementation review
+proofs/out/itil/change-enablement/post-implementation-review/post_implementation_review.xlsx sha256 e8ae029d962f6dff01922e51869356f3a0ede233bb4a92d91ede3bdc1c4f0f38  reproduced
+shows: rows 1; first {"cases": 1434, "fit_cases": 1425.0, "mean_fitness": 1.0}
+```
+
+### IT asset management / lifecycle records  proven  (revised 1)
+
+```
+shape: first and last use per asset
+instantiated on: receipt-phase resources
+-> events (P6 rows as a relation)
+-> group by=["resource"], aggregates=[["min", "ts", "first_seen"], ["max", "ts", "last_seen"], ["count", "*", "events"]] (duckdb GROUP BY with count, sum, avg, min, max, list)
+-> derive field=active_days, fn=days_between, a=first_seen, b=last_seen (duckdb expression (closed set: month, year, days_between, hours_between, contains, ratio, length, words, upper, gt, word))
+-> workbook name=lifecycle (openpyxl.Workbook.save)
+-> lifecycle records
+proofs/out/itil/it-asset-management/lifecycle-records/lifecycle.xlsx   sha256 9917d89c410763ad50ec5e22be2226de7b786d18f6edbf1164e18f13ac839fce  reproduced
+shows: rows 48; first {"resource": "Resource01", "first_seen": "2010-11-02 12:42:19.582000+01:00", "last_seen": "2011-12-28 15:44:34.115000+01:00", "events": 1228, "active_days": 421.13}
+```
+
+### Monitoring and event management / alert list  proven  (revised 1)
+
+```
+shape: open items past threshold, decided by a rule
+instantiated on: open receipt-phase cases against department means
+-> cases (duckdb: one row per case from the event rows)
+-> group by=["department"], aggregates=[["avg", "duration_days", "threshold_days"]] (duckdb GROUP BY with count, sum, avg, min, max, list)
+-> save_as name=thresholds (the relation kept under a name for a later join)
+-> cases (duckdb: one row per case from the event rows)
+-> filter where=[["outcome", "eq", "open"]] (duckdb WHERE)
+-> join with=thresholds, keys=[["department", "department"]] (duckdb JOIN)
+-> derive field=over, fn=ratio, num=days_since_last_event, den=threshold_days (duckdb expression (closed set: month, year, days_between, hours_between, contains, ratio, length, words, upper, gt, word))
+-> decision_table name=alert, inputs=["over"], outputs=["alert"] (jinja2 -> GoRules JDM; zen.ZenEngine.create_decision; zen.ZenDecision.evaluate)
+-> workbook name=alerts (openpyxl.Workbook.save)
+-> alert list
+proofs/out/itil/monitoring-and-event-management/alert-list/policy.jdm.json sha256 9835ab6f3625f14d66147c79c28d997b9ac1c310a7149f095b956eda0abab2c0  reproduced
+proofs/out/itil/monitoring-and-event-management/alert-list/alerts.xlsx sha256 5c51e871f2df40a50fa46d6b0c5b64ced009098dcfd4d8bb8d4abcfa39be4799  reproduced
+shows: rows 105; first {"case": "case-10011", "department": "General", "channel": "Internet", "responsible": "Resource21", "start": "2011-10-11 11:45:40.276000+00:00", "end": "2011-11-24 14:37:16.553000+00:00", "events": 4, "duration_days": 44
+```
+
+### Problem management / trend analysis  proven  (revised 1)
+
+```
+shape: failures per period
+instantiated on: late receipt-phase cases per month
+-> cases (duckdb: one row per case from the event rows)
+-> derive field=late, fn=contains, of=outcome, value=after (duckdb expression (closed set: month, year, days_between, hours_between, contains, ratio, length, words, upper, gt, word))
+-> group by=["month"], aggregates=[["count", "*", "cases"], ["sum", "late", "late_cases"]] (duckdb GROUP BY with count, sum, avg, min, max, list)
+-> derive field=late_share, fn=ratio, num=late_cases, den=cases (duckdb expression (closed set: month, year, days_between, hours_between, contains, ratio, length, words, upper, gt, word))
+-> page name=trend, title=share of cases ending after deadline, per month, kind=line, x=month, y=late_share (plotly.express / plotly.graph_objects; plotly.io.write_html | jinja2 table page)
+-> trend analysis
+proofs/out/itil/problem-management/trend-analysis/trend.html           sha256 90e8251c6c3ff64e4a2a95d7bd81491f46a21b3acb26f56e165a6d1955cabb3c  reproduced
+shows: rows 16; first {"month": "2010-10", "cases": 15, "late_cases": 10.0, "late_share": 0.6667}
+```
+
+### Infrastructure and platform management / utilization report  proven  (revised 1)
+
+```
+shape: use per resource per period
+instantiated on: receipt-phase events per resource per month
+-> events (P6 rows as a relation)
+-> derive field=month, fn=month, of=ts (duckdb expression (closed set: month, year, days_between, hours_between, contains, ratio, length, words, upper, gt, word))
+-> pivot row=resource, col=month (duckdb GROUP BY, laid out as a matrix)
+-> workbook name=utilization (openpyxl.Workbook.save)
+-> utilization report
+proofs/out/itil/infrastructure-and-platform-management/utilization-report/utilization.xlsx sha256 e85de9fce1d4b8979ecd6b9ddb63c7ed637121276cd604954ce9f91285de6b02  reproduced
+shows: rows 48; first {"resource": "Resource01", "2010-10": 0, "2010-11": 6, "2010-12": 50, "2011-01": 24, "2011-02": 150, "2011-03": 160, "2011-04": 199, "2011-05": 94, "2011-06": 105, "2011-07": 227, "2011-08": 87, "2011-09": 83, "2011-10":
+```

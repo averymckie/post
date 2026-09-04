@@ -51,9 +51,10 @@ BINDINGS: dict[str, str] = {
     "licenses": "re over the Node.js LICENSE file: one row per bundled component",
     "dependencies": "re over maintaining-dependencies.md: one row per maintained dependency",
     "changelog": "re over CHANGELOG_V22.md: one row per release, security releases flagged",
+    "changelog_commits": "re over CHANGELOG_V22.md: one row per commit with release, date, scope, message, author, CVE",
     "filter": "duckdb WHERE",
     "select": "duckdb SELECT",
-    "derive": "duckdb expression (closed set: month, days_between, hours_between, contains, ratio, length)",
+    "derive": "duckdb expression (closed set: month, year, days_between, hours_between, contains, ratio, length, words, upper, gt, word)",
     "group": "duckdb GROUP BY with count, sum, avg, min, max, list",
     "join": "duckdb JOIN",
     "sort": "duckdb ORDER BY",
@@ -403,6 +404,20 @@ class Ctx:
             rows.append({"date": m.group(1), "version": m.group(2), "codename": m.group(3), "kind": m.group(4), "releaser": m.group(5), "security": "This is a security release" in body, "commits": len(re.findall(r"^\* \\?\[\[`", body, flags=re.M))})
         return rows
 
+    def changelog_commits(self, _: str = "") -> Rows:
+        text = (ROOT / "proofs" / "in" / "node-CHANGELOG_V22.md").read_text(encoding="utf-8")
+        rows = []
+        version = date = ""
+        for line in text.splitlines():
+            h = re.match(r"^## (\d{4}-\d{2}-\d{2}), Version (\S+) ", line)
+            if h:
+                date, version = h.group(1), h.group(2)
+                continue
+            m = re.match(r"^\* \\?\[\[`([0-9a-f]+)`\]\([^)]*\)\] - (?:\*\*\((CVE-[0-9-]+)\)\*\* )?\*\*([^*]+)\*\*: (.+?) \(([^)]+)\)(?: \[([^\]]+)\]\([^)]*\))?\s*$", line)
+            if m and version:
+                rows.append({"version": version, "date": date, "commit": m.group(1), "cve": m.group(2) or "", "scope": m.group(3), "message": m.group(4), "author": m.group(5), "reference": m.group(6) or ""})
+        return rows
+
     def source(self, op: str, arg: str) -> Rows:
         return getattr(self, op)(arg) if arg else getattr(self, op)()
 
@@ -485,6 +500,7 @@ def op_derive(rows: Rows, field: str, fn: str, **kw: Any) -> Rows:
         "upper": lambda: f"upper(cast(\"{kw['of']}\" as varchar))",
         "gt": lambda: f"(cast(\"{kw['of']}\" as double) > {float(kw['value'])})",
         "year": lambda: f"strftime(try_cast(\"{kw['of']}\" as timestamptz), '%Y')",
+        "word": lambda: f"split_part(cast(\"{kw['of']}\" as varchar), ' ', {int(kw['n'])})",
     }[fn]()
     assert IDENT.match(field)
     return _fetch(con, f'select *, {expr} as "{field}" from r')
@@ -712,7 +728,7 @@ def run_chain(ctx: Ctx, chain: list[list[Any]], out_dir: Path, name: str) -> tup
     for step in chain:
         op, params = (step[0], step[1] if len(step) > 1 else {})
         params = dict(params)
-        if op in ("facts", "required_actions", "ordered_steps", "forced_edges", "anchors", "definitions", "prohibitions", "who_must_what", "records", "cases", "events", "minutes_sentences", "minutes_sections", "participants", "attendance", "decisions", "tags", "conformance", "variants", "dfg", "handover", "execution_trace", "roundtrips", "bottlenecks", "release_schedule", "licenses", "dependencies", "changelog"):
+        if op in ("facts", "required_actions", "ordered_steps", "forced_edges", "anchors", "definitions", "prohibitions", "who_must_what", "records", "cases", "events", "minutes_sentences", "minutes_sections", "participants", "attendance", "decisions", "tags", "conformance", "variants", "dfg", "handover", "execution_trace", "roundtrips", "bottlenecks", "release_schedule", "licenses", "dependencies", "changelog", "changelog_commits"):
             rows = ctx.source(op, params.get("of", ""))
         elif op == "filter":
             rows = op_filter(rows, params["where"])

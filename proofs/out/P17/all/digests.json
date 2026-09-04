@@ -1,5 +1,5 @@
 {
- "digest": "bb5d751dc8ea871805be1c2b856f0ad33577e34081c1060bf110a3efd2c8d10c",
+ "digest": "fe41bbb784092e6f38652659517da6929df4c0cc699e3e513cc5212bdc6d6037",
  "entries": [
   {
    "file": "proofs/out/P1/nodejs-governance/facts.jsonl",
@@ -539,7 +539,43 @@
    "file": "proofs/out/P53/all/register_state.json",
    "input": "all",
    "proof": "P53",
-   "sha256": "59b018317d73fcbd3e47c07cb1f0471b90b34a51004e44eeb647df2b21c072d9"
+   "sha256": "4b8060fbc50fd705d361d66659fcb92d76239dda5718973dfbd80350f46b1467"
+  },
+  {
+   "file": "proofs/out/P54/majority/truth_table.html",
+   "input": "majority",
+   "proof": "P54",
+   "sha256": "99bf76a07e4391960cde062d843746ea550540033779306d455c75ab0ba83652"
+  },
+  {
+   "file": "proofs/out/P54/majority/truth_table.xlsx",
+   "input": "majority",
+   "proof": "P54",
+   "sha256": "27cbadd2eb1b2ef6d555b5f43d11b7ae6b3e924ab62d79a1cda5f61ed7f0bbf3"
+  },
+  {
+   "file": "proofs/out/P55/majority/cross_engine.xlsx",
+   "input": "majority",
+   "proof": "P55",
+   "sha256": "0fdb587e4572f113b9792746644d11f5459bfbf029b6ba9b71f43d569cbed108"
+  },
+  {
+   "file": "proofs/out/P55/majority/majority.dmn",
+   "input": "majority",
+   "proof": "P55",
+   "sha256": "2ab96f26abba5d4c8d5ed62a719e4cdea34e6b7f410ae328cf033f6cafc4243c"
+  },
+  {
+   "file": "proofs/out/P56/majority/explanations.docx",
+   "input": "majority",
+   "proof": "P56",
+   "sha256": "1eb74cd516f9735d5fd5d51138a9527a0c8fcc963717a40c3106962f50ec0c64"
+  },
+  {
+   "file": "proofs/out/P57/receipt/performance_map_3d.html",
+   "input": "receipt",
+   "proof": "P57",
+   "sha256": "ca827be6f5ca0689e4f800684d1005ffb105d9db6aac3be32abd578e8e6bfa61"
   },
   {
    "file": "proofs/out/P6/receipt-csv/facts.lp",
