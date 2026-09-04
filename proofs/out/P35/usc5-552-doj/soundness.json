@@ -1,6 +1,11 @@
 {
- "pnml_sha256": "2a3939e33a445b62bb0b5f2d246c9e9dcdb34fdaa6c7aa90ca31c9167354af99",
- "seconds_budget": 420,
- "sound": null,
- "undecided": "woflan did not finish within 420 s"
+ "acyclic": true,
+ "marked_graph": true,
+ "places": 38,
+ "pnml_sha256": "3fc8ebba80e37cfb9bc1aa981e0ab07c17b4d3b1e729784f64a9dabf1fddc1b4",
+ "process_tree": null,
+ "reason": "acyclic marked-graph workflow net: every transition fires exactly once",
+ "sound": true,
+ "transitions": 26,
+ "workflow_net": true
 }

@@ -63,7 +63,7 @@ practices:
     - [cases, {}]
     - [save_as, {name: cases}]
     - [conformance, {}]
-    - [join, {with: cases, on: [[case, case]]}]
+    - [join, {with: cases, keys: [[case, case]]}]
     - [derive, {field: fit, fn: contains, of: is_fit, value: "true"}]
     - [group, {by: [department], aggregates: [[count, "*", cases], [sum, fit, fit_cases], [avg, fitness, mean_fitness]]}]
     - [document, {name: review_report, title: "review: fitness to the process model, per department"}]
@@ -275,7 +275,7 @@ practices:
     - [group, {by: [handle], aggregates: [[count, "*", meetings_attended], [min, name, name]]}]
     - [save_as, {name: attended}]
     - [records, {of: tsc-voting-members}]
-    - [join, {with: attended, on: [[handle, handle]], how: left}]
+    - [join, {with: attended, keys: [[handle, handle]], how: left}]
     - [workbook, {name: stakeholder_register}]
   - name: decision log
     shape: decisions taken with the meeting where they were taken
@@ -304,7 +304,7 @@ practices:
     - [save_as, {name: means}]
     - [cases, {}]
     - [filter, {where: [[outcome, eq, open]]}]
-    - [join, {with: means, on: [[department, department]]}]
+    - [join, {with: means, keys: [[department, department]]}]
     - [derive, {field: exposure, fn: ratio, num: days_since_last_event, den: mean_days}]
     - [sort, {by: [exposure], desc: true}]
     - [workbook, {name: risk_register}]
@@ -493,7 +493,7 @@ practices:
     - [required_actions, {of: nodejs-governance}]
     - [select, {fields: [action]}]
     - [distinct, {}]
-    - [join, {with: charter, on: [[action, action]], how: left}]
+    - [join, {with: charter, keys: [[action, action]], how: left}]
     - [workbook, {name: gap_analysis}]
   - name: acceptance criteria
     shape: each required action with its clock
@@ -503,7 +503,7 @@ practices:
     - [filter, {where: [[timex3, contains, DURATION]]}]
     - [save_as, {name: clocks}]
     - [required_actions, {of: usc5-552-doj}]
-    - [join, {with: clocks, on: [[sentence_id, sentence_id]]}]
+    - [join, {with: clocks, keys: [[sentence_id, sentence_id]]}]
     - [select, {fields: [unit, who, action, span, timex3, sentence]}]
     - [workbook, {name: acceptance_criteria}]
 
@@ -686,7 +686,7 @@ practices:
     - [save_as, {name: thresholds}]
     - [cases, {}]
     - [filter, {where: [[outcome, eq, open]]}]
-    - [join, {with: thresholds, on: [[department, department]]}]
+    - [join, {with: thresholds, keys: [[department, department]]}]
     - [derive, {field: over, fn: ratio, num: days_since_last_event, den: threshold_days}]
     - [decision_table, {name: alert, inputs: [over], outputs: [alert], rules: [{when: {over: "> 1"}, then: {alert: "true"}, because: "idle longer than the department's mean case duration (P22)"}, {when: {}, then: {alert: "false"}, because: "otherwise"}]}]
     - [workbook, {name: alerts}]
@@ -918,7 +918,7 @@ practices:
     - [filter, {where: [[timex3, contains, DURATION]]}]
     - [save_as, {name: clocks}]
     - [required_actions, {of: usc5-552-doj}]
-    - [join, {with: clocks, on: [[sentence_id, sentence_id]]}]
+    - [join, {with: clocks, keys: [[sentence_id, sentence_id]]}]
     - [select, {fields: [unit, who, action, span, timex3]}]
     - [distinct, {}]
     - [workbook, {name: targets}]
@@ -1092,7 +1092,7 @@ practices:
     instantiated_on: TSC minutes items naming a version
     chain:
     - [minutes_sections, {}]
-    - [filter, {where: [[item, matches, "\\bv?[0-9]+\\.[0-9]+"]]}]
+    - [filter, {where: [[item, matches, "\\b(v[0-9]{1,2}|Node\\.js [0-9]{1,2}|[0-9]+\\.[0-9]+\\.[0-9]+)\\b"]]}]
     - [select, {fields: [meeting, item, link]}]
     - [workbook, {name: versions}]
   - name: verification report

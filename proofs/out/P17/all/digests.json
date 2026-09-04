@@ -1,5 +1,5 @@
 {
- "digest": "7e078180dc2a01ccd178ec4f264b104089cfd33997a6cd795e3c776156f5d6e4",
+ "digest": "af04fbf29b803b165092ccc5f47c68f87e979d9f0c2cd417db9944f5aa8a008b",
  "entries": [
   {
    "file": "proofs/out/P1/nodejs-governance/facts.jsonl",
@@ -23,7 +23,7 @@
    "file": "proofs/out/P10/nodejs-governance+nodejs-tsc-minutes/tagged_steps.xlsx",
    "input": "nodejs-governance+nodejs-tsc-minutes",
    "proof": "P10",
-   "sha256": "e5b169582feb195f4f2280b6fca0c2e1262848abcac783c881c2a8ada90ae87f"
+   "sha256": "ef1b2d2ffe35418645977ad97f740a5729b06ae1dbcf9d59377d40fb2bc371af"
   },
   {
    "file": "proofs/out/P10/nodejs-governance+nodejs-tsc-minutes/tags.jsonl",
@@ -35,25 +35,25 @@
    "file": "proofs/out/P11/nodejs-governance/measured_steps.xlsx",
    "input": "nodejs-governance",
    "proof": "P11",
-   "sha256": "dfd6e624661834de2cb96f5dffa668fce3037ba9cde66824ce2f9ef3e2b8e113"
+   "sha256": "1cf193eb87f0f788f04a95942b3ff729655bba8ccf0c0c1c50e62c63c1af03d0"
   },
   {
    "file": "proofs/out/P11/nodejs-tsc-charter/measured_steps.xlsx",
    "input": "nodejs-tsc-charter",
    "proof": "P11",
-   "sha256": "20443e14c9f6228810f23c9a898d4735c5dbdddf1118e017fd1dbd35bb99976e"
+   "sha256": "2bdf39eabedc9f5d2afd5a8b04de0dc93a29dd6d4afdf1f4785c1e2802b0ce51"
   },
   {
    "file": "proofs/out/P12/receipt-xes+receipt-csv/measured_activities.xlsx",
    "input": "receipt-xes+receipt-csv",
    "proof": "P12",
-   "sha256": "3ddbda555a9b23126beba2d6d2fe38b200e6456db52b9c85f4a07f9473f20fb7"
+   "sha256": "544bda186c506df777a499206424b268bab52501000cbcaeed1e88fd12a754ad"
   },
   {
    "file": "proofs/out/P13/charter+roster+minutes/decisions.xlsx",
    "input": "charter+roster+minutes",
    "proof": "P13",
-   "sha256": "63ea6ded301ca9d7d1be14bd3e3dedd2e6f2bd757bc2834ecc9131508fa85391"
+   "sha256": "c333cd29051c0297a3d1cc188f850d15089879ada856e96b54f3f1a28d211a25"
   },
   {
    "file": "proofs/out/P13/charter+roster+minutes/policy.jdm.json",
@@ -65,49 +65,49 @@
    "file": "proofs/out/P14/nodejs-governance/dependencies.pptx",
    "input": "nodejs-governance",
    "proof": "P14",
-   "sha256": "adc48e4226748f9fd205d0757aa41a465290b6f98b6dfc8337962902def713fb"
+   "sha256": "349160c68b6d1a1f705620c05641124b9f58afdb0851b3fbb85235f05a5d501b"
   },
   {
    "file": "proofs/out/P14/usc5-552-doj/dependencies.pptx",
    "input": "usc5-552-doj",
    "proof": "P14",
-   "sha256": "10ccd43ef3377afb1e1e892d0ebac8ff5d959492c43698dac84fb22421e15469"
+   "sha256": "36f04460d3c94f482f06c73a56d9591851905ed2d85faf64be32f2f21b421728"
   },
   {
    "file": "proofs/out/P15/nodejs-governance/ordered_steps.docx",
    "input": "nodejs-governance",
    "proof": "P15",
-   "sha256": "9d361f69b034842890c34dc8894d4d32e34d659e8976eb545df9d7d18c34964f"
+   "sha256": "fa6b8164919d776b3a2e7d4463600d56f77e26b77dca32368e9428961b0ec53f"
   },
   {
    "file": "proofs/out/P15/usc5-552-doj/ordered_steps.docx",
    "input": "usc5-552-doj",
    "proof": "P15",
-   "sha256": "f99706ec269b16884af8dbef45a7277208d4372a7a885c8572e4e4c6f2d589d2"
+   "sha256": "6da847e325f9ebb56a3bf4981788ed3bee5bcd9802b839824930f7062e1d14d1"
   },
   {
    "file": "proofs/out/P16/nodejs-governance/facts.xlsx",
    "input": "nodejs-governance",
    "proof": "P16",
-   "sha256": "6bae41d3a38439864d0782bc5bc3779afc5b2b0e78d0835a1bf8357b440265ba"
+   "sha256": "f9608a6e76ef2643940b1bc26d440e95e643d3175e171fc2870ae978838b7d46"
   },
   {
    "file": "proofs/out/P16/nodejs-tsc-charter/facts.xlsx",
    "input": "nodejs-tsc-charter",
    "proof": "P16",
-   "sha256": "27631b41edcb375bdb8d593f78c07dcb2c680eb7564300ab6f71fa4995a1e7f2"
+   "sha256": "549f9290f6744b52f6dbcfb9cfa58a35163e8016fe24921ffd34e7b4b705e0eb"
   },
   {
    "file": "proofs/out/P16/usc5-552-doj/facts.xlsx",
    "input": "usc5-552-doj",
    "proof": "P16",
-   "sha256": "8709580ecd02e9fee5ffa3950eec6b8825b6f630876e00d7c90c2b9d8fcb90de"
+   "sha256": "895cd74f2f48c34da51e07aea39b781af0b4b4d202e8e7b2bfeda3e1dcf6efd4"
   },
   {
    "file": "proofs/out/P18/nodejs-governance+tsc-2024-01-17/deck.pptx",
    "input": "nodejs-governance+tsc-2024-01-17",
    "proof": "P18",
-   "sha256": "286e17ccf7fdd27f4844e776306ddb0f3c9efb3ee141888dec3cb172ccb0004f"
+   "sha256": "90af16c70fab459d27e65759c6140ff71226cae57a8bdb85e4d2603db8122bf1"
   },
   {
    "file": "proofs/out/P18/nodejs-governance+tsc-2024-01-17/digest.json",
@@ -161,19 +161,19 @@
    "file": "proofs/out/P20/nodejs-governance/conformance.xlsx",
    "input": "nodejs-governance",
    "proof": "P20",
-   "sha256": "c8458192be3ec3b6a683ddb5be287e3bf3eeb1fd95540b110425ea870423f6f7"
+   "sha256": "041de6a3fcad86eebbcf28c7f16a439361a9d756286c385713daeaf009d5deaa"
   },
   {
    "file": "proofs/out/P21/receipt-csv/deadlines.xlsx",
    "input": "receipt-csv",
    "proof": "P21",
-   "sha256": "e1467d34b9f7cf35925ea8f403c01bca9a30dc8a32fea45057cfcee0de69c160"
+   "sha256": "f923fdc8cd38481fac9f426fbe55d23f8206bb1f8ad59528e14126229ae6cfd0"
   },
   {
    "file": "proofs/out/P22/receipt-csv/by_department_and_channel.xlsx",
    "input": "receipt-csv",
    "proof": "P22",
-   "sha256": "b7968ad8fb54b5fb8c19d09d3f64da5aceb4b5e19ddc66e50e6d9f8618756ef0"
+   "sha256": "4ad652e5f73e2286302b6b2d4f9ffadacf61c133a1b08ea5af02851f094b6968"
   },
   {
    "file": "proofs/out/P23/receipt-xes/directly_follows.json",
@@ -185,7 +185,7 @@
    "file": "proofs/out/P23/receipt-xes/directly_follows.xlsx",
    "input": "receipt-xes",
    "proof": "P23",
-   "sha256": "460ec5e13044cf8bbb6d79d9139193e7eaffa6a0a37dba32b273c178aa155352"
+   "sha256": "07dfafdeaa64f3526c0aa177ab6de79d7df9bacc5f435e336a8555f56df04b68"
   },
   {
    "file": "proofs/out/P24/receipt-xes+receipt-csv/dashboard.html",
@@ -197,19 +197,19 @@
    "file": "proofs/out/P25/nodejs-tsc-charter/required_actions.docx",
    "input": "nodejs-tsc-charter",
    "proof": "P25",
-   "sha256": "eb8a74661f1daf79a8cf9542fd979b06914542c1f34fa638f7a534f2d4b139d8"
+   "sha256": "128db0ce380dbcf9f7b143d3ae340c9985eb4f31006bb583709a39beb76be08b"
   },
   {
    "file": "proofs/out/P25/usc5-552-doj/required_actions.docx",
    "input": "usc5-552-doj",
    "proof": "P25",
-   "sha256": "0e9281346d39f73562aa5bff6425336a951fd69b9d0115d152d4a7ce05e68940"
+   "sha256": "c910688d18800d40943d8e100fcf5282d4cdc95a25deac352fccfba5af418726"
   },
   {
    "file": "proofs/out/P26/nodejs-tsc-charter+nodejs-tsc-minutes/tagged_steps.xlsx",
    "input": "nodejs-tsc-charter+nodejs-tsc-minutes",
    "proof": "P26",
-   "sha256": "f72ba52bdb7634024dabd6e65822f9e72857672704a02d1f99cea6d24b7c2a0c"
+   "sha256": "e3b7806a5238fa632f0882f023eb23689d930ef50a13fdb5479a572926e2411d"
   },
   {
    "file": "proofs/out/P26/nodejs-tsc-charter+nodejs-tsc-minutes/tags.jsonl",
@@ -221,37 +221,37 @@
    "file": "proofs/out/P27/receipt-xes+receipt-csv/conformance_by_group.xlsx",
    "input": "receipt-xes+receipt-csv",
    "proof": "P27",
-   "sha256": "2f714e476cbf83529036a91c8ab32a072075830735c1a211cb9126068b3e6653"
+   "sha256": "70e4bb450df3a8387ebfbfa478c8fe9d593580672e9c091f4b53055dc26ab151"
   },
   {
    "file": "proofs/out/P28/majority+charter-tags/decisions_with_discussion.xlsx",
    "input": "majority+charter-tags",
    "proof": "P28",
-   "sha256": "249e153b1b8071167599252588e14b03195e8318defb46cbe5adfa4af114a7f9"
+   "sha256": "4f0ba45d8e29fd3e3d7d32344965b1989cb7ddbc87db141a29c2a842105f5719"
   },
   {
    "file": "proofs/out/P29/nodejs-governance/execution_trace.xlsx",
    "input": "nodejs-governance",
    "proof": "P29",
-   "sha256": "e839a664bca37a1830aba6eadaf9e0acce10287dea735c94e15844e39a057c98"
+   "sha256": "829d201465e891e466faca8422cdadc590f69b80fb4d34909df5e41e1420bea4"
   },
   {
    "file": "proofs/out/P29/nodejs-governance/process.executable.bpmn",
    "input": "nodejs-governance",
    "proof": "P29",
-   "sha256": "5b792af708eda700afe0b0e26bd6a63ccead9886863286b13fe09c580ef6164a"
+   "sha256": "2a172700c0bcfcf1273ecc38d00e2fb4966c2128b4a83fb8b9e6657ee1c378ae"
   },
   {
    "file": "proofs/out/P29/usc5-552-doj/execution_trace.xlsx",
    "input": "usc5-552-doj",
    "proof": "P29",
-   "sha256": "824842dce7aab634a91443d9ea353fb2c053d97c83c84b5e71c5c7f0a72729b2"
+   "sha256": "adbd07ad97584717c888b7e88837f673eca2527bda3479912fb53718ca126212"
   },
   {
    "file": "proofs/out/P29/usc5-552-doj/process.executable.bpmn",
    "input": "usc5-552-doj",
    "proof": "P29",
-   "sha256": "f10a92a5d94b2373a74258f1990d8d8bbee7c6ac687de980a6103e910489253a"
+   "sha256": "adc5a48992f869cc8cc28100567b185eb30e8b41eff05dc8f44fdc5fbe56a217"
   },
   {
    "file": "proofs/out/P3/nodejs-tsc-charter/anchor_dates.jsonl",
@@ -281,13 +281,13 @@
    "file": "proofs/out/P32/charter+minutes/coverage_matrix.xlsx",
    "input": "charter+minutes",
    "proof": "P32",
-   "sha256": "99bf122d73b115921b3f68edf495826240c17f3d26c84f71fe3e1486e0f2b595"
+   "sha256": "c601b257f4de26d0cc1cf9e9d4e2a61f22f0e28bd3ce664bb9d58264ab32e8b4"
   },
   {
    "file": "proofs/out/P33/nodejs-governance/never_discussed.xlsx",
    "input": "nodejs-governance",
    "proof": "P33",
-   "sha256": "534562e3d17a9c3a5234eec28166b66f93c01449146bac76ec9f5d03780c4f32"
+   "sha256": "3d8f0878f0063c1ffc9412ff8560fb5f8cf3e9a573248ea8e7cbc9ac0a5b5229"
   },
   {
    "file": "proofs/out/P34/receipt-xes/process.pnml",
@@ -299,43 +299,43 @@
    "file": "proofs/out/P34/receipt-xes/soundness.json",
    "input": "receipt-xes",
    "proof": "P34",
-   "sha256": "eec74566c5ddaccd1d63515e762b7a631f2f4937481101f52376ebea1f689ecb"
+   "sha256": "c651a83c5d8abd78fbe3f2c42f8f74e800c58da2f930822c8a1ee495c8005a82"
   },
   {
    "file": "proofs/out/P35/nodejs-governance/process.pnml",
    "input": "nodejs-governance",
    "proof": "P35",
-   "sha256": "8c2ab70bd4a9e282d854099206039a42150de0b51ff3434b91a84c78a9ef7ece"
+   "sha256": "5b8649535023d4c0a6f1e5f7f5429cd523ba989d11618ab2c8ad85711f207063"
   },
   {
    "file": "proofs/out/P35/nodejs-governance/soundness.json",
    "input": "nodejs-governance",
    "proof": "P35",
-   "sha256": "c687384fae8a44be0c6adae3c50b017000b0c92c8268435d85e182850d473426"
+   "sha256": "0e408c69f24e2573396ab5a7cd2eadef2b020dc1533f6881924e04d6b7b86acd"
   },
   {
    "file": "proofs/out/P35/usc5-552-doj/process.pnml",
    "input": "usc5-552-doj",
    "proof": "P35",
-   "sha256": "df4d75ccb33a6b50e3394fb377542a6fe774043ca40b3b23ef28b7ffe1d0e4ad"
+   "sha256": "3fc8ebba80e37cfb9bc1aa981e0ab07c17b4d3b1e729784f64a9dabf1fddc1b4"
   },
   {
    "file": "proofs/out/P35/usc5-552-doj/soundness.json",
    "input": "usc5-552-doj",
    "proof": "P35",
-   "sha256": "7f0efe217d243d09d2a00ad7ff51b4acf3b02bf570be0c393450528437710a4b"
+   "sha256": "2fa0467fa5339ad4681c273c3cc2038ec4dab3255bda43076636c25fd6d04e7d"
   },
   {
    "file": "proofs/out/P36/receipt-xes/variants.xlsx",
    "input": "receipt-xes",
    "proof": "P36",
-   "sha256": "8b4c196689661c7ea60a40ea80196634a6b460d067936f2556afb8042c9b2e81"
+   "sha256": "fb2540bb2ab8ecfa30e1ecc13e60f6fcd390842b87b6ba7eab5fdc9512eed5f5"
   },
   {
    "file": "proofs/out/P37/nodejs-tsc-charter/facts.ttl",
    "input": "nodejs-tsc-charter",
    "proof": "P37",
-   "sha256": "857fcd473d295406a3ce9e1ad9ec02502856d13ecddc7080069c1f6e1327a282"
+   "sha256": "5e4f210151b30ecd7074e94fd924da280cfe7c50dd2d2f037ab26f969a2a7e5b"
   },
   {
    "file": "proofs/out/P37/nodejs-tsc-charter/query.sparql",
@@ -347,13 +347,13 @@
    "file": "proofs/out/P37/nodejs-tsc-charter/sparql_required_actions.xlsx",
    "input": "nodejs-tsc-charter",
    "proof": "P37",
-   "sha256": "4eccfd89131c2ca15de3c003ab9fac75be664db5fb2026aa25d90b0964b95d73"
+   "sha256": "aff33c5ad3a210af359135a3c17e7583fb6b49e516ca2561d0152951ae185e4e"
   },
   {
    "file": "proofs/out/P37/usc5-552-doj/facts.ttl",
    "input": "usc5-552-doj",
    "proof": "P37",
-   "sha256": "f71d193a71bbf2f5dcab6e6a337f86445e565e0397e6cce32c890dbb1633b2de"
+   "sha256": "b5d077ed4c3b1e4a4d2f20d8464b21ef13a0a154e5434a6f26ca1b891794d1cf"
   },
   {
    "file": "proofs/out/P37/usc5-552-doj/query.sparql",
@@ -365,13 +365,13 @@
    "file": "proofs/out/P37/usc5-552-doj/sparql_required_actions.xlsx",
    "input": "usc5-552-doj",
    "proof": "P37",
-   "sha256": "1f30aa012c9a18d4ae4630f9e27196cce9d99a72fbb216117a1fdc7a7b03effa"
+   "sha256": "20e20eae695f1d7ea439531fbcef9ec82a14023f0883d0d46c2044e7dc5b3340"
   },
   {
    "file": "proofs/out/P38/usc5-552-doj/cypher_results.xlsx",
    "input": "usc5-552-doj",
    "proof": "P38",
-   "sha256": "9b2db14d45742d8065cc490788441dc0a1baa89154c5aa280fc43ed0c2b3796e"
+   "sha256": "02537128a315c8afc9949d7c40510431fbec4bb74c0463794d12383840362c15"
   },
   {
    "file": "proofs/out/P38/usc5-552-doj/queries.cypher",
@@ -389,7 +389,13 @@
    "file": "proofs/out/P39/usc5-552-doj/site/index.html",
    "input": "usc5-552-doj",
    "proof": "P39",
-   "sha256": "c6422220006d2e3a745f7d8113b7c6ea1d569fe7cf14f7ef9b167574f16678b5"
+   "sha256": "820e61732036d0494e33bfbeba89e8b061019deaba4951a3c462f49149f88d6b"
+  },
+  {
+   "file": "proofs/out/P4/nodejs-governance/policy.jdm.json",
+   "input": "nodejs-governance",
+   "proof": "P4",
+   "sha256": "49ffeb14ab911e7aa42c283c5daf90cd0fd4013e136093d6637d4af1413647c7"
   },
   {
    "file": "proofs/out/P4/nodejs-tsc-charter/policy.jdm.json",
@@ -410,16 +416,106 @@
    "sha256": "c7dd5eaa4558c9725afe526cb11feffee61dce89d0baffdcbc3801f7d5e335be"
   },
   {
+   "file": "proofs/out/P41/nodejs-governance/process_3d.html",
+   "input": "nodejs-governance",
+   "proof": "P41",
+   "sha256": "3327c62a2f8f1d88e1db3142b2dfae12612c46a791c43dc7c53e0c66dec111b2"
+  },
+  {
+   "file": "proofs/out/P41/usc5-552-doj/process_3d.html",
+   "input": "usc5-552-doj",
+   "proof": "P41",
+   "sha256": "de6cf2d9dadd83c946af728172c4a94ab0f2290312d89df4adf3d341cc183931"
+  },
+  {
+   "file": "proofs/out/P42/majority/policy.html",
+   "input": "majority",
+   "proof": "P42",
+   "sha256": "65c31de300fd01cd146714fb7773e18061a5a2887b0afe03c28c9e9400fe83f9"
+  },
+  {
+   "file": "proofs/out/P42/usc5-552-doj/policy.html",
+   "input": "usc5-552-doj",
+   "proof": "P42",
+   "sha256": "8d432f293ecc14adb3df2d04f0bfc94ea77524d72e2f51e7c62fc39a536a3e80"
+  },
+  {
+   "file": "proofs/out/P43/receipt-csv/heatmap.html",
+   "input": "receipt-csv",
+   "proof": "P43",
+   "sha256": "3504954defb53f9ea3ac88bdec339a03c5b8c1ce74d8d196d92327f057ce545a"
+  },
+  {
+   "file": "proofs/out/P43/receipt-csv/heatmap.xlsx",
+   "input": "receipt-csv",
+   "proof": "P43",
+   "sha256": "1066a4d0170faf376a4b4188d0d324f8bc09d58b85af50452718d9af5efaf644"
+  },
+  {
+   "file": "proofs/out/P44/usc5-552-doj/who_must_what.xlsx",
+   "input": "usc5-552-doj",
+   "proof": "P44",
+   "sha256": "aa06b6378b2ce858c477a33f3ecc432bfc47f3cbad98620ae1e2705afb6124a7"
+  },
+  {
+   "file": "proofs/out/P45/nodejs-governance/timeline.html",
+   "input": "nodejs-governance",
+   "proof": "P45",
+   "sha256": "363997bc9a827017d9d25339455ffd01d02b01cd435f2ae1764dcc6819c52739"
+  },
+  {
+   "file": "proofs/out/P46/receipt-xes/bottlenecks.xlsx",
+   "input": "receipt-xes",
+   "proof": "P46",
+   "sha256": "24e95ee3c33152b11796844dee5d4aab374d9bb3933b4efe29179ea1225211ca"
+  },
+  {
+   "file": "proofs/out/P47/receipt-csv/at_risk.xlsx",
+   "input": "receipt-csv",
+   "proof": "P47",
+   "sha256": "48d3f15fc112a71ea5d5bad8f507eb3efdee23b05d1efb836f9471680bc9ab3a"
+  },
+  {
+   "file": "proofs/out/P47/receipt-csv/policy.jdm.json",
+   "input": "receipt-csv",
+   "proof": "P47",
+   "sha256": "6bc04dac17275fce6bb01debab65ddcdff1d73ce370fde16e8b3766e090cf312"
+  },
+  {
+   "file": "proofs/out/P48/nodejs-tsc-charter/checklist.docx",
+   "input": "nodejs-tsc-charter",
+   "proof": "P48",
+   "sha256": "90fc5c88ddec2436d62e40eb2d2f3183537afc8c21e6eca3712e65430adda49b"
+  },
+  {
+   "file": "proofs/out/P48/usc5-552-doj/checklist.docx",
+   "input": "usc5-552-doj",
+   "proof": "P48",
+   "sha256": "0f28c008d487ab23e99bceb293a4134e02da5af00f9968081c4008f8c1275c8d"
+  },
+  {
+   "file": "proofs/out/P49/nodejs-tsc-charter+nodejs-governance/cross_document.xlsx",
+   "input": "nodejs-tsc-charter+nodejs-governance",
+   "proof": "P49",
+   "sha256": "63bafd8676d8c8269d4fc8a076f758d423af5b4b499285c050ccaa8498167c53"
+  },
+  {
    "file": "proofs/out/P5/nodejs-governance/process.bpmn",
    "input": "nodejs-governance",
    "proof": "P5",
-   "sha256": "d446d05dabfa30e83285d58fba8447d1b6f8a781e3262a196ece3c5dfe052dcc"
+   "sha256": "ad2e5871899b598d98c1d810312b9c93c5bc38dbd86ccfb88138f55b92dde727"
   },
   {
    "file": "proofs/out/P5/usc5-552-doj/process.bpmn",
    "input": "usc5-552-doj",
    "proof": "P5",
-   "sha256": "57d47a0195fa48e6fbdd464771ba39e68f4a8af964fa5190f865e7411f291316"
+   "sha256": "c5a466c1419b16b7cb6ecaf2f2385b683d840857e2322b912818e7d3bc481821"
+  },
+  {
+   "file": "proofs/out/P50/usc5-552-doj/roundtrip.json",
+   "input": "usc5-552-doj",
+   "proof": "P50",
+   "sha256": "275f48efe8a265823f93a4f37c7679ab78f0075e201b9e182ad617fc89bffde6"
   },
   {
    "file": "proofs/out/P6/receipt-csv/facts.lp",
@@ -443,19 +539,19 @@
    "file": "proofs/out/P8/receipt-xes/process.bpmn",
    "input": "receipt-xes",
    "proof": "P8",
-   "sha256": "a5fe7dba55e950afa04eb788a2df0de5a6ac01d09591809d8c7bcc1c9f84ff90"
+   "sha256": "66fa1e38525674151fce339caf0dcbd023ce7520931c990f9bdc4402dea2de46"
   },
   {
    "file": "proofs/out/P8/receipt-xes/process.pnml",
    "input": "receipt-xes",
    "proof": "P8",
-   "sha256": "4a1bb1cb575c27f49fe89b644930aa020261fdd1350047428d24e024b8c94f1e"
+   "sha256": "746b108c4d9bbd566f3d7bab818cd265fc6357027d6313d1a0de904a7347720d"
   },
   {
    "file": "proofs/out/P9/receipt-xes/conformance.xlsx",
    "input": "receipt-xes",
    "proof": "P9",
-   "sha256": "0e510617be36e849a3a4d10fca2a5052dca37e14fe99c0de8d648bd8fa38bee5"
+   "sha256": "339533b73457ffcd2df529f6452ce6e728f35ebc244dbbc36f394a8d8912f007"
   }
  ]
 }

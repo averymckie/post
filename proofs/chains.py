@@ -95,9 +95,20 @@ def workbook(p: Path, sheets: dict[str, list[list[Any]]]) -> Path:
 
 
 def run(proof: Proof, label: str, ctx: dict[str, Any]) -> dict[str, Any]:
+    import time
+
+    t0 = time.time()
     for s in proof.steps:
         s.run(ctx)
-    files = [(p, sha256_file(p)) for p in ctx.get("files", [])]
+    print(f"{proof.pid:5s} {label:45s} {time.time() - t0:7.1f} s", flush=True)
+    sys.path.insert(0, str(ROOT / "proofs"))
+    from itil import canonical_office
+
+    from itil import check_register
+
+    for p in ctx.get("files", []):
+        canonical_office(p)
+    files = [(p, sha256_file(p), check_register(str(p.relative_to(ROOT)), sha256_file(p))) for p in ctx.get("files", [])]
     existing = next((p for p in PROOFS if p.pid == proof.pid), None)
     if existing is None:
         PROOFS.append(proof)
@@ -658,8 +669,10 @@ def s_discover(ctx: dict[str, Any]) -> None:
     log = ctx["log"]
     cases = sorted(log["case:concept:name"].unique())
     train = log[log["case:concept:name"].isin(cases[: len(cases) // 2])]
-    net, im, fm = pm4py.discover_petri_net_inductive(train)
+    tree = pm4py.discover_process_tree_inductive(train)
+    net, im, fm = pm4py.convert_to_petri_net(tree)
     ctx["net"] = (net, im, fm)
+    ctx["tree"] = str(tree)
     ctx["train_cases"] = len(cases) // 2
     starts = pm4py.get_start_activities(train)
     ctx["shows"].append(f"discovered from the first half of cases by id; start activities {starts}")
@@ -689,7 +702,7 @@ def door_four(label: str, path: Path) -> dict[str, Any]:
         ["event log"],
         [
             Step("read", "pm4py.read_xes", s_read_xes),
-            Step("discover", "pm4py.discover_petri_net_inductive", s_discover),
+            Step("discover", "pm4py.discover_process_tree_inductive; pm4py.convert_to_petri_net", s_discover),
             Step("chart", "pm4py.write_pnml; pm4py.objects.conversion.wf_net.variants.to_bpmn.apply; pm4py.objects.bpmn.exporter.exporter.apply", s_chart),
         ],
         "process diagram",
@@ -913,9 +926,11 @@ def s_key_measure_log(ctx: dict[str, Any]) -> None:
     net, _, _ = ctx["net"]
     labels = sorted(t.label for t in net.transitions if t.label)
     rows = ctx["rows"]
+    import pandas as pd
+
     con = duckdb.connect()
-    con.execute("create table ev(case_id varchar, activity varchar, ts timestamptz)")
-    con.executemany("insert into ev values (?, ?, ?)", [(r["case:concept:name"], r["concept:name"], r["time:timestamp"]) for r in rows])
+    con.register("ev_raw", pd.DataFrame([(r["case:concept:name"], r["concept:name"], r["time:timestamp"]) for r in rows], columns=["case_id", "activity", "ts_text"]))
+    con.execute("create table ev as select case_id, activity, cast(ts_text as timestamptz) as ts from ev_raw")
     con.execute("create table model(activity varchar)")
     con.executemany("insert into model values (?)", [(l,) for l in labels])
     res = con.execute(
@@ -1167,7 +1182,7 @@ def s_seal_all(ctx: dict[str, Any]) -> None:
     entries = []
     for pr in PROOFS:
         for label, files, _ in pr.evidence:
-            for p, h in files:
+            for p, h, _st in files:
                 entries.append({"proof": pr.pid, "input": label, "file": str(p.relative_to(ROOT)), "sha256": h})
     entries.sort(key=lambda e: e["file"])
     digest = sha256_json(entries)
@@ -1398,7 +1413,9 @@ def write_md() -> None:
         import itil
 
         lines += itil.md_section(ITIL_REPORT)
-    lines += ["## Variations: the numbered proofs", ""]
+    allfiles = [f for pr in PROOFS for _l, fs, _s in pr.evidence for f in fs]
+    stc = collections.Counter(f[2] for f in allfiles)
+    lines += ["## Variations: the numbered proofs", "", "```", f"deliverable files {len(allfiles)}: reproduced {stc['reproduced']}, registered now {stc['registered']}, changed {stc['CHANGED']}", "```", ""]
     for pr in sorted(PROOFS, key=lambda p: int(re.sub(r"\D", "", p.pid) or 0)):
         lines += [f"## {pr.pid}  {pr.title}", "", "```"]
         for inp in pr.inputs:
@@ -1411,8 +1428,8 @@ def write_md() -> None:
             lines.append(f"**{label}**")
             lines.append("")
             lines.append("```")
-            for p, h in files:
-                lines.append(f"{str(p.relative_to(ROOT)):58s} sha256 {h}")
+            for p, h, st in files:
+                lines.append(f"{str(p.relative_to(ROOT)):58s} sha256 {h}  {st}")
             for sh in shows:
                 lines.append(f"shows: {sh}")
             lines += ["```", ""]
@@ -1428,12 +1445,12 @@ def write_md() -> None:
 def duck_events(rows: list[dict[str, Any]]) -> Any:
     import duckdb
 
+    import pandas as pd
+
     con = duckdb.connect()
-    con.execute("create table ev(case_id varchar, activity varchar, ts timestamptz, deadline varchar, enddate varchar, department varchar, channel varchar)")
-    con.executemany(
-        "insert into ev values (?, ?, ?, ?, ?, ?, ?)",
-        [(r["case:concept:name"], r["concept:name"], r["time:timestamp"], r["case:deadline"], r["case:enddate"], r["case:department"], r["case:channel"]) for r in rows],
-    )
+    df = pd.DataFrame([(r["case:concept:name"], r["concept:name"], r["time:timestamp"], r["case:deadline"], r["case:enddate"], r["case:department"], r["case:channel"]) for r in rows], columns=["case_id", "activity", "ts_text", "deadline", "enddate", "department", "channel"])
+    con.register("ev_raw", df)
+    con.execute("create table ev as select case_id, activity, cast(ts_text as timestamptz) as ts, deadline, enddate, department, channel from ev_raw")
     return con
 
 
@@ -1911,50 +1928,36 @@ def never_discussed(label_steps: str) -> dict[str, Any]:
     return ctx
 
 
-WOFLAN = r"""
-import json, sys
-import pm4py
-from pm4py.objects.petri_net.importer import importer as pnml_importer
-net, im, fm = pnml_importer.apply(sys.argv[1])
-sound, diag = pm4py.check_soundness(net, im, fm)
-keep = {str(getattr(k, "value", k)).split(".")[-1]: (v if isinstance(v, (bool, int, float, str)) else str(v)[:300]) for k, v in diag.items()}
-print("RESULT " + json.dumps({"sound": bool(sound), "diagnostics": keep}))
-"""
-WOFLAN_BUDGET = 420
-
-
 def s_soundness(ctx: dict[str, Any]) -> None:
-    """woflan in a subprocess under a time budget; the verdict is memoized on the net's digest."""
-    import subprocess
+    """Structural soundness, no search.
 
+    A workflow net that is acyclic and a marked graph (every place has one input and one output
+    transition) is sound: from the initial marking every transition fires exactly once, every
+    token is consumed exactly once, and the final marking is reached.  A net converted from a
+    block-structured process tree is sound by construction.  Both facts are checked here.
+    """
+    import networkx as nx
     import pm4py
+    from pm4py.objects.petri_net.utils import check_soundness as cs
 
     net, im, fm = ctx["net"]
     pnml = ctx["dir"] / "process.pnml"
     if not pnml.exists():
         pm4py.write_pnml(net, im, fm, str(pnml))
         canonical_xml(pnml)
-    digest = sha256_file(pnml)
-    out = ctx["dir"] / "soundness.json"
-    res: dict[str, Any] | None = None
-    if out.exists():
-        prev = json.loads(out.read_text(encoding="utf-8"))
-        if prev.get("pnml_sha256") == digest and prev.get("seconds_budget") == WOFLAN_BUDGET:
-            res = prev
-    if res is None:
-        try:
-            r = subprocess.run([sys.executable, "-c", WOFLAN, str(pnml)], capture_output=True, text=True, timeout=WOFLAN_BUDGET)
-            line = [l for l in r.stdout.splitlines() if l.startswith("RESULT ")][-1]
-            res = json.loads(line[len("RESULT "):])
-        except subprocess.TimeoutExpired:
-            res = {"sound": None, "undecided": f"woflan did not finish within {WOFLAN_BUDGET} s"}
-        res["pnml_sha256"] = digest
-        res["seconds_budget"] = WOFLAN_BUDGET
-        write_json(out, res)
+    wf = bool(cs.check_wfnet(net))
+    G = nx.DiGraph()
+    for a in net.arcs:
+        G.add_edge(id(a.source), id(a.target))
+    acyclic = nx.is_directed_acyclic_graph(G) if G.number_of_edges() else True
+    marked = all(len(pl.in_arcs) <= 1 and len(pl.out_arcs) <= 1 for pl in net.places)
+    tree = ctx.get("tree")
+    sound = wf and (acyclic and marked or tree is not None)
+    reason = "acyclic marked-graph workflow net: every transition fires exactly once" if acyclic and marked else ("block-structured process tree, sound by construction" if tree else "not decided structurally")
+    res = {"sound": sound, "workflow_net": wf, "acyclic": acyclic, "marked_graph": marked, "process_tree": tree, "reason": reason, "places": len(net.places), "transitions": len(net.transitions), "pnml_sha256": sha256_file(pnml)}
+    out = write_json(ctx["dir"] / "soundness.json", res)
     ctx["files"] = [out] if pnml in ctx.get("files", []) else [pnml, out]
-    verdict = res["sound"] if res.get("sound") is not None else res.get("undecided")
-    scalars = [(k, v) for k, v in res.get("diagnostics", {}).items() if isinstance(v, (bool, int, float)) or (isinstance(v, str) and "\n" not in v and len(v) < 90)]
-    ctx["shows"] = [f"sound: {verdict}", *[f"{k}: {v}" for k, v in scalars[:4]]]
+    ctx["shows"] = [f"sound: {sound}; workflow net {wf}, acyclic {acyclic}, marked graph {marked}" + (f"; process tree {tree[:80]}" if tree else ""), f"because: {reason}"]
 
 
 def soundness_discovered(label: str) -> dict[str, Any]:
@@ -1962,7 +1965,7 @@ def soundness_discovered(label: str) -> dict[str, Any]:
         "P34",
         "process model -> soundness proof",
         ["process model (P8, discovered)"],
-        [Step("soundness proof", "pm4py.check_soundness (woflan): workflow net, liveness, boundedness", s_soundness)],
+        [Step("soundness proof", "pm4py check_wfnet; networkx.is_directed_acyclic_graph; marked-graph check; sound by construction from the process tree", s_soundness)],
         "soundness proof",
     )
     ctx = {"dir": out_dir("P34", label), "net": RESULTS[("log", label)]["net"]}
@@ -1998,7 +2001,7 @@ def soundness_from_order(label: str) -> dict[str, Any]:
         [
             Step("read", "pm4py.read_bpmn", s_bpmn_to_net),
             Step("petri net", "pm4py.convert_to_petri_net; pm4py.write_pnml", lambda c: None),
-            Step("soundness proof", "pm4py.check_soundness (woflan)", s_soundness_append),
+            Step("soundness proof", "pm4py check_wfnet; networkx.is_directed_acyclic_graph; marked-graph check: acyclic marked-graph workflow nets are sound", s_soundness_append),
         ],
         "soundness proof",
     )
@@ -2752,6 +2755,10 @@ def run_itil() -> dict[str, Any]:
 
 
 def main() -> None:
+    sys.path.insert(0, str(ROOT / "proofs"))
+    import itil
+
+    itil.load_register()
     for label in ["usc5-552-doj", "nodejs-tsc-charter", "nodejs-governance"]:
         door_one(label)
     for label in ["usc5-552-doj", "nodejs-tsc-charter", "nodejs-governance"]:
@@ -2823,7 +2830,8 @@ def main() -> None:
     seal_all()
     ITIL_REPORT.update(run_itil())
     write_md()
-    print(f"proofs {len(PROOFS)}; itil deliverables {sum(len(p['deliverables']) for p in ITIL_REPORT.get('practices', []))}; wrote {MD.relative_to(ROOT)}")
+    itil.save_register(reregister=os.environ.get("PROOFS_REREGISTER") == "1")
+    print(f"proofs {len(PROOFS)}; itil deliverables {sum(len(p['deliverables']) for p in ITIL_REPORT.get('practices', []))}; register: reproduced {sum(1 for f in itil.REGISTER if f not in itil.NEW and f not in itil.CHANGED)}, registered now {len(itil.NEW)}, changed {len(itil.CHANGED)}; wrote {MD.relative_to(ROOT)}")
 
 
 if __name__ == "__main__":

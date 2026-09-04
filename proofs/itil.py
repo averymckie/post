@@ -68,6 +68,67 @@ BINDINGS: dict[str, str] = {
 }
 
 
+OFFICE = (".xlsx", ".docx", ".pptx")
+FIXED_STAMP = "2000-01-01T00:00:00Z"
+
+
+def canonical_office(path: Path) -> None:
+    """Make an Office file byte-reproducible: fixed core timestamps, fixed zip entry dates, sorted entries."""
+    import zipfile
+
+    if path.suffix.lower() not in OFFICE:
+        return
+    with zipfile.ZipFile(path) as z:
+        entries = {i.filename: z.read(i.filename) for i in z.infolist()}
+    core = entries.get("docProps/core.xml")
+    if core is not None:
+        text = core.decode("utf-8")
+        text = re.sub(r"(<dcterms:created[^>]*>)[^<]*(</dcterms:created>)", rf"\g<1>{FIXED_STAMP}\g<2>", text)
+        text = re.sub(r"(<dcterms:modified[^>]*>)[^<]*(</dcterms:modified>)", rf"\g<1>{FIXED_STAMP}\g<2>", text)
+        entries["docProps/core.xml"] = text.encode("utf-8")
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    with zipfile.ZipFile(tmp, "w", zipfile.ZIP_DEFLATED) as z:
+        for name in sorted(entries):
+            info = zipfile.ZipInfo(name, date_time=(1980, 1, 1, 0, 0, 0))
+            info.compress_type = zipfile.ZIP_DEFLATED
+            z.writestr(info, entries[name])
+    tmp.replace(path)
+
+
+# ---- the register of proven digests ----------------------------------------------------------
+# A deliverable is proven once.  Its digest is registered, and every later run compares the new
+# digest against the registered one instead of proving it again.
+REGISTER_PATH = ROOT / "proofs" / "register.json"
+REGISTER: dict[str, str] = {}
+NEW: dict[str, str] = {}
+CHANGED: dict[str, tuple[str, str]] = {}
+
+
+def load_register() -> None:
+    REGISTER.clear()
+    NEW.clear()
+    CHANGED.clear()
+    if REGISTER_PATH.exists():
+        REGISTER.update(json.loads(REGISTER_PATH.read_text(encoding="utf-8")))
+
+
+def check_register(rel: str, sha: str) -> str:
+    if rel in REGISTER:
+        if REGISTER[rel] == sha:
+            return "reproduced"
+        CHANGED[rel] = (REGISTER[rel], sha)
+        return "CHANGED"
+    NEW[rel] = sha
+    return "registered"
+
+
+def save_register(reregister: bool = False) -> None:
+    REGISTER.update(NEW)
+    if reregister:
+        REGISTER.update({k: v[1] for k, v in CHANGED.items()})
+    REGISTER_PATH.write_text(json.dumps(dict(sorted(REGISTER.items())), indent=1) + "\n", encoding="utf-8")
+
+
 def sha256_file(p: Path) -> str:
     return hashlib.sha256(p.read_bytes()).hexdigest()
 
@@ -169,9 +230,12 @@ class Ctx:
         if "cases" not in self.cache:
             import duckdb
 
+            import pandas as pd
+
             con = duckdb.connect()
-            con.execute("create table ev(case_id varchar, activity varchar, ts timestamptz, resource varchar, department varchar, channel varchar, deadline varchar, enddate varchar, responsible varchar)")
-            con.executemany("insert into ev values (?,?,?,?,?,?,?,?,?)", [(e["case"], e["activity"], e["ts"], e["resource"], e["department"], e["channel"], e["deadline"], e["enddate"], e["responsible"]) for e in self.events(name)])
+            df = pd.DataFrame([(e["case"], e["activity"], e["ts"], e["resource"], e["department"], e["channel"], e["deadline"], e["enddate"], e["responsible"]) for e in self.events(name)], columns=["case_id", "activity", "ts_text", "resource", "department", "channel", "deadline", "enddate", "responsible"])
+            con.register("ev_raw", df)
+            con.execute("create table ev as select case_id, activity, cast(ts_text as timestamptz) as ts, resource, department, channel, deadline, enddate, responsible from ev_raw")
             end = con.execute("select max(ts) from ev").fetchone()[0]
             res = con.execute(
                 """
@@ -273,7 +337,8 @@ class Ctx:
 
         if "handover" not in self.cache:
             net = pm4py.discover_handover_of_work_network(self.results[("log", log)]["log"])
-            self.cache["handover"] = [{"from": a, "to": b, "value": round(float(v), 6)} for (a, b), v in sorted(net.items(), key=lambda kv: (-kv[1], kv[0]))]
+            conn = net.connections if hasattr(net, "connections") else net
+            self.cache["handover"] = [{"from": a, "to": b, "value": round(float(v), 6)} for (a, b), v in sorted(conn.items(), key=lambda kv: (-kv[1], kv[0]))]
         return list(self.cache["handover"])
 
     def execution_trace(self, pack: str) -> Rows:
@@ -605,7 +670,7 @@ def run_chain(ctx: Ctx, chain: list[list[Any]], out_dir: Path, name: str) -> tup
         elif op == "group":
             rows = op_group(rows, params.get("by", []), params["aggregates"])
         elif op == "join":
-            rows = op_join(rows, saved[params["with"]], params["on"], params.get("how", "inner"))
+            rows = op_join(rows, saved[params["with"]], params.get("keys") or params.get("on"), params.get("how", "inner"))
         elif op == "sort":
             rows = op_sort(rows, params["by"], params.get("desc", False))
         elif op == "limit":
@@ -668,7 +733,9 @@ def run_register(ctx: Ctx, register: Path) -> dict[str, Any]:
                 out_dir.mkdir(parents=True, exist_ok=True)
                 try:
                     files, shows, rows = run_chain(ctx, d["chain"], out_dir, d["name"])
-                    entry["files"] = [(str(p.relative_to(ROOT)), sha256_file(p)) for p in files]
+                    for f in files:
+                        canonical_office(f)
+                    entry["files"] = [(str(p.relative_to(ROOT)), sha256_file(p), check_register(str(p.relative_to(ROOT)), sha256_file(p))) for p in files]
                     entry["shows"] = shows
                     entry["status"] = "proven" if files and rows else ("empty" if files else "failed")
                 except Exception as e:  # the failure is the evidence
@@ -680,7 +747,12 @@ def run_register(ctx: Ctx, register: Path) -> dict[str, Any]:
 
 
 def md_section(report: dict[str, Any]) -> list[str]:
-    lines = ["## Baseline: the ITIL surface", "", "```", f"{'practice':45s} {'deliverables':>12s} {'proven':>7s} {'empty':>6s} {'failed':>7s} {'no real input':>14s}"]
+    lines = ["## Baseline: the ITIL surface", "", "```"]
+    files = [f for pr in report["practices"] for d in pr["deliverables"] for f in d["files"]]
+    st = collections.Counter(f[2] for f in files)
+    lines.append(f"deliverable files {len(files)}: reproduced {st['reproduced']}, registered now {st['registered']}, changed {st['CHANGED']}")
+    lines.append("")
+    lines.append(f"{'practice':45s} {'deliverables':>12s} {'proven':>7s} {'empty':>6s} {'failed':>7s} {'no real input':>14s}")
     tot = collections.Counter()
     for pr in report["practices"]:
         c = collections.Counter(d["status"] for d in pr["deliverables"])
@@ -697,8 +769,8 @@ def md_section(report: dict[str, Any]) -> list[str]:
             lines.append(f"instantiated on: {d['instantiated_on']}")
             lines += arrows(d["chain"])
             lines.append(f"-> {d['name']}")
-            for f, h in d["files"]:
-                lines.append(f"{f:70s} sha256 {h}")
+            for f, h, st in d["files"]:
+                lines.append(f"{f:70s} sha256 {h}  {st}")
             for s in d["shows"]:
                 lines.append(f"shows: {s}")
             lines += ["```", ""]

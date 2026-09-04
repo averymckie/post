@@ -1,0 +1,6071 @@
+{
+ "practices": [
+  {
+   "deliverables": [
+    {
+     "chain": [
+      [
+       "dfg",
+       {}
+      ],
+      [
+       "sort",
+       {
+        "by": [
+         "count"
+        ],
+        "desc": true
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "dependency_model"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/architecture-management/component-dependency-model/dependency_model.xlsx",
+       "18d955657444fd3eb9ebde649272460f6daa31d5bad719da33b7b4731c342909",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "activities and directly-follows edges of the receipt-phase log",
+     "name": "component dependency model",
+     "shape": "components and the dependencies between them, with the strength of each dependency",
+     "shows": [
+      "rows 99; first {\"from\": \"T04 Determine confirmation of receipt\", \"to\": \"T05 Print and send confirmation of receipt\", \"count\": 1177}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "required_actions",
+       {
+        "of": "nodejs-tsc-charter"
+       }
+      ],
+      [
+       "select",
+       {
+        "fields": [
+         "unit",
+         "who",
+         "action",
+         "sentence"
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "standards"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/architecture-management/architecture-standards-register/standards.xlsx",
+       "f7e6e02e08fce77cb37eda55c09761e20d4eb51df6f1678f5e20309785f7db4f",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "obligations of the Node.js TSC charter",
+     "name": "architecture standards register",
+     "shape": "the standing rules a design must satisfy, each with its source sentence",
+     "shows": [
+      "rows 13; first {\"unit\": \"u0002\", \"who\": \"\", \"action\": \"open\", \"sentence\": \"Project proposals, timelines, and status must not merely be open, but also easily visible to outsiders.\"}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "ordered_steps",
+       {
+        "of": "nodejs-governance"
+       }
+      ],
+      [
+       "select",
+       {
+        "fields": [
+         "phase",
+         "position",
+         "step",
+         "sentence"
+        ]
+       }
+      ],
+      [
+       "page",
+       {
+        "kind": "table",
+        "name": "roadmap",
+        "title": "roadmap: phases of the governance steps"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/architecture-management/architecture-roadmap/roadmap.html",
+       "6494d3671edde9365e6da9a1557a670c722d47aeb39384715dd4156094295144",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "ordered steps of the Node.js governance document",
+     "name": "architecture roadmap",
+     "shape": "steps grouped into phases in forced order",
+     "shows": [
+      "rows 18; first {\"phase\": 1, \"position\": 1, \"step\": \"collaborator\", \"sentence\": \"A collaborator is automatically made emeritus (and removed from active collaborator status) if it has been more than 12 months since the collaborator has a"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "forced_edges",
+       {
+        "of": "usc5-552-doj"
+       }
+      ],
+      [
+       "clingo",
+       {
+        "fields": [
+         "before",
+         "after",
+         "before_step",
+         "after_step"
+        ],
+        "in": "edge",
+        "out": "impact",
+        "out_fields": [
+         "component",
+         "step",
+         "dependents"
+        ],
+        "program": "dep(A,B) :- edge(A,B,_,_). dep(A,C) :- dep(A,B), edge(B,C,_,_). name(A,N) :- edge(A,_,N,_). name(B,N) :- edge(_,B,_,N). impact(A,N,K) :- name(A,N), K = #count{ B : dep(A,B) }, K > 0."
+       }
+      ],
+      [
+       "sort",
+       {
+        "by": [
+         "dependents"
+        ],
+        "desc": true
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "impact"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/architecture-management/change-impact-assessment/impact.xlsx",
+       "2e7543679eaf64df3fc94a1bac96a83cb313b7222fc85b388bad46cbeb1aad66",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "forced precedence of 5 U.S.C. 552",
+     "name": "change impact assessment",
+     "shape": "for each component, everything that depends on it, transitively",
+     "shows": [
+      "rows 12; first {\"component\": \"usc5-552-doj:u0021:s00#e43\", \"step\": \"request\", \"dependents\": 1}"
+     ],
+     "status": "proven"
+    }
+   ],
+   "group": "general management",
+   "name": "Architecture management"
+  },
+  {
+   "deliverables": [
+    {
+     "chain": [
+      [
+       "minutes_sentences",
+       {}
+      ],
+      [
+       "filter",
+       {
+        "where": [
+         [
+          "lemmas",
+          "matches",
+          "\\b(improve|fix|rework|migrate|deprecate|remove|simplify|unflag|enable)\\b"
+         ]
+        ]
+       }
+      ],
+      [
+       "select",
+       {
+        "fields": [
+         "meeting",
+         "sentence_id",
+         "lemmas",
+         "sentence"
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "improvement_register"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/continual-improvement/improvement-register/improvement_register.xlsx",
+       "ff1e5ae1fbaded86922a72f8bda2c28a5fd2322445b4450d69fde3533a6deb55",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "TSC minutes sentences whose actions include improve, fix, rework, migrate, deprecate, remove or simplify",
+     "name": "improvement register",
+     "shape": "candidate improvements with where they were raised",
+     "shows": [
+      "rows 29; first {\"meeting\": \"tsc-2023-11-08\", \"sentence_id\": \"tsc-2023-11-08:u0010:s06\", \"lemmas\": \"remove say wait\", \"sentence\": \"wait for a week to see what Kafra says, remove the label.\"}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "cases",
+       {}
+      ],
+      [
+       "derive",
+       {
+        "field": "late",
+        "fn": "contains",
+        "of": "outcome",
+        "value": "after"
+       }
+      ],
+      [
+       "group",
+       {
+        "aggregates": [
+         [
+          "count",
+          "*",
+          "cases"
+         ],
+         [
+          "avg",
+          "duration_days",
+          "mean_days"
+         ],
+         [
+          "sum",
+          "late",
+          "after_deadline"
+         ]
+        ],
+        "by": [
+         "month"
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "measurement_by_month"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/continual-improvement/improvement-measurement/measurement_by_month.xlsx",
+       "403198098487f5be6e5379dd2aa472591ac17cbc2a0708d9973286a2db941e73",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "receipt-phase cases per month, mean duration and cases after deadline",
+     "name": "improvement measurement",
+     "shape": "the measure before and after, per period",
+     "shows": [
+      "rows 16; first {\"month\": \"2010-10\", \"cases\": 15, \"mean_days\": 10.38, \"after_deadline\": 10.0}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "cases",
+       {}
+      ],
+      [
+       "save_as",
+       {
+        "name": "cases"
+       }
+      ],
+      [
+       "conformance",
+       {}
+      ],
+      [
+       "join",
+       {
+        "keys": [
+         [
+          "case",
+          "case"
+         ]
+        ],
+        "with": "cases"
+       }
+      ],
+      [
+       "derive",
+       {
+        "field": "fit",
+        "fn": "contains",
+        "of": "is_fit",
+        "value": "true"
+       }
+      ],
+      [
+       "group",
+       {
+        "aggregates": [
+         [
+          "count",
+          "*",
+          "cases"
+         ],
+         [
+          "sum",
+          "fit",
+          "fit_cases"
+         ],
+         [
+          "avg",
+          "fitness",
+          "mean_fitness"
+         ]
+        ],
+        "by": [
+         "department"
+        ]
+       }
+      ],
+      [
+       "document",
+       {
+        "name": "review_report",
+        "title": "review: fitness to the process model, per department"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/continual-improvement/improvement-review-report/review_report.docx",
+       "d743b15186fe1bd6bf852154aed3dca1d1c0d78ac93960bbe4d79aa027ab3697",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "receipt-phase conformance joined to case departments",
+     "name": "improvement review report",
+     "shape": "conformance of the work to the model, per group",
+     "shows": [
+      "rows 3; first {\"department\": \"Customer contact\", \"cases\": 29, \"fit_cases\": 29.0, \"mean_fitness\": 1.0}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "cases",
+       {}
+      ],
+      [
+       "workbook",
+       {
+        "name": "business_case"
+       }
+      ]
+     ],
+     "files": [],
+     "instantiated_on": "none",
+     "name": "improvement business case",
+     "shape": "cost and benefit of a proposed improvement",
+     "shows": [],
+     "status": "no real input"
+    }
+   ],
+   "group": "general management",
+   "name": "Continual improvement"
+  },
+  {
+   "deliverables": [
+    {
+     "chain": [
+      [
+       "required_actions",
+       {
+        "of": "usc5-552-doj"
+       }
+      ],
+      [
+       "filter",
+       {
+        "where": [
+         [
+          "sentence",
+          "matches",
+          "(?i)withh|exempt|classif|confiden|privacy"
+         ]
+        ]
+       }
+      ],
+      [
+       "select",
+       {
+        "fields": [
+         "unit",
+         "who",
+         "action",
+         "sentence"
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "confidentiality_obligations"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/information-security-management/confidentiality-obligations-register/confidentiality_obligations.xlsx",
+       "5156f7a28bc7003cd7802016679474adeb90e01087ade7bac7d2d318eb8c996f",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "5 U.S.C. 552 sentences containing withhold, exempt, classified, confidential or privacy",
+     "name": "confidentiality obligations register",
+     "shape": "obligations about withholding, exempting or protecting information, with sources",
+     "shows": [
+      "rows 15; first {\"unit\": \"u0018\", \"who\": \"\", \"action\": \"explain\", \"sentence\": \"However, in each case the justification for the deletion shall be explained fully in writing, and the extent of such deletion shall be indicated on the porti"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "who_must_what",
+       {
+        "of": "usc5-552-doj"
+       }
+      ],
+      [
+       "pivot",
+       {
+        "col": "action",
+        "fn": "sum",
+        "row": "who",
+        "value": "count"
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "access_matrix"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/information-security-management/access-control-matrix/access_matrix.xlsx",
+       "d6501053fd60b08aca40bca95acb9afdeda53f38788d6960588c14134ad77c0a",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "agents and required actions of 5 U.S.C. 552",
+     "name": "access control matrix",
+     "shape": "who is required to do what",
+     "shows": [
+      "rows 54; first {\"who\": \"administrator of general services shall provide\", \"accord\": 0, \"allow\": 0, \"assess\": 0, \"assist\": 0, \"chair\": 0, \"conduct\": 0, \"consult\": 0, \"cover\": 0, \"designate\": 0, \"determine\": 0, \"develop\": 0, \"director\": "
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "prohibitions",
+       {
+        "of": "usc5-552-doj"
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "prohibitions"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/information-security-management/prohibitions-register/prohibitions.xlsx",
+       "b2ef042b7d089d3e3eb650a4e0a5abb921a36d3829aebf54a74d0d94706e1369",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "negated obligations of 5 U.S.C. 552",
+     "name": "prohibitions register",
+     "shape": "what must not be done, with the sentence",
+     "shows": [
+      "rows 10; first {\"event\": \"usc5-552-doj:u0025:s00#e52\", \"action\": \"make\", \"sentence_id\": \"usc5-552-doj:u0025:s00\", \"sentence\": \"(E) An agency, or part of an agency, that is an element of the intelligence community (as that term is defin"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "cases",
+       {}
+      ],
+      [
+       "workbook",
+       {
+        "name": "security_incidents"
+       }
+      ]
+     ],
+     "files": [],
+     "instantiated_on": "none",
+     "name": "security incident report",
+     "shape": "incidents with severity and timeline",
+     "shows": [],
+     "status": "no real input"
+    }
+   ],
+   "group": "general management",
+   "name": "Information security management"
+  },
+  {
+   "deliverables": [
+    {
+     "chain": [
+      [
+       "definitions",
+       {
+        "of": "usc5-552-doj"
+       }
+      ],
+      [
+       "select",
+       {
+        "fields": [
+         "unit",
+         "verb",
+         "sentence"
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "glossary"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/knowledge-management/glossary/glossary.xlsx",
+       "6db1bc44fdb5bd3cc3c013808933dcd50871570b672dc908da7b2f26a90228ce",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "definitional sentences of 5 U.S.C. 552 (mean, include, define)",
+     "name": "glossary",
+     "shape": "defined terms with their defining sentences",
+     "shows": [
+      "rows 17; first {\"unit\": \"u0024\", \"verb\": \"mean\", \"sentence\": \"For purposes of this paragraph, the term \\\"search\\\" means to review, manually or by automated means, agency records for the purpose of locating those records which are respo"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "ordered_steps",
+       {
+        "of": "usc5-552-doj"
+       }
+      ],
+      [
+       "document",
+       {
+        "columns": [
+         "position",
+         "step",
+         "sentence"
+        ],
+        "name": "knowledge_article",
+        "title": "the statutory steps, in forced order"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/knowledge-management/knowledge-article/knowledge_article.docx",
+       "3e85de966b34570b854d7bfa1fb570761e307b54efe6d151c84d00bddcbf8e9c",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "ordered steps of 5 U.S.C. 552",
+     "name": "knowledge article",
+     "shape": "a procedure written out in order with its sources",
+     "shows": [
+      "rows 24; first {\"position\": 1, \"event\": \"usc5-552-doj:u0021:s00#e43\", \"step\": \"request\", \"phase\": 1, \"sentence\": \"(3)(A) Except with respect to the records made available under paragraphs (1) and (2) of this subsection, and except as p"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "facts",
+       {
+        "of": "usc5-552-doj"
+       }
+      ],
+      [
+       "group",
+       {
+        "aggregates": [
+         [
+          "count",
+          "*",
+          "facts"
+         ]
+        ],
+        "by": [
+         "predicate"
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "index_usc5_552"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/knowledge-management/knowledge-index/index_usc5_552.xlsx",
+       "3cf8be4fccf39374be7554287dab8a8f0335c5bbe1b97a99b5206c9e52f50147",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "facts of the three procedure documents",
+     "name": "knowledge index",
+     "shape": "what each source contains, counted by kind",
+     "shows": [
+      "rows 7; first {\"predicate\": \"agent\", \"facts\": 283}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "tags",
+       {
+        "of": "nodejs-governance"
+       }
+      ],
+      [
+       "filter",
+       {
+        "where": [
+         [
+          "tie",
+          "eq",
+          false
+         ]
+        ]
+       }
+      ],
+      [
+       "group",
+       {
+        "aggregates": [
+         [
+          "count",
+          "*",
+          "mentions"
+         ],
+         [
+          "distinct",
+          "meeting",
+          "meetings"
+         ]
+        ],
+        "by": [
+         "step_lemma"
+        ]
+       }
+      ],
+      [
+       "sort",
+       {
+        "by": [
+         "mentions"
+        ],
+        "desc": true
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "topics"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/knowledge-management/frequently-discussed-topics/topics.xlsx",
+       "aa4c93ed15750e2a161242b98f1be49528a9e3cc7e05f68c6b09426638f44817",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "governance steps tagged in TSC minutes",
+     "name": "frequently discussed topics",
+     "shape": "the steps most often referred to in meetings",
+     "shows": [
+      "rows 9; first {\"step_lemma\": \"be\", \"mentions\": 21, \"meetings\": 7}"
+     ],
+     "status": "proven"
+    }
+   ],
+   "group": "general management",
+   "name": "Knowledge management"
+  },
+  {
+   "deliverables": [
+    {
+     "chain": [
+      [
+       "cases",
+       {}
+      ],
+      [
+       "derive",
+       {
+        "field": "late",
+        "fn": "contains",
+        "of": "outcome",
+        "value": "after"
+       }
+      ],
+      [
+       "group",
+       {
+        "aggregates": [
+         [
+          "count",
+          "*",
+          "cases"
+         ],
+         [
+          "avg",
+          "duration_days",
+          "mean_days"
+         ],
+         [
+          "median",
+          "duration_days",
+          "median_days"
+         ],
+         [
+          "sum",
+          "late",
+          "after_deadline"
+         ]
+        ],
+        "by": [
+         "department"
+        ]
+       }
+      ],
+      [
+       "derive",
+       {
+        "den": "cases",
+        "field": "late_share",
+        "fn": "ratio",
+        "num": "after_deadline"
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "kpi_report"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/measurement-and-reporting/kpi-report/kpi_report.xlsx",
+       "8a39162c0d8b0552e9c44232ab184f6e2e3451854a907223984bd2ee2c36fba0",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "receipt-phase cases per department",
+     "name": "KPI report",
+     "shape": "the agreed indicators per group and period",
+     "shows": [
+      "rows 3; first {\"department\": \"Customer contact\", \"cases\": 29, \"mean_days\": 1.66, \"median_days\": 0.0, \"after_deadline\": 1.0, \"late_share\": 0.0345}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "events",
+       {}
+      ],
+      [
+       "group",
+       {
+        "aggregates": [
+         [
+          "count",
+          "*",
+          "events"
+         ]
+        ],
+        "by": [
+         "activity"
+        ]
+       }
+      ],
+      [
+       "page",
+       {
+        "kind": "bar",
+        "name": "dashboard",
+        "title": "events per activity",
+        "x": "activity",
+        "y": "events"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/measurement-and-reporting/dashboard/dashboard.html",
+       "53306bfe359d052835628d9ba408164083be82326369b256bcfaa3c2e82b9c7a",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "receipt-phase events per activity",
+     "name": "dashboard",
+     "shape": "the indicators as a chart page",
+     "shows": [
+      "rows 27; first {\"activity\": \"Confirmation of receipt\", \"events\": 1434}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "decisions",
+       {}
+      ],
+      [
+       "page",
+       {
+        "kind": "table",
+        "name": "scorecard",
+        "title": "scorecard: could a vote carry at each meeting"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/measurement-and-reporting/scorecard/scorecard.html",
+       "5296906fa43153bfd9065d5ea5fe7b65b05d1d45b7d38113e4c6cdf0a794e3cf",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "majority reachable per TSC meeting",
+     "name": "scorecard",
+     "shape": "pass or fail per period against a rule",
+     "shows": [
+      "rows 8; first {\"meeting\": \"tsc-2023-11-08\", \"present_voting\": 6, \"majority_reachable\": false}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "anchors",
+       {
+        "of": "usc5-552-doj"
+       }
+      ],
+      [
+       "filter",
+       {
+        "where": [
+         [
+          "timex3",
+          "contains",
+          "DURATION"
+         ]
+        ]
+       }
+      ],
+      [
+       "distinct",
+       {
+        "fields": [
+         "span",
+         "timex3",
+         "sentence"
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "measurement_plan"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/measurement-and-reporting/measurement-plan/measurement_plan.xlsx",
+       "712f6783c15c46cb44bfed962630c2fc32d6dee8c305851179382861742c73bb",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "TIMEX3 durations found in 5 U.S.C. 552",
+     "name": "measurement plan",
+     "shape": "the clocks and durations the rules define",
+     "shows": [
+      "rows 17; first {\"span\": \"one year\", \"timex3\": \"TIMEX3 type=\\\"DURATION\\\" value=\\\"P1Y\\\"\", \"sentence\": \"For records created on or after November 1, 1996, within one year after such date, each agency shall make such records available, incl"
+     ],
+     "status": "proven"
+    }
+   ],
+   "group": "general management",
+   "name": "Measurement and reporting"
+  },
+  {
+   "deliverables": [
+    {
+     "chain": [
+      [
+       "participants",
+       {}
+      ],
+      [
+       "group",
+       {
+        "aggregates": [
+         [
+          "count",
+          "*",
+          "meetings"
+         ]
+        ],
+        "by": [
+         "name",
+         "role"
+        ]
+       }
+      ],
+      [
+       "sort",
+       {
+        "by": [
+         "meetings"
+        ],
+        "desc": true
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "stakeholders"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/organizational-change-management/stakeholder-map/stakeholders.xlsx",
+       "eb0333dd666d2a3efdd9c4e1ac822cd23599cf70f543590d18517d6023381919",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "the Present lists of eight TSC meetings",
+     "name": "stakeholder map",
+     "shape": "who takes part, in what role, how often",
+     "shows": [
+      "rows 30; first {\"name\": \"Richard Lau\", \"role\": \"voting member\", \"meetings\": 8}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "minutes_sections",
+       {}
+      ],
+      [
+       "filter",
+       {
+        "where": [
+         [
+          "section",
+          "matches",
+          "(?i)announce|update"
+         ]
+        ]
+       }
+      ],
+      [
+       "select",
+       {
+        "fields": [
+         "meeting",
+         "section",
+         "item",
+         "link"
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "communications"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/organizational-change-management/communication-log/communications.xlsx",
+       "0251e986176b09ed1184b8e63d09c023ac07c000cbb5aac99fdaa17950168c52",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "Announcements and update sections of the TSC minutes",
+     "name": "communication log",
+     "shape": "announcements and updates made to the group, by date",
+     "shows": [
+      "rows 20; first {\"meeting\": \"tsc-2023-12-06\", \"section\": \"CPC and Board Meeting Updates\", \"item\": \"Michael - CPC discussion updates to the Travel fund, if you are interested please check out the issue or comment on updated proposal when"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "decisions",
+       {}
+      ],
+      [
+       "workbook",
+       {
+        "name": "readiness"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/organizational-change-management/readiness-assessment/readiness.xlsx",
+       "3e9beefff35ce027cb13eb539e1b93736151dcd067da9396dd38f9f85bb8d121",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "majority reachable per TSC meeting",
+     "name": "readiness assessment",
+     "shape": "whether the group can decide, per occasion",
+     "shows": [
+      "rows 8; first {\"meeting\": \"tsc-2023-11-08\", \"present_voting\": 6, \"majority_reachable\": false}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "participants",
+       {}
+      ],
+      [
+       "workbook",
+       {
+        "name": "training"
+       }
+      ]
+     ],
+     "files": [],
+     "instantiated_on": "none",
+     "name": "training records",
+     "shape": "who was trained in what, when",
+     "shows": [],
+     "status": "no real input"
+    }
+   ],
+   "group": "general management",
+   "name": "Organizational change management"
+  },
+  {
+   "deliverables": [
+    {
+     "chain": [
+      [
+       "minutes_sections",
+       {}
+      ],
+      [
+       "filter",
+       {
+        "where": [
+         [
+          "links",
+          "gt",
+          0
+         ]
+        ]
+       }
+      ],
+      [
+       "select",
+       {
+        "fields": [
+         "meeting",
+         "section",
+         "item",
+         "link"
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "portfolio"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/portfolio-management/portfolio-register/portfolio.xlsx",
+       "1ae5a206019ea1a57271b48069fe638e62378689c7c6c11a9027aa8a336ce857",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "agenda items with links in the TSC minutes",
+     "name": "portfolio register",
+     "shape": "the items under consideration, with references",
+     "shows": [
+      "rows 92; first {\"meeting\": \"tsc-2023-11-08\", \"section\": \"Links\", \"item\": \"GitHub Issue: https://github.com/nodejs/TSC/issues/1468\", \"link\": \"https://github.com/nodejs/TSC/issues/1468\"}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "minutes_sections",
+       {}
+      ],
+      [
+       "filter",
+       {
+        "where": [
+         [
+          "link",
+          "notnull",
+          ""
+         ]
+        ]
+       }
+      ],
+      [
+       "group",
+       {
+        "aggregates": [
+         [
+          "distinct",
+          "meeting",
+          "meetings"
+         ],
+         [
+          "count",
+          "*",
+          "mentions"
+         ]
+        ],
+        "by": [
+         "link"
+        ]
+       }
+      ],
+      [
+       "sort",
+       {
+        "by": [
+         "meetings",
+         "mentions"
+        ],
+        "desc": true
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "prioritization"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/portfolio-management/prioritization-matrix/prioritization.xlsx",
+       "4c84d0fe2fd393fe7c7ed51f73c135196207b75974deafcba6a0869dd4bde30c",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "links recurring across TSC meetings",
+     "name": "prioritization matrix",
+     "shape": "items ranked by how often they recur",
+     "shows": [
+      "rows 68; first {\"link\": \"https://nodejs.org/calendar\", \"meetings\": 8, \"mentions\": 8}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "minutes_sections",
+       {}
+      ],
+      [
+       "pivot",
+       {
+        "col": "meeting",
+        "row": "section"
+       }
+      ],
+      [
+       "page",
+       {
+        "kind": "table",
+        "name": "portfolio_review",
+        "title": "items per section per meeting"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/portfolio-management/portfolio-review/portfolio_review.html",
+       "68fa5cfee2b9c81f9ed859491333ae9a926a115ea63da07072576263a8eb0ce6",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "TSC minutes sections",
+     "name": "portfolio review",
+     "shape": "the items per section per meeting",
+     "shows": [
+      "rows 14; first {\"section\": \"Announcements\", \"tsc-2023-11-08\": 0, \"tsc-2023-12-06\": 0, \"tsc-2024-01-10\": 1, \"tsc-2024-01-17\": 1, \"tsc-2024-02-07\": 3, \"tsc-2025-01-08\": 1, \"tsc-2025-02-05\": 1, \"tsc-2025-03-05\": 1}"
+     ],
+     "status": "proven"
+    }
+   ],
+   "group": "general management",
+   "name": "Portfolio management"
+  },
+  {
+   "deliverables": [
+    {
+     "chain": [
+      [
+       "required_actions",
+       {
+        "of": "nodejs-tsc-charter"
+       }
+      ],
+      [
+       "document",
+       {
+        "columns": [
+         "unit",
+         "who",
+         "action",
+         "sentence"
+        ],
+        "name": "charter",
+        "title": "charter: what the TSC must do"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/project-management/project-charter/charter.docx",
+       "35070667ee78f2329af2aa47a42d2612d2677735fd55e7ac75e77a85710c15a4",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "the Node.js TSC charter's obligations",
+     "name": "project charter",
+     "shape": "purpose, responsibilities and rules of the undertaking",
+     "shows": [
+      "rows 13; first {\"event\": \"nodejs-tsc-charter:u0002:s02#e12\", \"action\": \"open\", \"who\": \"\", \"sentence_id\": \"nodejs-tsc-charter:u0002:s02\", \"sentence\": \"Project proposals, timelines, and status must not merely be open, but also easily vis"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "ordered_steps",
+       {
+        "of": "usc5-552-doj"
+       }
+      ],
+      [
+       "select",
+       {
+        "fields": [
+         "phase",
+         "position",
+         "step",
+         "unit"
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "schedule"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/project-management/project-schedule/schedule.xlsx",
+       "a16532af1261ac68dd83600f2b1ddeb9fe73259e36a1dff7ef0e7113d950b778",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "ordered steps of 5 U.S.C. 552 by phase",
+     "name": "project schedule",
+     "shape": "work packages in phases",
+     "shows": [
+      "rows 24; first {\"phase\": 1, \"position\": 1, \"step\": \"request\", \"unit\": \"u0021\"}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "cases",
+       {}
+      ],
+      [
+       "pivot",
+       {
+        "col": "outcome",
+        "row": "month"
+       }
+      ],
+      [
+       "document",
+       {
+        "name": "status_report",
+        "title": "status by month: open, by deadline, after deadline"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/project-management/status-report/status_report.docx",
+       "234679fc31873865d4b770e63292375fed72bc2def1cf7d87deda72c237a3851",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "receipt-phase cases per month",
+     "name": "status report",
+     "shape": "open, closed and late work per period",
+     "shows": [
+      "rows 16; first {\"month\": \"2010-10\", \"after deadline\": 10, \"by deadline\": 4, \"open\": 1}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "minutes_sentences",
+       {}
+      ],
+      [
+       "filter",
+       {
+        "where": [
+         [
+          "sentence",
+          "matches",
+          "(?i)\\b(risk|block|blocker|issue|depend|concern)"
+         ]
+        ]
+       }
+      ],
+      [
+       "select",
+       {
+        "fields": [
+         "meeting",
+         "sentence_id",
+         "sentence"
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "raid_log"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/project-management/raid-log/raid_log.xlsx",
+       "f9c1b4c08d767e311663b6e135e187e2a32797a14051b688f1993d5f8c7578fc",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "TSC minutes sentences mentioning risk, block, issue, depend or concern",
+     "name": "RAID log",
+     "shape": "risks, assumptions, issues and dependencies raised",
+     "shows": [
+      "rows 84; first {\"meeting\": \"tsc-2023-11-08\", \"sentence_id\": \"tsc-2023-11-08:u0002:s02\", \"sentence\": \"<Not available, did not stream> * **GitHub Issue**: <https://github.com/nodejs/TSC/issues/1468>\"}"
+     ],
+     "status": "proven"
+    }
+   ],
+   "group": "general management",
+   "name": "Project management"
+  },
+  {
+   "deliverables": [
+    {
+     "chain": [
+      [
+       "participants",
+       {}
+      ],
+      [
+       "group",
+       {
+        "aggregates": [
+         [
+          "count",
+          "*",
+          "meetings_attended"
+         ],
+         [
+          "min",
+          "name",
+          "name"
+         ]
+        ],
+        "by": [
+         "handle"
+        ]
+       }
+      ],
+      [
+       "save_as",
+       {
+        "name": "attended"
+       }
+      ],
+      [
+       "records",
+       {
+        "of": "tsc-voting-members"
+       }
+      ],
+      [
+       "join",
+       {
+        "how": "left",
+        "keys": [
+         [
+          "handle",
+          "handle"
+         ]
+        ],
+        "with": "attended"
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "stakeholder_register"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/relationship-management/stakeholder-register/stakeholder_register.xlsx",
+       "b5c7d92625b5f527c0fcec33647d1ed470c5643b9e9e53131df8af27d478e69a",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "TSC voting members joined with meeting participants",
+     "name": "stakeholder register",
+     "shape": "parties, their standing and contact points",
+     "shows": [
+      "rows 18; first {\"handle\": \"BridgeAR\", \"name\": \"Ruben Bridgewater\", \"meetings_attended\": 4}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "minutes_sentences",
+       {}
+      ],
+      [
+       "filter",
+       {
+        "where": [
+         [
+          "lemmas",
+          "matches",
+          "\\b(agree|approve|vote|decide|resolve|consensus|object)\\b"
+         ]
+        ]
+       }
+      ],
+      [
+       "select",
+       {
+        "fields": [
+         "meeting",
+         "sentence_id",
+         "lemmas",
+         "sentence"
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "decision_log"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/relationship-management/decision-log/decision_log.xlsx",
+       "063f5fcb396353d97a5979e1b8212cf1f80e5b61bc09d97e5640fe4c8cd5a78d",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "TSC minutes sentences whose actions include agree, approve, vote, decide, resolve or consensus",
+     "name": "decision log",
+     "shape": "decisions taken with the meeting where they were taken",
+     "shows": [
+      "rows 14; first {\"meeting\": \"tsc-2023-12-06\", \"sentence_id\": \"tsc-2023-12-06:u0011:s00\", \"lemmas\": \"agree discuss do follow get have make open promote runtime say suggest turn\", \"sentence\": \"* lib: promote process.binding/_tickCallback "
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "participants",
+       {}
+      ],
+      [
+       "workbook",
+       {
+        "name": "satisfaction"
+       }
+      ]
+     ],
+     "files": [],
+     "instantiated_on": "none",
+     "name": "satisfaction report",
+     "shape": "satisfaction measured per party",
+     "shows": [],
+     "status": "no real input"
+    }
+   ],
+   "group": "general management",
+   "name": "Relationship management"
+  },
+  {
+   "deliverables": [
+    {
+     "chain": [
+      [
+       "cases",
+       {}
+      ],
+      [
+       "group",
+       {
+        "aggregates": [
+         [
+          "avg",
+          "duration_days",
+          "mean_days"
+         ]
+        ],
+        "by": [
+         "department"
+        ]
+       }
+      ],
+      [
+       "save_as",
+       {
+        "name": "means"
+       }
+      ],
+      [
+       "cases",
+       {}
+      ],
+      [
+       "filter",
+       {
+        "where": [
+         [
+          "outcome",
+          "eq",
+          "open"
+         ]
+        ]
+       }
+      ],
+      [
+       "join",
+       {
+        "keys": [
+         [
+          "department",
+          "department"
+         ]
+        ],
+        "with": "means"
+       }
+      ],
+      [
+       "derive",
+       {
+        "den": "mean_days",
+        "field": "exposure",
+        "fn": "ratio",
+        "num": "days_since_last_event"
+       }
+      ],
+      [
+       "sort",
+       {
+        "by": [
+         "exposure"
+        ],
+        "desc": true
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "risk_register"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/risk-management/risk-register/risk_register.xlsx",
+       "6870a2aa4290dba471de3fab3d07aba5fc7dd7750290df446d016678dcecfe9d",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "open receipt-phase cases against their department's mean duration",
+     "name": "risk register",
+     "shape": "open items exposed beyond their group's norm",
+     "shows": [
+      "rows 105; first {\"case\": \"case-416\", \"department\": \"General\", \"channel\": \"Internet\", \"responsible\": \"Resource26\", \"start\": \"2010-10-20 10:56:58.348000+00:00\", \"end\": \"2010-11-08 13:07:42.360000+00:00\", \"events\": 6, \"duration_days\": 19.0"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "cases",
+       {}
+      ],
+      [
+       "derive",
+       {
+        "field": "late",
+        "fn": "contains",
+        "of": "outcome",
+        "value": "after"
+       }
+      ],
+      [
+       "group",
+       {
+        "aggregates": [
+         [
+          "count",
+          "*",
+          "cases"
+         ],
+         [
+          "sum",
+          "late",
+          "late_cases"
+         ],
+         [
+          "avg",
+          "duration_days",
+          "impact_days"
+         ]
+        ],
+        "by": [
+         "department"
+        ]
+       }
+      ],
+      [
+       "derive",
+       {
+        "den": "cases",
+        "field": "likelihood",
+        "fn": "ratio",
+        "num": "late_cases"
+       }
+      ],
+      [
+       "page",
+       {
+        "kind": "scatter",
+        "name": "risk_matrix",
+        "size": "cases",
+        "title": "likelihood of lateness against mean duration",
+        "x": "likelihood",
+        "y": "impact_days"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/risk-management/risk-matrix/risk_matrix.html",
+       "89bd50c2374beed820a734e6aa4fb5e5d3a8a0203de107dc2dcc1c71e091ee0d",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "receipt-phase departments, share late against mean duration",
+     "name": "risk matrix",
+     "shape": "likelihood against impact per group",
+     "shows": [
+      "rows 3; first {\"department\": \"Customer contact\", \"cases\": 29, \"late_cases\": 1.0, \"impact_days\": 1.66, \"likelihood\": 0.0345}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "cases",
+       {}
+      ],
+      [
+       "derive",
+       {
+        "field": "late",
+        "fn": "contains",
+        "of": "outcome",
+        "value": "after"
+       }
+      ],
+      [
+       "group",
+       {
+        "aggregates": [
+         [
+          "count",
+          "*",
+          "cases"
+         ],
+         [
+          "sum",
+          "late",
+          "late_cases"
+         ]
+        ],
+        "by": [
+         "department",
+         "channel"
+        ]
+       }
+      ],
+      [
+       "derive",
+       {
+        "den": "cases",
+        "field": "late_share",
+        "fn": "ratio",
+        "num": "late_cases"
+       }
+      ],
+      [
+       "document",
+       {
+        "name": "risk_report",
+        "title": "lateness by department and channel"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/risk-management/risk-report/risk_report.docx",
+       "2cf5fbb078f8b0f8f1b57ce26a1bc00e7118fe8da60aa505bf5674895a8904d5",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "receipt-phase departments",
+     "name": "risk report",
+     "shape": "the register summarized for review",
+     "shows": [
+      "rows 10; first {\"department\": \"Customer contact\", \"channel\": \"Desk\", \"cases\": 3, \"late_cases\": 0.0, \"late_share\": 0.0}"
+     ],
+     "status": "proven"
+    }
+   ],
+   "group": "general management",
+   "name": "Risk management"
+  },
+  {
+   "deliverables": [
+    {
+     "chain": [
+      [
+       "required_actions",
+       {
+        "of": "usc5-552-doj"
+       }
+      ],
+      [
+       "filter",
+       {
+        "where": [
+         [
+          "sentence",
+          "matches",
+          "(?i)\\bfee"
+         ]
+        ]
+       }
+      ],
+      [
+       "select",
+       {
+        "fields": [
+         "unit",
+         "who",
+         "action",
+         "sentence"
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "fee_rules"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/service-financial-management/fee-rules-register/fee_rules.xlsx",
+       "10c522669ac6b9b8dbe988c694e8dd6ffd6d8aa3e95bfe35e4c0e78209543ddf",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "fee provisions of 5 U.S.C. 552",
+     "name": "fee rules register",
+     "shape": "the rules under which charges are made",
+     "shows": [
+      "rows 14; first {\"unit\": \"u0028\", \"who\": \"agency shall promulgate\", \"action\": \"promulgate\", \"sentence\": \"(4)(A)(i) In order to carry out the provisions of this section, each agency shall promulgate regulations, pursuant to notice and re"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "cases",
+       {}
+      ],
+      [
+       "workbook",
+       {
+        "name": "budget"
+       }
+      ]
+     ],
+     "files": [],
+     "instantiated_on": "none",
+     "name": "budget",
+     "shape": "planned spend per period and cost centre",
+     "shows": [],
+     "status": "no real input"
+    },
+    {
+     "chain": [
+      [
+       "cases",
+       {}
+      ],
+      [
+       "workbook",
+       {
+        "name": "cost_model"
+       }
+      ]
+     ],
+     "files": [],
+     "instantiated_on": "none",
+     "name": "cost model",
+     "shape": "cost per unit of service",
+     "shows": [],
+     "status": "no real input"
+    },
+    {
+     "chain": [
+      [
+       "cases",
+       {}
+      ],
+      [
+       "workbook",
+       {
+        "name": "chargeback"
+       }
+      ]
+     ],
+     "files": [],
+     "instantiated_on": "none",
+     "name": "chargeback report",
+     "shape": "charges per consumer",
+     "shows": [],
+     "status": "no real input"
+    }
+   ],
+   "group": "general management",
+   "name": "Service financial management"
+  },
+  {
+   "deliverables": [
+    {
+     "chain": [
+      [
+       "required_actions",
+       {
+        "of": "nodejs-governance"
+       }
+      ],
+      [
+       "select",
+       {
+        "fields": [
+         "unit",
+         "who",
+         "action",
+         "sentence"
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "objectives"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/strategy-management/objectives-register/objectives.xlsx",
+       "8f2d87098ec744d9b124efbb661b2f3350946be88491286eaead77acbcf39d32",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "obligations of the Node.js governance document",
+     "name": "objectives register",
+     "shape": "the standing commitments of the organization",
+     "shows": [
+      "rows 2; first {\"unit\": \"u0013\", \"who\": \"collaborators must approve\", \"action\": \"approve\", \"sentence\": \"Two collaborators must approve a pull request before the pull request can land.\"}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "ordered_steps",
+       {
+        "of": "nodejs-governance"
+       }
+      ],
+      [
+       "group",
+       {
+        "aggregates": [
+         [
+          "count",
+          "*",
+          "steps"
+         ],
+         [
+          "list",
+          "step",
+          "steps_in_phase"
+         ]
+        ],
+        "by": [
+         "phase"
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "strategic_roadmap"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/strategy-management/strategic-roadmap/strategic_roadmap.xlsx",
+       "7be2e9b3d390c513389bb34dedf68277b92ba104286a95c831a170b60141b71b",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "ordered steps of the Node.js governance document",
+     "name": "strategic roadmap",
+     "shape": "phases and steps",
+     "shows": [
+      "rows 2; first {\"phase\": 1, \"steps\": 9, \"steps_in_phase\": \"address, collaborator, hour, meeting, onboarded, require, share, time, week\"}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "tags",
+       {
+        "of": "nodejs-tsc-charter"
+       }
+      ],
+      [
+       "filter",
+       {
+        "where": [
+         [
+          "tie",
+          "eq",
+          false
+         ]
+        ]
+       }
+      ],
+      [
+       "pivot",
+       {
+        "col": "meeting",
+        "row": "step_lemma"
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "strategy_review"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/strategy-management/strategy-review/strategy_review.xlsx",
+       "608a888d96c75ffe5949e36c7d86a258245a41802c60d11f38553fe672877655",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "charter actions tagged in TSC minutes",
+     "name": "strategy review",
+     "shape": "what the leadership discussed, by topic",
+     "shows": [
+      "rows 9; first {\"step_lemma\": \"approve\", \"tsc-2023-11-08\": 0, \"tsc-2023-12-06\": 0, \"tsc-2024-01-10\": 1, \"tsc-2024-01-17\": 0, \"tsc-2024-02-07\": 0, \"tsc-2025-01-08\": 0, \"tsc-2025-02-05\": 0, \"tsc-2025-03-05\": 0}"
+     ],
+     "status": "proven"
+    }
+   ],
+   "group": "general management",
+   "name": "Strategy management"
+  },
+  {
+   "deliverables": [
+    {
+     "chain": [
+      [
+       "required_actions",
+       {
+        "of": "nodejs-tsc-charter"
+       }
+      ],
+      [
+       "filter",
+       {
+        "where": [
+         [
+          "sentence",
+          "matches",
+          "CPC|Foundation|Board"
+         ]
+        ]
+       }
+      ],
+      [
+       "select",
+       {
+        "fields": [
+         "unit",
+         "who",
+         "action",
+         "sentence"
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "third_party_obligations"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/supplier-management/third-party-obligations-register/third_party_obligations.xlsx",
+       "37aab9e3c82159358794a010fd17c90da8aacbe5ab5a6b3ee50cf213952b98ad",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "TSC charter sentences naming the CPC or the Foundation",
+     "name": "third-party obligations register",
+     "shape": "obligations toward or from external parties",
+     "shows": [
+      "rows 2; first {\"unit\": \"u0026\", \"who\": \"TSC shall hold\", \"action\": \"hold\", \"sentence\": \"The TSC shall hold annual elections to select a TSC Chairperson and voting CPC member; there are no limits on the number of terms a TSC Chairperso"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "events",
+       {}
+      ],
+      [
+       "workbook",
+       {
+        "name": "suppliers"
+       }
+      ]
+     ],
+     "files": [],
+     "instantiated_on": "none",
+     "name": "supplier register",
+     "shape": "suppliers and what they supply",
+     "shows": [],
+     "status": "no real input"
+    },
+    {
+     "chain": [
+      [
+       "events",
+       {}
+      ],
+      [
+       "workbook",
+       {
+        "name": "supplier_performance"
+       }
+      ]
+     ],
+     "files": [],
+     "instantiated_on": "none",
+     "name": "supplier performance report",
+     "shape": "delivered against agreed, per supplier",
+     "shows": [],
+     "status": "no real input"
+    }
+   ],
+   "group": "general management",
+   "name": "Supplier management"
+  },
+  {
+   "deliverables": [
+    {
+     "chain": [
+      [
+       "who_must_what",
+       {
+        "of": "nodejs-tsc-charter"
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "roles"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/workforce-and-talent-management/roles-and-responsibilities/roles.xlsx",
+       "5960c68351c7adacc8a9db1dc003bc1dbda335eca3210423ab60b11ebfca8f57",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "agents and required actions of the TSC charter",
+     "name": "roles and responsibilities",
+     "shape": "who must do what",
+     "shows": [
+      "rows 5; first {\"who\": \"collaborators shall operate\", \"action\": \"operate\", \"count\": 1}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "attendance",
+       {}
+      ],
+      [
+       "page",
+       {
+        "kind": "bar",
+        "name": "attendance",
+        "title": "voting members present per meeting",
+        "x": "meeting",
+        "y": "present_voting"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/workforce-and-talent-management/attendance-report/attendance.html",
+       "9e8d4ce0789939b9405a0a6ae2d966f10feaefe10a8d3dc2e4500beae20ee435",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "voting members present at eight TSC meetings",
+     "name": "attendance report",
+     "shape": "participation per occasion",
+     "shows": [
+      "rows 8; first {\"meeting\": \"tsc-2023-11-08\", \"present_voting\": 6, \"present\": 6}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "events",
+       {}
+      ],
+      [
+       "group",
+       {
+        "aggregates": [
+         [
+          "count",
+          "*",
+          "events"
+         ],
+         [
+          "distinct",
+          "case",
+          "cases"
+         ],
+         [
+          "distinct",
+          "activity",
+          "activities"
+         ]
+        ],
+        "by": [
+         "resource"
+        ]
+       }
+      ],
+      [
+       "sort",
+       {
+        "by": [
+         "events"
+        ],
+        "desc": true
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "workload"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/workforce-and-talent-management/workload-report/workload.xlsx",
+       "f299c0a1684cf8745db1c0c97e021de10309c45f65eebe380e94227cdbe703e9",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "receipt-phase events per resource",
+     "name": "workload report",
+     "shape": "work handled per person",
+     "shows": [
+      "rows 48; first {\"resource\": \"Resource01\", \"events\": 1228, \"cases\": 243, \"activities\": 14}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "events",
+       {}
+      ],
+      [
+       "pivot",
+       {
+        "col": "activity",
+        "row": "resource"
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "skills_matrix"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/workforce-and-talent-management/skills-matrix/skills_matrix.xlsx",
+       "d17309c1815087e6898a7832df4043a42c218a6d173fa585879d434e4c915ea3",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "receipt-phase resources against the activities they performed",
+     "name": "skills matrix",
+     "shape": "people against skills",
+     "shows": [
+      "rows 48; first {\"resource\": \"Resource01\", \"Confirmation of receipt\": 195, \"T02 Check confirmation of receipt\": 209, \"T03 Adjust confirmation of receipt\": 1, \"T04 Determine confirmation of receipt\": 184, \"T05 Print and send confirmation"
+     ],
+     "status": "proven"
+    }
+   ],
+   "group": "general management",
+   "name": "Workforce and talent management"
+  },
+  {
+   "deliverables": [
+    {
+     "chain": [
+      [
+       "anchors",
+       {
+        "of": "usc5-552-doj"
+       }
+      ],
+      [
+       "filter",
+       {
+        "where": [
+         [
+          "timex3",
+          "contains",
+          "DURATION"
+         ]
+        ]
+       }
+      ],
+      [
+       "select",
+       {
+        "fields": [
+         "span",
+         "timex3",
+         "sentence"
+        ]
+       }
+      ],
+      [
+       "distinct",
+       {}
+      ],
+      [
+       "workbook",
+       {
+        "name": "availability_requirements"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/availability-management/availability-requirements/availability_requirements.xlsx",
+       "712f6783c15c46cb44bfed962630c2fc32d6dee8c305851179382861742c73bb",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "durations in 5 U.S.C. 552 with their sentences",
+     "name": "availability requirements",
+     "shape": "the time limits the rules impose",
+     "shows": [
+      "rows 17; first {\"span\": \"one year\", \"timex3\": \"TIMEX3 type=\\\"DURATION\\\" value=\\\"P1Y\\\"\", \"sentence\": \"For records created on or after November 1, 1996, within one year after such date, each agency shall make such records available, incl"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "decisions",
+       {}
+      ],
+      [
+       "derive",
+       {
+        "den": "present_voting",
+        "field": "availability",
+        "fn": "ratio",
+        "num": "present_voting"
+       }
+      ],
+      [
+       "select",
+       {
+        "fields": [
+         "meeting",
+         "present_voting",
+         "majority_reachable"
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "availability_report"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/availability-management/availability-report/availability_report.xlsx",
+       "3e9beefff35ce027cb13eb539e1b93736151dcd067da9396dd38f9f85bb8d121",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "share of voting members available per TSC meeting",
+     "name": "availability report",
+     "shape": "achieved availability per period",
+     "shows": [
+      "rows 8; first {\"meeting\": \"tsc-2023-11-08\", \"present_voting\": 6, \"majority_reachable\": false}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "cases",
+       {}
+      ],
+      [
+       "workbook",
+       {
+        "name": "availability_plan"
+       }
+      ]
+     ],
+     "files": [],
+     "instantiated_on": "none",
+     "name": "availability plan",
+     "shape": "planned measures to keep the service available",
+     "shows": [],
+     "status": "no real input"
+    }
+   ],
+   "group": "service management",
+   "name": "Availability management"
+  },
+  {
+   "deliverables": [
+    {
+     "chain": [
+      [
+       "required_actions",
+       {
+        "of": "usc5-552-doj"
+       }
+      ],
+      [
+       "select",
+       {
+        "fields": [
+         "unit",
+         "who",
+         "action",
+         "sentence"
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "requirements"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/business-analysis/requirements-catalogue/requirements.xlsx",
+       "6e6b1b61aded21bc43e1631a5c6337d00176a534b6503e98f9131ac45e1f9774",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "obligations of 5 U.S.C. 552",
+     "name": "requirements catalogue",
+     "shape": "every requirement with its source and owner",
+     "shows": [
+      "rows 122; first {\"unit\": \"u0001\", \"who\": \"agency shall make\", \"action\": \"make\", \"sentence\": \"(a) Each agency shall make available to the public information as follows:\"}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "dfg",
+       {}
+      ],
+      [
+       "workbook",
+       {
+        "name": "as_is_process"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/business-analysis/as-is-process-model/as_is_process.xlsx",
+       "18d955657444fd3eb9ebde649272460f6daa31d5bad719da33b7b4731c342909",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "receipt-phase directly-follows edges",
+     "name": "as-is process model",
+     "shape": "the process as performed",
+     "shows": [
+      "rows 99; first {\"from\": \"T04 Determine confirmation of receipt\", \"to\": \"T05 Print and send confirmation of receipt\", \"count\": 1177}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "required_actions",
+       {
+        "of": "nodejs-tsc-charter"
+       }
+      ],
+      [
+       "select",
+       {
+        "fields": [
+         "action"
+        ]
+       }
+      ],
+      [
+       "distinct",
+       {}
+      ],
+      [
+       "save_as",
+       {
+        "name": "charter"
+       }
+      ],
+      [
+       "required_actions",
+       {
+        "of": "nodejs-governance"
+       }
+      ],
+      [
+       "select",
+       {
+        "fields": [
+         "action"
+        ]
+       }
+      ],
+      [
+       "distinct",
+       {}
+      ],
+      [
+       "join",
+       {
+        "how": "left",
+        "keys": [
+         [
+          "action",
+          "action"
+         ]
+        ],
+        "with": "charter"
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "gap_analysis"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/business-analysis/gap-analysis/gap_analysis.xlsx",
+       "79b1a36ad7ee69a986b7662f16eb9ef20fa1dee32026e7449b573849cb0d9168",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "required actions of the TSC charter against the governance document",
+     "name": "gap analysis",
+     "shape": "requirements present in one source and absent in another",
+     "shows": [
+      "rows 2; first {\"action\": \"approve\"}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "anchors",
+       {
+        "of": "usc5-552-doj"
+       }
+      ],
+      [
+       "filter",
+       {
+        "where": [
+         [
+          "timex3",
+          "contains",
+          "DURATION"
+         ]
+        ]
+       }
+      ],
+      [
+       "save_as",
+       {
+        "name": "clocks"
+       }
+      ],
+      [
+       "required_actions",
+       {
+        "of": "usc5-552-doj"
+       }
+      ],
+      [
+       "join",
+       {
+        "keys": [
+         [
+          "sentence_id",
+          "sentence_id"
+         ]
+        ],
+        "with": "clocks"
+       }
+      ],
+      [
+       "select",
+       {
+        "fields": [
+         "unit",
+         "who",
+         "action",
+         "span",
+         "timex3",
+         "sentence"
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "acceptance_criteria"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/business-analysis/acceptance-criteria/acceptance_criteria.xlsx",
+       "06697e82453161bb8a0c5a6811e58c5e92867933cde32018207f21cadbbf8a79",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "5 U.S.C. 552 obligations joined to durations in the same sentence",
+     "name": "acceptance criteria",
+     "shape": "each required action with its clock",
+     "shows": [
+      "rows 6; first {\"unit\": \"u0018\", \"who\": \"agency shall make\", \"action\": \"make\", \"span\": \"one year\", \"timex3\": \"TIMEX3 type=\\\"DURATION\\\" value=\\\"P1Y\\\"\", \"sentence\": \"For records created on or after November 1, 1996, within one year after"
+     ],
+     "status": "proven"
+    }
+   ],
+   "group": "service management",
+   "name": "Business analysis"
+  },
+  {
+   "deliverables": [
+    {
+     "chain": [
+      [
+       "events",
+       {}
+      ],
+      [
+       "derive",
+       {
+        "field": "month",
+        "fn": "month",
+        "of": "ts"
+       }
+      ],
+      [
+       "pivot",
+       {
+        "col": "department",
+        "row": "month"
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "capacity_plan"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/capacity-and-performance-management/capacity-plan/capacity_plan.xlsx",
+       "fab180bfb9e59e2b5f5d547ca78cd2690d068327e616cf76abd4ee21d85b7a74",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "receipt-phase events per month and department",
+     "name": "capacity plan",
+     "shape": "demand per period and group",
+     "shows": [
+      "rows 16; first {\"month\": \"2010-10\", \"Customer contact\": 0, \"Experts\": 26, \"General\": 55}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "cases",
+       {}
+      ],
+      [
+       "group",
+       {
+        "aggregates": [
+         [
+          "count",
+          "*",
+          "cases"
+         ],
+         [
+          "min",
+          "duration_days",
+          "min_days"
+         ],
+         [
+          "median",
+          "duration_days",
+          "median_days"
+         ],
+         [
+          "avg",
+          "duration_days",
+          "mean_days"
+         ],
+         [
+          "max",
+          "duration_days",
+          "max_days"
+         ]
+        ],
+        "by": [
+         "department"
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "performance_report"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/capacity-and-performance-management/performance-report/performance_report.xlsx",
+       "1b6af16c4b4fe3ff6398bac3c904b7933f066a4fc08b04a0e70f7ea0d13c6364",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "receipt-phase cases per department",
+     "name": "performance report",
+     "shape": "duration statistics per group",
+     "shows": [
+      "rows 3; first {\"department\": \"Customer contact\", \"cases\": 29, \"min_days\": 0.0, \"median_days\": 0.0, \"mean_days\": 1.66, \"max_days\": 12.25}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "cases",
+       {}
+      ],
+      [
+       "group",
+       {
+        "aggregates": [
+         [
+          "count",
+          "*",
+          "cases"
+         ]
+        ],
+        "by": [
+         "month"
+        ]
+       }
+      ],
+      [
+       "page",
+       {
+        "kind": "line",
+        "name": "demand",
+        "title": "cases started per month",
+        "x": "month",
+        "y": "cases"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/capacity-and-performance-management/demand-trend/demand.html",
+       "655c52141c02f2c6934b190413eecd58177652f4795241ae5eeca3c1cdb8158c",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "receipt-phase cases",
+     "name": "demand trend",
+     "shape": "cases started per month",
+     "shows": [
+      "rows 16; first {\"month\": \"2010-10\", \"cases\": 15}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "bottlenecks",
+       {}
+      ],
+      [
+       "workbook",
+       {
+        "name": "bottlenecks"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/capacity-and-performance-management/bottleneck-analysis/bottlenecks.xlsx",
+       "bfdf9be9a88d4c5b0a7d7e2758e87d313b654b907eb7a68da0308a9ba4dfcc25",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "receipt-phase directly-follows edges with waiting times",
+     "name": "bottleneck analysis",
+     "shape": "the transitions with the longest waits",
+     "shows": [
+      "rows 25; first {\"from\": \"T05 Print and send confirmation of receipt\", \"to\": \"T13 Adjust document X request unlicensed\", \"cases\": 2, \"mean_hours_waiting_into_to\": 205.36}"
+     ],
+     "status": "proven"
+    }
+   ],
+   "group": "service management",
+   "name": "Capacity and performance management"
+  },
+  {
+   "deliverables": [
+    {
+     "chain": [
+      [
+       "minutes_sections",
+       {}
+      ],
+      [
+       "filter",
+       {
+        "where": [
+         [
+          "link",
+          "contains",
+          "/pull/"
+         ]
+        ]
+       }
+      ],
+      [
+       "select",
+       {
+        "fields": [
+         "meeting",
+         "section",
+         "item",
+         "link"
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "change_requests"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/change-enablement/change-request-record/change_requests.xlsx",
+       "ba38755eed41043d4f39eed30418cd52107a2ac30541da4d6ba9d87ae7380f9d",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "pull requests referenced in TSC minutes",
+     "name": "change request record",
+     "shape": "proposed changes with their reference",
+     "shows": [
+      "rows 20; first {\"meeting\": \"tsc-2023-11-08\", \"section\": \"nodejs/node\", \"item\": \"doc: move deprecated utils to runtime deprecation #50488\", \"link\": \"https://github.com/nodejs/node/pull/50488\"}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "forced_edges",
+       {
+        "of": "nodejs-governance"
+       }
+      ],
+      [
+       "bpmn",
+       {
+        "name": "change_model"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/change-enablement/change-model/change_model.bpmn",
+       "166bbb4144b5a68850328b79b7388ac030a78e9a76c08820422136062d598113",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "forced precedence of the Node.js governance document",
+     "name": "change model",
+     "shape": "the standard steps of a change in forced order",
+     "shows": [
+      "rows 9; first {\"before\": \"nodejs-governance:u0020:s00#e25\", \"after\": \"nodejs-governance:u0020:s00#e19\", \"before_step\": \"collaborator\", \"after_step\": \"more\"}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "minutes_sections",
+       {}
+      ],
+      [
+       "filter",
+       {
+        "where": [
+         [
+          "link",
+          "contains",
+          "/pull/"
+         ]
+        ]
+       }
+      ],
+      [
+       "group",
+       {
+        "aggregates": [
+         [
+          "count",
+          "*",
+          "changes"
+         ],
+         [
+          "list",
+          "link",
+          "links"
+         ]
+        ],
+        "by": [
+         "meeting"
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "change_schedule"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/change-enablement/change-schedule/change_schedule.xlsx",
+       "a7e70fe13108f94c6844c44bc870f1e533df9a94dc99964762a8cc4963e78682",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "pull requests per TSC meeting date",
+     "name": "change schedule",
+     "shape": "changes by date",
+     "shows": [
+      "rows 6; first {\"meeting\": \"tsc-2023-11-08\", \"changes\": 5, \"links\": \"https://github.com/nodejs/node/pull/49867, https://github.com/nodejs/node/pull/50169, https://github.com/nodejs/node/pull/50250, https://github.com/nodejs/node/pull/5"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "who_must_what",
+       {
+        "of": "nodejs-tsc-charter"
+       }
+      ],
+      [
+       "pivot",
+       {
+        "col": "action",
+        "fn": "sum",
+        "row": "who",
+        "value": "count"
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "authority_matrix"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/change-enablement/change-authority-matrix/authority_matrix.xlsx",
+       "c5f21da356efff6344a93a997e853da976ec3bd76e1efc56bf006d8100541344",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "agents and required actions of the TSC charter",
+     "name": "change authority matrix",
+     "shape": "who must authorize what",
+     "shows": [
+      "rows 5; first {\"who\": \"collaborators shall operate\", \"establish\": 0, \"have\": 0, \"hold\": 0, \"meet\": 0, \"operate\": 1.0}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "conformance",
+       {}
+      ],
+      [
+       "derive",
+       {
+        "field": "fit",
+        "fn": "contains",
+        "of": "is_fit",
+        "value": "true"
+       }
+      ],
+      [
+       "group",
+       {
+        "aggregates": [
+         [
+          "count",
+          "*",
+          "cases"
+         ],
+         [
+          "sum",
+          "fit",
+          "fit_cases"
+         ],
+         [
+          "avg",
+          "fitness",
+          "mean_fitness"
+         ]
+        ],
+        "by": []
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "post_implementation_review"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/change-enablement/post-implementation-review/post_implementation_review.xlsx",
+       "e8ae029d962f6dff01922e51869356f3a0ede233bb4a92d91ede3bdc1c4f0f38",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "receipt-phase conformance per variant",
+     "name": "post-implementation review",
+     "shape": "whether performed changes matched the model",
+     "shows": [
+      "rows 1; first {\"cases\": 1434, \"fit_cases\": 1425.0, \"mean_fitness\": 1.0}"
+     ],
+     "status": "proven"
+    }
+   ],
+   "group": "service management",
+   "name": "Change enablement"
+  },
+  {
+   "deliverables": [
+    {
+     "chain": [
+      [
+       "cases",
+       {}
+      ],
+      [
+       "select",
+       {
+        "fields": [
+         "case",
+         "department",
+         "channel",
+         "responsible",
+         "start",
+         "end",
+         "events",
+         "duration_days",
+         "outcome"
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "case_records"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/incident-management/incident-record/case_records.xlsx",
+       "21d9cb2b5cc71589fceb9e208a456eb038993dc64db91f8c5f8f985f8f63478f",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "receipt-phase cases",
+     "name": "incident record",
+     "shape": "one row per case with category, status, timestamps and outcome",
+     "shows": [
+      "rows 1434; first {\"case\": \"case-10011\", \"department\": \"General\", \"channel\": \"Internet\", \"responsible\": \"Resource21\", \"start\": \"2011-10-11 11:45:40.276000+00:00\", \"end\": \"2011-11-24 14:37:16.553000+00:00\", \"events\": 4, \"duration_days\": 44"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "variants",
+       {}
+      ],
+      [
+       "limit",
+       {
+        "n": 5
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "models"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/incident-management/incident-model/models.xlsx",
+       "e71b4a1a2c43329fb68ecf5bfdea7bf0d6dc0f31b958d5448b0c40e54f65b77c",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "the most common receipt-phase variant",
+     "name": "incident model",
+     "shape": "the standard sequence of steps",
+     "shows": [
+      "rows 5; first {\"rank\": 1, \"cases\": 713, \"length\": 6, \"variant\": \"Confirmation of receipt -> T02 Check confirmation of receipt -> T04 Determine confirmation of receipt -> T05 Print and send confirmation of receipt -> T06 Determine nece"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "cases",
+       {}
+      ],
+      [
+       "sort",
+       {
+        "by": [
+         "duration_days"
+        ],
+        "desc": true
+       }
+      ],
+      [
+       "limit",
+       {
+        "n": 10
+       }
+      ],
+      [
+       "document",
+       {
+        "columns": [
+         "case",
+         "department",
+         "channel",
+         "start",
+         "end",
+         "duration_days",
+         "outcome"
+        ],
+        "name": "major_cases",
+        "title": "the ten longest cases"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/incident-management/major-incident-report/major_cases.docx",
+       "933867beef3f8615c36f580658985f768e5fcd2036298983c9d138e5014c3eda",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "the ten longest receipt-phase cases",
+     "name": "major incident report",
+     "shape": "the longest cases with their timeline",
+     "shows": [
+      "rows 10; first {\"case\": \"case-4601\", \"department\": \"General\", \"channel\": \"Internet\", \"responsible\": \"Resource12\", \"start\": \"2010-12-14 13:36:38.009000+00:00\", \"end\": \"2011-09-16 09:45:39.533000+00:00\", \"events\": 6, \"duration_days\": 275"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "cases",
+       {}
+      ],
+      [
+       "filter",
+       {
+        "where": [
+         [
+          "outcome",
+          "eq",
+          "open"
+         ]
+        ]
+       }
+      ],
+      [
+       "group",
+       {
+        "aggregates": [
+         [
+          "count",
+          "*",
+          "open_cases"
+         ],
+         [
+          "avg",
+          "days_since_last_event",
+          "mean_days_idle"
+         ]
+        ],
+        "by": [
+         "department"
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "status"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/incident-management/incident-status-report/status.xlsx",
+       "2f67f489cd263e6644402e28a856624e808c69173b83ffee3bf334a96111520f",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "open receipt-phase cases per department",
+     "name": "incident status report",
+     "shape": "open work per group",
+     "shows": [
+      "rows 1; first {\"department\": \"General\", \"open_cases\": 105, \"mean_days_idle\": 69.47}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "cases",
+       {}
+      ],
+      [
+       "filter",
+       {
+        "where": [
+         [
+          "outcome",
+          "eq",
+          "after deadline"
+         ]
+        ]
+       }
+      ],
+      [
+       "select",
+       {
+        "fields": [
+         "case",
+         "department",
+         "channel",
+         "deadline",
+         "enddate",
+         "duration_days"
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "breaches"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/incident-management/deadline-breach-list/breaches.xlsx",
+       "de3fec19361ddd4d0cf4ab1dbaa3f97317be96bc765ad6a91cd82d7dd5ecb7e8",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "receipt-phase cases",
+     "name": "deadline breach list",
+     "shape": "cases that ended after their deadline",
+     "shows": [
+      "rows 377; first {\"case\": \"case-10028\", \"department\": \"General\", \"channel\": \"Internet\", \"deadline\": \"2011-12-05 01:06:40+01:00\", \"enddate\": \"2011-12-05 15:34:49.174000+01:00\", \"duration_days\": 0.01}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "handover",
+       {}
+      ],
+      [
+       "limit",
+       {
+        "n": 200
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "escalation"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/incident-management/escalation-matrix/escalation.xlsx",
+       "68e49809f003ca00200d70a43e49d792ef16320dffd3a93a81d2d44c21d3e095",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "receipt-phase handover-of-work network",
+     "name": "escalation matrix",
+     "shape": "who hands work to whom",
+     "shows": [
+      "rows 200; first {\"from\": \"Resource01\", \"to\": \"Resource01\", \"value\": 0.136497}"
+     ],
+     "status": "proven"
+    }
+   ],
+   "group": "service management",
+   "name": "Incident management"
+  },
+  {
+   "deliverables": [
+    {
+     "chain": [
+      [
+       "events",
+       {}
+      ],
+      [
+       "group",
+       {
+        "aggregates": [
+         [
+          "count",
+          "*",
+          "events"
+         ],
+         [
+          "min",
+          "ts",
+          "first_seen"
+         ],
+         [
+          "max",
+          "ts",
+          "last_seen"
+         ]
+        ],
+        "by": [
+         "group",
+         "resource"
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "asset_register"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/it-asset-management/asset-register/asset_register.xlsx",
+       "57cee043168cbdcdd529da658da9f0856ed485ae428c38acbba5d013419a47f6",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "receipt-phase resources and groups",
+     "name": "asset register",
+     "shape": "the assets in use with counts of use",
+     "shows": [
+      "rows 215; first {\"group\": \"EMPTY\", \"resource\": \"Resource01\", \"events\": 193, \"first_seen\": \"2010-12-10 12:09:40.789000+01:00\", \"last_seen\": \"2011-12-28 15:36:23.336000+01:00\"}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "events",
+       {}
+      ],
+      [
+       "group",
+       {
+        "aggregates": [
+         [
+          "min",
+          "ts",
+          "first_seen"
+         ],
+         [
+          "max",
+          "ts",
+          "last_seen"
+         ],
+         [
+          "count",
+          "*",
+          "events"
+         ]
+        ],
+        "by": [
+         "resource"
+        ]
+       }
+      ],
+      [
+       "derive",
+       {
+        "a": "first_seen",
+        "b": "last_seen",
+        "field": "active_days",
+        "fn": "days_between"
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "lifecycle"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/it-asset-management/lifecycle-records/lifecycle.xlsx",
+       "9917d89c410763ad50ec5e22be2226de7b786d18f6edbf1164e18f13ac839fce",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "receipt-phase resources",
+     "name": "lifecycle records",
+     "shape": "first and last use per asset",
+     "shows": [
+      "rows 48; first {\"resource\": \"Resource01\", \"first_seen\": \"2010-11-02 12:42:19.582000+01:00\", \"last_seen\": \"2011-12-28 15:44:34.115000+01:00\", \"events\": 1228, \"active_days\": 421.13}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "roundtrips",
+       {}
+      ],
+      [
+       "workbook",
+       {
+        "name": "reconciliation"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/it-asset-management/audit-reconciliation/reconciliation.xlsx",
+       "6e49e3dabd08905d28f3db4a1b676853ddf59176de68a1eb014200f5af8a32e5",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "the reverse proofs of this file",
+     "name": "audit reconciliation",
+     "shape": "forward records against what was read back from the deliverables",
+     "shows": [
+      "rows 4; first {\"proof\": \"P19\", \"label\": \"deck\", \"match\": true, \"changed\": 0}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "events",
+       {}
+      ],
+      [
+       "workbook",
+       {
+        "name": "licenses"
+       }
+      ]
+     ],
+     "files": [],
+     "instantiated_on": "none",
+     "name": "license compliance report",
+     "shape": "entitlements against installations",
+     "shows": [],
+     "status": "no real input"
+    }
+   ],
+   "group": "service management",
+   "name": "IT asset management"
+  },
+  {
+   "deliverables": [
+    {
+     "chain": [
+      [
+       "events",
+       {}
+      ],
+      [
+       "select",
+       {
+        "fields": [
+         "case",
+         "activity",
+         "ts",
+         "resource",
+         "department",
+         "channel"
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "event_records"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/monitoring-and-event-management/event-records/event_records.xlsx",
+       "693c9ee65f6f95513f807da32af5b541423750e7cf30bb5bdebc2271bb3cbf91",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "receipt-phase events",
+     "name": "event records",
+     "shape": "every event with case, activity, time and resource",
+     "shows": [
+      "rows 8577; first {\"case\": \"case-10011\", \"activity\": \"Confirmation of receipt\", \"ts\": \"2011-10-11 13:45:40.276000+02:00\", \"resource\": \"Resource21\", \"department\": \"General\", \"channel\": \"Internet\"}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "cases",
+       {}
+      ],
+      [
+       "group",
+       {
+        "aggregates": [
+         [
+          "avg",
+          "duration_days",
+          "threshold_days"
+         ],
+         [
+          "count",
+          "*",
+          "cases"
+         ]
+        ],
+        "by": [
+         "department"
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "thresholds"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/monitoring-and-event-management/monitoring-thresholds/thresholds.xlsx",
+       "90e04cdcfd6b51aedf7977745aaae77d11d6e04437b86069181d02b3f9d332df",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "receipt-phase department mean durations",
+     "name": "monitoring thresholds",
+     "shape": "the threshold per group beyond which an alert is raised",
+     "shows": [
+      "rows 3; first {\"department\": \"Customer contact\", \"threshold_days\": 1.66, \"cases\": 29}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "cases",
+       {}
+      ],
+      [
+       "group",
+       {
+        "aggregates": [
+         [
+          "avg",
+          "duration_days",
+          "threshold_days"
+         ]
+        ],
+        "by": [
+         "department"
+        ]
+       }
+      ],
+      [
+       "save_as",
+       {
+        "name": "thresholds"
+       }
+      ],
+      [
+       "cases",
+       {}
+      ],
+      [
+       "filter",
+       {
+        "where": [
+         [
+          "outcome",
+          "eq",
+          "open"
+         ]
+        ]
+       }
+      ],
+      [
+       "join",
+       {
+        "keys": [
+         [
+          "department",
+          "department"
+         ]
+        ],
+        "with": "thresholds"
+       }
+      ],
+      [
+       "derive",
+       {
+        "den": "threshold_days",
+        "field": "over",
+        "fn": "ratio",
+        "num": "days_since_last_event"
+       }
+      ],
+      [
+       "decision_table",
+       {
+        "inputs": [
+         "over"
+        ],
+        "name": "alert",
+        "outputs": [
+         "alert"
+        ],
+        "rules": [
+         {
+          "because": "idle longer than the department's mean case duration (P22)",
+          "then": {
+           "alert": "true"
+          },
+          "when": {
+           "over": "> 1"
+          }
+         },
+         {
+          "because": "otherwise",
+          "then": {
+           "alert": "false"
+          },
+          "when": {}
+         }
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "alerts"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/monitoring-and-event-management/alert-list/policy.jdm.json",
+       "9835ab6f3625f14d66147c79c28d997b9ac1c310a7149f095b956eda0abab2c0",
+       "registered"
+      ],
+      [
+       "proofs/out/itil/monitoring-and-event-management/alert-list/alerts.xlsx",
+       "5c51e871f2df40a50fa46d6b0c5b64ced009098dcfd4d8bb8d4abcfa39be4799",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "open receipt-phase cases against department means",
+     "name": "alert list",
+     "shape": "open items past threshold, decided by a rule",
+     "shows": [
+      "rows 105; first {\"case\": \"case-10011\", \"department\": \"General\", \"channel\": \"Internet\", \"responsible\": \"Resource21\", \"start\": \"2011-10-11 11:45:40.276000+00:00\", \"end\": \"2011-11-24 14:37:16.553000+00:00\", \"events\": 4, \"duration_days\": 44"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "dfg",
+       {}
+      ],
+      [
+       "workbook",
+       {
+        "name": "correlation"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/monitoring-and-event-management/event-correlation/correlation.xlsx",
+       "18d955657444fd3eb9ebde649272460f6daa31d5bad719da33b7b4731c342909",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "receipt-phase directly-follows edges",
+     "name": "event correlation",
+     "shape": "which events follow which, with counts",
+     "shows": [
+      "rows 99; first {\"from\": \"T04 Determine confirmation of receipt\", \"to\": \"T05 Print and send confirmation of receipt\", \"count\": 1177}"
+     ],
+     "status": "proven"
+    }
+   ],
+   "group": "service management",
+   "name": "Monitoring and event management"
+  },
+  {
+   "deliverables": [
+    {
+     "chain": [
+      [
+       "cases",
+       {}
+      ],
+      [
+       "filter",
+       {
+        "where": [
+         [
+          "outcome",
+          "eq",
+          "after deadline"
+         ]
+        ]
+       }
+      ],
+      [
+       "group",
+       {
+        "aggregates": [
+         [
+          "count",
+          "*",
+          "late_cases"
+         ],
+         [
+          "avg",
+          "duration_days",
+          "mean_days"
+         ]
+        ],
+        "by": [
+         "department",
+         "channel"
+        ]
+       }
+      ],
+      [
+       "sort",
+       {
+        "by": [
+         "late_cases"
+        ],
+        "desc": true
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "problems"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/problem-management/problem-record/problems.xlsx",
+       "126a467908e80e746c650bec72fbe175f6703fd6f58858feb2938c18d28ba74c",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "late receipt-phase cases per department and channel",
+     "name": "problem record",
+     "shape": "recurring failures grouped by cause candidate",
+     "shows": [
+      "rows 8; first {\"department\": \"General\", \"channel\": \"Internet\", \"late_cases\": 308, \"mean_days\": 9.54}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "conformance",
+       {}
+      ],
+      [
+       "filter",
+       {
+        "where": [
+         [
+          "is_fit",
+          "eq",
+          false
+         ]
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "known_errors"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/problem-management/known-error-record/known_errors.xlsx",
+       "06ec4a4303c58a7d328c8b90e36969e93f8336ffa60d894dcb11a99dd3b37d08",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "receipt-phase variants of cases that did not fit the model",
+     "name": "known error record",
+     "shape": "paths that deviate from the model",
+     "shows": [
+      "rows 9; first {\"case\": \"case-4771\", \"fitness\": 0.9783, \"is_fit\": false, \"missing_tokens\": 2, \"remaining_tokens\": 2}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "bottlenecks",
+       {}
+      ],
+      [
+       "limit",
+       {
+        "n": 10
+       }
+      ],
+      [
+       "document",
+       {
+        "name": "root_cause",
+        "title": "root cause: the ten slowest transitions"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/problem-management/root-cause-analysis/root_cause.docx",
+       "b201d52d7cc6105787e56a888f1a46208a8dfda2998807422d7e4e6ce014099b",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "receipt-phase bottlenecks",
+     "name": "root-cause analysis",
+     "shape": "where the waiting accumulates",
+     "shows": [
+      "rows 10; first {\"from\": \"T05 Print and send confirmation of receipt\", \"to\": \"T13 Adjust document X request unlicensed\", \"cases\": 2, \"mean_hours_waiting_into_to\": 205.36}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "cases",
+       {}
+      ],
+      [
+       "derive",
+       {
+        "field": "late",
+        "fn": "contains",
+        "of": "outcome",
+        "value": "after"
+       }
+      ],
+      [
+       "group",
+       {
+        "aggregates": [
+         [
+          "count",
+          "*",
+          "cases"
+         ],
+         [
+          "sum",
+          "late",
+          "late_cases"
+         ]
+        ],
+        "by": [
+         "month"
+        ]
+       }
+      ],
+      [
+       "derive",
+       {
+        "den": "cases",
+        "field": "late_share",
+        "fn": "ratio",
+        "num": "late_cases"
+       }
+      ],
+      [
+       "page",
+       {
+        "kind": "line",
+        "name": "trend",
+        "title": "share of cases ending after deadline, per month",
+        "x": "month",
+        "y": "late_share"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/problem-management/trend-analysis/trend.html",
+       "90e8251c6c3ff64e4a2a95d7bd81491f46a21b3acb26f56e165a6d1955cabb3c",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "late receipt-phase cases per month",
+     "name": "trend analysis",
+     "shape": "failures per period",
+     "shows": [
+      "rows 16; first {\"month\": \"2010-10\", \"cases\": 15, \"late_cases\": 10.0, \"late_share\": 0.6667}"
+     ],
+     "status": "proven"
+    }
+   ],
+   "group": "service management",
+   "name": "Problem management"
+  },
+  {
+   "deliverables": [
+    {
+     "chain": [
+      [
+       "ordered_steps",
+       {
+        "of": "nodejs-governance"
+       }
+      ],
+      [
+       "select",
+       {
+        "fields": [
+         "phase",
+         "position",
+         "step",
+         "sentence"
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "release_plan"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/release-management/release-plan/release_plan.xlsx",
+       "a8f3112bfee8f787be65b3ab97ef8e4944c20e6fa787b1a3649e59b780c66138",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "ordered steps of the Node.js governance document by phase",
+     "name": "release plan",
+     "shape": "steps grouped into releases",
+     "shows": [
+      "rows 18; first {\"phase\": 1, \"position\": 1, \"step\": \"collaborator\", \"sentence\": \"A collaborator is automatically made emeritus (and removed from active collaborator status) if it has been more than 12 months since the collaborator has a"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "minutes_sections",
+       {}
+      ],
+      [
+       "filter",
+       {
+        "where": [
+         [
+          "links",
+          "gt",
+          0
+         ]
+        ]
+       }
+      ],
+      [
+       "document",
+       {
+        "columns": [
+         "meeting",
+         "section",
+         "item",
+         "link"
+        ],
+        "name": "release_notes",
+        "title": "items with references, by meeting"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/release-management/release-notes/release_notes.docx",
+       "bfe057deb3393d7b6909668536ec6cb1a21f2e1088d03b0d7d63750d73dbe640",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "agenda items with links in the TSC minutes",
+     "name": "release notes",
+     "shape": "what changed, with references",
+     "shows": [
+      "rows 92; first {\"meeting\": \"tsc-2023-11-08\", \"section\": \"Links\", \"item\": \"GitHub Issue: https://github.com/nodejs/TSC/issues/1468\", \"link\": \"https://github.com/nodejs/TSC/issues/1468\", \"links\": 1}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "minutes_sections",
+       {}
+      ],
+      [
+       "filter",
+       {
+        "where": [
+         [
+          "item",
+          "matches",
+          "(?i)release|v[0-9]+\\b"
+         ]
+        ]
+       }
+      ],
+      [
+       "select",
+       {
+        "fields": [
+         "meeting",
+         "section",
+         "item",
+         "link"
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "release_schedule"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/release-management/release-schedule/release_schedule.xlsx",
+       "b7f6fa5a330a135cda6d279a7f982c6d3385aa22473d113627e0148cc522f5bc",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "TSC minutes sections mentioning release",
+     "name": "release schedule",
+     "shape": "releases by date",
+     "shows": [
+      "rows 13; first {\"meeting\": \"tsc-2024-01-10\", \"section\": \"Announcements\", \"item\": \"Richard, Ulises did a release for Node.js 20\", \"link\": \"\"}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "required_actions",
+       {
+        "of": "nodejs-tsc-charter"
+       }
+      ],
+      [
+       "checklist",
+       {
+        "item": "action",
+        "name": "readiness_checklist",
+        "note": "sentence",
+        "title": "readiness: the charter's obligations"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/release-management/release-readiness-checklist/readiness_checklist.docx",
+       "7a609a0676f5c6c5ad399eeebf0b5bba0cb6900430e164bc523c9196f24c2e48",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "obligations of the TSC charter",
+     "name": "release readiness checklist",
+     "shape": "what must be true before release",
+     "shows": [
+      "rows 13; first {\"event\": \"nodejs-tsc-charter:u0002:s02#e12\", \"action\": \"open\", \"who\": \"\", \"sentence_id\": \"nodejs-tsc-charter:u0002:s02\", \"sentence\": \"Project proposals, timelines, and status must not merely be open, but also easily vis"
+     ],
+     "status": "proven"
+    }
+   ],
+   "group": "service management",
+   "name": "Release management"
+  },
+  {
+   "deliverables": [
+    {
+     "chain": [
+      [
+       "events",
+       {}
+      ],
+      [
+       "group",
+       {
+        "aggregates": [
+         [
+          "count",
+          "*",
+          "events"
+         ],
+         [
+          "distinct",
+          "case",
+          "cases"
+         ]
+        ],
+        "by": [
+         "activity"
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "catalogue"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/service-catalogue-management/service-catalogue/catalogue.xlsx",
+       "a30f1360f5877670feefe77b74bdb11df64e4f049613c908825895c244526c71",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "receipt-phase activities",
+     "name": "service catalogue",
+     "shape": "the services offered with volumes",
+     "shows": [
+      "rows 27; first {\"activity\": \"Confirmation of receipt\", \"events\": 1434, \"cases\": 1434}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "definitions",
+       {
+        "of": "usc5-552-doj"
+       }
+      ],
+      [
+       "document",
+       {
+        "columns": [
+         "unit",
+         "verb",
+         "sentence"
+        ],
+        "name": "descriptions",
+        "title": "definitions in the statute"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/service-catalogue-management/service-descriptions/descriptions.docx",
+       "9675d5075ed67446fb2b87425b701a3538e3c71451e56bfbc0beb8a09633b44f",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "definitional sentences of 5 U.S.C. 552",
+     "name": "service descriptions",
+     "shape": "what each term means, from the governing text",
+     "shows": [
+      "rows 17; first {\"event\": \"usc5-552-doj:u0024:s01#e12\", \"verb\": \"mean\", \"sentence_id\": \"usc5-552-doj:u0024:s01\", \"sentence\": \"For purposes of this paragraph, the term \\\"search\\\" means to review, manually or by automated means, agency re"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "events",
+       {}
+      ],
+      [
+       "pivot",
+       {
+        "col": "channel",
+        "row": "activity"
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "request_catalogue"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/service-catalogue-management/request-catalogue/request_catalogue.xlsx",
+       "faffad86140e0b0e33d934ba3bdf5e57f78938011d789f539fc9822399b482a7",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "receipt-phase activities per channel",
+     "name": "request catalogue",
+     "shape": "what can be requested through which channel",
+     "shows": [
+      "rows 27; first {\"activity\": \"Confirmation of receipt\", \"Desk\": 109, \"Intern\": 1, \"Internet\": 1250, \"Post\": 53, \"e-mail\": 21}"
+     ],
+     "status": "proven"
+    }
+   ],
+   "group": "service management",
+   "name": "Service catalogue management"
+  },
+  {
+   "deliverables": [
+    {
+     "chain": [
+      [
+       "events",
+       {}
+      ],
+      [
+       "distinct",
+       {
+        "fields": [
+         "activity",
+         "resource",
+         "group"
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "ci_register"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/service-configuration-management/configuration-item-register/ci_register.xlsx",
+       "d3f0f5ae52283b9194d2593db8ef4ea31c493773c76de93ad77d50b67e02ca08",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "receipt-phase activities, resources and groups",
+     "name": "configuration item register",
+     "shape": "the items and their attributes",
+     "shows": [
+      "rows 526; first {\"activity\": \"Confirmation of receipt\", \"resource\": \"Resource21\", \"group\": \"Group 1\"}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "dfg",
+       {}
+      ],
+      [
+       "page",
+       {
+        "kind": "table",
+        "name": "relationships",
+        "title": "directly-follows relationships"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/service-configuration-management/ci-relationship-map/relationships.html",
+       "a0184388aad4d53c76d2336aa24b1ee8ba28d224d6bcfc9edfbe4be4b523a295",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "receipt-phase directly-follows edges",
+     "name": "CI relationship map",
+     "shape": "which item relates to which, with strength",
+     "shows": [
+      "rows 99; first {\"from\": \"T04 Determine confirmation of receipt\", \"to\": \"T05 Print and send confirmation of receipt\", \"count\": 1177}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "ordered_steps",
+       {
+        "of": "usc5-552-doj"
+       }
+      ],
+      [
+       "json",
+       {
+        "name": "baseline"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/service-configuration-management/configuration-baseline/baseline.json",
+       "5851a99fe1fdb483cbe7e2459721066168905140f96ee9cec3edbfb40994b207",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "the forced order of 5 U.S.C. 552",
+     "name": "configuration baseline",
+     "shape": "the sealed state of the model",
+     "shows": [
+      "rows 24; first {\"position\": 1, \"event\": \"usc5-552-doj:u0021:s00#e43\", \"step\": \"request\", \"phase\": 1, \"sentence\": \"(3)(A) Except with respect to the records made available under paragraphs (1) and (2) of this subsection, and except as p"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "roundtrips",
+       {}
+      ],
+      [
+       "workbook",
+       {
+        "name": "verification"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/service-configuration-management/configuration-verification-report/verification.xlsx",
+       "6e49e3dabd08905d28f3db4a1b676853ddf59176de68a1eb014200f5af8a32e5",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "the reverse proofs of this file",
+     "name": "configuration verification report",
+     "shape": "what was read back matches what was written",
+     "shows": [
+      "rows 4; first {\"proof\": \"P19\", \"label\": \"deck\", \"match\": true, \"changed\": 0}"
+     ],
+     "status": "proven"
+    }
+   ],
+   "group": "service management",
+   "name": "Service configuration management"
+  },
+  {
+   "deliverables": [
+    {
+     "chain": [
+      [
+       "cases",
+       {}
+      ],
+      [
+       "group",
+       {
+        "aggregates": [
+         [
+          "count",
+          "*",
+          "cases"
+         ],
+         [
+          "avg",
+          "duration_days",
+          "mean_days"
+         ],
+         [
+          "max",
+          "duration_days",
+          "max_days"
+         ]
+        ],
+        "by": [
+         "department"
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "bia"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/service-continuity-management/business-impact-analysis/bia.xlsx",
+       "2336582410bc401f781a3621079ebcfb9e8ff068c8fd0e49a6edcf378d083681",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "receipt-phase departments",
+     "name": "business impact analysis",
+     "shape": "volume and duration per group",
+     "shows": [
+      "rows 3; first {\"department\": \"Customer contact\", \"cases\": 29, \"mean_days\": 1.66, \"max_days\": 12.25}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "required_actions",
+       {
+        "of": "usc5-552-doj"
+       }
+      ],
+      [
+       "document",
+       {
+        "columns": [
+         "unit",
+         "who",
+         "action",
+         "sentence"
+        ],
+        "name": "continuity_plan",
+        "title": "required actions"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/service-continuity-management/continuity-plan/continuity_plan.docx",
+       "bc76be40df9526b65b44eb0f971b62a7a0b61fbdd1db8711c029dc6228c3b084",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "5 U.S.C. 552 required actions",
+     "name": "continuity plan",
+     "shape": "the required actions in order",
+     "shows": [
+      "rows 122; first {\"event\": \"usc5-552-doj:u0001:s00#e7\", \"action\": \"make\", \"who\": \"agency shall make\", \"sentence_id\": \"usc5-552-doj:u0001:s00\", \"sentence\": \"(a) Each agency shall make available to the public information as follows:\", \"quo"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "ordered_steps",
+       {
+        "of": "usc5-552-doj"
+       }
+      ],
+      [
+       "document",
+       {
+        "columns": [
+         "position",
+         "phase",
+         "step",
+         "sentence"
+        ],
+        "name": "recovery_procedure",
+        "title": "steps in forced order"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/service-continuity-management/recovery-procedure/recovery_procedure.docx",
+       "bfe2abce4ca66498589f4f09426593317b95ae8edd0eb134498c8327472f7db0",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "ordered steps of 5 U.S.C. 552",
+     "name": "recovery procedure",
+     "shape": "the ordered steps to restore",
+     "shows": [
+      "rows 24; first {\"position\": 1, \"event\": \"usc5-552-doj:u0021:s00#e43\", \"step\": \"request\", \"phase\": 1, \"sentence\": \"(3)(A) Except with respect to the records made available under paragraphs (1) and (2) of this subsection, and except as p"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "execution_trace",
+       {
+        "of": "usc5-552-doj"
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "test_report"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/service-continuity-management/continuity-test-report/test_report.xlsx",
+       "3ace901e86701e2edc3c1a79417fdc535a4594dab61d0b02b4acb91b3c2a3d8a",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "execution trace of the statutory process in SpiffWorkflow",
+     "name": "continuity test report",
+     "shape": "the procedure executed and checked",
+     "shows": [
+      "rows 24; first {\"position\": 1, \"task\": \"authorize [u0131:s00#e16]\"}"
+     ],
+     "status": "proven"
+    }
+   ],
+   "group": "service management",
+   "name": "Service continuity management"
+  },
+  {
+   "deliverables": [
+    {
+     "chain": [
+      [
+       "required_actions",
+       {
+        "of": "usc5-552-doj"
+       }
+      ],
+      [
+       "document",
+       {
+        "columns": [
+         "unit",
+         "who",
+         "action",
+         "sentence"
+        ],
+        "name": "design_package",
+        "title": "design package: requirements"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/service-design/service-design-package/design_package.docx",
+       "69ebdd2d5274d2d1f879445cf5b26029b1d88b33719252d299aad0f0e6111616",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "5 U.S.C. 552",
+     "name": "service design package",
+     "shape": "requirements, steps and rules together",
+     "shows": [
+      "rows 122; first {\"event\": \"usc5-552-doj:u0001:s00#e7\", \"action\": \"make\", \"who\": \"agency shall make\", \"sentence_id\": \"usc5-552-doj:u0001:s00\", \"sentence\": \"(a) Each agency shall make available to the public information as follows:\", \"quo"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "required_actions",
+       {
+        "of": "usc5-552-doj"
+       }
+      ],
+      [
+       "pivot",
+       {
+        "col": "action",
+        "row": "unit"
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "traceability"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/service-design/requirements-traceability-matrix/traceability.xlsx",
+       "34a591089bc4a9518095fc49d7cc5b25e7b40e22edbaef5834f760c4bcd9389c",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "5 U.S.C. 552 obligations per unit",
+     "name": "requirements traceability matrix",
+     "shape": "each requirement traced to its source unit",
+     "shows": [
+      "rows 74; first {\"unit\": \"u0001\", \"accord\": 0, \"aggregate\": 0, \"allow\": 0, \"apply\": 0, \"assess\": 0, \"assist\": 0, \"available\": 0, \"base\": 0, \"chair\": 0, \"commence\": 0, \"comprise\": 0, \"conduct\": 0, \"conform\": 0, \"consider\": 0, \"construe\":"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "forced_edges",
+       {
+        "of": "usc5-552-doj"
+       }
+      ],
+      [
+       "bpmn",
+       {
+        "name": "blueprint"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/service-design/service-blueprint/blueprint.bpmn",
+       "bff8566093ca1992bd9aeefe5ab597f4381897b80ddf30fa664c68d3f166e3a2",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "forced precedence of 5 U.S.C. 552",
+     "name": "service blueprint",
+     "shape": "the process with its steps and order",
+     "shows": [
+      "rows 12; first {\"before\": \"usc5-552-doj:u0021:s00#e43\", \"after\": \"usc5-552-doj:u0021:s00#e59\", \"before_step\": \"request\", \"after_step\": \"make\"}"
+     ],
+     "status": "proven"
+    }
+   ],
+   "group": "service management",
+   "name": "Service design"
+  },
+  {
+   "deliverables": [
+    {
+     "chain": [
+      [
+       "cases",
+       {}
+      ],
+      [
+       "pivot",
+       {
+        "col": "channel",
+        "row": "month"
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "ticket_log"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/service-desk/ticket-log/ticket_log.xlsx",
+       "76022eca427bcdc10a0277150e5f1daa1c56906191fbddd4bbc21184d4dab74f",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "receipt-phase cases by channel",
+     "name": "ticket log",
+     "shape": "contacts by channel and time",
+     "shows": [
+      "rows 16; first {\"month\": \"2010-10\", \"Desk\": 3, \"Intern\": 0, \"Internet\": 12, \"Post\": 0, \"e-mail\": 0}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "events",
+       {}
+      ],
+      [
+       "filter",
+       {
+        "where": [
+         [
+          "channel",
+          "eq",
+          "Desk"
+         ]
+        ]
+       }
+      ],
+      [
+       "select",
+       {
+        "fields": [
+         "case",
+         "activity",
+         "ts",
+         "resource"
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "desk_interactions"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/service-desk/interaction-records/desk_interactions.xlsx",
+       "d8e5f4c0f929a94c88e3f68d298f7edbf8bccbf68a0488a4514a85424099d58d",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "receipt-phase events on the Desk channel",
+     "name": "interaction records",
+     "shape": "the interactions that came through the desk",
+     "shows": [
+      "rows 657; first {\"case\": \"case-10199\", \"activity\": \"Confirmation of receipt\", \"ts\": \"2011-10-31 12:27:03.433000+01:00\", \"resource\": \"Resource13\"}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "tags",
+       {
+        "of": "nodejs-governance"
+       }
+      ],
+      [
+       "filter",
+       {
+        "where": [
+         [
+          "tie",
+          "eq",
+          false
+         ]
+        ]
+       }
+      ],
+      [
+       "group",
+       {
+        "aggregates": [
+         [
+          "count",
+          "*",
+          "lines"
+         ]
+        ],
+        "by": [
+         "step_lemma"
+        ]
+       }
+      ],
+      [
+       "sort",
+       {
+        "by": [
+         "lines"
+        ],
+        "desc": true
+       }
+      ],
+      [
+       "limit",
+       {
+        "n": 10
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "knowledge_suggestions"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/service-desk/knowledge-suggestions/knowledge_suggestions.xlsx",
+       "0f5df56b186ff344862cb8c3eb675685e0b8452ae16c9a2297ea09c9d57f2146",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "governance steps tagged in TSC minutes",
+     "name": "knowledge suggestions",
+     "shape": "the steps most discussed, as candidates for articles",
+     "shows": [
+      "rows 9; first {\"step_lemma\": \"be\", \"lines\": 21}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "minutes_sections",
+       {}
+      ],
+      [
+       "filter",
+       {
+        "where": [
+         [
+          "section",
+          "contains",
+          "announce"
+         ]
+        ]
+       }
+      ],
+      [
+       "select",
+       {
+        "fields": [
+         "meeting",
+         "item"
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "announcements"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/service-desk/user-communications/announcements.xlsx",
+       "0b5660bfd43832d1200998bd9a118c9c2e3ed34eecd769882df91b01dc6fb3af",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "Announcements sections of the TSC minutes",
+     "name": "user communications",
+     "shape": "what was announced, when",
+     "shows": [
+      "rows 8; first {\"meeting\": \"tsc-2024-01-10\", \"item\": \"Richard, Ulises did a release for Node.js 20\"}"
+     ],
+     "status": "proven"
+    }
+   ],
+   "group": "service management",
+   "name": "Service desk"
+  },
+  {
+   "deliverables": [
+    {
+     "chain": [
+      [
+       "anchors",
+       {
+        "of": "usc5-552-doj"
+       }
+      ],
+      [
+       "filter",
+       {
+        "where": [
+         [
+          "timex3",
+          "contains",
+          "DURATION"
+         ]
+        ]
+       }
+      ],
+      [
+       "save_as",
+       {
+        "name": "clocks"
+       }
+      ],
+      [
+       "required_actions",
+       {
+        "of": "usc5-552-doj"
+       }
+      ],
+      [
+       "join",
+       {
+        "keys": [
+         [
+          "sentence_id",
+          "sentence_id"
+         ]
+        ],
+        "with": "clocks"
+       }
+      ],
+      [
+       "select",
+       {
+        "fields": [
+         "unit",
+         "who",
+         "action",
+         "span",
+         "timex3"
+        ]
+       }
+      ],
+      [
+       "distinct",
+       {}
+      ],
+      [
+       "workbook",
+       {
+        "name": "targets"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/service-level-management/service-level-targets/targets.xlsx",
+       "366c2583ed86b99b8cfcfc167ae3404841b64e610c207233e5a67df6c649c554",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "5 U.S.C. 552 obligations with durations in the same sentence",
+     "name": "service level targets",
+     "shape": "each target with the clock the text sets",
+     "shows": [
+      "rows 6; first {\"unit\": \"u0018\", \"who\": \"agency shall make\", \"action\": \"make\", \"span\": \"one year\", \"timex3\": \"TIMEX3 type=\\\"DURATION\\\" value=\\\"P1Y\\\"\"}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "cases",
+       {}
+      ],
+      [
+       "pivot",
+       {
+        "col": "outcome",
+        "row": "department"
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "service_level_report"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/service-level-management/service-level-report/service_level_report.xlsx",
+       "903be867ca0c14f8a85ba373b273d86569859d09a3d12e53b73bf978f6af6870",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "receipt-phase cases per department",
+     "name": "service level report",
+     "shape": "achieved against deadline per group",
+     "shows": [
+      "rows 3; first {\"department\": \"Customer contact\", \"after deadline\": 1, \"by deadline\": 28, \"open\": 0}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "cases",
+       {}
+      ],
+      [
+       "filter",
+       {
+        "where": [
+         [
+          "outcome",
+          "eq",
+          "after deadline"
+         ]
+        ]
+       }
+      ],
+      [
+       "pivot",
+       {
+        "col": "channel",
+        "row": "department"
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "breach_analysis"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/service-level-management/breach-analysis/breach_analysis.xlsx",
+       "56529eea81ba8f9c33dd208034d3be2da4048437e4b43411f637c3dd791a709b",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "receipt-phase cases after deadline",
+     "name": "breach analysis",
+     "shape": "breaches by channel and department",
+     "shows": [
+      "rows 3; first {\"department\": \"Customer contact\", \"Desk\": 0, \"Internet\": 1, \"Post\": 0, \"e-mail\": 0}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "handover",
+       {}
+      ],
+      [
+       "limit",
+       {
+        "n": 100
+       }
+      ],
+      [
+       "page",
+       {
+        "kind": "table",
+        "name": "dependency_map",
+        "title": "handover of work"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/service-level-management/dependency-map/dependency_map.html",
+       "5177064a413070c13dd15286a6b73a7095565c03c8849c521bad7b4440f3fb40",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "receipt-phase handover-of-work network",
+     "name": "dependency map",
+     "shape": "who depends on whom for delivery",
+     "shows": [
+      "rows 100; first {\"from\": \"Resource01\", \"to\": \"Resource01\", \"value\": 0.136497}"
+     ],
+     "status": "proven"
+    }
+   ],
+   "group": "service management",
+   "name": "Service level management"
+  },
+  {
+   "deliverables": [
+    {
+     "chain": [
+      [
+       "variants",
+       {}
+      ],
+      [
+       "limit",
+       {
+        "n": 20
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "request_models"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/service-request-management/request-models/request_models.xlsx",
+       "09e5a890c7fcfaafddaf1258567de08a0f09e662640cb2c6d8b1ee7092f7e991",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "receipt-phase variants",
+     "name": "request models",
+     "shape": "the standard paths a request takes",
+     "shows": [
+      "rows 20; first {\"rank\": 1, \"cases\": 713, \"length\": 6, \"variant\": \"Confirmation of receipt -> T02 Check confirmation of receipt -> T04 Determine confirmation of receipt -> T05 Print and send confirmation of receipt -> T06 Determine nece"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "cases",
+       {}
+      ],
+      [
+       "filter",
+       {
+        "where": [
+         [
+          "outcome",
+          "ne",
+          "open"
+         ]
+        ]
+       }
+      ],
+      [
+       "select",
+       {
+        "fields": [
+         "case",
+         "department",
+         "channel",
+         "start",
+         "end",
+         "duration_days",
+         "outcome"
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "fulfilment_records"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/service-request-management/fulfilment-records/fulfilment_records.xlsx",
+       "02f041b87e93d3d29dfaf27f0cdf39d1422ef99ddb4779c2f790af7c1de0ce6f",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "receipt-phase cases that ended",
+     "name": "fulfilment records",
+     "shape": "closed requests with their duration",
+     "shows": [
+      "rows 1329; first {\"case\": \"case-10017\", \"department\": \"General\", \"channel\": \"Internet\", \"start\": \"2011-10-18 11:46:39.679000+00:00\", \"end\": \"2011-10-18 11:56:57.603000+00:00\", \"duration_days\": 0.01, \"outcome\": \"by deadline\"}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "cases",
+       {}
+      ],
+      [
+       "filter",
+       {
+        "where": [
+         [
+          "outcome",
+          "ne",
+          "open"
+         ]
+        ]
+       }
+      ],
+      [
+       "group",
+       {
+        "aggregates": [
+         [
+          "count",
+          "*",
+          "cases"
+         ],
+         [
+          "median",
+          "duration_days",
+          "median_days"
+         ],
+         [
+          "avg",
+          "duration_days",
+          "mean_days"
+         ]
+        ],
+        "by": [
+         "channel"
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "fulfilment_time"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/service-request-management/fulfilment-time-report/fulfilment_time.xlsx",
+       "d4236c595aca262e0db942d91cbf74ca1ed5613de062fabc51b7879e3376561e",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "receipt-phase cases per channel",
+     "name": "fulfilment time report",
+     "shape": "duration statistics per channel",
+     "shows": [
+      "rows 5; first {\"channel\": \"Desk\", \"cases\": 107, \"median_days\": 0.76, \"mean_days\": 5.89}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "minutes_sentences",
+       {}
+      ],
+      [
+       "filter",
+       {
+        "where": [
+         [
+          "lemmas",
+          "matches",
+          "\\b(approve|vote|lgtm|merge)\\b"
+         ]
+        ]
+       }
+      ],
+      [
+       "select",
+       {
+        "fields": [
+         "meeting",
+         "sentence_id",
+         "sentence"
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "approvals"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/service-request-management/approvals-log/approvals.xlsx",
+       "921e6c2fa4548a0d67688968f880488ea527118a26fee039a40596ac5be543c5",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "TSC minutes sentences whose actions include approve or vote",
+     "name": "approvals log",
+     "shape": "approvals and votes recorded",
+     "shows": [
+      "rows 3; first {\"meeting\": \"tsc-2024-01-10\", \"sentence_id\": \"tsc-2024-01-10:u0014:s09\", \"sentence\": \"If we Have a vote lets vote on removing npm, versus vote on corepack.\"}"
+     ],
+     "status": "proven"
+    }
+   ],
+   "group": "service management",
+   "name": "Service request management"
+  },
+  {
+   "deliverables": [
+    {
+     "chain": [
+      [
+       "required_actions",
+       {
+        "of": "usc5-552-doj"
+       }
+      ],
+      [
+       "checklist",
+       {
+        "item": "action",
+        "name": "test_plan",
+        "note": "sentence",
+        "title": "test plan: every obligation"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/service-validation-and-testing/test-plan/test_plan.docx",
+       "5a46ef6b9e9f8c5b61b4cf061f0f5deb8a3f47f03d8db28fd1cfff6a0e0ca052",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "obligations of 5 U.S.C. 552 as a checklist",
+     "name": "test plan",
+     "shape": "what must be verified",
+     "shows": [
+      "rows 122; first {\"event\": \"usc5-552-doj:u0001:s00#e7\", \"action\": \"make\", \"who\": \"agency shall make\", \"sentence_id\": \"usc5-552-doj:u0001:s00\", \"sentence\": \"(a) Each agency shall make available to the public information as follows:\", \"quo"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "forced_edges",
+       {
+        "of": "usc5-552-doj"
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "test_cases"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/service-validation-and-testing/test-cases/test_cases.xlsx",
+       "3f7d90a88d1f7d5e554226e1ef22997afffadf123c6a060bd2501acc18761ebf",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "forced precedence of 5 U.S.C. 552",
+     "name": "test cases",
+     "shape": "ordering tests, one per forced edge",
+     "shows": [
+      "rows 12; first {\"before\": \"usc5-552-doj:u0021:s00#e43\", \"after\": \"usc5-552-doj:u0021:s00#e59\", \"before_step\": \"request\", \"after_step\": \"make\"}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "execution_trace",
+       {
+        "of": "usc5-552-doj"
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "test_results"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/service-validation-and-testing/test-results/test_results.xlsx",
+       "3ace901e86701e2edc3c1a79417fdc535a4594dab61d0b02b4acb91b3c2a3d8a",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "SpiffWorkflow execution of the statutory process",
+     "name": "test results",
+     "shape": "the executed order against the required order",
+     "shows": [
+      "rows 24; first {\"position\": 1, \"task\": \"authorize [u0131:s00#e16]\"}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "roundtrips",
+       {}
+      ],
+      [
+       "filter",
+       {
+        "where": [
+         [
+          "match",
+          "eq",
+          true
+         ]
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "acceptance"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/service-validation-and-testing/acceptance-record/acceptance.xlsx",
+       "6e49e3dabd08905d28f3db4a1b676853ddf59176de68a1eb014200f5af8a32e5",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "the reverse proofs of this file",
+     "name": "acceptance record",
+     "shape": "reverse checks that passed",
+     "shows": [
+      "rows 4; first {\"proof\": \"P19\", \"label\": \"deck\", \"match\": true, \"changed\": 0}"
+     ],
+     "status": "proven"
+    }
+   ],
+   "group": "service management",
+   "name": "Service validation and testing"
+  },
+  {
+   "deliverables": [
+    {
+     "chain": [
+      [
+       "ordered_steps",
+       {
+        "of": "nodejs-governance"
+       }
+      ],
+      [
+       "select",
+       {
+        "fields": [
+         "phase",
+         "position",
+         "step"
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "deployment_plan"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/deployment-management/deployment-plan/deployment_plan.xlsx",
+       "21e9a27b47b4352ad555d5fe68a11a33f7a02d56fa92b01f564845971c2acca9",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "ordered steps of the Node.js governance document",
+     "name": "deployment plan",
+     "shape": "ordered steps with phases",
+     "shows": [
+      "rows 18; first {\"phase\": 1, \"position\": 1, \"step\": \"collaborator\"}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "minutes_sections",
+       {}
+      ],
+      [
+       "filter",
+       {
+        "where": [
+         [
+          "item",
+          "matches",
+          "(?i)\\b(release|deploy|land|ship)"
+         ]
+        ]
+       }
+      ],
+      [
+       "select",
+       {
+        "fields": [
+         "meeting",
+         "item",
+         "link"
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "deployment_records"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/deployment-management/deployment-records/deployment_records.xlsx",
+       "ddc268f511762e5c67fdbb464dfcea809fa7a60ae798886f86b00556a4822485",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "TSC minutes items mentioning release, deploy or land",
+     "name": "deployment records",
+     "shape": "deployments performed, with references",
+     "shows": [
+      "rows 14; first {\"meeting\": \"tsc-2023-11-08\", \"item\": \"Support for file-system based persistent code cache in user-land module loaders #47472\", \"link\": \"https://github.com/nodejs/node/issues/47472\"}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "events",
+       {}
+      ],
+      [
+       "group",
+       {
+        "aggregates": [
+         [
+          "distinct",
+          "resource",
+          "resources"
+         ],
+         [
+          "count",
+          "*",
+          "events"
+         ]
+        ],
+        "by": [
+         "group"
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "environments"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/deployment-management/environment-inventory/environments.xlsx",
+       "40b50ca380cbb2543a3631115f814add9e97ea9a20416de192e425f6c6e2b7d5",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "receipt-phase groups and resources",
+     "name": "environment inventory",
+     "shape": "the environments and who works in them",
+     "shows": [
+      "rows 10; first {\"group\": \"EMPTY\", \"resources\": 44, \"events\": 1936}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "ordered_steps",
+       {
+        "of": "nodejs-governance"
+       }
+      ],
+      [
+       "sort",
+       {
+        "by": [
+         "position"
+        ],
+        "desc": true
+       }
+      ],
+      [
+       "document",
+       {
+        "columns": [
+         "position",
+         "step",
+         "sentence"
+        ],
+        "name": "rollback",
+        "title": "rollback: the steps in reverse order"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/deployment-management/rollback-procedure/rollback.docx",
+       "32f39b5d1c99ad969475ef4830d70bd6d5d25bc5eaf8b967e899e30e13d43f04",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "ordered steps of the Node.js governance document",
+     "name": "rollback procedure",
+     "shape": "the ordered steps, reversed",
+     "shows": [
+      "rows 18; first {\"position\": 18, \"event\": \"nodejs-governance:u0070:s00#e11\", \"step\": \"visible\", \"phase\": 2, \"sentence\": \"Remember that all private discussions about a nomination will be visible to the nominee once they are onboarded.\", "
+     ],
+     "status": "proven"
+    }
+   ],
+   "group": "technical management",
+   "name": "Deployment management"
+  },
+  {
+   "deliverables": [
+    {
+     "chain": [
+      [
+       "events",
+       {}
+      ],
+      [
+       "pivot",
+       {
+        "col": "activity",
+        "row": "group"
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "infrastructure_inventory"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/infrastructure-and-platform-management/infrastructure-inventory/infrastructure_inventory.xlsx",
+       "188a7f3b131f07df59060d0f4e3e4e50e9565190708de98bcc22be549e4b1e5c",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "receipt-phase groups and resources",
+     "name": "infrastructure inventory",
+     "shape": "groups, resources and activity counts",
+     "shows": [
+      "rows 10; first {\"group\": \"EMPTY\", \"Confirmation of receipt\": 1136, \"T02 Check confirmation of receipt\": 373, \"T03 Adjust confirmation of receipt\": 0, \"T04 Determine confirmation of receipt\": 204, \"T05 Print and send confirmation of rec"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "ordered_steps",
+       {
+        "of": "usc5-552-doj"
+       }
+      ],
+      [
+       "document",
+       {
+        "columns": [
+         "position",
+         "phase",
+         "step",
+         "sentence"
+        ],
+        "name": "runbook",
+        "title": "runbook"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/infrastructure-and-platform-management/runbook/runbook.docx",
+       "ecfced8d56bf9967c71b9693c72796e151623f78a74fc8d21d63867b91b79700",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "ordered steps of 5 U.S.C. 552",
+     "name": "runbook",
+     "shape": "the steps to perform, in order, with sources",
+     "shows": [
+      "rows 24; first {\"position\": 1, \"event\": \"usc5-552-doj:u0021:s00#e43\", \"step\": \"request\", \"phase\": 1, \"sentence\": \"(3)(A) Except with respect to the records made available under paragraphs (1) and (2) of this subsection, and except as p"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "events",
+       {}
+      ],
+      [
+       "derive",
+       {
+        "field": "month",
+        "fn": "month",
+        "of": "ts"
+       }
+      ],
+      [
+       "pivot",
+       {
+        "col": "month",
+        "row": "resource"
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "utilization"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/infrastructure-and-platform-management/utilization-report/utilization.xlsx",
+       "e85de9fce1d4b8979ecd6b9ddb63c7ed637121276cd604954ce9f91285de6b02",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "receipt-phase events per resource per month",
+     "name": "utilization report",
+     "shape": "use per resource per period",
+     "shows": [
+      "rows 48; first {\"resource\": \"Resource01\", \"2010-10\": 0, \"2010-11\": 6, \"2010-12\": 50, \"2011-01\": 24, \"2011-02\": 150, \"2011-03\": 160, \"2011-04\": 199, \"2011-05\": 94, \"2011-06\": 105, \"2011-07\": 227, \"2011-08\": 87, \"2011-09\": 83, \"2011-10\":"
+     ],
+     "status": "proven"
+    }
+   ],
+   "group": "technical management",
+   "name": "Infrastructure and platform management"
+  },
+  {
+   "deliverables": [
+    {
+     "chain": [
+      [
+       "minutes_sections",
+       {}
+      ],
+      [
+       "filter",
+       {
+        "where": [
+         [
+          "link",
+          "contains",
+          "/issues/"
+         ]
+        ]
+       }
+      ],
+      [
+       "select",
+       {
+        "fields": [
+         "meeting",
+         "section",
+         "item",
+         "link"
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "backlog"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/software-development-and-management/backlog/backlog.xlsx",
+       "1ab9c7c3ccc86209c1a37f5671c7b199d892f22cb3539b7f0c23d6e0162f4841",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "issues referenced in TSC minutes",
+     "name": "backlog",
+     "shape": "work items with references and where they were raised",
+     "shows": [
+      "rows 47; first {\"meeting\": \"tsc-2023-11-08\", \"section\": \"Links\", \"item\": \"GitHub Issue: https://github.com/nodejs/TSC/issues/1468\", \"link\": \"https://github.com/nodejs/TSC/issues/1468\"}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "minutes_sentences",
+       {}
+      ],
+      [
+       "filter",
+       {
+        "where": [
+         [
+          "lemmas",
+          "matches",
+          "\\b(approve|object|merge|block|revert)\\b"
+         ]
+        ]
+       }
+      ],
+      [
+       "select",
+       {
+        "fields": [
+         "meeting",
+         "sentence_id",
+         "lemmas",
+         "sentence"
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "review_decisions"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/software-development-and-management/code-review-decisions/review_decisions.xlsx",
+       "02e0dc5e6eb3dbbdf5d14bd3c41388b1c0c30fb261fe17ffc262b04d5023f874",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "TSC minutes sentences whose actions include approve, object, merge or block",
+     "name": "code review decisions",
+     "shape": "approvals and objections recorded",
+     "shows": [
+      "rows 1; first {\"meeting\": \"tsc-2025-03-05\", \"sentence_id\": \"tsc-2025-03-05:u0021:s07\", \"lemmas\": \"lose move need object seem\", \"sentence\": \"But it seems that the initiative lost its momentum * Michael anybody in the meeting who object"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "minutes_sections",
+       {}
+      ],
+      [
+       "filter",
+       {
+        "where": [
+         [
+          "item",
+          "matches",
+          "\\b(v[0-9]{1,2}|Node\\.js [0-9]{1,2}|[0-9]+\\.[0-9]+\\.[0-9]+)\\b"
+         ]
+        ]
+       }
+      ],
+      [
+       "select",
+       {
+        "fields": [
+         "meeting",
+         "item",
+         "link"
+        ]
+       }
+      ],
+      [
+       "workbook",
+       {
+        "name": "versions"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/software-development-and-management/version-records/versions.xlsx",
+       "347c9f615b3d7a300d95667077057729afaff0418587411211fca4a41257d865",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "TSC minutes items naming a version",
+     "name": "version records",
+     "shape": "versions mentioned and when",
+     "shows": [
+      "rows 4; first {\"meeting\": \"tsc-2024-01-10\", \"item\": \"Richard, Ulises did a release for Node.js 20\", \"link\": \"\"}"
+     ],
+     "status": "proven"
+    },
+    {
+     "chain": [
+      [
+       "roundtrips",
+       {}
+      ],
+      [
+       "workbook",
+       {
+        "name": "verification_report"
+       }
+      ]
+     ],
+     "files": [
+      [
+       "proofs/out/itil/software-development-and-management/verification-report/verification_report.xlsx",
+       "6e49e3dabd08905d28f3db4a1b676853ddf59176de68a1eb014200f5af8a32e5",
+       "registered"
+      ]
+     ],
+     "instantiated_on": "the execution and reverse proofs of this file",
+     "name": "verification report",
+     "shape": "what was executed and what was read back",
+     "shows": [
+      "rows 4; first {\"proof\": \"P19\", \"label\": \"deck\", \"match\": true, \"changed\": 0}"
+     ],
+     "status": "proven"
+    }
+   ],
+   "group": "technical management",
+   "name": "Software development and management"
+  }
+ ]
+}

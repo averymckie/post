@@ -1,0 +1,16 @@
+{
+ "contentType": "application/vnd.gorules.decision",
+ "nodes": [
+  {"id": "in", "type": "inputNode", "name": "request", "position": {"x": 0, "y": 0}},
+  {"id": "dt", "type": "decisionTableNode", "name": "required actions", "position": {"x": 0, "y": 0},
+   "content": {"hitPolicy": "first",
+    "inputs": [{"id": "i1", "name": "action", "field": "action"}],
+    "outputs": [{"id": "o1", "name": "required", "field": "required"}, {"id": "o2", "name": "rule", "field": "rule"}],
+    "rules": [
+     {"_id": "r1", "_description": "must approve", "i1": "\"approve\"", "o1": "true", "o2": "'r1'"},
+     {"_id": "r2", "_description": "must be from collaborators", "i1": "\"collaborator\"", "o1": "true", "o2": "'r2'"}
+    ]}},
+  {"id": "out", "type": "outputNode", "name": "decision", "position": {"x": 0, "y": 0}}
+ ],
+ "edges": [{"id": "e1", "sourceId": "in", "targetId": "dt", "type": "edge"}, {"id": "e2", "sourceId": "dt", "targetId": "out", "type": "edge"}]
+}

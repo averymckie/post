@@ -1,0 +1,194 @@
+[
+ {
+  "event": "usc5-552-doj:u0021:s00#e43",
+  "phase": 1,
+  "position": 1,
+  "sentence": "(3)(A) Except with respect to the records made available under paragraphs (1) and (2) of this subsection, and except as provided in subparagraph (E), each agency, upon any request for records which (i) reasonably describes such records and (ii) is made in accordance with published rules stating the time, place, fees (if any), and procedures to be followed, shall make the records promptly available to any person.",
+  "step": "request",
+  "unit": "u0021"
+ },
+ {
+  "event": "usc5-552-doj:u0021:s00#e59",
+  "phase": 2,
+  "position": 2,
+  "sentence": "(3)(A) Except with respect to the records made available under paragraphs (1) and (2) of this subsection, and except as provided in subparagraph (E), each agency, upon any request for records which (i) reasonably describes such records and (ii) is made in accordance with published rules stating the time, place, fees (if any), and procedures to be followed, shall make the records promptly available to any person.",
+  "step": "make",
+  "unit": "u0021"
+ },
+ {
+  "event": "usc5-552-doj:u0066:s00#e28",
+  "phase": 1,
+  "position": 3,
+  "sentence": "(ii) make a determination with respect to any appeal within twenty days (excepting Saturdays, Sundays, and legal public holidays) after the receipt of such appeal.",
+  "step": "receipt",
+  "unit": "u0066"
+ },
+ {
+  "event": "usc5-552-doj:u0066:s00#e16",
+  "phase": 2,
+  "position": 4,
+  "sentence": "(ii) make a determination with respect to any appeal within twenty days (excepting Saturdays, Sundays, and legal public holidays) after the receipt of such appeal.",
+  "step": "except",
+  "unit": "u0066"
+ },
+ {
+  "event": "usc5-552-doj:u0077:s03#e3",
+  "phase": 1,
+  "position": 5,
+  "sentence": "Upon any determination by an agency to comply with a request for records, the records shall be made promptly available to such person making such request.",
+  "step": "determination",
+  "unit": "u0077"
+ },
+ {
+  "event": "usc5-552-doj:u0077:s03#e19",
+  "phase": 2,
+  "position": 6,
+  "sentence": "Upon any determination by an agency to comply with a request for records, the records shall be made promptly available to such person making such request.",
+  "step": "make",
+  "unit": "u0077"
+ },
+ {
+  "event": "usc5-552-doj:u0079:s01#e36",
+  "phase": 1,
+  "position": 7,
+  "sentence": "Refusal by a person to reasonably modify the scope of a request or arrange an alternative time frame for processing a request (or a modified request) under clause (ii) after being given an opportunity to do so by the agency to whom the person made the request shall be considered as a factor in determining whether exceptional circumstances exist for purposes of this subparagraph.",
+  "step": "give",
+  "unit": "u0079"
+ },
+ {
+  "event": "usc5-552-doj:u0079:s01#e14",
+  "phase": 2,
+  "position": 8,
+  "sentence": "Refusal by a person to reasonably modify the scope of a request or arrange an alternative time frame for processing a request (or a modified request) under clause (ii) after being given an opportunity to do so by the agency to whom the person made the request shall be considered as a factor in determining whether exceptional circumstances exist for purposes of this subparagraph.",
+  "step": "arrange",
+  "unit": "u0079"
+ },
+ {
+  "event": "usc5-552-doj:u0089:s02#e53",
+  "phase": 1,
+  "position": 9,
+  "sentence": "Agency action to deny or affirm denial of a request for expedited processing pursuant to this subparagraph, and failure by an agency to respond in a timely manner to such a request shall be subject to judicial review under paragraph (4), except that the judicial review shall be based on the record before the agency at the time of the determination.",
+  "step": "base",
+  "unit": "u0089"
+ },
+ {
+  "event": "usc5-552-doj:u0089:s02#e59",
+  "phase": 2,
+  "position": 10,
+  "sentence": "Agency action to deny or affirm denial of a request for expedited processing pursuant to this subparagraph, and failure by an agency to respond in a timely manner to such a request shall be subject to judicial review under paragraph (4), except that the judicial review shall be based on the record before the agency at the time of the determination.",
+  "step": "agency",
+  "unit": "u0089"
+ },
+ {
+  "event": "usc5-552-doj:u0128:s01#e13",
+  "phase": 1,
+  "position": 11,
+  "sentence": "On or before February 1 of each year, each agency shall submit to the Attorney General of the United States and to the Director of the Office of Government Information Services a report which shall cover the preceding fiscal year and which shall include—",
+  "step": "submit",
+  "unit": "u0128"
+ },
+ {
+  "event": "usc5-552-doj:u0128:s01#e4",
+  "phase": 2,
+  "position": 12,
+  "sentence": "On or before February 1 of each year, each agency shall submit to the Attorney General of the United States and to the Director of the Office of Government Information Services a report which shall cover the preceding fiscal year and which shall include—",
+  "step": "February",
+  "unit": "u0128"
+ },
+ {
+  "event": "usc5-552-doj:u0131:s00#e16",
+  "phase": 1,
+  "position": 13,
+  "sentence": "(ii) a complete list of all statutes that the agency relies upon to authorize the agency to withhold information under subsection (b)(3), the number of occasions on which each statute was relied upon, a description of whether a court has upheld the decision of the agency to withhold information under each such statute, and a concise description of the scope of any information withheld;",
+  "step": "authorize",
+  "unit": "u0131"
+ },
+ {
+  "event": "usc5-552-doj:u0131:s00#e13",
+  "phase": 2,
+  "position": 14,
+  "sentence": "(ii) a complete list of all statutes that the agency relies upon to authorize the agency to withhold information under subsection (b)(3), the number of occasions on which each statute was relied upon, a description of whether a court has upheld the decision of the agency to withhold information under each such statute, and a concise description of the scope of any information withheld;",
+  "step": "rely",
+  "unit": "u0131"
+ },
+ {
+  "event": "usc5-552-doj:u0131:s00#e44",
+  "phase": 1,
+  "position": 15,
+  "sentence": "(ii) a complete list of all statutes that the agency relies upon to authorize the agency to withhold information under subsection (b)(3), the number of occasions on which each statute was relied upon, a description of whether a court has upheld the decision of the agency to withhold information under each such statute, and a concise description of the scope of any information withheld;",
+  "step": "description",
+  "unit": "u0131"
+ },
+ {
+  "event": "usc5-552-doj:u0131:s00#e40",
+  "phase": 2,
+  "position": 16,
+  "sentence": "(ii) a complete list of all statutes that the agency relies upon to authorize the agency to withhold information under subsection (b)(3), the number of occasions on which each statute was relied upon, a description of whether a court has upheld the decision of the agency to withhold information under each such statute, and a concise description of the scope of any information withheld;",
+  "step": "rely",
+  "unit": "u0131"
+ },
+ {
+  "event": "usc5-552-doj:u0132:s00#e36",
+  "phase": 1,
+  "position": 17,
+  "sentence": "(C) the number of requests for records pending before the agency as of September 30 of the preceding year, and the median and average number of days that such requests had been pending before the agency as of that date;",
+  "step": "pend",
+  "unit": "u0132"
+ },
+ {
+  "event": "usc5-552-doj:u0132:s00#e39",
+  "phase": 2,
+  "position": 18,
+  "sentence": "(C) the number of requests for records pending before the agency as of September 30 of the preceding year, and the median and average number of days that such requests had been pending before the agency as of that date;",
+  "step": "agency",
+  "unit": "u0132"
+ },
+ {
+  "event": "usc5-552-doj:u0136:s00#e16",
+  "phase": 1,
+  "position": 19,
+  "sentence": "(G) based on the number of business days that have elapsed since each request was originally received by the agency—",
+  "step": "request",
+  "unit": "u0136"
+ },
+ {
+  "event": "usc5-552-doj:u0136:s00#e13",
+  "phase": 2,
+  "position": 20,
+  "sentence": "(G) based on the number of business days that have elapsed since each request was originally received by the agency—",
+  "step": "elapse",
+  "unit": "u0136"
+ },
+ {
+  "event": "usc5-552-doj:u0143:s00#e33",
+  "phase": 1,
+  "position": 21,
+  "sentence": "(J) data on the 10 active requests with the earliest filing dates pending at each agency, including the amount of time that has elapsed since each request was originally received by the agency;",
+  "step": "receive",
+  "unit": "u0143"
+ },
+ {
+  "event": "usc5-552-doj:u0143:s00#e27",
+  "phase": 2,
+  "position": 22,
+  "sentence": "(J) data on the 10 active requests with the earliest filing dates pending at each agency, including the amount of time that has elapsed since each request was originally received by the agency;",
+  "step": "elapse",
+  "unit": "u0143"
+ },
+ {
+  "event": "usc5-552-doj:u0144:s00#e43",
+  "phase": 1,
+  "position": 23,
+  "sentence": "(K) data on the 10 active administrative appeals with the earliest filing dates pending before the agency as of September 30 of the preceding year, including the number of business days that have elapsed since the requests were originally received by the agency;",
+  "step": "receive",
+  "unit": "u0144"
+ },
+ {
+  "event": "usc5-552-doj:u0144:s00#e37",
+  "phase": 2,
+  "position": 24,
+  "sentence": "(K) data on the 10 active administrative appeals with the earliest filing dates pending before the agency as of September 30 of the preceding year, including the number of business days that have elapsed since the requests were originally received by the agency;",
+  "step": "elapse",
+  "unit": "u0144"
+ }
+]
