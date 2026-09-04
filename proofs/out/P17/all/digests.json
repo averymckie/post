@@ -1,5 +1,5 @@
 {
- "digest": "97b3c46c10a2bc157da2d528ddb89af4c845983481341ba30838e64a92893e33",
+ "digest": "c3eb270ca174bcff4629d73efb60da57e65c97445c7ea8fdf58a15a0277e1ead",
  "entries": [
   {
    "file": "proofs/out/P1/nodejs-governance/facts.jsonl",
@@ -539,7 +539,7 @@
    "file": "proofs/out/P53/all/register_state.json",
    "input": "all",
    "proof": "P53",
-   "sha256": "fda880992f5227227e1f6dcad89d4a28e0fb4b4f0dee49db13e127b6840c7ca1"
+   "sha256": "fddd1ba2e839152c4c445f4de52252a13486c35b4e1c44c9627b424289f1ac79"
   },
   {
    "file": "proofs/out/P54/majority/truth_table.html",
@@ -612,6 +612,42 @@
    "input": "majority",
    "proof": "P60",
    "sha256": "cae43519b49b0d42bca8ccca4e30d5d3a2db75aebbbdd3c7526707a0668fa0d4"
+  },
+  {
+   "file": "proofs/out/P61/usc5-552-doj/cross_references.json",
+   "input": "usc5-552-doj",
+   "proof": "P61",
+   "sha256": "f8244167e0545ee47bd5fbe3e51150757aa4bc81f9324b5353cfaa194223f674"
+  },
+  {
+   "file": "proofs/out/P61/usc5-552-doj/cross_references.xlsx",
+   "input": "usc5-552-doj",
+   "proof": "P61",
+   "sha256": "75b43ea314ce165deb70833a912df18c407611dbea4f216912729d3cf0611461"
+  },
+  {
+   "file": "proofs/out/P62/receipt-xes/handover.xlsx",
+   "input": "receipt-xes",
+   "proof": "P62",
+   "sha256": "5fea249b89c4eb9a7e08b42be107c72854e80ba296a778e96f104fccd09eb4bd"
+  },
+  {
+   "file": "proofs/out/P62/receipt-xes/handover_heatmap.html",
+   "input": "receipt-xes",
+   "proof": "P62",
+   "sha256": "53cadc0d94ae89bac1333f4c53ee70a88c1572b9e7c6de27746570b60c85b819"
+  },
+  {
+   "file": "proofs/out/P63/receipt-xes/process_tree.pptx",
+   "input": "receipt-xes",
+   "proof": "P63",
+   "sha256": "34f7ef23e8b2f7f6a1d45389bd82c3e5e75bd22a14ef6f3b2323c7152c35a14e"
+  },
+  {
+   "file": "proofs/out/P64/usc5-552-doj/roundtrip.json",
+   "input": "usc5-552-doj",
+   "proof": "P64",
+   "sha256": "93dc615d0e4ad74fef3c3436749a01adb8d0340f9e1b6c298271dec4fcb3202a"
   },
   {
    "file": "proofs/out/P7/nodejs-tsc-minutes/facts.jsonl",

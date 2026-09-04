@@ -3087,6 +3087,182 @@ def truth_roundtrip() -> dict[str, Any]:
 
 
 # ----------------------------------------------------------------------------
+# P61 .. P64
+# ----------------------------------------------------------------------------
+
+
+def s_cross_refs(ctx: dict[str, Any]) -> None:
+    import networkx as nx
+
+    src = ctx["sources"][0]
+    unit_path = {u.id: u.path for u in src.units}
+    pat = re.compile(r"\bsubsections? (\([a-z]\))")
+    edges = collections.Counter()
+    for ps in ctx["parsed"]:
+        here = unit_path.get(ps.sentence.id.split(":")[1], "")
+        top = re.match(r"^\([^)]*\)", here)
+        if not top:
+            continue
+        for m in pat.finditer(ps.sentence.text):
+            target = re.match(r"^\([^)]*\)", m.group(1)).group(0)
+            if target != top.group(0):
+                edges[(top.group(0), target)] += 1
+    G = nx.DiGraph()
+    for (a, b), n in edges.items():
+        G.add_edge(a, b, weight=n)
+    rows = [["from_subsection", "to_subsection", "references"]] + [[a, b, n] for (a, b), n in sorted(edges.items(), key=lambda kv: (-kv[1], kv[0]))]
+    indeg = sorted(G.in_degree(weight="weight"), key=lambda kv: -kv[1])
+    p = workbook(ctx["dir"] / "cross_references.xlsx", {"edges": rows, "most_referenced": [["subsection", "references_in"]] + [[a, n] for a, n in indeg]})
+    p2 = write_json(ctx["dir"] / "cross_references.json", {"edges": rows[1:], "acyclic": nx.is_directed_acyclic_graph(G)})
+    ctx["files"] = [p, p2]
+    ctx["shows"] = [f"reference edges {len(edges)} between {G.number_of_nodes()} subsections; most referenced {indeg[:3]}; acyclic {nx.is_directed_acyclic_graph(G)}"]
+
+
+def cross_refs(label: str) -> dict[str, Any]:
+    proof = Proof(
+        "P61",
+        "sentences, units -> cross-reference graph -> workbook",
+        ["parsed sentences (P1), units with paths (P1)"],
+        [
+            Step("references", "re: 'subsection (x)' in each sentence; paragraph and clause references stay inside their subsection and are not edges", s_cross_refs),
+            Step("graph", "networkx.DiGraph; in_degree; is_directed_acyclic_graph", lambda c: None),
+            Step("tabulate", "openpyxl.Workbook.save; json.dumps", lambda c: None),
+        ],
+        "cross-reference graph",
+    )
+    src = RESULTS[("facts", label)]
+    ctx = {"dir": out_dir("P61", label), "sources": src["sources"], "parsed": src["parsed"]}
+    run(proof, label, ctx)
+    return ctx
+
+
+def s_handover_heatmap(ctx: dict[str, Any]) -> None:
+    import pm4py
+    import plotly.express as px
+    import plotly.io as pio
+
+    net = pm4py.discover_handover_of_work_network(ctx["log"])
+    conn = net.connections if hasattr(net, "connections") else net
+    items = sorted(conn.items(), key=lambda kv: (-kv[1], kv[0]))
+    top = [a for a, _ in collections.Counter({k[0]: v for k, v in conn.items()}).most_common(25)]
+    top = sorted(set(top) | {b for (a, b), v in items if a in top})[:30]
+    cell = {(a, b): round(float(v), 4) for (a, b), v in conn.items()}
+    z = [[cell.get((a, b), 0.0) for b in top] for a in top]
+    fig = px.imshow(z, x=top, y=top, labels={"x": "to", "y": "from", "color": "handover"}, title="handover of work between resources, receipt phase", aspect="auto")
+    fig.update_layout(xaxis_tickangle=-45)
+    p = ctx["dir"] / "handover_heatmap.html"
+    pio.write_html(fig, str(p), include_plotlyjs="cdn", full_html=True, div_id="chart")
+    p2 = workbook(ctx["dir"] / "handover.xlsx", {"handover": [["from", "to", "value"]] + [[a, b, round(float(v), 6)] for (a, b), v in items]})
+    ctx["files"] = [p, p2]
+    ctx["shows"] = [f"resource pairs {len(items)}; strongest {items[0][0][0]} -> {items[0][0][1]} ({round(float(items[0][1]), 4)})"]
+
+
+def handover_heatmap(label: str) -> dict[str, Any]:
+    proof = Proof(
+        "P62",
+        "log -> handover network -> heatmap page, workbook",
+        ["log (P8)"],
+        [
+            Step("handover", "pm4py.discover_handover_of_work_network", s_handover_heatmap),
+            Step("chart", "plotly.express.imshow over the busiest resources", lambda c: None),
+            Step("page", "plotly.io.write_html; openpyxl.Workbook.save", lambda c: None),
+        ],
+        "heatmap page",
+    )
+    ctx = {"dir": out_dir("P62", label), "log": RESULTS[("log", label)]["log"]}
+    run(proof, label, ctx)
+    return ctx
+
+
+def s_tree_deck(ctx: dict[str, Any]) -> None:
+    from pptx import Presentation
+    from pptx.enum.shapes import MSO_CONNECTOR, MSO_SHAPE
+    from pptx.util import Inches, Pt
+
+    import pm4py
+
+    tree = ctx["tree"]
+    prs = Presentation()
+    prs.slide_width, prs.slide_height = Inches(16), Inches(9)
+    s = prs.slides.add_slide(prs.slide_layouts[6])
+    s.shapes.add_textbox(Inches(0.3), Inches(0.1), Inches(15), Inches(0.5)).text_frame.text = "process tree of the receipt phase, discovered from the first half of the cases"
+    boxes: list[Any] = []
+    counter = collections.Counter()
+
+    def draw(node: Any, depth: int) -> Any:
+        label = str(node.label) if node.label is not None else (str(node.operator).split(".")[-1] if node.operator is not None else "tau")
+        row = counter[depth]
+        counter[depth] += 1
+        sh = s.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.3 + depth * 2.2), Inches(0.8 + row * 0.5), Inches(2.0), Inches(0.4))
+        sh.text_frame.text = label[:38]
+        for para in sh.text_frame.paragraphs:
+            for r in para.runs:
+                r.font.size = Pt(8)
+        boxes.append(sh)
+        for child in node.children:
+            c = draw(child, depth + 1)
+            conn = s.shapes.add_connector(MSO_CONNECTOR.STRAIGHT, 0, 0, 0, 0)
+            conn.begin_connect(sh, 3)
+            conn.end_connect(c, 1)
+        return sh
+
+    draw(tree, 0)
+    p = ctx["dir"] / "process_tree.pptx"
+    prs.save(p)
+    ctx["files"] = [p]
+    ctx["shows"] = [f"tree nodes {len(boxes)}, depth {max(counter) + 1}; root operator {str(tree.operator).split('.')[-1] if tree.operator else 'leaf'}"]
+
+
+def tree_deck(label: str) -> dict[str, Any]:
+    proof = Proof(
+        "P63",
+        "process tree -> deck",
+        ["process tree (P8)"],
+        [Step("draw", "pptx.Presentation: one box per tree node, depth as column, connectors parent to child", s_tree_deck)],
+        "deck",
+    )
+    src = RESULTS[("log", label)]
+    import pm4py
+
+    cases = sorted(src["log"]["case:concept:name"].unique())
+    train = src["log"][src["log"]["case:concept:name"].isin(cases[: len(cases) // 2])]
+    ctx = {"dir": out_dir("P63", label), "tree": pm4py.discover_process_tree_inductive(train)}
+    run(proof, label, ctx)
+    return ctx
+
+
+def s_page_roundtrip(ctx: dict[str, Any]) -> None:
+    html = Path(ctx["page"]).read_text(encoding="utf-8")
+    m = re.search(r"Plotly\.newPlot\(\s*\"chart\",\s*(\[.*?\])\s*,\s*\{", html, flags=re.S)
+    data = json.loads(m.group(1))
+    labels = sorted(t for d in data for t in (d.get("text") or []) if isinstance(t, str))
+    lemma = {a.args[0]: a.args[1] for a in ctx["atoms"] if a.predicate == "event"}
+    expected = sorted(lemma.get(e, "?") for e in ctx["ordering"].order)
+    same = labels == expected
+    p = write_json(ctx["dir"] / "roundtrip.json", {"labels_in_page": len(labels), "steps_in_order": len(expected), "match": same})
+    ctx["files"] = [p]
+    ctx["shows"] = [f"labels read out of the page {len(labels)}, steps in the order {len(expected)}, match {same}"]
+
+
+def page_roundtrip(label: str) -> dict[str, Any]:
+    proof = Proof(
+        "P64",
+        "3D process page -> labels' ; labels', ordered steps -> match",
+        ["3D process page (P41), ordered steps (P2)"],
+        [
+            Step("read page", "re over the html for the Plotly.newPlot data; json.loads", s_page_roundtrip),
+            Step("compare", "the marker labels against the ordered steps' lemmas", lambda c: None),
+        ],
+        "match",
+    )
+    src = RESULTS[("ordered steps", label)]
+    ctx = {"dir": out_dir("P64", label), "page": OUT / "P41" / label / "process_3d.html", "atoms": src["atoms"], "ordering": src["ordering"]}
+    run(proof, label, ctx)
+    return ctx
+
+
+
+# ----------------------------------------------------------------------------
 # P51 .. P53: the orchestration itself, as proofs
 # ----------------------------------------------------------------------------
 
@@ -3250,6 +3426,8 @@ def _recorded(text: str) -> tuple[dict[str, list[str]], dict[tuple[str, str], tu
     i = 0
     while i < len(lines):
         m = re.match(r"^#{2,3} (P\d+)  (.+?)(?:  \(revised chain \d+\))?$", lines[i])
+        if m and ("(further input)" in m.group(2) or "(evidence after revision" in m.group(2)):
+            m = None
         m2 = re.match(r"^### (.+?) / (.+?)  (proven|empty|failed|no real input)(?:  \(revised \d+\))?$", lines[i])
         if m or m2:
             j = i + 1
@@ -3314,6 +3492,15 @@ def append_ledger() -> dict[str, int]:
             out += [f"### {pr.pid}  {pr.title}  (revised chain {n})", "", "```"] + pr.inputs + current_chain + ["```", ""]
             recorded_chain[pr.pid] = current_chain
             counts["revisions"] += 1
+        rev = led.get("chain_revisions", {}).get(pr.pid, 0)
+        if rev:
+            for label, files, shows in pr.evidence:
+                rkey = f"{pr.pid}|{label}|rev{rev}"
+                if rkey in written:
+                    continue
+                out += [f"### {pr.pid}  {pr.title}  (evidence after revision {rev})", "", f"**{label}**", ""] + evidence_lines(files, shows)
+                written.add(rkey)
+                counts["sections"] += 1
         for label, files, shows in pr.evidence:
             key = f"{pr.pid}|{label}"
             if key in written:
@@ -3467,6 +3654,10 @@ def main() -> None:
     working_days()
     by_section("usc5-552-doj")
     truth_roundtrip()
+    cross_refs("usc5-552-doj")
+    handover_heatmap("receipt-xes")
+    tree_deck("receipt-xes")
+    page_roundtrip("usc5-552-doj")
     orchestration_proofs()
     counts = append_ledger()
     itil.save_register(reregister=os.environ.get("PROOFS_REREGISTER") == "1")

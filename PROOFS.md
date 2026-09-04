@@ -3592,3 +3592,162 @@ the enumerated rule (P54), policy (P13)
 proofs/out/P60/majority/roundtrip.json                     sha256 cae43519b49b0d42bca8ccca4e30d5d3a2db75aebbbdd3c7526707a0668fa0d4  registered
 shows: threshold read back 10, policy threshold 10, match True; monotone True
 ```
+## P61  sentences, units -> cross-reference graph -> workbook
+
+```
+parsed sentences (P1), units with paths (P1)
+-> references (re: 'subsection (x)', 'paragraph (n)' patterns in each sentence, resolved against the sentence's own subsection)
+-> graph (networkx.DiGraph; in_degree; is_directed_acyclic_graph)
+-> tabulate (openpyxl.Workbook.save; json.dumps)
+-> cross-reference graph
+```
+
+**usc5-552-doj**
+
+```
+proofs/out/P61/usc5-552-doj/cross_references.xlsx          sha256 3202988ddf25b58c20324893ebe7f64f68b39b344be8ac187095804b031c39ce  registered
+proofs/out/P61/usc5-552-doj/cross_references.json          sha256 386bc896d835269c528ccddb7207a7a2173be1fc01e36fe00733fc470123e262  registered
+shows: reference edges 35 between 23 subsections; most referenced [('(b)', 13), ('(i)', 8), ('(ii)', 8)]; acyclic False
+```
+
+## P62  log -> handover network -> heatmap page, workbook
+
+```
+log (P8)
+-> handover (pm4py.discover_handover_of_work_network)
+-> chart (plotly.express.imshow over the busiest resources)
+-> page (plotly.io.write_html; openpyxl.Workbook.save)
+-> heatmap page
+```
+
+**receipt-xes**
+
+```
+proofs/out/P62/receipt-xes/handover_heatmap.html           sha256 53cadc0d94ae89bac1333f4c53ee70a88c1572b9e7c6de27746570b60c85b819  registered
+proofs/out/P62/receipt-xes/handover.xlsx                   sha256 5fea249b89c4eb9a7e08b42be107c72854e80ba296a778e96f104fccd09eb4bd  registered
+shows: resource pairs 286; strongest Resource01 -> Resource01 (0.1365)
+```
+
+## P63  process tree -> deck
+
+```
+process tree (P8)
+-> draw (pptx.Presentation: one box per tree node, depth as column, connectors parent to child)
+-> deck
+```
+
+**receipt-xes**
+
+```
+proofs/out/P63/receipt-xes/process_tree.pptx               sha256 34f7ef23e8b2f7f6a1d45389bd82c3e5e75bd22a14ef6f3b2323c7152c35a14e  registered
+shows: tree nodes 103, depth 25; root operator ->
+```
+
+## P64  3D process page -> labels' ; labels', ordered steps -> match
+
+```
+3D process page (P41), ordered steps (P2)
+-> read page (re over the html for the Plotly.newPlot data; json.loads)
+-> compare (the marker labels against the ordered steps' lemmas)
+-> match
+```
+
+**usc5-552-doj**
+
+```
+proofs/out/P64/usc5-552-doj/roundtrip.json                 sha256 93dc615d0e4ad74fef3c3436749a01adb8d0340f9e1b6c298271dec4fcb3202a  registered
+shows: labels read out of the page 24, steps in the order 24, match True
+```
+### P61  sentences, units -> cross-reference graph -> workbook  (revised chain 1)
+
+```
+parsed sentences (P1), units with paths (P1)
+-> references (re: 'subsection (x)' in each sentence; paragraph and clause references stay inside their subsection and are not edges)
+-> graph (networkx.DiGraph; in_degree; is_directed_acyclic_graph)
+-> tabulate (openpyxl.Workbook.save; json.dumps)
+-> cross-reference graph
+```
+
+## Amendment 4
+
+reason: P61 revised: only subsection references are edges; paragraph and clause references are intra-subsection
+
+```
+proofs/out/P61/usc5-552-doj/cross_references.json                      386bc896d835269c… -> f8244167e0545ee4…
+proofs/out/P61/usc5-552-doj/cross_references.xlsx                      3202988ddf25b58c… -> 75b43ea314ce165d…
+```
+### P5  ordered steps -> process model -> process  (evidence after revision 1)
+
+**usc5-552-doj**
+
+```
+proofs/out/P5/usc5-552-doj/process.bpmn                    sha256 6209f474a27c67b72b44c6dc345b5d9f06bf2f24c86d485582cb8442e5697d61  reproduced
+shows: tasks 24, parallel gateways 2, flows 38; first flow request -> make
+```
+
+### P5  ordered steps -> process model -> process  (evidence after revision 1)
+
+**nodejs-governance**
+
+```
+proofs/out/P5/nodejs-governance/process.bpmn               sha256 9c83f8172d8fdb4540f84c74140c665ad49f564a9cf2e792fb6eede61449927f  reproduced
+shows: tasks 18, parallel gateways 2, flows 29; first flow collaborator -> more
+```
+
+### P8  event log -> log -> process model -> process diagram  (evidence after revision 1)
+
+**receipt-xes**
+
+```
+proofs/out/P8/receipt-xes/process.pnml                     sha256 9475109f51c0c7e1ba204969aa2cfe6b275b8ed4910e6d31a9f14672ac836725  reproduced
+proofs/out/P8/receipt-xes/process.bpmn                     sha256 1f4fc44ee45b11e960caa1da0436ae6da78e13e1ebcfa8c0429fb92f70560a35  reproduced
+shows: events 8577, cases 1434, activities 27
+shows: span 2010-10-02 to 2012-01-23
+shows: discovered from the first half of cases by id; start activities {'Confirmation of receipt': 717}
+shows: petri net places 44, transitions 72; bpmn nodes 79
+```
+
+### P34  process model -> soundness proof  (evidence after revision 1)
+
+**receipt-xes**
+
+```
+proofs/out/P34/receipt-xes/process.pnml                    sha256 e75e4c1e7f195eea21e50295697bf4f0d942476e98567f579c3cf9723ae91ebd  reproduced
+proofs/out/P34/receipt-xes/soundness.json                  sha256 c651a83c5d8abd78fbe3f2c42f8f74e800c58da2f930822c8a1ee495c8005a82  reproduced
+shows: sound: False; workflow net True, acyclic False, marked graph False
+shows: because: not decided structurally
+```
+
+### P35  process -> petri net -> soundness proof  (evidence after revision 1)
+
+**usc5-552-doj**
+
+```
+proofs/out/P35/usc5-552-doj/process.pnml                   sha256 d4d8dfed1baf10204eb215e5936ca8cd183389052fcc8ec6ffbdf6a5287b2997  reproduced
+proofs/out/P35/usc5-552-doj/soundness.json                 sha256 d703bae13849e7def6b18212c62e9141befcf107cd0735d0f2dfca43fef24a7f  reproduced
+shows: read back 28 bpmn nodes; petri net places 38, transitions 26
+shows: sound: True; workflow net True, acyclic True, marked graph True
+shows: because: acyclic marked-graph workflow net: every transition fires exactly once
+```
+
+### P35  process -> petri net -> soundness proof  (evidence after revision 1)
+
+**nodejs-governance**
+
+```
+proofs/out/P35/nodejs-governance/process.pnml              sha256 dc149693d9a6058f506f6cc561b2e612d8b73c493ad88471aa1d4af3f9de752a  reproduced
+proofs/out/P35/nodejs-governance/soundness.json            sha256 845d8a655f04710bdd2943e6881af8f4870b13ac92bdc79da299ea7afd404866  reproduced
+shows: read back 22 bpmn nodes; petri net places 29, transitions 20
+shows: sound: True; workflow net True, acyclic True, marked graph True
+shows: because: acyclic marked-graph workflow net: every transition fires exactly once
+```
+
+### P61  sentences, units -> cross-reference graph -> workbook  (evidence after revision 1)
+
+**usc5-552-doj**
+
+```
+proofs/out/P61/usc5-552-doj/cross_references.xlsx          sha256 75b43ea314ce165deb70833a912df18c407611dbea4f216912729d3cf0611461  reproduced
+proofs/out/P61/usc5-552-doj/cross_references.json          sha256 f8244167e0545ee47bd5fbe3e51150757aa4bc81f9324b5353cfaa194223f674  reproduced
+shows: reference edges 12 between 9 subsections; most referenced [('(b)', 13), ('(a)', 6), ('(c)', 1)]; acyclic True
+```
