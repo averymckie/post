@@ -28,7 +28,7 @@
       [
        "proofs/out/itil/architecture-management/component-dependency-model/dependency_model.xlsx",
        "18d955657444fd3eb9ebde649272460f6daa31d5bad719da33b7b4731c342909",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "activities and directly-follows edges of the receipt-phase log",
@@ -69,7 +69,7 @@
       [
        "proofs/out/itil/architecture-management/architecture-standards-register/standards.xlsx",
        "f7e6e02e08fce77cb37eda55c09761e20d4eb51df6f1678f5e20309785f7db4f",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "obligations of the Node.js TSC charter",
@@ -112,7 +112,7 @@
       [
        "proofs/out/itil/architecture-management/architecture-roadmap/roadmap.html",
        "6494d3671edde9365e6da9a1557a670c722d47aeb39384715dd4156094295144",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "ordered steps of the Node.js governance document",
@@ -170,7 +170,7 @@
       [
        "proofs/out/itil/architecture-management/change-impact-assessment/impact.xlsx",
        "2e7543679eaf64df3fc94a1bac96a83cb313b7222fc85b388bad46cbeb1aad66",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "forced precedence of 5 U.S.C. 552",
@@ -227,7 +227,7 @@
       [
        "proofs/out/itil/continual-improvement/improvement-register/improvement_register.xlsx",
        "ff1e5ae1fbaded86922a72f8bda2c28a5fd2322445b4450d69fde3533a6deb55",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "TSC minutes sentences whose actions include improve, fix, rework, migrate, deprecate, remove or simplify",
@@ -289,7 +289,7 @@
       [
        "proofs/out/itil/continual-improvement/improvement-measurement/measurement_by_month.xlsx",
        "403198098487f5be6e5379dd2aa472591ac17cbc2a0708d9973286a2db941e73",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "receipt-phase cases per month, mean duration and cases after deadline",
@@ -374,7 +374,7 @@
       [
        "proofs/out/itil/continual-improvement/improvement-review-report/review_report.docx",
        "d743b15186fe1bd6bf852154aed3dca1d1c0d78ac93960bbe4d79aa027ab3697",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "receipt-phase conformance joined to case departments",
@@ -453,7 +453,7 @@
       [
        "proofs/out/itil/information-security-management/confidentiality-obligations-register/confidentiality_obligations.xlsx",
        "5156f7a28bc7003cd7802016679474adeb90e01087ade7bac7d2d318eb8c996f",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "5 U.S.C. 552 sentences containing withhold, exempt, classified, confidential or privacy",
@@ -492,7 +492,7 @@
       [
        "proofs/out/itil/information-security-management/access-control-matrix/access_matrix.xlsx",
        "d6501053fd60b08aca40bca95acb9afdeda53f38788d6960588c14134ad77c0a",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "agents and required actions of 5 U.S.C. 552",
@@ -522,7 +522,7 @@
       [
        "proofs/out/itil/information-security-management/prohibitions-register/prohibitions.xlsx",
        "b2ef042b7d089d3e3eb650a4e0a5abb921a36d3829aebf54a74d0d94706e1369",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "negated obligations of 5 U.S.C. 552",
@@ -536,22 +536,56 @@
     {
      "chain": [
       [
-       "cases",
+       "changelog",
        {}
       ],
       [
-       "workbook",
+       "filter",
        {
-        "name": "security_incidents"
+        "where": [
+         [
+          "security",
+          "eq",
+          true
+         ]
+        ]
+       }
+      ],
+      [
+       "select",
+       {
+        "fields": [
+         "date",
+         "version",
+         "codename",
+         "kind",
+         "releaser",
+         "commits"
+        ]
+       }
+      ],
+      [
+       "document",
+       {
+        "name": "security_incidents",
+        "title": "security releases of Node.js 22"
        }
       ]
      ],
-     "files": [],
-     "instantiated_on": "none",
+     "files": [
+      [
+       "proofs/out/itil/information-security-management/security-incident-report/security_incidents.docx",
+       "516acdcdfe51f10ae31548bb509898d0d3bd951597db1cf98b00096318c2e15d",
+       "reproduced"
+      ]
+     ],
+     "instantiated_on": "Node.js 22 changelog, releases marked as security releases",
      "name": "security incident report",
-     "shape": "incidents with severity and timeline",
-     "shows": [],
-     "status": "no real input"
+     "shape": "security releases with date, line and releaser",
+     "shows": [
+      "rows 6; first {\"date\": \"2026-07-29\", \"version\": \"22.23.2\", \"codename\": \"Jod\", \"kind\": \"LTS\", \"releaser\": \"marco-ippolito\", \"commits\": 12}"
+     ],
+     "status": "proven"
     }
    ],
    "group": "general management",
@@ -588,7 +622,7 @@
       [
        "proofs/out/itil/knowledge-management/glossary/glossary.xlsx",
        "6db1bc44fdb5bd3cc3c013808933dcd50871570b672dc908da7b2f26a90228ce",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "definitional sentences of 5 U.S.C. 552 (mean, include, define)",
@@ -624,7 +658,7 @@
       [
        "proofs/out/itil/knowledge-management/knowledge-article/knowledge_article.docx",
        "3e85de966b34570b854d7bfa1fb570761e307b54efe6d151c84d00bddcbf8e9c",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "ordered steps of 5 U.S.C. 552",
@@ -669,7 +703,7 @@
       [
        "proofs/out/itil/knowledge-management/knowledge-index/index_usc5_552.xlsx",
        "3cf8be4fccf39374be7554287dab8a8f0335c5bbe1b97a99b5206c9e52f50147",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "facts of the three procedure documents",
@@ -740,7 +774,7 @@
       [
        "proofs/out/itil/knowledge-management/frequently-discussed-topics/topics.xlsx",
        "aa4c93ed15750e2a161242b98f1be49528a9e3cc7e05f68c6b09426638f44817",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "governance steps tagged in TSC minutes",
@@ -822,7 +856,7 @@
       [
        "proofs/out/itil/measurement-and-reporting/kpi-report/kpi_report.xlsx",
        "8a39162c0d8b0552e9c44232ab184f6e2e3451854a907223984bd2ee2c36fba0",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "receipt-phase cases per department",
@@ -869,7 +903,7 @@
       [
        "proofs/out/itil/measurement-and-reporting/dashboard/dashboard.html",
        "53306bfe359d052835628d9ba408164083be82326369b256bcfaa3c2e82b9c7a",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "receipt-phase events per activity",
@@ -899,7 +933,7 @@
       [
        "proofs/out/itil/measurement-and-reporting/scorecard/scorecard.html",
        "5296906fa43153bfd9065d5ea5fe7b65b05d1d45b7d38113e4c6cdf0a794e3cf",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "majority reachable per TSC meeting",
@@ -951,7 +985,7 @@
       [
        "proofs/out/itil/measurement-and-reporting/measurement-plan/measurement_plan.xlsx",
        "712f6783c15c46cb44bfed962630c2fc32d6dee8c305851179382861742c73bb",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "TIMEX3 durations found in 5 U.S.C. 552",
@@ -1010,7 +1044,7 @@
       [
        "proofs/out/itil/organizational-change-management/stakeholder-map/stakeholders.xlsx",
        "eb0333dd666d2a3efdd9c4e1ac822cd23599cf70f543590d18517d6023381919",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "the Present lists of eight TSC meetings",
@@ -1061,7 +1095,7 @@
       [
        "proofs/out/itil/organizational-change-management/communication-log/communications.xlsx",
        "0251e986176b09ed1184b8e63d09c023ac07c000cbb5aac99fdaa17950168c52",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "Announcements and update sections of the TSC minutes",
@@ -1089,7 +1123,7 @@
       [
        "proofs/out/itil/organizational-change-management/readiness-assessment/readiness.xlsx",
        "3e9beefff35ce027cb13eb539e1b93736151dcd067da9396dd38f9f85bb8d121",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "majority reachable per TSC meeting",
@@ -1166,7 +1200,7 @@
       [
        "proofs/out/itil/portfolio-management/portfolio-register/portfolio.xlsx",
        "1ae5a206019ea1a57271b48069fe638e62378689c7c6c11a9027aa8a336ce857",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "agenda items with links in the TSC minutes",
@@ -1236,7 +1270,7 @@
       [
        "proofs/out/itil/portfolio-management/prioritization-matrix/prioritization.xlsx",
        "4c84d0fe2fd393fe7c7ed51f73c135196207b75974deafcba6a0869dd4bde30c",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "links recurring across TSC meetings",
@@ -1273,7 +1307,7 @@
       [
        "proofs/out/itil/portfolio-management/portfolio-review/portfolio_review.html",
        "68fa5cfee2b9c81f9ed859491333ae9a926a115ea63da07072576263a8eb0ce6",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "TSC minutes sections",
@@ -1316,7 +1350,7 @@
       [
        "proofs/out/itil/project-management/project-charter/charter.docx",
        "35070667ee78f2329af2aa47a42d2612d2677735fd55e7ac75e77a85710c15a4",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "the Node.js TSC charter's obligations",
@@ -1357,7 +1391,7 @@
       [
        "proofs/out/itil/project-management/project-schedule/schedule.xlsx",
        "a16532af1261ac68dd83600f2b1ddeb9fe73259e36a1dff7ef0e7113d950b778",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "ordered steps of 5 U.S.C. 552 by phase",
@@ -1393,7 +1427,7 @@
       [
        "proofs/out/itil/project-management/status-report/status_report.docx",
        "234679fc31873865d4b770e63292375fed72bc2def1cf7d87deda72c237a3851",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "receipt-phase cases per month",
@@ -1443,7 +1477,7 @@
       [
        "proofs/out/itil/project-management/raid-log/raid_log.xlsx",
        "f9c1b4c08d767e311663b6e135e187e2a32797a14051b688f1993d5f8c7578fc",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "TSC minutes sentences mentioning risk, block, issue, depend or concern",
@@ -1522,7 +1556,7 @@
       [
        "proofs/out/itil/relationship-management/stakeholder-register/stakeholder_register.xlsx",
        "b5c7d92625b5f527c0fcec33647d1ed470c5643b9e9e53131df8af27d478e69a",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "TSC voting members joined with meeting participants",
@@ -1573,7 +1607,7 @@
       [
        "proofs/out/itil/relationship-management/decision-log/decision_log.xlsx",
        "063f5fcb396353d97a5979e1b8212cf1f80e5b61bc09d97e5640fe4c8cd5a78d",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "TSC minutes sentences whose actions include agree, approve, vote, decide, resolve or consensus",
@@ -1694,7 +1728,7 @@
       [
        "proofs/out/itil/risk-management/risk-register/risk_register.xlsx",
        "6870a2aa4290dba471de3fab3d07aba5fc7dd7750290df446d016678dcecfe9d",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "open receipt-phase cases against their department's mean duration",
@@ -1770,7 +1804,7 @@
       [
        "proofs/out/itil/risk-management/risk-matrix/risk_matrix.html",
        "89bd50c2374beed820a734e6aa4fb5e5d3a8a0203de107dc2dcc1c71e091ee0d",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "receipt-phase departments, share late against mean duration",
@@ -1838,7 +1872,7 @@
       [
        "proofs/out/itil/risk-management/risk-report/risk_report.docx",
        "2cf5fbb078f8b0f8f1b57ce26a1bc00e7118fe8da60aa505bf5674895a8904d5",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "receipt-phase departments",
@@ -1897,7 +1931,7 @@
       [
        "proofs/out/itil/service-financial-management/fee-rules-register/fee_rules.xlsx",
        "10c522669ac6b9b8dbe988c694e8dd6ffd6d8aa3e95bfe35e4c0e78209543ddf",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "fee provisions of 5 U.S.C. 552",
@@ -2004,7 +2038,7 @@
       [
        "proofs/out/itil/strategy-management/objectives-register/objectives.xlsx",
        "8f2d87098ec744d9b124efbb661b2f3350946be88491286eaead77acbcf39d32",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "obligations of the Node.js governance document",
@@ -2054,7 +2088,7 @@
       [
        "proofs/out/itil/strategy-management/strategic-roadmap/strategic_roadmap.xlsx",
        "7be2e9b3d390c513389bb34dedf68277b92ba104286a95c831a170b60141b71b",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "ordered steps of the Node.js governance document",
@@ -2103,7 +2137,7 @@
       [
        "proofs/out/itil/strategy-management/strategy-review/strategy_review.xlsx",
        "608a888d96c75ffe5949e36c7d86a258245a41802c60d11f38553fe672877655",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "charter actions tagged in TSC minutes",
@@ -2162,7 +2196,7 @@
       [
        "proofs/out/itil/supplier-management/third-party-obligations-register/third_party_obligations.xlsx",
        "37aab9e3c82159358794a010fd17c90da8aacbe5ab5a6b3ee50cf213952b98ad",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "TSC charter sentences naming the CPC or the Foundation",
@@ -2176,8 +2210,58 @@
     {
      "chain": [
       [
-       "events",
+       "licenses",
        {}
+      ],
+      [
+       "derive",
+       {
+        "field": "key",
+        "fn": "upper",
+        "of": "component"
+       }
+      ],
+      [
+       "save_as",
+       {
+        "name": "lic"
+       }
+      ],
+      [
+       "dependencies",
+       {}
+      ],
+      [
+       "derive",
+       {
+        "field": "key",
+        "fn": "upper",
+        "of": "dependency"
+       }
+      ],
+      [
+       "join",
+       {
+        "how": "left",
+        "keys": [
+         [
+          "key",
+          "key"
+         ]
+        ],
+        "with": "lic"
+       }
+      ],
+      [
+       "select",
+       {
+        "fields": [
+         "dependency",
+         "component",
+         "location",
+         "license_heading"
+        ]
+       }
       ],
       [
        "workbook",
@@ -2186,12 +2270,20 @@
        }
       ]
      ],
-     "files": [],
-     "instantiated_on": "none",
+     "files": [
+      [
+       "proofs/out/itil/supplier-management/supplier-register/suppliers.xlsx",
+       "8b3c044d6c55fb03ef769721906c112980ab0205690ff5273600bc0409f5d0f2",
+       "reproduced"
+      ]
+     ],
+     "instantiated_on": "Node.js maintained dependencies joined to the LICENSE register",
      "name": "supplier register",
-     "shape": "suppliers and what they supply",
-     "shows": [],
-     "status": "no real input"
+     "shape": "external components relied on, with their license",
+     "shows": [
+      "rows 31; first {\"dependency\": \"acorn\", \"component\": \"Acorn\", \"location\": \"deps/acorn\", \"license_heading\": \"MIT License\"}"
+     ],
+     "status": "proven"
     },
     {
      "chain": [
@@ -2238,7 +2330,7 @@
       [
        "proofs/out/itil/workforce-and-talent-management/roles-and-responsibilities/roles.xlsx",
        "5960c68351c7adacc8a9db1dc003bc1dbda335eca3210423ab60b11ebfca8f57",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "agents and required actions of the TSC charter",
@@ -2270,7 +2362,7 @@
       [
        "proofs/out/itil/workforce-and-talent-management/attendance-report/attendance.html",
        "9e8d4ce0789939b9405a0a6ae2d966f10feaefe10a8d3dc2e4500beae20ee435",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "voting members present at eight TSC meetings",
@@ -2332,7 +2424,7 @@
       [
        "proofs/out/itil/workforce-and-talent-management/workload-report/workload.xlsx",
        "f299c0a1684cf8745db1c0c97e021de10309c45f65eebe380e94227cdbe703e9",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "receipt-phase events per resource",
@@ -2367,7 +2459,7 @@
       [
        "proofs/out/itil/workforce-and-talent-management/skills-matrix/skills_matrix.xlsx",
        "d17309c1815087e6898a7832df4043a42c218a6d173fa585879d434e4c915ea3",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "receipt-phase resources against the activities they performed",
@@ -2429,7 +2521,7 @@
       [
        "proofs/out/itil/availability-management/availability-requirements/availability_requirements.xlsx",
        "712f6783c15c46cb44bfed962630c2fc32d6dee8c305851179382861742c73bb",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "durations in 5 U.S.C. 552 with their sentences",
@@ -2476,7 +2568,7 @@
       [
        "proofs/out/itil/availability-management/availability-report/availability_report.xlsx",
        "3e9beefff35ce027cb13eb539e1b93736151dcd067da9396dd38f9f85bb8d121",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "share of voting members available per TSC meeting",
@@ -2490,8 +2582,17 @@
     {
      "chain": [
       [
-       "cases",
+       "release_schedule",
        {}
+      ],
+      [
+       "derive",
+       {
+        "a": "start",
+        "b": "end",
+        "field": "supported_days",
+        "fn": "days_between"
+       }
       ],
       [
        "workbook",
@@ -2500,12 +2601,20 @@
        }
       ]
      ],
-     "files": [],
-     "instantiated_on": "none",
+     "files": [
+      [
+       "proofs/out/itil/availability-management/availability-plan/availability_plan.xlsx",
+       "321680589d2b9990de07e8086547537471b38d2004dd2f07f49cda65b00824a0",
+       "reproduced"
+      ]
+     ],
+     "instantiated_on": "Node.js release lines with start, LTS, maintenance and end dates",
      "name": "availability plan",
-     "shape": "planned measures to keep the service available",
-     "shows": [],
-     "status": "no real input"
+     "shape": "the windows in which each service line is supported",
+     "shows": [
+      "rows 27; first {\"version\": \"v0.8\", \"codename\": \"\", \"start\": \"2012-06-25\", \"lts\": \"\", \"maintenance\": \"\", \"end\": \"2014-07-31\", \"supported_days\": 766.0}"
+     ],
+     "status": "proven"
     }
    ],
    "group": "service management",
@@ -2543,7 +2652,7 @@
       [
        "proofs/out/itil/business-analysis/requirements-catalogue/requirements.xlsx",
        "6e6b1b61aded21bc43e1631a5c6337d00176a534b6503e98f9131ac45e1f9774",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "obligations of 5 U.S.C. 552",
@@ -2571,7 +2680,7 @@
       [
        "proofs/out/itil/business-analysis/as-is-process-model/as_is_process.xlsx",
        "18d955657444fd3eb9ebde649272460f6daa31d5bad719da33b7b4731c342909",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "receipt-phase directly-follows edges",
@@ -2650,7 +2759,7 @@
       [
        "proofs/out/itil/business-analysis/gap-analysis/gap_analysis.xlsx",
        "79b1a36ad7ee69a986b7662f16eb9ef20fa1dee32026e7449b573849cb0d9168",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "required actions of the TSC charter against the governance document",
@@ -2729,7 +2838,7 @@
       [
        "proofs/out/itil/business-analysis/acceptance-criteria/acceptance_criteria.xlsx",
        "06697e82453161bb8a0c5a6811e58c5e92867933cde32018207f21cadbbf8a79",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "5 U.S.C. 552 obligations joined to durations in the same sentence",
@@ -2778,7 +2887,7 @@
       [
        "proofs/out/itil/capacity-and-performance-management/capacity-plan/capacity_plan.xlsx",
        "fab180bfb9e59e2b5f5d547ca78cd2690d068327e616cf76abd4ee21d85b7a74",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "receipt-phase events per month and department",
@@ -2841,7 +2950,7 @@
       [
        "proofs/out/itil/capacity-and-performance-management/performance-report/performance_report.xlsx",
        "1b6af16c4b4fe3ff6398bac3c904b7933f066a4fc08b04a0e70f7ea0d13c6364",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "receipt-phase cases per department",
@@ -2888,7 +2997,7 @@
       [
        "proofs/out/itil/capacity-and-performance-management/demand-trend/demand.html",
        "655c52141c02f2c6934b190413eecd58177652f4795241ae5eeca3c1cdb8158c",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "receipt-phase cases",
@@ -2916,7 +3025,7 @@
       [
        "proofs/out/itil/capacity-and-performance-management/bottleneck-analysis/bottlenecks.xlsx",
        "bfdf9be9a88d4c5b0a7d7e2758e87d313b654b907eb7a68da0308a9ba4dfcc25",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "receipt-phase directly-follows edges with waiting times",
@@ -2973,7 +3082,7 @@
       [
        "proofs/out/itil/change-enablement/change-request-record/change_requests.xlsx",
        "ba38755eed41043d4f39eed30418cd52107a2ac30541da4d6ba9d87ae7380f9d",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "pull requests referenced in TSC minutes",
@@ -3002,8 +3111,8 @@
      "files": [
       [
        "proofs/out/itil/change-enablement/change-model/change_model.bpmn",
-       "166bbb4144b5a68850328b79b7388ac030a78e9a76c08820422136062d598113",
-       "registered"
+       "9c83f8172d8fdb4540f84c74140c665ad49f564a9cf2e792fb6eede61449927f",
+       "reproduced"
       ]
      ],
      "instantiated_on": "forced precedence of the Node.js governance document",
@@ -3063,7 +3172,7 @@
       [
        "proofs/out/itil/change-enablement/change-schedule/change_schedule.xlsx",
        "a7e70fe13108f94c6844c44bc870f1e533df9a94dc99964762a8cc4963e78682",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "pull requests per TSC meeting date",
@@ -3102,7 +3211,7 @@
       [
        "proofs/out/itil/change-enablement/change-authority-matrix/authority_matrix.xlsx",
        "c5f21da356efff6344a93a997e853da976ec3bd76e1efc56bf006d8100541344",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "agents and required actions of the TSC charter",
@@ -3162,7 +3271,7 @@
       [
        "proofs/out/itil/change-enablement/post-implementation-review/post_implementation_review.xlsx",
        "e8ae029d962f6dff01922e51869356f3a0ede233bb4a92d91ede3bdc1c4f0f38",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "receipt-phase conformance per variant",
@@ -3212,7 +3321,7 @@
       [
        "proofs/out/itil/incident-management/incident-record/case_records.xlsx",
        "21d9cb2b5cc71589fceb9e208a456eb038993dc64db91f8c5f8f985f8f63478f",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "receipt-phase cases",
@@ -3246,7 +3355,7 @@
       [
        "proofs/out/itil/incident-management/incident-model/models.xlsx",
        "e71b4a1a2c43329fb68ecf5bfdea7bf0d6dc0f31b958d5448b0c40e54f65b77c",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "the most common receipt-phase variant",
@@ -3299,7 +3408,7 @@
       [
        "proofs/out/itil/incident-management/major-incident-report/major_cases.docx",
        "933867beef3f8615c36f580658985f768e5fcd2036298983c9d138e5014c3eda",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "the ten longest receipt-phase cases",
@@ -3359,7 +3468,7 @@
       [
        "proofs/out/itil/incident-management/incident-status-report/status.xlsx",
        "2f67f489cd263e6644402e28a856624e808c69173b83ffee3bf334a96111520f",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "open receipt-phase cases per department",
@@ -3412,7 +3521,7 @@
       [
        "proofs/out/itil/incident-management/deadline-breach-list/breaches.xlsx",
        "de3fec19361ddd4d0cf4ab1dbaa3f97317be96bc765ad6a91cd82d7dd5ecb7e8",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "receipt-phase cases",
@@ -3446,7 +3555,7 @@
       [
        "proofs/out/itil/incident-management/escalation-matrix/escalation.xlsx",
        "68e49809f003ca00200d70a43e49d792ef16320dffd3a93a81d2d44c21d3e095",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "receipt-phase handover-of-work network",
@@ -3506,7 +3615,7 @@
       [
        "proofs/out/itil/it-asset-management/asset-register/asset_register.xlsx",
        "57cee043168cbdcdd529da658da9f0856ed485ae428c38acbba5d013419a47f6",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "receipt-phase resources and groups",
@@ -3568,7 +3677,7 @@
       [
        "proofs/out/itil/it-asset-management/lifecycle-records/lifecycle.xlsx",
        "9917d89c410763ad50ec5e22be2226de7b786d18f6edbf1164e18f13ac839fce",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "receipt-phase resources",
@@ -3596,7 +3705,7 @@
       [
        "proofs/out/itil/it-asset-management/audit-reconciliation/reconciliation.xlsx",
        "6e49e3dabd08905d28f3db4a1b676853ddf59176de68a1eb014200f5af8a32e5",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "the reverse proofs of this file",
@@ -3610,7 +3719,7 @@
     {
      "chain": [
       [
-       "events",
+       "licenses",
        {}
       ],
       [
@@ -3620,12 +3729,20 @@
        }
       ]
      ],
-     "files": [],
-     "instantiated_on": "none",
+     "files": [
+      [
+       "proofs/out/itil/it-asset-management/license-compliance-report/licenses.xlsx",
+       "52b7dbe497fec705d1367adf6f4cb119d779757e16f965a7c51f130ea794d96b",
+       "reproduced"
+      ]
+     ],
+     "instantiated_on": "the Node.js LICENSE file, one section per bundled dependency",
      "name": "license compliance report",
-     "shape": "entitlements against installations",
-     "shows": [],
-     "status": "no real input"
+     "shape": "every bundled component with its license",
+     "shows": [
+      "rows 43; first {\"component\": \"Acorn\", \"location\": \"deps/acorn\", \"license_heading\": \"MIT License\", \"license_lines\": 24}"
+     ],
+     "status": "proven"
     }
    ],
    "group": "service management",
@@ -3663,7 +3780,7 @@
       [
        "proofs/out/itil/monitoring-and-event-management/event-records/event_records.xlsx",
        "693c9ee65f6f95513f807da32af5b541423750e7cf30bb5bdebc2271bb3cbf91",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "receipt-phase events",
@@ -3711,7 +3828,7 @@
       [
        "proofs/out/itil/monitoring-and-event-management/monitoring-thresholds/thresholds.xlsx",
        "90e04cdcfd6b51aedf7977745aaae77d11d6e04437b86069181d02b3f9d332df",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "receipt-phase department mean durations",
@@ -3827,12 +3944,12 @@
       [
        "proofs/out/itil/monitoring-and-event-management/alert-list/policy.jdm.json",
        "9835ab6f3625f14d66147c79c28d997b9ac1c310a7149f095b956eda0abab2c0",
-       "registered"
+       "reproduced"
       ],
       [
        "proofs/out/itil/monitoring-and-event-management/alert-list/alerts.xlsx",
        "5c51e871f2df40a50fa46d6b0c5b64ced009098dcfd4d8bb8d4abcfa39be4799",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "open receipt-phase cases against department means",
@@ -3860,7 +3977,7 @@
       [
        "proofs/out/itil/monitoring-and-event-management/event-correlation/correlation.xlsx",
        "18d955657444fd3eb9ebde649272460f6daa31d5bad719da33b7b4731c342909",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "receipt-phase directly-follows edges",
@@ -3936,7 +4053,7 @@
       [
        "proofs/out/itil/problem-management/problem-record/problems.xlsx",
        "126a467908e80e746c650bec72fbe175f6703fd6f58858feb2938c18d28ba74c",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "late receipt-phase cases per department and channel",
@@ -3976,7 +4093,7 @@
       [
        "proofs/out/itil/problem-management/known-error-record/known_errors.xlsx",
        "06ec4a4303c58a7d328c8b90e36969e93f8336ffa60d894dcb11a99dd3b37d08",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "receipt-phase variants of cases that did not fit the model",
@@ -4011,7 +4128,7 @@
       [
        "proofs/out/itil/problem-management/root-cause-analysis/root_cause.docx",
        "b201d52d7cc6105787e56a888f1a46208a8dfda2998807422d7e4e6ce014099b",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "receipt-phase bottlenecks",
@@ -4081,7 +4198,7 @@
       [
        "proofs/out/itil/problem-management/trend-analysis/trend.html",
        "90e8251c6c3ff64e4a2a95d7bd81491f46a21b3acb26f56e165a6d1955cabb3c",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "late receipt-phase cases per month",
@@ -4128,7 +4245,7 @@
       [
        "proofs/out/itil/release-management/release-plan/release_plan.xlsx",
        "a8f3112bfee8f787be65b3ab97ef8e4944c20e6fa787b1a3649e59b780c66138",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "ordered steps of the Node.js governance document by phase",
@@ -4175,7 +4292,7 @@
       [
        "proofs/out/itil/release-management/release-notes/release_notes.docx",
        "bfe057deb3393d7b6909668536ec6cb1a21f2e1088d03b0d7d63750d73dbe640",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "agenda items with links in the TSC minutes",
@@ -4189,29 +4306,26 @@
     {
      "chain": [
       [
-       "minutes_sections",
+       "changelog",
        {}
-      ],
-      [
-       "filter",
-       {
-        "where": [
-         [
-          "item",
-          "matches",
-          "(?i)release|v[0-9]+\\b"
-         ]
-        ]
-       }
       ],
       [
        "select",
        {
         "fields": [
-         "meeting",
-         "section",
-         "item",
-         "link"
+         "date",
+         "version",
+         "kind",
+         "releaser",
+         "security"
+        ]
+       }
+      ],
+      [
+       "sort",
+       {
+        "by": [
+         "date"
         ]
        }
       ],
@@ -4225,15 +4339,15 @@
      "files": [
       [
        "proofs/out/itil/release-management/release-schedule/release_schedule.xlsx",
-       "b7f6fa5a330a135cda6d279a7f982c6d3385aa22473d113627e0148cc522f5bc",
-       "registered"
+       "fe0564f9f4b51fa8fba353e7b224f830993f448d192cd93e8d0685bedd0f92e1",
+       "reproduced"
       ]
      ],
-     "instantiated_on": "TSC minutes sections mentioning release",
+     "instantiated_on": "Node.js 22 changelog",
      "name": "release schedule",
-     "shape": "releases by date",
+     "shape": "releases by date with their line and kind",
      "shows": [
-      "rows 13; first {\"meeting\": \"tsc-2024-01-10\", \"section\": \"Announcements\", \"item\": \"Richard, Ulises did a release for Node.js 20\", \"link\": \"\"}"
+      "rows 19; first {\"date\": \"2024-10-29\", \"version\": \"22.11.0\", \"kind\": \"LTS\", \"releaser\": \"richardlau\", \"security\": false}"
      ],
      "status": "proven"
     },
@@ -4259,7 +4373,7 @@
       [
        "proofs/out/itil/release-management/release-readiness-checklist/readiness_checklist.docx",
        "7a609a0676f5c6c5ad399eeebf0b5bba0cb6900430e164bc523c9196f24c2e48",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "obligations of the TSC charter",
@@ -4313,7 +4427,7 @@
       [
        "proofs/out/itil/service-catalogue-management/service-catalogue/catalogue.xlsx",
        "a30f1360f5877670feefe77b74bdb11df64e4f049613c908825895c244526c71",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "receipt-phase activities",
@@ -4349,7 +4463,7 @@
       [
        "proofs/out/itil/service-catalogue-management/service-descriptions/descriptions.docx",
        "9675d5075ed67446fb2b87425b701a3538e3c71451e56bfbc0beb8a09633b44f",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "definitional sentences of 5 U.S.C. 552",
@@ -4384,7 +4498,7 @@
       [
        "proofs/out/itil/service-catalogue-management/request-catalogue/request_catalogue.xlsx",
        "faffad86140e0b0e33d934ba3bdf5e57f78938011d789f539fc9822399b482a7",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "receipt-phase activities per channel",
@@ -4428,7 +4542,7 @@
       [
        "proofs/out/itil/service-configuration-management/configuration-item-register/ci_register.xlsx",
        "d3f0f5ae52283b9194d2593db8ef4ea31c493773c76de93ad77d50b67e02ca08",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "receipt-phase activities, resources and groups",
@@ -4458,7 +4572,7 @@
       [
        "proofs/out/itil/service-configuration-management/ci-relationship-map/relationships.html",
        "a0184388aad4d53c76d2336aa24b1ee8ba28d224d6bcfc9edfbe4be4b523a295",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "receipt-phase directly-follows edges",
@@ -4488,7 +4602,7 @@
       [
        "proofs/out/itil/service-configuration-management/configuration-baseline/baseline.json",
        "5851a99fe1fdb483cbe7e2459721066168905140f96ee9cec3edbfb40994b207",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "the forced order of 5 U.S.C. 552",
@@ -4516,7 +4630,7 @@
       [
        "proofs/out/itil/service-configuration-management/configuration-verification-report/verification.xlsx",
        "6e49e3dabd08905d28f3db4a1b676853ddf59176de68a1eb014200f5af8a32e5",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "the reverse proofs of this file",
@@ -4575,7 +4689,7 @@
       [
        "proofs/out/itil/service-continuity-management/business-impact-analysis/bia.xlsx",
        "2336582410bc401f781a3621079ebcfb9e8ff068c8fd0e49a6edcf378d083681",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "receipt-phase departments",
@@ -4612,7 +4726,7 @@
       [
        "proofs/out/itil/service-continuity-management/continuity-plan/continuity_plan.docx",
        "bc76be40df9526b65b44eb0f971b62a7a0b61fbdd1db8711c029dc6228c3b084",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "5 U.S.C. 552 required actions",
@@ -4649,7 +4763,7 @@
       [
        "proofs/out/itil/service-continuity-management/recovery-procedure/recovery_procedure.docx",
        "bfe2abce4ca66498589f4f09426593317b95ae8edd0eb134498c8327472f7db0",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "ordered steps of 5 U.S.C. 552",
@@ -4679,7 +4793,7 @@
       [
        "proofs/out/itil/service-continuity-management/continuity-test-report/test_report.xlsx",
        "3ace901e86701e2edc3c1a79417fdc535a4594dab61d0b02b4acb91b3c2a3d8a",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "execution trace of the statutory process in SpiffWorkflow",
@@ -4722,7 +4836,7 @@
       [
        "proofs/out/itil/service-design/service-design-package/design_package.docx",
        "69ebdd2d5274d2d1f879445cf5b26029b1d88b33719252d299aad0f0e6111616",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "5 U.S.C. 552",
@@ -4759,7 +4873,7 @@
       [
        "proofs/out/itil/service-design/requirements-traceability-matrix/traceability.xlsx",
        "34a591089bc4a9518095fc49d7cc5b25e7b40e22edbaef5834f760c4bcd9389c",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "5 U.S.C. 552 obligations per unit",
@@ -4788,8 +4902,8 @@
      "files": [
       [
        "proofs/out/itil/service-design/service-blueprint/blueprint.bpmn",
-       "bff8566093ca1992bd9aeefe5ab597f4381897b80ddf30fa664c68d3f166e3a2",
-       "registered"
+       "6209f474a27c67b72b44c6dc345b5d9f06bf2f24c86d485582cb8442e5697d61",
+       "reproduced"
       ]
      ],
      "instantiated_on": "forced precedence of 5 U.S.C. 552",
@@ -4830,7 +4944,7 @@
       [
        "proofs/out/itil/service-desk/ticket-log/ticket_log.xlsx",
        "76022eca427bcdc10a0277150e5f1daa1c56906191fbddd4bbc21184d4dab74f",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "receipt-phase cases by channel",
@@ -4881,7 +4995,7 @@
       [
        "proofs/out/itil/service-desk/interaction-records/desk_interactions.xlsx",
        "d8e5f4c0f929a94c88e3f68d298f7edbf8bccbf68a0488a4514a85424099d58d",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "receipt-phase events on the Desk channel",
@@ -4953,7 +5067,7 @@
       [
        "proofs/out/itil/service-desk/knowledge-suggestions/knowledge_suggestions.xlsx",
        "0f5df56b186ff344862cb8c3eb675685e0b8452ae16c9a2297ea09c9d57f2146",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "governance steps tagged in TSC minutes",
@@ -5002,7 +5116,7 @@
       [
        "proofs/out/itil/service-desk/user-communications/announcements.xlsx",
        "0b5660bfd43832d1200998bd9a118c9c2e3ed34eecd769882df91b01dc6fb3af",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "Announcements sections of the TSC minutes",
@@ -5090,7 +5204,7 @@
       [
        "proofs/out/itil/service-level-management/service-level-targets/targets.xlsx",
        "366c2583ed86b99b8cfcfc167ae3404841b64e610c207233e5a67df6c649c554",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "5 U.S.C. 552 obligations with durations in the same sentence",
@@ -5125,7 +5239,7 @@
       [
        "proofs/out/itil/service-level-management/service-level-report/service_level_report.xlsx",
        "903be867ca0c14f8a85ba373b273d86569859d09a3d12e53b73bf978f6af6870",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "receipt-phase cases per department",
@@ -5172,7 +5286,7 @@
       [
        "proofs/out/itil/service-level-management/breach-analysis/breach_analysis.xlsx",
        "56529eea81ba8f9c33dd208034d3be2da4048437e4b43411f637c3dd791a709b",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "receipt-phase cases after deadline",
@@ -5208,7 +5322,7 @@
       [
        "proofs/out/itil/service-level-management/dependency-map/dependency_map.html",
        "5177064a413070c13dd15286a6b73a7095565c03c8849c521bad7b4440f3fb40",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "receipt-phase handover-of-work network",
@@ -5248,7 +5362,7 @@
       [
        "proofs/out/itil/service-request-management/request-models/request_models.xlsx",
        "09e5a890c7fcfaafddaf1258567de08a0f09e662640cb2c6d8b1ee7092f7e991",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "receipt-phase variants",
@@ -5302,7 +5416,7 @@
       [
        "proofs/out/itil/service-request-management/fulfilment-records/fulfilment_records.xlsx",
        "02f041b87e93d3d29dfaf27f0cdf39d1422ef99ddb4779c2f790af7c1de0ce6f",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "receipt-phase cases that ended",
@@ -5367,7 +5481,7 @@
       [
        "proofs/out/itil/service-request-management/fulfilment-time-report/fulfilment_time.xlsx",
        "d4236c595aca262e0db942d91cbf74ca1ed5613de062fabc51b7879e3376561e",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "receipt-phase cases per channel",
@@ -5417,7 +5531,7 @@
       [
        "proofs/out/itil/service-request-management/approvals-log/approvals.xlsx",
        "921e6c2fa4548a0d67688968f880488ea527118a26fee039a40596ac5be543c5",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "TSC minutes sentences whose actions include approve or vote",
@@ -5456,7 +5570,7 @@
       [
        "proofs/out/itil/service-validation-and-testing/test-plan/test_plan.docx",
        "5a46ef6b9e9f8c5b61b4cf061f0f5deb8a3f47f03d8db28fd1cfff6a0e0ca052",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "obligations of 5 U.S.C. 552 as a checklist",
@@ -5486,7 +5600,7 @@
       [
        "proofs/out/itil/service-validation-and-testing/test-cases/test_cases.xlsx",
        "3f7d90a88d1f7d5e554226e1ef22997afffadf123c6a060bd2501acc18761ebf",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "forced precedence of 5 U.S.C. 552",
@@ -5516,7 +5630,7 @@
       [
        "proofs/out/itil/service-validation-and-testing/test-results/test_results.xlsx",
        "3ace901e86701e2edc3c1a79417fdc535a4594dab61d0b02b4acb91b3c2a3d8a",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "SpiffWorkflow execution of the statutory process",
@@ -5556,7 +5670,7 @@
       [
        "proofs/out/itil/service-validation-and-testing/acceptance-record/acceptance.xlsx",
        "6e49e3dabd08905d28f3db4a1b676853ddf59176de68a1eb014200f5af8a32e5",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "the reverse proofs of this file",
@@ -5602,7 +5716,7 @@
       [
        "proofs/out/itil/deployment-management/deployment-plan/deployment_plan.xlsx",
        "21e9a27b47b4352ad555d5fe68a11a33f7a02d56fa92b01f564845971c2acca9",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "ordered steps of the Node.js governance document",
@@ -5652,7 +5766,7 @@
       [
        "proofs/out/itil/deployment-management/deployment-records/deployment_records.xlsx",
        "ddc268f511762e5c67fdbb464dfcea809fa7a60ae798886f86b00556a4822485",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "TSC minutes items mentioning release, deploy or land",
@@ -5700,7 +5814,7 @@
       [
        "proofs/out/itil/deployment-management/environment-inventory/environments.xlsx",
        "40b50ca380cbb2543a3631115f814add9e97ea9a20416de192e425f6c6e2b7d5",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "receipt-phase groups and resources",
@@ -5745,7 +5859,7 @@
       [
        "proofs/out/itil/deployment-management/rollback-procedure/rollback.docx",
        "32f39b5d1c99ad969475ef4830d70bd6d5d25bc5eaf8b967e899e30e13d43f04",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "ordered steps of the Node.js governance document",
@@ -5786,7 +5900,7 @@
       [
        "proofs/out/itil/infrastructure-and-platform-management/infrastructure-inventory/infrastructure_inventory.xlsx",
        "188a7f3b131f07df59060d0f4e3e4e50e9565190708de98bcc22be549e4b1e5c",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "receipt-phase groups and resources",
@@ -5823,7 +5937,7 @@
       [
        "proofs/out/itil/infrastructure-and-platform-management/runbook/runbook.docx",
        "ecfced8d56bf9967c71b9693c72796e151623f78a74fc8d21d63867b91b79700",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "ordered steps of 5 U.S.C. 552",
@@ -5866,7 +5980,7 @@
       [
        "proofs/out/itil/infrastructure-and-platform-management/utilization-report/utilization.xlsx",
        "e85de9fce1d4b8979ecd6b9ddb63c7ed637121276cd604954ce9f91285de6b02",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "receipt-phase events per resource per month",
@@ -5923,7 +6037,7 @@
       [
        "proofs/out/itil/software-development-and-management/backlog/backlog.xlsx",
        "1ab9c7c3ccc86209c1a37f5671c7b199d892f22cb3539b7f0c23d6e0162f4841",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "issues referenced in TSC minutes",
@@ -5974,7 +6088,7 @@
       [
        "proofs/out/itil/software-development-and-management/code-review-decisions/review_decisions.xlsx",
        "02e0dc5e6eb3dbbdf5d14bd3c41388b1c0c30fb261fe17ffc262b04d5023f874",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "TSC minutes sentences whose actions include approve, object, merge or block",
@@ -5988,30 +6102,8 @@
     {
      "chain": [
       [
-       "minutes_sections",
+       "changelog",
        {}
-      ],
-      [
-       "filter",
-       {
-        "where": [
-         [
-          "item",
-          "matches",
-          "\\b(v[0-9]{1,2}|Node\\.js [0-9]{1,2}|[0-9]+\\.[0-9]+\\.[0-9]+)\\b"
-         ]
-        ]
-       }
-      ],
-      [
-       "select",
-       {
-        "fields": [
-         "meeting",
-         "item",
-         "link"
-        ]
-       }
       ],
       [
        "workbook",
@@ -6023,15 +6115,15 @@
      "files": [
       [
        "proofs/out/itil/software-development-and-management/version-records/versions.xlsx",
-       "347c9f615b3d7a300d95667077057729afaff0418587411211fca4a41257d865",
-       "registered"
+       "6c7a8fa240dfc7dea56be8f882a7c4e51803a65ca1921a87db44e92080725e1e",
+       "reproduced"
       ]
      ],
-     "instantiated_on": "TSC minutes items naming a version",
+     "instantiated_on": "Node.js 22 changelog",
      "name": "version records",
-     "shape": "versions mentioned and when",
+     "shape": "versions released, with dates and commit counts",
      "shows": [
-      "rows 4; first {\"meeting\": \"tsc-2024-01-10\", \"item\": \"Richard, Ulises did a release for Node.js 20\", \"link\": \"\"}"
+      "rows 19; first {\"date\": \"2026-07-29\", \"version\": \"22.23.2\", \"codename\": \"Jod\", \"kind\": \"LTS\", \"releaser\": \"marco-ippolito\", \"security\": true, \"commits\": 12}"
      ],
      "status": "proven"
     },
@@ -6052,7 +6144,7 @@
       [
        "proofs/out/itil/software-development-and-management/verification-report/verification_report.xlsx",
        "6e49e3dabd08905d28f3db4a1b676853ddf59176de68a1eb014200f5af8a32e5",
-       "registered"
+       "reproduced"
       ]
      ],
      "instantiated_on": "the execution and reverse proofs of this file",

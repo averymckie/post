@@ -108,7 +108,7 @@ def run(proof: Proof, label: str, ctx: dict[str, Any]) -> dict[str, Any]:
 
     for p in ctx.get("files", []):
         canonical_office(p)
-    files = [(p, sha256_file(p), check_register(str(p.relative_to(ROOT)), sha256_file(p))) for p in ctx.get("files", [])]
+    files = [(p, sha256_file(p), "index" if proof.pid in ("P17", "P53") else check_register(str(p.relative_to(ROOT)), sha256_file(p))) for p in ctx.get("files", [])]
     existing = next((p for p in PROOFS if p.pid == proof.pid), None)
     if existing is None:
         PROOFS.append(proof)
@@ -136,15 +136,20 @@ def words(text: str) -> set[str]:
 
 
 REF_ATTRS = ("sourceRef", "targetRef", "source", "target", "bpmnElement", "idref", "processRef")
+UUID = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
 
 
 def canonical_xml(path: Path) -> None:
     """Rewrite the ids of a BPMN or PNML file so that structurally equal exports are byte-equal.
 
-    pm4py names nodes with fresh uuids on every export.  Ids are recomputed here from structure
-    alone (tag, name, markings, and the neighbourhood of references, refined four times), elements
-    are ordered by those ids, and the file is written back.  Nothing semantic changes.
+    pm4py names nodes with fresh uuids on every export.  Ids are recomputed from structure alone:
+    a colour-refinement signature (tag, name, markings, and the neighbourhood of references, refined
+    twelve times), and where symmetric elements still tie, individualization: each tied element is
+    tried as the first of its class, the refinement is repeated, and the lexicographically smallest
+    serialization is kept.  Elements are ordered by the resulting ids.  Nothing semantic changes.
     """
+    import copy
+
     import lxml.etree as ET
 
     tree = ET.parse(str(path))
@@ -157,15 +162,24 @@ def canonical_xml(path: Path) -> None:
     by_id = {e.get("id"): e for e in elems}
 
     def label(e: Any) -> str:
-        n = e.get("name") or ""
+        """Name and marking of an element, independent of the order of its children."""
+        name = e.get("name") or ""
+        init = ""
         for c in e:
             if local(c) == "name":
                 for t in c:
                     if local(t) == "text" and t.text:
-                        n = t.text
-            if local(c) in ("initialMarking",) and len(c) and c[0].text:
-                n += f"|init={c[0].text.strip()}"
-        return n
+                        name = t.text.strip()
+            if local(c) == "initialMarking":
+                for t in c:
+                    if local(t) == "text" and t.text:
+                        init = t.text.strip()
+        if re.match(r"^imdf_net_\d+(\.\d+)?$", name):
+            name = "net"
+        name = re.sub(r"^(p|skip|tauSplit|tauJoin|init_loop|loop|intermediate|tau)_\d+$", r"\1", name)
+        if UUID.match(name):
+            name = ""
+        return name + (f"|init={init}" if init else "")
 
     def refs(e: Any) -> list[tuple[str, str]]:
         out = []
@@ -180,48 +194,93 @@ def canonical_xml(path: Path) -> None:
                 v = c.get(a)
                 if v in by_id:
                     out.append((f"{local(c)}.{a}", v))
-        return out
+        return sorted(out)
 
     links = {e.get("id"): refs(e) for e in elems}
     back: dict[str, list[tuple[str, str]]] = collections.defaultdict(list)
     for src, lst in links.items():
         for role, dst in lst:
             back[dst].append((role, src))
-    sig = {i: hashlib.sha256(f"{local(e)}|{label(e)}".encode()).hexdigest() for i, e in by_id.items()}
-    for _ in range(4):
-        sig = {
-            i: hashlib.sha256(json.dumps([sig[i], sorted((r, sig[d]) for r, d in links[i]), sorted((r, sig[s]) for r, s in back[i])]).encode()).hexdigest()
-            for i in by_id
-        }
-    order = sorted(by_id, key=lambda i: (local(by_id[i]), sig[i]))
-    counters: dict[str, int] = collections.defaultdict(int)
-    new: dict[str, str] = {}
-    for i in order:
-        tag = local(by_id[i])
-        counters[tag] += 1
-        new[i] = f"{tag}_{counters[tag]}"
-    for e in root.iter():
-        if not isinstance(e.tag, str):
-            continue
-        if e.get("id") in new:
-            e.set("id", new[e.get("id")])
-        for a in REF_ATTRS:
-            if e.get(a) in new:
-                e.set(a, new[e.get(a)])
-        if local(e) in ("incoming", "outgoing") and e.text and e.text.strip() in new:
-            e.text = new[e.text.strip()]
-    for parent in root.iter():
-        if not isinstance(parent.tag, str):
-            continue
-        kids = list(parent)
-        if len(kids) > 1 and all(isinstance(k.tag, str) for k in kids):
-            keyed = [((local(k), k.get("id") or k.get("bpmnElement") or k.get("idref") or (k.text or "").strip()), k) for k in kids]
-            if len({k[0] for k in keyed}) == len(keyed):
+    base = {i: hashlib.sha256(f"{local(e)}|{label(e)}".encode()).hexdigest() for i, e in by_id.items()}
+
+    def refine(sig: dict[str, str]) -> dict[str, str]:
+        for _ in range(12):
+            sig = {
+                i: hashlib.sha256(json.dumps([sig[i], sorted((r, sig[d]) for r, d in links[i]), sorted((r, sig[s]) for r, s in back[i])]).encode()).hexdigest()
+                for i in by_id
+            }
+        return sig
+
+    def serialize(sig: dict[str, str]) -> bytes:
+        t2 = copy.deepcopy(tree)
+        r2 = t2.getroot()
+        order = sorted(by_id, key=lambda i: (local(by_id[i]), sig[i], i))
+        counters: dict[str, int] = collections.defaultdict(int)
+        new: dict[str, str] = {}
+        for i in order:
+            tag = local(by_id[i])
+            counters[tag] += 1
+            new[i] = f"{tag}_{counters[tag]}"
+        for e in r2.iter():
+            if not isinstance(e.tag, str):
+                continue
+            if e.get("id") in new:
+                e.set("id", new[e.get("id")])
+            for a in REF_ATTRS:
+                if e.get(a) in new:
+                    e.set(a, new[e.get(a)])
+            if local(e) in ("incoming", "outgoing") and e.text and e.text.strip() in new:
+                e.text = new[e.text.strip()]
+            if local(e) == "text" and e.text and re.match(r"^imdf_net_\d+(\.\d+)?$", e.text.strip()):
+                e.text = "net"
+            if local(e) == "name" and e.getparent() is not None and e.getparent().get("id") in new.values():
+                for t in e:
+                    if local(t) == "text" and t.text and re.match(r"^(p|skip|tauSplit|tauJoin|init_loop|loop|intermediate|tau)_\d+$", t.text.strip()):
+                        t.text = re.sub(r"_\d+$", "", t.text.strip()) + "_" + e.getparent().get("id").split("_")[-1]
+                    elif local(t) == "text" and t.text and UUID.match(t.text.strip()):
+                        t.text = e.getparent().get("id")
+            if e.get("localNodeID") is not None:
+                holder = e.getparent()
+                while holder is not None and not holder.get("id"):
+                    holder = holder.getparent()
+                e.set("localNodeID", holder.get("id") if holder is not None else "node")
+        for parent in reversed(list(r2.iter())):
+            if not isinstance(parent.tag, str):
+                continue
+            kids = list(parent)
+            if len(kids) > 1 and all(isinstance(k.tag, str) for k in kids):
+                keyed = [((local(k), k.get("id") or k.get("bpmnElement") or k.get("idref") or (k.text or "").strip(), ET.tostring(k)), k) for k in kids]
                 for k in kids:
                     parent.remove(k)
                 for _, k in sorted(keyed, key=lambda kv: kv[0]):
                     parent.append(k)
-    tree.write(str(path), xml_declaration=True, encoding="UTF-8", pretty_print=True)
+        for e in r2.iter():
+            if not isinstance(e.tag, str):
+                continue
+            if e.text is not None and not e.text.strip() and len(e):
+                e.text = None
+            if e.tail is not None and not e.tail.strip():
+                e.tail = None
+        ET.indent(r2, space="  ")
+        return ET.tostring(t2, xml_declaration=True, encoding="UTF-8")
+
+    def search(sig: dict[str, str], depth: int) -> bytes:
+        sig = refine(sig)
+        classes: dict[str, list[str]] = collections.defaultdict(list)
+        for i in by_id:
+            classes[sig[i]].append(i)
+        ties = [c for c in classes.values() if len(c) > 1]
+        if not ties or depth >= 40:
+            return serialize(sig)
+        cls = min(ties, key=lambda c: (len(c), sig[c[0]]))
+        best: bytes | None = None
+        for m in cls:
+            cand = search({**sig, m: hashlib.sha256((sig[m] + "|individualized").encode()).hexdigest()}, depth + 1)
+            if best is None or cand < best:
+                best = cand
+        return best  # type: ignore[return-value]
+
+    path.write_bytes(search(base, 0))
 
 
 # ----------------------------------------------------------------------------
@@ -1403,39 +1462,6 @@ DOORS = [
 PINS = "ufal.udpipe 1.4.0.1 · predpatt 1.0.1 · clingo 5.8.2 · clorm 1.6.3 · z3-solver 5.1.0.0 · networkx 3.6.1 · timexy 0.1.3 · spacy 3.8.16 · zen-engine 2.0.2 · Jinja2 3.1.6 · pm4py 2.7.23.8 · pydantic 2.13.5 · duckdb 1.5.5 · markdown 3.6 · lxml 6.1.3 · python-pptx 1.0.2 · python-docx 1.2.0 · openpyxl 3.1.2 · csv-diff 1.2 · PyYAML 6.0.3"
 
 
-def write_md() -> None:
-    lines = ["# Proofs", "", "```", "thing", "-> change (functions)", "-> thing", "a line naming two things is a join", "every function ran on the named input; every deliverable carries its sha256", "```", "", "## Doors", "", "```"]
-    for name, where in DOORS:
-        lines.append(f"{name:12s} {where}")
-    lines += ["```", ""]
-    if ITIL_REPORT.get("practices"):
-        sys.path.insert(0, str(ROOT / "proofs"))
-        import itil
-
-        lines += itil.md_section(ITIL_REPORT)
-    allfiles = [f for pr in PROOFS for _l, fs, _s in pr.evidence for f in fs]
-    stc = collections.Counter(f[2] for f in allfiles)
-    lines += ["## Variations: the numbered proofs", "", "```", f"deliverable files {len(allfiles)}: reproduced {stc['reproduced']}, registered now {stc['registered']}, changed {stc['CHANGED']}", "```", ""]
-    for pr in sorted(PROOFS, key=lambda p: int(re.sub(r"\D", "", p.pid) or 0)):
-        lines += [f"## {pr.pid}  {pr.title}", "", "```"]
-        for inp in pr.inputs:
-            lines.append(inp)
-        for s in pr.steps:
-            lines.append(f"-> {s.change} ({s.fns})")
-        lines.append(f"-> {pr.result}")
-        lines += ["```", ""]
-        for label, files, shows in pr.evidence:
-            lines.append(f"**{label}**")
-            lines.append("")
-            lines.append("```")
-            for p, h, st in files:
-                lines.append(f"{str(p.relative_to(ROOT)):58s} sha256 {h}  {st}")
-            for sh in shows:
-                lines.append(f"shows: {sh}")
-            lines += ["```", ""]
-    lines += ["## Pins", "", "```", PINS, "```", ""]
-    MD.write_text("\n".join(lines), encoding="utf-8")
-
 
 # ----------------------------------------------------------------------------
 # P21 .. P30
@@ -2186,6 +2212,8 @@ def s_site(ctx: dict[str, Any]) -> None:
     site = d / "site"
     for junk in ("sitemap.xml", "sitemap.xml.gz"):
         (site / junk).unlink(missing_ok=True)
+    for page in site.glob("*.html"):
+        page.write_text(re.sub(r"Build Date UTC : [^\n<]*", "Build Date UTC : fixed", page.read_text(encoding="utf-8")), encoding="utf-8")
     ctx["files"] = [site / "index.html", site / "facts.html"]
     ctx["shows"] = [f"pages {len(list(site.glob('*.html')))}; index rows {len(o.order)}; facts rows {len(atoms)}"]
 
@@ -2754,6 +2782,263 @@ def run_itil() -> dict[str, Any]:
     return report
 
 
+
+# ----------------------------------------------------------------------------
+# P51 .. P53: the orchestration itself, as proofs
+# ----------------------------------------------------------------------------
+
+
+def s_office_twice(ctx: dict[str, Any]) -> None:
+    import time
+
+    from itil import canonical_office
+
+    rows = [["step", "event"]] + [[i, e] for i, e in enumerate(ctx["ordering"].order, 1)]
+    a = ctx["dir"] / "a.xlsx"
+    b = ctx["dir"] / "b.xlsx"
+    workbook(a, {"order": rows})
+    time.sleep(1.1)
+    workbook(b, {"order": rows})
+    raw_equal = a.read_bytes() == b.read_bytes()
+    canonical_office(a)
+    canonical_office(b)
+    ctx["files"] = [a]
+    ctx["shows"] = [f"two saves of the same rows, one second apart: raw bytes equal {raw_equal}; after canonical office {a.read_bytes() == b.read_bytes()}", f"digest {sha256_file(a)}"]
+    b.unlink()
+
+
+def office_proof(label: str) -> dict[str, Any]:
+    proof = Proof(
+        "P51",
+        "deliverable -> canonical office file -> digest",
+        ["ordered steps (P2)"],
+        [
+            Step("save twice", "openpyxl.Workbook.save, one second apart", s_office_twice),
+            Step("canonical office", "zipfile: docProps/core.xml created and modified fixed; entry dates fixed; entries sorted", lambda c: None),
+            Step("digest", "hashlib.sha256", lambda c: None),
+        ],
+        "digest",
+    )
+    ctx = {"dir": out_dir("P51", label), "ordering": RESULTS[("ordered steps", label)]["ordering"]}
+    run(proof, label, ctx)
+    return ctx
+
+
+def s_scramble_proof(ctx: dict[str, Any]) -> None:
+    import random
+    import shutil
+
+    import lxml.etree as ET
+
+    src = ctx["source"]
+    outs = []
+    for seed in (1, 2, 3):
+        random.seed(seed)
+        t = ET.parse(str(src))
+        root = t.getroot()
+        ids = [e.get("id") for e in root.iter() if isinstance(e.tag, str) and e.get("id")]
+        new = {i: f"x{random.randrange(10**9)}" for i in ids}
+        for e in root.iter():
+            if not isinstance(e.tag, str):
+                continue
+            if e.get("id") in new:
+                e.set("id", new[e.get("id")])
+            for a in REF_ATTRS:
+                if e.get(a) in new:
+                    e.set(a, new[e.get(a)])
+            if e.tag.endswith(("incoming", "outgoing")) and e.text and e.text.strip() in new:
+                e.text = new[e.text.strip()]
+        for parent in list(root.iter()):
+            if not isinstance(parent.tag, str):
+                continue
+            kids = list(parent)
+            if len(kids) > 1:
+                random.shuffle(kids)
+                for k in kids:
+                    parent.remove(k)
+                for k in kids:
+                    parent.append(k)
+        p = ctx["dir"] / f"scrambled_{seed}{src.suffix}"
+        t.write(str(p), xml_declaration=True, encoding="UTF-8")
+        canonical_xml(p)
+        outs.append(p.read_bytes())
+    keep = ctx["dir"] / f"canonical{src.suffix}"
+    shutil.copy(src, keep)
+    canonical_xml(keep)
+    ctx["files"] = [keep]
+    ctx["shows"] = [f"three scrambles (fresh ids, shuffled order) canonicalize to one byte sequence: {len(set(outs)) == 1}; equal to the canonical original: {outs[0] == keep.read_bytes()}"]
+    for seed in (1, 2, 3):
+        (ctx["dir"] / f"scrambled_{seed}{src.suffix}").unlink()
+
+
+def canonical_proof(label: str, source: Path) -> dict[str, Any]:
+    proof = Proof(
+        "P52",
+        "process model -> canonical ids -> one byte sequence",
+        ["process model (P5, P8)"],
+        [
+            Step("scramble", "lxml: fresh random ids, shuffled children, three times", s_scramble_proof),
+            Step("canonical ids", "colour refinement over references, individualization on ties, elements ordered by the result; lxml.etree.indent", lambda c: None),
+            Step("compare", "bytes equal across all three", lambda c: None),
+        ],
+        "one byte sequence",
+    )
+    ctx = {"dir": out_dir("P52", label), "source": source}
+    run(proof, label, ctx)
+    return ctx
+
+
+def s_register_proof(ctx: dict[str, Any]) -> None:
+    import itil
+
+    st = collections.Counter()
+    for pr in PROOFS:
+        for _l, files, _s in pr.evidence:
+            for _p, _h, s in files:
+                st[s] += 1
+    for pr in ITIL_REPORT.get("practices", []):
+        for d in pr["deliverables"]:
+            for _f, _h, s in d["files"]:
+                st[s] += 1
+    led = _ledger()
+    p = write_json(ctx["dir"] / "register_state.json", {"registered_before_this_run": len(itil.REGISTER), "reproduced": st["reproduced"], "registered_now": st["registered"], "changed": st["CHANGED"], "ledger_sections": len(led["sections"]), "amendments": led.get("amendments", 0)})
+    ctx["files"] = [p]
+    ctx["shows"] = [f"deliverables reproduced {st['reproduced']}, registered now {st['registered']}, changed {st['CHANGED']}; ledger sections before this run {len(led['sections'])}, amendments {led.get('amendments', 0)}"]
+
+
+def register_proof() -> dict[str, Any]:
+    proof = Proof(
+        "P53",
+        "deliverable digests -> register -> reproduced, registered or changed ; sections -> ledger append",
+        ["every deliverable of this run; proofs/register.json; proofs/ledger.json"],
+        [
+            Step("compare", "json: each digest against the registered one; a match is reproduced, a new file is registered, a difference is changed", s_register_proof),
+            Step("append", "PROOFS.md opened in append mode: new sections only; changes as an amendment block", lambda c: None),
+        ],
+        "register state",
+    )
+    ctx = {"dir": out_dir("P53", "all")}
+    run(proof, "all", ctx)
+    return ctx
+
+
+def orchestration_proofs() -> None:
+    office_proof("usc5-552-doj")
+    canonical_proof("usc5-552-doj", RESULTS[("process", "usc5-552-doj")]["files"][0])
+    canonical_proof("receipt-xes", RESULTS[("log", "receipt-xes")]["files"][0])
+    register_proof()
+    seal_all()
+
+
+LEDGER = ROOT / "proofs" / "ledger.json"
+
+
+def _ledger() -> dict[str, Any]:
+    if LEDGER.exists():
+        return json.loads(LEDGER.read_text(encoding="utf-8"))
+    return {"sections": [], "amendments": 0, "coverage": None}
+
+
+def _header() -> list[str]:
+    lines = ["# Proofs", "", "```", "thing", "-> change (functions)", "-> thing", "a line naming two things is a join", "every function ran on the named input; every deliverable carries its sha256", "```", "", "## Doors", "", "```"]
+    for name, where in DOORS:
+        lines.append(f"{name:12s} {where}")
+    lines += ["```", "", "## Pins", "", "```", PINS, "```", ""]
+    return lines
+
+
+def append_ledger() -> dict[str, int]:
+    """PROOFS.md is a ledger: sections are appended once and never rewritten.
+
+    A proof's first evidence appends its section; later evidence for the same proof appends a
+    dated-free sub-section under the same number.  A deliverable whose digest differs from the
+    registered one is recorded as an amendment, never by editing the earlier lines.
+    """
+    sys.path.insert(0, str(ROOT / "proofs"))
+    import itil
+
+    led = _ledger()
+    written = set(led["sections"])
+    out: list[str] = []
+    if not MD.exists():
+        out += _header()
+    counts = {"sections": 0, "amendments": 0}
+
+    def evidence_lines(files: list[tuple[Path, str, str]], shows: list[str]) -> list[str]:
+        ls = ["```"]
+        for p, h, st in files:
+            ls.append(f"{str(p.relative_to(ROOT)):58s} sha256 {h}  {st}")
+        for sh in shows:
+            ls.append(f"shows: {sh}")
+        ls += ["```", ""]
+        return ls
+
+    for pr in sorted(PROOFS, key=lambda p: int(re.sub(r"\D", "", p.pid) or 0)):
+        chain_key = f"{pr.pid}|chain"
+        for label, files, shows in pr.evidence:
+            key = f"{pr.pid}|{label}"
+            if key in written:
+                continue
+            if chain_key not in written:
+                out += [f"## {pr.pid}  {pr.title}", "", "```"]
+                out += pr.inputs
+                out += [f"-> {s.change} ({s.fns})" for s in pr.steps]
+                out += [f"-> {pr.result}", "```", ""]
+                written.add(chain_key)
+            else:
+                out += [f"### {pr.pid}  {pr.title}  (further input)", ""]
+            out += [f"**{label}**", ""] + evidence_lines(files, shows)
+            written.add(key)
+            counts["sections"] += 1
+    if ITIL_REPORT.get("practices"):
+        if "itil|header" not in written:
+            out += ["## Baseline: the ITIL surface", "", "Every practice's deliverables, each a chain of operations bound to library functions, run on the real inputs; proofs/itil.yaml is the register.", ""]
+            written.add("itil|header")
+        cov = []
+        tot = collections.Counter()
+        for pr in ITIL_REPORT["practices"]:
+            c = collections.Counter(d["status"] for d in pr["deliverables"])
+            tot.update(c)
+            cov.append(f"{pr['name'][:45]:45s} {len(pr['deliverables']):12d} {c['proven']:7d} {c['empty']:6d} {c['failed']:7d} {c['no real input']:14d}")
+        cov.append(f"{'all':45s} {sum(tot.values()):12d} {tot['proven']:7d} {tot['empty']:6d} {tot['failed']:7d} {tot['no real input']:14d}")
+        if led.get("coverage") != cov:
+            out += ["### coverage", "", "```", f"{'practice':45s} {'deliverables':>12s} {'proven':>7s} {'empty':>6s} {'failed':>7s} {'no real input':>14s}"] + cov + ["```", ""]
+            led["coverage"] = cov
+        for pr in ITIL_REPORT["practices"]:
+            for d in pr["deliverables"]:
+                key = f"itil|{pr['name']}|{d['name']}"
+                if key in written:
+                    continue
+                out += [f"### {pr['name']} / {d['name']}  {d['status']}", "", "```"]
+                if d["shape"]:
+                    out.append(f"shape: {d['shape']}")
+                out.append(f"instantiated on: {d['instantiated_on']}")
+                out += itil.arrows(d["chain"])
+                out.append(f"-> {d['name']}")
+                for f, h, st in d["files"]:
+                    out.append(f"{f:70s} sha256 {h}  {st}")
+                for sh in d["shows"]:
+                    out.append(f"shows: {sh}")
+                out += ["```", ""]
+                written.add(key)
+                counts["sections"] += 1
+    if itil.CHANGED:
+        reason = os.environ.get("PROOFS_AMEND_REASON", "unstated")
+        n = led.get("amendments", 0) + 1
+        out += [f"## Amendment {n}", "", f"reason: {reason}", "", "```"]
+        for f, (old, new) in sorted(itil.CHANGED.items()):
+            out.append(f"{f:70s} {old[:16]}… -> {new[:16]}…")
+        out += ["```", ""]
+        led["amendments"] = n
+        counts["amendments"] = len(itil.CHANGED)
+    if out:
+        with MD.open("a", encoding="utf-8") as fh:
+            fh.write("\n".join(out) + ("\n" if not out[-1] == "" else ""))
+    led["sections"] = sorted(written)
+    LEDGER.write_text(json.dumps(led, indent=1) + "\n", encoding="utf-8")
+    return counts
+
+
 def main() -> None:
     sys.path.insert(0, str(ROOT / "proofs"))
     import itil
@@ -2827,11 +3112,11 @@ def main() -> None:
     checklist("usc5-552-doj")
     cross_document(["nodejs-tsc-charter", "nodejs-governance"])
     site_roundtrip("usc5-552-doj")
-    seal_all()
     ITIL_REPORT.update(run_itil())
-    write_md()
+    orchestration_proofs()
+    counts = append_ledger()
     itil.save_register(reregister=os.environ.get("PROOFS_REREGISTER") == "1")
-    print(f"proofs {len(PROOFS)}; itil deliverables {sum(len(p['deliverables']) for p in ITIL_REPORT.get('practices', []))}; register: reproduced {sum(1 for f in itil.REGISTER if f not in itil.NEW and f not in itil.CHANGED)}, registered now {len(itil.NEW)}, changed {len(itil.CHANGED)}; wrote {MD.relative_to(ROOT)}")
+    print(f"proofs {len(PROOFS)}; itil deliverables {sum(len(p['deliverables']) for p in ITIL_REPORT.get('practices', []))}; register: reproduced {sum(1 for f in itil.REGISTER if f not in itil.NEW and f not in itil.CHANGED)}, registered now {len(itil.NEW)}, changed {len(itil.CHANGED)}; ledger: sections appended {counts['sections']}, amendments {counts['amendments']}")
 
 
 if __name__ == "__main__":

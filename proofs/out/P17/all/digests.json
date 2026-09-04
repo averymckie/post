@@ -1,5 +1,5 @@
 {
- "digest": "af04fbf29b803b165092ccc5f47c68f87e979d9f0c2cd417db9944f5aa8a008b",
+ "digest": "bb5d751dc8ea871805be1c2b856f0ad33577e34081c1060bf110a3efd2c8d10c",
  "entries": [
   {
    "file": "proofs/out/P1/nodejs-governance/facts.jsonl",
@@ -239,7 +239,7 @@
    "file": "proofs/out/P29/nodejs-governance/process.executable.bpmn",
    "input": "nodejs-governance",
    "proof": "P29",
-   "sha256": "2a172700c0bcfcf1273ecc38d00e2fb4966c2128b4a83fb8b9e6657ee1c378ae"
+   "sha256": "2910ac675d259a9b4ae0556ec3f5f5388743e45311e5f7ce5d1b1901a1be6a89"
   },
   {
    "file": "proofs/out/P29/usc5-552-doj/execution_trace.xlsx",
@@ -251,7 +251,7 @@
    "file": "proofs/out/P29/usc5-552-doj/process.executable.bpmn",
    "input": "usc5-552-doj",
    "proof": "P29",
-   "sha256": "adc5a48992f869cc8cc28100567b185eb30e8b41eff05dc8f44fdc5fbe56a217"
+   "sha256": "049228aef5479a26fa18c720fa3691bb6ef405fe0572b3535264d8bee0cef359"
   },
   {
    "file": "proofs/out/P3/nodejs-tsc-charter/anchor_dates.jsonl",
@@ -305,25 +305,25 @@
    "file": "proofs/out/P35/nodejs-governance/process.pnml",
    "input": "nodejs-governance",
    "proof": "P35",
-   "sha256": "5b8649535023d4c0a6f1e5f7f5429cd523ba989d11618ab2c8ad85711f207063"
+   "sha256": "dc149693d9a6058f506f6cc561b2e612d8b73c493ad88471aa1d4af3f9de752a"
   },
   {
    "file": "proofs/out/P35/nodejs-governance/soundness.json",
    "input": "nodejs-governance",
    "proof": "P35",
-   "sha256": "0e408c69f24e2573396ab5a7cd2eadef2b020dc1533f6881924e04d6b7b86acd"
+   "sha256": "845d8a655f04710bdd2943e6881af8f4870b13ac92bdc79da299ea7afd404866"
   },
   {
    "file": "proofs/out/P35/usc5-552-doj/process.pnml",
    "input": "usc5-552-doj",
    "proof": "P35",
-   "sha256": "3fc8ebba80e37cfb9bc1aa981e0ab07c17b4d3b1e729784f64a9dabf1fddc1b4"
+   "sha256": "d4d8dfed1baf10204eb215e5936ca8cd183389052fcc8ec6ffbdf6a5287b2997"
   },
   {
    "file": "proofs/out/P35/usc5-552-doj/soundness.json",
    "input": "usc5-552-doj",
    "proof": "P35",
-   "sha256": "2fa0467fa5339ad4681c273c3cc2038ec4dab3255bda43076636c25fd6d04e7d"
+   "sha256": "d703bae13849e7def6b18212c62e9141befcf107cd0735d0f2dfca43fef24a7f"
   },
   {
    "file": "proofs/out/P36/receipt-xes/variants.xlsx",
@@ -389,7 +389,7 @@
    "file": "proofs/out/P39/usc5-552-doj/site/index.html",
    "input": "usc5-552-doj",
    "proof": "P39",
-   "sha256": "820e61732036d0494e33bfbeba89e8b061019deaba4951a3c462f49149f88d6b"
+   "sha256": "d8cee796da9585964e7db5d3fa9d9a0c9440533d099353e7cf17b1b632872885"
   },
   {
    "file": "proofs/out/P4/nodejs-governance/policy.jdm.json",
@@ -503,19 +503,43 @@
    "file": "proofs/out/P5/nodejs-governance/process.bpmn",
    "input": "nodejs-governance",
    "proof": "P5",
-   "sha256": "ad2e5871899b598d98c1d810312b9c93c5bc38dbd86ccfb88138f55b92dde727"
+   "sha256": "9c83f8172d8fdb4540f84c74140c665ad49f564a9cf2e792fb6eede61449927f"
   },
   {
    "file": "proofs/out/P5/usc5-552-doj/process.bpmn",
    "input": "usc5-552-doj",
    "proof": "P5",
-   "sha256": "c5a466c1419b16b7cb6ecaf2f2385b683d840857e2322b912818e7d3bc481821"
+   "sha256": "6209f474a27c67b72b44c6dc345b5d9f06bf2f24c86d485582cb8442e5697d61"
   },
   {
    "file": "proofs/out/P50/usc5-552-doj/roundtrip.json",
    "input": "usc5-552-doj",
    "proof": "P50",
    "sha256": "275f48efe8a265823f93a4f37c7679ab78f0075e201b9e182ad617fc89bffde6"
+  },
+  {
+   "file": "proofs/out/P51/usc5-552-doj/a.xlsx",
+   "input": "usc5-552-doj",
+   "proof": "P51",
+   "sha256": "0318e5d777d88c20cd9977a3c1ecb00364b398b78f248c9d606d088a09d3a851"
+  },
+  {
+   "file": "proofs/out/P52/receipt-xes/canonical.pnml",
+   "input": "receipt-xes",
+   "proof": "P52",
+   "sha256": "9475109f51c0c7e1ba204969aa2cfe6b275b8ed4910e6d31a9f14672ac836725"
+  },
+  {
+   "file": "proofs/out/P52/usc5-552-doj/canonical.bpmn",
+   "input": "usc5-552-doj",
+   "proof": "P52",
+   "sha256": "6209f474a27c67b72b44c6dc345b5d9f06bf2f24c86d485582cb8442e5697d61"
+  },
+  {
+   "file": "proofs/out/P53/all/register_state.json",
+   "input": "all",
+   "proof": "P53",
+   "sha256": "59b018317d73fcbd3e47c07cb1f0471b90b34a51004e44eeb647df2b21c072d9"
   },
   {
    "file": "proofs/out/P6/receipt-csv/facts.lp",
@@ -539,13 +563,13 @@
    "file": "proofs/out/P8/receipt-xes/process.bpmn",
    "input": "receipt-xes",
    "proof": "P8",
-   "sha256": "66fa1e38525674151fce339caf0dcbd023ce7520931c990f9bdc4402dea2de46"
+   "sha256": "1f4fc44ee45b11e960caa1da0436ae6da78e13e1ebcfa8c0429fb92f70560a35"
   },
   {
    "file": "proofs/out/P8/receipt-xes/process.pnml",
    "input": "receipt-xes",
    "proof": "P8",
-   "sha256": "746b108c4d9bbd566f3d7bab818cd265fc6357027d6313d1a0de904a7347720d"
+   "sha256": "9475109f51c0c7e1ba204969aa2cfe6b275b8ed4910e6d31a9f14672ac836725"
   },
   {
    "file": "proofs/out/P9/receipt-xes/conformance.xlsx",

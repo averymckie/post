@@ -99,11 +99,13 @@ practices:
     - [prohibitions, {of: usc5-552-doj}]
     - [workbook, {name: prohibitions}]
   - name: security incident report
-    shape: incidents with severity and timeline
-    instantiated_on: none
+    shape: security releases with date, line and releaser
+    instantiated_on: Node.js 22 changelog, releases marked as security releases
     chain:
-    - [cases, {}]
-    - [workbook, {name: security_incidents}]
+    - [changelog, {}]
+    - [filter, {where: [[security, eq, true]]}]
+    - [select, {fields: [date, version, codename, kind, releaser, commits]}]
+    - [document, {name: security_incidents, title: "security releases of Node.js 22"}]
 
 - name: Knowledge management
   group: general management
@@ -395,10 +397,16 @@ practices:
     - [select, {fields: [unit, who, action, sentence]}]
     - [workbook, {name: third_party_obligations}]
   - name: supplier register
-    shape: suppliers and what they supply
-    instantiated_on: none
+    shape: external components relied on, with their license
+    instantiated_on: Node.js maintained dependencies joined to the LICENSE register
     chain:
-    - [events, {}]
+    - [licenses, {}]
+    - [derive, {field: key, fn: upper, of: component}]
+    - [save_as, {name: lic}]
+    - [dependencies, {}]
+    - [derive, {field: key, fn: upper, of: dependency}]
+    - [join, {with: lic, keys: [[key, key]], how: left}]
+    - [select, {fields: [dependency, component, location, license_heading]}]
     - [workbook, {name: suppliers}]
   - name: supplier performance report
     shape: delivered against agreed, per supplier
@@ -460,10 +468,11 @@ practices:
     - [select, {fields: [meeting, present_voting, majority_reachable]}]
     - [workbook, {name: availability_report}]
   - name: availability plan
-    shape: planned measures to keep the service available
-    instantiated_on: none
+    shape: the windows in which each service line is supported
+    instantiated_on: Node.js release lines with start, LTS, maintenance and end dates
     chain:
-    - [cases, {}]
+    - [release_schedule, {}]
+    - [derive, {field: supported_days, fn: days_between, a: start, b: end}]
     - [workbook, {name: availability_plan}]
 
 - name: Business analysis
@@ -654,10 +663,10 @@ practices:
     - [roundtrips, {}]
     - [workbook, {name: reconciliation}]
   - name: license compliance report
-    shape: entitlements against installations
-    instantiated_on: none
+    shape: every bundled component with its license
+    instantiated_on: the Node.js LICENSE file, one section per bundled dependency
     chain:
-    - [events, {}]
+    - [licenses, {}]
     - [workbook, {name: licenses}]
 
 - name: Monitoring and event management
@@ -751,12 +760,12 @@ practices:
     - [filter, {where: [[links, gt, 0]]}]
     - [document, {name: release_notes, title: "items with references, by meeting", columns: [meeting, section, item, link]}]
   - name: release schedule
-    shape: releases by date
-    instantiated_on: TSC minutes sections mentioning release
+    shape: releases by date with their line and kind
+    instantiated_on: Node.js 22 changelog
     chain:
-    - [minutes_sections, {}]
-    - [filter, {where: [[item, matches, "(?i)release|v[0-9]+\\b"]]}]
-    - [select, {fields: [meeting, section, item, link]}]
+    - [changelog, {}]
+    - [select, {fields: [date, version, kind, releaser, security]}]
+    - [sort, {by: [date]}]
     - [workbook, {name: release_schedule}]
   - name: release readiness checklist
     shape: what must be true before release
@@ -1088,12 +1097,10 @@ practices:
     - [select, {fields: [meeting, sentence_id, lemmas, sentence]}]
     - [workbook, {name: review_decisions}]
   - name: version records
-    shape: versions mentioned and when
-    instantiated_on: TSC minutes items naming a version
+    shape: versions released, with dates and commit counts
+    instantiated_on: Node.js 22 changelog
     chain:
-    - [minutes_sections, {}]
-    - [filter, {where: [[item, matches, "\\b(v[0-9]{1,2}|Node\\.js [0-9]{1,2}|[0-9]+\\.[0-9]+\\.[0-9]+)\\b"]]}]
-    - [select, {fields: [meeting, item, link]}]
+    - [changelog, {}]
     - [workbook, {name: versions}]
   - name: verification report
     shape: what was executed and what was read back

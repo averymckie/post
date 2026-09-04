@@ -47,6 +47,10 @@ BINDINGS: dict[str, str] = {
     "execution_trace": "P29: SpiffWorkflow execution of the process",
     "roundtrips": "P19, P30, P40, P50: reverse proofs and csv_diff.compare",
     "bottlenecks": "P46: duckdb join of edges and waiting time",
+    "release_schedule": "json.loads of nodejs/Release schedule.json",
+    "licenses": "re over the Node.js LICENSE file: one row per bundled component",
+    "dependencies": "re over maintaining-dependencies.md: one row per maintained dependency",
+    "changelog": "re over CHANGELOG_V22.md: one row per release, security releases flagged",
     "filter": "duckdb WHERE",
     "select": "duckdb SELECT",
     "derive": "duckdb expression (closed set: month, days_between, hours_between, contains, ratio, length)",
@@ -349,6 +353,55 @@ class Ctx:
 
     def bottlenecks(self, _: str = "") -> Rows:
         return [dict(r) for r in self.h["bottlenecks"]]
+
+    # ---- door two, more real exports -----------------------------------------------------
+
+    def release_schedule(self, _: str = "") -> Rows:
+        data = json.loads((ROOT / "proofs" / "in" / "node-release-schedule.json").read_text(encoding="utf-8"))
+        rows = []
+        for v, d in data.items():
+            rows.append({"version": v, "codename": d.get("codename", ""), "start": d.get("start", ""), "lts": d.get("lts", ""), "maintenance": d.get("maintenance", ""), "end": d.get("end", "")})
+        return rows
+
+    def licenses(self, _: str = "") -> Rows:
+        text = (ROOT / "proofs" / "in" / "node-LICENSE.txt").read_text(encoding="utf-8").splitlines()
+        rows = []
+        i = 0
+        while i < len(text):
+            m = re.match(r"^- (.+?), located at (\S+?),? is licensed as follows:\s*$", text[i])
+            if m:
+                j = i + 1
+                first = ""
+                while j < len(text) and not re.match(r"^- .+ is licensed as follows:", text[j]):
+                    line = text[j].strip().strip('"').strip()
+                    if line and not first:
+                        first = line
+                    j += 1
+                rows.append({"component": m.group(1), "location": m.group(2), "license_heading": first[:120], "license_lines": j - i - 1})
+                i = j
+            else:
+                i += 1
+        return rows
+
+    def dependencies(self, _: str = "") -> Rows:
+        text = (ROOT / "proofs" / "in" / "node-maintaining-dependencies.md").read_text(encoding="utf-8")
+        names = re.findall(r"^\* \[([^\]]+)\]", text, flags=re.M)
+        rows = []
+        for n in names:
+            name = n.replace("\\_", "_")
+            sec = re.search(r"^## " + re.escape(name) + r"\s*$([\s\S]*?)(?=^## |\Z)", text, flags=re.M)
+            body = sec.group(1) if sec else ""
+            ver = re.search(r"\bv?(\d+\.\d+(?:\.\d+)?)\b", body)
+            rows.append({"dependency": name, "documented": bool(sec), "version_mentioned": ver.group(1) if ver else "", "section_lines": body.count("\n")})
+        return rows
+
+    def changelog(self, _: str = "") -> Rows:
+        text = (ROOT / "proofs" / "in" / "node-CHANGELOG_V22.md").read_text(encoding="utf-8")
+        rows = []
+        for m in re.finditer(r"^## (\d{4}-\d{2}-\d{2}), Version (\S+) '([^']+)' \(([^)]+)\), @(\S+)\s*$([\s\S]*?)(?=^## \d{4}-|\Z)", text, flags=re.M):
+            body = m.group(6)
+            rows.append({"date": m.group(1), "version": m.group(2), "codename": m.group(3), "kind": m.group(4), "releaser": m.group(5), "security": "This is a security release" in body, "commits": len(re.findall(r"^\* \\?\[\[`", body, flags=re.M))})
+        return rows
 
     def source(self, op: str, arg: str) -> Rows:
         return getattr(self, op)(arg) if arg else getattr(self, op)()
@@ -659,7 +712,7 @@ def run_chain(ctx: Ctx, chain: list[list[Any]], out_dir: Path, name: str) -> tup
     for step in chain:
         op, params = (step[0], step[1] if len(step) > 1 else {})
         params = dict(params)
-        if op in ("facts", "required_actions", "ordered_steps", "forced_edges", "anchors", "definitions", "prohibitions", "who_must_what", "records", "cases", "events", "minutes_sentences", "minutes_sections", "participants", "attendance", "decisions", "tags", "conformance", "variants", "dfg", "handover", "execution_trace", "roundtrips", "bottlenecks"):
+        if op in ("facts", "required_actions", "ordered_steps", "forced_edges", "anchors", "definitions", "prohibitions", "who_must_what", "records", "cases", "events", "minutes_sentences", "minutes_sections", "participants", "attendance", "decisions", "tags", "conformance", "variants", "dfg", "handover", "execution_trace", "roundtrips", "bottlenecks", "release_schedule", "licenses", "dependencies", "changelog"):
             rows = ctx.source(op, params.get("of", ""))
         elif op == "filter":
             rows = op_filter(rows, params["where"])

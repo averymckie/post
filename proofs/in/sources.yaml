@@ -20,3 +20,31 @@ inputs:
     origin: https://github.com/nodejs/node
     retrieved: "2026-09-04"
     license: per the origin
+  - file: node-release-schedule.json
+    title: Node.js release lines: start, LTS, maintenance and end dates
+    sha256: 1cf0432ceb9dfde7f1fd4cce43206519942cfdfad5a26039c2f4bb20fde8549c
+    fetched_from: https://raw.githubusercontent.com/nodejs/Release/main/schedule.json
+    origin: https://github.com/nodejs/Release
+    retrieved: "2026-09-04"
+    license: per the origin
+  - file: node-LICENSE.txt
+    title: Node.js LICENSE: the bundled dependencies and their licenses
+    sha256: 6b85ee1983d01fa2cdcdd5d1a3053c6221fae41d6a54e43b416bf35969fc4128
+    fetched_from: https://raw.githubusercontent.com/nodejs/node/main/LICENSE
+    origin: https://github.com/nodejs/node
+    retrieved: "2026-09-04"
+    license: per the origin
+  - file: node-maintaining-dependencies.md
+    title: Node.js maintained dependencies
+    sha256: efa11ca49e4fdcc0be5208058e477b6d1126c6659f5128c565aafded17c7d3b3
+    fetched_from: https://raw.githubusercontent.com/nodejs/node/main/doc/contributing/maintaining/maintaining-dependencies.md
+    origin: https://github.com/nodejs/node
+    retrieved: "2026-09-04"
+    license: per the origin
+  - file: node-CHANGELOG_V22.md
+    title: Node.js 22 changelog: releases, dates, releasers, security releases
+    sha256: 2fb4b0559663b84e9a24af05884630f17e3a7ff4195072cbcd55483af64d2e50
+    fetched_from: https://raw.githubusercontent.com/nodejs/node/main/doc/changelogs/CHANGELOG_V22.md
+    origin: https://github.com/nodejs/node
+    retrieved: "2026-09-04"
+    license: per the origin

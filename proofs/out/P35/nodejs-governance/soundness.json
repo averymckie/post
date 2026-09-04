@@ -2,7 +2,7 @@
  "acyclic": true,
  "marked_graph": true,
  "places": 29,
- "pnml_sha256": "5b8649535023d4c0a6f1e5f7f5429cd523ba989d11618ab2c8ad85711f207063",
+ "pnml_sha256": "dc149693d9a6058f506f6cc561b2e612d8b73c493ad88471aa1d4af3f9de752a",
  "process_tree": null,
  "reason": "acyclic marked-graph workflow net: every transition fires exactly once",
  "sound": true,
