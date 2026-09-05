@@ -1,5 +1,13 @@
 # Proofs
 
+## Presentation execution contract
+
+**Zero LLM reasoning intervention between functions or chains is the framework's core execution claim and requirement.** LLM reasoning is confined to upstream ideation. Every runtime handoff, decision, transformation, and presentation is executed by defined functions and data.
+
+The initial augmentations prioritize front end usability and presentation of the core deliverables, then expand into additional capabilities. P65 onward implements this sequence. The presentation runner checks registered input bytes and rejects model-client imports and network calls. New interface text uses US English; quoted source text remains verbatim.
+
+[Open the combined workbench](proofs/out/augmentation/workbench.html). Validation details and current limits accompany each added proof.
+
 ```
 thing
 -> change (functions)
@@ -3843,3 +3851,416 @@ instantiated on: OMB outlays per agency and bureau, fiscal year 2017, as shares 
 proofs/out/itil/service-financial-management/chargeback-report/chargeback.xlsx sha256 99166a37d8035c263ce4b2071c75dca78dcec004b445a8baf834ab982571cb0a  registered
 shows: rows 507; first {"agency_name": "Department of Health and Human Services", "bureau_name": "Centers for Medicare and Medicaid Services", "bureau_fy2017": 1128631000.0, "agency_fy2017": 1144690000.0, "share": 0.986}
 ```
+## P65  policy, truth table, meetings -> checked policy interface
+
+```
+proofs/out/P13/charter+roster+minutes/policy.jdm.json, proofs/out/P54/majority/truth_table.xlsx, proofs/out/P13/charter+roster+minutes/decisions.xlsx, proofs/out/P55/majority/majority.dmn
+-> verify inputs (hashlib.sha256 against proofs/register.json)
+-> transform and render (zen.ZenDecision.evaluate; CalamineWorkbook.from_filelike; DMNEngine.result; Jinja2.Template.render)
+-> read back and compare (lxml.html.fromstring; json.loads; typed model equality)
+-> standalone interface
+```
+
+**policy**
+
+```
+proofs/out/augmentation/policy.html                        sha256 cf8b2b09b6eadc6348241abcb953735169de430d759fa5bd8ed65f8b495d1565  registered
+shows: all 19 inputs agree across Zen, DMN, and the stored truth table
+shows: meeting rows 8; no formula or policy rewrite
+shows: embedded model roundtrip True; en-US; external assets 0; connect-src none
+```
+
+## P66  ordered steps, facts -> layered graph -> process explorer
+
+```
+proofs/out/P2/usc5-552-doj/ordered_steps.json, proofs/out/P2/nodejs-governance/ordered_steps.json, proofs/out/P1/usc5-552-doj/facts.jsonl, proofs/out/P1/nodejs-governance/facts.jsonl
+-> verify inputs (hashlib.sha256 against proofs/register.json)
+-> transform and render (networkx.is_directed_acyclic_graph; networkx.topological_generations; Jinja2.Template.render)
+-> read back and compare (lxml.html.fromstring; json.loads; typed model equality)
+-> standalone interface
+```
+
+**process**
+
+```
+proofs/out/augmentation/process.html                       sha256 f547c13520bde3170c21eb202acfc52589bb3dc02ea12067a542e4c3c66cbc6a  registered
+shows: usc5-552-doj: nodes 24, edges 12; IDs, labels, quotes, and edge endpoints preserved
+shows: nodejs-governance: nodes 18, edges 9; IDs, labels, quotes, and edge endpoints preserved
+shows: embedded model roundtrip True; en-US; external assets 0; connect-src none
+```
+
+## P67  workbooks -> typed tables -> searchable records interface
+
+```
+proofs/out/P12/receipt-xes+receipt-csv/measured_activities.xlsx, proofs/out/P13/charter+roster+minutes/decisions.xlsx, proofs/out/P16/nodejs-tsc-charter/facts.xlsx
+-> verify inputs (hashlib.sha256 against proofs/register.json)
+-> transform and render (openpyxl.load_workbook; Worksheet.values; Jinja2.Template.render; Array.filter; Array.sort; Array.slice)
+-> read back and compare (lxml.html.fromstring; json.loads; typed model equality)
+-> standalone interface
+```
+
+**records**
+
+```
+proofs/out/augmentation/records.html                       sha256 7530ddd0bc4339f2c5dd803aa0edb224db3037e4e07077b7e8032ff62a3d0638  registered
+shows: activities: 26 rows, 3 columns; original values and types retained
+shows: meetings: 8 rows, 3 columns; original values and types retained
+shows: facts: 336 rows, 5 columns; original values and types retained
+shows: embedded model roundtrip True; en-US; external assets 0; connect-src none
+```
+
+## P68  documents -> ordered blocks -> readable briefings
+
+```
+proofs/out/P56/majority/explanations.docx, proofs/out/P25/nodejs-tsc-charter/required_actions.docx
+-> verify inputs (hashlib.sha256 against proofs/register.json)
+-> transform and render (docx.Document; Paragraph.text; Table.rows; Jinja2.Template.render)
+-> read back and compare (lxml.html.fromstring; json.loads; typed model equality)
+-> standalone interface
+```
+
+**briefing**
+
+```
+proofs/out/augmentation/briefing.html                      sha256 c37ac4c4d038d001d8067fbb2ecfd136787d385a3dfa5598b33768dba16185e3  registered
+shows: explanations: 25 blocks; paragraph and table order preserved
+shows: actions: 2 blocks; paragraph and table order preserved
+shows: embedded model roundtrip True; en-US; external assets 0; connect-src none
+```
+
+## P69  deck -> text nodes, connected edges -> readable slide view
+
+```
+proofs/out/P18/nodejs-governance+tsc-2024-01-17/deck.pptx
+-> verify inputs (hashlib.sha256 against proofs/register.json)
+-> transform and render (pptx.Presentation; slide.shapes; lxml XPath stCxn/endCxn; networkx.topological_generations; Jinja2.Template.render)
+-> read back and compare (lxml.html.fromstring; json.loads; typed model equality)
+-> standalone interface
+```
+
+**slides**
+
+```
+proofs/out/augmentation/slides.html                        sha256 4350ab58781e8fc3d3a60a10a61ab62aed9cdcfd647d17bc93c72f5c60fcf612  registered
+shows: slides 1; text nodes 8; connectors 2; shape endpoints retained
+shows: embedded model roundtrip True; en-US; external assets 0; connect-src none
+```
+
+## P70  checked views -> shared navigation -> standalone workbench
+
+```
+policy.html, process.html, records.html, briefing.html, slides.html
+-> verify inputs (hashlib.sha256 against proofs/register.json)
+-> transform and render (Jinja2.Template.render; DOM.addEventListener; DOM.hidden)
+-> read back and compare (lxml.html.fromstring; json.loads; typed model equality)
+-> standalone interface
+```
+
+**workbench**
+
+```
+proofs/out/augmentation/workbench.html                     sha256 f7d37182ae43a4e7e3a4b25e32f0501477d6a312405bf75d81965307fa48b40c  registered
+shows: five views composed from the same model; no external assets
+shows: all interactions use fixed handlers and typed records
+shows: embedded model roundtrip True; en-US; external assets 0; connect-src none
+```
+
+## P71  presentation chain -> guarded execution -> source and output verification
+
+```
+P65-P70; registered input artifacts; presentation.json
+-> guard (importlib.abc.MetaPathFinder; sys.addaudithook)
+-> check (hashlib.sha256; source register equality; lxml and JSON roundtrip)
+-> record versions (importlib.metadata.version; json.dumps)
+-> verification record
+```
+
+**all**
+
+```
+proofs/out/augmentation/verification.json                  sha256 170774feb864efaf1401ec4c94dc48a3b7d3fe0cbe9084b1f32f671d24143e05  registered
+shows: registered inputs checked 13
+shows: model import attempts 0; network and child-execution attempts 0
+shows: version pins: Jinja2 3.1.6, networkx 3.6.1, zen-engine 2.0.2, SpiffWorkflow 3.2.0, openpyxl 3.1.5, python-calamine 0.8.2, python-docx 1.2.0, python-pptx 1.0.2, lxml 6.1.3, PyYAML 6.0.3
+```
+## Amendment 5
+
+reason: unstated
+
+```
+proofs/out/augmentation/briefing.html                                  c37ac4c4d038d001… -> 34b5c8808bd8133f…
+proofs/out/augmentation/policy.html                                    cf8b2b09b6eadc63… -> afcc2443cedfd2d4…
+proofs/out/augmentation/process.html                                   f547c13520bde317… -> a9f465b231abd821…
+proofs/out/augmentation/records.html                                   7530ddd0bc4339f2… -> fc93b9aa31850c06…
+proofs/out/augmentation/slides.html                                    4350ab58781e8fc3… -> ac3735c7c23f1f00…
+proofs/out/augmentation/verification.json                              170774feb864efaf… -> 90366ea5565d4ce6…
+proofs/out/augmentation/workbench.html                                 f7d37182ae43a4e7… -> 1e53da3424a67523…
+```
+## P72  standalone interfaces -> offline interaction tests -> checked DOM snapshots
+
+```
+P65-P70 artifacts; checked source model; versioned presentation handlers
+-> execute checks (jsdom.JSDOM; dispatchEvent; HTMLElement.click; node:assert.deepStrictEqual; Document.cloneNode)
+-> compare and record (typed value equality; source hashes; output hashes)
+-> validation evidence
+```
+
+**all**
+
+```
+proofs/out/augmentation/dom-verification.json              sha256 ca926cbd68bbf58c143d57f34e3f76b764321e06d48ed0df2550ff9440a67d89  registered
+shows: assertions 824; policy inputs 19; invalid inputs 6; stored meetings 8
+shows: process nodes 42 and edges 21 preserved; workbook rows 370 compared; document blocks 27 preserved
+shows: keyboard tabs, node selection, search, sort, pagination, and source controls passed
+shows: network attempts 0; browser layout and responsive behavior unverified
+shows: browser blocked: supported preview service unavailable; local-file access rejected by browser policy
+```
+
+## P73  checked DOM snapshots -> styled print rendering -> reproducible PDFs
+
+```
+P65-P70 artifacts; checked source model; versioned presentation handlers
+-> execute checks (WeasyPrint.HTML.write_pdf; SOURCE_DATE_EPOCH; PyMuPDF.Page.get_text; hashlib.sha256)
+-> compare and record (typed value equality; source hashes; output hashes)
+-> validation evidence
+```
+
+**all**
+
+```
+proofs/out/augmentation/print-verification.json            sha256 f0cdd3f07c8463b659773465dd206baf274f737b64625c2187bbfc682c0f5cea  registered
+proofs/out/augmentation/policy-print.pdf                   sha256 5a3adf7209e41e3053f2f88009c985607d64a56f42d2df9792fe8239abdca57e  registered
+proofs/out/augmentation/majority-briefing.pdf              sha256 2558c38d613171127a62818d6bb26e615c14389275b3ec7f8685c9fe2b2226ca  registered
+shows: print samples 9; pages 15; repeated PDF bytes equal for every sample
+shows: printed document and table blocks checked 183; text outside pages 0
+shows: resource requests 0; source text preserved; embedded font timestamps canonicalized
+shows: native library initialization precedes the render guard; source reads and rendering are guarded
+shows: CSS print engine validation; browser rendering remains unverified
+```
+## Amendment 6
+
+reason: unstated
+
+```
+proofs/out/augmentation/print-verification.json                        f0cdd3f07c8463b6… -> 05d79df8808c73c6…
+```
+
+## Augmentation checkpoint: presentation and usability
+
+P65-P73 add six standalone interfaces, guarded execution evidence, offline interaction checks, and print documents. The core and augmentation suite passed 19 tests; interface checks passed 824 assertions; print checks preserved all 183 checked text blocks across nine samples. The initial work prioritizes usability and presentation, with additional capabilities following from tested function combinations.
+
+Browser layout remains unverified because the supported preview service and local-file browser access were unavailable. The optional catalog test was blocked by automatic approval review after a dependency attempted Microsoft telemetry. The original proof runner did not complete because PM4Py could not inspect the parent process. These limits, the pre-existing P17 digest-register mismatch, and the installed toolchain are recorded in `proofs/out/augmentation/validation-summary.json` and `proofs/out/augmentation/toolchain.json`.
+
+Delivery consists of three packages with disjoint paths: implementation/toolchain, deliverables/evidence, and this ledger. See `proofs/AUGMENTATION.md` for commands, function mappings, and continuation candidates. Runtime handoffs remain defined functions and data, with no LLM reasoning intervention.
+### P71  presentation chain -> guarded execution -> source and output verification  (further input)
+
+**model**
+
+```
+proofs/out/augmentation/model.json                         sha256 7bfb1c626dadb8030317683a9cce12bf3bea9908198985287a8c2dab06f80da3  registered
+shows: typed source model registered as an explicit input for later augmentation chains
+shows: all six embedded view payloads checked against the same typed values
+```
+
+## Amendment 7
+
+reason: unstated
+
+```
+proofs/out/augmentation/verification.json                              90366ea5565d4ce6… -> 347bf219106706b4…
+```
+## Amendment 8
+
+reason: Scope presentation provenance to its own templates; operations adds a separate presentation chain
+
+```
+proofs/out/augmentation/verification.json                              347bf219106706b4… -> 917632a0ec39d4d1…
+```
+## P74  registered workbooks and policy -> exact case joins -> typed operations model
+
+```
+registered historical artifacts selected in proofs/operations.json
+-> check source bytes (hashlib.sha256; registered input equality)
+-> transform and verify (openpyxl.load_workbook; python_calamine.CalamineWorkbook; dictionary joins; datetime.astimezone; ZenEngine.create_decision; Decision.evaluate)
+-> record outputs (typed value equality; output hashes; append-only ledger)
+-> checked operations deliverables
+```
+
+**all**
+
+```
+proofs/out/augmentation/operations-model.json              sha256 1cecbee36274ff240d4038a212e95d00abd3e562c4ec656dd1fe2d92d81b795d  registered
+proofs/out/augmentation/operations-verification.json       sha256 1b7216ca5e698fd769c34b991673364765fe4e61e1d94be8586e3c2f4512bd31  registered
+shows: ten registered source hashes checked; nine workbooks read by two independent readers
+shows: 1434 unique case joins preserve deadline, outcome, risk, and calendar fields
+shows: all 105 open-case policy decisions reevaluated and equal; 94 flagged, 11 unflagged; 1329 closed cases unassessed
+shows: department and channel totals agree with stored aggregates; activity variants account for all 1434 cases
+shows: historical snapshot retained; no current-date risk inference; model and network attempts 0
+```
+
+## P75  typed operations model -> fixed interface handlers -> browsable cases and paths
+
+```
+registered historical artifacts selected in proofs/operations.json
+-> check source bytes (hashlib.sha256; registered input equality)
+-> transform and verify (Jinja2.Template.render; Array.filter; Array.sort; Array.slice; JSON.stringify; jsdom.JSDOM; dispatchEvent)
+-> record outputs (typed value equality; output hashes; append-only ledger)
+-> checked operations deliverables
+```
+
+**all**
+
+```
+proofs/out/augmentation/operations.html                    sha256 3fe46533488c33dacff01a101276cc18b9f29dfe7252c639fc253a15ba69acad  registered
+proofs/out/augmentation/operations-dom-verification.json   sha256 9de04df6caff4a1e65387f84818948584b1205659bcf5e86110d5533b52a52cd  registered
+shows: offline DOM assertions 5157; all 1434 case details compared; 96 facet combinations
+shows: all 116 activity paths preserve repeated activities and order; all 385 stored connections compared
+shows: risk states remain distinct; date sorting uses explicit UTC keys; empty results clear stale details
+shows: export bytes checked against selected source records; locale en-US; external resource attempts 0
+shows: browser layout, file dialogs, and responsive behavior remain unverified
+```
+
+## P76  typed measures -> Plotly specifications -> static charts and offline atlas
+
+```
+registered historical artifacts selected in proofs/operations.json
+-> check source bytes (hashlib.sha256; registered input equality)
+-> transform and verify (plotly.graph_objects.Bar; plotly.graph_objects.Heatmap; Figure.to_html; matplotlib.axes.Axes.barh; Axes.imshow; Figure.savefig)
+-> record outputs (typed value equality; output hashes; append-only ledger)
+-> checked operations deliverables
+```
+
+**all**
+
+```
+proofs/out/augmentation/operations-figures.json            sha256 3a6140725b43f649174d3a712a142f6b7457b78b9a05808f3da1c6a9017bbd73  registered
+proofs/out/augmentation/performance-atlas.html             sha256 b8b60f1a3a2e0bf9c2b23600c7a61140f75d36cc5adc32fc16502148f7465f27  registered
+proofs/out/augmentation/ops-outcomes.svg                   sha256 1ca7617f53e625d745f82ae302a6eaceda2fedec16411b239a87f7155d206ca8  registered
+proofs/out/augmentation/ops-outcomes.png                   sha256 735376d068292671a3bada8af28d5acd7c968ae19d55207a96f4ee1626c45f77  registered
+proofs/out/augmentation/ops-gaps.svg                       sha256 159e8a8e638ec30bf04b37f5801e8d82622eb3d70abb36eb6405e5f6eb5dfb08  registered
+proofs/out/augmentation/ops-gaps.png                       sha256 a1f8e126dcf2bc98eb09d1208e25ee830ccd8312b9acf70b855038c0c884a03d  registered
+proofs/out/augmentation/ops-heatmap.svg                    sha256 866cbf665d4c8d2d4f4af1279ab233a612af8d4e1912d5e898840e8671fdd54c  registered
+proofs/out/augmentation/ops-heatmap.png                    sha256 561addbd13c4a9914623e6a044f56a3c965d42c1e1babfc7fa73f96b16978ca1  registered
+shows: 55 plotted numeric marks equal source values; all 36 missing heatmap cells remain missing
+shows: largest-gap values retain their paired source activities and case counts; gaps are not task durations
+shows: PNG and SVG rendered from the same Plotly specifications; static charts visually reviewed
+shows: offline Plotly bundle included once with fixed IDs; embedded figure data roundtrip equal
+shows: native font initialization precedes guard; source reads and render functions are guarded; Plotly browser paint remains unverified
+```
+## Amendment 9
+
+reason: Scope inline SVG IDs and references per chart after print review found duplicate anchors
+
+```
+proofs/out/augmentation/operations-dom-verification.json               9de04df6caff4a1e… -> 5f6d086741d8f2a4…
+proofs/out/augmentation/operations-verification.json                   1b7216ca5e698fd7… -> f10a2192c0e972ac…
+proofs/out/augmentation/operations.html                                3fe46533488c33da… -> f600b1a1267b178b…
+```
+## Amendment 10
+
+reason: Correct singular and plural activity-path labels; preserve all source sequences
+
+```
+proofs/out/augmentation/operations-dom-verification.json               5f6d086741d8f2a4… -> 2bb279fa7bfe0049…
+proofs/out/augmentation/operations-verification.json                   f10a2192c0e972ac… -> adfff8dab2f37f42…
+proofs/out/augmentation/operations.html                                f600b1a1267b178b… -> abffad483d2f66bc…
+```
+## P77  registered case selections -> defined brief fields -> one-page case briefs
+
+```
+previously registered source artifacts and their checked execution evidence
+-> check inputs (registered source hashes; explicit output contracts)
+-> transform and verify (dictionary field mapping; Jinja2.Template.render; WeasyPrint.HTML.write_pdf; PyMuPDF.Page.get_text)
+-> append evidence (source equality; output hashes; append-only ledger)
+-> checked presentation extension
+```
+
+**all**
+
+```
+proofs/out/augmentation/case-briefs.html                   sha256 7ce08c06160dbbd748510350e52b2dfed1c2d1c69c6db4b6b2540473ee060b68  registered
+proofs/out/augmentation/case-briefs.json                   sha256 e983c5d6db4d8964a7cb8e0f824bb6e942522094733b05c5e9b63b5af94550b0  registered
+proofs/out/augmentation/case-briefs.pdf                    sha256 9c71738610e15977d0d47268b702ace4e732798b151cb7f954564749db343d6e  registered
+shows: three historical cases: flagged, unflagged, and not assessed; every selected source field retained
+shows: three one-page briefs; 62 printed values checked; all fields checked on their own case page
+shows: HTML typed-record roundtrip equal; missing values remain explicit; original timestamps and rule IDs retained
+shows: repeated PDF bytes equal; text outside pages 0; source reads and rendering guarded
+```
+
+## P78  checked interface states -> print stylesheet -> operations print collection
+
+```
+previously registered source artifacts and their checked execution evidence
+-> check inputs (registered source hashes; explicit output contracts)
+-> transform and verify (lxml.html.fromstring; base64.b64decode for checked embedded PNGs; WeasyPrint.HTML.write_pdf; PyMuPDF.Document.insert_pdf; Page.get_text)
+-> append evidence (source equality; output hashes; append-only ledger)
+-> checked presentation extension
+```
+
+**all**
+
+```
+proofs/out/augmentation/operations-print-samples.pdf       sha256 96133e18e03daa7bc5bbeb993a727c7b576c9ea8ad262f589f2202b86a7ad1ed  registered
+proofs/out/augmentation/operations-print-verification.json sha256 988e8f08b0122fbe4e059d336abae048921016c7db397e43276a8ae8f86a7993  registered
+shows: ten checked DOM states; 10 printed pages; 288 source text values preserved
+shows: chart, case, path, and connection print states rendered and visually reviewed
+shows: embedded heatmap and color-scale PNGs decoded only from hash-checked snapshots; external resource requests 0
+shows: repeated sample PDF bytes equal; text outside pages 0; browser rendering and browser print dialogs unverified
+```
+### P75  typed operations model -> fixed interface handlers -> browsable cases and paths  (revised chain 1)
+
+```
+registered historical artifacts selected in proofs/operations.json
+-> check source bytes (hashlib.sha256; registered input equality)
+-> transform and verify (lxml.etree.fromstring; lxml.etree.tostring; scoped SVG IDs; Jinja2.Template.render; Array.filter; Array.sort; Array.slice; JSON.stringify; jsdom.JSDOM; dispatchEvent)
+-> record outputs (typed value equality; output hashes; append-only ledger)
+-> checked operations deliverables
+```
+
+### P75  typed operations model -> fixed interface handlers -> browsable cases and paths  (evidence after revision 1)
+
+**all**
+
+```
+proofs/out/augmentation/operations.html                    sha256 abffad483d2f66bc8de7c83c5cd96b43e3d0db6213432bd8a5ce50a07b796879  reproduced
+proofs/out/augmentation/operations-dom-verification.json   sha256 2bb279fa7bfe0049176f869fe9c28b8c7cd20f8ca217c3596c7e5117c1b7362d  reproduced
+shows: offline DOM assertions 5273; all 1434 case details compared; 96 facet combinations
+shows: all 116 activity paths preserve repeated activities and order; all 385 stored connections compared
+shows: risk states remain distinct; date sorting uses explicit UTC keys; empty results clear stale details
+shows: inline SVG IDs and references scoped to each chart; singular and plural path labels checked on all 116 variants
+shows: export bytes checked against selected source records; locale en-US; external resource attempts 0
+shows: browser layout, file dialogs, and responsive behavior remain unverified
+```
+## P79  registered deliverables -> typed catalog -> searchable collection
+
+```
+previously registered source artifacts and their checked execution evidence
+-> check inputs (registered source hashes; explicit output contracts)
+-> transform and verify (hashlib.sha256; Jinja2.Template.render; Array.filter; DOM.hidden; jsdom.JSDOM; WeasyPrint.HTML.write_pdf)
+-> append evidence (source equality; output hashes; append-only ledger)
+-> checked presentation extension
+```
+
+**all**
+
+```
+proofs/out/augmentation/index.html                         sha256 20ceff995886f4c52a264a3b75b1df0b3f6b464e6e0a88d743020ed79cdd7f42  registered
+proofs/out/augmentation/catalog.json                       sha256 3639587416b4460fd8504d874481f0731796ff189a330a51308d774c206bccbc  registered
+proofs/out/augmentation/gallery-verification.json          sha256 dbc9f1f73ff5dc73b351a498f229075707650a1ac6bd3ed1d38a3a39919a243d  registered
+proofs/out/augmentation/gallery-dom-verification.json      sha256 d0f32f0f980978c9bf6fe469777192177873a315e2a2225e69d4de5058e35d40  registered
+proofs/out/augmentation/gallery-print-verification.json    sha256 95ab3e95a9e06fe9ca7e9f4cdd569ab1312d7c316c6bd6657dfdd667f47911ad  registered
+proofs/out/augmentation/workflow-verification.json         sha256 22c3d7d959f135911f4933b86c8e4734319f30a54aa7e9a0877271c616b18fdb  registered
+shows: 16 deliverables; 19 distinct registered artifact links checked
+shows: 142 offline DOM assertions; 28 search and format combinations; keyboard navigation checked
+shows: all referenced deliverable bytes match the source register; thumbnails embedded from registered PNGs
+shows: complete P65-P79 workflow uses fixed commands and fails on the first failed handoff; 19 presentation and operations tests passed
+shows: print rendering reviewed; browser layout remains unverified; model and network attempts 0
+```
+
+## Augmentation checkpoint P79
+
+P74-P79 extend the usability work with an operations desk, exact case joins, activity paths, static and interactive chart deliverables, three case briefs, a ten-page print collection, and a searchable entry page. The collection links 16 deliverables through 19 checked artifact paths.
+
+The complete P65-P79 workflow ran as 14 fixed worker commands, including 19 presentation and operations tests and 6,239 offline DOM assertions. Its source transformations, rendering, and handoffs required no LLM reasoning intervention. The workflow stops at the first failed handoff; its coordinator blocks model imports and network access while allowing only the named worker commands. New print outputs preserved 350 checked values across 13 pages. Browser layout, Plotly browser rendering, and file dialogs remain unverified.
+
+Checkpoint ZIPs are cumulative, with three disjoint upload packages and one complete bundle. The shared P76 snapshot remains fixed. P79 includes print-driven layout corrections, scoped SVG identifiers, and checked singular/plural path labels. Source bytes and original proof history remain intact. See `proofs/AUGMENTATION.md` and `proofs/out/augmentation/workflow-verification.json` for the reproduction command and evidence.

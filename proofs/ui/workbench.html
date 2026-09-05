@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en-US">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="description" content="Explore recorded policies, process dependencies, records, and briefings from the Function Chain.">
+  <title>Function Chain | {{ initial | capitalize }}</title>
+  <style>:root{ {% for name,value in theme.items() %}--{{name | replace('_','-')}}:{{value}};{% endfor %} }</style>
+  <style>{{ css | safe }}</style>
+</head>
+<body data-initial="{{ initial }}">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><span class="brand-mark" aria-hidden="true">f</span><div><strong>Function Chain</strong><span>Computed results. Clear views.</span></div></div>
+    <span class="offline-note"><i aria-hidden="true"></i>Works offline</span>
+  </header>
+  <div class="workspace">
+    <aside class="rail">
+      <p class="rail-label">WORKSPACE</p>
+      <nav aria-label="Views" role="tablist">
+      {% for key,view,name,num in [('policy','policy','Policy','01'),('processes','process','Process','02'),('records','records','Records','03'),('documents','briefing','Briefing','04'),('deck','slides','Slides','05')] %}
+      {% if key in model %}<button type="button" id="tab-{{view}}" role="tab" data-view="{{view}}" aria-controls="view-{{view}}" aria-selected="{{ 'true' if view == initial else 'false' }}" tabindex="{{ '0' if view == initial else '-1' }}"><span>{{num}}</span>{{name}}<b aria-hidden="true">↗</b></button>{% endif %}
+      {% endfor %}
+      </nav>
+      <div class="rail-foot"><span class="small-label">SOURCE FIRST</span><p>Explore the result.<br>Keep the evidence close.</p><button type="button" class="text-button" id="show-evidence">View source files</button></div>
+    </aside>
+    <main id="main" tabindex="-1">
+      <noscript><p class="notice">Enable JavaScript to use the views. The source files remain unchanged.</p></noscript>
+      {% if model.policy is defined %}
+      <section id="view-policy" role="tabpanel" aria-labelledby="tab-policy" {% if initial != 'policy' %}hidden{% endif %}>
+        <div class="page-heading"><div><p class="eyebrow">POLICY / NODE.JS TSC</p><h1>Explore the majority rule</h1><p class="lede">Change attendance. See the recorded rule at work.</p></div><span class="count-badge">{{model.policy.truth | length}} checked inputs</span></div>
+        <div class="policy-grid">
+          <div class="panel input-panel"><p class="small-label">YOUR SCENARIO</p><h2>Who is in the room?</h2><label for="present">Voting members present</label><div class="number-wrap"><input id="present" type="number" min="0" max="{{model.policy.total}}" step="1" value="{{model.policy.threshold}}" aria-describedby="present-help present-error"><span>of {{model.policy.total}} members</span></div><p id="present-help" class="hint">Enter a whole number from 0 to {{model.policy.total}}.</p><p id="present-error" class="input-error" role="alert" hidden></p>
+            <div class="divider"></div><label for="meeting">Try a recorded meeting</label><select id="meeting"><option value="">Choose a meeting</option>{% for row in model.policy.meetings %}<option value="{{loop.index0}}">{{row[0]}} · {{row[1]}} present</option>{% endfor %}</select><p class="hint">Selecting a meeting uses its stored attendance.</p>
+          </div>
+          <div class="panel result-panel" id="policy-result" role="status" aria-live="polite" aria-atomic="true"><p class="small-label">MAJORITY REACHABLE</p><div class="result-heading"><span id="result-symbol" aria-hidden="true">✓</span><h2 id="result-title"></h2></div><p id="result-detail" class="result-detail"></p><div class="result-metrics"><div><span>Present</span><strong id="result-present"></strong></div><div><span>Threshold</span><strong>{{model.policy.threshold}}</strong></div><div><span>Applied rule</span><strong id="result-rule"></strong></div></div><p class="hint">This result describes whether enough members are present to reach the recorded majority threshold.</p></div>
+        </div>
+        <section class="panel truth-panel" aria-labelledby="truth-heading"><div class="section-heading"><div><p class="small-label">THE COMPLETE INPUT RANGE</p><h2 id="truth-heading">Every attendance count</h2></div><div class="legend"><span><i class="dot no"></i>Not reachable</span><span><i class="dot yes"></i>Reachable</span></div></div><div class="truth-strip">{% for row in model.policy.truth %}<button type="button" data-count="{{row[0]}}" class="truth-cell {{ 'yes' if row[1] else 'no' }}" aria-label="Use {{row[0]}} present" aria-pressed="false"><span>{{row[0]}}</span><small>{{ '✓' if row[1] else '·' }}</small></button>{% endfor %}</div></section>
+        <details class="source-details"><summary>Read the rule and source context</summary><blockquote id="rule-quote"></blockquote><p class="hint">{{model.policy.note}}</p><p class="source-path">{{model.policy.source}}</p></details>
+      </section>
+      {% endif %}
+      {% if model.processes is defined %}
+      <section id="view-process" role="tabpanel" aria-labelledby="tab-process" {% if initial != 'process' %}hidden{% endif %}>
+        <div class="page-heading"><div><p class="eyebrow">PROCESS / DEPENDENCIES</p><h1>See how steps connect</h1><p class="lede">Follow recorded dependencies. Select a step to inspect its cited text.</p></div></div>
+        <div class="toolbar"><div><label for="process-choice">Process</label><select id="process-choice">{% for p in model.processes %}<option value="{{loop.index0}}">{{p.title}}</option>{% endfor %}</select></div><div><label for="step-choice">Select a step</label><select id="step-choice"></select></div><button type="button" id="process-fit" class="secondary">Fit graph</button></div>
+        <div class="graph-grid"><section class="panel graph-panel"><div class="graph-caption"><strong id="process-counts"></strong><span class="hint">Arrows show forced precedence</span></div><div id="process-canvas" class="graph-canvas" tabindex="0" aria-label="Dependency graph, scroll to explore"></div></section><aside class="panel node-panel"><p class="small-label">SELECTED STEP</p><h2 id="node-label"></h2><p class="field-label">Cited text</p><blockquote id="node-quote"></blockquote><p class="field-label">Sentence</p><p id="node-sentence" class="mono"></p><p class="field-label">Step ID</p><p id="node-id" class="mono"></p><p class="field-label">Connected steps</p><ul id="node-connections"></ul></aside></div>
+        <p class="footnote">Labels and arrows retain the recorded model. Independent steps have no implied order between them.</p>
+      </section>
+      {% endif %}
+      {% if model.records is defined %}
+      <section id="view-records" role="tabpanel" aria-labelledby="tab-records" {% if initial != 'records' %}hidden{% endif %}>
+        <div class="page-heading"><div><p class="eyebrow">RECORDS / WORKBOOKS</p><h1>Find the detail you need</h1><p class="lede">Search and sort the original values without changing the source.</p></div></div>
+        <div class="toolbar"><div><label for="record-choice">Dataset</label><select id="record-choice">{% for r in model.records %}<option value="{{loop.index0}}">{{r.title}}</option>{% endfor %}</select></div><div class="grow"><label for="record-search">Search records</label><input id="record-search" type="search" placeholder="Search any field" autocomplete="off"></div><div><label for="record-page-size">Rows per page</label><select id="record-page-size"><option>10</option><option selected>25</option><option>50</option></select></div></div>
+        <p id="record-description" class="footnote"></p><div id="activity-chart" class="panel activity-chart"></div>
+        <section class="panel table-panel"><div class="table-scroll" tabindex="0" aria-label="Records table, scroll horizontally for all columns"><table id="records-table"><caption id="records-caption"></caption><thead></thead><tbody></tbody></table></div><div class="pagination"><span id="record-count" role="status" aria-live="polite"></span><div><button type="button" id="record-prev" class="secondary">Previous</button><button type="button" id="record-next" class="secondary">Next</button></div></div></section>
+      </section>
+      {% endif %}
+      {% if model.documents is defined %}
+      <section id="view-briefing" role="tabpanel" aria-labelledby="tab-briefing" {% if initial != 'briefing' %}hidden{% endif %}>
+        <div class="page-heading"><div><p class="eyebrow">BRIEFING / DOCUMENTS</p><h1>Read with room to think</h1><p class="lede">A clear reading view of the original paragraphs and tables.</p></div><button type="button" class="secondary print-button">Print this view</button></div>
+        <div class="toolbar"><div><label for="document-choice">Document</label><select id="document-choice">{% for d in model.documents %}<option value="{{loop.index0}}">{{d.title}}</option>{% endfor %}</select></div><div class="grow"><label for="document-section">Jump to section</label><select id="document-section"></select></div></div>
+        <article id="document-body" class="document-paper"></article>
+      </section>
+      {% endif %}
+      {% if model.deck is defined %}
+      <section id="view-slides" role="tabpanel" aria-labelledby="tab-slides" {% if initial != 'slides' %}hidden{% endif %}>
+        <div class="page-heading"><div><p class="eyebrow">SLIDES / MEETING DISCUSSION</p><h1>A clearer discussion map</h1><p class="lede">Original slide text and connected shapes, arranged for reading.</p></div><button type="button" class="secondary print-button">Print this view</button></div>
+        <div class="toolbar"><div><label for="slide-choice">Slide</label><select id="slide-choice">{% for s in model.deck.slides %}<option value="{{loop.index0}}">Slide {{loop.index}}</option>{% endfor %}</select></div><span id="slide-counts" class="hint"></span></div><section class="panel slide-panel"><h2 id="slide-heading"></h2><div id="slide-canvas" class="graph-canvas"></div></section><details class="source-details"><summary>Read all slide text</summary><div id="slide-transcript"></div></details>
+      </section>
+      {% endif %}
+      <section id="evidence" class="evidence" hidden><div class="section-heading"><div><p class="small-label">SOURCE FILES</p><h2>Where these views come from</h2></div><button type="button" id="hide-evidence" class="secondary">Close sources</button></div><p>Each input matched its recorded SHA-256 digest before these views were built.</p><dl>{% for path,sha in model.sources.items() %}<dt>{{path}}</dt><dd>{{sha}}</dd>{% endfor %}</dl></section>
+      <footer class="page-footer"><span>Function Chain</span><span>Source values preserved · US English interface</span></footer>
+    </main>
+  </div>
+  <script type="application/json" id="model">{{ model | tojson }}</script>
+  <script>{{ js | safe }}</script>
+</body>
+</html>

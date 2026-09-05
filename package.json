@@ -1,0 +1,14 @@
+{
+  "name": "function-chain-proof-preview",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0 --port 4173 --strictPort",
+    "check:ui": "node --check proofs/ui/workbench.js",
+    "test:ui": "node tests/test_augmentation_ui.mjs"
+  },
+  "devDependencies": {
+    "jsdom": "30.0.1",
+    "vite": "8.2.2"
+  }
+}

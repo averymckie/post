@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en-US">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="description" content="Explore recorded policies, process dependencies, records, and briefings from the Function Chain.">
+  <title>Function Chain | Process</title>
+  <style>:root{ --ink:#172e35;--muted:#52666d;--paper:#f5f7f5;--surface:#ffffff;--accent:#086e61;--accent-soft:#e1f1ec;--border:#cbd8d4;--warning:#8b4e12;--warning-soft:#fff2df; }</style>
+  <style>*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input,select{font:inherit}button{cursor:pointer}button:disabled{cursor:default;opacity:.45}button,input,select,a,summary,[tabindex]{outline-offset:4px}button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible,summary:focus-visible,[tabindex]:focus-visible{outline:3px solid #176ab5}[hidden]{display:none!important}h1,h2,h3,p{margin-top:0}h1{font-size:clamp(29px,3vw,43px);letter-spacing:-1.5px;line-height:1.14;margin-bottom:12px;font-weight:600}h2{font-size:23px;letter-spacing:-.5px;line-height:1.3;margin-bottom:18px}h3{font-size:19px}p{margin-bottom:14px}blockquote{margin:10px 0;padding-left:18px;border-left:3px solid var(--accent);line-height:1.7}label{display:block;font-size:13px;font-weight:600;margin-bottom:8px}input,select{border:1px solid #99ada6;background:#fff;border-radius:8px;padding:11px 13px;color:var(--ink);min-height:46px;max-width:100%}input:focus,select:focus{border-color:var(--accent)}select{width:100%}input[type=search]{width:100%}.masthead{height:94px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 38px;background:var(--surface)}.brand{display:flex;align-items:center;gap:12px}.brand-mark{display:grid;place-items:center;font:italic 34px Georgia,serif;color:white;background:var(--accent);width:43px;height:43px;border-radius:11px}.brand strong{display:block;font-size:18px;letter-spacing:-.45px}.brand div>span{display:block;color:var(--muted);font-size:12px}.offline-note{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px}.offline-note i{width:7px;height:7px;border-radius:50%;background:var(--accent)}.workspace{display:grid;grid-template-columns:216px minmax(0,1fr);min-height:calc(100vh - 94px)}.rail{padding:36px 20px;border-right:1px solid var(--border);display:flex;flex-direction:column}.rail-label,.small-label,.eyebrow{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted)}.rail-label{margin:0 16px 18px}.rail nav{display:flex;flex-direction:column;gap:7px}.rail nav button{display:flex;align-items:center;gap:15px;border:0;border-radius:8px;background:transparent;text-align:left;padding:13px 15px;color:var(--muted);font-weight:600;min-height:48px}.rail nav button span{font-size:10px;opacity:.8;font-variant-numeric:tabular-nums}.rail nav button b{margin-left:auto;font-size:16px;font-weight:400}.rail nav button[aria-selected=true]{background:var(--accent-soft);color:var(--accent);font-weight:700}.rail nav button:hover{background:#e8efeb}.rail-foot{margin-top:auto;padding:80px 16px 0}.rail-foot p{font-size:12px;color:var(--muted);margin-top:10px}.text-button{background:none;padding:0;border:0;color:var(--accent);text-decoration:underline;text-underline-offset:4px;font-size:12px;min-height:36px}main{padding:42px clamp(22px,3.3vw,56px) 24px;min-width:0;max-width:1570px;width:100%;margin:auto}.page-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;margin-bottom:30px}.eyebrow{color:var(--accent);margin-bottom:14px}.lede{color:var(--muted);font-size:15px;max-width:670px;margin-bottom:0}.count-badge{border:1px solid var(--border);border-radius:100px;font-size:11px;white-space:nowrap;padding:6px 12px;margin-top:6px}.policy-grid{display:grid;grid-template-columns:minmax(250px,.9fr) minmax(310px,1.25fr);gap:22px}.panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;min-width:0}.input-panel,.result-panel{padding:28px}.input-panel .small-label,.result-panel .small-label{margin-bottom:14px}.input-panel h2{margin-bottom:26px}.number-wrap{display:flex;align-items:center;gap:14px}.number-wrap input{font-size:30px;width:115px;height:70px;font-weight:600;font-variant-numeric:tabular-nums}.number-wrap span{font-size:13px;color:var(--muted)}.hint{font-size:12px;color:var(--muted);line-height:1.55}.number-wrap+.hint{margin-top:10px}.divider{height:1px;background:var(--border);margin:25px 0}.input-panel select+.hint{margin-top:10px;margin-bottom:0}.result-panel{background:var(--accent-soft);border-color:#b5d7cc;display:flex;flex-direction:column;justify-content:center}.result-panel.is-no{background:var(--warning-soft);border-color:#e1c7a7}.result-panel.is-invalid{background:#edf0f1;border-color:#bac7cc}.result-heading{display:flex;gap:13px;align-items:center;margin:3px 0 17px}.result-heading span{font-size:25px;display:grid;place-items:center;width:44px;height:44px;border:1px solid currentColor;border-radius:50%;color:var(--accent);flex:none}.is-no .result-heading span{color:var(--warning)}.result-heading h2{font-size:38px;margin:0;letter-spacing:-1.5px;color:var(--accent)}.is-no .result-heading h2{color:var(--warning)}.is-invalid .result-heading h2{color:var(--muted);font-size:28px}.result-detail{font-size:17px;line-height:1.6;min-height:54px;max-width:440px}.result-metrics{display:grid;grid-template-columns:1fr 1fr 1fr;border-top:1px solid #bbd3ca;padding-top:20px;gap:12px;margin:10px 0 20px}.result-metrics span{display:block;font-size:11px;color:var(--muted)}.result-metrics strong{font-size:28px;font-weight:600;font-variant-numeric:tabular-nums}.result-panel>.hint{margin-bottom:0;max-width:420px}.truth-panel{padding:25px 28px;margin-top:22px}.section-heading{display:flex;justify-content:space-between;align-items:center;gap:20px}.section-heading h2{margin-bottom:0;font-size:20px}.section-heading .small-label{margin-bottom:6px}.legend{display:flex;gap:15px;flex-wrap:wrap;font-size:10px;color:var(--muted)}.legend>span{display:flex;gap:5px;align-items:center}.dot{display:inline-block;width:7px;height:7px;border-radius:50%}.dot.yes{background:var(--accent)}.dot.no{background:#bd8437}.truth-strip{display:grid;grid-template-columns:repeat(19,minmax(0,1fr));gap:5px;margin-top:23px}.truth-cell{min-height:60px;border:1px solid transparent;border-radius:6px;padding:6px 0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:13px;font-variant-numeric:tabular-nums}.truth-cell.yes{background:var(--accent-soft);color:var(--accent)}.truth-cell.no{background:var(--warning-soft);color:var(--warning)}.truth-cell[aria-pressed=true]{box-shadow:0 0 0 2px var(--ink);font-weight:700}.truth-cell small{font-size:11px}.source-details{margin-top:23px;background:#edf1ef;border-radius:10px;padding:17px 22px;font-size:13px}.source-details summary{cursor:pointer;font-weight:600;min-height:24px}.source-details[open] summary{margin-bottom:15px}.source-path,.mono{font:11px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;overflow-wrap:anywhere}.source-path{margin-bottom:0;color:var(--muted)}.input-error{font-size:12px;color:#9c2626;margin-top:8px}.toolbar{display:flex;gap:18px;align-items:flex-end;flex-wrap:wrap;margin-bottom:20px}.toolbar>div{min-width:160px}.toolbar .grow{flex:1}.secondary{min-height:46px;padding:10px 15px;border:1px solid #9fb1aa;background:var(--surface);border-radius:8px;color:var(--ink);font-size:12px;font-weight:600}.secondary:hover{background:var(--accent-soft)}.graph-grid{display:grid;grid-template-columns:minmax(0,1fr) 255px;gap:20px}.graph-caption{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:12px}.graph-canvas{overflow:auto;max-height:640px;padding:14px;scrollbar-gutter:stable}.graph-canvas svg{display:block;width:100%;min-width:480px;height:auto}.graph-edge{fill:none;stroke:#71948a;stroke-width:2}.graph-node rect{fill:#fff;stroke:#afc6be;stroke-width:1.5;rx:8}.graph-node text{fill:var(--ink);font-family:inherit}.graph-node .node-main{font-size:17px;font-weight:600}.graph-node .node-sub{font-size:11px;fill:var(--muted)}.graph-node[aria-pressed=true] rect{fill:var(--accent-soft);stroke:var(--accent);stroke-width:2.5}.graph-node[role=button]{cursor:pointer}.node-panel{padding:23px;align-self:start}.node-panel blockquote{font-size:14px;overflow-wrap:anywhere}.field-label{font-size:10px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin:23px 0 8px}.node-panel ul{padding-left:18px;font-size:12px;overflow-wrap:anywhere}.footnote{font-size:12px;color:var(--muted);margin-top:14px}.table-panel{overflow:hidden}.table-scroll{overflow:auto;max-height:670px}table{width:100%;border-collapse:collapse;text-align:left;font-size:13px}caption{text-align:left;font-size:17px;font-weight:600;padding:22px}th{background:#eaf0ec;position:sticky;top:0;z-index:1;font-size:11px;font-weight:600;white-space:nowrap}th,td{padding:12px 17px;border-bottom:1px solid #e1e7e3}th button{border:0;background:none;color:inherit;padding:0;min-height:24px;font-weight:inherit;text-align:left}td{vertical-align:top;overflow-wrap:anywhere;min-width:85px;max-width:370px}td.numeric{text-align:right;font-variant-numeric:tabular-nums}tbody tr:nth-child(even){background:#fafbf9}tbody tr:hover{background:#eff5f1}.pagination{padding:15px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12px;color:var(--muted)}.pagination>div{display:flex;gap:8px}.pagination .secondary{min-height:36px;padding:6px 12px}.activity-chart{padding:24px;margin-bottom:22px}.activity-chart h2{font-size:19px;margin-bottom:5px}.bar-row{display:grid;grid-template-columns:minmax(140px,1.3fr) minmax(90px,2fr) 70px;gap:15px;align-items:center;font-size:11px;margin-top:13px}.bar-track{height:12px;background:#e9efeb;border-radius:3px;overflow:hidden}.bar-fill{height:100%;background:var(--accent);border-radius:3px}.bar-value{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink)}.document-paper{max-width:930px;margin:0 auto;background:#fff;border:1px solid var(--border);border-radius:4px;padding:clamp(25px,5vw,66px);box-shadow:0 12px 30px #213c3506}.document-paper h2{font-size:29px;margin-bottom:28px}.document-paper h3{border-top:1px solid var(--border);padding-top:27px;margin-top:32px;scroll-margin-top:20px}.document-paper p,.document-paper blockquote{font-family:Georgia,serif;font-size:16px;line-height:1.85}.document-paper blockquote{color:#48625a;font-size:14px;padding:15px 20px;background:#f4f7f4;margin:20px 0}.document-paper table{font-size:12px}.document-paper th{position:static}.slide-panel{padding:28px}.slide-panel h2{font-size:24px;max-width:720px}.slide-panel .graph-canvas{max-height:750px}.slide-transcript-item{white-space:pre-wrap;border-top:1px solid var(--border);padding:12px 0;font:13px/1.7 ui-monospace,monospace}.evidence{margin-top:28px;padding:25px;background:#fff;border:1px solid var(--border);border-radius:10px}.evidence p{font-size:13px;color:var(--muted);margin-top:15px}.evidence dt{font-size:12px;font-weight:600;margin-top:18px;overflow-wrap:anywhere}.evidence dd{margin:5px 0 0;font:10px/1.7 ui-monospace,monospace;color:var(--muted);overflow-wrap:anywhere}.page-footer{display:flex;justify-content:space-between;gap:15px;margin-top:40px;padding-top:18px;border-top:1px solid var(--border);font-size:10px;color:var(--muted)}.skip-link{position:absolute;left:15px;top:-100px;background:white;padding:10px;z-index:5}.skip-link:focus{top:10px}.notice{padding:18px;background:var(--warning-soft)}
+@media(max-width:1050px){.workspace{grid-template-columns:170px minmax(0,1fr)}.rail{padding:28px 10px}.rail nav button{gap:10px;padding:12px}.rail-foot{padding:60px 12px 0}.policy-grid{grid-template-columns:1fr 1fr}.input-panel,.result-panel{padding:22px}.result-heading h2{font-size:30px}.graph-grid{grid-template-columns:1fr}.node-panel{display:grid;grid-template-columns:1fr 1fr;gap:0 20px}.node-panel .small-label,.node-panel h2{grid-column:1/-1}.truth-strip{gap:3px}.truth-cell{font-size:12px}.section-heading{align-items:flex-start}.legend{gap:8px;max-width:115px}}
+@media(max-width:760px){.masthead{height:76px;padding:0 20px}.workspace{display:block}.rail{padding:13px 15px;border-right:0;border-bottom:1px solid var(--border);background:white}.rail-label,.rail-foot{display:none}.rail nav{flex-direction:row;overflow-x:auto;gap:4px}.rail nav button{flex:1;justify-content:center;min-width:70px;font-size:12px;padding:10px 7px}.rail nav button span,.rail nav button b{display:none}main{padding:28px 18px 20px}.page-heading{margin-bottom:24px;gap:12px}.count-badge{display:none}.policy-grid{grid-template-columns:1fr;gap:16px}.input-panel,.result-panel{padding:24px}.input-panel h2{margin-bottom:20px}.result-panel{min-height:300px}.truth-panel{padding:22px 20px;margin-top:16px}.truth-strip{grid-template-columns:repeat(10,minmax(0,1fr));gap:6px}.truth-cell{min-height:52px;font-size:13px}.section-heading{gap:10px}.section-heading h2{font-size:18px}.legend{font-size:9px}.graph-canvas{max-height:510px;padding:8px}.graph-caption{padding:13px;font-size:11px}.toolbar{gap:12px}.toolbar>div{flex:1;min-width:145px}.toolbar .grow{min-width:200px}.toolbar select,.toolbar input{width:100%}.node-panel{display:block}.page-footer{font-size:9px}.activity-chart{padding:20px}.bar-row{grid-template-columns:1fr 1fr 58px;gap:8px;font-size:10px}.bar-value{font-size:10px}.document-paper{padding:24px 18px}.document-paper h2{font-size:25px}.document-paper table{font-size:10px}.document-paper td{padding:9px;min-width:0}.print-button{display:none}.source-details{padding:17px}.result-heading h2{font-size:34px}.evidence{padding:18px}.slide-panel{padding:20px}.slide-panel h2{font-size:20px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+@media print{.brand-mark{text-align:center;line-height:43px;display:block}.brand{min-width:300px}.count-badge{display:none!important}.truth-strip{display:block!important;height:48px}.truth-cell{display:block!important;float:left;width:5.26%;min-width:0;min-height:44px;font-size:10px;border:2px solid white;padding:4px 0}.truth-cell span,.truth-cell small{display:block}.legend{display:none}.policy-grid h2{font-size:26px}.graph-grid{grid-template-columns:minmax(0,1fr) 180px}.graph-node .node-sub{font-size:10px}}
+@media print{body{background:#fff}.masthead{height:65px;padding:0;border-bottom:1px solid #aaa}.rail,.toolbar,.print-button,.offline-note,.page-footer,#evidence,.skip-link{display:none!important}.workspace{display:block}main{padding:20px 0;max-width:none}.panel,.document-paper{box-shadow:none;break-inside:avoid}.document-paper{border:0;padding:0}.graph-canvas,.table-scroll{max-height:none;overflow:visible}.graph-canvas svg{min-width:0}.page-heading{margin-bottom:20px}h1{font-size:28px}.policy-grid{grid-template-columns:1fr 1fr}.source-details{background:#fff}.truth-strip{grid-template-columns:repeat(19,minmax(0,1fr))}th{position:static}h2,h3{break-after:avoid}.document-paper p,.document-paper blockquote{orphans:3;widows:3}}
+
+@media print{@page{size:A4;margin:13mm}body{font-size:13px}.masthead{height:52px}.page-heading{margin-bottom:16px}h1{font-size:25px}.lede{font-size:12px}.panel,.document-paper{break-inside:auto}.input-panel,.result-panel,.truth-panel{break-inside:avoid;padding:18px}.policy-grid{gap:16px}.input-panel h2{margin-bottom:16px}.result-detail{font-size:14px;min-height:0}.result-heading h2{font-size:28px}.divider{margin:16px 0}.number-wrap input{height:52px;font-size:24px}.result-metrics{margin:6px 0 12px;padding-top:12px}.result-metrics strong{font-size:23px}.source-details{margin-top:14px;padding:12px}.source-details blockquote{font-size:10px;margin:8px 0}.source-details .hint{font-size:9px}.graph-grid{display:block}.graph-canvas{padding:8px;break-inside:avoid}.graph-canvas svg{height:590px;width:100%;min-width:0;max-width:100%}.node-panel{margin-top:12px;padding:16px;break-inside:avoid}.node-panel .field-label{margin-top:10px}.node-panel blockquote{font-size:11px}.document-paper h2{font-size:24px}.document-paper h3{font-size:17px;margin-top:20px;padding-top:18px}.document-paper p,.document-paper blockquote{font-size:12px;line-height:1.65}.document-paper blockquote{padding:10px 14px;margin:12px 0;break-inside:avoid}.document-paper p{break-after:avoid}.table-scroll{width:100%;max-height:none;overflow:visible}table{table-layout:fixed;width:100%;font-size:10px}th,td{white-space:normal;min-width:0;max-width:none;padding:8px;overflow-wrap:anywhere}th{font-size:9px}tbody tr{break-inside:avoid}.pagination{display:none}.slide-panel{padding:18px}.slide-panel .graph-canvas svg{height:530px}.slide-panel h2{font-size:20px}.slide-transcript-item{font-size:10px}.activity-chart{padding:18px}.graph-caption{font-size:10px}.brand-mark{font-size:28px;width:36px;height:36px;line-height:36px}}
+</style>
+</head>
+<body data-initial="process">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><span class="brand-mark" aria-hidden="true">f</span><div><strong>Function Chain</strong><span>Computed results. Clear views.</span></div></div>
+    <span class="offline-note"><i aria-hidden="true"></i>Works offline</span>
+  </header>
+  <div class="workspace">
+    <aside class="rail">
+      <p class="rail-label">WORKSPACE</p>
+      <nav aria-label="Views" role="tablist">
+      
+      
+      
+      <button type="button" id="tab-process" role="tab" data-view="process" aria-controls="view-process" aria-selected="true" tabindex="0"><span>02</span>Process<b aria-hidden="true">↗</b></button>
+      
+      
+      
+      
+      
+      
+      
+      </nav>
+      <div class="rail-foot"><span class="small-label">SOURCE FIRST</span><p>Explore the result.<br>Keep the evidence close.</p><button type="button" class="text-button" id="show-evidence">View source files</button></div>
+    </aside>
+    <main id="main" tabindex="-1">
+      <noscript><p class="notice">Enable JavaScript to use the views. The source files remain unchanged.</p></noscript>
+      
+      
+      <section id="view-process" role="tabpanel" aria-labelledby="tab-process" >
+        <div class="page-heading"><div><p class="eyebrow">PROCESS / DEPENDENCIES</p><h1>See how steps connect</h1><p class="lede">Follow recorded dependencies. Select a step to inspect its cited text.</p></div></div>
+        <div class="toolbar"><div><label for="process-choice">Process</label><select id="process-choice"><option value="0">FOIA procedural dependencies</option><option value="1">Node.js governance dependencies</option></select></div><div><label for="step-choice">Select a step</label><select id="step-choice"></select></div><button type="button" id="process-fit" class="secondary">Fit graph</button></div>
+        <div class="graph-grid"><section class="panel graph-panel"><div class="graph-caption"><strong id="process-counts"></strong><span class="hint">Arrows show forced precedence</span></div><div id="process-canvas" class="graph-canvas" tabindex="0" aria-label="Dependency graph, scroll to explore"></div></section><aside class="panel node-panel"><p class="small-label">SELECTED STEP</p><h2 id="node-label"></h2><p class="field-label">Cited text</p><blockquote id="node-quote"></blockquote><p class="field-label">Sentence</p><p id="node-sentence" class="mono"></p><p class="field-label">Step ID</p><p id="node-id" class="mono"></p><p class="field-label">Connected steps</p><ul id="node-connections"></ul></aside></div>
+        <p class="footnote">Labels and arrows retain the recorded model. Independent steps have no implied order between them.</p>
+      </section>
+      
+      
+      
+      
+      <section id="evidence" class="evidence" hidden><div class="section-heading"><div><p class="small-label">SOURCE FILES</p><h2>Where these views come from</h2></div><button type="button" id="hide-evidence" class="secondary">Close sources</button></div><p>Each input matched its recorded SHA-256 digest before these views were built.</p><dl><dt>proofs/out/P2/usc5-552-doj/ordered_steps.json</dt><dd>58a3c227a23125b3d645f2ea62e9be716b6e2987cdc40b837987c4bbfcf5c70f</dd><dt>proofs/out/P2/nodejs-governance/ordered_steps.json</dt><dd>46fdd991c2c12639b557c1cb52000915cf18ec3782a34c6d5f18b1b9caf9fbce</dd><dt>proofs/out/P1/usc5-552-doj/facts.jsonl</dt><dd>08d2fc2fff7c11e7810c7658fa2f0deac188bae1cffa32603a21a903556991b3</dd><dt>proofs/out/P1/nodejs-governance/facts.jsonl</dt><dd>ce60a372408888a0e047ec3e23085bd97dae2db11bb50114ea565af5b20fba85</dd></dl></section>
+      <footer class="page-footer"><span>Function Chain</span><span>Source values preserved · US English interface</span></footer>
+    </main>
+  </div>
+  <script type="application/json" id="model">{"processes": [{"edges": [["usc5-552-doj:u0021:s00#e43", "usc5-552-doj:u0021:s00#e59"], ["usc5-552-doj:u0066:s00#e28", "usc5-552-doj:u0066:s00#e16"], ["usc5-552-doj:u0077:s03#e3", "usc5-552-doj:u0077:s03#e19"], ["usc5-552-doj:u0079:s01#e36", "usc5-552-doj:u0079:s01#e14"], ["usc5-552-doj:u0089:s02#e53", "usc5-552-doj:u0089:s02#e59"], ["usc5-552-doj:u0128:s01#e13", "usc5-552-doj:u0128:s01#e4"], ["usc5-552-doj:u0131:s00#e16", "usc5-552-doj:u0131:s00#e13"], ["usc5-552-doj:u0131:s00#e44", "usc5-552-doj:u0131:s00#e40"], ["usc5-552-doj:u0132:s00#e36", "usc5-552-doj:u0132:s00#e39"], ["usc5-552-doj:u0136:s00#e16", "usc5-552-doj:u0136:s00#e13"], ["usc5-552-doj:u0143:s00#e33", "usc5-552-doj:u0143:s00#e27"], ["usc5-552-doj:u0144:s00#e43", "usc5-552-doj:u0144:s00#e37"]], "height": 1310, "id": "usc5-552-doj", "layers": 2, "nodes": [{"id": "usc5-552-doj:u0021:s00#e43", "label": "request", "quote": "request", "sentence": "usc5-552-doj:u0021:s00", "x": 38, "y": 38}, {"id": "usc5-552-doj:u0021:s00#e59", "label": "make", "quote": "made", "sentence": "usc5-552-doj:u0021:s00", "x": 308, "y": 38}, {"id": "usc5-552-doj:u0066:s00#e28", "label": "receipt", "quote": "receipt", "sentence": "usc5-552-doj:u0066:s00", "x": 38, "y": 144}, {"id": "usc5-552-doj:u0066:s00#e16", "label": "except", "quote": "excepting", "sentence": "usc5-552-doj:u0066:s00", "x": 308, "y": 144}, {"id": "usc5-552-doj:u0077:s03#e3", "label": "determination", "quote": "determination", "sentence": "usc5-552-doj:u0077:s03", "x": 38, "y": 250}, {"id": "usc5-552-doj:u0077:s03#e19", "label": "make", "quote": "made", "sentence": "usc5-552-doj:u0077:s03", "x": 308, "y": 250}, {"id": "usc5-552-doj:u0079:s01#e36", "label": "give", "quote": "given", "sentence": "usc5-552-doj:u0079:s01", "x": 38, "y": 356}, {"id": "usc5-552-doj:u0079:s01#e14", "label": "arrange", "quote": "arrange", "sentence": "usc5-552-doj:u0079:s01", "x": 308, "y": 356}, {"id": "usc5-552-doj:u0089:s02#e53", "label": "base", "quote": "based", "sentence": "usc5-552-doj:u0089:s02", "x": 38, "y": 462}, {"id": "usc5-552-doj:u0089:s02#e59", "label": "agency", "quote": "agency", "sentence": "usc5-552-doj:u0089:s02", "x": 308, "y": 462}, {"id": "usc5-552-doj:u0128:s01#e13", "label": "submit", "quote": "submit", "sentence": "usc5-552-doj:u0128:s01", "x": 38, "y": 568}, {"id": "usc5-552-doj:u0128:s01#e4", "label": "February", "quote": "February", "sentence": "usc5-552-doj:u0128:s01", "x": 308, "y": 568}, {"id": "usc5-552-doj:u0131:s00#e16", "label": "authorize", "quote": "authorize", "sentence": "usc5-552-doj:u0131:s00", "x": 38, "y": 674}, {"id": "usc5-552-doj:u0131:s00#e13", "label": "rely", "quote": "relies", "sentence": "usc5-552-doj:u0131:s00", "x": 308, "y": 674}, {"id": "usc5-552-doj:u0131:s00#e44", "label": "description", "quote": "description", "sentence": "usc5-552-doj:u0131:s00", "x": 38, "y": 780}, {"id": "usc5-552-doj:u0131:s00#e40", "label": "rely", "quote": "relied", "sentence": "usc5-552-doj:u0131:s00", "x": 308, "y": 780}, {"id": "usc5-552-doj:u0132:s00#e36", "label": "pend", "quote": "pending", "sentence": "usc5-552-doj:u0132:s00", "x": 38, "y": 886}, {"id": "usc5-552-doj:u0132:s00#e39", "label": "agency", "quote": "agency", "sentence": "usc5-552-doj:u0132:s00", "x": 308, "y": 886}, {"id": "usc5-552-doj:u0136:s00#e16", "label": "request", "quote": "request", "sentence": "usc5-552-doj:u0136:s00", "x": 38, "y": 992}, {"id": "usc5-552-doj:u0136:s00#e13", "label": "elapse", "quote": "elapsed", "sentence": "usc5-552-doj:u0136:s00", "x": 308, "y": 992}, {"id": "usc5-552-doj:u0143:s00#e33", "label": "receive", "quote": "received", "sentence": "usc5-552-doj:u0143:s00", "x": 38, "y": 1098}, {"id": "usc5-552-doj:u0143:s00#e27", "label": "elapse", "quote": "elapsed", "sentence": "usc5-552-doj:u0143:s00", "x": 308, "y": 1098}, {"id": "usc5-552-doj:u0144:s00#e43", "label": "receive", "quote": "received", "sentence": "usc5-552-doj:u0144:s00", "x": 38, "y": 1204}, {"id": "usc5-552-doj:u0144:s00#e37", "label": "elapse", "quote": "elapsed", "sentence": "usc5-552-doj:u0144:s00", "x": 308, "y": 1204}], "source": "proofs/out/P2/usc5-552-doj/ordered_steps.json", "title": "FOIA procedural dependencies", "width": 578}, {"edges": [["nodejs-governance:u0020:s00#e25", "nodejs-governance:u0020:s00#e19"], ["nodejs-governance:u0031:s00#e10", "nodejs-governance:u0031:s00#e4"], ["nodejs-governance:u0033:s01#e3", "nodejs-governance:u0033:s01#e8"], ["nodejs-governance:u0040:s01#e8", "nodejs-governance:u0040:s01#e11"], ["nodejs-governance:u0055:s04#e4", "nodejs-governance:u0055:s04#e33"], ["nodejs-governance:u0059:s00#e19", "nodejs-governance:u0059:s00#e7"], ["nodejs-governance:u0063:s00#e23", "nodejs-governance:u0063:s00#e18"], ["nodejs-governance:u0068:s01#e29", "nodejs-governance:u0068:s01#e33"], ["nodejs-governance:u0070:s00#e18", "nodejs-governance:u0070:s00#e11"]], "height": 992, "id": "nodejs-governance", "layers": 2, "nodes": [{"id": "nodejs-governance:u0020:s00#e25", "label": "collaborator", "quote": "collaborator", "sentence": "nodejs-governance:u0020:s00", "x": 38, "y": 38}, {"id": "nodejs-governance:u0020:s00#e19", "label": "more", "quote": "more", "sentence": "nodejs-governance:u0020:s00", "x": 308, "y": 38}, {"id": "nodejs-governance:u0031:s00#e10", "label": "share", "quote": "share", "sentence": "nodejs-governance:u0031:s00", "x": 38, "y": 144}, {"id": "nodejs-governance:u0031:s00#e4", "label": "meeting", "quote": "meeting", "sentence": "nodejs-governance:u0031:s00", "x": 308, "y": 144}, {"id": "nodejs-governance:u0033:s01#e3", "label": "meeting", "quote": "meeting", "sentence": "nodejs-governance:u0033:s01", "x": 38, "y": 250}, {"id": "nodejs-governance:u0033:s01#e8", "label": "ensure", "quote": "ensures", "sentence": "nodejs-governance:u0033:s01", "x": 308, "y": 250}, {"id": "nodejs-governance:u0040:s01#e8", "label": "hour", "quote": "hours", "sentence": "nodejs-governance:u0040:s01", "x": 38, "y": 356}, {"id": "nodejs-governance:u0040:s01#e11", "label": "be", "quote": "are", "sentence": "nodejs-governance:u0040:s01", "x": 308, "y": 356}, {"id": "nodejs-governance:u0055:s04#e4", "label": "time", "quote": "time", "sentence": "nodejs-governance:u0055:s04", "x": 38, "y": 462}, {"id": "nodejs-governance:u0055:s04#e33", "label": "add", "quote": "add", "sentence": "nodejs-governance:u0055:s04", "x": 308, "y": 462}, {"id": "nodejs-governance:u0059:s00#e19", "label": "week", "quote": "week", "sentence": "nodejs-governance:u0059:s00", "x": 38, "y": 568}, {"id": "nodejs-governance:u0059:s00#e7", "label": "oppose", "quote": "oppose", "sentence": "nodejs-governance:u0059:s00", "x": 308, "y": 568}, {"id": "nodejs-governance:u0063:s00#e23", "label": "require", "quote": "requires", "sentence": "nodejs-governance:u0063:s00", "x": 38, "y": 674}, {"id": "nodejs-governance:u0063:s00#e18", "label": "zero", "quote": "zero", "sentence": "nodejs-governance:u0063:s00", "x": 308, "y": 674}, {"id": "nodejs-governance:u0068:s01#e29", "label": "address", "quote": "addressing", "sentence": "nodejs-governance:u0068:s01", "x": 38, "y": 780}, {"id": "nodejs-governance:u0068:s01#e33", "label": "advance", "quote": "advancing", "sentence": "nodejs-governance:u0068:s01", "x": 308, "y": 780}, {"id": "nodejs-governance:u0070:s00#e18", "label": "onboarded", "quote": "onboarded", "sentence": "nodejs-governance:u0070:s00", "x": 38, "y": 886}, {"id": "nodejs-governance:u0070:s00#e11", "label": "visible", "quote": "visible", "sentence": "nodejs-governance:u0070:s00", "x": 308, "y": 886}], "source": "proofs/out/P2/nodejs-governance/ordered_steps.json", "title": "Node.js governance dependencies", "width": 578}], "sources": {"proofs/out/P1/nodejs-governance/facts.jsonl": "ce60a372408888a0e047ec3e23085bd97dae2db11bb50114ea565af5b20fba85", "proofs/out/P1/usc5-552-doj/facts.jsonl": "08d2fc2fff7c11e7810c7658fa2f0deac188bae1cffa32603a21a903556991b3", "proofs/out/P2/nodejs-governance/ordered_steps.json": "46fdd991c2c12639b557c1cb52000915cf18ec3782a34c6d5f18b1b9caf9fbce", "proofs/out/P2/usc5-552-doj/ordered_steps.json": "58a3c227a23125b3d645f2ea62e9be716b6e2987cdc40b837987c4bbfcf5c70f"}, "version": 1}</script>
+  <script>/* Fixed presentation handlers. Decisions are looked up in the checked table. */
+"use strict";
+(() => {
+  const model = JSON.parse(document.getElementById("model").textContent);
+  const el = id => document.getElementById(id);
+  const make = (tag, text, className) => {
+    const node = document.createElement(tag);
+    if (text !== undefined) node.textContent = text;
+    if (className) node.className = className;
+    return node;
+  };
+  const display = value => value === null ? "—" : typeof value === "boolean" ? (value ? "True" : "False") : String(value);
+  const tabs = Array.from(document.querySelectorAll("[data-view]"));
+  function showView(view, focus = false) {
+    const chosen = tabs.find(t => t.dataset.view === view);
+    if (!chosen) return;
+    tabs.forEach(t => { const active = t === chosen; t.setAttribute("aria-selected", String(active)); t.tabIndex = active ? 0 : -1; el("view-" + t.dataset.view).hidden = !active; });
+    document.title = "Function Chain | " + chosen.textContent.trim().replace(/^\d+/, "").replace("↗", "").trim();
+    if (focus) chosen.focus();
+  }
+  tabs.forEach((tab, i) => {
+    tab.addEventListener("click", () => showView(tab.dataset.view));
+    tab.addEventListener("keydown", e => {
+      let next;
+      if (e.key === "ArrowRight") next = (i + 1) % tabs.length;
+      if (e.key === "ArrowLeft") next = (i + tabs.length - 1) % tabs.length;
+      if (e.key === "Home") next = 0;
+      if (e.key === "End") next = tabs.length - 1;
+      if (next !== undefined) { e.preventDefault(); showView(tabs[next].dataset.view, true); }
+    });
+  });
+  showView(document.body.dataset.initial);
+  el("show-evidence").addEventListener("click", () => { el("evidence").hidden = false; el("evidence").scrollIntoView({ block: "start" }); el("hide-evidence").focus({ preventScroll: true }); });
+  el("hide-evidence").addEventListener("click", () => { el("evidence").hidden = true; el("show-evidence").focus(); });
+  document.querySelectorAll(".print-button").forEach(b => b.addEventListener("click", () => window.print()));
+
+  if (model.policy) {
+    const policy = model.policy;
+    function applyAttendance() {
+      const raw = el("present").value;
+      const n = Number(raw);
+      const valid = /^(0|[1-9]\d*)$/.test(raw) && Number.isSafeInteger(n) && n >= 0 && n <= policy.total;
+      const row = valid ? policy.truth[n] : null;
+      if (row && row[0] !== n) throw new Error("Truth table index mismatch");
+      el("present").setAttribute("aria-invalid", String(!valid));
+      el("present-error").hidden = valid;
+      el("present-error").textContent = valid ? "" : `Enter a whole number from 0 to ${policy.total}.`;
+      el("policy-result").className = "panel result-panel" + (!valid ? " is-invalid" : row[1] ? "" : " is-no");
+      el("result-title").textContent = !valid ? "Check the input" : row[1] ? "Reachable" : "Not reachable";
+      el("result-symbol").textContent = !valid ? "?" : row[1] ? "✓" : "−";
+      el("result-present").textContent = valid ? String(n) : "—";
+      el("result-rule").textContent = valid ? row[2] : "—";
+      el("result-detail").textContent = !valid ? "A valid attendance count is required before showing a decision." : row[1] ? `${n} members are present. The recorded threshold of ${policy.threshold} can be reached.` : `${n} members are present. ${policy.threshold - n} more would be needed to reach the recorded threshold.`;
+      const description = valid ? policy.rules[row[2]].description : policy.rules[policy.truth[0][2]].description;
+      el("rule-quote").textContent = description;
+      document.querySelectorAll("[data-count]").forEach(b => b.setAttribute("aria-pressed", String(valid && Number(b.dataset.count) === n)));
+    }
+    el("present").addEventListener("input", () => { el("meeting").value = ""; applyAttendance(); });
+    el("meeting").addEventListener("change", () => {
+      if (el("meeting").value !== "") { el("present").value = String(policy.meetings[Number(el("meeting").value)][1]); applyAttendance(); }
+    });
+    document.querySelectorAll("[data-count]").forEach(b => b.addEventListener("click", () => { el("present").value = b.dataset.count; el("meeting").value = ""; applyAttendance(); }));
+    applyAttendance();
+  }
+
+  const NS = "http://www.w3.org/2000/svg";
+  function svgNode(tag, attrs, text) {
+    const node = document.createElementNS(NS, tag);
+    Object.entries(attrs || {}).forEach(([k, v]) => node.setAttribute(k, String(v)));
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+  function graphView(graph, container, prefix, onSelect) {
+    container.replaceChildren();
+    const svg = svgNode("svg", { viewBox: `0 0 ${graph.width} ${graph.height}`, "aria-label": prefix === "process" ? "Recorded process dependencies" : "Recorded slide connections" });
+    const defs = svgNode("defs");
+    const marker = svgNode("marker", { id: prefix + "-arrow", viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: "auto-start-reverse" });
+    marker.append(svgNode("path", { d: "M 0 0 L 10 5 L 0 10 z", fill: "#71948a" })); defs.append(marker); svg.append(defs);
+    const byId = new Map(graph.nodes.map(n => [n.id, n]));
+    graph.edges.forEach(([a, b]) => {
+      const from = byId.get(a), to = byId.get(b);
+      const x1 = from.x + 215, y1 = from.y + 35, x2 = to.x - 6, y2 = to.y + 35;
+      const mid = (x1 + x2) / 2;
+      svg.append(svgNode("path", { class: "graph-edge", fill: "none", stroke: "#71948a", "stroke-width": 2, d: `M${x1} ${y1} C${mid} ${y1},${mid} ${y2},${x2} ${y2}`, "marker-end": `url(#${prefix}-arrow)`, "data-source": a, "data-target": b }));
+    });
+    graph.nodes.forEach((node, i) => {
+      const g = svgNode("g", { class: "graph-node", "data-node-id": node.id, transform: `translate(${node.x},${node.y})` });
+      const full = node.text || node.label;
+      g.append(svgNode("title", {}, full));
+      g.append(svgNode("rect", { width: 215, height: 72, fill: "#ffffff", stroke: "#afc6be", "stroke-width": 1.5, rx: 8 }));
+      g.append(svgNode("text", { x: 14, y: 29, class: "node-main", fill: "#19342e", "font-size": 17, "font-weight": 600 }, node.label.length > 23 ? node.label.slice(0, 22) + "…" : node.label));
+      const detail = node.text ? (node.text.split("\n").slice(1).join(" · ") || `Shape ${node.id}`) : `Step ${String(i + 1).padStart(2, "0")} · ${node.sentence.split(":").slice(-1)[0]}`;
+      g.append(svgNode("text", { x: 14, y: 52, class: "node-sub", fill: "#536d64", "font-size": 11 }, detail));
+      if (onSelect) {
+        g.setAttribute("role", "button"); g.setAttribute("tabindex", "0"); g.setAttribute("aria-label", `Select step ${i + 1}: ${node.label}`); g.setAttribute("aria-pressed", "false");
+        g.addEventListener("click", () => onSelect(node.id));
+        g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSelect(node.id); } });
+      }
+      svg.append(g);
+    });
+    container.append(svg);
+  }
+
+  if (model.processes) {
+    let current;
+    function selectStep(id) {
+      const node = current.nodes.find(n => n.id === id);
+      if (!node) throw new Error("Unknown graph node");
+      el("step-choice").value = id;
+      el("node-label").textContent = node.label;
+      el("node-quote").textContent = node.quote;
+      el("node-sentence").textContent = node.sentence;
+      el("node-id").textContent = node.id;
+      el("node-connections").replaceChildren();
+      current.edges.forEach(([a, b]) => { if (a === id || b === id) { const other = current.nodes.find(n => n.id === (a === id ? b : a)); el("node-connections").append(make("li", `${a === id ? "Before" : "After"}: ${other.label} (${other.id})`)); } });
+      if (!el("node-connections").children.length) el("node-connections").append(make("li", "No recorded dependency edges."));
+      el("process-canvas").querySelectorAll("[data-node-id]").forEach(g => g.setAttribute("aria-pressed", String(g.dataset.nodeId === id)));
+    }
+    function showProcess() {
+      current = model.processes[Number(el("process-choice").value)];
+      el("process-counts").textContent = `${current.nodes.length} steps · ${current.edges.length} dependencies`;
+      el("step-choice").replaceChildren();
+      current.nodes.forEach((n, i) => { const o = make("option", `${String(i + 1).padStart(2, "0")} · ${n.label}`); o.value = n.id; el("step-choice").append(o); });
+      graphView(current, el("process-canvas"), "process", selectStep);
+      selectStep(current.nodes[0].id);
+    }
+    el("process-choice").addEventListener("change", showProcess);
+    el("step-choice").addEventListener("change", () => selectStep(el("step-choice").value));
+    el("process-fit").addEventListener("click", () => { el("process-canvas").scrollTo({ top: 0, left: 0 }); el("process-canvas").focus({ preventScroll: true }); });
+    showProcess();
+  }
+
+  if (model.records) {
+    let page = 0, sort = null, direction = 1;
+    function chart(data) {
+      const box = el("activity-chart"); box.replaceChildren(); box.hidden = data.id !== "activities";
+      if (box.hidden) return;
+      box.append(make("h2", "Largest recorded gaps between events"));
+      box.append(make("p", "Five activities with the highest mean hours since the previous event.", "hint"));
+      const rows = data.rows.filter(r => typeof r[2] === "number").slice().sort((a, b) => b[2] - a[2] || a[0].localeCompare(b[0], "en-US")).slice(0, 5);
+      const maximum = Math.max(...rows.map(r => r[2]));
+      rows.forEach(row => { const r = make("div", undefined, "bar-row"), track = make("div", undefined, "bar-track"), fill = make("div", undefined, "bar-fill"); fill.style.width = `${100 * row[2] / maximum}%`; fill.setAttribute("aria-hidden", "true"); track.append(fill); r.append(make("span", row[0]), track, make("span", `${row[2].toFixed(2)} h`, "bar-value")); box.append(r); });
+    }
+    function drawRecords(reset = false) {
+      if (reset) page = 0;
+      const data = model.records[Number(el("record-choice").value)];
+      const query = el("record-search").value.trim().toLocaleLowerCase("en-US");
+      let rows = data.rows.map((row, index) => ({ row, index })).filter(r => r.row.some(v => display(v).toLocaleLowerCase("en-US").includes(query)));
+      if (sort !== null) rows.sort((a, b) => {
+        const x = a.row[sort], y = b.row[sort];
+        let result = x === y ? 0 : x === null ? 1 : y === null ? -1 : typeof x === "number" && typeof y === "number" ? x - y : typeof x === "boolean" && typeof y === "boolean" ? Number(x) - Number(y) : String(x).localeCompare(String(y), "en-US", { numeric: true });
+        return direction * result || a.index - b.index;
+      });
+      const size = Number(el("record-page-size").value), pages = Math.max(1, Math.ceil(rows.length / size));
+      page = Math.min(page, pages - 1);
+      const head = el("records-table").querySelector("thead"), body = el("records-table").querySelector("tbody"), tr = make("tr");
+      head.replaceChildren(); body.replaceChildren();
+      data.labels.forEach((label, i) => { const th = make("th"), button = make("button", label + (sort === i ? direction === 1 ? " ↑" : " ↓" : " ↕")); th.scope = "col"; th.setAttribute("aria-sort", sort === i ? direction === 1 ? "ascending" : "descending" : "none"); button.type = "button"; button.setAttribute("aria-label", `Sort by ${label}`); button.addEventListener("click", () => { direction = sort === i ? -direction : 1; sort = i; drawRecords(true); }); th.append(button); tr.append(th); });
+      head.append(tr);
+      rows.slice(page * size, (page + 1) * size).forEach(({row, index}) => { const tr = make("tr"); tr.dataset.sourceRow = String(index); row.forEach((v, i) => { const cell = make("td", display(v), typeof v === "number" ? "numeric" : ""); cell.dataset.column = data.columns[i]; tr.append(cell); }); body.append(tr); });
+      if (!rows.length) { const tr = make("tr"), td = make("td", "No matching records. Try another search."); td.colSpan = data.columns.length; tr.append(td); body.append(tr); }
+      el("records-caption").textContent = data.title;
+      el("record-description").textContent = data.description;
+      el("record-count").textContent = rows.length ? `${page * size + 1}–${Math.min((page + 1) * size, rows.length)} of ${rows.length} matching records · ${data.rows.length} total` : `0 matching records · ${data.rows.length} total`;
+      el("record-prev").disabled = page === 0;
+      el("record-next").disabled = page === pages - 1;
+      chart(data);
+    }
+    el("record-choice").addEventListener("change", () => { sort = null; direction = 1; el("record-search").value = ""; drawRecords(true); });
+    el("record-search").addEventListener("input", () => drawRecords(true));
+    el("record-page-size").addEventListener("change", () => drawRecords(true));
+    el("record-prev").addEventListener("click", () => { page--; drawRecords(); });
+    el("record-next").addEventListener("click", () => { page++; drawRecords(); });
+    drawRecords();
+  }
+
+  function tableBlock(rows) {
+    const wrap = make("div", undefined, "table-scroll"), table = make("table"), head = make("thead"), body = make("tbody");
+    wrap.tabIndex = 0; wrap.setAttribute("aria-label", "Document table, scroll for all columns");
+    rows.forEach((row, i) => { const tr = make("tr"); row.forEach(v => { const cell = make(i ? "td" : "th", v); if (!i) cell.scope = "col"; tr.append(cell); }); (i ? body : head).append(tr); });
+    table.append(head, body); wrap.append(table); return wrap;
+  }
+  if (model.documents) {
+    function showDocument() {
+      const doc = model.documents[Number(el("document-choice").value)];
+      const body = el("document-body"), sections = el("document-section"); body.replaceChildren(); sections.replaceChildren();
+      doc.blocks.forEach((block, i) => {
+        if (block.kind === "table") { body.append(tableBlock(block.rows)); return; }
+        const heading = /^Heading [1-6]$/.test(block.style), quote = /Quote/.test(block.style);
+        const tag = heading ? block.style === "Heading 1" ? "h2" : "h3" : quote ? "blockquote" : "p";
+        const node = make(tag, block.text); node.id = `doc-block-${i}`; node.dataset.block = String(i); body.append(node);
+        if (heading) { const option = make("option", block.text); option.value = node.id; sections.append(option); }
+      });
+      sections.disabled = !sections.children.length;
+    }
+    el("document-choice").addEventListener("change", showDocument);
+    el("document-section").addEventListener("change", () => { const node = el(el("document-section").value); node.tabIndex = -1; node.scrollIntoView({ block: "start" }); node.focus({ preventScroll: true }); });
+    showDocument();
+  }
+  if (model.deck) {
+    function showSlide() {
+      const slide = model.deck.slides[Number(el("slide-choice").value)];
+      el("slide-heading").textContent = slide.headings.join("\n");
+      el("slide-counts").textContent = `${slide.nodes.length} text nodes · ${slide.edges.length} connected arrows`;
+      graphView(slide, el("slide-canvas"), "slide", null);
+      el("slide-transcript").replaceChildren();
+      [...slide.headings, ...slide.nodes.map(n => n.text)].forEach(t => el("slide-transcript").append(make("p", t, "slide-transcript-item")));
+    }
+    el("slide-choice").addEventListener("change", showSlide); showSlide();
+  }
+})();
+</script>
+</body>
+</html>

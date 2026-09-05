@@ -1,0 +1,12 @@
+{
+  "assertions": 142,
+  "errors": [],
+  "network_attempts": 0,
+  "file_sha256": "20ceff995886f4c52a264a3b75b1df0b3f6b464e6e0a88d743020ed79cdd7f42",
+  "scope": "Offline DOM behavior and artifact hashes; browser layout unverified",
+  "snapshot_sha256": "996bc3f1bd9ba2555bad9326a35ca2244c438e538a85d60c31cb123d3c2cb955",
+  "implementation_sha256": "bd4c35a5f03a287d06fc206d55f75f4ab5e78d8ad79293ed874baef3962fe9e3",
+  "entries": 16,
+  "unique_artifact_links": 19,
+  "filter_combinations": 28
+}

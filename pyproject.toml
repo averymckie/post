@@ -9,7 +9,7 @@ dependencies = [
   "ufal.udpipe==1.4.0.1",
   "z3-solver==5.1.0.0",
   "networkx==3.6.1",
-  "pyyaml==6.0.2",
+  "pyyaml==6.0.3",
   "clingo==5.8.2",
   "clorm==1.6.3",
   "predpatt @ git+https://github.com/hltcoe/PredPatt.git@34bc751656a0766c7ac233b077ea8511a8004876",
@@ -24,6 +24,9 @@ dev = [
 ]
 
 chain = [
+  "Markdown==3.6",
+  "mkdocs==1.6.1",
+  "csv-diff==1.2",
   "docling==2.124.0",
   "docling-core==2.93.0",
   "lxml==6.1.3",
@@ -112,6 +115,9 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/compiled_ai"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

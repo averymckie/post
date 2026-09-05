@@ -1,0 +1,34 @@
+{
+  "assertions": 5273,
+  "errors": [],
+  "network_attempts": 0,
+  "snapshots": {
+    "overview-outcomes.html": "7660ab03fc62dd61a5d22f66a8c41b5b1deeae5e700248fac8b4513c61131093",
+    "overview-gaps.html": "155c44a0586f55a5843cc65cc1b12817880c6bcef4e0217ee686eff65a70298b",
+    "overview-heatmap.html": "c68e897c12da817f41ff3a366a5f68c2faeb22a6fc8e5c1f1b8f2c929b536506",
+    "cases-flagged.html": "ecc26fc7fc3acfc5666716e0dd2ff704a7c20fc895b9d0e6e8a39370817fef43",
+    "case-10011.html": "46c5894c7514ebad986288b4b94bc4ebf96c4684ba65fa1cc283d06ed0d29356",
+    "case-10017.html": "51cdc3c94d0fd475b17596d24e601afc3b4de65120f81046482b826f051830d2",
+    "case-10621.html": "9135a3104887f5a61257526ff9ee723cb40de235f49bcf76904b8839d90aad68",
+    "paths.html": "2126eb5ac56730a348263bc4ff955b29ff32c66ed79b75574ace1f3e6c69020f",
+    "flows-activity.html": "9dcbfafeccf6178bec7d398c0d2e87dfd8a4c26ae36e9f568e603d849a0eb9f9",
+    "flows-handover.html": "791627e0192e13d6a3d2f0404ce37096d8b7413f33b903a145a026da8e767ffc"
+  },
+  "scenarios": {
+    "keyboard_tab_actions": 4,
+    "cases_inspected": 1434,
+    "facet_combinations": 96,
+    "risk_states": 3,
+    "brief_cases": [
+      "case-10011",
+      "case-10017",
+      "case-10621"
+    ],
+    "variants_inspected": 116,
+    "connections_inspected": 385
+  },
+  "file_sha256": "abffad483d2f66bc8de7c83c5cd96b43e3d0db6213432bd8a5ce50a07b796879",
+  "browser": "unverified",
+  "scope": "offline DOM and event behavior; file dialogs, browser layout, and Plotly rendering unverified",
+  "implementation_sha256": "573a86eccc40fb3fe952ccabd8527b86ba77b69706c895d1da597b26f8caaa13"
+}

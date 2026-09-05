@@ -3,6 +3,9 @@ CLAUDE.local.md
 
 # Python
 .venv/
+.venv-full/
+.venv-presentation/
+node_modules/
 __pycache__/
 *.pyc
 .mypy_cache/
@@ -12,3 +15,7 @@ __pycache__/
 dist/
 *.egg-info/
 proofs/cache/
+pytest-of-root/
+
+# Superseded versions of files replaced by a later checkpoint; kept locally only
+Superseded/

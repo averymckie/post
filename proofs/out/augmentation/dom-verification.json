@@ -1,0 +1,62 @@
+{
+  "engine": "jsdom",
+  "version": "30.0.1",
+  "scope": "offline DOM and event behavior; no browser layout or paint",
+  "files": {
+    "policy.html": {
+      "sha256": "afcc2443cedfd2d445d69dd97ff466b883f04f393b4e8a8459868839fb6dddce",
+      "initial_script_errors": 0
+    },
+    "process.html": {
+      "sha256": "a9f465b231abd8211dd1949e1a3c7eaedf0c0a0a2e10f15ae4ce5062c289aa53",
+      "initial_script_errors": 0
+    },
+    "records.html": {
+      "sha256": "fc93b9aa31850c0631b6ba1481245ed33d8542691293e83c14ac80e05386be37",
+      "initial_script_errors": 0
+    },
+    "briefing.html": {
+      "sha256": "34b5c8808bd8133f3b393636035f9d78f2dae1d9742a664255a26776d555df8e",
+      "initial_script_errors": 0
+    },
+    "slides.html": {
+      "sha256": "ac3735c7c23f1f00ce30a335d04168e13addbdc9281dc650fbe743b624a66838",
+      "initial_script_errors": 0
+    },
+    "workbench.html": {
+      "sha256": "1e53da3424a67523625af26a70b62fa7c9411b9155c5d24b59f572b78483aab0",
+      "initial_script_errors": 0
+    }
+  },
+  "snapshots": {
+    "policy.html": "c2b1f5f583b44ba69e7fe23924fe1b437a51bade68dc90affb2b424c12146ebf",
+    "process-0.html": "75ab1d357ef34fec418633d0038da41d5035ffd06d6b0fca1f11d3113659658d",
+    "process-1.html": "143f76150d9b3e2e0754f2caf3055242930d34b0c29e32f9e3bd627eb399acc5",
+    "records-0.html": "57e85e0967d5051e536b863d25defe1a7f9b8720d84aad42088ab90c5d076ef4",
+    "records-1.html": "6acbd2a7d9536ba5e621cd481ce4b4ae71bfc186d8cf305f175a5e78cc294b62",
+    "records-2.html": "cd150567d8798283ae71dd93953464d6c8032897de76ec6b09fad9c9b8d56f39",
+    "briefing-0.html": "3761204460c769fa9e3a9768d8ba416fb391c0037fcf3d2033e55141bd854abe",
+    "briefing-1.html": "61c36d48db01358e4da86ecb28face8c5b8129a6fed091ee5392a5df25239b1c",
+    "slides-0.html": "6682ebcb78a4bd115e3eadb52496933200d7f2cf0bff8ad3f81df3932ac96366"
+  },
+  "scenarios": {
+    "policy_counts": 19,
+    "invalid_inputs": 6,
+    "meetings": 8,
+    "keyboard_tab_actions": 4,
+    "graph_nodes": 42,
+    "graph_edges": 21,
+    "record_rows": 370,
+    "record_datasets": 3,
+    "document_blocks": 27,
+    "slides": 1
+  },
+  "assertions": 824,
+  "network_attempts": 0,
+  "errors": [],
+  "browser": {
+    "status": "blocked",
+    "reason": "Supported preview service unavailable; browser policy rejects local files. No browser visual or responsive test is claimed."
+  },
+  "implementation_sha256": "35ee0dadac986a6a878bb5183e81bfa5abc4ec8a09e01f815da1653ab03b5cc5"
+}

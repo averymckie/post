@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "locale": "en-US",
+  "runtime": {"llm_reasoning": "forbidden", "network": "forbidden"},
+  "cases": "proofs/out/P21/receipt-csv/deadlines.xlsx",
+  "risk": "proofs/out/P47/receipt-csv/at_risk.xlsx",
+  "risk_policy": "proofs/out/P47/receipt-csv/policy.jdm.json",
+  "calendar": "proofs/out/P58/receipt-csv/working_days_to_deadline.xlsx",
+  "groups": "proofs/out/P22/receipt-csv/by_department_and_channel.xlsx",
+  "flows": "proofs/out/P23/receipt-xes/directly_follows.xlsx",
+  "variants": "proofs/out/P36/receipt-xes/variants.xlsx",
+  "heatmap": "proofs/out/P43/receipt-csv/heatmap.xlsx",
+  "bottlenecks": "proofs/out/P46/receipt-xes/bottlenecks.xlsx",
+  "handover": "proofs/out/P62/receipt-xes/handover.xlsx",
+  "brief_cases": ["case-10011", "case-10017"],
+  "note": "Historical receipt-phase records. Outcomes and risk flags describe the recorded data, not current cases. Risk flags compare elapsed time with recorded department means; they do not establish legal deadlines or predicted outcomes."
+}

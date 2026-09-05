@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "locale": "en-US",
+  "runtime": {"llm_reasoning": "forbidden", "network": "forbidden"},
+  "theme": {
+    "ink": "#172e35",
+    "muted": "#52666d",
+    "paper": "#f5f7f5",
+    "surface": "#ffffff",
+    "accent": "#086e61",
+    "accent_soft": "#e1f1ec",
+    "border": "#cbd8d4",
+    "warning": "#8b4e12",
+    "warning_soft": "#fff2df"
+  },
+  "views": ["policy", "process", "records", "briefing", "slides"],
+  "policy": {
+    "title": "Explore the majority rule",
+    "policy": "proofs/out/P13/charter+roster+minutes/policy.jdm.json",
+    "truth": "proofs/out/P54/majority/truth_table.xlsx",
+    "meetings": "proofs/out/P13/charter+roster+minutes/decisions.xlsx",
+    "dmn": "proofs/out/P55/majority/majority.dmn",
+    "roster_note": "Recorded example: 18 voting members, from the roster retrieved September 4, 2026. Historical meeting results use that recorded roster."
+  },
+  "processes": [
+    {"id": "usc5-552-doj", "title": "FOIA procedural dependencies"},
+    {"id": "nodejs-governance", "title": "Node.js governance dependencies"}
+  ],
+  "records": [
+    {"id": "activities", "title": "Receipt activity measures", "path": "proofs/out/P12/receipt-xes+receipt-csv/measured_activities.xlsx", "labels": ["Activity", "Events", "Mean hours since previous event"], "description": "Recorded event counts and elapsed time since the previous event. These values do not measure task duration."},
+    {"id": "meetings", "title": "Recorded meeting decisions", "path": "proofs/out/P13/charter+roster+minutes/decisions.xlsx", "labels": ["Meeting", "Voting members present", "Majority reachable"], "description": "The eight meeting results recorded by the majority policy proof."},
+    {"id": "facts", "title": "Charter facts and citations", "path": "proofs/out/P16/nodejs-tsc-charter/facts.xlsx", "labels": ["Fact ID", "Predicate", "Arguments", "Sentence ID", "Cited text"], "description": "Every recorded fact, with its original identifiers and cited text."}
+  ],
+  "documents": [
+    {"id": "explanations", "title": "Policy explanations", "path": "proofs/out/P56/majority/explanations.docx"},
+    {"id": "actions", "title": "Charter required actions", "path": "proofs/out/P25/nodejs-tsc-charter/required_actions.docx"}
+  ],
+  "deck": {"title": "Meeting discussion map", "path": "proofs/out/P18/nodejs-governance+tsc-2024-01-17/deck.pptx"}
+}
