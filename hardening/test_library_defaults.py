@@ -7,6 +7,7 @@ this repository, which is the point of rule 5 of the hardening assurance.
 
 Each test names the hand-typed expectation in the frozen guard modules that it replaces.
 """
+import calendar
 import contextlib
 import csv
 import pathlib
@@ -29,6 +30,7 @@ import docx
 import duckdb
 import icalendar
 from dateutil import rrule, tz as dateutil_tz
+from dateutil.relativedelta import relativedelta
 import numpy as np
 import numpy_financial as npf
 import pyxirr
@@ -1054,3 +1056,120 @@ def test_a_missing_cash_flow_is_a_number_in_one_library_and_absent_in_the_other(
     amounts[position % len(amounts)] = float('nan')
     npt.assert_array_equal(np.isnan(npf.npv(rate, amounts)), True)
     npt.assert_array_equal(pyxirr.npv(rate, amounts) is None, True)
+
+
+# ---------------------------------------------------------------- month arithmetic, two more runtimes
+MONTH_ORACLE_RB = pathlib.Path(__file__).with_name('month_offset_oracle.rb')
+MONTH_ORACLE_PHP = pathlib.Path(__file__).with_name('month_offset_oracle.php')
+ruby_available = shutil.which('ruby') is not None
+php_binary_available = shutil.which('php') is not None
+ANCHOR_YEAR = st.integers(min_value=1901, max_value=2199)
+ANCHOR_MONTH = st.integers(min_value=1, max_value=12)
+MONTH_OFFSET = st.integers(min_value=-60, max_value=60)
+POSITIVE_MONTH_OFFSET = st.integers(min_value=1, max_value=60)
+
+
+def _month_end(year, month):
+    return datetime.date(year, month, calendar.monthrange(year, month)[1])
+
+
+def _ruby_month_shift(anchor, months):
+    completed = subprocess.run(['ruby', str(MONTH_ORACLE_RB), anchor.isoformat(), str(months)],
+                               capture_output=True, text=True, check=True)
+    return completed.stdout.strip()
+
+
+def _php_modify(anchor, modifier):
+    completed = subprocess.run(['php', str(MONTH_ORACLE_PHP), anchor.isoformat(), modifier],
+                               capture_output=True, text=True, check=True)
+    return completed.stdout.strip()
+
+
+@pytest.mark.skipif(not ruby_available, reason='the ruby runtime is required for this oracle')
+@given(ANCHOR_YEAR, ANCHOR_MONTH, MONTH_OFFSET)
+@SLOW
+def test_month_shift_agrees_between_dateutil_and_the_ruby_c_implementation(year, month, months):
+    """Ruby's Date#>> is C in the standard library, unrelated to dateutil. Its documentation states, verbatim,
+    "When the same day does not exist for the new month, the last day of that month is used instead", and its
+    implementation decrements the day until valid_civil_p accepts it; dateutil 2.9.0.post0 computes
+    day = min(calendar.monthrange(year, month)[1], self.day or other.day). Two implementations, one
+    convention. The anchor is the last day of a generated month, which is the case P183 and P185 turn on.
+    Replaces the typed date(2026, 9, 30) and date(2025, 2, 28) expiries of handoff_guards_v20.py case 183."""
+    anchor = _month_end(year, month)
+    npt.assert_array_equal(_ruby_month_shift(anchor, months),
+                           (anchor + relativedelta(months=months)).isoformat())
+
+
+@pytest.mark.skipif(not php_binary_available, reason='the php runtime is required for this oracle')
+@given(ANCHOR_YEAR, ANCHOR_MONTH, MONTH_OFFSET)
+@SLOW
+def test_month_shift_agrees_with_php_when_the_target_month_has_the_anchor_day(year, month, months):
+    """Where the anchor day exists in the target month, PHP's DateTime::modify returns the same date as
+    dateutil, so the three runtimes agree on the ordinary case. The region is characterised by dateutil's own
+    output rather than by a calendar rule typed here: dateutil keeps the day exactly when the target month is
+    long enough."""
+    anchor = _month_end(year, month)
+    by_dateutil = anchor + relativedelta(months=months)
+    assume(by_dateutil.day == anchor.day)
+    npt.assert_array_equal(_php_modify(anchor, '%+d months' % months), by_dateutil.isoformat())
+
+
+@pytest.mark.skipif(not php_binary_available, reason='the php runtime is required for this oracle')
+@given(ANCHOR_YEAR, ANCHOR_MONTH, MONTH_OFFSET)
+@SLOW
+def test_php_overflows_into_the_next_month_where_dateutil_and_ruby_clamp(year, month, months):
+    """Where the anchor day does not exist in the target month, the two conventions part. dateutil and Ruby
+    clamp to the last day of the target month; PHP counts the missing days forward into the month after,
+    which its own manual documents in an example headed "Beware when adding or subtracting months" whose
+    output is 2001-01-31 then 2001-03-03. The overflow is not an error and nothing raises, so a term or an
+    expiry computed in PHP is later than the same term computed in Python, by one to three days, and only for
+    anchors at the end of a long month. This is the anniversary date of P183 and the renewal term of P185."""
+    anchor = _month_end(year, month)
+    by_dateutil = anchor + relativedelta(months=months)
+    assume(by_dateutil.day != anchor.day)
+    by_php = _php_modify(anchor, '%+d months' % months)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(by_php, by_dateutil.isoformat())
+    npt.assert_array_equal(by_php > by_dateutil.isoformat(), True)
+
+
+@pytest.mark.skipif(not php_binary_available, reason='the php runtime is required for this oracle')
+@given(ANCHOR_YEAR, ANCHOR_MONTH)
+@SLOW
+def test_the_last_day_of_the_next_month_agrees_between_php_and_dateutil(year, month):
+    """PHP has a phrase for the operation the chains actually want, documented as setting "the day to the last
+    day of the current month", and dateutil expresses the same thing as relativedelta(months=+1, day=31),
+    where the day is clamped down to the length of the target month. Asked that question rather than for a
+    month offset, the two runtimes agree on every generated month end. The divergence above is therefore about
+    which question the chain asked, not about either calendar."""
+    anchor = _month_end(year, month)
+    npt.assert_array_equal(_php_modify(anchor, 'last day of next month'),
+                           (anchor + relativedelta(months=+1, day=31)).isoformat())
+
+
+@pytest.mark.skipif(not ruby_available, reason='the ruby runtime is required for this oracle')
+@given(ANCHOR_YEAR, ANCHOR_MONTH, POSITIVE_MONTH_OFFSET)
+@SLOW
+def test_the_renewal_term_ends_the_day_before_the_anniversary_in_both_runtimes(year, month, months):
+    """P185 renews a term by starting the day after the old end and ending one day before the anniversary of
+    that start. Both runtimes are given the anniversary and the day is removed with datetime.timedelta on the
+    Python side, so the shim does no arithmetic. Replaces the typed ('2027-09-01', '2028-08-31'),
+    ('2027-09-01', '2027-09-30') and ('2028-03-01', '2029-02-28') tuples of case 185."""
+    begins = _month_end(year, month) + datetime.timedelta(days=1)
+    ends_by_dateutil = begins + relativedelta(months=months) - datetime.timedelta(days=1)
+    ends_by_ruby = datetime.date.fromisoformat(_ruby_month_shift(begins, months)) - datetime.timedelta(days=1)
+    npt.assert_array_equal(ends_by_ruby.isoformat(), ends_by_dateutil.isoformat())
+
+
+@given(ANCHOR_YEAR, ANCHOR_MONTH, MONTH_OFFSET)
+@SLOW
+def test_pandas_shifts_months_by_the_same_clamping_rule(year, month, months):
+    """pandas is a third implementation, in Cython: shift_month in pandas/_libs/tslibs/offsets.pyx computes
+    day = min(stamp.day, days_in_month). It is corroboration rather than independent confirmation, because its
+    own docstring says the day is "determined by day_opt using relativedelta semantics" and documents the
+    default as "the same day as the input, or the last day of the month if the new month is too short". That
+    it names dateutil is the point worth recording: two of the three implementations a chain is likely to
+    reach for share a convention by design, and the third runtime does not."""
+    anchor = _month_end(year, month)
+    npt.assert_array_equal((pd.Timestamp(anchor) + pd.DateOffset(months=months)).date().isoformat(),
+                           (anchor + relativedelta(months=months)).isoformat())
