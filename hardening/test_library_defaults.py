@@ -7,14 +7,22 @@ this repository, which is the point of rule 5 of the hardening assurance.
 
 Each test names the hand-typed expectation in the frozen guard modules that it replaces.
 """
+import io
 import itertools
 import json
 from decimal import Decimal, ROUND_HALF_EVEN, ROUND_HALF_UP
 from fractions import Fraction
 
+import docx
 import igraph
 import networkx as nx
+import openpyxl
 import orjson
+import pdfplumber
+import pymupdf
+import xlsxwriter
+from docx2python import docx2python
+from python_calamine import CalamineWorkbook
 
 import nltk
 import numpy.testing as npt
@@ -192,3 +200,84 @@ def test_sorted_keys_do_not_order_rows(rows):
     handoff_guards_v21.py."""
     with pytest.raises(AssertionError):
         npt.assert_array_equal(json.dumps(rows, sort_keys=True), json.dumps(list(reversed(rows)), sort_keys=True))
+
+
+# ---------------------------------------------------------------- document round trips
+SAFE_LINE = st.text(alphabet=st.characters(min_codepoint=32, max_codepoint=126), min_size=1, max_size=40)
+
+
+def _pdf_bytes(paragraphs):
+    document = pymupdf.open()
+    page = document.new_page()
+    for index, line in enumerate(paragraphs):
+        page.insert_text((72, 100 + 20 * index), line)
+    return document.tobytes()
+
+
+def _both_extractions(data):
+    mupdf_text = pymupdf.open('pdf', data)[0].get_text()
+    with pdfplumber.open(io.BytesIO(data)) as plumbed:
+        miner_text = plumbed.pages[0].extract_text() or ''
+    return mupdf_text, miner_text
+
+
+@given(st.lists(SAFE_LINE, min_size=1, max_size=6))
+@SLOW
+def test_pdf_characters_agree_between_two_extraction_stacks(paragraphs):
+    """PyMuPDF is MuPDF; pdfplumber is pdfminer.six. The non-whitespace characters agree. Replaces the
+    typed quote strings in handoff_guards_v12.py and the P163 passage expectations."""
+    mupdf_text, miner_text = _both_extractions(_pdf_bytes(paragraphs))
+    npt.assert_array_equal(''.join(mupdf_text.split()), ''.join(miner_text.split()))
+
+
+@given(st.lists(st.text(alphabet=st.characters(min_codepoint=97, max_codepoint=122), min_size=1, max_size=6),
+                min_size=2, max_size=4))
+@SLOW
+def test_pdf_whitespace_does_not_survive_both_extractors(words):
+    """A run of spaces written into the page is preserved by PyMuPDF and collapsed by pdfplumber, and
+    PyMuPDF appends a trailing newline the other does not. A claim of literally recovered characters
+    therefore depends on which extractor ran. Hypothesis supplies the words."""
+    line = '  '.join(words)
+    mupdf_text, miner_text = _both_extractions(_pdf_bytes([line]))
+    npt.assert_array_equal(line in mupdf_text, True)
+    npt.assert_array_equal(line in miner_text, False)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(mupdf_text, miner_text)
+
+
+@given(st.lists(SAFE_LINE, min_size=1, max_size=6))
+@SLOW
+def test_docx_text_agrees_between_two_readers(paragraphs):
+    """python-docx builds an object model; docx2python parses the XML directly. Replaces the typed
+    paragraph strings in handoff_guards_v16.py and the P151 readback expectations."""
+    document = docx.Document()
+    for line in paragraphs:
+        document.add_paragraph(line)
+    buffer = io.BytesIO()
+    document.save(buffer)
+    from_docx = [p.text for p in docx.Document(io.BytesIO(buffer.getvalue())).paragraphs]
+    buffer.seek(0)
+    with docx2python(io.BytesIO(buffer.getvalue())) as parsed:
+        from_xml = [line for line in parsed.text.split('\n') if line]
+    npt.assert_array_equal([p for p in from_docx if p], from_xml)
+
+
+@given(st.lists(st.lists(st.integers(min_value=-10**6, max_value=10**6), min_size=1, max_size=4),
+                min_size=1, max_size=6))
+@SLOW
+def test_workbook_cells_agree_between_two_readers(rows):
+    """openpyxl is pure Python; python-calamine is a Rust reader. This is the claim the chains make as
+    'both workbook readers agree on N cells', now over generated rows."""
+    width = min(len(row) for row in rows)
+    rows = [row[:width] for row in rows]
+    buffer = io.BytesIO()
+    book = xlsxwriter.Workbook(buffer, {'in_memory': True})
+    sheet = book.add_worksheet('S')
+    for r, row in enumerate(rows):
+        for c, value in enumerate(row):
+            sheet.write_number(r, c, value)
+    book.close()
+    from_openpyxl = [[cell.value for cell in row]
+                     for row in openpyxl.load_workbook(io.BytesIO(buffer.getvalue())).active.iter_rows()]
+    from_calamine = CalamineWorkbook.from_filelike(io.BytesIO(buffer.getvalue())).get_sheet_by_name('S').to_python()
+    npt.assert_array_equal(from_openpyxl, [[int(v) for v in row] for row in from_calamine])
