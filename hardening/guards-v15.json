@@ -1,0 +1,172 @@
+{
+  "assertions": 108,
+  "business_actions": 0,
+  "dependency_sha256": {
+    "handoff_guards_v1.py": "2b3138b692ecfd02b76ae34bdb001f5046608bb2983d8709d6c55c0765f7c9b8"
+  },
+  "failed": 0,
+  "full_chains_executed": 0,
+  "library_versions": {
+    "XlsxWriter": "3.2.9",
+    "defusedxml": "0.7.1",
+    "duckdb": "1.5.5",
+    "matplotlib": "3.11.1",
+    "networkx": "3.6.1",
+    "numpy": "2.4.6",
+    "openpyxl": "3.1.5",
+    "pandas": "2.2.3",
+    "pytest": "9.1.1"
+  },
+  "network_calls": 0,
+  "passed": 10,
+  "results": [
+    {
+      "assertions": 10,
+      "error": null,
+      "proof": 141,
+      "result": {
+        "add_table_overwrites_the_header_row": true,
+        "declared_columns_keep_the_source_headers": true,
+        "end_date_as_width_reproduced": true,
+        "right_width_days": 2.0,
+        "wrong_width_days": 20706.0,
+        "zero_duration_milestone_draws_nothing": true
+      },
+      "status": "passed",
+      "test": "a_bar_takes_a_width_not_an_end_date"
+    },
+    {
+      "assertions": 12,
+      "error": null,
+      "proof": 142,
+      "result": {
+        "busday_count_is_half_open": true,
+        "default_roll_raises_on_a_nonworking_start": true,
+        "forward_and_backward_rolls_differ": true,
+        "inclusive_finish_needs_plus_one": true,
+        "lexicographical_sort_is_stable": true,
+        "topological_sort_depends_on_insertion_order": true
+      },
+      "status": "passed",
+      "test": "working_day_counts_are_half_open_and_offsets_can_raise"
+    },
+    {
+      "assertions": 12,
+      "error": null,
+      "proof": 143,
+      "result": {
+        "add_edge_invents_a_node_for_a_typo": true,
+        "dropped_task_days": 4,
+        "groupby_drops_null_keys_by_default": true,
+        "is_arborescence_rejects_them": true,
+        "is_dag_accepts_two_parents": true
+      },
+      "status": "passed",
+      "test": "a_rollup_over_a_null_parent_loses_the_row"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 144,
+      "result": {
+        "a_duplicated_key_is_rejected": true,
+        "inner_join_dropped_rows": 2,
+        "missing_actual_dates_retained": true,
+        "outer_join_with_indicator_names_them": true,
+        "validate_one_to_one_checks_uniqueness_only": true
+      },
+      "status": "passed",
+      "test": "a_validated_join_still_drops_what_it_cannot_match"
+    },
+    {
+      "assertions": 10,
+      "error": null,
+      "proof": 145,
+      "result": {
+        "effort_on_a_zero_day_task_is_blocked": true,
+        "exact_fraction_split_conserves_effort": true,
+        "explode_emits_a_null_row_for_an_empty_list": true,
+        "float_split_does_not": true,
+        "phantom_rows": 1
+      },
+      "status": "passed",
+      "test": "an_empty_day_list_becomes_a_phantom_day"
+    },
+    {
+      "assertions": 10,
+      "error": null,
+      "proof": 146,
+      "result": {
+        "a_task_without_an_accountable_role_is_visible": true,
+        "assigned_cells": 3,
+        "explicit_state_column_separates_them": true,
+        "pivot_rejects_duplicate_pairs": true,
+        "reindex_fills_unassigned_cells_with_null": true,
+        "unassigned_cells": 1
+      },
+      "status": "passed",
+      "test": "a_blank_matrix_cell_needs_an_explicit_state"
+    },
+    {
+      "assertions": 12,
+      "error": null,
+      "proof": 147,
+      "result": {
+        "avg_returns_double": true,
+        "empty_category_sums_to_null": true,
+        "floats_and_overprecise_decimals_are_rounded_silently": true,
+        "precision_must_be_rejected_before_insert": true,
+        "sum_of_decimal_is_exact": true
+      },
+      "status": "passed",
+      "test": "exactness_survives_the_sum_and_stops_at_the_division"
+    },
+    {
+      "assertions": 13,
+      "error": null,
+      "proof": 148,
+      "result": {
+        "a_passing_testcase_has_no_child_element": true,
+        "declared_rule_reports_passes": 2,
+        "naive_rule_reports_passes": 4,
+        "skip_and_error_are_not_passes": true,
+        "tests_executed": 5
+      },
+      "status": "passed",
+      "test": "a_pass_is_the_absence_of_a_child_element"
+    },
+    {
+      "assertions": 12,
+      "error": null,
+      "proof": 149,
+      "result": {
+        "covering_bins_reconcile_to_the_total": true,
+        "covering_total": "900.00",
+        "due_today_and_over_90_fall_outside": true,
+        "pd_cut_is_right_closed": true,
+        "right_closed_total": "600.00",
+        "unbucketed_invoices": 3
+      },
+      "status": "passed",
+      "test": "a_right_closed_bucket_drops_the_invoice_due_today"
+    },
+    {
+      "assertions": 11,
+      "error": null,
+      "proof": 150,
+      "result": {
+        "cumsum_skips_nulls_by_default": true,
+        "date_range_W_drops_the_partial_last_week": true,
+        "dropped_days": 3,
+        "exact_path_refuses_an_undeclared_day": true,
+        "resample_reconciles_to_the_day_count": true,
+        "skipna_false_propagates_the_gap": true
+      },
+      "status": "passed",
+      "test": "a_missing_day_does_not_stop_a_running_total"
+    }
+  ],
+  "scope": "Bounded authored schedule, cost and cash fixtures and reproduced library defaults; the original P141-P150 chains and their artifacts were not rerun.",
+  "source_sha256": "a6515cdb0cd9eef54f8cba68f4da2138037e4da2bc8dadaca03fa4ce6604adcd",
+  "test_cases": 10
+}
