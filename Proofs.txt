@@ -28647,3 +28647,784 @@ Result file SHA256 2bc238c9a3e4e6084be0b0185accc047fbca5645cd0616e5eb1244c48abfc
 ```
 
 Checkpoint coverage: 170 of 300 proofs carry a hardening record. Prior cumulative TXT SHA256 59a86dfcae9fc85001ab8a6d037b6b125f5c72ea945593d209431bfc13e02eb1.
+
+## Checkpoint integrity and environment for this batch
+
+Base: the TXT as committed after batch 17 (SHA256 6ff6b87dcd641dca5fd8d8a69d51e246692ea3fd5b06851c0cd94b3a254b75c1, 1973016 bytes); it is the prior cumulative TXT SHA256 recorded at the end of this batch. New pinned library: numpy-financial 1.0.0, the version the P178 and P179 chains pin. Existing pins unchanged: pandas 2.2.3, numpy 2.4.6, pandera 0.33.1, largest-remainder 0.1.0. handoff_guards_v19.py imports handoff_guards_v1.py only; v1-v18 stay byte-identical under HG07.
+
+Note on method: this module carries no handwritten implementation of an operation a library performs. Working days are a numpy business-day calendar, membership is a pandas date_range or Interval with its closure declared at the call, overlap is pandas Interval.overlaps, conservation and uniqueness are pandera schema constraints, whole-pack rounding is math.ceil over an exact Fraction, the installment split is the largest-remainder library, and every loan and appraisal figure is numpy-financial.
+
+Note on versions: the P171-P180 chains pin numpy 2.3.5, PyMuPDF 1.26.6, matplotlib 3.10.8 and Python 3.12.13, and pin numpy-financial 1.0.0, pandas 2.2.3 and python-dateutil 2.9.0.post0, which the guards run on. Findings resting on numpy are reproductions on 2.4.6; the versions actually executed are in guards-v19.json.
+
+## Online-checked function references for this hardening batch
+[HD162] pandas date_range defaults to inclusive='both', so a span written as a start and an end returns both endpoints and a contract described as start-inclusive and end-exclusive needs inclusive='left' passed explicitly; the two readings of 2026-09-01 to 2026-09-20 differ by one day. pandas Interval defaults to closed='right', which is the opposite convention, so the same two dates given to the two primitives disagree about both ends: the left-closed interval excludes the declared exclusive end and admits the start, while the default right-closed interval admits the end and drops the start. Neither default matches a start-inclusive, end-exclusive contract. Executed with pandas 2.2.3. Source: installed pandas 2.2.3 and GitHub; pandas.pydata.org blocked.
+https://github.com/pandas-dev/pandas
+[HD163] pandas Interval.overlaps answers from the closure recorded on each interval, and two intervals built from the same clock times give opposite answers depending on how each was constructed: with closed='left' a booking ending at 15:00 does not overlap one starting at 15:00, while with closed='both' the same pair does. Mixed closures are compared without any error, so a right-closed interval touching a left-closed one overlaps while a left-closed one touching a both-closed one does not. IntervalIndex.overlaps returns True for the probe interval against itself, so a self-match must be removed by the caller before a conflict count means anything. Executed with pandas 2.2.3. Source: installed pandas 2.2.3 and GitHub.
+https://github.com/pandas-dev/pandas
+[HD164] pandera's table-level unique constraint raises pandas ValueError("Columns with duplicate values are not supported in stack") when the frame carries duplicate index labels, which is exactly what pandas concat produces. The failure happens inside pandera's own failure-case reshaping, so the validator that would have named the duplicate is defeated by the duplicated index and the caller sees a reshape error naming neither column. Calling reset_index(drop=True) before validate restores the rejection, which then reports multiple_fields_uniqueness and names the offending key values. A dataframe-level pandera Check expressing a grouped-sum conservation rule works normally in the same schema. Executed with pandera 0.33.1 and pandas 2.2.3. Source: installed pandera 0.33.1 and GitHub; pandera.readthedocs.io blocked.
+https://github.com/unionai-oss/pandera
+[HD165] numpy-financial npv sums from t=0, so the first cash flow is not discounted; the installed 1.0.0 docstring states the result as the sum over t of values_t divided by (1+rate)^t beginning at t=0. Spreadsheet NPV discounts from t=1, so the same flows at the same rate differ by exactly one period of discounting: 178.669563 against 165.434780 at 8 percent, a ratio of 1.08. The convention is correct for an initial investment placed at time zero and wrong for a series whose first element is already a period-one receipt, and nothing in the return value distinguishes the two intentions. Executed with numpy-financial 1.0.0. Source: installed numpy-financial 1.0.0 _financial.py and GitHub; numpy.org blocked.
+https://github.com/numpy/numpy-financial
+[HD166] numpy-financial irr returns nan for at least three distinct conditions and does not distinguish them: cash flows with no sign change, cash flows with more than one sign change, and an all-zero series all return nan. There is no raise_exceptions parameter in 1.0.0, so nan is the only signal available. A cash-flow series containing nan does not return nan: irr passes the values to numpy.roots, whose eigenvalue routine raises numpy.linalg.LinAlgError("Array must not contain infs or NaNs"), so an unknown cash flow raises a linear-algebra error naming nothing about cash flows, while npv over the same series returns nan quietly. The sign-change count must therefore be established before the call, not read from the result. Executed with numpy-financial 1.0.0 and numpy 2.4.6. Source: installed numpy-financial 1.0.0 and GitHub.
+https://github.com/numpy/numpy-financial
+[HD167] numpy-financial pmt signs a payment negative by the stated convention that a negative value is cash out, and ipmt and ppmt follow it, summing to pmt for every period in the term. Both accept a period outside the term without error: period 13 of a twelve-period loan returns negative zero and period 0 returns a nonzero interest figure, so an out-of-range index yields a number rather than a signal. Every one of these functions returns a zero-dimensional numpy array even for a scalar call, so the result has no __round__ and Python's round raises TypeError until it is converted with float. Executed with numpy-financial 1.0.0. Source: installed numpy-financial 1.0.0 and GitHub.
+https://github.com/numpy/numpy-financial
+
+## Hardening batch: P171-P180
+
+### HARDENING P171 -- The calendar decides the slots, and the groupby decides who is counted
+
+Original proof: P171  recorded leave and approval states -> working-day balances -> leave calendar
+Source location: frozen master lines 6832-6872; original section SHA256 bb257fc1a429aba90b75717fb207c2857eff74b15ad663a245c041e5a263cfae.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it. The chain expands inclusive leave dates into working half-day slots with a numpy business-day calendar, which is the right primitive and carries the holiday and weekend rule correctly. Two obligations sit beside it: busday_count is half-open, so an inclusive leave request is one working day short unless the end is advanced, and the pandas groupby that aggregates recorded use drops any row whose employee key is null, so an unattributed leave day leaves the totals without appearing anywhere.
+Handoff: recorded leave dates and approval states -> working half-day slots -> per-employee balances
+Failure path: The half-open count understates by exactly one day for every inclusive request, and the understatement is uniform, so the balances stay internally consistent and reconcile against each other while every one of them is short. The null-key case removes a day from the aggregate entirely: the per-employee totals sum to less than the recorded days and nothing in the grouped result records the difference, so a balance check that compares employees against each other passes while the ledger does not reconcile to its own source rows.
+Required repair: Advance the end date by one day before counting an inclusive span and assert the inclusive count exceeds the half-open count by exactly one; validate the employee key against the declared employee set before aggregating, so an unattributed row is rejected rather than dropped; and assert the grouped total against the source total in the same unit.
+Function bridge: numpy.busdaycalendar with the declared weekmask and holidays; numpy.is_busday for slot membership; numpy.busday_count with an explicit inclusive adjustment; pandas.DataFrame.groupby with the key validated beforehand
+Positive acceptance: September 2026 yields 21 working days with the declared holiday and both weekend days excluded; the inclusive count is exactly one more than the half-open count; 21 working days give 42 half-day slots in AM and PM order, an even number by construction.
+Adverse acceptance: busday_count over the same span returns 20 against 21 (reproduced); the declared September 7 holiday and September 5 Saturday are both absent from the working dates; the grouped total with the default dropna is 4.00 DAY against a source total of 5.00 DAY, and the unattributed day appears only when dropna=False is passed (reproduced).
+Evidence and limit: guards-v19 case 171 on one authored month, one authored holiday and three authored leave rows. The recorded eight requests, 22 calendar slots, 3.50 DAY recorded usage and the per-employee balances were not rerun.
+References: HD129 HD131
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P172 -- Both membership primitives default against the declared contract
+
+Original proof: P172  dated workforce assignments -> headcount and FTE gaps -> staffing plan
+Source location: frozen master lines 6873-6914; original section SHA256 6606192382878e9e4c10eb8398ea9d558ff623af3b6d7e4d9b91339242fe5dfa.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: the chain declares start-inclusive and end-exclusive membership, and neither cited primitive defaults to it. pandas date_range defaults to inclusive='both' and returns the declared end date as a member; pandas Interval defaults to closed='right', the opposite convention, which admits the end and drops the start. The two defaults disagree with the contract at different ends.
+Handoff: dated assignment intervals -> daily membership -> headcount, FTE and snapshot rows
+Failure path: The chain's recorded behaviour is that Employee B leaves the count on the explicit September 18 exclusive end date. Under the date_range default the same employee is still counted on the 18th, adding one employee-day to that department and shifting the average headcount, with every downstream figure still consistent because the extra day is present everywhere. Under the Interval default the error moves to the other end and the employee is absent on the start date instead. Both produce a plausible staffing plan and neither raises.
+Required repair: Pass inclusive='left' to every date_range that enumerates a membership span, and construct every assignment interval with closed='left' explicitly; assert the declared end date is not a member and the declared start date is, at the point the interval is built, rather than relying on the primitive's default.
+Function bridge: pandas.date_range with an explicit inclusive argument; pandas.Interval with an explicit closed argument; membership tested with the containment operator on the constructed interval
+Positive acceptance: The left-inclusive range returns 19 days ending September 19 for a September 1 to September 20 span; the left-closed interval contains September 17 and the declared start and excludes the September 18 end date.
+Adverse acceptance: The default date_range returns 20 days and includes September 20 (reproduced); pandas Interval reports its default closure as 'right' (reproduced); the right-closed interval contains the September 18 end and excludes the September 1 start, so the two closures disagree about both endpoints of the same declared span.
+Evidence and limit: guards-v19 case 172 on one authored twenty-day span and one authored assignment interval. The recorded six assignments, thirty daily rows, 48 employee-days and 2.40 average headcount were not rerun.
+References: HD162
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P173 -- The offset crosses the holiday weekend, and refuses to start on it
+
+Original proof: P173  staffing membership and onboarding policy -> dated tasks -> reusable Word checklists
+Source location: frozen master lines 6915-6957; original section SHA256 4d06828806f60b4a44ecbe42b00aae913f7e9ed8c5158f07c3e71206f8da43a3.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it. The recorded due dates are correct: three working days before September 10 is September 4, crossing both the weekend and the September 7 holiday, and the equivalent offset from September 22 is September 17. The obligation is the anchor. numpy busday_offset defaults to roll='raise' and raises when the anchor itself is not a working day, and the two rolling directions from the September 7 holiday land four calendar days apart, so a task anchored to a non-working start date either fails or silently moves depending on an argument the chain's interface text does not name.
+Handoff: declared start dates and template offsets -> working-day due dates -> bound Word checklists
+Failure path: Every recorded start date in this fixture is a working day, so the default never fires and the gap is invisible in this run. A start date on a weekend or a holiday, which a planned start easily is, either raises a ValueError from inside the offset call or, if a roll is supplied without being recorded, produces a due date up to four days from the one a reader would compute by hand. Neither outcome is distinguishable from the interface text.
+Required repair: Declare the roll direction explicitly at every offset call and record it beside the due date; assert the anchor is a working day before offsetting, or Blocked the task when it is not; and state the direction in the rendered checklist so a reader can reproduce the date.
+Function bridge: numpy.busday_offset with an explicit roll argument over the declared busdaycalendar; numpy.is_busday as the anchor precondition
+Positive acceptance: Three working days before September 10 is September 4 and before September 22 is September 17, reproducing the recorded dates; three working days after September 4 returns September 10, so the offset round-trips; a zero offset from a working day returns that day.
+Adverse acceptance: The default roll='raise' raises ValueError on the September 7 holiday anchor (reproduced); roll='forward' gives September 8 and roll='backward' gives September 4 from the same anchor, four calendar days apart (reproduced).
+Evidence and limit: guards-v19 case 173 on one authored calendar and four authored anchors. The recorded nine onboarding tasks, the two checklists and the docxtpl binding were not rerun; the template-escaping obligation for this chain is the one already recorded for P151.
+References: HD129 HD136
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P174 -- An unknown shortfall is not a zero request
+
+Original proof: P174  material shortfalls -> purchase requisition -> supplier-specific quote requests
+Source location: frozen master lines 6958-7002; original section SHA256 8fdb41345ef5f4a5ed8d357e863f7a45d1e416384795b9ac1d66f19f1d3ef946.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it. The chain records that an unknown shortfall becomes an explicit exception rather than a zero request, which is the correct contract and the one this record confirms. The obligation is that the three states must stay three: a known positive shortfall, a known zero, and an unknown. Any filter that tests a quantity for truth or for being greater than zero collapses the unknown into the zero case, and both then read as "nothing to order".
+Handoff: prior material requirements -> known positive shortfalls -> requisition lines and RFQs
+Failure path: A requisition that omits an item because its shortfall is unknown is indistinguishable, in the document it produces, from one that omits the item because the shortfall is genuinely zero. P160's own recorded output contains exactly this case: a missing cable stock record leaves the on-hand and net required quantities unknown while gross demand stays at eight. Ordering nothing because the number is missing is a different decision from ordering nothing because the number is zero, and the RFQ carries no trace of which one occurred.
+Required repair: Carry the three states as distinct labels through the requisition rather than as a quantity that may be null; assert that every input row appears in exactly one of the three states and that their counts sum to the input count; and render the unknown state on the requisition document rather than omitting the line.
+Function bridge: an explicit three-state classification over the prior requirements output, with the state carried as data; the requested quantity left null rather than defaulted
+Positive acceptance: Four authored rows produce two requested lines for six cables and one desk, one zero-shortfall line for chairs and one unknown line for monitors; the requested quantities are 6 and 1; the three state counts sum to the four input rows.
+Adverse acceptance: The unknown line's requested quantity is null and not zero, and comparing it to the zero-shortfall line's quantity shows they are not equal (reproduced), so a truth test or a greater-than-zero filter would merge them.
+Evidence and limit: guards-v19 case 174 on four authored requirement rows. The recorded three request lines, three suppliers, nine RFQ lines and the Word rendering were not rerun.
+References: HD131
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P175 -- The pack size decides the cost, not the unit count
+
+Original proof: P175  supplier responses and prior RFQs -> pack-aware costs -> dated bid comparison
+Source location: frozen master lines 7003-7041; original section SHA256 96dee957ced1c488ffd4554b077dc2091838182370feb2df14c5e12d7551c5a3.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it. The recorded pack arithmetic is right: six cables against a five-pack offer require two packs and ten units, leaving four surplus, and the cable cost is the pack cost rather than six times an assumed unit price. The obligation is that the ceiling be exact and that the eligibility boundary be declared. An expiry falling on the order date is not an expiry, and the chain records that boundary, so the comparison must be strict.
+Handoff: quoted pack prices and prior RFQ positions -> whole-pack quantities and converted costs -> ordered eligible comparison
+Failure path: A ceiling computed in floating point rather than over an exact rational puts the boundary case on the wrong side without any error: a required quantity that is an exact multiple of the pack size can round up to an extra pack, adding a whole pack of cost to a comparison that then orders the suppliers differently. The expiry boundary fails the same way in the other direction, retiring a quote that was valid on the order date and removing the only eligible bid from the comparison.
+Required repair: Compute whole packs as the ceiling of an exact rational rather than by float division or by an integer-division idiom; assert that an exact multiple of the pack size yields no surplus; and compare the expiry to the order date strictly, asserting that equality is not an expiry.
+Function bridge: math.ceil over fractions.Fraction for the whole-pack count; decimal.Decimal.quantize with ROUND_HALF_UP for the currency conversion; pandas.Timestamp comparison for the expiry boundary
+Positive acceptance: Six units against a five-pack give two packs, ten units and four surplus, reproducing the recorded figures; ten units give two packs and no surplus; one unit still requires a whole pack; a pack size of one is a pass-through; 220.00 at the declared 1.155 rate converts to 254.10; a declared half-cent rounds up under ROUND_HALF_UP.
+Adverse acceptance: A non-positive pack size is Blocked; the quote expiring on September 23 is expired at a September 24 order date and is not expired at a September 23 one (reproduced); a quote missing its freight and a quote missing a required line are both incomplete rather than eligible, leaving exactly one eligible bid.
+Evidence and limit: guards-v19 case 175 on three authored quotes and four authored pack cases. The recorded eight quote lines, nine positions, the 459.00 USD complete cost and the workbook readback were not rerun.
+References: HD142
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P176 -- The residual belongs to the apportionment library
+
+Original proof: P176  explicit quote selection -> draft purchase order -> proposed installment schedule
+Source location: frozen master lines 7042-7087; original section SHA256 85681835d993b480175d67108faca3bc8a16175cbb1f3f87243448bac46445c7.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it. The chain allocates declared pretax fractions with cent rounding and a final residual adjustment. That is the largest-remainder method, and the execution contract requires it to be a library call rather than a rounding rule written beside the schedule. The recorded case does not exercise it: 459.00 USD over two equal halves is 229.50 twice with no residual at all, so the adjustment the chain names is never reached by its own fixture.
+Handoff: draft order pretax total and declared milestone fractions -> proposed installment cents -> schedule table
+Failure path: A residual rule that is never exercised by the fixture is not evidence about the residual rule. The chain records checking exact conservation for a one-cent total, which is the right test, but between that and the 459.00 USD case there is no scenario where the fractions produce a genuine remainder to place. A local rule that places the residual on the wrong milestone, or that fails to place it at all, would pass both recorded cases and lose a cent on any total whose fractions do not divide evenly.
+Required repair: Call a researched largest-remainder implementation for the split and assert conservation against the declared total on every scenario; validate that the declared fractions sum to exactly one using exact rationals rather than floats; and Blocked a negative total, since neither researched implementation conserves one.
+Function bridge: largest_remainder.LargestRemainder.round for the cent split; fractions.Fraction for the declared fraction sum; an explicit Blocked outcome for fractions that miss one and for a negative total
+Positive acceptance: 459.00 USD over two halves gives 229.50 twice and conserves the total exactly; a one-cent total over two halves gives one cent and zero and conserves; 100.01 USD over three thirds gives 3334, 3334 and 3333 cents and conserves, which is the residual case the fixture does not reach.
+Adverse acceptance: Fractions of one half and one third do not sum to one and are Blocked before any allocation (reproduced through exact rationals, where a float sum would not be reliably detectable); a negative total is Blocked, consistent with the finding recorded for P169 that neither researched implementation conserves a credit.
+Evidence and limit: guards-v19 case 176 on four authored totals and three authored fraction sets. The recorded draft order, its 444.00 USD goods and 15.00 USD freight, the two September milestone dates and the Word rendering were not rerun.
+References: HD151
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P177 -- The duplicate defeats the check that would have named it
+
+Original proof: P177  stock movement records -> reconciled package manifests -> packing slips
+Source location: frozen master lines 7088-7134; original section SHA256 68743856a16b3a54f7eac59b481a50e5b3802964da6b50c6b40b217350005e49.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: expressing the chain's conservation and duplicate-package contracts as a pandera schema works for conservation and breaks for duplicates. A table-level unique constraint raises pandas ValueError("Columns with duplicate values are not supported in stack") when the frame carries duplicate index labels, which is exactly what pandas concat produces. The failure occurs inside pandera's own failure-case reshaping, so the validator that would have named the duplicated package is defeated by the duplicated index.
+Handoff: prior stock movements and declared package allocations -> conserved manifest rows -> packing slips and summary
+Failure path: The chain rejects duplicate packages among eleven invalid allocations. Built the natural way, by concatenating allocation frames from more than one source, the frame carries repeated index labels and the uniqueness check raises a reshape error that names neither the movement nor the package. A caller that catches broad exceptions and reports a validation failure loses the identity of the duplicate; a caller that catches only the schema error type does not catch this at all and the exception escapes as a pandas internal error.
+Required repair: Call reset_index(drop=True) before validating any frame that was concatenated or filtered, and assert the index is unique as a precondition; keep the conservation rule as a dataframe-level check, which is unaffected; and assert that the rejection names the offending key rather than only that a rejection occurred.
+Function bridge: pandera.DataFrameSchema with a dataframe-level Check for grouped-sum conservation and a composite unique constraint for package identity; pandas.DataFrame.reset_index as the precondition; pandas.DataFrame.groupby for the per-movement sums
+Positive acceptance: Six conserving allocation rows across three packages validate and total 21 EA; over-allocation, under-allocation, an omitted movement and an unknown movement identifier are each Blocked by the schema.
+Adverse acceptance: The duplicated-package frame produced by concat raises pandas ValueError rather than a schema rejection (reproduced); the same frame after reset_index is Blocked and the message names multiple_fields_uniqueness (reproduced), so the index, not the data, decided whether the contract was enforced.
+Evidence and limit: guards-v19 case 177 on five authored movements and six authored allocation rows. The recorded eight allocation rows, three packages, 21 EA total, the transfer-leg join and the Word slips were not rerun.
+References: HD164
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P178 -- Two defensible total-interest figures, two cents apart
+
+Original proof: P178  prior purchase amount and financing assumptions -> amortization -> extra-payment scenarios
+Source location: frozen master lines 7135-7177; original section SHA256 5f248b6b6d34eeb559197bfb6575f530b7ed378190a5ef1aeaa44fb789b8e61d.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP, and it confirms why the chain separates its two calculations. Twelve cent-rounded payments of 40.78 USD total 489.36 USD and imply 30.36 USD of interest, which is the recorded figure. Summing numpy-financial's own unrounded ipmt over the same twelve periods gives 30.38 USD. Both are defensible answers to "total interest" and they differ by two cents. Separately, ipmt and ppmt accept periods outside the term and return numbers for them, and every one of these functions returns a zero-dimensional array rather than a float.
+Handoff: draft purchase amount and financing assumptions -> payment, interest and principal vectors -> cent-rounded schedule
+Failure path: The two figures come from the same library and the same inputs and differ only in where the rounding happens, so a schedule that reports one and a summary that reports the other are both correct and disagree on the page. The out-of-range period case is worse: a loop written over the wrong range, or an off-by-one in the period index, returns negative zero for period 13 and a nonzero interest figure for period 0 rather than raising, so the schedule gains or loses a row without any signal. The zero-dimensional return type means Python's round raises TypeError on a value that prints like a float.
+Required repair: State which of the two interest figures the schedule reports and assert the other alongside it, so the two-cent gap is recorded rather than discovered; assert every period index lies within one to nper before calling ipmt or ppmt; and convert every numpy-financial result with float before any Decimal or rounding operation.
+Function bridge: numpy_financial.pmt, ipmt and ppmt over the declared rate and term; decimal.Decimal.quantize with ROUND_HALF_UP for the cent rounding; float conversion at the library boundary
+Positive acceptance: The payment quantizes to 40.78 USD and twelve of them total 489.36 USD, reproducing the recorded figures; ipmt and ppmt sum to pmt at periods 1, 6 and 12; the zero-rate scenario pays 38.25 USD for twelve periods and implies zero interest; the payment is signed negative by the library's cash-out convention.
+Adverse acceptance: The library's unrounded interest is 30.38 USD against the schedule's 30.36 USD, a two-cent gap (reproduced); period 13 of a twelve-period loan returns negative zero and period 0 returns -4.948333, both without error (reproduced); a scalar ipmt call returns a zero-dimensional ndarray and Python's round raises TypeError on it (reproduced).
+Evidence and limit: guards-v19 case 178 on one authored principal, two authored rates and one authored term. The recorded three scenarios, 35 cent-rounded rows, the extra-payment scenario and the balance chart were not rerun.
+References: HD167
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P179 -- One nan carries three reasons, and a fourth case raises
+
+Original proof: P179  prior draft cost and annual cash assumptions -> investment appraisal -> sensitivity analysis
+Source location: frozen master lines 7178-7221; original section SHA256 a5822e53988cfdb65e93b274bb53806b529759ff54dfa7d17467ebbb7017c099.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: numpy-financial irr returns nan for cash flows with no sign change, for cash flows with more than one sign change and for an all-zero series, without distinguishing them, and version 1.0.0 has no raise_exceptions parameter to make it signal otherwise. A series containing nan does not return nan at all: irr passes the values to numpy.roots, whose eigenvalue routine raises LinAlgError, while npv over the same series returns nan quietly. Separately, npv leaves the first flow undiscounted, which is correct for a time-zero investment and differs from the spreadsheet convention by exactly one period of discounting.
+Handoff: prior draft cost and annual cash assumptions -> NPV, ROI, IRR and payback -> sensitivity table
+Failure path: The chain withholds IRR for the repair scenario's nonconventional sign pattern, which is the correct outcome, and the return value cannot be what establishes it: the same nan comes back from the unknown scenario's missing receipts and from a degenerate all-zero series. Reading nan as "nonconventional" mislabels the other two. The missing-flow case does not even reach nan, so an appraisal table that handles nan for every metric still fails on IRR with a linear-algebra error naming nothing about cash flows. And the npv convention is right for this fixture and silently wrong for any series whose first element is already a period-one receipt.
+Required repair: Count sign changes before calling irr and Blocked on anything other than one, so the reason is established rather than inferred; reject a series containing an unknown value before the call rather than after; and assert the npv result against an independent discounted sum that names its first period explicitly, so the time-zero convention is recorded rather than assumed.
+Function bridge: numpy_financial.npv with an independent discounted-sum check at a declared first period; numpy_financial.irr guarded by a numpy sign-change count; explicit Blocked outcomes for a nonconventional pattern and for an unknown flow
+Positive acceptance: The base scenario's NPV at 8 percent is 178.669563, quantizing to the recorded 178.67 USD, and agrees with an independent sum discounted from period zero; its sign-change count is one and its IRR is 0.269913, reproducing the recorded approximate 26.9913 percent.
+Adverse acceptance: The spreadsheet convention over the same flows gives 165.434780, exactly 1.08 times smaller at an 8 percent rate (reproduced); a two-sign-change series, a no-sign-change series and an all-zero series all return nan (reproduced); a series containing nan raises numpy.linalg.LinAlgError from irr while npv returns nan for the same series (reproduced); all three are Blocked by the guarded path with distinct reasons.
+Evidence and limit: guards-v19 case 179 on one authored four-period series and three authored degenerate series. The recorded four scenarios, sixteen cash-flow rows, sixteen sensitivity positions and the payback calculations were not rerun.
+References: HD165 HD166
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P180 -- Whether two bookings touch depends on how each was built
+
+Original proof: P180  leave and workforce outputs -> proposed roster checks -> shift coverage calendar
+Source location: frozen master lines 7222-7264; original section SHA256 c310114cc364c9c48de0e0577972fdffa7b2ca919eac4b148dbebe31f05c2030.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: pandas Interval.overlaps answers from the closure recorded on each interval, so two bookings built from the same clock times give opposite answers depending on how each was constructed. With closed='left' a booking ending at 15:00 does not overlap one starting at 15:00, which is the recorded contract; with closed='both' the same pair does. Mixed closures compare without any error. And IntervalIndex.overlaps returns True for the probe interval against itself.
+Handoff: proposed shift positions and prior leave slots -> overlap detection -> coverage gaps and warnings
+Failure path: The chain records that a booking ending exactly when another starts is not an overlap, and that removing the September 23 overlap raises coverage from six to seven. That result holds only while every interval in the comparison carries the same declared closure. An interval constructed elsewhere with the pandas default, which is right-closed, compares against a left-closed one and reports an overlap on a touching pair, converting a legitimate back-to-back roster into a conflict, with no error to attribute it to. The self-match is the other direction: an unguarded conflict count reports every booking as conflicting with itself, so the count is uniformly one too high and still looks like data.
+Required repair: Construct every interval with the closure declared at the call and assert the closure on each interval before comparing; reject a comparison between intervals whose closures differ, since the primitive will answer it silently; and exclude the probe interval from an IntervalIndex overlap count explicitly.
+Function bridge: pandas.Interval with an explicit closed argument and tz-aware UTC bounds; pandas.Interval.overlaps for the pairwise test; pandas.IntervalIndex.overlaps with the self-match removed by the caller
+Positive acceptance: The desk and training bookings sharing 13:00 to 15:00 overlap; a booking ending at 15:00 does not overlap one starting at 15:00 under the declared left closure, reproducing the recorded contract; removing the overlapping booking clears the conflict count to zero.
+Adverse acceptance: The same two clock times under closed='both' do overlap, so the recorded contract is a property of the closure and not of the times (reproduced); a right-closed interval touching a left-closed one overlaps while a left-closed one touching a both-closed one does not, both without error (reproduced); IntervalIndex.overlaps counts the probe against itself, giving two conflicts where one exists until the self-match is removed (reproduced).
+Evidence and limit: guards-v19 case 180 on four authored UTC bookings. The recorded ten positions, six passing checks, four gaps, three pending warnings and the weekly calendar were not rerun.
+References: HD163
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+## Embedded runnable local guard module: handoff_guards_v19.py
+
+SHA256 aeddd95c9dfbb8cf69ac10f7a785e15cb380e4eaf671c892f244de054a6bb47d; bytes 24742. Run: python handoff_guards_v19.py --report guards-v19.json, with handoff_guards_v1.py beside it. Ten cases, 120 assertions, no network and no model client. Working days are a numpy business-day calendar, membership and overlap are pandas Interval operations with declared closures, conservation and uniqueness are pandera constraints, the installment split is largest_remainder, and every loan and appraisal figure is numpy_financial.
+
+```python
+"""Eighteenth bounded adapter suite: P171-P180, leave balances, workforce membership, onboarding dates, requisitions,
+pack-aware quotes, installment allocation, packing conservation, amortization, appraisal and roster overlap.
+Requires handoff_guards_v1.py from this TXT.
+
+Every meaningful operation below is a library primitive call. Working days are a numpy business-day calendar,
+membership is a pandas date_range or Interval with its closure declared, overlap is pandas Interval.overlaps,
+conservation and uniqueness are pandera schema constraints, whole-pack rounding is math.ceil over an exact Fraction,
+the installment split is largest_remainder, and the loan and appraisal figures are numpy_financial. Local code
+declares fixtures and policies and turns a primitive result into a Blocked outcome; it does not reimplement an
+operation a library performs. All runtime inputs are authored fixtures. No model client and no network.
+Run: python handoff_guards_v19.py --report report.json
+"""
+from __future__ import annotations
+import argparse, hashlib, importlib.metadata, io, json, logging, math, traceback, warnings
+from decimal import Decimal, ROUND_HALF_UP
+from fractions import Fraction
+from pathlib import Path
+import numpy as np
+import numpy_financial as npf
+import pandas as pd
+import pandera.pandas as pandera
+from largest_remainder import LargestRemainder
+import handoff_guards_v1 as g
+warnings.simplefilter('ignore'); logging.disable(logging.WARNING)
+
+CENT = Decimal('0.01')
+HOLIDAYS = ['2026-09-07']
+CALENDAR = np.busdaycalendar(weekmask='Mon Tue Wed Thu Fri', holidays=HOLIDAYS)
+
+
+def cents(value) -> Decimal:
+    return Decimal(str(value)).quantize(CENT, rounding=ROUND_HALF_UP)
+
+
+# ---------------------------------------------------------------- P171
+def working_days(start: str, finish: str, *, inclusive: bool) -> int:
+    end = np.datetime64(finish) + np.timedelta64(1, 'D') if inclusive else np.datetime64(finish)
+    return int(np.busday_count(np.datetime64(start), end, busdaycal=CALENDAR))
+
+
+def working_dates(start: str, finish: str) -> list[str]:
+    span = np.arange(np.datetime64(start), np.datetime64(finish) + np.timedelta64(1, 'D'), dtype='datetime64[D]')
+    return [str(d) for d in span[np.is_busday(span, busdaycal=CALENDAR)]]
+
+
+def half_day_slots(dates: list[str]) -> list[tuple[str, str]]:
+    return [(day, half) for day in dates for half in ('AM', 'PM')]
+
+
+def day_totals(rows: list[dict], *, dropna: bool) -> dict:
+    frame = pd.DataFrame(rows)
+    return {k: v for k, v in frame.groupby('employee', dropna=dropna)['days'].sum().items()}
+
+
+# ---------------------------------------------------------------- P172
+def membership_dates(start: str, finish: str, *, inclusive: str) -> list[str]:
+    return [str(d.date()) for d in pd.date_range(start, finish, freq='D', inclusive=inclusive)]
+
+
+def assignment_interval(start: str, finish: str, *, closed: str) -> pd.Interval:
+    return pd.Interval(pd.Timestamp(start), pd.Timestamp(finish), closed=closed)
+
+
+# ---------------------------------------------------------------- P173
+def offset_working_days(anchor: str, days: int, *, roll: str) -> str:
+    return str(np.busday_offset(np.datetime64(anchor), days, roll=roll, busdaycal=CALENDAR))
+
+
+# ---------------------------------------------------------------- P174
+def requested_lines(rows: list[dict]) -> list[dict]:
+    """A null shortfall stays an exception; only a known positive quantity becomes a request line."""
+    out = []
+    for row in rows:
+        if row['net'] is None:
+            out.append({'item': row['item'], 'requested': None, 'state': 'unknown shortfall'})
+        elif row['net'] > 0:
+            out.append({'item': row['item'], 'requested': row['net'], 'state': 'requested'})
+        else:
+            out.append({'item': row['item'], 'requested': 0, 'state': 'no shortfall'})
+    return out
+
+
+# ---------------------------------------------------------------- P175
+def whole_packs(required: int, pack_size: int) -> tuple[int, int, int]:
+    """Exact rational ceiling; no integer-division rounding rule written here."""
+    if pack_size <= 0:
+        raise g.Blocked('pack size must be positive')
+    packs = math.ceil(Fraction(required, pack_size))
+    units = packs * pack_size
+    return packs, units, units - required
+
+
+def converted(amount: str, rate: str) -> Decimal:
+    return cents(Decimal(amount) * Decimal(rate))
+
+
+def eligible(quote: dict, *, order_date: str) -> str:
+    expiry = pd.Timestamp(quote['expires'])
+    if expiry < pd.Timestamp(order_date):
+        return 'expired'
+    if quote['freight'] is None or quote['lines_quoted'] != quote['lines_required']:
+        return 'incomplete'
+    return 'eligible'
+
+
+# ---------------------------------------------------------------- P176
+def installments(total_cents: int, fractions: list[str]) -> list[int]:
+    """The residual adjustment is the largest-remainder library's, not a local rule."""
+    weights = [Fraction(f) for f in fractions]
+    if sum(weights) != 1:
+        raise g.Blocked('declared fractions do not total one')
+    if total_cents < 0:
+        raise g.Blocked('no researched primitive conserves a negative total')
+    return LargestRemainder.round([float(w) for w in weights], total=total_cents)
+
+
+# ---------------------------------------------------------------- P177
+def manifest_schema(events: dict) -> pandera.DataFrameSchema:
+    declared = pd.Series(events, dtype='int64').sort_index()
+    return pandera.DataFrameSchema(
+        {'movement': pandera.Column(str, pandera.Check.isin(list(events))),
+         'package': pandera.Column(str),
+         'qty': pandera.Column(int, pandera.Check.gt(0))},
+        checks=pandera.Check(
+            lambda df: df.groupby('movement')['qty'].sum().reindex(declared.index).fillna(-1).astype('int64').equals(declared),
+            error='allocations do not conserve every declared movement quantity'),
+        unique=['movement', 'package'])
+
+
+def validated_manifest(frame: pd.DataFrame, events: dict, *, reset_index: bool) -> pd.DataFrame:
+    checked = frame.reset_index(drop=True) if reset_index else frame
+    try:
+        return manifest_schema(events).validate(checked, lazy=True)
+    except pandera.errors.SchemaErrors as failure:
+        raise g.Blocked('manifest rejected: %s'
+                        % sorted({str(c) for c in failure.failure_cases['check']}))
+
+
+# ---------------------------------------------------------------- P178
+def payment(principal: str, annual_rate: str, periods: int) -> Decimal:
+    rate = float(Decimal(annual_rate) / 12)
+    return cents(-npf.pmt(rate, periods, float(Decimal(principal))))
+
+
+def interest_from_schedule(principal: str, annual_rate: str, periods: int) -> Decimal:
+    return payment(principal, annual_rate, periods) * periods - Decimal(principal)
+
+
+def interest_from_library(principal: str, annual_rate: str, periods: int) -> Decimal:
+    rate = float(Decimal(annual_rate) / 12)
+    return cents(-sum(npf.ipmt(rate, k, periods, float(Decimal(principal))) for k in range(1, periods + 1)))
+
+
+def components(principal: str, annual_rate: str, periods: int, period: int) -> tuple[float, float]:
+    rate = float(Decimal(annual_rate) / 12)
+    return (npf.ipmt(rate, period, periods, float(Decimal(principal))),
+            npf.ppmt(rate, period, periods, float(Decimal(principal))))
+
+
+# ---------------------------------------------------------------- P179
+def net_present_value(rate: float, flows: list[float]) -> float:
+    return float(npf.npv(rate, flows))
+
+
+def discounted_from(rate: float, flows: list[float], *, first_period: int) -> float:
+    return float(sum(v / (1 + rate) ** (t + first_period) for t, v in enumerate(flows)))
+
+
+def sign_changes(flows: list[float]) -> int:
+    nonzero = [v for v in flows if v != 0]
+    return int(np.sum(np.diff(np.sign(nonzero)) != 0))
+
+
+def internal_rate(flows: list[float]) -> float:
+    if sign_changes(flows) != 1:
+        raise g.Blocked('internal rate is defined here only for one sign change, found %d' % sign_changes(flows))
+    if any(math.isnan(v) for v in flows):
+        raise g.Blocked('cash flows contain an unknown value')
+    return float(npf.irr(flows))
+
+
+# ---------------------------------------------------------------- P180
+def booking(start: str, finish: str, *, closed: str) -> pd.Interval:
+    return pd.Interval(pd.Timestamp(start, tz='UTC'), pd.Timestamp(finish, tz='UTC'), closed=closed)
+
+
+def conflicts(bookings: list[pd.Interval], probe: pd.Interval, *, drop_self: bool) -> int:
+    index = pd.IntervalIndex(bookings)
+    hits = index.overlaps(probe)
+    if drop_self:
+        hits = [h and iv != probe for h, iv in zip(hits, bookings)]
+    return int(sum(bool(h) for h in hits))
+
+
+C = []
+def case(i):
+    def reg(fn): C.append((i, fn)); return fn
+    return reg
+
+
+@case(171)
+def working_slots_come_from_the_calendar_not_from_a_span():
+    september = working_dates('2026-09-01', '2026-09-30')
+    g.equal(len(september), 21)
+    g.equal('2026-09-07' in september, False)  # the declared holiday
+    g.equal('2026-09-05' in september, False)  # a Saturday
+    g.equal(bool(np.is_busday(np.datetime64('2026-09-08'), busdaycal=CALENDAR)), True)
+    g.equal(working_days('2026-09-01', '2026-09-30', inclusive=False), 20)
+    g.equal(working_days('2026-09-01', '2026-09-30', inclusive=True), 21)
+    g.equal(working_days('2026-09-01', '2026-09-30', inclusive=True)
+            - working_days('2026-09-01', '2026-09-30', inclusive=False), 1)
+    g.equal(len(half_day_slots(september)), 42)
+    g.equal(half_day_slots(september)[:2], [('2026-09-01', 'AM'), ('2026-09-01', 'PM')])
+    g.equal(len(half_day_slots(september)) % 2, 0)
+    rows = [{'employee': 'A', 'days': Decimal('3.50')}, {'employee': 'B', 'days': Decimal('0.50')},
+            {'employee': None, 'days': Decimal('1.00')}]
+    g.equal(day_totals(rows, dropna=True), {'A': Decimal('3.50'), 'B': Decimal('0.50')})
+    g.equal(sum(day_totals(rows, dropna=True).values()), Decimal('4.00'))
+    g.equal(sum(day_totals(rows, dropna=False).values()), Decimal('5.00'))  # the unattributed day only appears here
+    g.equal(len(day_totals(rows, dropna=False)), 3)
+    return {'holiday_and_weekend_excluded_by_the_calendar': True,
+            'inclusive_span_is_one_more_than_the_half_open_count': True,
+            'unattributed_days_vanish_under_the_groupby_default': True}
+
+
+@case(172)
+def two_membership_primitives_default_against_the_declared_contract():
+    both = membership_dates('2026-09-01', '2026-09-20', inclusive='both')
+    left = membership_dates('2026-09-01', '2026-09-20', inclusive='left')
+    g.equal(len(both), 20); g.equal(both[-1], '2026-09-20')  # date_range includes the end by default
+    g.equal(len(left), 19); g.equal(left[-1], '2026-09-19')  # the declared end-exclusive reading
+    g.equal(len(both) - len(left), 1)
+    g.equal(pd.Interval(0, 1).closed, 'right')  # and Interval defaults to the opposite closure
+    span = assignment_interval('2026-09-01', '2026-09-18', closed='left')
+    g.equal(pd.Timestamp('2026-09-17') in span, True)
+    g.equal(pd.Timestamp('2026-09-18') in span, False)  # the declared exclusive end date
+    g.equal(pd.Timestamp('2026-09-01') in span, True)
+    default_closed = assignment_interval('2026-09-01', '2026-09-18', closed='right')
+    g.equal(pd.Timestamp('2026-09-18') in default_closed, True)
+    g.equal(pd.Timestamp('2026-09-01') in default_closed, False)  # and it drops the declared start instead
+    g.equal((pd.Timestamp('2026-09-18') in span) == (pd.Timestamp('2026-09-18') in default_closed), False)
+    return {'date_range_includes_both_ends_by_default': True,
+            'interval_defaults_to_right_closed': True,
+            'both_defaults_contradict_the_declared_contract': True}
+
+
+@case(173)
+def a_due_date_before_a_holiday_weekend_is_a_calendar_offset():
+    g.equal(offset_working_days('2026-09-10', -3, roll='raise'), '2026-09-04')  # crosses the weekend and the holiday
+    g.equal(offset_working_days('2026-09-22', -3, roll='raise'), '2026-09-17')
+    g.equal(offset_working_days('2026-09-04', 3, roll='raise'), '2026-09-10')
+    g.rejects(ValueError, lambda: offset_working_days('2026-09-07', -3, roll='raise'))  # the holiday itself
+    g.equal(offset_working_days('2026-09-07', 0, roll='forward'), '2026-09-08')
+    g.equal(offset_working_days('2026-09-07', 0, roll='backward'), '2026-09-04')
+    forward = np.datetime64(offset_working_days('2026-09-07', 0, roll='forward'))
+    backward = np.datetime64(offset_working_days('2026-09-07', 0, roll='backward'))
+    g.equal(int((forward - backward) / np.timedelta64(1, 'D')), 4)
+    g.equal(offset_working_days('2026-09-10', 0, roll='raise'), '2026-09-10')
+    return {'offset_crosses_the_holiday_weekend': True,
+            'roll_raise_refuses_a_non_working_anchor': True,
+            'forward_and_backward_are_four_days_apart': True}
+
+
+@case(174)
+def an_unknown_shortfall_is_not_a_zero_request():
+    rows = [{'item': 'cable', 'net': 6}, {'item': 'chair', 'net': 0},
+            {'item': 'desk', 'net': 1}, {'item': 'monitor', 'net': None}]
+    lines = requested_lines(rows)
+    requested = [r for r in lines if r['state'] == 'requested']
+    g.equal([r['item'] for r in requested], ['cable', 'desk'])
+    g.equal([r['requested'] for r in requested], [6, 1])
+    unknown = [r for r in lines if r['state'] == 'unknown shortfall']
+    g.equal([r['item'] for r in unknown], ['monitor'])
+    g.equal(unknown[0]['requested'] is None, True)  # not zero
+    absent = [r for r in lines if r['state'] == 'no shortfall']
+    g.equal([r['item'] for r in absent], ['chair']); g.equal(absent[0]['requested'], 0)
+    g.equal(unknown[0]['requested'] == absent[0]['requested'], False)
+    g.equal(len(lines), 4); g.equal(len(requested) + len(unknown) + len(absent), 4)
+    return {'unknown_shortfall_stays_unknown': True, 'zero_shortfall_is_a_separate_state': True}
+
+
+@case(175)
+def a_pack_size_decides_the_cost_not_the_unit_count():
+    packs, units, surplus = whole_packs(6, 5)
+    g.equal((packs, units, surplus), (2, 10, 4))  # six cables need two five-packs
+    g.equal(whole_packs(10, 5), (2, 10, 0))
+    g.equal(whole_packs(1, 5), (1, 5, 4))
+    g.equal(whole_packs(6, 1), (6, 6, 0))
+    g.rejects(g.Blocked, lambda: whole_packs(6, 0))
+    g.equal(math.ceil(Fraction(6, 5)), 2); g.equal(math.ceil(Fraction(10, 5)), 2)
+    g.equal(converted('220.00', '1.155'), Decimal('254.10'))
+    g.equal(converted('0.005', '1.00'), Decimal('0.01'))  # the declared half-cent rounds up
+    quotes = {'A': {'expires': '2026-09-30', 'freight': '15.00', 'lines_quoted': 3, 'lines_required': 3},
+              'B': {'expires': '2026-09-30', 'freight': None, 'lines_quoted': 3, 'lines_required': 3},
+              'C': {'expires': '2026-09-23', 'freight': '10.00', 'lines_quoted': 2, 'lines_required': 3}}
+    states = {k: eligible(v, order_date='2026-09-24') for k, v in quotes.items()}
+    g.equal(states, {'A': 'eligible', 'B': 'incomplete', 'C': 'expired'})
+    g.equal(eligible(quotes['C'], order_date='2026-09-23'), 'incomplete')  # expiry on the order date is not expired
+    g.equal(len([k for k, v in states.items() if v == 'eligible']), 1)
+    return {'whole_pack_ceiling_is_an_exact_rational': True, 'surplus_units': 4,
+            'expiry_on_the_order_date_is_not_expired': True}
+
+
+@case(176)
+def the_installment_residual_belongs_to_the_apportionment_library():
+    g.equal(installments(459_00, ['1/2', '1/2']), [22950, 22950])
+    g.equal(sum(installments(459_00, ['1/2', '1/2'])), 459_00)
+    g.equal(cents(installments(459_00, ['1/2', '1/2'])[0] / 100), Decimal('229.50'))
+    g.equal(installments(1, ['1/2', '1/2']), [1, 0])  # a one-cent total conserves exactly
+    g.equal(sum(installments(1, ['1/2', '1/2'])), 1)
+    g.equal(installments(100_01, ['1/3', '1/3', '1/3']), [3334, 3334, 3333])
+    g.equal(sum(installments(100_01, ['1/3', '1/3', '1/3'])), 100_01)
+    g.rejects(g.Blocked, lambda: installments(459_00, ['1/2', '1/3']))
+    g.rejects(g.Blocked, lambda: installments(-459_00, ['1/2', '1/2']))
+    g.equal(sum(Fraction(f) for f in ['1/2', '1/2']), 1)
+    return {'residual_is_the_library_method': True, 'one_cent_total_conserves': True,
+            'fractions_that_miss_one_are_blocked': True}
+
+
+@case(177)
+def a_conservation_check_is_a_schema_and_a_duplicate_index_defeats_it():
+    events = {'M1': 3, 'M2': 4, 'M3': 12, 'M4': 1, 'M5': 1}
+    conserving = pd.DataFrame({'movement': ['M1', 'M1', 'M2', 'M3', 'M4', 'M5'],
+                               'package': ['A1', 'A2', 'A1', 'A1', 'A2', 'B1'],
+                               'qty': [2, 1, 4, 12, 1, 1]})
+    checked = validated_manifest(conserving, events, reset_index=True)
+    g.equal(len(checked), 6); g.equal(int(checked['qty'].sum()), 21)
+    g.rejects(g.Blocked, lambda: validated_manifest(conserving.assign(qty=[3, 1, 4, 12, 1, 1]), events, reset_index=True))
+    g.rejects(g.Blocked, lambda: validated_manifest(conserving.assign(qty=[1, 1, 4, 12, 1, 1]), events, reset_index=True))
+    g.rejects(g.Blocked, lambda: validated_manifest(conserving.iloc[:5], events, reset_index=True))
+    unknown_movement = conserving.assign(movement=['M9'] + list(conserving['movement'][1:]))
+    g.rejects(g.Blocked, lambda: validated_manifest(unknown_movement, events, reset_index=True))
+    duplicated = pd.concat([conserving, conserving.iloc[[0]]])
+    g.equal(list(duplicated.index), [0, 1, 2, 3, 4, 5, 0])  # concat repeats the index label
+    g.rejects(ValueError, lambda: validated_manifest(duplicated, events, reset_index=False))
+    g.rejects(g.Blocked, lambda: validated_manifest(duplicated, events, reset_index=True))
+    try:
+        validated_manifest(duplicated, events, reset_index=True)
+    except g.Blocked as blocked:
+        g.equal('multiple_fields_uniqueness' in str(blocked), True)
+    return {'conservation_is_a_dataframe_level_check': True,
+            'duplicate_index_crashes_the_uniqueness_report': True,
+            'reset_index_restores_the_rejection': True}
+
+
+@case(178)
+def the_rounded_schedule_and_the_library_disagree_by_two_cents():
+    g.equal(payment('459.00', '0.12', 12), Decimal('40.78'))
+    g.equal(payment('459.00', '0.12', 12) * 12, Decimal('489.36'))
+    g.equal(interest_from_schedule('459.00', '0.12', 12), Decimal('30.36'))
+    g.equal(interest_from_library('459.00', '0.12', 12), Decimal('30.38'))
+    g.equal(interest_from_library('459.00', '0.12', 12)
+            - interest_from_schedule('459.00', '0.12', 12), Decimal('0.02'))
+    g.equal(payment('459.00', '0.00', 12), Decimal('38.25'))
+    g.equal(payment('459.00', '0.00', 12) * 12, Decimal('459.00'))
+    g.equal(interest_from_schedule('459.00', '0.00', 12), Decimal('0.00'))
+    rate = 0.12 / 12
+    for period in (1, 6, 12):
+        interest, principal = components('459.00', '0.12', 12, period)
+        g.equal(abs(interest + principal - npf.pmt(rate, 12, 459.0)) < 1e-9, True)
+    g.equal(npf.pmt(rate, 12, 459.0) < 0, True)  # the library signs a payment as cash out
+    g.equal(type(npf.ipmt(rate, 1, 12, 459.0)).__name__, 'ndarray')  # a scalar call returns a 0-d array
+    g.rejects(TypeError, lambda: round(npf.ipmt(rate, 1, 12, 459.0), 2))
+    g.equal(float(npf.ipmt(rate, 13, 12, 459.0)), -0.0)  # a period past the term returns a number
+    g.equal(math.isnan(float(npf.ipmt(rate, 0, 12, 459.0))), False)  # so does period zero
+    g.equal(round(float(npf.ipmt(rate, 0, 12, 459.0)), 6), -4.948333)
+    return {'schedule_interest': '30.36', 'library_interest': '30.38', 'gap_cents': 2,
+            'out_of_range_periods_return_numbers': True, 'scalar_call_returns_a_zero_d_array': True, 'payment_is_signed_negative': True}
+
+
+@case(179)
+def one_nan_carries_three_different_reasons_and_one_raises():
+    base = [-459.00, 200.00, 250.00, 300.00]
+    g.equal(round(net_present_value(0.08, base), 6), 178.669563)
+    g.equal(abs(net_present_value(0.08, base) - discounted_from(0.08, base, first_period=0)) < 1e-9, True)
+    excel_style = discounted_from(0.08, base, first_period=1)
+    g.equal(round(excel_style, 6), 165.43478)
+    g.equal(round(net_present_value(0.08, base) / excel_style, 6), 1.08)  # one whole period of discounting apart
+    g.equal(round(cents(net_present_value(0.08, base)), 2), Decimal('178.67'))
+    g.equal(sign_changes(base), 1)
+    g.equal(round(internal_rate(base), 6), 0.269913)
+    g.equal(sign_changes([-459.00, 900.00, -500.00]), 2)
+    g.rejects(g.Blocked, lambda: internal_rate([-459.00, 900.00, -500.00]))
+    g.equal(math.isnan(npf.irr([-459.00, 900.00, -500.00])), True)
+    g.equal(sign_changes([100.0, 200.0, 300.0]), 0)
+    g.rejects(g.Blocked, lambda: internal_rate([100.0, 200.0, 300.0]))
+    g.equal(math.isnan(npf.irr([100.0, 200.0, 300.0])), True)
+    g.equal(math.isnan(npf.irr([0.0, 0.0, 0.0])), True)  # three reasons, one return value
+    g.equal(math.isnan(net_present_value(0.08, [-459.0, float('nan'), 250.0])), True)
+    g.rejects(np.linalg.LinAlgError, lambda: npf.irr([-459.0, float('nan'), 250.0]))  # not nan, an exception
+    g.rejects(g.Blocked, lambda: internal_rate([-459.0, float('nan'), 250.0]))
+    return {'npv_leaves_the_first_flow_undiscounted': True, 'excel_convention_ratio': 1.08,
+            'irr_returns_nan_for_three_distinct_reasons': True,
+            'irr_raises_linalgerror_on_a_missing_flow': True}
+
+
+@case(180)
+def whether_two_bookings_touch_depends_on_how_each_was_built():
+    desk = booking('2026-09-23 13:00', '2026-09-23 15:00', closed='left')
+    training = booking('2026-09-23 14:00', '2026-09-23 16:00', closed='left')
+    later = booking('2026-09-23 15:00', '2026-09-23 17:00', closed='left')
+    g.equal(desk.overlaps(training), True)  # the shared 13:00-15:00 window
+    g.equal(desk.overlaps(later), False)  # a booking ending when another starts is not an overlap
+    both_desk = booking('2026-09-23 13:00', '2026-09-23 15:00', closed='both')
+    both_later = booking('2026-09-23 15:00', '2026-09-23 17:00', closed='both')
+    g.equal(both_desk.overlaps(both_later), True)  # the same two clock times, the other closure
+    right_desk = booking('2026-09-23 13:00', '2026-09-23 15:00', closed='right')
+    g.equal(right_desk.overlaps(later), True)  # mixed closures answer without any error
+    g.equal(right_desk.overlaps(both_later), True)
+    g.equal(desk.overlaps(both_later), False)
+    g.equal(desk.overlaps(later) == both_desk.overlaps(both_later), False)
+    g.equal(conflicts([desk, training, later], desk, drop_self=False), 2)  # the probe matches itself
+    g.equal(conflicts([desk, training, later], desk, drop_self=True), 1)
+    g.equal(conflicts([desk, training, later], later, drop_self=True), 1)
+    g.equal(conflicts([desk, later], desk, drop_self=True), 0)  # removing the overlap clears the conflict
+    return {'touching_bookings_depend_on_the_declared_closure': True,
+            'mixed_closures_compare_without_error': True,
+            'intervalindex_overlaps_includes_the_probe_itself': True}
+
+
+def run() -> dict:
+    g.ASSERTIONS = 0; rows = []
+    for i, fn in C:
+        before = g.ASSERTIONS
+        try: r = fn(); state = 'passed'; error = None
+        except Exception: r = {}; state = 'failed'; error = traceback.format_exc()
+        rows.append({'proof': i, 'test': fn.__name__, 'status': state, 'assertions': g.ASSERTIONS - before, 'result': r, 'error': error})
+    packages = ['largest-remainder', 'numpy', 'numpy-financial', 'pandas', 'pandera']
+    here = Path(__file__).resolve().parent
+    return {'scope': 'Bounded authored leave, workforce, onboarding, requisition, quote, installment, packing, loan, appraisal and roster fixtures and reproduced library defaults; the original P171-P180 chains and their artifacts were not rerun.',
+            'test_cases': len(rows), 'passed': sum(r['status'] == 'passed' for r in rows), 'failed': sum(r['status'] == 'failed' for r in rows),
+            'assertions': g.ASSERTIONS, 'full_chains_executed': 0, 'network_calls': 0, 'business_actions': 0,
+            'source_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+            'dependency_sha256': {name: hashlib.sha256((here / name).read_bytes()).hexdigest() for name in ['handoff_guards_v1.py']},
+            'library_versions': {n: importlib.metadata.version(n) for n in packages}, 'results': rows}
+
+
+if __name__ == '__main__':
+    p = argparse.ArgumentParser(); p.add_argument('--report', type=Path, required=True)
+    args = p.parse_args()
+    result = run(); args.report.parent.mkdir(parents=True, exist_ok=True)
+    args.report.write_text(json.dumps(result, indent=2, sort_keys=True, allow_nan=False) + '\n')
+    print(json.dumps({k: result[k] for k in ['test_cases', 'passed', 'failed', 'assertions']}))
+    if result['failed']:
+        print('\n'.join(r['error'] for r in result['results'] if r['error'])); raise SystemExit(1)
+```
+
+## Fresh local guard evidence: guards-v19.json
+
+Result file SHA256 012c58387e5d135bda825e6ada01993f940bce3e897926cc14967ccb6586505b; bytes 4551. Ten cases passed, zero failed, 120 assertions, full_chains_executed 0, network_calls 0, business_actions 0; a second run of the same module produced byte-identical output.
+
+```json
+{
+  "assertions": 120,
+  "business_actions": 0,
+  "dependency_sha256": {
+    "handoff_guards_v1.py": "2b3138b692ecfd02b76ae34bdb001f5046608bb2983d8709d6c55c0765f7c9b8"
+  },
+  "failed": 0,
+  "full_chains_executed": 0,
+  "library_versions": {
+    "largest-remainder": "0.1.0",
+    "numpy": "2.4.6",
+    "numpy-financial": "1.0.0",
+    "pandas": "2.2.3",
+    "pandera": "0.33.1"
+  },
+  "network_calls": 0,
+  "passed": 10,
+  "results": [
+    {
+      "assertions": 14,
+      "error": null,
+      "proof": 171,
+      "result": {
+        "holiday_and_weekend_excluded_by_the_calendar": true,
+        "inclusive_span_is_one_more_than_the_half_open_count": true,
+        "unattributed_days_vanish_under_the_groupby_default": true
+      },
+      "status": "passed",
+      "test": "working_slots_come_from_the_calendar_not_from_a_span"
+    },
+    {
+      "assertions": 12,
+      "error": null,
+      "proof": 172,
+      "result": {
+        "both_defaults_contradict_the_declared_contract": true,
+        "date_range_includes_both_ends_by_default": true,
+        "interval_defaults_to_right_closed": true
+      },
+      "status": "passed",
+      "test": "two_membership_primitives_default_against_the_declared_contract"
+    },
+    {
+      "assertions": 8,
+      "error": null,
+      "proof": 173,
+      "result": {
+        "forward_and_backward_are_four_days_apart": true,
+        "offset_crosses_the_holiday_weekend": true,
+        "roll_raise_refuses_a_non_working_anchor": true
+      },
+      "status": "passed",
+      "test": "a_due_date_before_a_holiday_weekend_is_a_calendar_offset"
+    },
+    {
+      "assertions": 9,
+      "error": null,
+      "proof": 174,
+      "result": {
+        "unknown_shortfall_stays_unknown": true,
+        "zero_shortfall_is_a_separate_state": true
+      },
+      "status": "passed",
+      "test": "an_unknown_shortfall_is_not_a_zero_request"
+    },
+    {
+      "assertions": 12,
+      "error": null,
+      "proof": 175,
+      "result": {
+        "expiry_on_the_order_date_is_not_expired": true,
+        "surplus_units": 4,
+        "whole_pack_ceiling_is_an_exact_rational": true
+      },
+      "status": "passed",
+      "test": "a_pack_size_decides_the_cost_not_the_unit_count"
+    },
+    {
+      "assertions": 10,
+      "error": null,
+      "proof": 176,
+      "result": {
+        "fractions_that_miss_one_are_blocked": true,
+        "one_cent_total_conserves": true,
+        "residual_is_the_library_method": true
+      },
+      "status": "passed",
+      "test": "the_installment_residual_belongs_to_the_apportionment_library"
+    },
+    {
+      "assertions": 10,
+      "error": null,
+      "proof": 177,
+      "result": {
+        "conservation_is_a_dataframe_level_check": true,
+        "duplicate_index_crashes_the_uniqueness_report": true,
+        "reset_index_restores_the_rejection": true
+      },
+      "status": "passed",
+      "test": "a_conservation_check_is_a_schema_and_a_duplicate_index_defeats_it"
+    },
+    {
+      "assertions": 17,
+      "error": null,
+      "proof": 178,
+      "result": {
+        "gap_cents": 2,
+        "library_interest": "30.38",
+        "out_of_range_periods_return_numbers": true,
+        "payment_is_signed_negative": true,
+        "scalar_call_returns_a_zero_d_array": true,
+        "schedule_interest": "30.36"
+      },
+      "status": "passed",
+      "test": "the_rounded_schedule_and_the_library_disagree_by_two_cents"
+    },
+    {
+      "assertions": 17,
+      "error": null,
+      "proof": 179,
+      "result": {
+        "excel_convention_ratio": 1.08,
+        "irr_raises_linalgerror_on_a_missing_flow": true,
+        "irr_returns_nan_for_three_distinct_reasons": true,
+        "npv_leaves_the_first_flow_undiscounted": true
+      },
+      "status": "passed",
+      "test": "one_nan_carries_three_different_reasons_and_one_raises"
+    },
+    {
+      "assertions": 11,
+      "error": null,
+      "proof": 180,
+      "result": {
+        "intervalindex_overlaps_includes_the_probe_itself": true,
+        "mixed_closures_compare_without_error": true,
+        "touching_bookings_depend_on_the_declared_closure": true
+      },
+      "status": "passed",
+      "test": "whether_two_bookings_touch_depends_on_how_each_was_built"
+    }
+  ],
+  "scope": "Bounded authored leave, workforce, onboarding, requisition, quote, installment, packing, loan, appraisal and roster fixtures and reproduced library defaults; the original P171-P180 chains and their artifacts were not rerun.",
+  "source_sha256": "aeddd95c9dfbb8cf69ac10f7a785e15cb380e4eaf671c892f244de054a6bb47d",
+  "test_cases": 10
+}
+```
+
+Checkpoint coverage: 180 of 300 proofs carry a hardening record. Prior cumulative TXT SHA256 6ff6b87dcd641dca5fd8d8a69d51e246692ea3fd5b06851c0cd94b3a254b75c1.

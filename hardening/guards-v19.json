@@ -1,0 +1,146 @@
+{
+  "assertions": 120,
+  "business_actions": 0,
+  "dependency_sha256": {
+    "handoff_guards_v1.py": "2b3138b692ecfd02b76ae34bdb001f5046608bb2983d8709d6c55c0765f7c9b8"
+  },
+  "failed": 0,
+  "full_chains_executed": 0,
+  "library_versions": {
+    "largest-remainder": "0.1.0",
+    "numpy": "2.4.6",
+    "numpy-financial": "1.0.0",
+    "pandas": "2.2.3",
+    "pandera": "0.33.1"
+  },
+  "network_calls": 0,
+  "passed": 10,
+  "results": [
+    {
+      "assertions": 14,
+      "error": null,
+      "proof": 171,
+      "result": {
+        "holiday_and_weekend_excluded_by_the_calendar": true,
+        "inclusive_span_is_one_more_than_the_half_open_count": true,
+        "unattributed_days_vanish_under_the_groupby_default": true
+      },
+      "status": "passed",
+      "test": "working_slots_come_from_the_calendar_not_from_a_span"
+    },
+    {
+      "assertions": 12,
+      "error": null,
+      "proof": 172,
+      "result": {
+        "both_defaults_contradict_the_declared_contract": true,
+        "date_range_includes_both_ends_by_default": true,
+        "interval_defaults_to_right_closed": true
+      },
+      "status": "passed",
+      "test": "two_membership_primitives_default_against_the_declared_contract"
+    },
+    {
+      "assertions": 8,
+      "error": null,
+      "proof": 173,
+      "result": {
+        "forward_and_backward_are_four_days_apart": true,
+        "offset_crosses_the_holiday_weekend": true,
+        "roll_raise_refuses_a_non_working_anchor": true
+      },
+      "status": "passed",
+      "test": "a_due_date_before_a_holiday_weekend_is_a_calendar_offset"
+    },
+    {
+      "assertions": 9,
+      "error": null,
+      "proof": 174,
+      "result": {
+        "unknown_shortfall_stays_unknown": true,
+        "zero_shortfall_is_a_separate_state": true
+      },
+      "status": "passed",
+      "test": "an_unknown_shortfall_is_not_a_zero_request"
+    },
+    {
+      "assertions": 12,
+      "error": null,
+      "proof": 175,
+      "result": {
+        "expiry_on_the_order_date_is_not_expired": true,
+        "surplus_units": 4,
+        "whole_pack_ceiling_is_an_exact_rational": true
+      },
+      "status": "passed",
+      "test": "a_pack_size_decides_the_cost_not_the_unit_count"
+    },
+    {
+      "assertions": 10,
+      "error": null,
+      "proof": 176,
+      "result": {
+        "fractions_that_miss_one_are_blocked": true,
+        "one_cent_total_conserves": true,
+        "residual_is_the_library_method": true
+      },
+      "status": "passed",
+      "test": "the_installment_residual_belongs_to_the_apportionment_library"
+    },
+    {
+      "assertions": 10,
+      "error": null,
+      "proof": 177,
+      "result": {
+        "conservation_is_a_dataframe_level_check": true,
+        "duplicate_index_crashes_the_uniqueness_report": true,
+        "reset_index_restores_the_rejection": true
+      },
+      "status": "passed",
+      "test": "a_conservation_check_is_a_schema_and_a_duplicate_index_defeats_it"
+    },
+    {
+      "assertions": 17,
+      "error": null,
+      "proof": 178,
+      "result": {
+        "gap_cents": 2,
+        "library_interest": "30.38",
+        "out_of_range_periods_return_numbers": true,
+        "payment_is_signed_negative": true,
+        "scalar_call_returns_a_zero_d_array": true,
+        "schedule_interest": "30.36"
+      },
+      "status": "passed",
+      "test": "the_rounded_schedule_and_the_library_disagree_by_two_cents"
+    },
+    {
+      "assertions": 17,
+      "error": null,
+      "proof": 179,
+      "result": {
+        "excel_convention_ratio": 1.08,
+        "irr_raises_linalgerror_on_a_missing_flow": true,
+        "irr_returns_nan_for_three_distinct_reasons": true,
+        "npv_leaves_the_first_flow_undiscounted": true
+      },
+      "status": "passed",
+      "test": "one_nan_carries_three_different_reasons_and_one_raises"
+    },
+    {
+      "assertions": 11,
+      "error": null,
+      "proof": 180,
+      "result": {
+        "intervalindex_overlaps_includes_the_probe_itself": true,
+        "mixed_closures_compare_without_error": true,
+        "touching_bookings_depend_on_the_declared_closure": true
+      },
+      "status": "passed",
+      "test": "whether_two_bookings_touch_depends_on_how_each_was_built"
+    }
+  ],
+  "scope": "Bounded authored leave, workforce, onboarding, requisition, quote, installment, packing, loan, appraisal and roster fixtures and reproduced library defaults; the original P171-P180 chains and their artifacts were not rerun.",
+  "source_sha256": "aeddd95c9dfbb8cf69ac10f7a785e15cb380e4eaf671c892f244de054a6bb47d",
+  "test_cases": 10
+}

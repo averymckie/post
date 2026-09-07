@@ -1,6 +1,6 @@
 # Handoff hardening guards
 
-Runnable local guard modules embedded in `../Proofs.txt` (hardening batches P1-P10 … P141-P150, P151-P160, P161-P170) together with their evidence files. Each module's SHA256 and byte count are recorded in `Proofs.txt` next to its embedded copy; each evidence file records the `source_sha256` of the module that produced it and, from v2 on, the `dependency_sha256` of the modules it imports.
+Runnable local guard modules embedded in `../Proofs.txt` (hardening batches P1-P10 … P141-P150, P151-P160, P161-P170, P171-P180) together with their evidence files. Each module's SHA256 and byte count are recorded in `Proofs.txt` next to its embedded copy; each evidence file records the `source_sha256` of the module that produced it and, from v2 on, the `dependency_sha256` of the modules it imports.
 
 ## Files
 
@@ -24,6 +24,7 @@ Runnable local guard modules embedded in `../Proofs.txt` (hardening batches P1-P
 | `handoff_guards_v16.py` | batch P151-P160 (SHA256 `f4d9a482…`), imports v1; renders DOCX templates and loads a Beancount journal in memory |
 | `handoff_guards_v17.py` | batch P161-P170 (SHA256 `5a8a0eef…`), imports v1; pandera constraints, rapidfuzz lookup and the two researched largest-remainder libraries |
 | `handoff_guards_v18.py` | glue elimination for v15-v17 (SHA256 `c5bddd02…`), imports v1; replaces 17 handwritten functions with portion, pandera, scipy, pandas, repro-zipfile, largest-remainder and rapidfuzz primitives |
+| `handoff_guards_v19.py` | batch P171-P180 (SHA256 `aeddd95c…`), imports v1; numpy business-day calendar, pandas Interval closures, pandera constraints, largest-remainder split, numpy-financial |
 | `guards-v1.json`, `guards-v2.json` | evidence recorded with the earlier batches |
 | `rerun-v1.json`, `rerun-v2.json` | the same modules re-executed in the batch-3 environment |
 | `guards-v3.json` … `guards-v15.json` | batch-3 through batch-15 evidence |
@@ -51,6 +52,7 @@ npm install jsdom && ./venv/bin/python handoff_guards_v8.py --report guards-v8.j
 ./venv/bin/python handoff_guards_v16.py --report guards-v16.json
 ./venv/bin/python handoff_guards_v17.py --report guards-v17.json
 ./venv/bin/python handoff_guards_v18.py --report guards-v18.json
+./venv/bin/python handoff_guards_v19.py --report guards-v19.json
 ```
 
 Case 26 of v3 uses the WordNet 3.0 corpus when `NLTK_DATA` points at a directory holding `corpora/wordnet.zip` (SHA256 `cbda5ea6eef7f36a97a43d4a75f85e07fccbb4f23657d27b4ccbc93e2646ab59`, 10775600 bytes, obtained once with `nltk.download('wordnet', download_dir=...)`). Without it the case still passes and records `not installed; no lexical expansion executed`. The guard runs themselves make no network call.
