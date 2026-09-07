@@ -1238,6 +1238,175 @@ def test_pandas_shifts_months_by_the_same_clamping_rule(year, month, months):
                            (anchor + relativedelta(months=months)).isoformat())
 
 
+# ---------------------------------------------------------------- composing and reversing month offsets
+ORACLE_PROCESS = settings(max_examples=40, deadline=None)
+"""Each example of a test below starts one runtime process for every value it compares, so these run fewer
+examples than SLOW. The regions they draw from are enumerated in full for every generated anchor."""
+
+
+def _split_offsets(anchor, agree):
+    """The (n, k) pairs where one offset of n months and two hops of k and n - k months land on the same
+    date, and the pairs where they do not, separated by dateutil's own output rather than by a rule written
+    here. Both lists are non-empty for every anchor at the end of a 31-day month, so no generated input is
+    discarded and no health check can fire."""
+    return [(months, first_hop)
+            for months in range(2, 25)
+            for first_hop in range(1, months)
+            if (((anchor + relativedelta(months=first_hop)) + relativedelta(months=months - first_hop))
+                == (anchor + relativedelta(months=months))) == agree]
+
+
+def _round_trip_offsets(anchor, returns):
+    """The offsets whose inverse comes back to the anchor and the offsets whose inverse does not, again
+    separated by dateutil's own output. Both lists are non-empty for every 31-day month end."""
+    return [months for months in range(1, 61)
+            if ((anchor + relativedelta(months=months) - relativedelta(months=months)) == anchor) == returns]
+
+
+@pytest.mark.skipif(not ruby_available, reason='the ruby runtime is required for this oracle')
+@given(ANCHOR_YEAR, st.integers(min_value=0, max_value=1000), st.integers(min_value=0, max_value=1000))
+@ORACLE_PROCESS
+def test_two_hops_reach_the_same_date_as_one_where_the_day_survives_every_month_between(year, month_index,
+                                                                                        pair_index):
+    """Where dateutil says splitting an offset changes nothing, Ruby's Date#>> says the same: its own two
+    hops land where its own single offset lands. The two implementations therefore agree about where a
+    schedule may be computed one instalment at a time, which is what P157 assumes throughout."""
+    anchor = _month_end_of_thirty_one_days(year, month_index)
+    pairs = _split_offsets(anchor, agree=True)
+    months, first_hop = pairs[pair_index % len(pairs)]
+    midpoint = datetime.date.fromisoformat(_ruby_month_shift(anchor, first_hop))
+    npt.assert_array_equal(_ruby_month_shift(midpoint, months - first_hop),
+                           _ruby_month_shift(anchor, months))
+
+
+@pytest.mark.skipif(not ruby_available, reason='the ruby runtime is required for this oracle')
+@given(ANCHOR_YEAR, st.integers(min_value=0, max_value=1000), st.integers(min_value=0, max_value=1000))
+@ORACLE_PROCESS
+def test_splitting_one_month_offset_into_two_hops_loses_days_in_both_clamping_runtimes(year, month_index,
+                                                                                       pair_index):
+    """The drift case 157 records as a surprise is documented behaviour in the other runtime. Ruby's own C
+    source at v3_3_6 introduces it as "This results in the following, possibly unexpected, behaviors:" and
+    then shows d0 = Date.new(2001, 1, 31); d1 = d0 >> 1 giving 2001-02-28 and d2 = d1 >> 1 giving 2001-03-28.
+    dateutil's documentation at 2.9.0.post0 states the clamp -- "If the result falls on a day after the last
+    one of the month, the last day of the month is used instead" -- and its doctest shows the single offset
+    keeping the day, date(2003,1,31)+relativedelta(months=+2) giving 2003-03-31, but says nothing about what
+    happens when the offset is applied in stages. Ruby is executed here rather than quoted: on the whole
+    region where dateutil's two hops differ from its one, Ruby's two hops differ from Ruby's one by the same
+    date, and always earlier, never later. Replaces the typed month_walk step and offset lists of
+    handoff_guards_v16.py case 157."""
+    anchor = _month_end_of_thirty_one_days(year, month_index)
+    pairs = _split_offsets(anchor, agree=False)
+    months, first_hop = pairs[pair_index % len(pairs)]
+    midpoint = datetime.date.fromisoformat(_ruby_month_shift(anchor, first_hop))
+    by_two_hops = _ruby_month_shift(midpoint, months - first_hop)
+    by_one_hop = _ruby_month_shift(anchor, months)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(by_two_hops, by_one_hop)
+    npt.assert_array_equal(by_two_hops < by_one_hop, True)
+    npt.assert_array_equal(by_two_hops, ((anchor + relativedelta(months=first_hop))
+                                         + relativedelta(months=months - first_hop)).isoformat())
+
+
+@pytest.mark.skipif(not php_binary_available, reason='the php runtime is required for this oracle')
+@given(ANCHOR_YEAR, st.integers(min_value=0, max_value=1000), st.integers(min_value=0, max_value=1000))
+@ORACLE_PROCESS
+def test_php_moves_a_split_offset_later_where_the_clamping_runtimes_move_it_earlier(year, month_index,
+                                                                                    pair_index):
+    """PHP documents the same hazard in the opposite direction. Its manual source carries an example headed
+    "Beware when adding or subtracting months" in which two successive modify('+1 month') calls on
+    2000-12-31 print 2001-01-31 and then 2001-03-03. Executed over the whole region where dateutil's two
+    hops fall short of its single offset, PHP's two hops overshoot its own single offset every time. So the
+    instalment schedule and the anniversary schedule of case 157 differ in both runtimes, and a chain that
+    moves between them does not merely keep its error: the error changes sign."""
+    anchor = _month_end_of_thirty_one_days(year, month_index)
+    pairs = _split_offsets(anchor, agree=False)
+    months, first_hop = pairs[pair_index % len(pairs)]
+    midpoint = datetime.date.fromisoformat(_php_modify(anchor, '%+d months' % first_hop))
+    npt.assert_array_equal(_php_modify(midpoint, '%+d months' % (months - first_hop))
+                           > _php_modify(anchor, '%+d months' % months), True)
+    npt.assert_array_equal(((anchor + relativedelta(months=first_hop))
+                            + relativedelta(months=months - first_hop))
+                           < (anchor + relativedelta(months=months)), True)
+
+
+@pytest.mark.skipif(not (ruby_available and php_binary_available),
+                    reason='both runtimes are required for this oracle')
+@given(ANCHOR_YEAR, st.integers(min_value=0, max_value=1000), st.integers(min_value=0, max_value=1000))
+@ORACLE_PROCESS
+def test_the_three_runtimes_fail_to_return_to_the_anchor_on_the_same_offsets(year, month_index, offset_index):
+    """Ruby's source documents this one too, immediately after the stepping example: d0 = Date.new(2001, 1,
+    31); d1 = d0 >> 1 giving 2001-02-28 and d2 = d1 >> -1 giving 2001-01-28. Executed, the set of offsets
+    that do not come back is the same set in both conventions -- every offset where dateutil fails to return
+    is an offset where PHP fails to return -- and the two miss the anchor on opposite sides, dateutil and
+    Ruby landing before it and PHP after it. Replaces the typed date(2026, 1, 28) round trip of case 157."""
+    anchor = _month_end_of_thirty_one_days(year, month_index)
+    offsets = _round_trip_offsets(anchor, returns=False)
+    months = offsets[offset_index % len(offsets)]
+    by_dateutil = anchor + relativedelta(months=months) - relativedelta(months=months)
+    by_ruby = _ruby_month_shift(datetime.date.fromisoformat(_ruby_month_shift(anchor, months)), -months)
+    by_php = _php_modify(datetime.date.fromisoformat(_php_modify(anchor, '%+d months' % months)),
+                         '%+d months' % -months)
+    npt.assert_array_equal(by_ruby, by_dateutil.isoformat())
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal([by_ruby, by_php], [anchor.isoformat(), anchor.isoformat()])
+    npt.assert_array_equal([by_ruby < anchor.isoformat(), by_php > anchor.isoformat()], True)
+
+
+@pytest.mark.skipif(not (ruby_available and php_binary_available),
+                    reason='both runtimes are required for this oracle')
+@given(ANCHOR_YEAR, st.integers(min_value=0, max_value=1000), st.integers(min_value=0, max_value=1000))
+@ORACLE_PROCESS
+def test_the_round_trip_returns_to_the_anchor_in_all_three_runtimes_where_the_day_survives(year, month_index,
+                                                                                          offset_index):
+    """On the complementary region all three runtimes come back to the anchor, so the failure above is a
+    property of which offsets were chosen and not of any one calendar implementation."""
+    anchor = _month_end_of_thirty_one_days(year, month_index)
+    offsets = _round_trip_offsets(anchor, returns=True)
+    months = offsets[offset_index % len(offsets)]
+    by_ruby = _ruby_month_shift(datetime.date.fromisoformat(_ruby_month_shift(anchor, months)), -months)
+    by_php = _php_modify(datetime.date.fromisoformat(_php_modify(anchor, '%+d months' % months)),
+                         '%+d months' % -months)
+    npt.assert_array_equal([by_ruby, by_php], [anchor.isoformat(), anchor.isoformat()])
+
+
+@given(ANCHOR_YEAR, st.integers(min_value=0, max_value=1000), st.integers(min_value=2, max_value=24),
+       st.integers(min_value=0, max_value=1000))
+@SLOW
+def test_pandas_splits_and_reverses_a_month_offset_exactly_as_dateutil_does(year, month_index, months,
+                                                                            hop_index):
+    """The third implementation needs no region at all: over every generated split and every generated
+    offset, pandas' DateOffset composes and reverses exactly as relativedelta does, including where both
+    lose the day. A chain that swaps one for the other keeps the drift unchanged."""
+    anchor = _month_end_of_thirty_one_days(year, month_index)
+    first_hop = 1 + hop_index % (months - 1)
+    stamp = pd.Timestamp(anchor)
+    npt.assert_array_equal((stamp + pd.DateOffset(months=first_hop)
+                            + pd.DateOffset(months=months - first_hop)).date().isoformat(),
+                           ((anchor + relativedelta(months=first_hop))
+                            + relativedelta(months=months - first_hop)).isoformat())
+    npt.assert_array_equal((stamp + pd.DateOffset(months=months) - pd.DateOffset(months=months))
+                           .date().isoformat(),
+                           (anchor + relativedelta(months=months)
+                            - relativedelta(months=months)).isoformat())
+
+
+@pytest.mark.skipif(not php_binary_available, reason='the php runtime is required for this oracle')
+@given(ANCHOR_YEAR, ANCHOR_MONTH)
+@ORACLE_PROCESS
+def test_a_month_period_ends_at_an_instant_no_date_is_equal_to(year, month):
+    """The other half of case 157 asks pandas for the end of a period. Its Period.end_time falls on the day
+    PHP calls "last day of this month" for every generated month, so the two agree about the date; but the
+    value pandas returns is the last representable nanosecond of that day, so comparing it with the
+    Timestamp of its own date is false. A cutoff written as period_end == Timestamp(day) never fires.
+    Replaces the typed '2026-02-28 23:59:59.999999999' of case 157."""
+    first_of_month = datetime.date(year, month, 1)
+    period = pd.Period(first_of_month, freq='M')
+    npt.assert_array_equal(period.end_time.date().isoformat(),
+                           _php_modify(first_of_month, 'last day of this month'))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(period.end_time.to_numpy(),
+                               pd.Timestamp(period.end_time.date()).to_numpy())
+
 # ---------------------------------------------------------------- reachability and reference resolution
 REFERENCE_EDGES = st.lists(st.tuples(st.integers(min_value=0, max_value=6), st.integers(min_value=0, max_value=6)),
                            min_size=1, max_size=14)
