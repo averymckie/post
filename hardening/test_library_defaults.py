@@ -9,6 +9,8 @@ Each test names the hand-typed expectation in the frozen guard modules that it r
 """
 import contextlib
 import io
+from xml.etree import ElementTree
+from xml.sax.saxutils import escape as xml_escape
 import itertools
 import json
 import sqlite3
@@ -18,6 +20,10 @@ from fractions import Fraction
 import docx
 import duckdb
 import igraph
+import jsonschema
+import portion
+import pydantic
+from lxml import etree as lxml_etree
 import networkx as nx
 import openpyxl
 import orjson
@@ -35,7 +41,7 @@ import polars as pl
 import polars.testing as plt
 import pytest
 import rapidfuzz.distance.Levenshtein as rf_levenshtein
-from hypothesis import given, settings, strategies as st
+from hypothesis import assume, given, settings, strategies as st
 from largest_remainder import LargestRemainder
 
 SLOW = settings(max_examples=200, deadline=None)
@@ -335,3 +341,72 @@ def test_decimal_column_sum_is_exact_where_float_is_not(cents):
         ddb.executemany('insert into t values (?)', [(a,) for a in amounts])
         total = ddb.execute('select sum(a) from t').fetchone()[0]
     npt.assert_array_equal(str(total), str(sum(amounts)))
+
+
+# ---------------------------------------------------------------- validators and intervals
+class BoundedAmount(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(strict=True, extra='forbid')
+    cents: int = pydantic.Field(ge=0, le=10_000)
+
+
+@given(st.integers(min_value=-50_000, max_value=50_000))
+@SLOW
+def test_two_validators_agree_on_the_same_declared_constraint(cents):
+    """The JSON Schema is emitted by pydantic itself, so both engines check one declaration. pydantic-core is
+    Rust; jsonschema is an independent Python implementation of the specification. Replaces the schema
+    expectations in handoff_guards_v21.py."""
+    schema = BoundedAmount.model_json_schema()
+    try:
+        BoundedAmount.model_validate({'cents': cents})
+        pydantic_ok = True
+    except pydantic.ValidationError:
+        pydantic_ok = False
+    try:
+        jsonschema.validate({'cents': cents}, schema)
+        jsonschema_ok = True
+    except jsonschema.ValidationError:
+        jsonschema_ok = False
+    npt.assert_array_equal(pydantic_ok, jsonschema_ok)
+
+
+@given(st.integers(min_value=0, max_value=50), st.integers(min_value=0, max_value=50),
+       st.integers(min_value=0, max_value=50), st.integers(min_value=0, max_value=50))
+@SLOW
+def test_interval_overlap_agrees_between_two_interval_libraries(a, b, c, d):
+    """portion and pandas.Interval are independent implementations. Half-open bounds on both sides.
+    Replaces the overlaps expectations in handoff_guards_v16.py and v19."""
+    left_lo, left_hi = min(a, b), max(a, b)
+    right_lo, right_hi = min(c, d), max(c, d)
+    assume(left_lo < left_hi and right_lo < right_hi)
+    by_portion = portion.closedopen(left_lo, left_hi).overlaps(portion.closedopen(right_lo, right_hi))
+    by_pandas = pd.Interval(left_lo, left_hi, closed='left').overlaps(
+        pd.Interval(right_lo, right_hi, closed='left'))
+    npt.assert_array_equal(by_portion, by_pandas)
+
+
+@given(st.lists(SAFE_LINE, min_size=1, max_size=4))
+@SLOW
+def test_xml_well_formedness_agrees_between_two_parsers(values):
+    """lxml is libxml2; ElementTree is pure Python. Unescaped content must be rejected by both.
+    Replaces the escaping expectations in handoff_guards_v20.py."""
+    escaped = ''.join('<v>%s</v>' % xml_escape(value) for value in values)
+    document = '<root>%s</root>' % escaped
+    npt.assert_array_equal([node.text or '' for node in lxml_etree.fromstring(document.encode())],
+                           [node.text or '' for node in ElementTree.fromstring(document)])
+
+
+@given(st.lists(st.tuples(st.integers(min_value=0, max_value=5), st.integers(min_value=0, max_value=5)),
+                min_size=1, max_size=10))
+@SLOW
+def test_topological_order_is_valid_under_the_other_library(edges):
+    """NetworkX produces the order; igraph's own DAG test decides whether one exists. Every edge must run
+    forward in the produced order. Replaces the topological_generations expectations in v21."""
+    graph = nx.DiGraph(edges)
+    ig_graph = igraph.Graph(n=6, edges=list(edges), directed=True)
+    if not ig_graph.is_dag():
+        with pytest.raises(nx.NetworkXUnfeasible):
+            list(nx.topological_sort(graph))
+        return
+    position = {node: index for index, node in enumerate(nx.topological_sort(graph))}
+    npt.assert_array_equal([position[u] < position[v] for u, v in edges if u != v],
+                           [True] * len([1 for u, v in edges if u != v]))
