@@ -30,6 +30,8 @@ import duckdb
 import icalendar
 from dateutil import rrule, tz as dateutil_tz
 import numpy as np
+import numpy_financial as npf
+import pyxirr
 from workalendar import core as workalendar_core
 import igraph
 import jsonschema
@@ -899,3 +901,156 @@ def test_the_php_port_agrees_on_the_month_end_rule(count):
     start = datetime.date(2026, 1, 31)
     npt.assert_array_equal(_php_occurrences('FREQ=MONTHLY;BYMONTHDAY=-1;COUNT=%d' % count, start),
                            _dateutil_occurrences(rrule.MONTHLY, start, count, bymonthday=-1))
+
+
+# ---------------------------------------------------------------- financial primitives, two implementations
+LOAN_RATE = st.floats(min_value=0.0001, max_value=0.5, allow_nan=False, allow_infinity=False)
+MODEST_RATE = st.floats(min_value=0.0001, max_value=0.2, allow_nan=False, allow_infinity=False)
+ANY_RATE = st.floats(min_value=0.0, max_value=0.5, allow_nan=False, allow_infinity=False)
+LOAN_TERM = st.integers(min_value=1, max_value=60)
+PRINCIPAL = st.floats(min_value=1.0, max_value=1_000_000.0, allow_nan=False, allow_infinity=False)
+CASH_FLOWS = st.lists(st.integers(min_value=-100_000, max_value=100_000), min_size=1, max_size=20)
+
+
+@given(ANY_RATE, LOAN_TERM, PRINCIPAL)
+@SLOW
+def test_the_periodic_payment_agrees_between_a_python_and_a_rust_implementation(rate, periods, principal):
+    """numpy-financial solves the annuity equation in Python over numpy arrays; pyxirr solves it in Rust with
+    its own closed form and no dependency on numpy-financial. Replaces the typed Decimal('40.78') and
+    Decimal('38.25') payments in handoff_guards_v19.py case 178, including the zero-rate branch both
+    libraries special-case."""
+    npt.assert_allclose(float(npf.pmt(rate, periods, principal)),
+                        pyxirr.pmt(rate, periods, principal), rtol=1e-9)
+
+
+@given(LOAN_RATE, LOAN_TERM, PRINCIPAL)
+@SLOW
+def test_both_libraries_sign_a_payment_on_a_borrowed_amount_as_cash_out(rate, periods, principal):
+    """Both projects document the same sign convention, numpy-financial as "By convention, the negative sign
+    represents cash flow out" and pyxirr as "By convention, investments or 'deposits' are negative, income or
+    'withdrawals' are positive." Replaces the typed g.equal(npf.pmt(...) < 0, True) in case 178."""
+    npt.assert_array_equal(float(npf.pmt(rate, periods, principal)) < 0, True)
+    npt.assert_array_equal(pyxirr.pmt(rate, periods, principal) < 0, True)
+
+
+@given(LOAN_RATE, LOAN_TERM, LOAN_TERM, PRINCIPAL)
+@SLOW
+def test_interest_plus_principal_is_the_payment_in_both_libraries(rate, period, periods, principal):
+    """The decomposition is an invariant of the output, so nothing is typed. It is not circular in pyxirr:
+    its ppmt is an independently derived closed form, -r*(F+P)*(r+1)^(per-1)/((r+1)^(n+t) - r*t - 1), not
+    pmt minus ipmt. Replaces the three-period loop of case 178."""
+    assume(period <= periods)
+    npt.assert_allclose(float(npf.ipmt(rate, period, periods, principal))
+                        + float(npf.ppmt(rate, period, periods, principal)),
+                        float(npf.pmt(rate, periods, principal)), rtol=1e-12)
+    npt.assert_allclose(pyxirr.ipmt(rate, period, periods, principal)
+                        + pyxirr.ppmt(rate, period, periods, principal),
+                        pyxirr.pmt(rate, periods, principal), rtol=1e-12)
+
+
+@given(MODEST_RATE, LOAN_TERM, LOAN_TERM, PRINCIPAL)
+@SLOW
+def test_the_interest_portion_agrees_inside_an_ordinary_loan_term(rate, period, periods, principal):
+    """Inside 1..nper, and at rates up to twenty per cent per period, the two implementations agree to nine
+    significant figures, so the amortisation split of P178 does not depend on which library computed it in
+    that region. The region has a boundary; the next test is on the other side of it."""
+    assume(period <= periods)
+    npt.assert_allclose(float(npf.ipmt(rate, period, periods, principal)),
+                        pyxirr.ipmt(rate, period, periods, principal), rtol=1e-9)
+
+
+@given(st.integers(min_value=45, max_value=60), st.integers(min_value=-20, max_value=20))
+@SLOW
+def test_the_interest_portion_diverges_in_the_last_period_of_a_long_high_rate_term(periods, scale):
+    """The same two calls disagree once (1 + rate)**nper is large. numpy-financial computes the interest as
+    the remaining balance times the rate, _rbl(rate, per, total_pmt, pv, when)*rate, which routes through its
+    future-value formula; pyxirr evaluates one algebraically simplified closed form. The two are equal on
+    paper and differ in floating point by cancellation, and the gap grows with (1 + rate)**nper: at a fifth
+    per period it stays below 1e-10 relative for every term up to sixty, and in the final period of a
+    sixty-period term at rate 0.5 it reaches 1.6e-5 relative. Nothing raises and neither value is nan, so a
+    schedule reconciled against the other library does not balance. The principal is generated as a power-of-
+    two multiple, which is exact in binary floating point and leaves the relative gap unchanged; the rate is
+    an anchor the strategy is built on. Hypothesis found the divergence while checking the agreement claim
+    above, and then found that an arbitrary principal can cancel it, which is why the scale is generated this
+    way rather than freely."""
+    principal = 1000.0 * 2.0 ** scale
+    interest_by_numpy_financial = float(npf.ipmt(0.5, periods, periods, principal))
+    interest_by_pyxirr = pyxirr.ipmt(0.5, periods, periods, principal)
+    npt.assert_array_equal(np.isfinite([interest_by_numpy_financial, interest_by_pyxirr]), True)
+    with pytest.raises(AssertionError):
+        npt.assert_allclose(interest_by_numpy_financial, interest_by_pyxirr, rtol=1e-9)
+    npt.assert_allclose(interest_by_numpy_financial, interest_by_pyxirr, rtol=1e-4)
+
+
+@given(LOAN_RATE, st.one_of(st.integers(min_value=-20, max_value=0), st.integers(min_value=61, max_value=200)),
+       LOAN_TERM, PRINCIPAL)
+@SLOW
+def test_the_interest_portion_diverges_outside_the_loan_term(rate, period, periods, principal):
+    """Outside 1..nper the two libraries answer differently and neither raises. numpy-financial 1.0.0
+    computes _rbl(rate, per, total_pmt, pv, when)*rate for any per and returns a finite number, so a period
+    before the loan starts or after it ends still produces interest. pyxirr's Rust core returns f64::NAN
+    there, with the comment "payments before first period don't make any sense", and its float_or_none
+    converts that to None. Replaces the typed -0.0 and -4.948333 of case 178: a schedule built by looping
+    over an off-by-one period range is silently wrong in one library and visibly absent in the other."""
+    by_numpy_financial = np.asarray(npf.ipmt(rate, period, periods, principal), dtype=float)
+    npt.assert_array_equal(np.isfinite(by_numpy_financial), True)
+    npt.assert_array_equal(pyxirr.ipmt(rate, period, periods, principal) is None, True)
+
+
+@given(ANY_RATE, CASH_FLOWS)
+@SLOW
+def test_net_present_value_agrees_between_the_two_implementations(rate, flows):
+    """Replaces the typed 178.669563 of case 179. numpy-financial documents the sum from t=0 to M-1 of
+    values_t/(1+rate)**t and warns that "npv considers a series of cashflows starting in the present
+    (t = 0)"; pyxirr's npv defaults to start_from_zero=True, documented as "numpy compatible"."""
+    npt.assert_allclose(float(npf.npv(rate, flows)),
+                        pyxirr.npv(rate, flows), rtol=1e-9, atol=1e-9)
+
+
+@given(LOAN_RATE, CASH_FLOWS)
+@SLOW
+def test_the_excel_convention_discounts_every_flow_one_further_period(rate, flows):
+    """pyxirr documents both conventions in one function: "By default, npv function starts from zero (numpy
+    compatible), but you can call it with start_from_zero=False parameter to make it Excel compatible." The
+    ratio between them is exactly one period of discounting, which is an invariant of the two outputs rather
+    than a typed number. Replaces the typed 165.43478 and the typed ratio 1.08 of case 179."""
+    npt.assert_allclose(pyxirr.npv(rate, flows),
+                        pyxirr.npv(rate, flows, start_from_zero=False) * (1 + rate), rtol=1e-9, atol=1e-9)
+
+
+@given(st.integers(min_value=1, max_value=100_000),
+       st.lists(st.integers(min_value=0, max_value=100_000), min_size=2, max_size=8))
+@SLOW
+def test_the_internal_rate_agrees_when_the_flows_change_sign_once(investment, returns):
+    """The two solvers share no code and no method: numpy-financial takes the roots of the cash-flow
+    polynomial with np.roots and picks the one closest to zero, pyxirr runs Newton-Raphson and falls back to
+    Brent's method. Replaces the typed 0.269913 of case 179."""
+    assume(sum(returns) > investment)
+    flows = [-float(investment)] + [float(value) for value in returns]
+    npt.assert_allclose(float(npf.irr(flows)), pyxirr.irr(flows), rtol=1e-6)
+
+
+@given(st.lists(st.integers(min_value=0, max_value=100_000), min_size=1, max_size=8))
+@SLOW
+def test_the_two_libraries_partition_the_internal_rate_failures_differently(flows):
+    """Cash flows that never change sign have no internal rate. numpy-financial folds that into the same nan
+    it returns when a real positive root is simply not found, so the caller cannot tell an ill-posed question
+    from a failed search. pyxirr raises InvalidPaymentsError for the ill-posed one, documented as "negative
+    and positive payments are required", and reserves None for the failed search. Replaces the typed
+    g.equal(math.isnan(npf.irr([100.0, 200.0, 300.0])), True) and the all-zero case of case 179."""
+    amounts = [float(value) for value in flows]
+    npt.assert_array_equal(np.isnan(npf.irr(amounts)), True)
+    with pytest.raises(pyxirr.InvalidPaymentsError):
+        pyxirr.irr(amounts)
+
+
+@given(ANY_RATE, CASH_FLOWS, st.integers(min_value=0))
+@SLOW
+def test_a_missing_cash_flow_is_a_number_in_one_library_and_absent_in_the_other(rate, flows, position):
+    """A nan in the input reaches the output as a nan from numpy-financial, which keeps arithmetic working and
+    poisons every later sum, and as None from pyxirr, which stops arithmetic at the call site. Replaces the
+    typed g.equal(math.isnan(net_present_value(0.08, [-459.0, float('nan'), 250.0])), True) of case 179."""
+    amounts = [float(value) for value in flows]
+    amounts[position % len(amounts)] = float('nan')
+    npt.assert_array_equal(np.isnan(npf.npv(rate, amounts)), True)
+    npt.assert_array_equal(pyxirr.npv(rate, amounts) is None, True)
