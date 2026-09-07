@@ -1,0 +1,182 @@
+{
+  "assertions": 85,
+  "business_actions": 0,
+  "dependency_sha256": {
+    "handoff_guards_v1.py": "2b3138b692ecfd02b76ae34bdb001f5046608bb2983d8709d6c55c0765f7c9b8",
+    "handoff_guards_v12.py": "0bc7d97c3107102f0b6d7293b12999a6612eb9cd42ca911aef00e6001c2af8d2",
+    "handoff_guards_v6.py": "7dc3e6c5588bc9293c0c6c94802e7bb057090776647482e6ddf0b748d1c7f259",
+    "handoff_guards_v8.py": "9809d9d6df911eb5f1326a8ded8d53f7aa039679a8570eeb0c24fcb12ff8751c"
+  },
+  "failed": 0,
+  "full_chains_executed": 0,
+  "library_versions": {
+    "deepdiff": "9.1.0",
+    "docxcompose": "2.2.0",
+    "icalendar": "7.3.0",
+    "matplotlib": "3.11.1",
+    "opencv-python-headless": "5.0.0.93",
+    "pillow": "12.3.0",
+    "pyarrow": "25.0.1",
+    "pydantic": "2.13.5",
+    "pymupdf": "1.28.2",
+    "pypdf": "6.17.0",
+    "python-docx": "1.2.0",
+    "python-pptx": "1.0.2",
+    "reportlab": "5.0.1",
+    "segno": "1.6.6"
+  },
+  "network_calls": 0,
+  "passed": 10,
+  "results": [
+    {
+      "assertions": 12,
+      "error": null,
+      "proof": 131,
+      "result": {
+        "appended_page_width_dropped": true,
+        "block_order_retained": true,
+        "composed_section_count": 1,
+        "page_geometry_is_not_a_composable_property": true,
+        "source_section_widths": [
+          7772400,
+          6858000
+        ]
+      },
+      "status": "passed",
+      "test": "composition_keeps_blocks_and_sections"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 132,
+      "result": {
+        "chart_values_from_the_embedded_workbook": true,
+        "majority_scope_unchanged": true,
+        "table_cells_match_the_records": true
+      },
+      "status": "passed",
+      "test": "deck_chart_and_table_agree_with_the_records"
+    },
+    {
+      "assertions": 9,
+      "error": null,
+      "proof": 133,
+      "result": {
+        "clip_path_id_and_date_are_the_cause": true,
+        "default_fonttype": "path",
+        "default_svg_text_nodes": 0,
+        "fonttype_none_recovers_every_cell": true,
+        "fonttype_none_still_reproducible": true,
+        "hashsalt_and_suppressed_date_fix_it": true,
+        "png_reproducible": true,
+        "svg_not_reproducible_by_default_reproduced": true
+      },
+      "status": "passed",
+      "test": "matplotlib_svg_needs_a_fixed_hashsalt"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 134,
+      "result": {
+        "both_charts_on_one_page": true,
+        "images_extracted_by_a_second_library": true,
+        "pixels_identical_after_embedding": true,
+        "placement_order_pairs_them_correctly": true,
+        "resource_order_mispairs_the_sources": true
+      },
+      "status": "passed",
+      "test": "embedded_chart_images_keep_every_pixel"
+    },
+    {
+      "assertions": 7,
+      "error": null,
+      "proof": 135,
+      "result": {
+        "declared_status_choices": [
+          "not_reviewed",
+          "reviewed",
+          "needs_follow_up"
+        ],
+        "fields_read_by_a_second_library": true,
+        "owner_and_note_start_blank": true,
+        "quotations_printed": true
+      },
+      "status": "passed",
+      "test": "form_choices_match_the_declared_contract"
+    },
+    {
+      "assertions": 8,
+      "error": null,
+      "proof": 136,
+      "result": {
+        "invalid_date_rejected": true,
+        "oversized_note_rejected": true,
+        "page_content_untouched": true,
+        "two_readers_agree_on_values": true,
+        "undeclared_status_rejected": true
+      },
+      "status": "passed",
+      "test": "readback_fits_the_progress_contract"
+    },
+    {
+      "assertions": 9,
+      "error": null,
+      "proof": 137,
+      "result": {
+        "declared_column_types_round_trip": true,
+        "default_read_collapses_null_into_empty_string": true,
+        "leading_zero_lost_without_declared_types": true,
+        "null_and_empty_string_need_quoted_strings_can_be_null_false": true,
+        "quoting_does_not_prevent_inference_reproduced": true,
+        "strings_can_be_null_collapses_empty_string_into_null": true
+      },
+      "status": "passed",
+      "test": "csv_inference_destroys_a_leading_zero"
+    },
+    {
+      "assertions": 16,
+      "error": null,
+      "proof": 138,
+      "result": {
+        "both_codes_are_version_6": true,
+        "card_names_printed": true,
+        "codes_decode_to_their_urls": true,
+        "legacy_detector_misses_a_valid_code": true,
+        "pdf_link_targets_agree": true,
+        "rescaling_does_not_rescue_the_legacy_detector": true,
+        "undecodable_image_blocked": true
+      },
+      "status": "passed",
+      "test": "every_code_decodes_to_its_recorded_url"
+    },
+    {
+      "assertions": 4,
+      "error": null,
+      "proof": 139,
+      "result": {
+        "appendix_bookmark_added": true,
+        "original_bookmarks_retained": true,
+        "original_pages_retained": true
+      },
+      "status": "passed",
+      "test": "the_appendix_keeps_the_original_pages_and_bookmarks"
+    },
+    {
+      "assertions": 8,
+      "error": null,
+      "proof": 140,
+      "result": {
+        "a_changed_count_is_detected": true,
+        "calendar_event_all_day": true,
+        "counts_and_date_agree_everywhere": true,
+        "six_formats_from_one_record": true
+      },
+      "status": "passed",
+      "test": "one_meeting_agrees_across_six_formats"
+    }
+  ],
+  "scope": "Bounded authored handoff fixtures and reproduced library defaults; the original P131-P140 chains and their artifacts were not rerun.",
+  "source_sha256": "0c6170186f532e5682b3c53f5b1698f7ff60634f6a1a5c87a7fa39c4af8f5cfc",
+  "test_cases": 10
+}
