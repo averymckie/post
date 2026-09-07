@@ -82,6 +82,7 @@ pandas==2.2.3
 pandera==0.33.1
 pathspec==1.1.1
 pillow==12.3.0
+pint==0.25.3
 platformdirs==4.11.7
 plotly==7.0.0
 pm4py==2.7.23.8

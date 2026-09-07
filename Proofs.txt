@@ -29428,3 +29428,870 @@ Result file SHA256 012c58387e5d135bda825e6ada01993f940bce3e897926cc14967ccb65865
 ```
 
 Checkpoint coverage: 180 of 300 proofs carry a hardening record. Prior cumulative TXT SHA256 6ff6b87dcd641dca5fd8d8a69d51e246692ea3fd5b06851c0cd94b3a254b75c1.
+
+## Checkpoint integrity and environment for this batch
+
+Base: the TXT as committed after batch 18 (SHA256 703702f2ebff59a824aaff52ea0cff5eea4ee6a3040a04d107863981070ec054, 2040456 bytes); it is the prior cumulative TXT SHA256 recorded at the end of this batch. New pinned library: Pint 0.25.3, the version the P184 chain pins. Existing pins unchanged: pandas 2.2.3, networkx 3.6.1, duckdb 1.5.5, lxml 6.1.3, Jinja2 3.1.6, python-dateutil 2.9.0.post0, python-pptx 1.0.2. handoff_guards_v20.py imports handoff_guards_v1.py only; v1-v19 stay byte-identical under HG07.
+
+Note on method: this module carries no handwritten implementation of an operation a library performs. Recurrence is dateutil.rrule, unit conversion is Pint with an exact rational magnitude, temporal selection is pandas.merge_asof, hierarchy validation is NetworkX, exact money is DuckDB DECIMAL with fractions.Fraction for the ratios, escaping is a Jinja2 autoescaping Environment checked through both an HTML and an XML parser, and native shape and chart binding is python-pptx.
+
+Note on versions: the P181-P190 chains pin numpy 2.3.5, PyMuPDF 1.26.6, matplotlib 3.10.8, pytest 8.4.2 and Python 3.12.13, and pin Pint 0.25.3, lxml 6.1.1, Jinja2 3.1.6, python-pptx 1.0.2, networkx 3.6.1, duckdb 1.5.5, pandas 2.2.3 and python-dateutil 2.9.0.post0, which the guards run on or within one patch of. The versions actually executed are in guards-v20.json.
+
+## Online-checked function references for this hardening batch
+[HD168] A Jinja2 Environment defaults to autoescape=False, and whether that omission is visible depends on which parser reads the result back. lxml.html applies HTML5 error recovery, so an unescaped "A & B < 5 > 2" round-trips through it byte for byte and a text comparison against the source passes; lxml.etree rejects the same bytes with XMLSyntaxError. Unescaped literal markup is worse than an ampersand: "see <b>bold</b> here" reads back from the HTML parser as "see bold here" with the element count unchanged, so a per-passage text check fails while a count check passes, and a passage containing a closing list tag becomes two elements, manufacturing a reading row that no source row produced. Executed with Jinja2 3.1.6 and lxml 6.1.3. Source: installed Jinja2 3.1.6 and lxml 6.1.3, and GitHub.
+https://github.com/pallets/jinja
+[HD169] dateutil rrule with MONTHLY and a literal bymonthday of 31, which is also what a dtstart on the 31st produces, silently skips every month that has no 31st: eight occurrences from a 2026-01-31 anchor span thirteen months and omit February, April and June entirely, with no error and no gap marker. bymonthday=-1 is the month-end rule and returns one occurrence per month including 2026-02-28 and, in a leap year, 2028-02-29. rrule yields datetime objects rather than dates, so a comparison against a date cutoff needs conversion, and the until bound is inclusive. Executed with python-dateutil 2.9.0.post0. Source: installed dateutil 2.9.0.post0 rrule.py and GitHub; dateutil.readthedocs.io blocked.
+https://github.com/dateutil/dateutil
+[HD170] Pint distinguishes an absolute temperature from a temperature difference, and converting an uncertainty with the absolute unit is silently wrong rather than an error: 0.9 degF converted as delta_degF is 0.5 delta_degC, while the same 0.9 converted as degF is -17.277778 degC, an error of 17.777778 degrees that still reads as a number. Pint refuses ambiguous offset arithmetic, raising OffsetUnitCalculusError for degC plus degC while accepting degC plus delta_degC, and raises DimensionalityError across dimensions. With UnitRegistry(non_int_type=Fraction) every magnitude stays an exact rational, so 85.64 degF is exactly 149/5 degC and a psi-to-kPa conversion equals an independent exact computation from the pound, standard gravity and inch definitions rather than merely approximating it. Executed with Pint 0.25.3. Source: installed Pint 0.25.3 and GitHub; pint.readthedocs.io blocked.
+https://github.com/hgrecco/pint
+[HD171] pandas merge_asof defaults to allow_exact_matches=True, so an update timestamped exactly at a cutoff is selected as the state at that cutoff; passing False selects the previous update instead, and the same fixture then reports a different progress figure for the same task with nothing else changed. The default direction is backward. Both frames must be sorted on the as-of key and the primitive refuses otherwise, raising ValueError("right keys must be sorted") rather than returning a wrong answer. A cutoff earlier than every record for a key yields a null, not a zero. Executed with pandas 2.2.3. Source: installed pandas 2.2.3 and GitHub; pandas.pydata.org blocked.
+https://github.com/pandas-dev/pandas
+[HD172] NetworkX is_arborescence is the predicate for a single rooted reporting tree and is strictly stronger than is_directed_acyclic_graph: a position with two parents is accepted by the DAG test and rejected by the arborescence test, and a two-root structure is rejected by the arborescence test while is_forest accepts it. topological_generations returns the hierarchy levels in order and raises NetworkXUnfeasible when consumed over a cyclic graph. python-pptx records a bound connector's endpoints as stCxn and endCxn shape identifiers in the connector XML, and those identifiers are the shapes' own ids and survive a later move of the connected shape. Executed with networkx 3.6.1 and python-pptx 1.0.2. Source: installed networkx 3.6.1 and python-pptx 1.0.2, and GitHub; networkx.org blocked.
+https://github.com/networkx/networkx
+
+## Hardening batch: P181-P190
+
+### HARDENING P181 -- The HTML parser hides the escaping the XML parser rejects
+
+Original proof: P181  stored Word passages -> literal search and reading controls -> interactive reader and print copy
+Source location: frozen master lines 7265-7306; original section SHA256 0d636039bb51ed68e6656b771cf90d6bff8eca3adf0149f6cb1fc653690b2eb4.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: a Jinja2 Environment defaults to autoescape=False, and the readback check the chain performs cannot see the omission for the case it names. Parsed with lxml.html, an unescaped ampersand-and-less-than passage round-trips identically to the escaped one, so a text comparison passes; the same bytes are rejected by lxml.etree with XMLSyntaxError. A passage containing literal markup reads back with its tags consumed and its element count unchanged, and a passage containing a closing list tag becomes two elements.
+Handoff: extracted Word passages -> escaped offline HTML -> DOM readback and rendered reading states
+Failure path: The chain compares 143 passage texts against the source model after parsing the generated page. For the recorded A & B < 5 > 2 case that comparison passes whether or not escaping was on, because the HTML parser recovers it, so the check cannot distinguish a correctly escaped page from an unescaped one. For a passage carrying literal markup the comparison would fail, but a check that counts passages instead of comparing each text would pass, since the element count is unchanged. Only the third case, a closing tag, changes the count, and it changes it by manufacturing a reading row that no source row produced.
+Required repair: Construct the Environment with autoescape=True and assert env.autoescape before rendering rather than relying on the default; parse the generated page with a strict XML parser in addition to the HTML parser and require both to accept it; and assert both the per-passage text equality and the element count against the source model, since the two checks fail on different inputs.
+Function bridge: jinja2.Environment(undefined=StrictUndefined, autoescape=True) with the flag asserted; lxml.etree.fromstring as the strict parse; lxml.html.fromstring with per-element text_content comparison and an element-count assertion
+Positive acceptance: With escaping on, all three authored passages, the ampersand literal, the literal markup and the closing tag, read back as their exact source text and each yields exactly one element; the strict XML parser accepts the escaped page.
+Adverse acceptance: A bare Environment reports autoescape False (reproduced); the unescaped ampersand page parses to the same text as the escaped one through the HTML parser while the XML parser raises XMLSyntaxError on it (both reproduced); the unescaped markup passage reads back as "see bold here" with one element, so the text check fails and the count check passes (reproduced); the unescaped closing-tag passage yields two elements reading "end" and "injected" (reproduced); a missing template field raises under StrictUndefined.
+Evidence and limit: guards-v20 case 181 on three authored passages. The recorded thirteen charter passages, 229 DOM checks, the jsdom event handlers and the WeasyPrint reading states were not rerun; Node and jsdom were not exercised here.
+References: HD168
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P182 -- A monthly rule anchored on the 31st skips three months
+
+Original proof: P182  asset register -> recurring maintenance and work-record checks -> maintenance calendar
+Source location: frozen master lines 7307-7346; original section SHA256 357816298bb3fb7325ef943792dccad674400fff03b1d226c331cd967c389cc3.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP, and it confirms the behaviour the chain records as literal day-31 skipping. A dateutil MONTHLY rule anchored on the 31st, which is also what an explicit bymonthday of 31 produces, omits every month without a 31st: eight occurrences from a 2026-01-31 anchor span thirteen months and February, April and June produce nothing at all. The month-end rule, bymonthday=-1, returns one occurrence per month and handles the leap year.
+Handoff: declared maintenance frequencies -> scheduled occurrences -> due, overdue and upcoming status
+Failure path: A maintenance policy described as monthly and anchored on a month end produces a schedule with three missing months in the first year, and every occurrence it does produce is a valid date, so the calendar looks correct and simply has gaps. A count-based check passes, because the requested count is honoured; it is the span that stretches. The chain's own status counts, two on-time, one late, three overdue and seven upcoming, are counts over whatever the recurrence produced, so they cannot reveal an occurrence that was never generated.
+Required repair: Choose the month-end rule explicitly with bymonthday=-1 when the policy means the last day of the month, and reserve a literal day number for policies that genuinely mean that date; assert the number of distinct months covered against the number of occurrences, so a skipped month is detected rather than absorbed; and convert rrule's datetime results to dates before comparing against a date cutoff.
+Function bridge: dateutil.rrule.rrule with MONTHLY and an explicit bymonthday, or with interval for quarterly, and WEEKLY with interval for a two-week cycle; the month-coverage assertion over the generated series
+Positive acceptance: The month-end rule returns January 31, February 28, March 31 and April 30 in sequence, eight occurrences spanning eight months, and returns February 29 in a leap year; the quarterly rule returns September, December, March and June; the two-week rule returns September 1, 15, 29 and October 13.
+Adverse acceptance: The literal day rule returns only months 1, 3, 5, 7, 8, 10 and 12 in 2026, February is absent entirely, and the eighth occurrence falls in January 2027 (reproduced); an unknown rule name is Blocked; the until bound is inclusive, so a December 1 bound returns a December 1 occurrence (reproduced).
+Evidence and limit: guards-v20 case 182 on four authored recurrence rules and two authored anchors. The recorded four policies, thirteen occurrences, the November 1 cutoff and the 465 open minutes were not rerun.
+References: HD169
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P183 -- The expiry date is the first invalid day, not the last valid one
+
+Original proof: P183  workforce scenario and training records -> attendance and completion checks -> training matrix
+Source location: frozen master lines 7347-7388; original section SHA256 156416272958bbdda03b0f1a88227ad60edf107f65d783a86688035d55aac7ae.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it. The chain records expiry as completion plus twelve months, with that date being the first invalid one, which is the correct and unambiguous reading and the one this record confirms. Two obligations sit beside it: relativedelta clamps a leap-day completion, so a February 29 completion expires on February 28, and the merge that joins results to sessions drops an unmatched result under the default inner join.
+Handoff: recorded completions and course policies -> qualification expiry -> current, expired and incomplete states
+Failure path: The boundary is a single day and it decides a person's recorded state. Read as the last valid day rather than the first invalid one, every qualification appears current for one extra day, and the matrix reports a person as qualified on the day their qualification lapsed. The leap-day case moves the boundary in the other direction for one completion in four years. The join case removes evidence: a result whose session is not in the declared catalog disappears from an inner join, and the chain's own record notes that eight source results must remain visible including one outside the current population.
+Required repair: Define the expiry as the first invalid date and assert both the day before and the day itself against that definition; record the clamping behaviour for a leap-day completion rather than leaving it to the calendar; and join results with how='left' and read the indicator, so a result with no matching session is named rather than dropped.
+Function bridge: dateutil.relativedelta for the term arithmetic with an explicit first-invalid-date contract; pandas.DataFrame.merge with how='left', validate='many_to_one' and indicator=True
+Positive acceptance: A 2025-09-30 completion with a twelve-month term expires on 2026-09-30, the day before is still current and the expiry date itself is not; a 2025-02-28 completion expires on 2026-02-28; the left join returns all three authored results and names the unmatched one.
+Adverse acceptance: A 2024-02-29 completion expires on 2025-02-28, one day earlier than the same arithmetic on any other date (reproduced); the default inner join returns two of three results with the indicator constant at 'both' and the unmatched result absent (reproduced); a duplicated session row raises pandas MergeError under validate='many_to_one'.
+Evidence and limit: guards-v20 case 183 on four authored completion dates and three authored results. The recorded six requirements, eight results, the 90 percent attendance boundary and the training matrix were not rerun.
+References: HD143 HD138
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P184 -- An uncertainty converted as a temperature is off by seventeen degrees
+
+Original proof: P184  maintenance occurrences -> unit-aware inspection findings -> editable inspection records
+Source location: frozen master lines 7389-7440; original section SHA256 d9333805b7365ed67ac3ad83a525689b34edf4f877fb15e1051d4669f427e426.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP, and it confirms the chain's central claim. Pint distinguishes an absolute temperature from a temperature difference, and converting an uncertainty with the absolute unit produces a number rather than an error: 0.9 degF is 0.5 delta_degC as a difference and -17.277778 degC as an absolute reading, an error of 17.777778 degrees. The chain's recorded finding depends on the difference being carried correctly, because the nominal reading alone passes the limit while the interval does not.
+Handoff: recorded readings and uncertainties -> converted quantities and acceptance intervals -> inspection findings
+Failure path: The wrong conversion yields a plausible negative number, and a negative uncertainty widens the interval in the wrong direction or is silently accepted as a magnitude. On this fixture the nominal 29.8 degC is at or below the 30 degC limit, so the finding is a pass on the nominal value alone and a review only once the correct 0.5 degree spread is carried; with the mis-converted spread the interval is meaningless and the recorded review finding cannot arise. Nothing in the chain's own value checks would catch it, because both conversions return a Pint quantity in the requested unit.
+Required repair: Convert every uncertainty through the delta unit and assert the converted magnitude is non-negative; keep the acceptance comparison on the complete interval rather than the nominal value; and use an exact rational registry so the comparison is decided before any display rounding.
+Function bridge: pint.UnitRegistry(non_int_type=Fraction) for exact magnitudes; Quantity.to with delta_ units for every uncertainty; the acceptance comparison over the full interval against the declared limit
+Positive acceptance: 85.64 degF is exactly 149/5 degC and 0.9 delta_degF is exactly one half delta_degC; the 29.3 to 30.3 interval against a 30 degC upper limit yields a review while the nominal value alone would pass; a zero spread at 29.8 passes and at 31 fails; a psi-to-kPa conversion equals an independent exact computation from the pound, standard gravity and inch definitions.
+Adverse acceptance: The same 0.9 converted as an absolute temperature gives -17.277778 degC, differing from the correct spread by 17.777778 degrees (reproduced); degC plus degC raises OffsetUnitCalculusError while degC plus delta_degC is accepted (reproduced); a conversion across dimensions raises DimensionalityError.
+Evidence and limit: guards-v20 case 184 on two authored readings and three authored uncertainties. The recorded three inspections, seven findings, the Word reports and the workbook readback were not rerun.
+References: HD170
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P185 -- The term end and the notice deadline are separate dates
+
+Original proof: P185  asset identities and structured terms -> notice and renewal checks -> renewal review register
+Source location: frozen master lines 7441-7484; original section SHA256 d323bb5d148c7323163c41bbbb6a2278993919339ec8ed75fe0c824f38be4117.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it. The chain calculates inclusive term status and separate calendar-day notice deadlines, and the two dates move independently: a term can be active while its notice deadline has already passed, which is exactly the recorded case of a support notice missed by fourteen days on a term that has not ended. The obligation is that the inclusive end be treated as inside the term and that the next term begin the day after it.
+Handoff: declared term dates and notice periods -> status and deadline states -> potential next terms
+Failure path: An exclusive reading of the term end reports a term as expired on its last valid day, and a next term computed from the end date rather than the day after overlaps the old term by one day. Neither error raises, and both produce a register that reads plausibly: the recorded sixteen-days-remaining warranty becomes fifteen, and the potential next term silently double-counts a day of coverage. The notice deadline is a different date from the term end and a check that watches only the end date reports nothing until the deadline is already gone.
+Required repair: Treat the declared end date as inside the term and assert that status on the end date is active and on the following day expired; compute the notice deadline as a separate date and report it independently of the term status; and start every potential next term on the day after the previous end, asserting the two terms do not overlap.
+Function bridge: datetime.date comparison for the inclusive term status; datetime.timedelta for the calendar-day notice deadline; dateutil.relativedelta for the next term length with an explicit day-after start
+Positive acceptance: A term ending 2027-08-31 is active on that date and expired on 2027-09-01, and is future before its start; the term has sixteen days left at the recorded 2027-08-15 cutoff; a thirty-day notice on that term falls on 2027-08-01, fourteen days before the cutoff; a thirty-day notice on a 2027-09-15 term falls one day after the cutoff; the next twelve-month term runs 2027-09-01 to 2028-08-31 and a one-month term runs to 2027-09-30.
+Adverse acceptance: A next term computed from a 2028-02-29 end runs 2028-03-01 to 2029-02-28, so the leap day does not extend it; the two known next-term prices total 149.00 USD and the count shows a third is missing, so the full total is not asserted.
+Evidence and limit: guards-v20 case 185 on four authored cutoffs and four authored terms. The recorded seven structured terms, the cancellation records and the Word review brief were not rerun.
+References: HD143
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P186 -- Whether the cutoff update counts is one default flag
+
+Original proof: P186  dated task updates and Gantt baseline -> actual progress checks -> remaining-work report
+Source location: frozen master lines 7485-7525; original section SHA256 7d862b394efd076948a5a77e0ed9ff8c8e499456e327151ff2a114754fdae7e2.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: pandas merge_asof defaults to allow_exact_matches=True, so an update timestamped exactly at the cutoff is selected as the state at that cutoff. Passing False selects the previous update instead, and the same fixture then reports a different progress figure for the same task with nothing else changed. The chain's phrase "at or before each cutoff" matches the default, and the flag is unstated and load bearing.
+Handoff: dated task updates -> latest update at or before each cutoff -> progress snapshots and remaining work
+Failure path: The two readings differ only on updates that land exactly on a cutoff, which for start-of-day cutoffs and dated updates is a common alignment rather than a rare one. The reported percentage changes, the derived status can change with it, and every downstream figure stays internally consistent, so the snapshot table reconciles against itself under either reading. On the authored fixture one task reports 0.60 under the default and 0.25 with the flag off.
+Required repair: Pass allow_exact_matches explicitly at every as-of join and record the choice beside the snapshot; assert that a cutoff earlier than every record for a key yields a null rather than a zero; and rely on the primitive's own sortedness requirement rather than sorting defensively, since it refuses unsorted keys.
+Function bridge: pandas.merge_asof with explicit direction and allow_exact_matches arguments and a by key; pandas.to_datetime for the key normalisation
+Positive acceptance: With the default, the September 17 cutoff selects the September 17 update at 0.60 for the first task and the September 12 update at 0.50 for the second, and the September 18 update stays out of both readings; a cutoff before every record returns a null.
+Adverse acceptance: With allow_exact_matches=False the first task reports 0.25 instead of 0.60 from the same records (reproduced); an unsorted right frame raises ValueError("right keys must be sorted") rather than returning a wrong answer (reproduced), which is the opposite of the silent behaviour recorded for the grouped cumulative sum in P153.
+Evidence and limit: guards-v20 case 186 on four authored updates and three authored cutoffs. The recorded twenty updates, 48 snapshots, six cutoffs and the baseline comparison were not rerun.
+References: HD171
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P187 -- The ratio stays rational or it stops being checkable
+
+Original proof: P187  actual progress and incurred costs -> earned-value metrics -> conditional completion estimates
+Source location: frozen master lines 7526-7567; original section SHA256 939b8429d5193e30153d28ba82ed0f5f10b2564d5258d5d82aaacc0e343285f9.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it. The chain records exact CPI of 10/11 and SPI of 38/47, which are rationals with no finite decimal expansion, and the obligation is that they stay rational through every use. It also guards denominators, and this record confirms the guard is needed at two different points: a zero actual cost makes CPI undefined, and a zero earned value makes the efficiency-based completion estimate undefined, which are different scenarios in the same table.
+Handoff: task budgets and incurred costs -> planned, earned and actual value -> variances, indices and completion estimates
+Failure path: CPI as a float is 0.9090909090909091, and multiplying it back by eleven does not return ten. Any check that recomputes an estimate from a rounded or floated index disagrees with the exact one by an amount that grows with the budget, and the disagreement is small enough to look like display rounding. The denominator cases fail differently: an unguarded CPI divides by zero on a task with no recorded cost, while the efficiency estimate divides by a zero earned value, so a single guard placed on one of them leaves the other exposed.
+Required repair: Carry every index as an exact rational and assert an exact identity such as the index multiplied by its denominator, rather than comparing rounded decimals; keep money in DuckDB DECIMAL through the aggregation and convert only for display; and declare each zero-denominator case separately with its own Blocked outcome.
+Function bridge: duckdb DECIMAL(18,2) with a parameterized cutoff and GROUP BY for the exact cost aggregation; fractions.Fraction for every index and estimate; explicit Blocked outcomes for the zero-cost and zero-earned-value denominators
+Positive acceptance: Costs through the September 17 cutoff are 1200.25 and 889.75 USD by task and 2090.00 USD in total, with the later record excluded and a recorded credit reducing its task cost; cost variance is -190 and schedule variance -450; CPI is exactly 10/11 and multiplying it by eleven returns exactly ten; the two budget-based completion estimates are both 3190 and the efficiency-based one is 3300.
+Adverse acceptance: A cutoff before every record returns no rows rather than zeros; a zero actual cost returns a null CPI rather than raising; a zero earned value Blocks the efficiency-based estimate, a different case from the null CPI; an unknown completion assumption is Blocked.
+Evidence and limit: guards-v20 case 187 on four authored cost records and one authored cutoff. The recorded eight budgets, nine cost records, 48 snapshots and the 3,586.58 USD third estimate were not rerun.
+References: HD133
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P188 -- The DAG test accepts the structure the tree test rejects
+
+Original proof: P188  workforce snapshot and position design -> reporting hierarchy -> editable organization chart
+Source location: frozen master lines 7568-7605; original section SHA256 1c3d106eeca04c1ac44bb1fa100c94a5bd1c6cdf501d168c052ba8f2cdca01d1.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it. The chain cites is_arborescence, which is the correct predicate for a single rooted reporting tree and is strictly stronger than the acyclicity test: a position with two parents is accepted by is_directed_acyclic_graph and rejected by is_arborescence, and a two-root structure is rejected by is_arborescence while is_forest accepts it. The obligation is that the stronger predicate be the one that gates, since the weaker one admits both malformed structures.
+Handoff: proposed positions and reporting relationships -> validated rooted tree -> levels, connectors and directory
+Failure path: A position with two reporting lines is a plausible data-entry outcome and produces a graph that is still acyclic, so an acyclicity gate passes it. The levels then place that position under whichever parent the traversal reaches first, the descendant counts double-count it, and the chart draws two connectors into one box, which reads as a matrix reporting line rather than as an error. A two-root structure passes a forest test and produces a chart with two disconnected trees and no top-level position.
+Required repair: Gate on is_arborescence and record that the acyclicity test is insufficient; assert the level structure against the expected depth after the gate passes; and read each connector's stCxn and endCxn identifiers back from the saved package and compare them to the shapes' own ids, rather than trusting that the connector was bound.
+Function bridge: networkx.is_arborescence as the gate; networkx.topological_generations for the levels and networkx.descendants for the spans; python-pptx add_connector with begin_connect and end_connect, verified by reading stCxn and endCxn from the saved XML
+Positive acceptance: The five-edge tree passes the gate and yields three levels in order, with two descendants under the operations node and three leaves; the generated deck's two connectors carry exactly the shape identifiers of the boxes they join.
+Adverse acceptance: Adding a second parent is Blocked by the arborescence gate while the same graph still passes is_directed_acyclic_graph (reproduced); a cycle is Blocked and topological_generations raises NetworkXUnfeasible when consumed over it; a two-root structure is Blocked while is_forest accepts it (reproduced).
+Evidence and limit: guards-v20 case 188 on five authored reporting edges and one authored two-connector deck. The recorded six positions, five connectors, the directory CSV and the LibreOffice renders were not rerun.
+References: HD172 HD130
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P189 -- A signature cannot cover a criterion that never ran
+
+Original proof: P189  current requirement tests and bound records -> acceptance gates -> deliverable acceptance review
+Source location: frozen master lines 7606-7658; original section SHA256 f7a075782784fb03d7aaf52f22d6074423d4e508268fd23d7c5c177195f470a3.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it. The chain records that the workbook deliverable has six passing criteria and one unexecuted criterion, so its supplied signoff does not establish acceptance. That is the correct outcome and it requires the not-run state to be distinct from both passed and failed, which the JUnit reading recorded for P148 shows is not automatic. The evidence binding has the same shape: acceptance is bound to exact artifact bytes, so changed bytes must break it.
+Handoff: executed criteria and signoff records -> acceptance gates -> recorded acceptance state
+Failure path: A not-run criterion collapsed into a pass produces a deliverable that reports as accepted with a genuine signature attached, which is the most expensive possible failure of this chain because the artifact then carries a real approval for work that was never checked. Collapsed into a failure instead, it produces a rejection that a reviewer will read as a defect rather than as missing evidence. Both readings are single-word changes in a status mapping and neither raises.
+Required repair: Keep not-run, failed and passed as three distinct criterion states and assert that a not-run criterion and a failed criterion produce different acceptance outcomes; verify the artifact's bytes against the declared hash before any acceptance decision and Blocked on a mismatch; and require the signoff to be in the signed state and dated at or before the cutoff, treating draft and withdrawn as absent rather than as weaker forms of signed.
+Function bridge: hashlib.sha256 over the artifact bytes compared to the declared evidence hash; explicit three-state criterion results; datetime.date comparison for the signoff cutoff
+Positive acceptance: Matching bytes return the declared hash; five passing criteria with a signed record dated at or before the cutoff produce acceptance.
+Adverse acceptance: A single appended byte and a wrong declared hash are both Blocked (reproduced); a signed record dated after the cutoff, an absent record, a draft record and a withdrawn record each fail acceptance; adding one not-run criterion to five passing ones produces an incomplete outcome that a signoff cannot lift (reproduced); the not-run outcome and the failed outcome are different strings, so the two states stay distinguishable.
+Evidence and limit: guards-v20 case 189 on one authored artifact and four authored criterion sets. The recorded six executed tests, the P148 trace reuse, the twelve requirement links and the Word review were not rerun; the JUnit reading obligation for this chain is the one already recorded for P148.
+References: HD134
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P190 -- The edit stays in the copy
+
+Original proof: P190  progress and earned-value outputs -> explicit review rules -> editable project status presentation
+Source location: frozen master lines 7659-7699; original section SHA256 c90a1cd496e9d3290f9993b41ed01e4cf56e4cbc1b314e4fb2d3fac38257644e.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it. The chain exercises a chart-value edit in a separate memory copy and states that the source presentation stays unchanged. That isolation holds and this record confirms it, and it confirms the property the chain depends on for its unknown values: a None in a chart series survives the round trip as None rather than becoming zero, so an unknown current earned value stays visually and structurally distinct from a measured zero.
+Handoff: composed progress and earned-value figures -> native chart and notes -> editable presentation and rendered slides
+Failure path: If an unknown value became zero in the chart, the deck would draw a bar at the axis for a figure the report explicitly declares unknown, and the recorded claim that current earned value and actual cost remain unknown would be contradicted by the artifact that carries it. If the edit were not isolated, the source deck would silently acquire the illustrative edited value and every hash recorded against it would be wrong. Neither failure raises and both are invisible in a rendered slide, since a zero bar and a missing bar differ only by a few pixels.
+Required repair: Perform every demonstration edit on a reopened copy and assert the source bytes are unchanged by hash afterwards; assert that a None in a series reads back as None and not as zero; and keep the labelled earlier snapshot's known values in the same series as the unknown current ones, so the distinction is carried in the chart data rather than only in the notes.
+Function bridge: pptx.Presentation reopened from bytes for the edited copy; pptx.chart.chart.Chart.replace_data with the declared categories and values; hashlib.sha256 over the source bytes as the isolation assertion
+Positive acceptance: The source deck reads back its three planned, earned and actual values; the edited copy reads back the changed value; the source values and the source hash are unchanged after the edit; a series carrying two None values reads back with both as None while the known value stays 2350.0.
+Adverse acceptance: The edited copy's hash differs from the source hash, so the two decks are distinguishable by bytes; the unknown values are None rather than 0.0, so a zero-versus-unknown comparison on the chart data separates them.
+Evidence and limit: guards-v20 case 190 on one authored three-value chart. The recorded composition of the P186 and P187 outputs, the configured signal rules, the follow-up table and the LibreOffice renders were not rerun.
+References: HD159
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+## Embedded runnable local guard module: handoff_guards_v20.py
+
+SHA256 0a44fac2e92a5de6530c245b6f532d19eb1712dffa5503eba02bd13ccd121c83; bytes 29495. Run: python handoff_guards_v20.py --report guards-v20.json, with handoff_guards_v1.py beside it. Ten cases, 131 assertions, no network and no model client. Recurrence is dateutil.rrule, unit conversion is Pint with exact rational magnitudes, temporal selection is pandas.merge_asof, hierarchy validation is NetworkX, exact money is DuckDB DECIMAL with fractions.Fraction ratios, and native shape and chart binding is python-pptx.
+
+```python
+"""Nineteenth bounded adapter suite: P181-P190, passage rendering, maintenance recurrence, training expiry,
+unit-aware inspection, renewal terms, as-of progress selection, earned value, reporting hierarchy, acceptance
+binding and status composition. Requires handoff_guards_v1.py from this TXT.
+
+Every meaningful operation below is a library primitive call. Recurrence is dateutil.rrule, unit conversion is Pint
+with an exact rational magnitude, temporal selection is pandas.merge_asof, hierarchy validation is NetworkX,
+exact money is DuckDB DECIMAL with fractions.Fraction for ratios, escaping is a Jinja2 autoescaping Environment
+checked through lxml, and native shape and chart binding is python-pptx. Local code declares fixtures and policies
+and turns a primitive result into a Blocked outcome. All runtime inputs are authored fixtures. No model client and
+no network.
+Run: python handoff_guards_v20.py --report report.json
+"""
+from __future__ import annotations
+import argparse, hashlib, importlib.metadata, io, json, logging, re, traceback, warnings
+from datetime import date, datetime, timedelta
+from decimal import Decimal
+from fractions import Fraction
+from pathlib import Path
+import duckdb
+import networkx as nx
+import pandas as pd
+import pint
+from dateutil.relativedelta import relativedelta
+from dateutil.rrule import MONTHLY, WEEKLY, rrule
+from jinja2 import Environment, StrictUndefined
+from lxml import etree, html as lxml_html
+from pptx import Presentation
+from pptx.chart.data import CategoryChartData
+from pptx.enum.chart import XL_CHART_TYPE
+from pptx.enum.shapes import MSO_CONNECTOR, MSO_SHAPE
+from pptx.util import Inches
+import handoff_guards_v1 as g
+warnings.simplefilter('ignore'); logging.disable(logging.WARNING)
+
+UNITS = pint.UnitRegistry(non_int_type=Fraction)
+Q = UNITS.Quantity
+
+
+# ---------------------------------------------------------------- P181
+def escaped_page(passages: list[dict], *, autoescape: bool) -> str:
+    env = Environment(undefined=StrictUndefined, autoescape=autoescape)
+    template = env.from_string('<ul>{% for p in passages %}<li id="{{ p.id }}">{{ p.text }}</li>{% endfor %}</ul>')
+    return template.render(passages=passages)
+
+
+def parsed_texts(markup: str) -> list[str]:
+    return [node.text_content() for node in lxml_html.fromstring(markup).xpath('//li')]
+
+
+# ---------------------------------------------------------------- P182
+def occurrences(anchor: str, count: int, *, rule: str) -> list[str]:
+    start = datetime.fromisoformat(anchor)
+    if rule == 'monthly_literal_day':
+        series = rrule(MONTHLY, dtstart=start, count=count, bymonthday=start.day)
+    elif rule == 'monthly_month_end':
+        series = rrule(MONTHLY, dtstart=start, count=count, bymonthday=-1)
+    elif rule == 'quarterly':
+        series = rrule(MONTHLY, dtstart=start, count=count, interval=3)
+    elif rule == 'two_weekly':
+        series = rrule(WEEKLY, dtstart=start, count=count, interval=2)
+    else:
+        raise g.Blocked('unknown recurrence rule %r' % rule)
+    return [d.date().isoformat() for d in series]
+
+
+def until_occurrences(anchor: str, until: str) -> list[str]:
+    return [d.date().isoformat() for d in
+            rrule(MONTHLY, dtstart=datetime.fromisoformat(anchor), until=datetime.fromisoformat(until))]
+
+
+# ---------------------------------------------------------------- P183
+def expiry(completed: str, months: int) -> date:
+    return date.fromisoformat(completed) + relativedelta(months=months)
+
+
+RESULT_SCHEMA_KEYS = ['result', 'session']
+
+
+def joined_results(results: list[dict], sessions: list[dict], *, how: str) -> pd.DataFrame:
+    return pd.DataFrame(results).merge(pd.DataFrame(sessions), on='session', how=how,
+                                       validate='many_to_one', indicator=True)
+
+
+# ---------------------------------------------------------------- P184
+def reading(value: str, unit: str) -> object:
+    return Q(Fraction(value), unit)
+
+
+def converted_reading(value: str, unit: str, target: str) -> object:
+    return reading(value, unit).to(target)
+
+
+def uncertainty(value: str, unit: str, target: str, *, as_delta: bool) -> object:
+    """as_delta=False converts the uncertainty as an absolute temperature, the common error."""
+    source = 'delta_' + unit if as_delta else unit
+    goal = 'delta_' + target if as_delta else target
+    return Q(Fraction(value), source).to(goal)
+
+
+def acceptance(nominal, spread, *, upper: str) -> str:
+    limit = Fraction(upper)
+    low, high = nominal.magnitude - spread.magnitude, nominal.magnitude + spread.magnitude
+    if high <= limit:
+        return 'pass'
+    if low > limit:
+        return 'fail'
+    return 'review'
+
+
+# ---------------------------------------------------------------- P185
+def term_status(start: str, finish: str, cutoff: str) -> str:
+    begin, end, today = (date.fromisoformat(x) for x in (start, finish, cutoff))
+    if today < begin:
+        return 'future'
+    return 'active' if today <= end else 'expired'
+
+
+def notice_deadline(finish: str, notice_days: int) -> date:
+    return date.fromisoformat(finish) - timedelta(days=notice_days)
+
+
+def next_term(finish: str, months: int) -> tuple[str, str]:
+    begin = date.fromisoformat(finish) + timedelta(days=1)
+    return begin.isoformat(), (begin + relativedelta(months=months) - timedelta(days=1)).isoformat()
+
+
+# ---------------------------------------------------------------- P186
+def as_of(updates: list[dict], cutoffs: list[dict], *, exact: bool) -> list[dict]:
+    left = pd.DataFrame(cutoffs).assign(when=lambda d: pd.to_datetime(d['when'])).sort_values('when')
+    right = pd.DataFrame(updates).assign(when=lambda d: pd.to_datetime(d['when'])).sort_values('when')
+    merged = pd.merge_asof(left, right, on='when', by='task', direction='backward',
+                           allow_exact_matches=exact)
+    return [{'task': r['task'], 'pct': None if pd.isna(r['pct']) else r['pct']}
+            for r in merged.to_dict('records')]
+
+
+def unsorted_as_of(updates: list[dict], cutoffs: list[dict]) -> list[dict]:
+    left = pd.DataFrame(cutoffs).assign(when=lambda d: pd.to_datetime(d['when'])).sort_values('when')
+    right = pd.DataFrame(updates).assign(when=lambda d: pd.to_datetime(d['when']))
+    return pd.merge_asof(left, right, on='when', by='task', direction='backward').to_dict('records')
+
+
+# ---------------------------------------------------------------- P187
+def cost_through(records: list[dict], cutoff: str) -> dict:
+    con = duckdb.connect()
+    con.execute('CREATE TABLE cost(task VARCHAR, spent_on DATE, amount DECIMAL(18,2))')
+    con.executemany('INSERT INTO cost VALUES (?, ?, ?)',
+                    [(r['task'], r['spent_on'], Decimal(r['amount'])) for r in records])
+    rows = con.execute('SELECT task, sum(amount) FROM cost WHERE spent_on <= ? GROUP BY task ORDER BY task',
+                       [cutoff]).fetchall()
+    con.close()
+    return {task: total for task, total in rows}
+
+
+def indices(planned: str, earned: str, actual: str) -> dict:
+    pv, ev, ac = (Fraction(x) for x in (planned, earned, actual))
+    return {'cost_variance': ev - ac, 'schedule_variance': ev - pv,
+            'cpi': None if ac == 0 else Fraction(ev, ac), 'spi': None if pv == 0 else Fraction(ev, pv)}
+
+
+def estimate_at_completion(budget: str, actual: str, earned: str, *, assumption: str) -> Fraction:
+    bac, ac, ev = (Fraction(x) for x in (budget, actual, earned))
+    if assumption == 'remaining_at_budget':
+        return ac + (bac - ev)
+    if assumption == 'budget_plus_variance':
+        return bac + (ac - ev)
+    if assumption == 'remaining_at_current_efficiency':
+        if ev == 0:
+            raise g.Blocked('no earned value, so current efficiency is undefined')
+        return ac + (bac - ev) * Fraction(ac, ev)
+    raise g.Blocked('unknown completion assumption %r' % assumption)
+
+
+# ---------------------------------------------------------------- P188
+def hierarchy(edges: list[tuple[str, str]]) -> nx.DiGraph:
+    graph = nx.DiGraph(edges)
+    if not nx.is_arborescence(graph):
+        raise g.Blocked('reporting structure is not a single rooted tree')
+    return graph
+
+
+def levels(graph: nx.DiGraph) -> list[list[str]]:
+    return [sorted(generation) for generation in nx.topological_generations(graph)]
+
+
+def org_deck(edges: list[tuple[str, str]]) -> bytes:
+    deck = Presentation(); slide = deck.slides.add_slide(deck.slide_layouts[6])
+    boxes = {}
+    for row, name in enumerate(sorted({n for e in edges for n in e})):
+        shape = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(1), Inches(1 + row), Inches(2), Inches(0.8))
+        shape.text_frame.text = name
+        boxes[name] = shape
+    for parent, child in edges:
+        line = slide.shapes.add_connector(MSO_CONNECTOR.STRAIGHT, Inches(2), Inches(2), Inches(2), Inches(3))
+        line.begin_connect(boxes[parent], 2); line.end_connect(boxes[child], 0)
+    buf = io.BytesIO(); deck.save(buf); return buf.getvalue()
+
+
+def connector_bindings(deck: bytes) -> list[list[str]]:
+    slide = Presentation(io.BytesIO(deck)).slides[0]
+    out = []
+    for shape in slide.shapes:
+        if 'Connector' in type(shape).__name__:
+            out.append(re.findall(r'(?:st|end)Cxn id="(\d+)"', shape._element.xml))
+    return out
+
+
+def shape_ids(deck: bytes) -> dict:
+    slide = Presentation(io.BytesIO(deck)).slides[0]
+    return {s.text_frame.text: s.shape_id for s in slide.shapes if s.has_text_frame and s.text_frame.text}
+
+
+# ---------------------------------------------------------------- P189
+def evidence(artifact: bytes, declared_sha: str) -> str:
+    actual = hashlib.sha256(artifact).hexdigest()
+    if actual != declared_sha:
+        raise g.Blocked('artifact bytes do not match the declared evidence hash')
+    return actual
+
+
+def acceptance_state(criteria: list[dict], signoff: dict | None, *, cutoff: str) -> str:
+    if any(c['result'] == 'not_run' for c in criteria):
+        return 'incomplete: a criterion was not executed'
+    if any(c['result'] == 'failed' for c in criteria):
+        return 'not accepted: a criterion failed'
+    if signoff is None or signoff['state'] != 'signed':
+        return 'not accepted: no signed record'
+    if date.fromisoformat(signoff['on']) > date.fromisoformat(cutoff):
+        return 'not accepted: the record post-dates the cutoff'
+    return 'accepted'
+
+
+# ---------------------------------------------------------------- P190
+def status_deck(values: tuple[float, ...]) -> bytes:
+    deck = Presentation(); slide = deck.slides.add_slide(deck.slide_layouts[6])
+    data = CategoryChartData(); data.categories = ['PV', 'EV', 'AC']; data.add_series('Sep 17', values)
+    slide.shapes.add_chart(XL_CHART_TYPE.COLUMN_CLUSTERED, Inches(1), Inches(1), Inches(6), Inches(4), data)
+    buf = io.BytesIO(); deck.save(buf); return buf.getvalue()
+
+
+def edited_copy(deck: bytes, values: tuple[float, ...]) -> bytes:
+    copy = Presentation(io.BytesIO(deck))
+    data = CategoryChartData(); data.categories = ['PV', 'EV', 'AC']; data.add_series('Sep 17', values)
+    copy.slides[0].shapes[0].chart.replace_data(data)
+    buf = io.BytesIO(); copy.save(buf); return buf.getvalue()
+
+
+def chart_values(deck: bytes) -> list:
+    return list(Presentation(io.BytesIO(deck)).slides[0].shapes[0].chart.series[0].values)
+
+
+C = []
+def case(i):
+    def reg(fn): C.append((i, fn)); return fn
+    return reg
+
+
+@case(181)
+def the_html_parser_hides_the_escaping_the_xml_parser_rejects():
+    literal = [{'id': 'p1', 'text': 'A & B < 5 > 2'}]
+    markup = [{'id': 'p1', 'text': 'see <b>bold</b> here'}]
+    closing = [{'id': 'p1', 'text': 'end</li><li>injected'}]
+    g.equal(Environment(undefined=StrictUndefined).autoescape, False)
+    for passages in (literal, markup, closing):
+        g.equal(parsed_texts(escaped_page(passages, autoescape=True)), [passages[0]['text']])
+        g.equal(len(parsed_texts(escaped_page(passages, autoescape=True))), 1)
+    g.equal(parsed_texts(escaped_page(literal, autoescape=False)), ['A & B < 5 > 2'])
+    g.equal(parsed_texts(escaped_page(literal, autoescape=False))
+            == parsed_texts(escaped_page(literal, autoescape=True)), True)  # the HTML parser recovers it
+    g.rejects(etree.XMLSyntaxError, lambda: etree.fromstring(escaped_page(literal, autoescape=False)))
+    g.equal(etree.fromstring(escaped_page(literal, autoescape=True)) is not None, True)
+    g.equal(parsed_texts(escaped_page(markup, autoescape=False)), ['see bold here'])  # the tags are consumed
+    g.equal(parsed_texts(escaped_page(markup, autoescape=False))[0] == markup[0]['text'], False)
+    g.equal(len(parsed_texts(escaped_page(markup, autoescape=False))), 1)  # and the element count is unchanged
+    g.equal(len(parsed_texts(escaped_page(closing, autoescape=False))), 2)  # one passage became two reading rows
+    g.equal(parsed_texts(escaped_page(closing, autoescape=False)), ['end', 'injected'])
+    g.rejects(Exception, lambda: escaped_page([{'id': 'p1'}], autoescape=True))
+    return {'autoescape_is_off_by_default': True,
+            'html_parser_recovers_the_unescaped_literal': True,
+            'xml_parser_rejects_the_same_bytes': True,
+            'literal_markup_is_consumed_with_the_count_unchanged': True,
+            'a_closing_tag_manufactures_a_second_passage': True}
+
+
+@case(182)
+def a_monthly_rule_anchored_on_the_31st_skips_three_months():
+    literal = occurrences('2026-01-31', 8, rule='monthly_literal_day')
+    g.equal(literal[:3], ['2026-01-31', '2026-03-31', '2026-05-31'])
+    g.equal(sorted({int(d[5:7]) for d in literal if d[:4] == '2026'}), [1, 3, 5, 7, 8, 10, 12])
+    g.equal('2026-02-28' in literal, False)  # February produces no occurrence at all
+    g.equal(literal[-1], '2027-01-31')  # eight occurrences span thirteen months
+    month_end = occurrences('2026-01-31', 8, rule='monthly_month_end')
+    g.equal(month_end[:4], ['2026-01-31', '2026-02-28', '2026-03-31', '2026-04-30'])
+    g.equal(len(month_end), 8); g.equal(month_end[-1], '2026-08-31')  # eight occurrences span eight months
+    g.equal(occurrences('2028-01-31', 3, rule='monthly_month_end')[1], '2028-02-29')  # leap year
+    g.equal(occurrences('2026-09-01', 4, rule='quarterly'),
+            ['2026-09-01', '2026-12-01', '2027-03-01', '2027-06-01'])
+    g.equal(occurrences('2026-09-01', 4, rule='two_weekly'),
+            ['2026-09-01', '2026-09-15', '2026-09-29', '2026-10-13'])
+    g.rejects(g.Blocked, lambda: occurrences('2026-09-01', 4, rule='fortnightly'))
+    g.equal(until_occurrences('2026-09-01', '2026-12-01')[-1], '2026-12-01')  # until is inclusive
+    g.equal(len(until_occurrences('2026-09-01', '2026-12-01')), 4)
+    return {'literal_day_rule_skips_short_months': True, 'skipped_months': [2, 4, 6],
+            'month_end_rule_covers_every_month': True, 'until_is_inclusive': True}
+
+
+@case(183)
+def an_expiry_is_the_first_invalid_date_not_the_last_valid_one():
+    g.equal(expiry('2025-09-30', 12), date(2026, 9, 30))
+    g.equal(expiry('2025-09-30', 12) - timedelta(days=1), date(2026, 9, 29))
+    g.equal(date(2026, 9, 29) < expiry('2025-09-30', 12), True)  # the day before is still current
+    g.equal(date(2026, 9, 30) < expiry('2025-09-30', 12), False)  # the expiry date itself is not
+    g.equal(expiry('2024-02-29', 12), date(2025, 2, 28))  # a leap day clamps
+    g.equal(expiry('2025-02-28', 12), date(2026, 2, 28))
+    results = [{'result': 'R1', 'session': 'S1'}, {'result': 'R2', 'session': 'S1'}, {'result': 'R3', 'session': 'S9'}]
+    sessions = [{'session': 'S1', 'course': 'safety'}]
+    inner = joined_results(results, sessions, how='inner')
+    g.equal(len(inner), 2); g.equal(sorted(inner['_merge'].astype(str).unique()), ['both'])
+    outer = joined_results(results, sessions, how='left')
+    g.equal(len(outer), 3); g.equal(int((outer['_merge'] == 'left_only').sum()), 1)
+    g.equal(sorted(outer[outer['_merge'] == 'left_only']['result']), ['R3'])
+    duplicated = sessions + [{'session': 'S1', 'course': 'other'}]
+    g.rejects(pd.errors.MergeError, lambda: joined_results(results, duplicated, how='left'))
+    return {'expiry_is_the_first_invalid_date': True, 'leap_day_completion_clamps': True,
+            'inner_join_hides_the_unmatched_result': True}
+
+
+@case(184)
+def an_uncertainty_converted_as_a_temperature_is_off_by_seventeen_degrees():
+    nominal = converted_reading('85.64', 'degF', 'degC')
+    g.equal(nominal.magnitude, Fraction(149, 5))
+    g.equal(float(nominal.magnitude), 29.8)
+    spread = uncertainty('0.9', 'degF', 'degC', as_delta=True)
+    g.equal(spread.magnitude, Fraction(1, 2)); g.equal(float(spread.magnitude), 0.5)
+    wrong = uncertainty('0.9', 'degF', 'degC', as_delta=False)
+    g.equal(round(float(wrong.magnitude), 6), -17.277778)  # an absolute conversion of an uncertainty
+    g.equal(float(wrong.magnitude) < 0, True)
+    g.equal(round(float(spread.magnitude - wrong.magnitude), 6), 17.777778)
+    g.equal(acceptance(nominal, spread, upper='30'), 'review')  # the interval crosses the limit
+    g.equal(float(nominal.magnitude) <= 30.0, True)  # while the nominal value alone passes
+    g.equal(acceptance(nominal, Q(Fraction(0), 'delta_degC'), upper='30'), 'pass')
+    g.equal(acceptance(Q(Fraction(31), 'degC'), Q(Fraction(0), 'delta_degC'), upper='30'), 'fail')
+    g.rejects(pint.errors.OffsetUnitCalculusError, lambda: Q(Fraction(1), 'degC') + Q(Fraction(1), 'degC'))
+    g.equal((Q(Fraction(1), 'degC') + Q(Fraction(1), 'delta_degC')).magnitude, Fraction(2))
+    g.rejects(pint.errors.DimensionalityError, lambda: Q(Fraction(1), 'degC').to('psi'))
+    pressure = converted_reading('14.7', 'psi', 'kPa')
+    exact = Fraction('14.7') * (Fraction(45359237, 100000000) * Fraction(980665, 100000)) / (Fraction(254, 10000) ** 2) / 1000
+    g.equal(pressure.magnitude, exact)  # exact rational agreement with the independent definition
+    g.equal(isinstance(pressure.magnitude, Fraction), True)
+    return {'delta_units_are_required_for_an_uncertainty': True, 'absolute_conversion_error_degc': -17.277778,
+            'nominal_alone_passes_while_the_interval_does_not': True,
+            'offset_unit_addition_is_refused': True}
+
+
+@case(185)
+def an_inclusive_term_and_its_notice_deadline_are_separate_dates():
+    g.equal(term_status('2026-09-01', '2027-08-31', '2027-08-15'), 'active')
+    g.equal(term_status('2026-09-01', '2027-08-31', '2027-08-31'), 'active')  # the end date is inside the term
+    g.equal(term_status('2026-09-01', '2027-08-31', '2027-09-01'), 'expired')
+    g.equal(term_status('2026-09-01', '2027-08-31', '2026-08-31'), 'future')
+    g.equal((date.fromisoformat('2027-08-31') - date.fromisoformat('2027-08-15')).days, 16)
+    g.equal(notice_deadline('2027-08-31', 30), date(2027, 8, 1))
+    g.equal(notice_deadline('2027-08-31', 30) < date.fromisoformat('2027-08-15'), True)  # missed by 14 days
+    g.equal((date.fromisoformat('2027-08-15') - notice_deadline('2027-08-31', 30)).days, 14)
+    g.equal(notice_deadline('2027-09-15', 30), date(2027, 8, 16))
+    g.equal((notice_deadline('2027-09-15', 30) - date.fromisoformat('2027-08-15')).days, 1)  # one day away
+    g.equal(next_term('2027-08-31', 12), ('2027-09-01', '2028-08-31'))
+    g.equal(next_term('2027-08-31', 1), ('2027-09-01', '2027-09-30'))
+    g.equal(next_term('2028-02-29', 12), ('2028-03-01', '2029-02-28'))
+    known = [Decimal('99.00'), Decimal('50.00')]
+    g.equal(sum(known), Decimal('149.00'))
+    g.equal(len(known) < 3, True)  # a third price is missing, so the full total stays unknown
+    return {'inclusive_end_date_is_inside_the_term': True, 'notice_deadline_is_a_separate_date': True,
+            'next_term_starts_the_day_after': True}
+
+
+@case(186)
+def whether_the_cutoff_update_counts_is_one_default_flag():
+    updates = [{'task': 'T1', 'when': '2026-09-10', 'pct': 0.25},
+               {'task': 'T1', 'when': '2026-09-17', 'pct': 0.60},
+               {'task': 'T2', 'when': '2026-09-12', 'pct': 0.50},
+               {'task': 'T2', 'when': '2026-09-18', 'pct': 0.90}]
+    cutoffs = [{'task': 'T1', 'when': '2026-09-17'}, {'task': 'T2', 'when': '2026-09-17'}]
+    inclusive = as_of(updates, cutoffs, exact=True)
+    g.equal(inclusive, [{'task': 'T1', 'pct': 0.60}, {'task': 'T2', 'pct': 0.50}])
+    exclusive = as_of(updates, cutoffs, exact=False)
+    g.equal(exclusive, [{'task': 'T1', 'pct': 0.25}, {'task': 'T2', 'pct': 0.50}])
+    g.equal(inclusive[0]['pct'] == exclusive[0]['pct'], False)  # one flag, two reported percentages
+    g.equal(as_of(updates, cutoffs, exact=True)[1]['pct'], 0.50)  # the September 18 update stays out of both
+    early = as_of(updates, [{'task': 'T1', 'when': '2026-09-01'}], exact=True)
+    g.equal(early, [{'task': 'T1', 'pct': None}])  # unknown, not zero
+    g.equal(early[0]['pct'] is None, True)
+    g.rejects(ValueError, lambda: unsorted_as_of(
+        [updates[1], updates[0], updates[2], updates[3]], cutoffs))  # the primitive refuses unsorted keys
+    return {'allow_exact_matches_defaults_true': True, 'flag_changes_the_reported_progress': True,
+            'cutoff_before_the_first_record_is_null': True, 'unsorted_input_is_refused': True}
+
+
+@case(187)
+def exact_ratios_stay_rational_and_a_zero_denominator_is_declared():
+    records = [{'task': 'T01', 'spent_on': '2026-09-10', 'amount': '1200.25'},
+               {'task': 'T01', 'spent_on': '2026-09-20', 'amount': '500.00'},
+               {'task': 'T02', 'spent_on': '2026-09-15', 'amount': '939.75'},
+               {'task': 'T02', 'spent_on': '2026-09-16', 'amount': '-50.00'}]
+    through = cost_through(records, '2026-09-17')
+    g.equal(through['T01'], Decimal('1200.25'))  # the September 20 record is excluded
+    g.equal(through['T02'], Decimal('889.75'))  # the credit reduces its task cost
+    g.equal(sum(through.values()), Decimal('2090.00'))
+    g.equal(len(cost_through(records, '2026-09-09')), 0)
+    metrics = indices('2350.00', '1900.00', '2090.00')
+    g.equal(metrics['cost_variance'], Fraction(-190))
+    g.equal(metrics['schedule_variance'], Fraction(-450))
+    g.equal(metrics['cpi'], Fraction(10, 11)); g.equal(metrics['spi'], Fraction(38, 47))
+    g.equal(float(metrics['cpi']) == 10 / 11, True)
+    g.equal(metrics['cpi'] * 11, Fraction(10))  # exact, unlike the float
+    g.equal(indices('0.00', '0.00', '0.00')['cpi'] is None, True)
+    g.equal(estimate_at_completion('3000.00', '2090.00', '1900.00', assumption='remaining_at_budget'), Fraction(3190))
+    g.equal(estimate_at_completion('3000.00', '2090.00', '1900.00', assumption='budget_plus_variance'), Fraction(3190))
+    efficiency = estimate_at_completion('3000.00', '2090.00', '1900.00', assumption='remaining_at_current_efficiency')
+    g.equal(round(float(efficiency), 2), 3300.0)
+    g.equal(efficiency, Fraction(2090) + Fraction(1100) * Fraction(2090, 1900))
+    g.rejects(g.Blocked, lambda: estimate_at_completion('3000.00', '2090.00', '0.00',
+                                                        assumption='remaining_at_current_efficiency'))
+    g.rejects(g.Blocked, lambda: estimate_at_completion('3000.00', '2090.00', '1900.00', assumption='optimistic'))
+    return {'decimal_sum_is_exact': True, 'credit_reduces_the_task_cost': True,
+            'cpi_stays_rational': '10/11', 'zero_denominators_are_declared': True}
+
+
+@case(188)
+def a_reporting_tree_is_a_graph_predicate_and_the_connectors_carry_ids():
+    edges = [('CEO', 'Ops'), ('CEO', 'Sales'), ('Ops', 'A'), ('Ops', 'B'), ('Sales', 'C')]
+    tree = hierarchy(edges)
+    g.equal(levels(tree), [['CEO'], ['Ops', 'Sales'], ['A', 'B', 'C']])
+    g.equal(sorted(nx.descendants(tree, 'Ops')), ['A', 'B'])
+    g.equal(sorted(n for n in tree if tree.out_degree(n) == 0), ['A', 'B', 'C'])
+    g.equal(tree.out_degree('Ops'), 2)
+    g.rejects(g.Blocked, lambda: hierarchy(edges + [('Sales', 'A')]))  # a second parent
+    g.equal(nx.is_directed_acyclic_graph(nx.DiGraph(edges + [('Sales', 'A')])), True)  # which is still a DAG
+    g.rejects(g.Blocked, lambda: hierarchy([('A', 'B'), ('B', 'A')]))
+    g.rejects(g.Blocked, lambda: hierarchy([('R1', 'A'), ('R2', 'B')]))  # two roots
+    g.equal(nx.is_forest(nx.DiGraph([('R1', 'A'), ('R2', 'B')])), True)  # which is a forest
+    g.rejects(nx.NetworkXUnfeasible, lambda: list(nx.topological_generations(nx.DiGraph([('A', 'B'), ('B', 'A')]))))
+    deck = org_deck([('CEO', 'Ops'), ('CEO', 'Sales')])
+    ids = shape_ids(deck)
+    bindings = connector_bindings(deck)
+    g.equal(len(bindings), 2)
+    g.equal(sorted(bindings[0]), sorted([str(ids['CEO']), str(ids['Ops'])]))
+    g.equal(sorted(bindings[1]), sorted([str(ids['CEO']), str(ids['Sales'])]))
+    g.equal(all(len(b) == 2 for b in bindings), True)
+    return {'arborescence_rejects_a_second_parent_a_dag_accepts': True,
+            'two_roots_are_a_forest_not_an_arborescence': True,
+            'connectors_carry_the_exact_shape_ids': True}
+
+
+@case(189)
+def acceptance_needs_a_hash_match_and_an_executed_criterion():
+    artifact = b'workbook bytes'
+    declared = hashlib.sha256(artifact).hexdigest()
+    g.equal(evidence(artifact, declared), declared)
+    g.rejects(g.Blocked, lambda: evidence(artifact + b'.', declared))
+    g.rejects(g.Blocked, lambda: evidence(artifact, '0' * 64))
+    passing = [{'id': 'C%d' % n, 'result': 'passed'} for n in range(5)]
+    signed = {'state': 'signed', 'on': '2026-09-17'}
+    g.equal(acceptance_state(passing, signed, cutoff='2026-09-18'), 'accepted')
+    g.equal(acceptance_state(passing, signed, cutoff='2026-09-16'), 'not accepted: the record post-dates the cutoff')
+    g.equal(acceptance_state(passing, None, cutoff='2026-09-18'), 'not accepted: no signed record')
+    g.equal(acceptance_state(passing, {'state': 'draft', 'on': '2026-09-17'}, cutoff='2026-09-18'),
+            'not accepted: no signed record')
+    g.equal(acceptance_state(passing, {'state': 'withdrawn', 'on': '2026-09-17'}, cutoff='2026-09-18'),
+            'not accepted: no signed record')
+    not_run = passing + [{'id': 'C7', 'result': 'not_run'}]
+    g.equal(acceptance_state(not_run, signed, cutoff='2026-09-18'), 'incomplete: a criterion was not executed')
+    g.equal(acceptance_state(not_run, signed, cutoff='2026-09-18') != 'accepted', True)  # a signoff cannot fill the gap
+    failed = passing + [{'id': 'C8', 'result': 'failed'}]
+    g.equal(acceptance_state(failed, signed, cutoff='2026-09-18'), 'not accepted: a criterion failed')
+    g.equal(acceptance_state(not_run, signed, cutoff='2026-09-18')
+            != acceptance_state(failed, signed, cutoff='2026-09-18'), True)  # not run is not the same as failed
+    return {'changed_bytes_break_the_evidence_binding': True,
+            'a_signoff_cannot_cover_an_unexecuted_criterion': True,
+            'not_run_and_failed_stay_distinct': True}
+
+
+@case(190)
+def an_in_memory_edit_leaves_the_source_presentation_alone():
+    source = status_deck((2350.0, 1900.0, 2090.0))
+    g.equal(chart_values(source), [2350.0, 1900.0, 2090.0])
+    before = hashlib.sha256(source).hexdigest()
+    edited = edited_copy(source, (2350.0, 1900.0, 9999.0))
+    g.equal(chart_values(edited), [2350.0, 1900.0, 9999.0])
+    g.equal(chart_values(source), [2350.0, 1900.0, 2090.0])  # the source is untouched
+    g.equal(hashlib.sha256(source).hexdigest(), before)
+    g.equal(hashlib.sha256(edited).hexdigest() == before, False)
+    unknown = edited_copy(source, (2350.0, None, None))
+    g.equal(chart_values(unknown), [2350.0, None, None])  # unknown current values stay unknown
+    g.equal(chart_values(unknown)[1] is None, True)
+    g.equal(chart_values(unknown)[0], 2350.0)  # while the labelled earlier snapshot stays visible
+    return {'edit_is_isolated_to_the_copy': True, 'unknown_values_survive_as_none': True}
+
+
+def run() -> dict:
+    g.ASSERTIONS = 0; rows = []
+    for i, fn in C:
+        before = g.ASSERTIONS
+        try: r = fn(); state = 'passed'; error = None
+        except Exception: r = {}; state = 'failed'; error = traceback.format_exc()
+        rows.append({'proof': i, 'test': fn.__name__, 'status': state, 'assertions': g.ASSERTIONS - before, 'result': r, 'error': error})
+    packages = ['duckdb', 'Jinja2', 'lxml', 'networkx', 'pandas', 'Pint', 'python-dateutil', 'python-pptx']
+    here = Path(__file__).resolve().parent
+    return {'scope': 'Bounded authored passage, maintenance, training, inspection, renewal, progress, earned-value, hierarchy, acceptance and status fixtures and reproduced library defaults; the original P181-P190 chains and their artifacts were not rerun.',
+            'test_cases': len(rows), 'passed': sum(r['status'] == 'passed' for r in rows), 'failed': sum(r['status'] == 'failed' for r in rows),
+            'assertions': g.ASSERTIONS, 'full_chains_executed': 0, 'network_calls': 0, 'business_actions': 0,
+            'source_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+            'dependency_sha256': {name: hashlib.sha256((here / name).read_bytes()).hexdigest() for name in ['handoff_guards_v1.py']},
+            'library_versions': {n: importlib.metadata.version(n) for n in packages}, 'results': rows}
+
+
+if __name__ == '__main__':
+    p = argparse.ArgumentParser(); p.add_argument('--report', type=Path, required=True)
+    args = p.parse_args()
+    result = run(); args.report.parent.mkdir(parents=True, exist_ok=True)
+    args.report.write_text(json.dumps(result, indent=2, sort_keys=True, allow_nan=False) + '\n')
+    print(json.dumps({k: result[k] for k in ['test_cases', 'passed', 'failed', 'assertions']}))
+    if result['failed']:
+        print('\n'.join(r['error'] for r in result['results'] if r['error'])); raise SystemExit(1)
+```
+
+## Fresh local guard evidence: guards-v20.json
+
+Result file SHA256 b899c939e369173f786bf768487f1f27aa7d430918ab97f11001039c95873bd7; bytes 4775. Ten cases passed, zero failed, 131 assertions, full_chains_executed 0, network_calls 0, business_actions 0; a second run of the same module produced byte-identical output.
+
+```json
+{
+  "assertions": 131,
+  "business_actions": 0,
+  "dependency_sha256": {
+    "handoff_guards_v1.py": "2b3138b692ecfd02b76ae34bdb001f5046608bb2983d8709d6c55c0765f7c9b8"
+  },
+  "failed": 0,
+  "full_chains_executed": 0,
+  "library_versions": {
+    "Jinja2": "3.1.6",
+    "Pint": "0.25.3",
+    "duckdb": "1.5.5",
+    "lxml": "6.1.3",
+    "networkx": "3.6.1",
+    "pandas": "2.2.3",
+    "python-dateutil": "2.9.0.post0",
+    "python-pptx": "1.0.2"
+  },
+  "network_calls": 0,
+  "passed": 10,
+  "results": [
+    {
+      "assertions": 17,
+      "error": null,
+      "proof": 181,
+      "result": {
+        "a_closing_tag_manufactures_a_second_passage": true,
+        "autoescape_is_off_by_default": true,
+        "html_parser_recovers_the_unescaped_literal": true,
+        "literal_markup_is_consumed_with_the_count_unchanged": true,
+        "xml_parser_rejects_the_same_bytes": true
+      },
+      "status": "passed",
+      "test": "the_html_parser_hides_the_escaping_the_xml_parser_rejects"
+    },
+    {
+      "assertions": 13,
+      "error": null,
+      "proof": 182,
+      "result": {
+        "literal_day_rule_skips_short_months": true,
+        "month_end_rule_covers_every_month": true,
+        "skipped_months": [
+          2,
+          4,
+          6
+        ],
+        "until_is_inclusive": true
+      },
+      "status": "passed",
+      "test": "a_monthly_rule_anchored_on_the_31st_skips_three_months"
+    },
+    {
+      "assertions": 12,
+      "error": null,
+      "proof": 183,
+      "result": {
+        "expiry_is_the_first_invalid_date": true,
+        "inner_join_hides_the_unmatched_result": true,
+        "leap_day_completion_clamps": true
+      },
+      "status": "passed",
+      "test": "an_expiry_is_the_first_invalid_date_not_the_last_valid_one"
+    },
+    {
+      "assertions": 16,
+      "error": null,
+      "proof": 184,
+      "result": {
+        "absolute_conversion_error_degc": -17.277778,
+        "delta_units_are_required_for_an_uncertainty": true,
+        "nominal_alone_passes_while_the_interval_does_not": true,
+        "offset_unit_addition_is_refused": true
+      },
+      "status": "passed",
+      "test": "an_uncertainty_converted_as_a_temperature_is_off_by_seventeen_degrees"
+    },
+    {
+      "assertions": 15,
+      "error": null,
+      "proof": 185,
+      "result": {
+        "inclusive_end_date_is_inside_the_term": true,
+        "next_term_starts_the_day_after": true,
+        "notice_deadline_is_a_separate_date": true
+      },
+      "status": "passed",
+      "test": "an_inclusive_term_and_its_notice_deadline_are_separate_dates"
+    },
+    {
+      "assertions": 7,
+      "error": null,
+      "proof": 186,
+      "result": {
+        "allow_exact_matches_defaults_true": true,
+        "cutoff_before_the_first_record_is_null": true,
+        "flag_changes_the_reported_progress": true,
+        "unsorted_input_is_refused": true
+      },
+      "status": "passed",
+      "test": "whether_the_cutoff_update_counts_is_one_default_flag"
+    },
+    {
+      "assertions": 17,
+      "error": null,
+      "proof": 187,
+      "result": {
+        "cpi_stays_rational": "10/11",
+        "credit_reduces_the_task_cost": true,
+        "decimal_sum_is_exact": true,
+        "zero_denominators_are_declared": true
+      },
+      "status": "passed",
+      "test": "exact_ratios_stay_rational_and_a_zero_denominator_is_declared"
+    },
+    {
+      "assertions": 14,
+      "error": null,
+      "proof": 188,
+      "result": {
+        "arborescence_rejects_a_second_parent_a_dag_accepts": true,
+        "connectors_carry_the_exact_shape_ids": true,
+        "two_roots_are_a_forest_not_an_arborescence": true
+      },
+      "status": "passed",
+      "test": "a_reporting_tree_is_a_graph_predicate_and_the_connectors_carry_ids"
+    },
+    {
+      "assertions": 12,
+      "error": null,
+      "proof": 189,
+      "result": {
+        "a_signoff_cannot_cover_an_unexecuted_criterion": true,
+        "changed_bytes_break_the_evidence_binding": true,
+        "not_run_and_failed_stay_distinct": true
+      },
+      "status": "passed",
+      "test": "acceptance_needs_a_hash_match_and_an_executed_criterion"
+    },
+    {
+      "assertions": 8,
+      "error": null,
+      "proof": 190,
+      "result": {
+        "edit_is_isolated_to_the_copy": true,
+        "unknown_values_survive_as_none": true
+      },
+      "status": "passed",
+      "test": "an_in_memory_edit_leaves_the_source_presentation_alone"
+    }
+  ],
+  "scope": "Bounded authored passage, maintenance, training, inspection, renewal, progress, earned-value, hierarchy, acceptance and status fixtures and reproduced library defaults; the original P181-P190 chains and their artifacts were not rerun.",
+  "source_sha256": "0a44fac2e92a5de6530c245b6f532d19eb1712dffa5503eba02bd13ccd121c83",
+  "test_cases": 10
+}
+```
+
+Checkpoint coverage: 190 of 300 proofs carry a hardening record. Prior cumulative TXT SHA256 703702f2ebff59a824aaff52ea0cff5eea4ee6a3040a04d107863981070ec054.

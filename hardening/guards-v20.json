@@ -1,0 +1,155 @@
+{
+  "assertions": 131,
+  "business_actions": 0,
+  "dependency_sha256": {
+    "handoff_guards_v1.py": "2b3138b692ecfd02b76ae34bdb001f5046608bb2983d8709d6c55c0765f7c9b8"
+  },
+  "failed": 0,
+  "full_chains_executed": 0,
+  "library_versions": {
+    "Jinja2": "3.1.6",
+    "Pint": "0.25.3",
+    "duckdb": "1.5.5",
+    "lxml": "6.1.3",
+    "networkx": "3.6.1",
+    "pandas": "2.2.3",
+    "python-dateutil": "2.9.0.post0",
+    "python-pptx": "1.0.2"
+  },
+  "network_calls": 0,
+  "passed": 10,
+  "results": [
+    {
+      "assertions": 17,
+      "error": null,
+      "proof": 181,
+      "result": {
+        "a_closing_tag_manufactures_a_second_passage": true,
+        "autoescape_is_off_by_default": true,
+        "html_parser_recovers_the_unescaped_literal": true,
+        "literal_markup_is_consumed_with_the_count_unchanged": true,
+        "xml_parser_rejects_the_same_bytes": true
+      },
+      "status": "passed",
+      "test": "the_html_parser_hides_the_escaping_the_xml_parser_rejects"
+    },
+    {
+      "assertions": 13,
+      "error": null,
+      "proof": 182,
+      "result": {
+        "literal_day_rule_skips_short_months": true,
+        "month_end_rule_covers_every_month": true,
+        "skipped_months": [
+          2,
+          4,
+          6
+        ],
+        "until_is_inclusive": true
+      },
+      "status": "passed",
+      "test": "a_monthly_rule_anchored_on_the_31st_skips_three_months"
+    },
+    {
+      "assertions": 12,
+      "error": null,
+      "proof": 183,
+      "result": {
+        "expiry_is_the_first_invalid_date": true,
+        "inner_join_hides_the_unmatched_result": true,
+        "leap_day_completion_clamps": true
+      },
+      "status": "passed",
+      "test": "an_expiry_is_the_first_invalid_date_not_the_last_valid_one"
+    },
+    {
+      "assertions": 16,
+      "error": null,
+      "proof": 184,
+      "result": {
+        "absolute_conversion_error_degc": -17.277778,
+        "delta_units_are_required_for_an_uncertainty": true,
+        "nominal_alone_passes_while_the_interval_does_not": true,
+        "offset_unit_addition_is_refused": true
+      },
+      "status": "passed",
+      "test": "an_uncertainty_converted_as_a_temperature_is_off_by_seventeen_degrees"
+    },
+    {
+      "assertions": 15,
+      "error": null,
+      "proof": 185,
+      "result": {
+        "inclusive_end_date_is_inside_the_term": true,
+        "next_term_starts_the_day_after": true,
+        "notice_deadline_is_a_separate_date": true
+      },
+      "status": "passed",
+      "test": "an_inclusive_term_and_its_notice_deadline_are_separate_dates"
+    },
+    {
+      "assertions": 7,
+      "error": null,
+      "proof": 186,
+      "result": {
+        "allow_exact_matches_defaults_true": true,
+        "cutoff_before_the_first_record_is_null": true,
+        "flag_changes_the_reported_progress": true,
+        "unsorted_input_is_refused": true
+      },
+      "status": "passed",
+      "test": "whether_the_cutoff_update_counts_is_one_default_flag"
+    },
+    {
+      "assertions": 17,
+      "error": null,
+      "proof": 187,
+      "result": {
+        "cpi_stays_rational": "10/11",
+        "credit_reduces_the_task_cost": true,
+        "decimal_sum_is_exact": true,
+        "zero_denominators_are_declared": true
+      },
+      "status": "passed",
+      "test": "exact_ratios_stay_rational_and_a_zero_denominator_is_declared"
+    },
+    {
+      "assertions": 14,
+      "error": null,
+      "proof": 188,
+      "result": {
+        "arborescence_rejects_a_second_parent_a_dag_accepts": true,
+        "connectors_carry_the_exact_shape_ids": true,
+        "two_roots_are_a_forest_not_an_arborescence": true
+      },
+      "status": "passed",
+      "test": "a_reporting_tree_is_a_graph_predicate_and_the_connectors_carry_ids"
+    },
+    {
+      "assertions": 12,
+      "error": null,
+      "proof": 189,
+      "result": {
+        "a_signoff_cannot_cover_an_unexecuted_criterion": true,
+        "changed_bytes_break_the_evidence_binding": true,
+        "not_run_and_failed_stay_distinct": true
+      },
+      "status": "passed",
+      "test": "acceptance_needs_a_hash_match_and_an_executed_criterion"
+    },
+    {
+      "assertions": 8,
+      "error": null,
+      "proof": 190,
+      "result": {
+        "edit_is_isolated_to_the_copy": true,
+        "unknown_values_survive_as_none": true
+      },
+      "status": "passed",
+      "test": "an_in_memory_edit_leaves_the_source_presentation_alone"
+    }
+  ],
+  "scope": "Bounded authored passage, maintenance, training, inspection, renewal, progress, earned-value, hierarchy, acceptance and status fixtures and reproduced library defaults; the original P181-P190 chains and their artifacts were not rerun.",
+  "source_sha256": "0a44fac2e92a5de6530c245b6f532d19eb1712dffa5503eba02bd13ccd121c83",
+  "test_cases": 10
+}
