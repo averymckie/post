@@ -10,6 +10,7 @@ Each test names the hand-typed expectation in the frozen guard modules that it r
 import contextlib
 import datetime
 import io
+import zoneinfo
 from xml.etree import ElementTree
 from xml.sax.saxutils import escape as xml_escape
 import itertools
@@ -18,8 +19,11 @@ import sqlite3
 from decimal import Decimal, ROUND_HALF_EVEN, ROUND_HALF_UP
 from fractions import Fraction
 
+import arrow
 import docx
 import duckdb
+import icalendar
+from dateutil import rrule, tz as dateutil_tz
 import numpy as np
 from workalendar import core as workalendar_core
 import igraph
@@ -466,3 +470,57 @@ def test_working_day_membership_agrees_between_the_two_libraries(day):
     """The disagreement above is about counting, not about which days are working days."""
     npt.assert_array_equal(WORKWEEK.is_working_day(day),
                            bool(np.is_busday(np.datetime64(day.isoformat()), busdaycal=NUMPY_CALENDAR)))
+
+
+# ---------------------------------------------------------------- time zones and parsing
+NEW_YORK = 'America/New_York'
+
+
+@given(st.datetimes(min_value=datetime.datetime(2026, 4, 1), max_value=datetime.datetime(2026, 10, 31)))
+@SLOW
+def test_utc_offset_agrees_outside_the_transition_gap(naive):
+    """zoneinfo is the standard library's IANA reader; dateutil.tz is an independent one. Away from a
+    transition they agree. Replaces the timezone expectations in handoff_guards_v16.py."""
+    npt.assert_array_equal(naive.replace(tzinfo=zoneinfo.ZoneInfo(NEW_YORK)).utcoffset(),
+                           naive.replace(tzinfo=dateutil_tz.gettz(NEW_YORK)).utcoffset())
+
+
+@given(st.integers(min_value=0, max_value=59))
+@SLOW
+def test_the_two_zone_readers_disagree_inside_a_nonexistent_local_time(minute):
+    """2026-03-08 02:xx does not exist in America/New_York; the clock jumps from 02:00 to 03:00. zoneinfo
+    resolves the gap with the pre-transition offset and dateutil with the post-transition one, so a local
+    timestamp inside the gap has two defensible UTC readings and no error is raised by either."""
+    naive = datetime.datetime(2026, 3, 8, 2, minute)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(naive.replace(tzinfo=zoneinfo.ZoneInfo(NEW_YORK)).utcoffset(),
+                               naive.replace(tzinfo=dateutil_tz.gettz(NEW_YORK)).utcoffset())
+
+
+@given(st.datetimes(min_value=datetime.datetime(2026, 1, 1), max_value=datetime.datetime(2026, 12, 31)))
+@SLOW
+def test_arrow_invents_a_timezone_the_standard_library_leaves_absent(naive):
+    """A naive timestamp parsed by arrow comes back as UTC; parsed by the standard library it comes back
+    naive. A chain that validates UTC timestamps by parsing them gets a different answer depending on which
+    parser ran. This is the second implementation behind the P156 finding that fromisoformat is a parser
+    rather than a validator."""
+    text = naive.isoformat()
+    npt.assert_array_equal(datetime.datetime.fromisoformat(text).tzinfo is None, True)
+    npt.assert_array_equal(str(arrow.get(text).tzinfo), 'UTC')
+
+
+@given(st.integers(min_value=1, max_value=12))
+@SLOW
+def test_icalendar_parses_a_recurrence_rule_without_expanding_it(count):
+    """icalendar reads the RRULE and hands back its parts; it does not produce the occurrences. There is
+    therefore no second implementation available to check dateutil's expansion behind P182, and the recorded
+    month-skipping finding rests on dateutil alone. Stating that is the honest result."""
+    ics = ('BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nDTSTART:20260131T090000Z\r\n'
+           'RRULE:FREQ=MONTHLY;BYMONTHDAY=31;COUNT=%d\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n' % count)
+    event = icalendar.Calendar.from_ical(ics).walk('VEVENT')[0]
+    npt.assert_array_equal(dict(event['RRULE'])['COUNT'], [count])
+    npt.assert_array_equal(hasattr(event['RRULE'], 'between'), False)
+    expanded = list(rrule.rrule(rrule.MONTHLY, dtstart=datetime.datetime(2026, 1, 31),
+                                count=count, bymonthday=31))
+    npt.assert_array_equal(len(expanded), count)
+    npt.assert_array_equal(all(moment.day == 31 for moment in expanded), True)
