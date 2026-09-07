@@ -21227,3 +21227,681 @@ Result file SHA256 44b0338b5173e26d6e73ac127e69b23a4daacb59c343f334f74bab407de20
 ```
 
 Checkpoint coverage: 90 of 300 proof-specific handoff amendments written, through P90. Prior cumulative TXT SHA256 0ceec259077f752aa6baf0a92d5a43c23ef1aa067cc51ede218b7534b7d685df.
+
+## Checkpoint integrity and environment for this batch
+
+Base: the TXT as committed after batch 9 (SHA256 540aaf9fc3ce2e340296d6771c55816acc837f77c41cbaed0f7875c48596fc9e, 1426585 bytes); it is the prior cumulative TXT SHA256 recorded at the end of this batch. Environment as in batch 9 plus altair 6.2.2, vl-convert-python 1.9.0.post1 and scipy 1.17.1. handoff_guards_v10.py imports handoff_guards_v1.py and handoff_guards_v8.py; v1-v9 stay byte-identical under HG07. Where a documentation host is blocked the reference cites a non-blocked source, named per reference.
+
+## Online-checked function references for this hardening batch
+[HD101] pandas groupby(...).size().unstack() produces NaN for a category combination that never occurs; unstack(fill_value=0) fills it, and the filled grid then sums to the population (executed with 2.2.3). An absent combination and a zero-count combination are otherwise indistinguishable only after the fill is declared. Source: installed pandas 2.2.3 docstrings (HD18, HD31); pandas.pydata.org blocked.
+[HD102] pandas DataFrame.sort_values kind: "{'quicksort', 'mergesort', 'heapsort', 'stable'}, default 'quicksort' ... mergesort and stable are the only stable algorithms." Executed with 2.2.3: at seventeen rows with alternating values the default ordering of tied rows differs from kind='stable', so a ranking that claims to preserve source tie order must pass kind='stable'. Source: installed pandas 2.2.3 docstring.
+[HD103] scipy.sparse.coo_matrix: "By default when converting to CSR or CSC format, duplicate (i,j) entries will be summed together", and "Duplicate coordinates are maintained until implicitly or explicitly summed". Executed with 1.17.1: two entries for one cell become their sum in toarray(), and a presence mask built by summing ones becomes a count. Source: installed scipy 1.17.1 docstring; scipy.org not used.
+[HD104] pydantic create_model builds a row model at runtime from declared field definitions; with ConfigDict(strict=True, extra='forbid') a string where an integer is declared, an integer where a boolean is declared and an unknown field are all refused, an Optional field keeps None, and model_json_schema() emits the contract (executed with 2.13.5). Source: installed pydantic 2.13.5 and GitHub (HD05).
+https://github.com/pydantic/pydantic/blob/main/pydantic/main.py
+[HD105] Altair Chart.to_dict places the rows under a named entry in datasets and leaves data as {"name": ...}, so a reader that inspects only data.values concludes the specification carries no data; an external source would appear as data.url. Altair also accepts an encoding whose field is not a column of the data and emits a specification for it (executed with 6.2.2). vl_convert.vegalite_to_svg renders the specification with the embedded Vega runtime and repeats byte for byte (executed with 1.9.0.post1). Source: installed altair 6.2.2 and vl-convert-python 1.9.0.post1, and GitHub.
+https://github.com/vega/altair
+[HD106] networkx.number_of_selfloops "Returns the number of selfloop edges. A selfloop edge has the same node at both ends." A resource that hands work to itself is such an edge and is kept (P62). Source: installed networkx 3.6.1 docstring.
+
+## Hardening batch: P91-P100
+
+### HARDENING P91 -- A category grid must fill absent combinations and total the population
+
+Original proof: P91  registered cases -> pandas group comparisons -> exact category totals
+Source location: frozen master lines 4428-4446; original section SHA256 a63dc0b8cee6e37a1503cad2add1541e63639387bf61c6ef5b5701b94e288479.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: unstack leaves NaN where a department and channel combination never occurs, so a grid read without a declared fill cannot be summed and cannot be distinguished from a zero.
+Handoff: registered operations model -> groupby, size, unstack -> category totals
+Failure path: A NaN cell reads as missing in one place and as zero in another; totals then depend on which. A duplicate case would inflate every dimension. "each dimension totals 1434 cases" is the property that has to be proven, not assumed.
+Required repair: Group with dropna=False, unstack with fill_value=0, and require the grid and every single dimension to sum to the declared population; block a duplicate case and a row count that disagrees with the population.
+Function bridge: pandas groupby(dropna=False).size; Series.unstack(fill_value=0); DataFrame.duplicated; explicit conservation checks
+Positive acceptance: Three cases give a two-by-two grid with one zero cell, and both dimensions total three.
+Adverse acceptance: The plain unstack contains NaN (reproduced); a wrong population blocks; a duplicate case blocks.
+Evidence and limit: guards-v10 case 91 on authored cases. The recorded data-atlas.json was not rebuilt.
+References: HD18 HD31 HD101
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P92 -- Preserving tie order requires a stable sort
+
+Original proof: P92  recorded variants -> stable ranking -> cumulative case coverage
+Source location: frozen master lines 4447-4465; original section SHA256 eac0f0a1f204ef54d34738efe6042aa215c449f360a1e9916e656845924d39a5.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: pandas sorts with quicksort by default, which is not stable; at seventeen rows the tied order already differs from the stable ordering, so "preserve exact source sequence, length, count, and tie order" does not hold under the default.
+Handoff: recorded variants -> sort_values -> cumsum -> cumulative coverage
+Failure path: Two variants with equal case counts can swap places between runs or library versions, which changes a published ranking. A cumulative sum that does not reach the population means a variant was lost. A repeated activity inside a path must survive the ranking.
+Required repair: Sort with kind='stable'; require the path counts to total the declared population and the final cumulative to equal it at one hundred percent; keep each path's sequence verbatim, repeats included; block duplicate paths.
+Function bridge: DataFrame.sort_values(kind='stable'); Series.cumsum; explicit population and coverage checks
+Positive acceptance: Three paths rank v1, v2, v3 with cumulative 10, 20, 25 and final coverage 100.0, and a path with a repeated activity keeps it.
+Adverse acceptance: The default sort reorders ties (reproduced); a population that does not match the counts blocks.
+Evidence and limit: guards-v10 case 92 on authored paths. The recorded 116 paths were not reranked.
+References: HD102
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P93 -- A sparse matrix sums duplicate pairs, so duplicates must be refused first
+
+Original proof: P93  recorded handover pairs -> sparse matrix and graph -> complete resource matrix
+Source location: frozen master lines 4466-4484; original section SHA256 008918cd65dd7057c5c997f6f50be4eb3ff87fbdedd612362b414e8af2314a71.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: coo_matrix sums two entries for the same cell instead of rejecting them, and a presence mask built by summing ones becomes a count rather than a mask.
+Handoff: recorded handover pairs -> coo_matrix and toarray -> DiGraph -> complete resource matrix
+Failure path: A duplicated pair silently doubles a weight; the proof's own requirement that duplicate pairs be rejected exists because the library will not reject them. An unrecorded cell must stay distinguishable from a recorded zero weight, and a self-pair is a real observation, not noise. The weights are shares, not case counts.
+Required repair: Reject duplicate and out-of-set pairs before building the matrix; build the presence mask by assignment rather than by summing; report recorded and unrecorded cell counts separately; keep self-pairs; label the measure.
+Function bridge: scipy.sparse.coo_matrix and toarray; a boolean numpy mask assigned per pair; networkx.DiGraph.add_weighted_edges_from and number_of_selfloops
+Positive acceptance: Two pairs over two resources give two recorded and two unrecorded cells, one self-pair, and a zero weight at a cell that is marked unrecorded.
+Adverse acceptance: Two entries for one cell sum to 0.5 and a mask of ones sums to 2 (both reproduced); a duplicate pair blocks; a pair outside the resource set blocks.
+Evidence and limit: guards-v10 case 93 on authored pairs. The recorded 286-edge matrix was not rebuilt.
+References: HD82 HD103 HD106
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P94 -- Calendar days are a difference; working days are retained, not recomputed
+
+Original proof: P94  recorded calendars -> date validation and grouped profiles -> checked interval catalog
+Source location: frozen master lines 4485-4503; original section SHA256 9118a40820fafa11573171699f9769b3cf0c8114b2537f627f07ef69bb75cbfc.
+Finding: ADDITIONAL HANDOFF OBLIGATION; the proof already states that the stored Netherlands working-day counts are retained "without rerunning holiday rules", which is the right call given that the calendar is library-defined (P58).
+Handoff: recorded calendars -> to_datetime and dt.days -> grouped profiles
+Failure path: A calendar difference is arithmetic; a working-day count is a claim about a holiday calendar that changes with the library version. Mixing them without saying which is which would attribute a library's rules to the source. A reversed interval would give a negative span.
+Required repair: Parse both dates as instants, require the deadline not to precede the start, compute the calendar difference in days, require the stored working-day count to be present rather than recomputed, group the profiles, and record the provenance of the working-day figure.
+Function bridge: pandas.to_datetime(utc=True); Series.dt.days; groupby(dropna=False).size; the provenance recorded as a data field
+Positive acceptance: Three cases give 56, 56 and 35 calendar days and two profiles, with the working-day provenance attached.
+Adverse acceptance: A reversed interval blocks; a case without a stored working-day count blocks rather than triggering a recomputation.
+Evidence and limit: guards-v10 case 94 on authored cases. The recorded 1434 intervals were not recomputed.
+References: HD68 HD78 HD79
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P95 -- A field contract is a strict model that refuses what it does not declare
+
+Original proof: P95  declared field labels and units -> strict row schemas -> reusable data contract
+Source location: frozen master lines 4504-4522; original section SHA256 feebeb925a77c8211aed6c6f8b238a3c87dde8343aaa8e6d513124d33935aa67.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it.
+Handoff: declared field labels and units -> pydantic.create_model -> validated rows and JSON schema
+Failure path: A row model built from declarations must refuse a string where an integer is declared and an integer where a boolean is declared, or the "checked cells" count includes coerced values (P16, P30). An optional field must keep None rather than becoming an empty string. An undeclared field type would silently widen the contract.
+Required repair: Build the model with create_model under strict and extra='forbid'; count accepted and rejected rows separately; preserve missing optional values as None; emit the JSON schema as the published contract; block an undeclared field type and an empty field list.
+Function bridge: pydantic.create_model with ConfigDict(strict=True, extra='forbid'); BaseModel.model_validate; BaseModel.model_json_schema
+Positive acceptance: Two of five rows are accepted, one missing optional value is preserved, and the schema lists the four declared properties.
+Adverse acceptance: A string integer, an integer boolean and an unknown field are each refused; an undeclared type blocks.
+Evidence and limit: guards-v10 case 95 on authored fields. The recorded 42 field definitions and 11582 cells were not revalidated.
+References: HD05 HD104
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P96 -- The specification carries its data under a name, and an encoded field may not exist
+
+Original proof: P96  checked atlas measures -> Altair specifications -> native Vega SVG and PNG
+Source location: frozen master lines 4523-4552; original section SHA256 a36515a11283f7fa2ce023589fe10540d63fffe65b53b9fae2612bfc8e5a38cf.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: Altair stores the rows under a named entry in datasets and leaves data as a name reference, so a check that inspects data.values would report no data; and Altair emits a specification for an encoding whose field is not a column, which renders empty rather than failing.
+Handoff: checked atlas measures -> Altair marks and encodings -> to_dict -> vl_convert SVG and PNG
+Failure path: "four specifications preserve exact source rows" needs the rows located wherever the library put them. A misspelled column produces a chart with no marks and no error. An external data URL would make the chart depend on the network at view time.
+Required repair: Reject a specification with a data URL; resolve the rows from data.values or from the named dataset and compare them with the source; require every encoded field to be a column of the data; render with the embedded runtime and require repeated renders to match.
+Function bridge: altair Chart.mark_bar and encode; Chart.to_dict; vl_convert.vegalite_to_svg; lxml over the SVG; DeepDiff(zip_ordered_iterables=True)
+Positive acceptance: Three rows are found under the named dataset, the SVG repeats byte for byte and carries marks, and there is no data URL.
+Adverse acceptance: data.values is absent while the rows sit in datasets (reproduced); an encoding for a nonexistent column produces a specification (reproduced) and is blocked.
+Evidence and limit: guards-v10 case 96 on authored rows. The recorded four specifications and eight image files were not rebuilt.
+References: HD34 HD105
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P97 -- A workbook readback agrees only after a declared type normalization
+
+Original proof: P97  documented atlas tables -> native workbook -> independent cell readback
+Source location: frozen master lines 4553-4570; original section SHA256 dbae199ab8e11498f656ac447bab5b93ee9e3a91e6a0ca019ab2ff25fa6ed8ed.
+Finding: ADDITIONAL HANDOFF OBLIGATION; the two-reader divergence established in P74 and P81 applies here to the atlas tables.
+Handoff: documented atlas tables -> native workbook -> independent cell readback
+Failure path: The second reader returns integers as floats, so an "independent readback" that compares raw values fails, and one that compares stringified values hides the type change.
+Required repair: Read the named sheet with both readers, report that the raw readings differ, and require agreement only after the declared normalization; keep the sheet selected by name rather than by position.
+Function bridge: openpyxl.load_workbook by sheet name; CalamineWorkbook; the normalization and comparison from handoff_guards_v8.read_two_ways
+Positive acceptance: A three-row sheet agrees after normalization and its values read back exactly through openpyxl.
+Adverse acceptance: The raw readings disagree (reproduced).
+Evidence and limit: guards-v10 case 97 on an authored workbook. The recorded atlas workbook was not rebuilt.
+References: HD40 HD94
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P98 -- Rows are validated against the contract before they reach the page
+
+Original proof: P98  checked data contract -> searchable tables and field glossary
+Source location: frozen master lines 4571-4588; original section SHA256 fba78f07fa4f8f2f79ca0de7d1256a298af66c4da219c77f008c822f4b46aeed.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it.
+Handoff: checked data contract -> searchable tables -> field glossary
+Failure path: A table rendered from rows that were never validated against the published contract can display values the schema forbids; an inline script in the page would break the fixed-handler rule (P66).
+Required repair: Validate every row against the contract model first and refuse to render if any row is rejected; render with the escaping template; assert the rows through jsdom; confirm the page carries no inline script.
+Function bridge: the P95 row model; Jinja2 autoescape template; jsdom row assertions
+Positive acceptance: Two validated rows render and read back through the DOM with zero external requests and no inline script.
+Adverse acceptance: A row the contract rejects never reaches the page.
+Evidence and limit: guards-v10 case 98 on authored rows. The recorded searchable tables were not rebuilt.
+References: HD85 HD89 HD104
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P99 -- Every published field carries its unit and its source caveat
+
+Original proof: P99  checked data-desk states and native workbook -> fixed interface handlers
+Source location: frozen master lines 4589-4610; original section SHA256 39b41a932615ea1d3cfcacf109150fd042d43c493af2ef7d7248503d271f0d19.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it.
+Handoff: checked data-desk states and native workbook -> fixed handlers -> published fields
+Failure path: A published measure without its unit and its derivation invites the reading the earlier proofs already refuse: a mean over closed cases read as a mean over all cases (P22), a handover weight read as a case count (P62, P93), a discussion mention read as an execution (P20).
+Required repair: Require a unit and a source note on every published field, block a field that lacks either, and carry the caveat text into the rendered interface rather than into a separate document.
+Function bridge: explicit field-definition checks; Jinja2 autoescape template; jsdom row assertions
+Positive acceptance: Two fields render with their units and the "not a case count" caveat present in the page.
+Adverse acceptance: A field without a unit or a source blocks.
+Evidence and limit: guards-v10 case 99 on an authored glossary. The recorded data-desk states were not rebuilt.
+References: HD85 HD89
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P100 -- A narrative may name only fields the model carries
+
+Original proof: P100  recorded data atlas -> fixed executive narrative -> executive summary
+Source location: frozen master lines 4611-4633; original section SHA256 03bdf43c918ff69db05713c8bbfaec5295ddf685afc52d9124c3ed1a72f17b92.
+Finding: ADDITIONAL HANDOFF OBLIGATION; this is where the framework's zero-reasoning claim is easiest to break, because prose is the one deliverable a reader cannot check against a schema by eye.
+Handoff: recorded data atlas -> fixed sentence templates -> executive summary
+Failure path: A sentence that names a quantity the model does not carry is an unsourced claim, whether it was written by a person or generated. A trend, a cause or a comparison that no field supports must be impossible to render, not merely discouraged.
+Required repair: Build every sentence from a fixed template whose placeholders are checked against the model before rendering; block a placeholder the model does not carry; confirm each named value appears in the rendered text.
+Function bridge: str.format over a declared model; an explicit placeholder-membership check; KeyError from the formatter as the library-level backstop
+Positive acceptance: Three sentences render from three model fields with the population and flagged counts present in the text.
+Adverse acceptance: A sentence naming a trend field the model does not carry blocks; formatting an unknown placeholder raises.
+Evidence and limit: guards-v10 case 100 on an authored model. The recorded executive summary was not rebuilt.
+References: HD11 HD71
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+## Embedded runnable local guard module: handoff_guards_v10.py
+
+SHA256 5881051f149606d3a45ed20b9320d55e31ae6aa981ee762da601e9259146d6da; bytes 21687. Save the following code block as handoff_guards_v10.py next to the earlier guard modules.
+
+```python
+"""Tenth bounded adapter suite: P91-P100, the data atlas. Requires handoff_guards_v1.py and handoff_guards_v8.py from
+this TXT. Every grouping, ranking, matrix build, calendar difference, schema, chart specification, workbook readback and
+DOM assertion below is a library primitive call; local code declares fixtures and policies and turns a primitive result
+into a Blocked outcome. All runtime inputs are authored fixtures. No model client and no network.
+Run: python handoff_guards_v10.py --report report.json [--jsdom-dir DIR]
+"""
+from __future__ import annotations
+import argparse, collections, datetime, hashlib, importlib.metadata, io, json, logging, os, traceback, warnings
+from pathlib import Path
+from typing import Literal
+import altair as alt
+import networkx as nx
+import numpy as np
+import openpyxl
+import pandas as pd
+import vl_convert as vlc
+from deepdiff import DeepDiff
+from lxml import etree
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, create_model
+from scipy.sparse import coo_matrix
+import handoff_guards_v1 as g
+import handoff_guards_v8 as g8
+warnings.simplefilter('ignore'); logging.disable(logging.WARNING)
+
+# ---------------------------------------------------------------- P91
+def category_totals(cases: list[dict], *, rows: str, cols: str, population: int) -> dict:
+    df = pd.DataFrame(cases)
+    if df['case_id'].duplicated().any(): raise g.Blocked('duplicate case')
+    if len(df) != population: raise g.Blocked('case rows do not match the declared population')
+    grid = df.groupby([rows, cols], dropna=False).size().unstack(fill_value=0)
+    if int(grid.to_numpy().sum()) != population: raise g.Blocked('grid does not conserve the population')
+    per_row = df.groupby(rows, dropna=False).size().to_dict()
+    if sum(per_row.values()) != population: raise g.Blocked('row dimension does not total the population')
+    return {'grid': {r: {c: int(grid.loc[r, c]) for c in grid.columns} for r in grid.index},
+            'per_row': {k: int(v) for k, v in per_row.items()}, 'population': population}
+
+# ---------------------------------------------------------------- P92
+def ranked_coverage(paths: list[dict], *, population: int) -> dict:
+    df = pd.DataFrame(paths)
+    if df['path_id'].duplicated().any(): raise g.Blocked('duplicate path')
+    if int(df['cases'].sum()) != population: raise g.Blocked('path counts do not total the population')
+    ordered = df.sort_values('cases', ascending=False, kind='stable')  # ties keep source order
+    ordered = ordered.assign(cumulative=ordered['cases'].cumsum())
+    ordered = ordered.assign(coverage=(ordered['cumulative'] / population * 100).round(4))
+    last = ordered.iloc[-1]
+    if int(last['cumulative']) != population or float(last['coverage']) != 100.0: raise g.Blocked('coverage does not reach the population')
+    return {'order': ordered['path_id'].tolist(), 'cumulative': [int(v) for v in ordered['cumulative']],
+            'final_coverage': float(last['coverage']), 'sequences': {r['path_id']: list(r['sequence']) for _, r in df.iterrows()}}
+
+# ---------------------------------------------------------------- P93
+def resource_matrix(pairs: list[dict], resources: list[str]) -> dict:
+    seen = set()
+    for p in pairs:
+        key = (p['source'], p['target'])
+        if key in seen: raise g.Blocked('duplicate resource pair: %s -> %s' % key)
+        if p['source'] not in resources or p['target'] not in resources: raise g.Blocked('pair outside the declared resource set')
+        seen.add(key)
+    index = {r: i for i, r in enumerate(resources)}
+    n = len(resources)
+    rows = [index[p['source']] for p in pairs]; cols = [index[p['target']] for p in pairs]
+    weights = coo_matrix(([p['weight'] for p in pairs], (rows, cols)), shape=(n, n)).toarray()
+    present = np.zeros((n, n), dtype=bool)
+    for r, c in zip(rows, cols): present[r, c] = True  # a boolean mask cannot be built by summing
+    graph = nx.DiGraph(); graph.add_weighted_edges_from([(p['source'], p['target'], p['weight']) for p in pairs])
+    return {'recorded_cells': int(present.sum()), 'unrecorded_cells': int((~present).sum()),
+            'self_pairs': nx.number_of_selfloops(graph), 'matrix': weights.tolist(), 'present': present.tolist(),
+            'measure': 'handover weight, not a case count'}
+
+# ---------------------------------------------------------------- P94
+def interval_profiles(cases: list[dict]) -> dict:
+    df = pd.DataFrame(cases)
+    start = pd.to_datetime(df['start'], utc=True, errors='raise'); deadline = pd.to_datetime(df['deadline'], utc=True, errors='raise')
+    if (deadline < start).any(): raise g.Blocked('a deadline precedes its start')
+    df = df.assign(calendar_days=(deadline - start).dt.days)
+    for c in cases:
+        if 'working_days' not in c: raise g.Blocked('stored working-day count missing; holiday rules are not rerun here')
+    profiles = df.groupby(['calendar_days', 'working_days'], dropna=False).size()
+    return {'cases': len(df), 'calendar_days': df['calendar_days'].tolist(),
+            'profiles': {'%d/%d' % k: int(v) for k, v in profiles.items()},
+            'working_days_source': 'retained from the recorded workbook; the holidays library was not rerun (P58)'}
+
+# ---------------------------------------------------------------- P95
+FIELD_TYPES = {'string': str, 'integer': int, 'boolean': bool, 'date': datetime.date}
+
+
+def build_row_model(fields: list[dict]):
+    if not fields: raise g.Blocked('no field definitions')
+    spec = {}
+    for f in fields:
+        if f['type'] not in FIELD_TYPES: raise g.Blocked('undeclared field type: ' + str(f['type']))
+        annotation = FIELD_TYPES[f['type']]
+        spec[f['name']] = ((annotation | None) if f.get('optional') else annotation, ... if not f.get('optional') else None)
+    return create_model('AtlasRow', __config__=ConfigDict(strict=True, extra='forbid'), **spec)
+
+
+def validate_rows(fields: list[dict], rows: list[dict]) -> dict:
+    model = build_row_model(fields)
+    accepted, rejected = [], []
+    for r in rows:
+        try: accepted.append(model.model_validate(r).model_dump())
+        except ValidationError as e: rejected.append({'row': r, 'errors': len(e.errors())})
+    schema = model.model_json_schema()
+    return {'fields': len(fields), 'accepted': len(accepted), 'rejected': len(rejected),
+            'cells': len(accepted) * len(fields), 'schema_properties': sorted(schema['properties']),
+            'missing_preserved': sum(1 for r in accepted for v in r.values() if v is None)}
+
+# ---------------------------------------------------------------- P96
+def atlas_chart(rows: list[dict], *, x: str, y: str) -> dict:
+    frame = pd.DataFrame(rows)
+    missing = [f for f in (x, y) if f not in frame.columns]
+    if missing: raise g.Blocked('encoded field is not a column of the data: ' + ','.join(missing))
+    chart = alt.Chart(frame).mark_bar().encode(x=alt.X(x + ':N'), y=alt.Y(y + ':Q'))
+    spec = chart.to_dict()
+    data = spec.get('data', {})
+    if 'url' in data: raise g.Blocked('specification references an external data URL')
+    # Altair names the dataset and stores the rows under datasets; inline values are the other shape.
+    data_values = data.get('values') if 'values' in data else spec.get('datasets', {}).get(data.get('name'))
+    if data_values is None: raise g.Blocked('specification does not carry its data inline or as a named dataset')
+    if DeepDiff(rows, data_values, zip_ordered_iterables=True): raise g.Blocked('embedded data differs from the source rows')
+    svg = vlc.vegalite_to_svg(json.dumps(spec))
+    again = vlc.vegalite_to_svg(json.dumps(spec))
+    root = etree.fromstring(svg.encode())
+    marks = root.findall('.//{http://www.w3.org/2000/svg}path') + root.findall('.//{http://www.w3.org/2000/svg}rect')
+    return {'rows': len(rows), 'svg_repeatable': svg == again, 'svg_bytes': len(svg.encode()),
+            'mark_elements': len(marks), 'external_data_url': False}
+
+# ---------------------------------------------------------------- P97
+def atlas_workbook(sheets: dict[str, list[list]]) -> bytes:
+    book = openpyxl.Workbook(); book.remove(book.active)
+    for name, rows in sheets.items():
+        ws = book.create_sheet(name)
+        for row in rows: ws.append(row)
+    buf = io.BytesIO(); book.save(buf); return buf.getvalue()
+
+# ---------------------------------------------------------------- P100
+NARRATIVE_FIELDS = {'population', 'flagged', 'departments'}
+
+
+def executive_narrative(model: dict, sentences: list[str]) -> dict:
+    used = []
+    for s in sentences:
+        placeholders = [p.strip('{}') for p in s.split() if p.startswith('{') and p.endswith('}')]
+        for p in placeholders:
+            if p not in model: raise g.Blocked('narrative names a field the model does not carry: ' + p)
+            used.append(p)
+    rendered = [s.format(**model) for s in sentences]
+    for value in ('population', 'flagged'):
+        if str(model[value]) not in ' '.join(rendered) and value in used: raise g.Blocked('a named value did not reach the text')
+    return {'sentences': len(rendered), 'fields_used': sorted(set(used)), 'text': rendered}
+
+C = []
+def case(i):
+    def reg(fn): C.append((i, fn)); return fn
+    return reg
+
+
+@case(91)
+def group_totals_conserve_the_population():
+    cases = [{'case_id': 'c1', 'department': 'General', 'channel': 'Desk'},
+             {'case_id': 'c2', 'department': 'General', 'channel': 'Internet'},
+             {'case_id': 'c3', 'department': 'Experts', 'channel': 'Desk'}]
+    frame = pd.DataFrame(cases)
+    plain = frame.groupby(['department', 'channel']).size().unstack()
+    g.equal(bool(plain.isna().any().any()), True)  # an absent combination becomes NaN, not zero
+    out = category_totals(cases, rows='department', cols='channel', population=3)
+    g.equal(out['grid'], {'Experts': {'Desk': 1, 'Internet': 0}, 'General': {'Desk': 1, 'Internet': 1}})
+    g.equal(out['per_row'], {'Experts': 1, 'General': 2})
+    g.rejects(g.Blocked, lambda: category_totals(cases, rows='department', cols='channel', population=4))
+    g.rejects(g.Blocked, lambda: category_totals(cases + [cases[0]], rows='department', cols='channel', population=4))
+    return {'unstack_nan_reproduced': True, 'fill_value_conserves_population': True, 'both_dimensions_total_the_population': True}
+
+
+@case(92)
+def ranking_ties_need_a_stable_sort():
+    frame = pd.DataFrame({'id': ['p%d' % i for i in range(17)], 'v': [1, 2] * 8 + [1]})
+    quick = frame.sort_values('v', ascending=False)['id'].tolist()
+    stable = frame.sort_values('v', ascending=False, kind='stable')['id'].tolist()
+    g.require(quick != stable, 'the default sort reorders ties')  # only mergesort and stable are stable algorithms
+    g.equal(stable[:4], ['p1', 'p3', 'p5', 'p7'])
+    paths = [{'path_id': 'v1', 'cases': 10, 'sequence': ['A', 'B', 'A']}, {'path_id': 'v2', 'cases': 10, 'sequence': ['A', 'C']},
+             {'path_id': 'v3', 'cases': 5, 'sequence': ['A']}]
+    out = ranked_coverage(paths, population=25)
+    g.equal(out['order'], ['v1', 'v2', 'v3']); g.equal(out['cumulative'], [10, 20, 25]); g.equal(out['final_coverage'], 100.0)
+    g.equal(out['sequences']['v1'], ['A', 'B', 'A'])  # a repeated activity survives the ranking
+    g.rejects(g.Blocked, lambda: ranked_coverage(paths, population=26))
+    return {'default_sort_reorders_ties_reproduced': True, 'stable_sort_preserves_source_order': True,
+            'cumulative_reaches_the_population': True, 'repeated_activities_retained': True}
+
+
+@case(93)
+def sparse_matrix_sums_duplicates_silently():
+    pairs = [{'source': 'R01', 'target': 'R02', 'weight': 0.2}, {'source': 'R01', 'target': 'R01', 'weight': 0.13}]
+    duplicated = coo_matrix(([0.2, 0.3], ([0, 0], [1, 1])), shape=(2, 2)).toarray()
+    g.equal(duplicated[0][1], 0.5)  # coo_matrix adds duplicate entries instead of rejecting them
+    mask_by_sum = coo_matrix(([1, 1], ([0, 0], [1, 1])), shape=(2, 2)).toarray()
+    g.equal(int(mask_by_sum[0][1]), 2)  # a presence mask built the same way becomes a count
+    out = resource_matrix(pairs, ['R01', 'R02'])
+    g.equal((out['recorded_cells'], out['unrecorded_cells']), (2, 2))
+    g.equal(out['self_pairs'], 1); g.equal(out['present'][1][0], False)  # an unrecorded cell is not a zero weight
+    g.equal(out['matrix'][1][0], 0.0)
+    g.rejects(g.Blocked, lambda: resource_matrix(pairs + [pairs[0]], ['R01', 'R02']))
+    g.rejects(g.Blocked, lambda: resource_matrix(pairs + [{'source': 'R09', 'target': 'R01', 'weight': 1.0}], ['R01', 'R02']))
+    return {'coo_duplicate_summing_reproduced': True, 'presence_mask_built_without_summing': True,
+            'unrecorded_kept_distinct_from_zero': True, 'self_pairs_retained': True, 'weights_are_not_case_counts': True}
+
+
+@case(94)
+def calendar_days_are_a_difference_not_a_rerun():
+    cases = [{'case_id': 'c1', 'start': '2011-10-11', 'deadline': '2011-12-06', 'working_days': 40},
+             {'case_id': 'c2', 'start': '2011-10-11', 'deadline': '2011-12-06', 'working_days': 40},
+             {'case_id': 'c3', 'start': '2011-11-01', 'deadline': '2011-12-06', 'working_days': 25}]
+    out = interval_profiles(cases)
+    g.equal(out['calendar_days'], [56, 56, 35])  # deadline minus start, in days
+    g.equal(out['profiles'], {'35/25': 1, '56/40': 2})
+    g.require('was not rerun' in out['working_days_source'], 'the working-day provenance travels with the result')
+    g.rejects(g.Blocked, lambda: interval_profiles([{'case_id': 'x', 'start': '2011-12-06', 'deadline': '2011-10-11', 'working_days': 1}]))
+    g.rejects(g.Blocked, lambda: interval_profiles([{'case_id': 'x', 'start': '2011-10-11', 'deadline': '2011-12-06'}]))
+    return {'calendar_difference_checked': True, 'stored_working_days_retained_not_recomputed': True,
+            'reversed_interval_blocked': True, 'profiles_counted': True}
+
+
+@case(95)
+def strict_row_schemas_reject_and_preserve():
+    fields = [{'name': 'case_id', 'type': 'string'}, {'name': 'events', 'type': 'integer'},
+              {'name': 'at_risk', 'type': 'boolean'}, {'name': 'activity', 'type': 'string', 'optional': True}]
+    rows = [{'case_id': 'c1', 'events': 3, 'at_risk': True, 'activity': 'T02'},
+            {'case_id': 'c2', 'events': 1, 'at_risk': False, 'activity': None},
+            {'case_id': 'c3', 'events': '1', 'at_risk': False, 'activity': 'T03'},
+            {'case_id': 'c4', 'events': 1, 'at_risk': 1, 'activity': 'T03'},
+            {'case_id': 'c5', 'events': 1, 'at_risk': False, 'activity': 'T03', 'extra': 1}]
+    out = validate_rows(fields, rows)
+    g.equal((out['accepted'], out['rejected']), (2, 3))  # a string integer, an int boolean and an unknown field are refused
+    g.equal(out['missing_preserved'], 1)  # the optional activity stays None rather than becoming ''
+    g.equal(out['schema_properties'], ['activity', 'at_risk', 'case_id', 'events'])
+    g.equal(out['cells'], 8)
+    g.rejects(g.Blocked, lambda: build_row_model([{'name': 'x', 'type': 'decimal'}]))
+    g.rejects(g.Blocked, lambda: build_row_model([]))
+    return {'strict_types_enforced': True, 'unknown_field_refused': True, 'optional_missing_preserved': True,
+            'json_schema_emitted': True}
+
+
+@case(96)
+def chart_specification_embeds_its_data():
+    rows = [{'department': 'General', 'cases': 1390}, {'department': 'Experts', 'cases': 15}, {'department': 'Customer contact', 'cases': 29}]
+    out = atlas_chart(rows, x='department', y='cases')
+    g.equal(out['rows'], 3); g.equal(out['external_data_url'], False)
+    g.equal(out['svg_repeatable'], True)  # the same specification renders to the same SVG
+    g.require(out['mark_elements'] > 0, 'the SVG carries rendered marks')
+    frame = pd.DataFrame(rows)
+    spec = alt.Chart(frame).mark_bar().encode(x='department:N', y='cases:Q').to_dict()
+    g.equal('values' in spec['data'], False)  # the rows live under a named dataset, not inline
+    g.equal(DeepDiff(rows, spec['datasets'][spec['data']['name']], zip_ordered_iterables=True), {})
+    unchecked = alt.Chart(pd.DataFrame(rows)).mark_bar().encode(x='missing_column:N', y='cases:Q').to_dict()
+    g.equal(unchecked['encoding']['x']['field'], 'missing_column')  # Altair builds a spec for a column that does not exist
+    g.rejects(g.Blocked, lambda: atlas_chart(rows, x='missing_column', y='cases'))
+    return {'data_carried_as_a_named_dataset_not_inline_reproduced': True, 'no_external_data_url': True, 'svg_repeatable': True,
+            'marks_rendered_by_the_vega_runtime': True,
+            'encoding_of_a_nonexistent_column_accepted_reproduced': True}
+
+
+@case(97)
+def atlas_workbook_reads_back_after_normalization():
+    sheets = {'departments': [['department', 'cases'], ['General', 1390], ['Experts', 15]]}
+    data = atlas_workbook(sheets)
+    out = g8.read_two_ways(data, 'departments')
+    g.equal(out['raw_agree'], False); g.equal(out['normalized_agree'], True)  # calamine returns the integers as floats
+    g.equal(out['rows'], 3)
+    ws = openpyxl.load_workbook(io.BytesIO(data))['departments']
+    g.equal([c.value for c in ws[2]], ['General', 1390])
+    return {'two_readers_normalized': True, 'sheet_selected_by_name': True, 'values_preserved': True}
+
+
+@case(98)
+def searchable_tables_render_the_contract():
+    fields = [{'name': 'case_id', 'type': 'string'}, {'name': 'events', 'type': 'integer'}]
+    rows = [{'case_id': 'c1', 'events': 3}, {'case_id': 'c2', 'events': 1}]
+    checked = validate_rows(fields, rows)
+    g.equal(checked['rejected'], 0)
+    page = g8.CATALOG.render(title='Data desk', fields=['case_id', 'events'], rows=[{'case_id': r['case_id'], 'events': str(r['events'])} for r in rows])
+    if g8.jsdom_available():
+        dom = g8.run_dom(page)
+        g.equal([r[0] for r in dom['rows']], ['c1', 'c2']); g.equal(dom['externalRequests'], 0)
+    g.equal('<script' in page, False)
+    return {'rows_validated_before_render': True, 'dom_checked': g8.jsdom_available(), 'no_inline_script': True}
+
+
+@case(99)
+def field_glossary_states_units_and_sources():
+    glossary = [{'name': 'mean_days_closed', 'unit': 'days', 'source': 'closed cases only (P22)'},
+                {'name': 'handover_weight', 'unit': 'share', 'source': 'pm4py handover network; not a case count (P62)'}]
+    for entry in glossary:
+        if not entry.get('unit') or not entry.get('source'): raise g.Blocked('a field without a unit or a source')
+    page = g8.CATALOG.render(title='Field glossary', fields=['name', 'unit', 'source'], rows=glossary)
+    g.equal('not a case count' in page, True)  # the measure caveat travels into the interface
+    g.equal(len(glossary), 2)
+    if g8.jsdom_available():
+        dom = g8.run_dom(page)
+        g.equal([r[0] for r in dom['rows']], ['mean_days_closed', 'handover_weight'])
+    return {'units_declared': True, 'measure_caveats_carried_into_the_interface': True, 'dom_checked': g8.jsdom_available()}
+
+
+@case(100)
+def the_narrative_names_only_model_fields():
+    model = {'population': 1434, 'flagged': 94, 'departments': 3}
+    sentences = ['The atlas covers {population} cases.', 'Of the open cases, {flagged} are flagged.', 'Cases span {departments} departments.']
+    out = executive_narrative(model, sentences)
+    g.equal(out['sentences'], 3); g.equal(out['fields_used'], ['departments', 'flagged', 'population'])
+    g.equal('1434' in out['text'][0] and '94' in out['text'][1], True)
+    g.rejects(g.Blocked, lambda: executive_narrative(model, ['Risk rose by {trend} percent.']))  # a field the model does not carry
+    g.rejects(KeyError, lambda: [s.format(**model) for s in ['{unknown}']])
+    return {'every_named_field_exists_in_the_model': True, 'numbers_come_from_the_model': True,
+            'no_unsourced_claim_can_be_rendered': True}
+
+
+def run() -> dict:
+    g.ASSERTIONS = 0; rows = []
+    for i, fn in C:
+        before = g.ASSERTIONS
+        try: r = fn(); state = 'passed'; error = None
+        except Exception: r = {}; state = 'failed'; error = traceback.format_exc()
+        rows.append({'proof': i, 'test': fn.__name__, 'status': state, 'assertions': g.ASSERTIONS - before, 'result': r, 'error': error})
+    packages = ['pydantic', 'pandas', 'numpy', 'scipy', 'networkx', 'altair', 'vl-convert-python', 'openpyxl', 'python-calamine', 'lxml', 'deepdiff']
+    here = Path(__file__).resolve().parent
+    return {'scope': 'Bounded authored handoff fixtures and reproduced library defaults; the original P91-P100 chains and their artifacts were not rerun.',
+            'test_cases': len(rows), 'passed': sum(r['status'] == 'passed' for r in rows), 'failed': sum(r['status'] == 'failed' for r in rows),
+            'assertions': g.ASSERTIONS, 'full_chains_executed': 0, 'network_calls': 0, 'business_actions': 0,
+            'source_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+            'dependency_sha256': {name: hashlib.sha256((here / name).read_bytes()).hexdigest() for name in ['handoff_guards_v1.py', 'handoff_guards_v8.py']},
+            'library_versions': {n: importlib.metadata.version(n) for n in packages}, 'results': rows}
+
+
+if __name__ == '__main__':
+    p = argparse.ArgumentParser(); p.add_argument('--report', type=Path, required=True); p.add_argument('--jsdom-dir', default=os.environ.get('JSDOM_DIR', ''))
+    args = p.parse_args(); os.environ['JSDOM_DIR'] = args.jsdom_dir; g8.JSDOM_DIR = args.jsdom_dir
+    result = run(); args.report.parent.mkdir(parents=True, exist_ok=True)
+    args.report.write_text(json.dumps(result, indent=2, sort_keys=True, allow_nan=False) + '\n')
+    print(json.dumps({k: result[k] for k in ['test_cases', 'passed', 'failed', 'assertions']}))
+    if result['failed']:
+        print('\n'.join(r['error'] for r in result['results'] if r['error'])); raise SystemExit(1)
+```
+
+## Fresh local guard evidence: guards-v10.json
+
+Result file SHA256 6afb2137fe1e8aa39afac0c761e20ebae4e4e256ab3532bacdc9c470228d67ad; bytes 4450. These results do not rerun or promote the full proof chains.
+
+```json
+{
+  "assertions": 55,
+  "business_actions": 0,
+  "dependency_sha256": {
+    "handoff_guards_v1.py": "2b3138b692ecfd02b76ae34bdb001f5046608bb2983d8709d6c55c0765f7c9b8",
+    "handoff_guards_v8.py": "9809d9d6df911eb5f1326a8ded8d53f7aa039679a8570eeb0c24fcb12ff8751c"
+  },
+  "failed": 0,
+  "full_chains_executed": 0,
+  "library_versions": {
+    "altair": "6.2.2",
+    "deepdiff": "9.1.0",
+    "lxml": "6.1.3",
+    "networkx": "3.6.1",
+    "numpy": "2.4.6",
+    "openpyxl": "3.1.5",
+    "pandas": "2.2.3",
+    "pydantic": "2.13.5",
+    "python-calamine": "0.8.2",
+    "scipy": "1.17.1",
+    "vl-convert-python": "1.9.0.post1"
+  },
+  "network_calls": 0,
+  "passed": 10,
+  "results": [
+    {
+      "assertions": 5,
+      "error": null,
+      "proof": 91,
+      "result": {
+        "both_dimensions_total_the_population": true,
+        "fill_value_conserves_population": true,
+        "unstack_nan_reproduced": true
+      },
+      "status": "passed",
+      "test": "group_totals_conserve_the_population"
+    },
+    {
+      "assertions": 7,
+      "error": null,
+      "proof": 92,
+      "result": {
+        "cumulative_reaches_the_population": true,
+        "default_sort_reorders_ties_reproduced": true,
+        "repeated_activities_retained": true,
+        "stable_sort_preserves_source_order": true
+      },
+      "status": "passed",
+      "test": "ranking_ties_need_a_stable_sort"
+    },
+    {
+      "assertions": 8,
+      "error": null,
+      "proof": 93,
+      "result": {
+        "coo_duplicate_summing_reproduced": true,
+        "presence_mask_built_without_summing": true,
+        "self_pairs_retained": true,
+        "unrecorded_kept_distinct_from_zero": true,
+        "weights_are_not_case_counts": true
+      },
+      "status": "passed",
+      "test": "sparse_matrix_sums_duplicates_silently"
+    },
+    {
+      "assertions": 5,
+      "error": null,
+      "proof": 94,
+      "result": {
+        "calendar_difference_checked": true,
+        "profiles_counted": true,
+        "reversed_interval_blocked": true,
+        "stored_working_days_retained_not_recomputed": true
+      },
+      "status": "passed",
+      "test": "calendar_days_are_a_difference_not_a_rerun"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 95,
+      "result": {
+        "json_schema_emitted": true,
+        "optional_missing_preserved": true,
+        "strict_types_enforced": true,
+        "unknown_field_refused": true
+      },
+      "status": "passed",
+      "test": "strict_row_schemas_reject_and_preserve"
+    },
+    {
+      "assertions": 8,
+      "error": null,
+      "proof": 96,
+      "result": {
+        "data_carried_as_a_named_dataset_not_inline_reproduced": true,
+        "encoding_of_a_nonexistent_column_accepted_reproduced": true,
+        "marks_rendered_by_the_vega_runtime": true,
+        "no_external_data_url": true,
+        "svg_repeatable": true
+      },
+      "status": "passed",
+      "test": "chart_specification_embeds_its_data"
+    },
+    {
+      "assertions": 4,
+      "error": null,
+      "proof": 97,
+      "result": {
+        "sheet_selected_by_name": true,
+        "two_readers_normalized": true,
+        "values_preserved": true
+      },
+      "status": "passed",
+      "test": "atlas_workbook_reads_back_after_normalization"
+    },
+    {
+      "assertions": 4,
+      "error": null,
+      "proof": 98,
+      "result": {
+        "dom_checked": true,
+        "no_inline_script": true,
+        "rows_validated_before_render": true
+      },
+      "status": "passed",
+      "test": "searchable_tables_render_the_contract"
+    },
+    {
+      "assertions": 3,
+      "error": null,
+      "proof": 99,
+      "result": {
+        "dom_checked": true,
+        "measure_caveats_carried_into_the_interface": true,
+        "units_declared": true
+      },
+      "status": "passed",
+      "test": "field_glossary_states_units_and_sources"
+    },
+    {
+      "assertions": 5,
+      "error": null,
+      "proof": 100,
+      "result": {
+        "every_named_field_exists_in_the_model": true,
+        "no_unsourced_claim_can_be_rendered": true,
+        "numbers_come_from_the_model": true
+      },
+      "status": "passed",
+      "test": "the_narrative_names_only_model_fields"
+    }
+  ],
+  "scope": "Bounded authored handoff fixtures and reproduced library defaults; the original P91-P100 chains and their artifacts were not rerun.",
+  "source_sha256": "5881051f149606d3a45ed20b9320d55e31ae6aa981ee762da601e9259146d6da",
+  "test_cases": 10
+}
+```
+
+Checkpoint coverage: 100 of 300 proof-specific handoff amendments written, through P100. Prior cumulative TXT SHA256 540aaf9fc3ce2e340296d6771c55816acc837f77c41cbaed0f7875c48596fc9e.

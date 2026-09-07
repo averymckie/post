@@ -1,0 +1,157 @@
+{
+  "assertions": 55,
+  "business_actions": 0,
+  "dependency_sha256": {
+    "handoff_guards_v1.py": "2b3138b692ecfd02b76ae34bdb001f5046608bb2983d8709d6c55c0765f7c9b8",
+    "handoff_guards_v8.py": "9809d9d6df911eb5f1326a8ded8d53f7aa039679a8570eeb0c24fcb12ff8751c"
+  },
+  "failed": 0,
+  "full_chains_executed": 0,
+  "library_versions": {
+    "altair": "6.2.2",
+    "deepdiff": "9.1.0",
+    "lxml": "6.1.3",
+    "networkx": "3.6.1",
+    "numpy": "2.4.6",
+    "openpyxl": "3.1.5",
+    "pandas": "2.2.3",
+    "pydantic": "2.13.5",
+    "python-calamine": "0.8.2",
+    "scipy": "1.17.1",
+    "vl-convert-python": "1.9.0.post1"
+  },
+  "network_calls": 0,
+  "passed": 10,
+  "results": [
+    {
+      "assertions": 5,
+      "error": null,
+      "proof": 91,
+      "result": {
+        "both_dimensions_total_the_population": true,
+        "fill_value_conserves_population": true,
+        "unstack_nan_reproduced": true
+      },
+      "status": "passed",
+      "test": "group_totals_conserve_the_population"
+    },
+    {
+      "assertions": 7,
+      "error": null,
+      "proof": 92,
+      "result": {
+        "cumulative_reaches_the_population": true,
+        "default_sort_reorders_ties_reproduced": true,
+        "repeated_activities_retained": true,
+        "stable_sort_preserves_source_order": true
+      },
+      "status": "passed",
+      "test": "ranking_ties_need_a_stable_sort"
+    },
+    {
+      "assertions": 8,
+      "error": null,
+      "proof": 93,
+      "result": {
+        "coo_duplicate_summing_reproduced": true,
+        "presence_mask_built_without_summing": true,
+        "self_pairs_retained": true,
+        "unrecorded_kept_distinct_from_zero": true,
+        "weights_are_not_case_counts": true
+      },
+      "status": "passed",
+      "test": "sparse_matrix_sums_duplicates_silently"
+    },
+    {
+      "assertions": 5,
+      "error": null,
+      "proof": 94,
+      "result": {
+        "calendar_difference_checked": true,
+        "profiles_counted": true,
+        "reversed_interval_blocked": true,
+        "stored_working_days_retained_not_recomputed": true
+      },
+      "status": "passed",
+      "test": "calendar_days_are_a_difference_not_a_rerun"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 95,
+      "result": {
+        "json_schema_emitted": true,
+        "optional_missing_preserved": true,
+        "strict_types_enforced": true,
+        "unknown_field_refused": true
+      },
+      "status": "passed",
+      "test": "strict_row_schemas_reject_and_preserve"
+    },
+    {
+      "assertions": 8,
+      "error": null,
+      "proof": 96,
+      "result": {
+        "data_carried_as_a_named_dataset_not_inline_reproduced": true,
+        "encoding_of_a_nonexistent_column_accepted_reproduced": true,
+        "marks_rendered_by_the_vega_runtime": true,
+        "no_external_data_url": true,
+        "svg_repeatable": true
+      },
+      "status": "passed",
+      "test": "chart_specification_embeds_its_data"
+    },
+    {
+      "assertions": 4,
+      "error": null,
+      "proof": 97,
+      "result": {
+        "sheet_selected_by_name": true,
+        "two_readers_normalized": true,
+        "values_preserved": true
+      },
+      "status": "passed",
+      "test": "atlas_workbook_reads_back_after_normalization"
+    },
+    {
+      "assertions": 4,
+      "error": null,
+      "proof": 98,
+      "result": {
+        "dom_checked": true,
+        "no_inline_script": true,
+        "rows_validated_before_render": true
+      },
+      "status": "passed",
+      "test": "searchable_tables_render_the_contract"
+    },
+    {
+      "assertions": 3,
+      "error": null,
+      "proof": 99,
+      "result": {
+        "dom_checked": true,
+        "measure_caveats_carried_into_the_interface": true,
+        "units_declared": true
+      },
+      "status": "passed",
+      "test": "field_glossary_states_units_and_sources"
+    },
+    {
+      "assertions": 5,
+      "error": null,
+      "proof": 100,
+      "result": {
+        "every_named_field_exists_in_the_model": true,
+        "no_unsourced_claim_can_be_rendered": true,
+        "numbers_come_from_the_model": true
+      },
+      "status": "passed",
+      "test": "the_narrative_names_only_model_fields"
+    }
+  ],
+  "scope": "Bounded authored handoff fixtures and reproduced library defaults; the original P91-P100 chains and their artifacts were not rerun.",
+  "source_sha256": "5881051f149606d3a45ed20b9320d55e31ae6aa981ee762da601e9259146d6da",
+  "test_cases": 10
+}
