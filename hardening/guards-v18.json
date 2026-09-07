@@ -1,0 +1,147 @@
+{
+  "assertions": 66,
+  "business_actions": 0,
+  "dependency_sha256": {
+    "handoff_guards_v1.py": "2b3138b692ecfd02b76ae34bdb001f5046608bb2983d8709d6c55c0765f7c9b8"
+  },
+  "failed": 0,
+  "full_chains_executed": 0,
+  "glue_functions_replaced": 17,
+  "library_versions": {
+    "apportionment": "1.0",
+    "largest-remainder": "0.1.0",
+    "networkx": "3.6.1",
+    "numpy": "2.4.6",
+    "pandas": "2.2.3",
+    "pandera": "0.33.1",
+    "portion": "2.6.2",
+    "rapidfuzz": "3.14.6",
+    "repro-zipfile": "0.4.1",
+    "scipy": "1.17.1"
+  },
+  "network_calls": 0,
+  "passed": 8,
+  "replacements": {
+    "v15.build_plan": "pandera.DataFrameSchema with Check.isin over declared identifiers",
+    "v15.earliest_starts": "networkx.dag_longest_path_length",
+    "v15.offset_day": "pandas.tseries.offsets.CustomBusinessDay",
+    "v15.working_days": "pandas.tseries.offsets.CustomBusinessDay",
+    "v16.assessed": "pandera.DataFrameSchema with Check.isin",
+    "v16.bom_graph": "pandera.DataFrameSchema with a composite unique constraint",
+    "v16.gross_requirement": "scipy.sparse.linalg.spsolve on the Leontief total-requirements system",
+    "v16.month_walk": "pandas.period_range and pandas.Period.end_time",
+    "v16.normalized_package": "repro_zipfile.ReproducibleZipFile",
+    "v16.overlaps": "portion.Interval.overlaps / adjacent",
+    "v16.part_digests": "repro_zipfile.ReproducibleZipFile",
+    "v16.path_quantity": "scipy.sparse.linalg.spsolve on the Leontief total-requirements system",
+    "v16.staged": "pandera.DataFrameSchema with Check.isin",
+    "v16.stamp_dates": "repro_zipfile.ReproducibleZipFile",
+    "v16.unique_receipts": "pandera.DataFrameSchema with a unique column constraint",
+    "v17.apportion": "largest_remainder.LargestRemainder.round / apportionment.methods.compute",
+    "v17.within_one": "rapidfuzz.process.extract alone"
+  },
+  "results": [
+    {
+      "assertions": 10,
+      "error": null,
+      "replacement": "v16.overlaps -> portion",
+      "result": {
+        "adds_an_adjacency_predicate_the_glue_lacked": true,
+        "replaces": "portion.Interval.overlaps / adjacent",
+        "reproduces_the_recorded_result": true
+      },
+      "status": "passed",
+      "test": "interval_overlap_is_a_library_operation"
+    },
+    {
+      "assertions": 8,
+      "error": null,
+      "replacement": "v15.working_days/offset_day -> pandas CustomBusinessDay",
+      "result": {
+        "replaces": "pandas.tseries.offsets.CustomBusinessDay",
+        "reproduces_the_recorded_result": true,
+        "roll_direction_is_an_offset_method": true
+      },
+      "status": "passed",
+      "test": "working_day_arithmetic_is_a_calendar_offset"
+    },
+    {
+      "assertions": 7,
+      "error": null,
+      "replacement": "v16.month_walk -> pandas period_range",
+      "result": {
+        "primitive_keeps_the_month_end_the_handwritten_step_lost": true,
+        "replaces": "pandas.period_range and pandas.Period.end_time",
+        "reproduces_the_recorded_result": false
+      },
+      "status": "passed",
+      "test": "month_ends_come_from_periods_not_from_repeated_addition"
+    },
+    {
+      "assertions": 8,
+      "error": null,
+      "replacement": "v16.path_quantity/gross_requirement -> scipy Leontief solve",
+      "result": {
+        "no_path_enumeration_in_local_code": true,
+        "replaces": "scipy.sparse.linalg.spsolve on the Leontief total-requirements system",
+        "reproduces_the_recorded_result": true
+      },
+      "status": "passed",
+      "test": "requirement_explosion_is_a_linear_solve"
+    },
+    {
+      "assertions": 9,
+      "error": null,
+      "replacement": "v16.staged/assessed -> pandera DataFrameSchema",
+      "result": {
+        "replaces": "pandera.DataFrameSchema with Check.isin",
+        "reproduces_the_recorded_result": true,
+        "row_uniqueness_does_not_catch_a_payload_conflict": true,
+        "schema_names_the_offending_value": true
+      },
+      "status": "passed",
+      "test": "category_membership_is_a_schema_check"
+    },
+    {
+      "assertions": 11,
+      "error": null,
+      "replacement": "v17.apportion -> largest_remainder / apportionment",
+      "result": {
+        "credit_allocation_has_no_conserving_primitive": true,
+        "negative_pool_loses_a_cent_under_apportionment": true,
+        "negative_pool_refused_by_largest_remainder": true,
+        "replaces": "largest_remainder.LargestRemainder.round / apportionment.methods.compute",
+        "reproduces_the_recorded_result": true
+      },
+      "status": "passed",
+      "test": "a_researched_apportionment_refuses_the_credit_pool"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "replacement": "v17.within_one -> rapidfuzz alone",
+      "result": {
+        "cross_check_was_not_independent": true,
+        "replaces": "rapidfuzz.process.extract alone",
+        "reproduces_the_recorded_result": true
+      },
+      "status": "passed",
+      "test": "the_independent_enumeration_was_the_same_metric_twice"
+    },
+    {
+      "assertions": 7,
+      "error": null,
+      "replacement": "v16.part_digests/normalized_package -> repro_zipfile",
+      "result": {
+        "content_identity_without_a_local_rewriter": true,
+        "replaces": "repro_zipfile.ReproducibleZipFile",
+        "reproduces_the_recorded_result": true
+      },
+      "status": "passed",
+      "test": "a_deterministic_package_is_a_library_writer"
+    }
+  ],
+  "scope": "Glue elimination for handoff_guards_v15-v17 embedded earlier in this TXT. Each case calls the researched library primitive alone and records whether it reproduces, refuses or contradicts the handwritten result. No proof chain was rerun.",
+  "source_sha256": "c5bddd0266c8072248ae7df58ad3b123c7eb77c32521adbbe337d07f7029d0a1",
+  "test_cases": 8
+}

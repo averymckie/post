@@ -22,6 +22,7 @@ Runnable local guard modules embedded in `../Proofs.txt` (hardening batches P1-P
 | `handoff_guards_v14.py` | batch P131-P140 (SHA256 `0c617018…`), imports v1, v6, v8 and v12 |
 | `handoff_guards_v15.py` | batch P141-P150 (SHA256 `a6515cdb…`), imports v1; runs pytest in a temporary directory |
 | `handoff_guards_v16.py` | batch P151-P160 (SHA256 `f4d9a482…`), imports v1; renders DOCX templates and loads a Beancount journal in memory |
+| `handoff_guards_v18.py` | glue elimination for v15-v17 (SHA256 `c5bddd02…`), imports v1; replaces 17 handwritten functions with portion, pandera, scipy, pandas, repro-zipfile, largest-remainder and rapidfuzz primitives |
 | `guards-v1.json`, `guards-v2.json` | evidence recorded with the earlier batches |
 | `rerun-v1.json`, `rerun-v2.json` | the same modules re-executed in the batch-3 environment |
 | `guards-v3.json` … `guards-v15.json` | batch-3 through batch-15 evidence |
@@ -47,6 +48,7 @@ npm install jsdom && ./venv/bin/python handoff_guards_v8.py --report guards-v8.j
 ./venv/bin/python handoff_guards_v14.py --report guards-v14.json
 ./venv/bin/python handoff_guards_v15.py --report guards-v15.json
 ./venv/bin/python handoff_guards_v16.py --report guards-v16.json
+./venv/bin/python handoff_guards_v18.py --report guards-v18.json
 ```
 
 Case 26 of v3 uses the WordNet 3.0 corpus when `NLTK_DATA` points at a directory holding `corpora/wordnet.zip` (SHA256 `cbda5ea6eef7f36a97a43d4a75f85e07fccbb4f23657d27b4ccbc93e2646ab59`, 10775600 bytes, obtained once with `nltk.download('wordnet', download_dir=...)`). Without it the case still passes and records `not installed; no lexical expansion executed`. The guard runs themselves make no network call.
