@@ -8,6 +8,7 @@ this repository, which is the point of rule 5 of the hardening assurance.
 Each test names the hand-typed expectation in the frozen guard modules that it replaces.
 """
 import contextlib
+import csv
 import datetime
 import io
 import zoneinfo
@@ -45,6 +46,7 @@ import numpy.testing as npt
 import pandas as pd
 import pandas.testing as pdt
 import polars as pl
+import pyarrow.csv as pyarrow_csv
 import polars.testing as plt
 import pytest
 import rapidfuzz.distance.Levenshtein as rf_levenshtein
@@ -524,3 +526,72 @@ def test_icalendar_parses_a_recurrence_rule_without_expanding_it(count):
                                 count=count, bymonthday=31))
     npt.assert_array_equal(len(expanded), count)
     npt.assert_array_equal(all(moment.day == 31 for moment in expanded), True)
+
+
+# ---------------------------------------------------------------- CSV null and empty semantics
+CSV_SOURCE = b'a,b,c\n1,"",\n2,x,y\n'
+
+
+@given(st.integers(min_value=0, max_value=0))
+@SLOW
+def test_four_csv_readers_do_not_agree_on_a_quoted_empty_field(row):
+    """The first data row is 1,"", -- column b is a quoted empty string and column c is an unquoted empty
+    field. Four independent readers give three different answers, so the distinction P137 relies on survives
+    in exactly one of them. Replaces the pyarrow expectations in handoff_guards_v14.py."""
+    by_stdlib = list(csv.reader(io.StringIO(CSV_SOURCE.decode())))[1 + row]
+    by_pandas = pd.read_csv(io.BytesIO(CSV_SOURCE)).iloc[row].tolist()
+    by_polars = list(pl.read_csv(io.BytesIO(CSV_SOURCE)).row(row))
+    by_arrow = [column[row].as_py() for column in pyarrow_csv.read_csv(io.BytesIO(CSV_SOURCE)).columns]
+
+    npt.assert_array_equal(by_stdlib[1:], ['', ''])                       # stdlib has no null concept
+    npt.assert_array_equal([value != value for value in by_pandas[1:]], [True, True])  # pandas: both null
+    npt.assert_array_equal([by_polars[1], by_polars[2] is None], ['', True])           # polars keeps them apart
+    npt.assert_array_equal(by_arrow[1:], ['', ''])                        # pyarrow: both empty strings
+
+
+# Literal field texts that are also common missing-value sentinels. Every one is a plausible real value:
+# NA is the ISO code for Namibia, None and null are ordinary words, and 1.#IND appears in exported data.
+SENTINEL_TEXTS = ['null', 'NULL', 'NA', 'N/A', 'NaN', 'nan', 'None', 'n/a', '1.#IND']
+PRESERVED_TEXTS = ['none', '-', 'ok', 'x']
+
+
+def _read_single_field(source):
+    by_stdlib = list(csv.reader(io.StringIO(source.decode())))[1][0]
+    by_pandas = pd.read_csv(io.BytesIO(source), dtype=str).iloc[0, 0]
+    by_polars = pl.read_csv(io.BytesIO(source), infer_schema_length=0).row(0)[0]
+    by_arrow = pyarrow_csv.read_csv(io.BytesIO(source)).columns[0][0].as_py()
+    missing = lambda value: value is None or (isinstance(value, float) and value != value)
+    return by_stdlib, by_pandas, by_polars, by_arrow, missing
+
+
+@given(st.sampled_from(SENTINEL_TEXTS))
+@SLOW
+def test_pandas_and_pyarrow_turn_literal_text_into_a_missing_value(text):
+    """The field contains the characters of a word, not an absent value. stdlib csv and polars return the
+    text; pandas returns a missing value even with dtype=str, and pyarrow returns null. A column whose real
+    content is NA, the ISO code for Namibia, is destroyed by two of the four readers."""
+    source = ('c\n%s\n' % text).encode()
+    by_stdlib, by_pandas, by_polars, by_arrow, missing = _read_single_field(source)
+    npt.assert_array_equal([by_stdlib, by_polars], [text, text])
+    npt.assert_array_equal(missing(by_pandas), True)
+    npt.assert_array_equal(missing(by_arrow), text != 'None')
+
+
+@given(st.sampled_from(PRESERVED_TEXTS))
+@SLOW
+def test_all_four_readers_preserve_text_outside_the_sentinel_sets(text):
+    """The coercion is confined to each reader's sentinel list, so the divergence is about those words and
+    not about parsing generally. Lowercase none is preserved by all four while None is not."""
+    source = ('c\n%s\n' % text).encode()
+    by_stdlib, by_pandas, by_polars, by_arrow, missing = _read_single_field(source)
+    npt.assert_array_equal([by_stdlib, by_pandas, by_polars, by_arrow], [text] * 4)
+
+
+@given(st.sampled_from(['None']))
+@SLOW
+def test_the_two_coercing_readers_disagree_with_each_other(text):
+    """pandas treats None as missing and pyarrow does not, so the two readers that coerce do not even agree
+    on the same sentinel set."""
+    source = ('c\n%s\n' % text).encode()
+    _, by_pandas, _, by_arrow, missing = _read_single_field(source)
+    npt.assert_array_equal([missing(by_pandas), missing(by_arrow)], [True, False])
