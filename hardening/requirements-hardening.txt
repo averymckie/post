@@ -110,6 +110,7 @@ pytest==9.1.1
 python-calamine==0.8.2
 python-dateutil==2.9.0.post0
 python-docx==1.2.0
+python-levenshtein==0.27.4
 python-pptx==1.0.2
 pytz==2026.3.post1
 pyyaml==6.0.3
@@ -155,6 +156,7 @@ wcwidth==0.8.3
 weasel==1.0.0
 weasyprint==69.0
 webencodings==0.6.1
+workalendar==17.0.0
 wrapt==2.4.0
 xlsxwriter==3.2.9
 z3-solver==5.1.0.0

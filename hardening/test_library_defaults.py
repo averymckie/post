@@ -8,6 +8,7 @@ this repository, which is the point of rule 5 of the hardening assurance.
 Each test names the hand-typed expectation in the frozen guard modules that it replaces.
 """
 import contextlib
+import datetime
 import io
 from xml.etree import ElementTree
 from xml.sax.saxutils import escape as xml_escape
@@ -19,6 +20,8 @@ from fractions import Fraction
 
 import docx
 import duckdb
+import numpy as np
+from workalendar import core as workalendar_core
 import igraph
 import jsonschema
 import portion
@@ -410,3 +413,56 @@ def test_topological_order_is_valid_under_the_other_library(edges):
     position = {node: index for index, node in enumerate(nx.topological_sort(graph))}
     npt.assert_array_equal([position[u] < position[v] for u, v in edges if u != v],
                            [True] * len([1 for u, v in edges if u != v]))
+
+
+# ---------------------------------------------------------------- business day arithmetic
+class MondayToFriday(workalendar_core.Calendar):
+    """A five-day week with no holidays, so the two libraries are compared on the calendar alone."""
+    WEEKEND_DAYS = (5, 6)
+
+    def get_calendar_holidays(self, year):
+        return []
+
+
+WORKWEEK = MondayToFriday()
+NUMPY_CALENDAR = np.busdaycalendar(weekmask='Mon Tue Wed Thu Fri', holidays=[])
+ANY_2026_DAY = st.dates(min_value=datetime.date(2026, 1, 1), max_value=datetime.date(2026, 12, 31))
+
+
+def _numpy_offset(day, count):
+    return datetime.date.fromisoformat(
+        str(np.busday_offset(np.datetime64(day.isoformat()), count, roll='forward', busdaycal=NUMPY_CALENDAR)))
+
+
+@given(ANY_2026_DAY.filter(lambda day: bool(np.is_busday(np.datetime64(day.isoformat()),
+                                                         busdaycal=NUMPY_CALENDAR))),
+       st.integers(min_value=1, max_value=20))
+@SLOW
+def test_working_day_offset_agrees_from_a_working_anchor(day, count):
+    """workalendar is an independent implementation; numpy is not derived from it. From a working-day anchor
+    the two agree. Replaces the busday_offset expectations in handoff_guards_v19.py."""
+    npt.assert_array_equal(WORKWEEK.add_working_days(day, count), _numpy_offset(day, count))
+
+
+@given(ANY_2026_DAY.filter(lambda day: not bool(np.is_busday(np.datetime64(day.isoformat()),
+                                                             busdaycal=NUMPY_CALENDAR))),
+       st.integers(min_value=1, max_value=20))
+@SLOW
+def test_working_day_offset_diverges_from_a_non_working_anchor(day, count):
+    """From a weekend anchor the two libraries return different dates: workalendar counts the next working
+    day as the first one added, while numpy rolls the anchor forward and then adds. Any chain that offsets
+    from a date which may not be a working day, such as a planned start, gets a different answer depending on
+    which library computed it."""
+    workalendar_result = WORKWEEK.add_working_days(day, count)
+    numpy_result = _numpy_offset(day, count)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(workalendar_result, numpy_result)
+    npt.assert_array_equal(workalendar_result, _numpy_offset(day, count - 1))
+
+
+@given(ANY_2026_DAY)
+@SLOW
+def test_working_day_membership_agrees_between_the_two_libraries(day):
+    """The disagreement above is about counting, not about which days are working days."""
+    npt.assert_array_equal(WORKWEEK.is_working_day(day),
+                           bool(np.is_busday(np.datetime64(day.isoformat()), busdaycal=NUMPY_CALENDAR)))
