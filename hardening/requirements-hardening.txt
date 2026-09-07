@@ -85,6 +85,7 @@ pydyf==0.12.1
 pygments==2.21.0
 pymupdf==1.28.2
 pyparsing==3.3.2
+pypdf==6.17.0
 pyphen==0.18.1
 pyshacl==0.40.1
 python-calamine==0.8.2

@@ -1,0 +1,160 @@
+{
+  "assertions": 63,
+  "business_actions": 0,
+  "dependency_sha256": {
+    "handoff_guards_v1.py": "2b3138b692ecfd02b76ae34bdb001f5046608bb2983d8709d6c55c0765f7c9b8",
+    "handoff_guards_v6.py": "7dc3e6c5588bc9293c0c6c94802e7bb057090776647482e6ddf0b748d1c7f259",
+    "handoff_guards_v8.py": "9809d9d6df911eb5f1326a8ded8d53f7aa039679a8570eeb0c24fcb12ff8751c"
+  },
+  "failed": 0,
+  "full_chains_executed": 0,
+  "library_versions": {
+    "deepdiff": "9.1.0",
+    "lxml": "6.1.3",
+    "markdownify": "1.2.3",
+    "networkx": "3.6.1",
+    "pydantic": "2.13.5",
+    "pymupdf": "1.28.2",
+    "pypdf": "6.17.0",
+    "python-docx": "1.2.0",
+    "python-pptx": "1.0.2",
+    "weasyprint": "69.0"
+  },
+  "network_calls": 0,
+  "passed": 10,
+  "results": [
+    {
+      "assertions": 7,
+      "error": null,
+      "proof": 111,
+      "result": {
+        "fitted_rect_preserves_aspect": true,
+        "note_areas_blank": true,
+        "pages_from_the_reopened_document": true,
+        "slide_order_preserved": true,
+        "stretch_reproduced": true
+      },
+      "status": "passed",
+      "test": "show_pdf_page_does_not_preserve_aspect"
+    },
+    {
+      "assertions": 8,
+      "error": null,
+      "proof": 112,
+      "result": {
+        "all_fields_start_blank": true,
+        "blank_representation_differs_reproduced": true,
+        "both_readers_see_the_same_fields": true,
+        "desktop_viewer_controls_not_claimed": true
+      },
+      "status": "passed",
+      "test": "form_fields_start_blank_in_both_readers"
+    },
+    {
+      "assertions": 8,
+      "error": null,
+      "proof": 113,
+      "result": {
+        "filled_value_appears_in_page_text_reproduced": true,
+        "source_content_unchanged_outside_widgets": true,
+        "unknown_field_blocked": true,
+        "untouched_fields_stay_blank": true,
+        "values_round_trip_through_both_readers": true
+      },
+      "status": "passed",
+      "test": "entered_values_round_trip_without_touching_content"
+    },
+    {
+      "assertions": 7,
+      "error": null,
+      "proof": 114,
+      "result": {
+        "chart_values_included": 2,
+        "html_and_markdown_agree_on_text": true,
+        "slide_and_shape_order_retained": true,
+        "table_cells_included": 4
+      },
+      "status": "passed",
+      "test": "deck_outline_keeps_order_tables_and_chart_values"
+    },
+    {
+      "assertions": 5,
+      "error": null,
+      "proof": 115,
+      "result": {
+        "canonical_digest_agrees": true,
+        "every_source_block_present": true,
+        "native_tables_preserved": true,
+        "raw_bytes_differ_reproduced": true
+      },
+      "status": "passed",
+      "test": "reading_copies_need_the_canonical_digest"
+    },
+    {
+      "assertions": 7,
+      "error": null,
+      "proof": 116,
+      "result": {
+        "cycle_blocked": true,
+        "predecessors_and_successors_from_the_graph": true,
+        "recorded_dependencies_distinguished_from_display": true,
+        "unknown_endpoint_blocked": true
+      },
+      "status": "passed",
+      "test": "display_order_is_not_dependency_order"
+    },
+    {
+      "assertions": 4,
+      "error": null,
+      "proof": 117,
+      "result": {
+        "duplicate_pairs_removed": true,
+        "first_seen_order_kept": true,
+        "missing_sentence_blocked": true
+      },
+      "status": "passed",
+      "test": "reference_cards_dedupe_and_require_sentences"
+    },
+    {
+      "assertions": 5,
+      "error": null,
+      "proof": 118,
+      "result": {
+        "discussion_not_completion": true,
+        "sentences_carried_with_coverage": true,
+        "unknown_step_blocked": true
+      },
+      "status": "passed",
+      "test": "coverage_rows_carry_their_source_sentences"
+    },
+    {
+      "assertions": 7,
+      "error": null,
+      "proof": 119,
+      "result": {
+        "event_outside_the_month_blocked": true,
+        "module_default_is_process_global": true,
+        "week_start_changes_the_grid_reproduced": true,
+        "week_start_declared_not_inherited": true
+      },
+      "status": "passed",
+      "test": "the_month_grid_needs_a_declared_week_start"
+    },
+    {
+      "assertions": 5,
+      "error": null,
+      "proof": 120,
+      "result": {
+        "changed_text_detected": true,
+        "comparison_is_positional": true,
+        "identical_documents_match": true,
+        "reordering_detected": true
+      },
+      "status": "passed",
+      "test": "styled_documents_compare_block_by_block"
+    }
+  ],
+  "scope": "Bounded authored handoff fixtures and reproduced library defaults; the original P111-P120 chains and their artifacts were not rerun.",
+  "source_sha256": "0bc7d97c3107102f0b6d7293b12999a6612eb9cd42ca911aef00e6001c2af8d2",
+  "test_cases": 10
+}
