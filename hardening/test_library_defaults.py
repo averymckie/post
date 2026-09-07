@@ -7,13 +7,16 @@ this repository, which is the point of rule 5 of the hardening assurance.
 
 Each test names the hand-typed expectation in the frozen guard modules that it replaces.
 """
+import contextlib
 import io
 import itertools
 import json
+import sqlite3
 from decimal import Decimal, ROUND_HALF_EVEN, ROUND_HALF_UP
 from fractions import Fraction
 
 import docx
+import duckdb
 import igraph
 import networkx as nx
 import openpyxl
@@ -281,3 +284,54 @@ def test_workbook_cells_agree_between_two_readers(rows):
                      for row in openpyxl.load_workbook(io.BytesIO(buffer.getvalue())).active.iter_rows()]
     from_calamine = CalamineWorkbook.from_filelike(io.BytesIO(buffer.getvalue())).get_sheet_by_name('S').to_python()
     npt.assert_array_equal(from_openpyxl, [[int(v) for v in row] for row in from_calamine])
+
+
+# ---------------------------------------------------------------- SQL engine semantics
+def _both_engines(query, ddb, lite):
+    return ddb.execute(query).fetchone()[0], lite.execute(query).fetchone()[0]
+
+
+@given(st.integers(min_value=1, max_value=10**6))
+@SLOW
+def test_sum_over_no_rows_is_null_in_both_engines(threshold):
+    """An aggregate over an empty selection is NULL, not zero, in two independent engines. Replaces the
+    typed None in handoff_guards_v15.py:420 and the P147 empty-sum expectation."""
+    with duckdb.connect() as ddb, contextlib.closing(sqlite3.connect(':memory:')) as lite:
+        query = 'select sum(v) from (select %d v) where v > %d' % (threshold, threshold)
+        duck, sql = _both_engines(query, ddb, lite)
+    npt.assert_array_equal([duck is None, sql is None], [True, True])
+
+
+@given(st.integers(min_value=1, max_value=999), st.integers(min_value=2, max_value=999))
+@SLOW
+def test_integer_division_differs_between_the_two_engines(numerator, denominator):
+    """DuckDB promotes to a float; SQLite truncates toward zero. A cost query written for one engine does
+    not carry to the other. Hypothesis supplies the operands."""
+    with duckdb.connect() as ddb, contextlib.closing(sqlite3.connect(':memory:')) as lite:
+        query = 'select %d / %d' % (numerator, denominator)
+        duck, sql = _both_engines(query, ddb, lite)
+    npt.assert_allclose(float(duck), numerator / denominator, rtol=1e-9)
+    npt.assert_array_equal(sql, numerator // denominator)
+
+
+@given(st.integers(min_value=-10**6, max_value=10**6))
+@SLOW
+def test_null_ordering_differs_between_the_two_engines(value):
+    """DuckDB sorts NULLs last and SQLite sorts them first, so 'the smallest row' is engine-dependent."""
+    with duckdb.connect() as ddb, contextlib.closing(sqlite3.connect(':memory:')) as lite:
+        query = 'select v from (select %d v union all select null) order by v limit 1' % value
+        duck, sql = _both_engines(query, ddb, lite)
+    npt.assert_array_equal([duck == value, sql is None], [True, True])
+
+
+@given(st.lists(st.integers(min_value=-10**8, max_value=10**8), min_size=1, max_size=12))
+@SLOW
+def test_decimal_column_sum_is_exact_where_float_is_not(cents):
+    """DuckDB DECIMAL agrees with Python's Decimal exactly. Replaces the typed monetary totals in
+    handoff_guards_v15.py and the P147 and P187 exactness expectations."""
+    amounts = [Decimal(value).scaleb(-2) for value in cents]
+    with duckdb.connect() as ddb:
+        ddb.execute('create table t(a DECIMAL(18,2))')
+        ddb.executemany('insert into t values (?)', [(a,) for a in amounts])
+        total = ddb.execute('select sum(a) from t').fetchone()[0]
+    npt.assert_array_equal(str(total), str(sum(amounts)))
