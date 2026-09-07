@@ -1,0 +1,169 @@
+{
+  "assertions": 48,
+  "business_actions": 0,
+  "dependency_sha256": {
+    "handoff_guards_v1.py": "2b3138b692ecfd02b76ae34bdb001f5046608bb2983d8709d6c55c0765f7c9b8",
+    "handoff_guards_v3.py": "e8df8d98831289c66ab705940ae2bc20ca7913a721002b811a5a77be05be2873",
+    "handoff_guards_v4.py": "90029a6917216a0ded8b685dc48c496ae8479d6204115a8ec10f8488e4076841",
+    "handoff_guards_v5.py": "611cd01de6ee4c96b2f4260fb3a33c27e7893b4b31d2b07baaf3d8fcf614fa6f"
+  },
+  "failed": 0,
+  "full_chains_executed": 0,
+  "library_versions": {
+    "SpiffWorkflow": "3.2.0",
+    "deepdiff": "9.1.0",
+    "holidays": "0.103",
+    "lxml": "6.1.3",
+    "networkx": "3.6.1",
+    "numpy": "2.4.6",
+    "openpyxl": "3.1.5",
+    "pandas": "2.2.3",
+    "pydantic": "2.13.5",
+    "python-calamine": "0.8.2",
+    "zen-engine": "2.0.2"
+  },
+  "network_calls": 0,
+  "passed": 10,
+  "results": [
+    {
+      "assertions": 4,
+      "error": null,
+      "proof": 51,
+      "result": {
+        "canonical_digest_stable": true,
+        "digest_proves_committed_bytes_not_semantics": true,
+        "original_chain_rerun": false,
+        "raw_saves_differ_reproduced": true,
+        "value_change_changes_digest": true
+      },
+      "status": "passed",
+      "test": "canonical_office_is_byte_not_semantic"
+    },
+    {
+      "assertions": 7,
+      "error": null,
+      "proof": 52,
+      "result": {
+        "c14n_normalizes_attrs_and_whitespace": true,
+        "c14n_preserves_sibling_order": true,
+        "isomorphism_confirms": true,
+        "original_chain_rerun": false,
+        "wl_collision_reproduced": "C6 vs 2xC3"
+      },
+      "status": "passed",
+      "test": "wl_hash_is_incomplete_c14n_keeps_order"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 53,
+      "result": {
+        "append_only_enforced": true,
+        "duplicate_path_blocked": true,
+        "original_chain_rerun": false,
+        "reproduced_registered_changed_classified": true
+      },
+      "status": "passed",
+      "test": "register_classifies_and_ledger_is_append_only"
+    },
+    {
+      "assertions": 5,
+      "error": null,
+      "proof": 54,
+      "result": {
+        "domain_is_not_the_input_space_reproduced": true,
+        "negative_float_and_over_ceiling_unenumerated": true,
+        "original_chain_rerun": false,
+        "threshold_and_monotonicity_from_enumeration": true
+      },
+      "status": "passed",
+      "test": "enumeration_covers_only_the_declared_domain"
+    },
+    {
+      "assertions": 5,
+      "error": null,
+      "proof": 55,
+      "result": {
+        "agreement_over_full_domain": true,
+        "dmn_engine_executed": true,
+        "original_chain_rerun": false,
+        "sample_agreement_is_not_universal": true
+      },
+      "status": "passed",
+      "test": "dmn_and_zen_agree_over_the_whole_domain"
+    },
+    {
+      "assertions": 4,
+      "error": null,
+      "proof": 56,
+      "result": {
+        "charter_sentence_quoted_verbatim": true,
+        "duplicate_meeting_blocked": true,
+        "flag_number_disagreement_blocked": true,
+        "numbers_carried_from_decision_rows": true,
+        "original_chain_rerun": false
+      },
+      "status": "passed",
+      "test": "explanations_use_decision_numbers_not_recomputation"
+    },
+    {
+      "assertions": 3,
+      "error": null,
+      "proof": 57,
+      "result": {
+        "duplicate_event_blocked": true,
+        "original_chain_rerun": false,
+        "ties_need_contract": true,
+        "within_case_position_mean": true
+      },
+      "status": "passed",
+      "test": "performance_positions_are_case_partitioned"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 58,
+      "result": {
+        "boundary_policy_explicit": true,
+        "dates_outside_pinned_years_blocked": true,
+        "half_open_count_reproduced": true,
+        "holiday_rule_is_library_defined_reproduced": true,
+        "original_chain_rerun": false,
+        "reversed_is_negative": true
+      },
+      "status": "passed",
+      "test": "working_days_are_half_open_and_calendar_defined"
+    },
+    {
+      "assertions": 4,
+      "error": null,
+      "proof": 59,
+      "result": {
+        "attribution_from_unit_path": true,
+        "conservation_checked": true,
+        "original_chain_rerun": false,
+        "permitted_excluded": true,
+        "sentence_regex_misattributes_reproduced": true
+      },
+      "status": "passed",
+      "test": "subsection_from_unit_path_not_sentence_text"
+    },
+    {
+      "assertions": 4,
+      "error": null,
+      "proof": 60,
+      "result": {
+        "calamine_int_to_float_reproduced": true,
+        "matches_policy_threshold": true,
+        "non_monotone_detected": true,
+        "original_chain_rerun": false,
+        "threshold_derived_from_readback": true
+      },
+      "status": "passed",
+      "test": "threshold_readback_and_monotonicity"
+    }
+  ],
+  "scope": "Bounded authored handoff fixtures and reproduced library defaults; the original P51-P60 chains and their artifacts were not rerun.",
+  "source_sha256": "7dc3e6c5588bc9293c0c6c94802e7bb057090776647482e6ddf0b748d1c7f259",
+  "test_cases": 10
+}

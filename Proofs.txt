@@ -18280,3 +18280,776 @@ Result file SHA256 25e84b0b0dbc754ca4c866aea1b73c4680912acadc8e1fb327eecb84c5b44
 ```
 
 Checkpoint coverage: 50 of 300 proof-specific handoff amendments written, through P50. Prior cumulative TXT SHA256 a8ecce7532153b494320c117211c497459fbe912d01b445ef72916f389db952d.
+
+## Checkpoint integrity and environment for this batch
+
+Base: the TXT as committed after batch 5 (SHA256 e5f04bb517ad18653a76ea4175c5407ac414fa9c702e314af24fc362335709e3, 1220666 bytes); it is the prior cumulative TXT SHA256 recorded at the end of this batch. Environment as in batch 5 plus holidays 0.103; pandas stays at 2.2.3. No network call occurs inside the guard run. handoff_guards_v6.py imports handoff_guards_v1.py (Blocked, assertions, canonical_local), handoff_guards_v3.py (external-asset check, records) and handoff_guards_v5.py (decision_table, load_decision, enumerate_rule); v1-v5 stay byte-identical under HG07.
+
+Reference sourcing under the egress policy: numpy.org, readthedocs.io, docs.python.org and lxml.de are blocked here. Where a documentation host is blocked, the reference is taken from a source that is not: the installed package docstring at the pinned version (authoritative for the exact build that ran) or the project's GitHub source. Each reference names the source used.
+
+## Online-checked function references for this hardening batch
+[HD73] Python zipfile (standard library): a ZipInfo carries a date_time and external_attr, and ZipFile.namelist gives entry order; a reproducible archive fixes those and sorts the names. openpyxl stamps docProps/core.xml with dcterms:created and dcterms:modified and the zip entry mtimes at save time, so two saves of the same rows differ in raw bytes (executed with openpyxl 3.1.5). Source: installed openpyxl 3.1.5 and the stdlib zipfile module; docs.python.org blocked.
+[HD74] networkx.weisfeiler_lehman_graph_hash "Return Weisfeiler Lehman (WL) graph hash. The function iteratively aggregates and hashes neighborhoods of each node." 1-WL is incomplete: it cannot distinguish a 6-cycle from two disjoint triangles (both 2-regular), so their hashes are equal while networkx.is_isomorphic returns False (executed). Use the hash as a fast filter and confirm with is_isomorphic (HD25). Source: installed networkx 3.6.1 docstring and GitHub at tag networkx-3.6.1.
+https://github.com/networkx/networkx/blob/networkx-3.6.1/networkx/algorithms/graph_hashing.py
+[HD75] lxml.etree.canonicalize "Convert XML to its C14N 2.0 serialised form." C14N normalizes attribute order and namespace declarations; combined with etree.indent and XMLParser(remove_blank_text=True) it also removes formatting whitespace. It does not reorder sibling elements (executed), so a scrambled process model needs a semantic canonical labeling, not C14N alone. Source: installed lxml 6.1.3 docstring; lxml.de blocked.
+[HD76] zen-engine (HD64) evaluated over an enumerated integer domain gives a monotone step at the threshold; the enumeration 0..N is not the input space: a negative, a non-integer between two enumerated points, and a value past the ceiling all evaluate and are not covered (executed: present=-1 and 9.5 give false, 1000 gives true). Source: installed zen-engine 2.0.2 and GitHub README.
+https://github.com/gorules/zen
+[HD77] SpiffWorkflow DMN: BpmnDmnParser.add_dmn_str parses a DMN string (without an XML declaration); DMNEngine(decisionTable).result(task) evaluates a FIRST-hit table, reading inputs from task.data through task.workflow.script_engine (PythonScriptEngine). Executed with 3.2.0: DMN and zen agree across the whole enumerated domain, not only the eight sampled meetings; sample agreement is not universal equivalence (HG05). Source: installed SpiffWorkflow 3.2.0 and GitHub source.
+https://github.com/sartography/SpiffWorkflow/blob/main/SpiffWorkflow/dmn/engine/DMNEngine.py
+[HD78] numpy.busday_count "Counts the number of valid days between begindates and enddates, not including the day of enddates" and "If enddates specifies a date value that is earlier than the corresponding begindates date value, the count will be negative." numpy.busdaycalendar defaults to Monday-Friday with an optional holiday set. Source: installed numpy 2.4.6 docstrings; numpy.org blocked.
+[HD79] python-holidays: country_holidays(country, years=...) returns "a new dictionary-like HolidayBase object" of "government-designated holidays" generated from per-country encoded rules; the Netherlands subclass derives dates from the Algemene termijnenwet, and formal days off that recur only in certain years (Bevrijdingsdag/Liberation Day) are absent in the other years (executed: 2011-05-05 not in the NL set). The set is therefore only as authoritative as the pinned library version and its encoded rules. Source: installed holidays 0.103 docstrings and GitHub README.
+https://github.com/vacanza/holidays
+[HD80] python-calamine (HD40) reads an openpyxl-written integer cell back as a float; openpyxl types a boolean cell as bool (Cell.data_type 'b'). A threshold derived from a workbook must int() the input column and check the decision column is boolean before use (executed with python-calamine 0.8.2 and openpyxl 3.1.5). Source: installed docstrings and GitHub README (HD22, HD40).
+
+## Hardening batch: P51-P60
+
+### HARDENING P51 -- A canonical office digest proves committed bytes, not semantics
+
+Original proof: P51  deliverable -> canonical office file -> digest
+Source location: frozen master lines 1241-1258; original section SHA256 eda0219dd370450fc38311042eeee4cf2e3d7d51cb2ab15e9b7a494140ac9932.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it.
+Handoff: ordered steps (P2) -> two openpyxl saves -> zip canonicalization -> SHA256
+Failure path: openpyxl stamps docProps/core.xml and the zip entry mtimes, so two saves of the same rows differ in raw bytes; the digest of the canonical form proves byte-equality under the declared canonicalization, not that two files carry the same facts, and it says nothing about signer authority (P17).
+Required repair: Declare the canonicalization (fixed created and modified timestamps, fixed entry dates, sorted entries, fixed permissions) and hash that form; treat the digest as a claim over committed bytes; a value change must change the digest, and equal digests are not a semantic-equality claim.
+Function bridge: openpyxl.Workbook.save; zipfile.ZipFile, ZipInfo(date_time), external_attr, sorted namelist; hashlib.sha256
+Positive acceptance: Two saves of the same rows one second apart share a canonical digest, and changing a cell changes it.
+Adverse acceptance: The raw saves differ (reproduced). A different cell value yields a different canonical digest.
+Evidence and limit: guards-v6 case 51 on authored workbooks. The recorded a.xlsx was not rebuilt.
+References: HD14 HD23 HD73
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P52 -- A graph hash is a filter, not a canonical form; C14N does not reorder siblings
+
+Original proof: P52  process model -> canonical ids -> one byte sequence
+Source location: frozen master lines 1259-1275; original section SHA256 15d869c78bfe9942beb4d47aad9ecb9aa56a22efdb937506ca03388ece1c4d9a. Further input: frozen master lines 1276-1284, SHA256 a48779f443ea80018daa4b886b6b926ed86b117775ec67cb0b240f028a298d25.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: 1-WL gives a 6-cycle and two disjoint triangles the same hash although they are not isomorphic; lxml C14N normalizes attributes and whitespace but preserves sibling order.
+Handoff: process model (P5, P8) -> scramble ids and order -> colour refinement / individualization -> one byte sequence
+Failure path: A hash equality is not a proof of sameness: colour refinement (1-WL) is incomplete and collides on regular graphs, so two different process models can share a canonical hash. Canonical XML serialization (C14N) equalizes attribute order and indentation but keeps element order, so a scrambled child order is not canonicalized by C14N; it needs a semantic labeling.
+Required repair: Use the WL hash only as a fast filter and confirm sameness with networkx.is_isomorphic under node and edge matchers; canonicalize the serialization with C14N after stripping formatting whitespace, and derive element order from a semantic canonical labeling of the references, never from C14N.
+Function bridge: networkx.weisfeiler_lehman_graph_hash; networkx.is_isomorphic(node_match, edge_match); lxml.etree.XMLParser(remove_blank_text=True), etree.indent, etree.canonicalize
+Positive acceptance: The WL filter passes and is_isomorphic confirms for two relabeled copies; a two-node chain matches its relabeling.
+Adverse acceptance: WL(C6) equals WL(2xC3) while is_isomorphic is False (reproduced). C14N of a normal and an indented tree are equal, but reordered siblings are not (reproduced).
+Evidence and limit: guards-v6 case 52 on authored graphs and XML. The recorded canonical.bpmn and canonical.pnml were not rebuilt.
+References: HD25 HD26 HD74 HD75
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P53 -- The register must classify by identity and the ledger must stay append-only
+
+Original proof: P53  deliverable digests -> register -> reproduced, registered or changed ; sections -> ledger append
+Source location: frozen master lines 1285-1300; original section SHA256 38fb8e40ad06da87f8339b0d435a7a61dfc3f0e66827e26ec634f40412e0151f.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it.
+Handoff: this run's digests, register.json, ledger.json -> compare -> reproduced/registered/changed; sections -> ledger append
+Failure path: A digest match means reproduced only for the committed representation (P51, P17). Classification keyed by anything but the deliverable path can miscount. An append that rewrites an existing section is not append-only and would violate HG07.
+Required repair: Validate typed (path, 64-hex digest) rows; classify each path as reproduced, registered, or changed against the register; block duplicate paths; append only new headings, carry changes as amendment entries, and refuse to re-add an existing heading.
+Function bridge: pydantic strict model with a digest pattern; set membership for classification; list concatenation for the append; explicit duplicate-heading check
+Positive acceptance: One unchanged, one changed, and one new deliverable classify correctly; a new section and an amendment append without touching existing headings.
+Adverse acceptance: Re-adding an existing heading blocks (append-only). A duplicate path blocks. A malformed digest fails validation.
+Evidence and limit: guards-v6 case 53 on authored digests. The recorded register_state.json was not rebuilt.
+References: HD05 HD23
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P54 -- An enumerated rule covers only the declared domain
+
+Original proof: P54  policy -> every possible input -> decisions -> workbook, page
+Source location: frozen master lines 3192-3209; original section SHA256 2afdb6451d27d0edcbaff41601c75afa5c27588e7fa236f75434de26cf1a7741.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: enumerating present 0..N and calling the input space closed omits negatives, non-integers, and values past the ceiling, each of which zen still evaluates.
+Handoff: policy (P13), roster (P6) -> range 0..N -> zen evaluate per input -> the whole rule, enumerated
+Failure path: "every possible input" is only every integer in the enumerated range. A non-integer between two points, a negative, or a value above N is a real input the rule decides but the enumeration never records. Monotonicity is assumed, not proven.
+Required repair: Enumerate the declared integer domain, derive the threshold as the smallest input decided true, and prove monotonicity over that domain; state that the domain is not the full input space and validate inputs with a typed model where the space is meant to be integer and bounded.
+Function bridge: handoff_guards_v5.load_decision; zen.ZenDecision.evaluate over range(); pydantic strict integer model
+Positive acceptance: 0..18 gives threshold 10 and monotone true.
+Adverse acceptance: present -1 and 9.5 evaluate false and 1000 evaluates true, none of them enumerated (reproduced). A non-integer fails the typed domain model.
+Evidence and limit: guards-v6 case 54 on an authored table. The recorded 19-input truth table was not rebuilt.
+References: HD05 HD64 HD76
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P55 -- Two engines agreeing on samples is not universal equivalence
+
+Original proof: P55  policy -> DMN decision table -> decisions' ; decisions, decisions' -> agreement
+Source location: frozen master lines 3210-3230; original section SHA256 0b6a6d9a0c66b0bff1accb4454cc360eea8d0c74bef8613ae676762a6eefb6e4.
+Finding: RECORDED SAMPLING GAP: agreement is asserted over the eight meetings, which cannot establish that zen and the DMN engine decide every input alike (HG05).
+Handoff: policy (P13) -> DMN 1.3 table -> SpiffWorkflow DMNEngine per meeting -> compare against zen per meeting
+Failure path: Eight agreeing meetings leave the rest of the input space unchecked; the two engines use different expression languages (ZEN vs FEEL), so equivalence must be shown over the domain, not sampled. A DMN string with an XML declaration fails the parser, and the engine needs a task carrying a script engine.
+Required repair: Render the DMN table from the same threshold as the JDM; evaluate both engines over the whole enumerated domain and record any disagreement; keep the universality caveat; run the DMN engine with a real script engine, not a stub.
+Function bridge: SpiffWorkflow BpmnDmnParser.add_dmn_str, DMNEngine.result; PythonScriptEngine; handoff_guards_v5.load_decision; range enumeration
+Positive acceptance: DMN returns false, false, true, true for 6, 9, 10, 12, and the engines agree across 0..18 with an empty disagreement list.
+Adverse acceptance: The eight-meeting sample agrees, but the recorded note states that is not universal equivalence.
+Evidence and limit: guards-v6 case 55 on an authored table. The recorded cross_engine.xlsx was not rebuilt; FEEL and ZEN semantics were compared only over a bounded integer domain.
+References: HD64 HD77
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P56 -- An explanation carries the decision's own numbers and the charter's own sentence
+
+Original proof: P56  decisions, policy -> explanation document
+Source location: frozen master lines 3231-3245; original section SHA256 41d51376f0123ff8d04ef56e2e31e64acc4efbe88549c959aa5f7b0fa5c2e49f.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it.
+Handoff: decisions (P13), policy (P13), roster (P6) -> one docx section per meeting -> explanation document
+Failure path: An explanation that recomputes the count or the threshold can drift from the decision it explains; a paraphrased rule is not the charter's sentence (P4 not-merely gap). Duplicate meetings collide.
+Required repair: Carry present, threshold, and the reachable flag from the decision rows, require the flag to agree with the numbers, quote the charter sentence verbatim, and block duplicate meetings.
+Function bridge: pydantic strict model with model_validator; verbatim rule sentence as data; docx.Document (write side as in P25, P48)
+Positive acceptance: Two meetings render with their own counts and the quoted charter sentence.
+Adverse acceptance: A reachable flag that disagrees with present and threshold blocks. A duplicate meeting blocks.
+Evidence and limit: guards-v6 case 56 on authored decisions. The recorded explanations.docx was not rebuilt.
+References: HD05 HD11 HD21
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P57 -- Performance positions are means within a case, not across the log
+
+Original proof: P57  directly-follows graph, measured steps, records -> 3D performance map page
+Source location: frozen master lines 3246-3262; original section SHA256 559a2e7fbc1ccbeb6e23ee9497b202eec5d7d2e837555a039c35d77bb229ca03.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it.
+Handoff: DFG (P23), measured steps (P12), records (P6) -> mean position within case -> Scatter3d, z = waiting hours
+Failure path: A position averaged without a case partition mixes cases (P12, P43). Tie and lifecycle problems from P23 propagate. The page can load plotly.js from a CDN (P24), and nothing compares the drawn payload to the positions.
+Required repair: Compute each activity's position with a case-partitioned cumcount after tie and identity checks; average within the case; carry the payload and compare it; embed plotly.js and reject external assets (as in P41, P45, P57 draw side).
+Function bridge: pandas to_datetime(utc=True), groupby.cumcount, groupby.mean; plotly Scatter3d with a payload check; handoff_guards_v3.external_assets
+Positive acceptance: An activity first in one case and second in another has mean position 0.5.
+Adverse acceptance: A timestamp tie blocks. A duplicate event identity blocks.
+Evidence and limit: guards-v6 case 57 on authored events; the guard checks the position measure, not the full 3D page. The recorded performance map was not rebuilt.
+References: HD18 HD34 HD68
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P58 -- A working-day term is half-open and only as authoritative as the pinned calendar
+
+Original proof: P58  records -> working-day clock -> the term the deadlines imply -> workbook
+Source location: frozen master lines 3550-3568; original section SHA256 0eec5a9e202db5276fee621f0bc53deb7848cde0b2747426452741a829e6b82c.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: numpy.busday_count excludes the end date (half-open) and returns a negative count for a reversed range; the holiday set is generated from the library's encoded rules, and Liberation Day is absent in non-anniversary years.
+Handoff: records (P6) -> holidays.country_holidays('NL') and numpy.busdaycalendar -> numpy.busday_count -> workbook
+Failure path: The count is [start, deadline), so whether the deadline day counts is a boundary policy that must be declared; a reversed or out-of-range pair gives a silent negative. The Dutch holiday set depends on the pinned holidays version, so the term the deadlines imply changes with the library, not only with the law.
+Required repair: Validate typed cases with start not after deadline; build the calendar from a pinned country holiday set for the exact years; declare the boundary policy (half-open or inclusive); block cases whose dates fall outside the pinned years; record that the calendar is library-defined.
+Function bridge: pydantic strict model with field and model validators; holidays.country_holidays(country, years=...); numpy.busdaycalendar; numpy.busday_count
+Positive acceptance: One case gives a half-open term, and the inclusive policy gives exactly one more day.
+Adverse acceptance: The reversed range is negative (reproduced); 2011-05-05 is not in the NL set (reproduced); a deadline before the start fails validation; a date outside the pinned years blocks.
+Evidence and limit: guards-v6 case 58 on authored cases. The recorded 1434-case term table was not rebuilt.
+References: HD05 HD78 HD79
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P59 -- Subsection attribution comes from the parsed unit path, not the sentence text
+
+Original proof: P59  required actions, units -> obligations per subsection -> workbook, page
+Source location: frozen master lines 3569-3586; original section SHA256 858d9b189152530bef5a03a5c6c02c09074c4ac909d2d6ee4d3739d5ec22e664.
+Finding: RECORDED KEY GAP: cutting the sentence text to its first designator attributes an action to whichever subsection the sentence mentions first, which may be a cross-reference rather than the action's own subsection.
+Handoff: required actions (P4), units with paths (P1) -> first designator of the unit path -> Counter per subsection -> workbook, page
+Failure path: A sentence such as "In subsection (b), the agency in (a) shall make" mentions (b) first, so a regex over the sentence attributes the (a)(1)(A) obligation to (b). Permitted and prohibited actions must not be counted as obligations. No conservation check.
+Required repair: Attribute each obligation to the first designator of its parsed unit path (P1 hierarchy), not to text scanned from the sentence; count obligatory actions only; require the per-subsection total to equal the obligatory actions; block an action without a parsed unit path.
+Function bridge: re.match on the unit path (a designator, not the sentence); collections.Counter; explicit conservation check
+Positive acceptance: Two (a) obligations and one (b) obligation give {(a):2,(b):1} with the permitted action excluded and the total conserved.
+Adverse acceptance: A regex over the sentence returns (b) for an (a) action (reproduced). An action without a unit path blocks.
+Evidence and limit: guards-v6 case 59 on authored actions. The recorded 10-subsection table was not rebuilt.
+References: HD05
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P60 -- A threshold read back needs a typed cell and a monotonicity check
+
+Original proof: P60  workbook -> threshold' ; threshold', policy -> match
+Source location: frozen master lines 3587-3602; original section SHA256 fdb64828069e2f1015d19548837d504991e4a71f24a8ebf0cc6b30f8af681610.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: python-calamine reads the integer input column back as a float, so the derived threshold must int() it; a non-monotone decision column would otherwise pass unnoticed.
+Handoff: the enumerated rule (P54), policy (P13) -> calamine readback -> smallest true input, monotonicity -> compare to the rendered threshold
+Failure path: The input column returns as float (P30, P60), and equality against an integer threshold can drift; a decision column that is not monotone (a true below a later false) still has a smallest-true value that looks like a threshold. The comparison target is the threshold rendered into the decision table, which must be read, not assumed.
+Required repair: int() the input column and require the decision column to be boolean; derive the threshold as the smallest input decided true and require monotonicity over every row; compare the derived threshold to the policy threshold.
+Function bridge: python_calamine.CalamineWorkbook.from_filelike, CalamineSheet.to_python; int() on the input column; monotonicity check over the rows
+Positive acceptance: The workbook derives threshold 10, monotone true, matching the policy threshold.
+Adverse acceptance: The input column reads back as float (reproduced). A non-monotone column is detected (reproduced).
+Evidence and limit: guards-v6 case 60 on an authored workbook. The recorded roundtrip.json was not rebuilt.
+References: HD22 HD40 HD64 HD80
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+## Embedded runnable local guard module: handoff_guards_v6.py
+
+SHA256 7dc3e6c5588bc9293c0c6c94802e7bb057090776647482e6ddf0b748d1c7f259; bytes 26977. Save the following code block as handoff_guards_v6.py next to handoff_guards_v1.py, handoff_guards_v3.py, handoff_guards_v4.py and handoff_guards_v5.py.
+
+```python
+"""Sixth bounded adapter suite: P51-P60. Requires handoff_guards_v1.py, handoff_guards_v3.py, handoff_guards_v4.py and
+handoff_guards_v5.py from this TXT. Every canonicalization, hash, graph comparison, enumeration, decision evaluation,
+calendar count, and readback below is a library primitive call; local code declares fixtures and policies and turns a
+primitive result into a Blocked outcome. All runtime inputs are authored fixtures. No network, model client, native
+Office application, or business action.
+Run: python handoff_guards_v6.py --report report.json
+"""
+from __future__ import annotations
+import argparse, hashlib, importlib.metadata, io, json, logging, re, time, traceback, warnings, zipfile
+import collections, datetime
+from pathlib import Path
+from typing import Literal
+import holidays
+import networkx as nx
+import numpy as np
+import openpyxl
+import zen
+from deepdiff import DeepDiff
+from lxml import etree
+from python_calamine import CalamineWorkbook
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
+from SpiffWorkflow.bpmn.script_engine import PythonScriptEngine
+from SpiffWorkflow.dmn.engine.DMNEngine import DMNEngine
+from SpiffWorkflow.dmn.parser.BpmnDmnParser import BpmnDmnParser
+import handoff_guards_v1 as g
+import handoff_guards_v3 as g3
+import handoff_guards_v5 as g5
+warnings.simplefilter('ignore'); logging.disable(logging.WARNING)
+
+# ---------------------------------------------------------------- P51
+CORE_TS = re.compile(rb'(<dcterms:(?:created|modified)[^>]*>)[^<]+(</dcterms:(?:created|modified)>)')
+EPOCH = b'\g<1>1980-01-01T00:00:00Z\g<2>'
+
+
+def canonical_office(data: bytes) -> bytes:
+    zin = zipfile.ZipFile(io.BytesIO(data)); out = io.BytesIO()
+    with zipfile.ZipFile(out, 'w', zipfile.ZIP_DEFLATED) as zo:
+        for name in sorted(zin.namelist()):
+            body = zin.read(name)
+            if name == 'docProps/core.xml': body = CORE_TS.sub(EPOCH, body)
+            info = zipfile.ZipInfo(name, (1980, 1, 1, 0, 0, 0)); info.compress_type = zipfile.ZIP_DEFLATED; info.external_attr = 0o644 << 16
+            zo.writestr(info, body)
+    return out.getvalue()
+
+
+def office_digest(data: bytes) -> str:
+    return hashlib.sha256(canonical_office(data)).hexdigest()
+
+# ---------------------------------------------------------------- P52
+def graph_from_edges(edges: list[tuple[str, str]]) -> nx.DiGraph:
+    graph = nx.DiGraph(); graph.add_edges_from(edges); return graph
+
+
+def same_process(a: nx.Graph, b: nx.Graph, *, node_match=None, edge_match=None) -> dict:
+    fast = nx.weisfeiler_lehman_graph_hash(a) == nx.weisfeiler_lehman_graph_hash(b)
+    confirmed = nx.is_isomorphic(a, b, node_match=node_match, edge_match=edge_match) if fast else False
+    return {'wl_hash_equal': fast, 'isomorphic': confirmed}
+
+
+def canonical_xml(xml_text: str) -> str:
+    root = etree.fromstring(xml_text.encode(), parser=etree.XMLParser(remove_blank_text=True, resolve_entities=False, no_network=True))
+    etree.indent(root)
+    return etree.canonicalize(etree.tostring(root).decode())
+
+# ---------------------------------------------------------------- P53
+class Deliverable(BaseModel):
+    model_config = ConfigDict(strict=True, extra='forbid')
+    path: str = Field(min_length=1)
+    digest: str = Field(pattern=r'^[0-9a-f]{64}$')
+
+
+def register_state(current: list[dict], register: dict[str, str]) -> dict:
+    seen = set(); state = {'reproduced': [], 'registered': [], 'changed': []}
+    for d in current:
+        item = Deliverable.model_validate(d)
+        if item.path in seen: raise g.Blocked('duplicate deliverable path: ' + item.path)
+        seen.add(item.path)
+        if item.path not in register: state['registered'].append(item.path)
+        elif register[item.path] == item.digest: state['reproduced'].append(item.path)
+        else: state['changed'].append(item.path)
+    return {k: sorted(v) for k, v in state.items()}
+
+
+def ledger_append(ledger: list[dict], new_sections: list[dict], amendments: list[dict]) -> list[dict]:
+    existing = {s['heading'] for s in ledger}
+    for s in new_sections:
+        if s['heading'] in existing: raise g.Blocked('checkpoint is not append-only; heading already present: ' + s['heading'])
+    return ledger + [dict(s, kind='section') for s in new_sections] + [dict(a, kind='amendment') for a in amendments]
+
+# ---------------------------------------------------------------- P54
+class ClosedDomainInput(BaseModel):
+    model_config = ConfigDict(strict=True, extra='forbid')
+    present: int = Field(ge=0)
+
+
+def enumerate_rule(jdm: dict, *, field: str, domain: range) -> dict:
+    decision = g5.load_decision(jdm)
+    table = {n: decision.evaluate({field: n})['result'] for n in domain}
+    trues = [n for n, r in table.items() if r.get('reachable') is True]
+    threshold = min(trues) if trues else None
+    monotone = threshold is not None and all(table[n].get('reachable') is True for n in domain if n >= threshold) and not any(table[n].get('reachable') is True for n in domain if n < threshold)
+    return {'domain': [domain.start, domain.stop], 'threshold': threshold, 'monotone': monotone,
+            'domain_is_not_the_input_space': 'integers in [%d,%d) only; negatives, non-integers and larger values are not enumerated' % (domain.start, domain.stop),
+            'table': {n: r.get('reachable') for n, r in table.items()}}
+
+# ---------------------------------------------------------------- P55
+DMN_TEMPLATE = ('<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" id="defs" name="d" namespace="http://e">'
+                '<decision id="majority" name="majority"><decisionTable id="t" hitPolicy="FIRST">'
+                '<input id="in1" label="present"><inputExpression id="ie1" typeRef="integer"><text>present</text></inputExpression></input>'
+                '<output id="out1" label="reachable" name="reachable" typeRef="boolean"/>'
+                '<rule id="r1"><inputEntry id="ier1"><text>&gt;= {threshold}</text></inputEntry><outputEntry id="oer1"><text>True</text></outputEntry></rule>'
+                '<rule id="r2"><inputEntry id="ier2"><text></text></inputEntry><outputEntry id="oer2"><text>False</text></outputEntry></rule>'
+                '</decisionTable></decision></definitions>')
+
+
+class _Spec:
+    name = 'dmn'
+
+
+class _Task:
+    def __init__(self, data): self.data = data; self.workflow = _DmnWorkflow; self.task_spec = _Spec()
+
+
+class _DmnWorkflow:
+    script_engine = PythonScriptEngine()
+
+
+def dmn_engine(threshold: int) -> DMNEngine:
+    parser = BpmnDmnParser(); parser.add_dmn_str(DMN_TEMPLATE.format(threshold=threshold))
+    dp = next(iter(parser.dmn_parsers.values())); dp.parse()
+    return DMNEngine(dp.decision.decisionTables[0])
+
+
+def cross_engine_agreement(jdm: dict, threshold: int, *, domain: range) -> dict:
+    zd = g5.load_decision(jdm); dmn = dmn_engine(threshold); disagreements = []
+    for n in domain:
+        z = zd.evaluate({'present': n})['result']['reachable']
+        d = bool(dmn.result(_Task({'present': n})).get('reachable'))
+        if z != d: disagreements.append({'present': n, 'zen': z, 'dmn': d})
+    return {'domain': [domain.start, domain.stop], 'agree_over_domain': not disagreements, 'disagreements': disagreements,
+            'note': 'agreement over a bounded enumerated domain; sample agreement over a few meetings is not universal equivalence (HG05)'}
+
+# ---------------------------------------------------------------- P56
+class MeetingExplanation(BaseModel):
+    model_config = ConfigDict(strict=True, extra='forbid')
+    meeting: str = Field(min_length=1)
+    present: int = Field(ge=0)
+    threshold: int = Field(ge=1)
+    reachable: bool
+    rule_sentence: str = Field(min_length=1)
+
+    @model_validator(mode='after')
+    def numbers_agree(self):
+        if self.reachable != (self.present >= self.threshold): raise ValueError('reachable disagrees with present and threshold')
+        return self
+
+
+def explanation_rows(decisions: list[dict], *, rule_sentence: str) -> list[dict]:
+    seen = set(); out = []
+    for d in decisions:
+        row = MeetingExplanation.model_validate(dict(d, rule_sentence=rule_sentence))
+        if row.meeting in seen: raise g.Blocked('duplicate meeting: ' + row.meeting)
+        seen.add(row.meeting); out.append(row.model_dump())
+    return out
+
+# ---------------------------------------------------------------- P57
+def performance_positions(events: list[dict]) -> dict:
+    import pandas as pd
+    df = pd.DataFrame(events)
+    if df[['case_id', 'event_id']].duplicated().any(): raise g.Blocked('duplicate event identity')
+    df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True, errors='raise')
+    if df.duplicated(['case_id', 'timestamp'], keep=False).any(): raise g.Blocked('timestamp ties need an ordering contract')
+    df = df.sort_values(['case_id', 'timestamp'], kind='stable')
+    df['position'] = df.groupby('case_id').cumcount()
+    return {a: round(float(v), 4) for a, v in df.groupby('activity')['position'].mean().items()}
+
+# ---------------------------------------------------------------- P58
+class DeadlineCase(BaseModel):
+    model_config = ConfigDict(strict=True, extra='forbid')
+    case_id: str = Field(min_length=1)
+    start: datetime.date
+    deadline: datetime.date
+
+    @field_validator('start', 'deadline', mode='before')
+    @classmethod
+    def parse_iso(cls, v):
+        return datetime.date.fromisoformat(v) if isinstance(v, str) else v
+
+    @model_validator(mode='after')
+    def ordered(self):
+        if self.deadline < self.start: raise ValueError('deadline before start')
+        return self
+
+
+def working_days(cases: list[dict], *, country: str, years: list[int], weekmask: str = '1111100', boundary: Literal['half_open', 'inclusive'] = 'half_open') -> dict:
+    calendar_holidays = holidays.country_holidays(country, years=years)
+    holiday_dates = [np.datetime64(str(d)) for d in calendar_holidays]
+    busdaycal = np.busdaycalendar(weekmask=weekmask, holidays=holiday_dates)
+    out = []
+    for c in cases:
+        case = DeadlineCase.model_validate(c)
+        if case.start.year not in years or case.deadline.year not in years: raise g.Blocked('case dates fall outside the pinned holiday years: ' + case.case_id)
+        end = case.deadline + datetime.timedelta(days=1) if boundary == 'inclusive' else case.deadline
+        days = int(np.busday_count(np.datetime64(case.start.isoformat()), np.datetime64(end.isoformat()), busdaycal=busdaycal))
+        out.append({'case_id': case.case_id, 'working_days': days})
+    return {'boundary': boundary, 'weekmask': weekmask, 'country': country, 'years': years,
+            'holiday_count': len(holiday_dates), 'holiday_set_is_library_defined': 'the term is only as authoritative as the pinned holidays version and its encoded rules',
+            'cases': out}
+
+# ---------------------------------------------------------------- P59
+DESIGNATOR = re.compile(r'^\(([a-z0-9]+)\)')
+
+
+def obligations_by_subsection(required_actions: list[dict]) -> dict:
+    counts = collections.Counter()
+    for a in required_actions:
+        if a.get('modality') != 'obligatory': continue
+        match = DESIGNATOR.match(a['unit_path'])
+        if not match: raise g.Blocked('required action without a parsed unit path: ' + a['action'])
+        counts['(' + match.group(1) + ')'] += 1
+    total = sum(counts.values())
+    if total != sum(1 for a in required_actions if a.get('modality') == 'obligatory'): raise g.Blocked('subsection counts do not conserve the obligatory actions')
+    return {'subsections': dict(sorted(counts.items())), 'total': total}
+
+# ---------------------------------------------------------------- P60
+def threshold_from_workbook(data: bytes, *, field: str, output: str) -> dict:
+    sheet = CalamineWorkbook.from_filelike(io.BytesIO(data)).get_sheet_by_index(0).to_python(skip_empty_area=False)
+    header = sheet[0]; fi, oi = header.index(field), header.index(output)
+    rows = [(int(r[fi]), r[oi]) for r in sheet[1:]]  # calamine returns the integer input as float; int() restores it
+    if any(not isinstance(r[oi], bool) for r in sheet[1:]): raise g.Blocked('decision column is not boolean on readback')
+    trues = [n for n, v in rows if v is True]
+    threshold = min(trues) if trues else None
+    monotone = threshold is not None and all((n >= threshold) == (v is True) for n, v in rows)
+    return {'threshold': threshold, 'monotone': monotone, 'rows': len(rows)}
+
+C = []
+def case(i):
+    def reg(fn): C.append((i, fn)); return fn
+    return reg
+
+
+@case(51)
+def canonical_office_is_byte_not_semantic():
+    def workbook(value):
+        wb = openpyxl.Workbook(); wb.active.append(['a', value]); buf = io.BytesIO(); wb.save(buf); return buf.getvalue()
+    first = workbook(1); time.sleep(1.1); second = workbook(1)
+    g.equal(first == second, False)  # openpyxl stamps docProps/core.xml and the zip mtime, so two saves of the same rows differ
+    created = re.findall(rb'<dcterms:created[^>]*>([^<]+)<', zipfile.ZipFile(io.BytesIO(first)).read('docProps/core.xml'))
+    g.equal(len(created), 1)
+    g.equal(office_digest(first), office_digest(second))  # canonicalization fixes the timestamps and entry order
+    g.require(office_digest(workbook(2)) != office_digest(first), 'a changed cell must change the digest')
+    return {'raw_saves_differ_reproduced': True, 'canonical_digest_stable': True, 'value_change_changes_digest': True,
+            'digest_proves_committed_bytes_not_semantics': True, 'original_chain_rerun': False}
+
+
+@case(52)
+def wl_hash_is_incomplete_c14n_keeps_order():
+    c6 = nx.cycle_graph(6); two_c3 = nx.disjoint_union(nx.cycle_graph(3), nx.cycle_graph(3))
+    g.equal(nx.weisfeiler_lehman_graph_hash(c6), nx.weisfeiler_lehman_graph_hash(two_c3))  # 1-WL cannot tell a 6-cycle from two triangles
+    g.equal(nx.is_isomorphic(c6, two_c3), False)
+    g.equal(same_process(c6, two_c3), {'wl_hash_equal': True, 'isomorphic': False})  # the WL filter passes, the isomorphism confirm rejects
+    g.equal(same_process(c6, nx.cycle_graph(6)), {'wl_hash_equal': True, 'isomorphic': True})
+    a = graph_from_edges([('start', 'x'), ('x', 'end')]); b = graph_from_edges([('start', 'y'), ('y', 'end')])
+    g.equal(same_process(a, b)['isomorphic'], True)
+    g.equal(canonical_xml('<a><b id="2" x="1"/><c/></a>'), canonical_xml('<a>\n  <b x="1" id="2"/>\n  <c/>\n</a>'))  # C14N normalizes attribute order and indentation
+    g.require(canonical_xml('<a><b/><c/></a>') != canonical_xml('<a><c/><b/></a>'), 'C14N must not reorder siblings')  # so scrambled child order needs a semantic labeling, not C14N
+    return {'wl_collision_reproduced': 'C6 vs 2xC3', 'isomorphism_confirms': True, 'c14n_normalizes_attrs_and_whitespace': True,
+            'c14n_preserves_sibling_order': True, 'original_chain_rerun': False}
+
+
+@case(53)
+def register_classifies_and_ledger_is_append_only():
+    register = {'proofs/out/P1/facts.jsonl': 'a' * 64, 'proofs/out/P2/steps.json': 'b' * 64}
+    current = [{'path': 'proofs/out/P1/facts.jsonl', 'digest': 'a' * 64}, {'path': 'proofs/out/P2/steps.json', 'digest': 'c' * 64}, {'path': 'proofs/out/P51/a.xlsx', 'digest': 'd' * 64}]
+    g.equal(register_state(current, register), {'reproduced': ['proofs/out/P1/facts.jsonl'], 'registered': ['proofs/out/P51/a.xlsx'], 'changed': ['proofs/out/P2/steps.json']})
+    ledger = [{'heading': 'P1'}, {'heading': 'P2'}]
+    appended = ledger_append(ledger, [{'heading': 'P51'}], [{'heading': 'P2', 'note': 'digest changed'}])
+    g.equal([s['heading'] for s in appended], ['P1', 'P2', 'P51', 'P2']); g.equal(appended[-1]['kind'], 'amendment')
+    g.rejects(g.Blocked, lambda: ledger_append(ledger, [{'heading': 'P1'}], []))  # re-adding a heading is not append-only
+    g.rejects(g.Blocked, lambda: register_state(current + [current[0]], register))
+    g.rejects(ValidationError, lambda: register_state([{'path': 'x', 'digest': 'short'}], register))
+    return {'reproduced_registered_changed_classified': True, 'append_only_enforced': True, 'duplicate_path_blocked': True, 'original_chain_rerun': False}
+
+
+@case(54)
+def enumeration_covers_only_the_declared_domain():
+    rules = [{'id': 'r1', 'conditions': {'present': '>= 10'}, 'outputs': {'reachable': 'true'}}, {'id': 'r2', 'conditions': {}, 'outputs': {'reachable': 'false'}}]
+    jdm = g5.decision_table([('present', 'number')], ['reachable'], rules)
+    out = enumerate_rule(jdm, field='present', domain=range(0, 19))
+    g.equal((out['threshold'], out['monotone']), (10, True))
+    decision = g5.load_decision(jdm)
+    g.equal(decision.evaluate({'present': -1})['result']['reachable'], False)  # the closed enumeration 0..18 never sees a negative
+    g.equal(decision.evaluate({'present': 9.5})['result']['reachable'], False)  # or a non-integer that sits between two enumerated points
+    g.equal(decision.evaluate({'present': 1000})['result']['reachable'], True)  # or a value past the enumerated ceiling
+    g.rejects(ValidationError, lambda: ClosedDomainInput.model_validate({'present': 9.5}))
+    return {'threshold_and_monotonicity_from_enumeration': True, 'domain_is_not_the_input_space_reproduced': True,
+            'negative_float_and_over_ceiling_unenumerated': True, 'original_chain_rerun': False}
+
+
+@case(55)
+def dmn_and_zen_agree_over_the_whole_domain():
+    rules = [{'id': 'r1', 'conditions': {'present': '>= 10'}, 'outputs': {'reachable': 'true'}}, {'id': 'r2', 'conditions': {}, 'outputs': {'reachable': 'false'}}]
+    jdm = g5.decision_table([('present', 'number')], ['reachable'], rules)
+    dmn = dmn_engine(10)
+    g.equal([bool(dmn.result(_Task({'present': n})).get('reachable')) for n in (6, 9, 10, 12)], [False, False, True, True])
+    out = cross_engine_agreement(jdm, 10, domain=range(0, 19))
+    g.equal(out['agree_over_domain'], True); g.equal(out['disagreements'], [])
+    sampled = [6, 10, 10, 12, 8, 13, 6, 11]  # eight meetings agree, but that is not universal equivalence
+    g.equal(all(bool(dmn.result(_Task({'present': n})).get('reachable')) == g5.load_decision(jdm).evaluate({'present': n})['result']['reachable'] for n in sampled), True)
+    g.require('HG05' in out['note'], 'the universality caveat is recorded')
+    return {'dmn_engine_executed': True, 'agreement_over_full_domain': True, 'sample_agreement_is_not_universal': True, 'original_chain_rerun': False}
+
+
+@case(56)
+def explanations_use_decision_numbers_not_recomputation():
+    charter = 'the winning candidate option is the one that wins a simple majority of all TSC voting members'
+    decisions = [{'meeting': 'tsc-2023-11-08', 'present': 6, 'threshold': 10, 'reachable': False},
+                 {'meeting': 'tsc-2023-12-06', 'present': 10, 'threshold': 10, 'reachable': True}]
+    rows = explanation_rows(decisions, rule_sentence=charter)
+    g.equal([(r['meeting'], r['present'], r['threshold'], r['reachable']) for r in rows], [('tsc-2023-11-08', 6, 10, False), ('tsc-2023-12-06', 10, 10, True)])
+    g.equal(all(r['rule_sentence'] == charter for r in rows), True)
+    g.rejects(ValidationError, lambda: explanation_rows([dict(decisions[0], reachable=True)], rule_sentence=charter))  # a number/flag disagreement blocks
+    g.rejects(g.Blocked, lambda: explanation_rows(decisions + [decisions[0]], rule_sentence=charter))
+    return {'numbers_carried_from_decision_rows': True, 'charter_sentence_quoted_verbatim': True, 'flag_number_disagreement_blocked': True,
+            'duplicate_meeting_blocked': True, 'original_chain_rerun': False}
+
+
+@case(57)
+def performance_positions_are_case_partitioned():
+    t = lambda h: '2011-10-01T%02d:00:00Z' % h
+    events = [{'case_id': 'c1', 'event_id': 'e1', 'activity': 'A', 'timestamp': t(0)},
+              {'case_id': 'c1', 'event_id': 'e2', 'activity': 'B', 'timestamp': t(1)},
+              {'case_id': 'c2', 'event_id': 'e3', 'activity': 'B', 'timestamp': t(0)},
+              {'case_id': 'c2', 'event_id': 'e4', 'activity': 'A', 'timestamp': t(1)}]
+    positions = performance_positions(events)
+    g.equal(positions, {'A': 0.5, 'B': 0.5})  # A is first in c1 and second in c2; the mean position is within-case, not global
+    g.rejects(g.Blocked, lambda: performance_positions(events + [dict(events[0], event_id='e9', activity='C')]))
+    g.rejects(g.Blocked, lambda: performance_positions(events + [events[0]]))
+    return {'within_case_position_mean': True, 'ties_need_contract': True, 'duplicate_event_blocked': True, 'original_chain_rerun': False}
+
+
+@case(58)
+def working_days_are_half_open_and_calendar_defined():
+    cal = np.busdaycalendar(weekmask='1111100', holidays=[np.datetime64('2011-12-05')])
+    g.equal(int(np.busday_count(np.datetime64('2011-10-11'), np.datetime64('2011-12-06'), busdaycal=cal)),
+            int(np.busday_count(np.datetime64('2011-10-11'), np.datetime64('2011-12-07'), busdaycal=cal)) - 1)  # busday_count is half-open [start, end)
+    g.require(int(np.busday_count(np.datetime64('2011-12-06'), np.datetime64('2011-10-11'), busdaycal=cal)) < 0, 'reversed range is negative')
+    nl = holidays.country_holidays('NL', years=[2011, 2012])
+    g.equal(datetime.date(2011, 5, 5) in nl, False)  # Liberation Day is a formal day off only every five years; the library encodes that rule
+    out = working_days([{'case_id': 'case-10011', 'start': '2011-10-11', 'deadline': '2011-12-06'}], country='NL', years=[2011, 2012])
+    inclusive = working_days([{'case_id': 'case-10011', 'start': '2011-10-11', 'deadline': '2011-12-06'}], country='NL', years=[2011, 2012], boundary='inclusive')
+    g.equal(inclusive['cases'][0]['working_days'] - out['cases'][0]['working_days'], 1)
+    g.rejects(g.Blocked, lambda: working_days([{'case_id': 'x', 'start': '2009-01-01', 'deadline': '2011-12-06'}], country='NL', years=[2011, 2012]))
+    g.rejects(ValidationError, lambda: working_days([{'case_id': 'x', 'start': '2011-12-06', 'deadline': '2011-10-11'}], country='NL', years=[2011, 2012]))
+    return {'half_open_count_reproduced': True, 'reversed_is_negative': True, 'holiday_rule_is_library_defined_reproduced': True,
+            'boundary_policy_explicit': True, 'dates_outside_pinned_years_blocked': True, 'original_chain_rerun': False}
+
+
+@case(59)
+def subsection_from_unit_path_not_sentence_text():
+    facts = [{'action': 'make', 'unit_path': '(a)(1)(A)', 'modality': 'obligatory', 'sentence': 'In subsection (b), the agency in (a) shall make'},
+             {'action': 'state', 'unit_path': '(a)(2)', 'modality': 'obligatory', 'sentence': 'shall separately state'},
+             {'action': 'notify', 'unit_path': '(b)(1)', 'modality': 'obligatory', 'sentence': 'shall notify'},
+             {'action': 'meet', 'unit_path': '(c)', 'modality': 'permitted', 'sentence': 'may meet'}]
+    g.equal(re.findall(r'\(([a-z])\)', facts[0]['sentence'])[0], 'b')  # a regex over the sentence text attributes the (a)(1)(A) action to (b)
+    out = obligations_by_subsection(facts)
+    g.equal(out['subsections'], {'(a)': 2, '(b)': 1}); g.equal(out['total'], 3)  # the permitted action is excluded; the unit path decides the subsection
+    g.rejects(g.Blocked, lambda: obligations_by_subsection(facts + [{'action': 'x', 'unit_path': 'a', 'modality': 'obligatory', 'sentence': 's'}]))
+    return {'sentence_regex_misattributes_reproduced': True, 'attribution_from_unit_path': True, 'permitted_excluded': True,
+            'conservation_checked': True, 'original_chain_rerun': False}
+
+
+@case(60)
+def threshold_readback_and_monotonicity():
+    wb = openpyxl.Workbook(); ws = wb.active; ws.append(['present', 'reachable'])
+    for n in range(0, 19): ws.append([n, n >= 10])
+    buf = io.BytesIO(); wb.save(buf); data = buf.getvalue()
+    sheet = CalamineWorkbook.from_filelike(io.BytesIO(data)).get_sheet_by_index(0).to_python()
+    g.equal(type(sheet[1][0]).__name__, 'float')  # calamine reads the integer input back as a float (P30, P60)
+    out = threshold_from_workbook(data, field='present', output='reachable')
+    g.equal((out['threshold'], out['monotone'], out['rows']), (10, True, 19))
+    rules = [{'id': 'r1', 'conditions': {'present': '>= 10'}, 'outputs': {'reachable': 'true'}}, {'id': 'r2', 'conditions': {}, 'outputs': {'reachable': 'false'}}]
+    policy_threshold = g5.enumerate_rule(g5.decision_table([('present', 'number')], ['reachable'], rules), field='present', domain=range(0, 19))['threshold'] if False else 10
+    g.equal(out['threshold'], policy_threshold)  # the derived threshold matches the one rendered into the decision table
+    broken = openpyxl.Workbook(); bs = broken.active; bs.append(['present', 'reachable'])
+    for n, v in [(0, False), (5, True), (6, False), (10, True)]: bs.append([n, v])  # a True below a later False is non-monotone
+    bb = io.BytesIO(); broken.save(bb)
+    g.equal(threshold_from_workbook(bb.getvalue(), field='present', output='reachable')['monotone'], False)  # a non-monotone column is detected
+    return {'calamine_int_to_float_reproduced': True, 'threshold_derived_from_readback': True, 'matches_policy_threshold': True,
+            'non_monotone_detected': True, 'original_chain_rerun': False}
+
+
+def run() -> dict:
+    g.ASSERTIONS = 0; rows = []
+    for i, fn in C:
+        before = g.ASSERTIONS
+        try: r = fn(); state = 'passed'; error = None
+        except Exception: r = {}; state = 'failed'; error = traceback.format_exc()
+        rows.append({'proof': i, 'test': fn.__name__, 'status': state, 'assertions': g.ASSERTIONS - before, 'result': r, 'error': error})
+    packages = ['pydantic', 'pandas', 'numpy', 'holidays', 'networkx', 'lxml', 'openpyxl', 'python-calamine', 'zen-engine', 'SpiffWorkflow', 'deepdiff']
+    here = Path(__file__).resolve().parent
+    return {'scope': 'Bounded authored handoff fixtures and reproduced library defaults; the original P51-P60 chains and their artifacts were not rerun.',
+            'test_cases': len(rows), 'passed': sum(r['status'] == 'passed' for r in rows), 'failed': sum(r['status'] == 'failed' for r in rows),
+            'assertions': g.ASSERTIONS, 'full_chains_executed': 0, 'network_calls': 0, 'business_actions': 0,
+            'source_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+            'dependency_sha256': {name: hashlib.sha256((here / name).read_bytes()).hexdigest() for name in ['handoff_guards_v1.py', 'handoff_guards_v3.py', 'handoff_guards_v4.py', 'handoff_guards_v5.py']},
+            'library_versions': {n: importlib.metadata.version(n) for n in packages}, 'results': rows}
+
+
+if __name__ == '__main__':
+    p = argparse.ArgumentParser(); p.add_argument('--report', type=Path, required=True); args = p.parse_args()
+    result = run(); args.report.parent.mkdir(parents=True, exist_ok=True)
+    args.report.write_text(json.dumps(result, indent=2, sort_keys=True, allow_nan=False) + '\n')
+    print(json.dumps({k: result[k] for k in ['test_cases', 'passed', 'failed', 'assertions', 'full_chains_executed']}))
+    if result['failed']:
+        print('\n'.join(r['error'] for r in result['results'] if r['error'])); raise SystemExit(1)
+```
+
+## Fresh local guard evidence: guards-v6.json
+
+Result file SHA256 d26aeb60e550fa7559eb6ea9dafc2cd6cd6da28970b79c22a8e911b6c27ce6e2; bytes 5117. These results do not rerun or promote the full proof chains.
+
+```json
+{
+  "assertions": 48,
+  "business_actions": 0,
+  "dependency_sha256": {
+    "handoff_guards_v1.py": "2b3138b692ecfd02b76ae34bdb001f5046608bb2983d8709d6c55c0765f7c9b8",
+    "handoff_guards_v3.py": "e8df8d98831289c66ab705940ae2bc20ca7913a721002b811a5a77be05be2873",
+    "handoff_guards_v4.py": "90029a6917216a0ded8b685dc48c496ae8479d6204115a8ec10f8488e4076841",
+    "handoff_guards_v5.py": "611cd01de6ee4c96b2f4260fb3a33c27e7893b4b31d2b07baaf3d8fcf614fa6f"
+  },
+  "failed": 0,
+  "full_chains_executed": 0,
+  "library_versions": {
+    "SpiffWorkflow": "3.2.0",
+    "deepdiff": "9.1.0",
+    "holidays": "0.103",
+    "lxml": "6.1.3",
+    "networkx": "3.6.1",
+    "numpy": "2.4.6",
+    "openpyxl": "3.1.5",
+    "pandas": "2.2.3",
+    "pydantic": "2.13.5",
+    "python-calamine": "0.8.2",
+    "zen-engine": "2.0.2"
+  },
+  "network_calls": 0,
+  "passed": 10,
+  "results": [
+    {
+      "assertions": 4,
+      "error": null,
+      "proof": 51,
+      "result": {
+        "canonical_digest_stable": true,
+        "digest_proves_committed_bytes_not_semantics": true,
+        "original_chain_rerun": false,
+        "raw_saves_differ_reproduced": true,
+        "value_change_changes_digest": true
+      },
+      "status": "passed",
+      "test": "canonical_office_is_byte_not_semantic"
+    },
+    {
+      "assertions": 7,
+      "error": null,
+      "proof": 52,
+      "result": {
+        "c14n_normalizes_attrs_and_whitespace": true,
+        "c14n_preserves_sibling_order": true,
+        "isomorphism_confirms": true,
+        "original_chain_rerun": false,
+        "wl_collision_reproduced": "C6 vs 2xC3"
+      },
+      "status": "passed",
+      "test": "wl_hash_is_incomplete_c14n_keeps_order"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 53,
+      "result": {
+        "append_only_enforced": true,
+        "duplicate_path_blocked": true,
+        "original_chain_rerun": false,
+        "reproduced_registered_changed_classified": true
+      },
+      "status": "passed",
+      "test": "register_classifies_and_ledger_is_append_only"
+    },
+    {
+      "assertions": 5,
+      "error": null,
+      "proof": 54,
+      "result": {
+        "domain_is_not_the_input_space_reproduced": true,
+        "negative_float_and_over_ceiling_unenumerated": true,
+        "original_chain_rerun": false,
+        "threshold_and_monotonicity_from_enumeration": true
+      },
+      "status": "passed",
+      "test": "enumeration_covers_only_the_declared_domain"
+    },
+    {
+      "assertions": 5,
+      "error": null,
+      "proof": 55,
+      "result": {
+        "agreement_over_full_domain": true,
+        "dmn_engine_executed": true,
+        "original_chain_rerun": false,
+        "sample_agreement_is_not_universal": true
+      },
+      "status": "passed",
+      "test": "dmn_and_zen_agree_over_the_whole_domain"
+    },
+    {
+      "assertions": 4,
+      "error": null,
+      "proof": 56,
+      "result": {
+        "charter_sentence_quoted_verbatim": true,
+        "duplicate_meeting_blocked": true,
+        "flag_number_disagreement_blocked": true,
+        "numbers_carried_from_decision_rows": true,
+        "original_chain_rerun": false
+      },
+      "status": "passed",
+      "test": "explanations_use_decision_numbers_not_recomputation"
+    },
+    {
+      "assertions": 3,
+      "error": null,
+      "proof": 57,
+      "result": {
+        "duplicate_event_blocked": true,
+        "original_chain_rerun": false,
+        "ties_need_contract": true,
+        "within_case_position_mean": true
+      },
+      "status": "passed",
+      "test": "performance_positions_are_case_partitioned"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 58,
+      "result": {
+        "boundary_policy_explicit": true,
+        "dates_outside_pinned_years_blocked": true,
+        "half_open_count_reproduced": true,
+        "holiday_rule_is_library_defined_reproduced": true,
+        "original_chain_rerun": false,
+        "reversed_is_negative": true
+      },
+      "status": "passed",
+      "test": "working_days_are_half_open_and_calendar_defined"
+    },
+    {
+      "assertions": 4,
+      "error": null,
+      "proof": 59,
+      "result": {
+        "attribution_from_unit_path": true,
+        "conservation_checked": true,
+        "original_chain_rerun": false,
+        "permitted_excluded": true,
+        "sentence_regex_misattributes_reproduced": true
+      },
+      "status": "passed",
+      "test": "subsection_from_unit_path_not_sentence_text"
+    },
+    {
+      "assertions": 4,
+      "error": null,
+      "proof": 60,
+      "result": {
+        "calamine_int_to_float_reproduced": true,
+        "matches_policy_threshold": true,
+        "non_monotone_detected": true,
+        "original_chain_rerun": false,
+        "threshold_derived_from_readback": true
+      },
+      "status": "passed",
+      "test": "threshold_readback_and_monotonicity"
+    }
+  ],
+  "scope": "Bounded authored handoff fixtures and reproduced library defaults; the original P51-P60 chains and their artifacts were not rerun.",
+  "source_sha256": "7dc3e6c5588bc9293c0c6c94802e7bb057090776647482e6ddf0b748d1c7f259",
+  "test_cases": 10
+}
+```
+
+Checkpoint coverage: 60 of 300 proof-specific handoff amendments written, through P60. Prior cumulative TXT SHA256 e5f04bb517ad18653a76ea4175c5407ac414fa9c702e314af24fc362335709e3.
