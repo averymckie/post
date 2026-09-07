@@ -17407,3 +17407,876 @@ Result file SHA256 67ad8c101246a98bd98faaead25d00cf5f7e3d9413e4545dbfad5cbd5e58f
 ```
 
 Checkpoint coverage: 40 of 300 proof-specific handoff amendments written, through P40. Prior cumulative TXT SHA256 0919135f7f840310418aef6feaec823354722653733390823010136db37b1552.
+
+## Checkpoint integrity and environment for this batch
+
+Base: the TXT as committed after batch 4 (SHA256 a8ecce7532153b494320c117211c497459fbe912d01b445ef72916f389db952d, 1152554 bytes); it is the prior cumulative TXT SHA256 recorded at the end of this batch. Environment as in batch 4 plus zen-engine 2.0.2 (the pin recorded for P4, P13 and P65); pandas stays at 2.2.3. No network call occurs inside the guard run. handoff_guards_v5.py imports handoff_guards_v1.py (alias resolution, occurrence receipts, strict JSON), handoff_guards_v3.py (external-asset check, records) and handoff_guards_v4.py (site build, table encoding, step rows); v1-v4 stay byte-identical under HG07.
+
+## Online-checked function references for this hardening batch
+[HD64] zen-engine Python binding: zen.ZenEngine(), engine.create_decision(content), decision.evaluate(input) as shown in the README; a JDM decision table carries inputs, outputs and rules whose cells are expressions such as ">= 10". Executed with 2.0.2: a string where a number is expected, a missing input, and a cell "> nan" all fall through to the default rule without an error, and "> 5.42" is strict at 5.42. Checked on GitHub README (root and bindings/python); gorules.io documentation not fetched.
+https://github.com/gorules/zen
+[HD65] networkx.topological_generations "Stratifies a DAG into generations"; the order of nodes inside a generation follows node insertion order (executed). networkx.multipartite_layout "Position nodes in layers of straight lines"; subset_key: "If a string, the key of node data in G that holds the node subset. If a dict, keyed by layer number to the nodes in that layer/subset." Checked on GitHub at tag networkx-3.6.1 (dag.py, layout.py).
+https://raw.githubusercontent.com/networkx/networkx/networkx-3.6.1/networkx/drawing/layout.py
+[HD66] plotly typed arrays: numpy-backed trace arrays serialize as a mapping {dtype, bdata, shape}, and plotly.io.from_json returns that mapping undecoded (executed with 7.0.0); numpy.frombuffer with the declared dtype and reshape with the declared shape restore the array, and numpy.array_equal(equal_nan=True) compares it. plotly.io.to_json and from_json as in HD38.
+https://github.com/plotly/plotly.py/blob/main/plotly/io/_json.py
+[HD67] plotly.express.imshow: "Display an image, i.e. data on a 2D regular raster"; "(M, N): an image with scalar data. The data is visualized using a colormap."; text_auto: "If True or a string, single-channel img values will be displayed as text."; a DataFrame's columns and index become the x and y labels (executed). Installed 7.0.0 docstring; the GitHub doc page supplies the zmin/zmax sentence.
+https://github.com/plotly/plotly.py/blob/main/doc/python/imshow.md
+[HD68] pandas GroupBy.shift: "Shift each group by periods observations." The case-partitioned lag is groupby(case)[timestamp].shift(1); an unpartitioned Series.diff crosses cases (executed). Installed 2.2.3 docstring.
+https://github.com/pandas-dev/pandas/blob/v2.2.3/pandas/core/groupby/groupby.py
+[HD69] dateutil.parser.parse fuzzy: "Whether to allow fuzzy parsing, allowing for string like 'Today is January 1, 2047 at 8:21:00AM'"; missing elements: "If any other elements are missing, they are taken from the datetime.datetime object passed to the parameter default", which is the current date by default (executed: 'tsc-2024-01' receives today's day of month). Checked on GitHub source.
+https://github.com/dateutil/dateutil/blob/master/src/dateutil/parser/_parser.py
+[HD70] Python 3.11 date.fromisoformat: "Return a date corresponding to a date_string given in any valid ISO 8601 format, with the following exceptions: 1. Reduced precision dates are not currently supported (YYYY-MM, YYYY)..."; a string with a prefix such as 'tsc-2024-01-17' raises ValueError (executed). Checked on GitHub (cpython 3.11 Doc/library/datetime.rst); docs.python.org blocked.
+https://github.com/python/cpython/blob/3.11/Doc/library/datetime.rst
+[HD71] Jinja2 tojson filter: "Serialize an object to a string of JSON, and mark it safe to render in HTML. This filter is only for use in HTML documents. The returned string is safe to render in HTML documents and <script> tags." It writes NaN for float('nan') (executed), which strict JSON parsing rejects; json.dumps(allow_nan=False) raises instead (HD14). Checked on GitHub source and the installed 3.1.6 docstring.
+https://raw.githubusercontent.com/pallets/jinja/main/src/jinja2/filters.py
+[HD72] python-docx Paragraph.add_run ("Append run containing text and having character-style style"), Paragraph.runs ("Sequence of Run instances corresponding to the <w:r> elements in this paragraph"), Paragraph.text setter ("Assigning text to this property causes all existing paragraph content to be replaced with a single run containing the assigned text ... All run-level formatting, such as bold or italic, is removed"); Font.hidden marks a run hidden (executed round trip). Checked on GitHub source.
+https://github.com/python-openxml/python-docx/blob/master/src/docx/text/paragraph.py
+
+## Hardening batch: P41-P50
+
+### HARDENING P41 -- A layered 3D page needs deterministic positions and a payload check
+
+Original proof: P41  ordered steps -> layers -> 3D process page
+Source location: frozen master lines 1035-1051; original section SHA256 e4be9db4e5e9e44b16548e6fb35004aa1e009c7698ed976120bcfd19232ff921. Further input: frozen master lines 1052-1060, SHA256 025977bb9b3d5517395f8c5301d90ddfd16ef0930f526bb2bd3bd66551ff4728.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: the order of nodes inside a topological generation follows node insertion order, so the same forced order yields different positions; edge separators pass through the numpy path as NaN inside a typed buffer.
+Handoff: ordered steps (P2) -> topological_generations -> Scatter3d markers and line segments with z = source unit -> HTML page
+Failure path: Positions inside a layer come from iteration order, so two runs over the same graph can draw different pages with equal hashes only by chance. Line-segment separators (None) become NaN in a base64 buffer when the coordinates go through numpy. The page loads plotly.js from a CDN (P24). Nothing compares the drawn coordinates with the layout.
+Required repair: Sort each generation by step identity and lay out through multipartite_layout with explicit layer lists; build traces from typed lists so separators stay null; compare the page payload with the layout; embed plotly.js and verify the absence of external assets; reject cycles and unknown endpoints.
+Function bridge: pydantic strict model; networkx.is_directed_acyclic_graph, topological_generations, multipartite_layout(subset_key=dict); plotly.graph_objects.Scatter3d; plotly.io.to_json(validate=True); DeepDiff(zip_ordered_iterables=True); numpy.frombuffer for typed buffers; handoff_guards_v3.external_assets
+Positive acceptance: Five steps in two layers give identical coordinates under reversed insertion order, and the payload equals the layout with three null-separated edges.
+Adverse acceptance: Generations list the same layer in two orders (reproduced). A numpy-backed separator is NaN inside bdata (reproduced). A cycle, an unknown endpoint, or a CDN page blocks.
+Evidence and limit: guards-v5 case 41 on authored steps. The recorded process_3d.html pages were not rebuilt.
+References: HD05 HD34 HD57 HD65 HD66
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P42 -- A readable policy page is rendered from the table structure and checked against the engine
+
+Original proof: P42  policy -> readable policy page
+Source location: frozen master lines 1061-1076; original section SHA256 cc1c84bd2306ba2e9df053b2af6e102cec36b65ce3a93f8ba15e18077f0f68b4. Further input: frozen master lines 1077-1085, SHA256 9f8e1249b3c4a26dd7c51e9420edfb25e04d6735a208ceb1d93c84cd2a58e002.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: zen-engine takes the default rule for a string-typed input, a missing input, or an unevaluable cell without an error; a template without autoescape renders rule descriptions as markup.
+Handoff: GoRules JDM (P4, P13) -> json.loads -> Jinja2 render -> policy page
+Failure path: The page states "if present voting members >= 10" from the 2026 roster (P13). Free-text rule descriptions can disagree with the cell expressions the engine evaluates. An input of the wrong type or a missing field silently yields the fallback outcome. Without autoescape a description containing markup executes in the page.
+Required repair: Render conditions and outputs from the JDM table structure, not from descriptions; keep autoescape on; validate inputs with a typed model before evaluation; declare boundary samples with their expected rule and require the engine to agree before the page is published.
+Function bridge: json.dumps(allow_nan=False); zen.ZenEngine().create_decision; ZenDecision.evaluate; Jinja2 Environment(autoescape=True, undefined=StrictUndefined); pydantic strict model
+Positive acceptance: The page shows "present >= 10" from the cell, escapes the hostile description, and the engine agrees at present 9 and 10.
+Adverse acceptance: present "10", None and a missing field take rule r2 (reproduced). autoescape off renders the script tag (reproduced). A sample expecting r1 at 9 blocks. A string input or a missing field fails validation.
+Evidence and limit: guards-v5 case 42 on an authored table. The recorded 2-rule and 66-rule pages were not rebuilt.
+References: HD05 HD11 HD14 HD64
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P43 -- Heatmap cells need case-partitioned lags, counts, and explicit missing cells
+
+Original proof: P43  records -> measured cells -> heatmap page
+Source location: frozen master lines 1086-1106; original section SHA256 d17e0f51c0ea0e59064daa9c84ff0e04d8310fcee8bdd8b8b0bd66d5821d173f.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: an unpartitioned lag measures gaps across cases; plotly.io.from_json returns the heatmap buffer undecoded, so a readback that does not decode it compares nothing.
+Handoff: records (P6) -> avg(epoch(ts - lag(ts))) per department and activity -> px.imshow -> page and workbook
+Failure path: The recorded 410.72 h cell has no event count beside it. A lag without case partition (P12) mixes cases. Department by activity combinations without events are blank cells indistinguishable from zero. The page loads plotly.js from a CDN.
+Required repair: Compute gaps with a case-partitioned shift after tie and identity checks; pivot means and counts over declared axes; keep missing cells as NaN with zero counts; decode the typed buffer and compare it with the matrix, including NaN positions; carry counts as customdata; embed plotly.js and reject external assets.
+Function bridge: pandas to_datetime(utc=True), groupby.shift, pivot_table, DataFrame.reindex; plotly.express.imshow; Figure.update_traces(customdata); numpy.frombuffer, reshape, array_equal(equal_nan=True); handoff_guards_v3.external_assets
+Positive acceptance: Two cases yield 4 h and 10 h cells, four missing cells with zero counts, and a payload equal to the matrix.
+Adverse acceptance: The unpartitioned diff gives 1 h, 3 h, 7 h across cases (reproduced). from_json returns {bdata, dtype, shape} (reproduced). A department that changes within a case blocks. A CDN page blocks.
+Evidence and limit: guards-v5 case 43 on authored events. The recorded 3 x 26 matrix was not rebuilt.
+References: HD18 HD34 HD52 HD66 HD67 HD68
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P44 -- The actor axis is an identity, not a quotation
+
+Original proof: P44  facts -> actor by action matrix -> workbook
+Source location: frozen master lines 1107-1125; original section SHA256 eaaefcb5da4ca863205aaadf4d532aaa587d7657f65841859b28ebfc6ca2fcce.
+Finding: RECORDED KEY GAP: the recorded matrix keys actors by the agent quotation ("agency shall make", "agency shall notify"), so one agency becomes as many actors as it has quoted verbs (56 actors for one statute).
+Handoff: facts (P1) -> count per (agent quote, event lemma) over obligatory events -> workbook
+Failure path: A quotation contains the verb, so each (actor, action) pair mints its own actor row. Lemma keys merge "agency" with "Each agency" only by accident of lemmatization and cannot merge coreferent phrases. Permitted and prohibited events are excluded silently. No conservation check.
+Required repair: Resolve the agent lemma to an approved actor concept through the scoped lexicon (P10) with polarity; pivot on the concept over declared action columns; require the matrix total to equal the obligatory facts; block unresolved actors.
+Function bridge: handoff_guards_v1.resolve_alias (spaCy PhraseMatcher); pandas pivot_table(fill_value=0), DataFrame.reindex; approved actor lexicon as data
+Positive acceptance: Three agency quotations and one TSC quotation form a 2 x 4 concept matrix that conserves the four obligatory facts.
+Adverse acceptance: Quote keys give four actor rows (reproduced). An actor outside the lexicon blocks. A negated agent blocks.
+Evidence and limit: guards-v5 case 44 on authored facts. The recorded 56 x 36 workbook was not rebuilt.
+References: HD01 HD15 HD52
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P45 -- Timeline dates come from a declared identifier pattern, not fuzzy parsing
+
+Original proof: P45  tagged steps -> timeline page
+Source location: frozen master lines 1126-1142; original section SHA256 7828310474422fc20609f33f956457f5f26cacd41c858ebfa4c22e27b4087b29.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: fuzzy date parsing of a truncated meeting identifier fills the missing day from today's date without an error.
+Handoff: tagged steps (P10) -> count of lines per (meeting, step) -> Scatter with marker size = lines -> page
+Failure path: A meeting identifier parsed fuzzily can acquire a day that never existed in the source (P3 anchor rule). Marker size is a visual encoding; the count must travel as data. Tied tags (P10) inflate counts. The page loads plotly.js from a CDN.
+Required repair: Parse meeting identifiers with a declared pattern and date.fromisoformat, blocking anything else; count accepted tags only and report ties; carry counts as customdata; compare the payload with the counts; embed plotly.js and reject external assets.
+Function bridge: re.fullmatch with a declared pattern; datetime.date.fromisoformat; pandas groupby(dropna=False).size; plotly.graph_objects.Scatter; DeepDiff(zip_ordered_iterables=True); handoff_guards_v3.external_assets
+Positive acceptance: Two points with three accepted lines and one excluded tie, dates 2024-01-17 and 2023-11-08.
+Adverse acceptance: 'tsc-2024-01' parses fuzzily to January of 2024 with today's day (reproduced) and blocks under the pattern. An impossible date raises. A CDN page blocks.
+Evidence and limit: guards-v5 case 45 on authored tags. The recorded 22-point timeline was not rebuilt.
+References: HD05 HD34 HD69 HD70
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P46 -- A bottleneck ranking needs per-edge waits, not a target's mean
+
+Original proof: P46  directly-follows graph, measured steps -> bottlenecks -> workbook
+Source location: frozen master lines 1143-1161; original section SHA256 547a1814a57e9e7c7e52f6a6b68050e25f4f6371f0b1901cfa40f74a8bdd2655.
+Finding: RECORDED MEASURE GAP: the recorded rows give two different edges into T03 the same 129.66 h because the join copies the target activity's mean onto every incoming edge.
+Handoff: DFG edges (P23) joined to the mean waiting time of the target activity (P12) -> order by mean hours -> workbook
+Failure path: A many-to-one join by activity name ranks edges by a property of their target, so the ranking is an activity ranking with duplicated rows. Tie and lifecycle problems from P23 and P12 propagate. The tiebreak of the sort is undeclared.
+Required repair: Measure each edge from the gap between its specific predecessor and successor inside a case (partitioned shift), aggregate per (previous, activity) with counts, label the measure, and sort with a declared tiebreak.
+Function bridge: pandas merge(validate='many_to_one') for the reproduction; groupby.shift(1); groupby(['previous', 'activity']).agg(count, mean); sort_values(kind='stable') with declared keys
+Positive acceptance: T02->T03 (24 h) ranks above T04->T03 (12 h) with one case each and the measure labeled edge_wait.
+Adverse acceptance: The join gives both T03 edges 129.66 h (reproduced). A duplicate event identity blocks.
+Evidence and limit: guards-v5 case 46 on authored events. The recorded bottlenecks.xlsx was not rebuilt.
+References: HD06 HD68
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P47 -- Derived thresholds need finite values, typed inputs, and a labeled basis
+
+Original proof: P47  records, measured groups -> decision table -> decisions -> workbook
+Source location: frozen master lines 1162-1182; original section SHA256 f0ce65dd4a79f0e79720df6e486143db7692795fb6446c65283387e7c6abd48a.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: a mean of NaN rendered through a text template produces invalid JSON, the tojson filter emits a bare NaN token, and a "> nan" cell loads in zen-engine and never fires; a string elapsed value also takes the default rule.
+Handoff: department means (P22) and open cases -> Jinja2-rendered JDM -> zen evaluate per open case -> at_risk workbook
+Failure path: The threshold is derived from the same log it judges, not from a policy. Open cases are right-censored (P21). A department without closed cases has no mean; templated as text it either breaks the JSON or silently disables its rule. Typed mismatches fall through to "not at risk".
+Required repair: Build the JDM as data and serialize with allow_nan=False; block departments without a finite mean; validate open cases with a typed model; prove the comparison at the boundary (mean is not at risk, mean plus epsilon is) before deciding; label the basis as derived from the log, not policy.
+Function bridge: json.dumps(allow_nan=False); pydantic strict model; zen.ZenEngine().create_decision; ZenDecision.evaluate; numpy.isfinite
+Positive acceptance: Two open cases decide as at risk (60 days) and not at risk (5.42 days) under a General threshold of 5.42 with the strict boundary proven.
+Adverse acceptance: The text template writes nan (reproduced); tojson writes NaN (reproduced); the "> nan" rule falls through (reproduced); a None or NaN mean blocks; a string elapsed value fails validation; an unknown department blocks.
+Evidence and limit: guards-v5 case 47 on authored means. The recorded 94 of 105 result was not rerun.
+References: HD11 HD14 HD64 HD71
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P48 -- Checklist items carry identity and no completion state
+
+Original proof: P48  required actions -> checklist document
+Source location: frozen master lines 1183-1197; original section SHA256 27b0375f9e7a271ec7c774d726938a3a1df02b463b802fe10c30787fed59b987. Further input: frozen master lines 1198-1206, SHA256 ce40d59900f00ad48addf164387c444b4ba276586bbd2cd49e999d20f817ec18.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it.
+Handoff: required actions (P4) and facts (P1) -> paragraph per item with a box glyph -> checklist document
+Failure path: A paragraph of glyph plus sentence has no identity; two items with the same sentence are indistinguishable. A box glyph edited to a checked glyph is text, not evidence of completion (P7). Assigning paragraph text replaces all runs, so any run-level identity is lost.
+Required repair: Write each item as three runs (glyph, hidden identity run with item, fact and quote, sentence); read items back from runs and re-validate; require an occurrence receipt for completion; block duplicate identities.
+Function bridge: pydantic strict model with model_validator; Paragraph.add_run; Font.hidden; Paragraph.runs; handoff_guards_v1.observed_action
+Positive acceptance: Two items with identical sentences round-trip with distinct identities.
+Adverse acceptance: Assigning paragraph text collapses three runs to one and the readback blocks (reproduced). A checked glyph is not an occurrence receipt. A duplicate identity or a quote outside its sentence blocks.
+Evidence and limit: guards-v5 case 48 on authored items. The recorded 13-item and 122-item documents were not rebuilt.
+References: HD05 HD21 HD72
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P49 -- Cross-document actions join on approved concepts, not lemmas
+
+Original proof: P49  required actions, required actions -> shared and unshared actions -> workbook
+Source location: frozen master lines 1207-1223; original section SHA256 0c9cd054fe344ee7b716b6bacf5620af5d803f72f38309c2d6c82babf5fbde00.
+Finding: RECORDED KEY GAP: a lemma join declares "approve" shared between the charter and the governance document although the objects differ, and misses a shared action whose lemma carries a lemmatizer artifact (the recorded "Nominat" for "Nominating").
+Handoff: required actions of two documents (P4) -> clingo join on the action lemma -> workbook
+Failure path: A lemma is neither an action identity nor stable across parsers. Shared and unshared lists computed from lemmas are candidates at best. Near matches are not identities.
+Required repair: Ground actions with document, identity, lemma and approved concept through the backend; derive shared and unshared sets on concepts; report lemma joins as candidates; treat fuzzy similarity as a candidate signal only.
+Function bridge: clingo Backend.add_atom and add_rule with Function and String symbols; Control.add, ground, solve; Model.symbols(shown=True); rapidfuzz.fuzz.ratio
+Positive acceptance: The concept join shares NOMINATE_MEMBER and leaves APPROVE_MEMBERSHIP and APPROVE_PULL_REQUEST unshared.
+Adverse acceptance: The lemma join shares "approve" and misses "nominat" (reproduced). "nominat" versus "nominate" scores above 90 and remains a candidate.
+Evidence and limit: guards-v5 case 49 on authored actions. The recorded cross_document.xlsx was not rebuilt.
+References: HD09 HD15 HD45
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P50 -- A site readback selects the content table and digests a declared profile
+
+Original proof: P50  site -> steps' -> digest' ; digest', digest -> match
+Source location: frozen master lines 1224-1240; original section SHA256 670d79ba78ae6a054efe997b307a8b9544874b86a50ea0b843bf2c1c4b042477.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: a generic table XPath over a built site also matches the theme's keyboard-shortcut table, so row counts and digests depend on the theme.
+Handoff: site (P39) -> lxml XPath over the steps table -> sorted-key JSON digest -> csv_diff.compare -> match
+Failure path: The recorded "24 of 24" depends on which table the XPath selected. Cell text that was escaped on the way in must be compared after rendering. The digest's representation is undeclared (P17, P30). csv_diff compares by Python equality.
+Required repair: Read the content table by its main-region role; compare typed rows positionally; compute forward and backward digests over the declared canonical JSON profile of typed rows; reject external assets; block duplicate identities.
+Function bridge: handoff_guards_v4.build_site and rendered_rows; lxml XPath //*[@role="main"]//table[1]; DeepDiff(zip_ordered_iterables=True); handoff_guards_v1.canonical_local; hashlib.sha256
+Positive acceptance: Two steps with a pipe and a tag in their quotes round-trip with equal digests and zero external assets.
+Adverse acceptance: //table yields more rows than the steps (reproduced). A duplicate identity blocks. An empty lemma fails validation.
+Evidence and limit: guards-v5 case 50 on authored steps. The recorded roundtrip.json was not rerun.
+References: HD14 HD23 HD26 HD34 HD61
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+## Embedded runnable local guard module: handoff_guards_v5.py
+
+SHA256 611cd01de6ee4c96b2f4260fb3a33c27e7893b4b31d2b07baaf3d8fcf614fa6f; bytes 37407. Save the following code block as handoff_guards_v5.py next to handoff_guards_v1.py, handoff_guards_v3.py and handoff_guards_v4.py.
+
+```python
+"""Fifth bounded adapter suite: P41-P50. Requires handoff_guards_v1.py, handoff_guards_v3.py and handoff_guards_v4.py from
+this TXT. Every layout, pivot, join, decision evaluation, serialization, build, and comparison below is a library primitive
+call; local code declares fixtures and policies and turns primitive results into Blocked outcomes. All runtime inputs are
+authored fixtures. No network, model client, native Office application, or business action.
+Run: python handoff_guards_v5.py --report report.json
+"""
+from __future__ import annotations
+import argparse, base64, datetime, hashlib, importlib.metadata, io, json, logging, re, traceback, warnings
+from pathlib import Path
+from typing import Literal
+import clingo
+import docx
+import networkx as nx
+import numpy as np
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+import plotly.io as pio
+import zen
+from dateutil import parser as date_parser
+from deepdiff import DeepDiff
+from jinja2 import Environment, StrictUndefined
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
+from rapidfuzz import fuzz
+import handoff_guards_v1 as g
+import handoff_guards_v3 as g3
+import handoff_guards_v4 as g4
+warnings.simplefilter('ignore'); logging.disable(logging.WARNING)
+
+
+def decode_typed_array(spec) -> np.ndarray:
+    # plotly serializes numpy-backed arrays as {dtype, bdata, shape?}; numpy restores the buffer.
+    if not isinstance(spec, dict): return np.asarray(spec, dtype=float)
+    values = np.frombuffer(base64.b64decode(spec['bdata']), dtype=spec['dtype'])
+    return values.reshape([int(x) for x in spec['shape'].split(',')]) if 'shape' in spec else values
+
+# ---------------------------------------------------------------- P41
+class StepNode(BaseModel):
+    model_config = ConfigDict(strict=True, extra='forbid')
+    id: str = Field(min_length=1)
+    unit: int = Field(ge=0)
+
+
+def layered_positions(nodes: list[dict], edges: list[tuple[str, str]]) -> dict:
+    typed = [StepNode.model_validate(n) for n in nodes]
+    graph = nx.DiGraph(); graph.add_nodes_from(n.id for n in typed); graph.add_edges_from(edges)
+    if set(graph) != {n.id for n in typed}: raise g.Blocked('edge endpoint outside the step set')
+    if not nx.is_directed_acyclic_graph(graph): raise g.Blocked('forced order is not acyclic')
+    layers = {i: sorted(generation) for i, generation in enumerate(nx.topological_generations(graph))}
+    pos = nx.multipartite_layout(graph, subset_key=layers, align='vertical')
+    unit = {n.id: n.unit for n in typed}
+    return {'coords': {n: [float(pos[n][0]), float(pos[n][1]), float(unit[n])] for n in sorted(graph)}, 'layers': len(layers)}
+
+
+def process_3d_page(nodes: list[dict], edges: list[tuple[str, str]], *, include_plotlyjs) -> dict:
+    layout = layered_positions(nodes, edges); coords = layout['coords']
+    ids = sorted(coords)
+    ex, ey, ez = [], [], []
+    for a, b in edges:
+        ex += [coords[a][0], coords[b][0], None]; ey += [coords[a][1], coords[b][1], None]; ez += [coords[a][2], coords[b][2], None]
+    fig = go.Figure([go.Scatter3d(name='steps', x=[coords[i][0] for i in ids], y=[coords[i][1] for i in ids], z=[coords[i][2] for i in ids], text=ids, mode='markers+text'),
+                     go.Scatter3d(name='forced', x=ex, y=ey, z=ez, mode='lines')])
+    data = json.loads(pio.to_json(fig, validate=True))['data']
+    diff = DeepDiff({'steps': [coords[i] for i in ids], 'edges': [ex, ey, ez]}, {'steps': [[x, y, z] for x, y, z in zip(data[0]['x'], data[0]['y'], data[0]['z'])], 'edges': [data[1]['x'], data[1]['y'], data[1]['z']]}, zip_ordered_iterables=True)
+    if diff: raise g.Blocked('page payload differs from the layout: ' + diff.to_json())
+    page = pio.to_html(fig, include_plotlyjs=include_plotlyjs, full_html=True, div_id='process3d', validate=True)
+    external = g3.external_assets(page)
+    if external: raise g.Blocked('external asset dependency: ' + external[0])
+    return {'nodes': len(ids), 'edges': len(edges), 'layers': layout['layers'], 'bytes': len(page.encode())}
+
+# ---------------------------------------------------------------- P42 and P47
+def decision_table(inputs: list[tuple[str, str]], outputs: list[str], rules: list[dict]) -> dict:
+    """A GoRules JDM graph as data: inputs are (field, kind) pairs, rules map field -> cell expression and output -> value."""
+    inp = [{'id': 'i%d' % k, 'field': f, 'name': f, 'type': 'expression'} for k, (f, _) in enumerate(inputs)]
+    out = [{'id': 'o%d' % k, 'field': f, 'name': f, 'type': 'expression'} for k, f in enumerate(outputs)]
+    table = []
+    for k, r in enumerate(rules):
+        cells = {'_id': r['id']}
+        for i in inp: cells[i['id']] = r['conditions'].get(i['field'], '')
+        for o in out: cells[o['id']] = r['outputs'][o['field']]
+        table.append(cells)
+    return {'nodes': [{'id': 'in', 'type': 'inputNode', 'name': 'request', 'position': {'x': 0, 'y': 0}},
+                      {'id': 'dt', 'type': 'decisionTableNode', 'name': 'policy', 'position': {'x': 0, 'y': 0}, 'content': {'hitPolicy': 'first', 'inputs': inp, 'outputs': out, 'rules': table}},
+                      {'id': 'out', 'type': 'outputNode', 'name': 'response', 'position': {'x': 0, 'y': 0}}],
+            'edges': [{'id': 'e1', 'type': 'edge', 'sourceId': 'in', 'targetId': 'dt'}, {'id': 'e2', 'type': 'edge', 'sourceId': 'dt', 'targetId': 'out'}]}
+
+
+def load_decision(jdm: dict):
+    return zen.ZenEngine().create_decision(json.dumps(jdm, allow_nan=False))
+
+
+class MajorityInput(BaseModel):
+    model_config = ConfigDict(strict=True, extra='forbid')
+    present: int = Field(ge=0)
+
+POLICY_PAGE = Environment(autoescape=True, undefined=StrictUndefined).from_string(
+    '<table>{% for r in rows %}<tr><td>{{ r.id }}</td><td>{% for f, c in r.conditions %}{{ f }} {{ c }}; {% endfor %}</td><td>{% for f, v in r.outputs %}{{ f }} = {{ v }}; {% endfor %}</td><td>{{ r.note }}</td></tr>{% endfor %}</table>')
+
+
+def policy_page(jdm: dict, samples: list[dict], input_model) -> str:
+    decision = load_decision(jdm); table = jdm['nodes'][1]['content']
+    rows = [{'id': r['_id'], 'conditions': [(i['field'], r[i['id']]) for i in table['inputs'] if r[i['id']]],
+             'outputs': [(o['field'], r[o['id']]) for o in table['outputs']], 'note': r.get('_description', '')} for r in table['rules']]
+    for s in samples:
+        payload = input_model.model_validate(s['input']).model_dump()
+        result = decision.evaluate(payload)['result']
+        if result['rule'] != s['rule']: raise g.Blocked('page and engine disagree at sample %r: %r' % (s['input'], result))
+    return POLICY_PAGE.render(rows=rows)
+
+# ---------------------------------------------------------------- P43
+def waiting_matrix(events: list[dict], *, departments: list[str], activities: list[str]) -> dict:
+    df = pd.DataFrame(events)
+    if df[['case_id', 'event_id']].duplicated().any(): raise g.Blocked('duplicate event identity')
+    df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True, errors='raise')
+    if df.duplicated(['case_id', 'timestamp'], keep=False).any(): raise g.Blocked('timestamp ties need an ordering contract')
+    if (df.groupby('case_id')['department'].nunique(dropna=False) > 1).any(): raise g.Blocked('department differs within a case')
+    df = df.sort_values(['case_id', 'timestamp'], kind='stable')
+    df['gap_hours'] = (df['timestamp'] - df.groupby('case_id')['timestamp'].shift(1)).dt.total_seconds() / 3600
+    measured = df.dropna(subset=['gap_hours'])
+    means = measured.pivot_table(index='department', columns='activity', values='gap_hours', aggfunc='mean').reindex(index=departments, columns=activities)
+    counts = measured.pivot_table(index='department', columns='activity', values='gap_hours', aggfunc='count', fill_value=0).reindex(index=departments, columns=activities, fill_value=0)
+    return {'means': means, 'counts': counts.astype(int), 'first_events_excluded': int(df['gap_hours'].isna().sum())}
+
+
+def heatmap_page(matrix: dict, *, include_plotlyjs) -> dict:
+    means, counts = matrix['means'], matrix['counts']
+    fig = px.imshow(means, aspect='auto')
+    fig.update_traces(customdata=counts.to_numpy(), hovertemplate='%{y} / %{x}: %{z} h over %{customdata} gaps<extra></extra>')
+    trace = json.loads(pio.to_json(fig, validate=True))['data'][0]
+    z = decode_typed_array(trace['z']); c = decode_typed_array(trace['customdata'])
+    if not np.array_equal(z, means.to_numpy(dtype=float), equal_nan=True) or not np.array_equal(c, counts.to_numpy()): raise g.Blocked('heatmap payload differs from the matrix')
+    if list(trace['x']) != list(means.columns) or list(trace['y']) != list(means.index): raise g.Blocked('heatmap axes differ from the declared axes')
+    page = pio.to_html(fig, include_plotlyjs=include_plotlyjs, full_html=True, div_id='heatmap', validate=True)
+    external = g3.external_assets(page)
+    if external: raise g.Blocked('external asset dependency: ' + external[0])
+    return {'cells': int(z.size), 'missing_cells': int(np.isnan(z).sum()), 'bytes': len(page.encode())}
+
+# ---------------------------------------------------------------- P44
+ACTOR_LEXICON = {'AGENCY': ['agency', 'each agency', 'the agency'], 'TSC': ['tsc', 'the tsc']}
+
+
+def actor_matrix(facts: list[dict], *, key: str, actions: list[str]) -> pd.DataFrame:
+    df = pd.DataFrame(facts); df = df[df['modality'] == 'obligatory']
+    return df.pivot_table(index=key, columns='lemma', values='event', aggfunc='count', fill_value=0).reindex(columns=actions, fill_value=0)
+
+
+def concept_actor_matrix(facts: list[dict], *, actions: list[str]) -> dict:
+    rows = []
+    for f in facts:
+        if f['modality'] != 'obligatory': continue
+        concept = g.resolve_alias(f['agent_lemma'], ACTOR_LEXICON, scope=f['scope'], allowed_scope='obligation', polarity=f['polarity'], expected_polarity='positive')
+        rows.append(dict(f, actor=concept))
+    matrix = actor_matrix(rows, key='actor', actions=actions)
+    if int(matrix.to_numpy().sum()) != len(rows): raise g.Blocked('matrix does not conserve the obligatory facts')
+    return {'actors': list(matrix.index), 'matrix': {a: [int(v) for v in matrix.loc[a]] for a in matrix.index}, 'facts': len(rows)}
+
+# ---------------------------------------------------------------- P45
+MEETING_ID = re.compile(r'tsc-(\d{4}-\d{2}-\d{2})')
+
+
+def meeting_date(meeting: str) -> datetime.date:
+    match = MEETING_ID.fullmatch(meeting)
+    if not match: raise g.Blocked('meeting identifier does not carry a full calendar date: ' + meeting)
+    return datetime.date.fromisoformat(match.group(1))
+
+
+def timeline_page(tags: list[dict], *, include_plotlyjs) -> dict:
+    df = pd.DataFrame(tags)
+    if set(df['state']) - {'accepted', 'tie'}: raise g.Blocked('unknown tag state')
+    accepted = df[df['state'] == 'accepted']
+    points = accepted.groupby(['meeting', 'step'], dropna=False).size().reset_index(name='lines')
+    points['date'] = [meeting_date(m).isoformat() for m in points['meeting']]
+    fig = go.Figure(go.Scatter(x=points['date'].tolist(), y=points['step'].tolist(), mode='markers', marker={'size': points['lines'].tolist()},
+                               customdata=[[int(n)] for n in points['lines']], hovertemplate='%{y} on %{x}: %{customdata[0]} lines<extra></extra>'))
+    trace = json.loads(pio.to_json(fig, validate=True))['data'][0]
+    diff = DeepDiff({'x': points['date'].tolist(), 'y': points['step'].tolist(), 'customdata': [[int(n)] for n in points['lines']]}, {k: trace[k] for k in ['x', 'y', 'customdata']}, zip_ordered_iterables=True)
+    if diff: raise g.Blocked('timeline payload differs from the counts: ' + diff.to_json())
+    page = pio.to_html(fig, include_plotlyjs=include_plotlyjs, full_html=True, div_id='timeline', validate=True)
+    external = g3.external_assets(page)
+    if external: raise g.Blocked('external asset dependency: ' + external[0])
+    return {'points': len(points), 'lines_total': int(points['lines'].sum()), 'tied_excluded': int((df['state'] == 'tie').sum()), 'bytes': len(page.encode())}
+
+# ---------------------------------------------------------------- P46
+def edge_waits(events: list[dict]) -> list[dict]:
+    df = pd.DataFrame(events)
+    if df[['case_id', 'event_id']].duplicated().any(): raise g.Blocked('duplicate event identity')
+    df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True, errors='raise')
+    if df.duplicated(['case_id', 'timestamp'], keep=False).any(): raise g.Blocked('timestamp ties need an ordering contract')
+    df = df.sort_values(['case_id', 'timestamp'], kind='stable')
+    df['previous'] = df.groupby('case_id')['activity'].shift(1)
+    df['gap_hours'] = (df['timestamp'] - df.groupby('case_id')['timestamp'].shift(1)).dt.total_seconds() / 3600
+    edges = df.dropna(subset=['previous']).groupby(['previous', 'activity'])['gap_hours'].agg(cases='count', mean_hours='mean').reset_index()
+    edges = edges.sort_values(['mean_hours', 'cases', 'previous', 'activity'], ascending=[False, False, True, True], kind='stable')
+    return [dict(r, measure='edge_wait') for r in g3.records(edges)]
+
+# ---------------------------------------------------------------- P47
+class OpenCase(BaseModel):
+    model_config = ConfigDict(strict=True, extra='forbid')
+    case_id: str = Field(min_length=1)
+    department: str = Field(min_length=1)
+    elapsed_days: float = Field(ge=0)
+
+
+def at_risk_decisions(department_means: dict, open_cases: list[dict]) -> dict:
+    rules = [{'id': 'r_' + d, 'conditions': {'department': json.dumps(d), 'elapsed_days': '> %r' % float(m) if m is not None else '> nan'}, 'outputs': {'at_risk': 'true', 'rule': json.dumps('r_' + d)}} for d, m in department_means.items()]
+    rules.append({'id': 'r_default', 'conditions': {}, 'outputs': {'at_risk': 'false', 'rule': '"r_default"'}})
+    for d, m in department_means.items():
+        if m is None or not np.isfinite(m): raise g.Blocked('department without a finite closed-case mean: ' + d)
+    jdm = decision_table([('department', 'string'), ('elapsed_days', 'number')], ['at_risk', 'rule'], rules)
+    decision = load_decision(jdm)
+    for d, m in department_means.items():  # boundary samples prove the comparison the table encodes
+        if decision.evaluate({'department': d, 'elapsed_days': float(m)})['result']['at_risk'] is not False: raise g.Blocked('boundary is not exclusive for ' + d)
+        if decision.evaluate({'department': d, 'elapsed_days': float(m) + 1e-9})['result']['at_risk'] is not True: raise g.Blocked('threshold does not fire for ' + d)
+    out = []
+    for c in open_cases:
+        typed = OpenCase.model_validate(c)
+        if typed.department not in department_means: raise g.Blocked('department without a threshold: ' + typed.department)
+        out.append({'case_id': typed.case_id, **decision.evaluate(typed.model_dump(exclude={'case_id'}))['result']})
+    return {'decisions': out, 'basis': 'threshold derived from closed-case means of the same log; not a policy', 'jdm_sha256': hashlib.sha256(g.canonical_local(jdm)).hexdigest()}
+
+# ---------------------------------------------------------------- P48
+class ChecklistItem(BaseModel):
+    model_config = ConfigDict(strict=True, extra='forbid')
+    item_id: str = Field(min_length=1)
+    fact_id: str = Field(min_length=1)
+    sentence: str = Field(min_length=1)
+    quote: str = Field(min_length=1)
+
+    @model_validator(mode='after')
+    def quote_inside(self):
+        if self.quote not in self.sentence: raise ValueError('quote is not inside its sentence')
+        return self
+
+BOX = '☐'
+
+
+def checklist_document(items: list[dict]) -> bytes:
+    typed = [ChecklistItem.model_validate(i) for i in items]
+    if pd.Index([i.item_id for i in typed]).has_duplicates: raise g.Blocked('duplicate item identity')
+    d = docx.Document()
+    for i in typed:
+        p = d.add_paragraph(); p.add_run(BOX + ' '); hidden = p.add_run(i.item_id + '|' + i.fact_id + '|' + i.quote); hidden.font.hidden = True; p.add_run(i.sentence)
+    buf = io.BytesIO(); d.save(buf); return buf.getvalue()
+
+
+def read_checklist(data: bytes) -> list[dict]:
+    out = []
+    for p in docx.Document(io.BytesIO(data)).paragraphs:
+        runs = p.runs
+        if len(runs) != 3 or runs[0].text != BOX + ' ' or runs[1].font.hidden is not True: raise g.Blocked('checklist paragraph lost its identity run')
+        item_id, fact_id, quote = runs[1].text.split('|')
+        out.append(ChecklistItem(item_id=item_id, fact_id=fact_id, sentence=runs[2].text, quote=quote).model_dump())
+    return out
+
+# ---------------------------------------------------------------- P49
+CROSS_PROGRAM = """shared_lemma(L) :- action(a, _, L, _), action(b, _, L, _).
+shared_concept(C) :- action(a, _, _, C), action(b, _, _, C).
+only_lemma(D, L) :- action(D, _, L, _), other(D, E), not action(E, _, L, _).
+only_concept(D, C) :- action(D, _, _, C), other(D, E), not action(E, _, _, C).
+other(a, b). other(b, a).
+#show shared_lemma/1. #show shared_concept/1. #show only_lemma/2. #show only_concept/2."""
+
+
+def cross_document(actions_a: list[dict], actions_b: list[dict]) -> dict:
+    ctl = clingo.Control(['0', '--warn=no-atom-undefined'])
+    with ctl.backend() as be:
+        for doc, rows in (('a', actions_a), ('b', actions_b)):
+            for r in rows:
+                be.add_rule([be.add_atom(clingo.Function('action', [clingo.Function(doc), clingo.String(r['id']), clingo.String(r['lemma']), clingo.String(r['concept'])]))])
+    ctl.add('base', [], CROSS_PROGRAM); ctl.ground([('base', [])])
+    shown = []; ctl.solve(on_model=lambda m: shown.extend(m.symbols(shown=True)))
+    out = {'shared_lemma': [], 'shared_concept': [], 'only_lemma': [], 'only_concept': []}
+    for s in shown:
+        out[s.name].append(s.arguments[0].string if len(s.arguments) == 1 else [s.arguments[0].name, s.arguments[1].string])
+    return {k: sorted(v) for k, v in out.items()}
+
+# ---------------------------------------------------------------- P50
+def site_steps_roundtrip(steps: list[dict]) -> dict:
+    rows = [g4.StepRow.model_validate(s).model_dump() for s in steps]
+    if pd.Index([r['id'] for r in rows]).has_duplicates: raise g.Blocked('duplicate step identity')
+    page = g4.build_site(g4.table_markdown(rows, g4.STEP_COLUMNS), highlightjs=False)
+    external = g3.external_assets(page)
+    if external: raise g.Blocked('external asset dependency: ' + external[0])
+    back = [dict(zip(g4.STEP_COLUMNS, cells)) for cells in g4.rendered_rows(page, '//*[@role="main"]//table[1]')]
+    forward, backward = hashlib.sha256(g.canonical_local(rows)).hexdigest(), hashlib.sha256(g.canonical_local(back)).hexdigest()
+    diff = DeepDiff(rows, back, zip_ordered_iterables=True)
+    if diff or forward != backward: raise g.Blocked('site readback differs: ' + (diff.to_json() if diff else 'digest'))
+    return {'rows': len(back), 'digest': forward, 'profile': 'canonical_local JSON of typed rows', 'all_tables_rows': len(g4.rendered_rows(page, '//table'))}
+
+C = []
+def case(i):
+    def reg(fn): C.append((i, fn)); return fn
+    return reg
+
+
+@case(41)
+def deterministic_layers_and_payload():
+    edges = [('request', 'make'), ('receipt', 'except'), ('determination', 'make')]
+    first = nx.DiGraph(); first.add_nodes_from(['request', 'receipt', 'determination', 'make', 'except']); first.add_edges_from(edges)
+    second = nx.DiGraph(); second.add_nodes_from(['determination', 'make', 'except', 'receipt', 'request']); second.add_edges_from(edges)
+    g.equal([list(x) for x in nx.topological_generations(first)], [['request', 'receipt', 'determination'], ['except', 'make']])
+    g.equal([list(x) for x in nx.topological_generations(second)], [['determination', 'receipt', 'request'], ['except', 'make']])  # insertion order leaks into the layer order
+    nodes = [{'id': 'request', 'unit': 1}, {'id': 'receipt', 'unit': 1}, {'id': 'determination', 'unit': 2}, {'id': 'make', 'unit': 1}, {'id': 'except', 'unit': 3}]
+    g.equal(bool(DeepDiff(layered_positions(nodes, edges), layered_positions(list(reversed(nodes)), edges))), False)
+    out = process_3d_page(nodes, edges, include_plotlyjs=True)
+    g.equal((out['nodes'], out['edges'], out['layers']), (5, 3, 2))
+    encoded = json.loads(pio.to_json(go.Figure(go.Scatter3d(x=np.array([0.0, 1.0, np.nan]), y=[0, 0, None], z=[0, 0, None], mode='lines'))))['data'][0]
+    g.equal(bool(np.isnan(decode_typed_array(encoded['x'])[2])), True); g.equal(encoded['y'], [0, 0, None])  # the numpy path hides the separator as NaN
+    g.rejects(g.Blocked, lambda: process_3d_page(nodes, edges, include_plotlyjs='cdn'))
+    g.rejects(g.Blocked, lambda: layered_positions(nodes, edges + [('make', 'request')]))
+    g.rejects(g.Blocked, lambda: layered_positions(nodes, edges + [('make', 'zz')]))
+    return {'insertion_order_in_generations_reproduced': True, 'positions_deterministic_under_reordering': True, 'edge_separators_kept_as_null': True,
+            'unit_index_carried_as_z': True, 'cdn_page': 'blocked', 'original_chain_rerun': False}
+
+
+@case(42)
+def policy_page_from_structure_with_engine_agreement():
+    rules = [{'id': 'r1', 'conditions': {'present': '>= 10'}, 'outputs': {'majority_reachable': 'true', 'rule': '"r1"'}},
+             {'id': 'r2', 'conditions': {}, 'outputs': {'majority_reachable': 'false', 'rule': '"r2"'}}]
+    jdm = decision_table([('present', 'number')], ['majority_reachable', 'rule'], rules)
+    jdm['nodes'][1]['content']['rules'][0]['_description'] = '<script>alert(1)</script> if present >= 10'
+    decision = load_decision(jdm)
+    g.equal([decision.evaluate({'present': v})['result']['rule'] for v in (9, 10, '10', None)], ['r2', 'r1', 'r2', 'r2'])  # a string or missing value takes the fallback rule silently
+    g.equal(decision.evaluate({})['result']['rule'], 'r2')
+    samples = [{'input': {'present': 9}, 'rule': 'r2'}, {'input': {'present': 10}, 'rule': 'r1'}]
+    page = policy_page(jdm, samples, MajorityInput)
+    g.equal('&lt;script&gt;' in page and '<script>' not in page, True); g.equal('present &gt;= 10' in page, True)
+    unsafe = Environment(autoescape=False).from_string('{{ note }}').render(note=jdm['nodes'][1]['content']['rules'][0]['_description'])
+    g.equal('<script>' in unsafe, True)
+    g.rejects(g.Blocked, lambda: policy_page(jdm, [{'input': {'present': 9}, 'rule': 'r1'}], MajorityInput))
+    g.rejects(ValidationError, lambda: policy_page(jdm, [{'input': {'present': '10'}, 'rule': 'r1'}], MajorityInput))
+    g.rejects(ValidationError, lambda: policy_page(jdm, [{'input': {}, 'rule': 'r2'}], MajorityInput))
+    return {'fallback_on_missing_or_string_input_reproduced': True, 'autoescape_off_injection_reproduced': True, 'page_rendered_from_table_structure': True,
+            'engine_agreement_at_samples': True, 'typed_inputs_before_evaluate': True, 'original_chain_rerun': False}
+
+
+@case(43)
+def heatmap_cells_with_partitioned_lags():
+    t = lambda h: '2011-10-01T%02d:00:00Z' % h
+    events = [{'case_id': 'c1', 'event_id': 'e1', 'department': 'General', 'activity': 'T02', 'timestamp': t(0)},
+              {'case_id': 'c1', 'event_id': 'e2', 'department': 'General', 'activity': 'T03', 'timestamp': t(4)},
+              {'case_id': 'c2', 'event_id': 'e3', 'department': 'Experts', 'activity': 'T02', 'timestamp': t(1)},
+              {'case_id': 'c2', 'event_id': 'e4', 'department': 'Experts', 'activity': 'T03', 'timestamp': t(11)}]
+    unpartitioned = pd.DataFrame(events); unpartitioned['timestamp'] = pd.to_datetime(unpartitioned['timestamp'], utc=True)
+    unpartitioned = unpartitioned.sort_values('timestamp'); crossed = unpartitioned['timestamp'].diff().dt.total_seconds() / 3600
+    g.equal(crossed.tolist()[1:], [1.0, 3.0, 7.0])  # a lag without case partition measures across cases
+    matrix = waiting_matrix(events, departments=['Experts', 'General', 'Customer contact'], activities=['T02', 'T03'])
+    g.equal(matrix['means'].loc['General', 'T03'], 4.0); g.equal(matrix['means'].loc['Experts', 'T03'], 10.0)
+    g.equal(bool(np.isnan(matrix['means'].loc['Customer contact', 'T03'])), True); g.equal(int(matrix['counts'].loc['Customer contact', 'T03']), 0)
+    g.equal(matrix['first_events_excluded'], 2)
+    out = heatmap_page(matrix, include_plotlyjs=True)
+    g.equal((out['cells'], out['missing_cells']), (6, 4))
+    fig = px.imshow(matrix['means']); back = pio.from_json(pio.to_json(fig))
+    g.equal(sorted(back.data[0].z.keys()) if isinstance(back.data[0].z, dict) else 'array', ['bdata', 'dtype', 'shape'])  # from_json returns the typed buffer undecoded
+    g.rejects(g.Blocked, lambda: heatmap_page(matrix, include_plotlyjs='cdn'))
+    g.rejects(g.Blocked, lambda: waiting_matrix(events + [dict(events[1], event_id='e9', department='Experts')], departments=['Experts', 'General'], activities=['T02', 'T03']))
+    return {'cross_case_lag_reproduced': True, 'missing_cells_explicit_with_zero_counts': True, 'payload_decoded_and_compared': True,
+            'from_json_leaves_buffer_encoded_reproduced': True, 'cdn_page': 'blocked', 'original_chain_rerun': False}
+
+
+@case(44)
+def actor_axis_by_identity_not_quote():
+    facts = [{'event': 'e7', 'agent_arg': 'x5', 'agent_lemma': 'agency', 'agent_quote': 'agency shall make', 'lemma': 'make', 'modality': 'obligatory', 'scope': 'obligation', 'polarity': 'positive'},
+             {'event': 'e9', 'agent_arg': 'x8', 'agent_lemma': 'agency', 'agent_quote': 'Each agency shall notify', 'lemma': 'notify', 'modality': 'obligatory', 'scope': 'obligation', 'polarity': 'positive'},
+             {'event': 'e12', 'agent_arg': 'x11', 'agent_lemma': 'agency', 'agent_quote': 'the agency shall promulgate', 'lemma': 'promulgate', 'modality': 'obligatory', 'scope': 'obligation', 'polarity': 'positive'},
+             {'event': 'e3', 'agent_arg': 'x2', 'agent_lemma': 'TSC', 'agent_quote': 'TSC must have', 'lemma': 'have', 'modality': 'obligatory', 'scope': 'obligation', 'polarity': 'positive'},
+             {'event': 'e4', 'agent_arg': 'x3', 'agent_lemma': 'TSC', 'agent_quote': 'TSC may meet', 'lemma': 'meet', 'modality': 'permitted', 'scope': 'obligation', 'polarity': 'positive'}]
+    actions = ['make', 'notify', 'promulgate', 'have']
+    g.equal(len(actor_matrix(facts, key='agent_quote', actions=actions)), 4)  # one row per quote: three rows for one agency
+    g.equal(len(actor_matrix(facts, key='agent_lemma', actions=actions)), 2)
+    out = concept_actor_matrix(facts, actions=actions)
+    g.equal(out['matrix'], {'AGENCY': [1, 1, 1, 0], 'TSC': [0, 0, 0, 1]}); g.equal(out['facts'], 4)
+    g.rejects(g.Blocked, lambda: concept_actor_matrix(facts + [dict(facts[0], event='e99', agent_lemma='board')], actions=actions))
+    g.rejects(g.Blocked, lambda: concept_actor_matrix([dict(facts[0], polarity='negative')], actions=actions))
+    return {'quote_keyed_axis_fragmentation_reproduced': True, 'actor_identity_through_approved_lexicon': True, 'permitted_facts_excluded': True,
+            'conservation_checked': True, 'original_chain_rerun': False}
+
+
+@case(45)
+def timeline_dates_from_declared_pattern():
+    fuzzy = date_parser.parse('tsc-2024-01', fuzzy=True)
+    g.equal((fuzzy.year, fuzzy.month, fuzzy.day == datetime.date.today().day), (2024, 1, True))  # the missing day comes from today
+    g.equal(date_parser.parse('tsc-2024-01-17', fuzzy=True).date(), datetime.date(2024, 1, 17))
+    g.equal(meeting_date('tsc-2024-01-17'), datetime.date(2024, 1, 17))
+    g.rejects(g.Blocked, lambda: meeting_date('tsc-2024-01'))
+    g.rejects(ValueError, lambda: meeting_date('tsc-2024-13-40'))
+    tags = [{'meeting': 'tsc-2024-01-17', 'step': 'share', 'state': 'accepted'}, {'meeting': 'tsc-2024-01-17', 'step': 'share', 'state': 'accepted'},
+            {'meeting': 'tsc-2024-01-17', 'step': 'meeting', 'state': 'tie'}, {'meeting': 'tsc-2023-11-08', 'step': 'ensure', 'state': 'accepted'}]
+    out = timeline_page(tags, include_plotlyjs=True)
+    g.equal((out['points'], out['lines_total'], out['tied_excluded']), (2, 3, 1))
+    g.rejects(g.Blocked, lambda: timeline_page(tags + [{'meeting': 'tsc-2025', 'step': 'x', 'state': 'accepted'}], include_plotlyjs=True))
+    g.rejects(g.Blocked, lambda: timeline_page(tags, include_plotlyjs='cdn'))
+    return {'fuzzy_parse_invents_day_reproduced': True, 'declared_pattern_and_fromisoformat': True, 'counts_in_customdata_not_only_marker_size': True,
+            'ties_excluded_and_reported': True, 'original_chain_rerun': False}
+
+
+@case(46)
+def edge_waits_not_target_means():
+    edges = pd.DataFrame({'source': ['T05', 'T02', 'T04'], 'target': ['T13', 'T03', 'T03'], 'cases': [2, 43, 6]})
+    activity_wait = pd.DataFrame({'activity': ['T13', 'T03'], 'mean_hours': [205.36, 129.66]})
+    joined = edges.merge(activity_wait, left_on='target', right_on='activity', validate='many_to_one')
+    g.equal(joined.loc[joined['target'] == 'T03', 'mean_hours'].tolist(), [129.66, 129.66])  # every edge into T03 inherits the same activity mean
+    t = lambda h: '2011-10-01T%02d:00:00Z' % h
+    events = [{'case_id': 'c1', 'event_id': 'e1', 'activity': 'T02', 'timestamp': t(0)}, {'case_id': 'c1', 'event_id': 'e2', 'activity': 'T03', 'timestamp': '2011-10-02T00:00:00Z'},
+              {'case_id': 'c2', 'event_id': 'e3', 'activity': 'T04', 'timestamp': t(0)}, {'case_id': 'c2', 'event_id': 'e4', 'activity': 'T03', 'timestamp': t(12)}]
+    out = edge_waits(events)
+    g.equal([(r['previous'], r['activity'], r['cases'], r['mean_hours'], r['measure']) for r in out], [('T02', 'T03', 1, 24.0, 'edge_wait'), ('T04', 'T03', 1, 12.0, 'edge_wait')])
+    g.rejects(g.Blocked, lambda: edge_waits(events + [dict(events[3], event_id='e5', activity='T09')]))
+    return {'target_mean_duplicated_across_edges_reproduced': True, 'per_edge_wait_from_partitioned_shift': True, 'ranking_with_declared_tiebreak': True,
+            'measure_labeled': True, 'original_chain_rerun': False}
+
+
+@case(47)
+def derived_thresholds_need_finite_values_and_typed_inputs():
+    rendered = Environment(undefined=StrictUndefined).from_string('{"threshold": {{ mean }}}').render(mean=float('nan'))
+    g.rejects(Exception, lambda: json.loads(rendered))  # text templating writes nan into JSON
+    g.equal(Environment().from_string('{{ v | tojson }}').render(v=float('nan')), 'NaN')
+    g.rejects(g.Blocked, lambda: g.strict_json_loads('{"threshold": NaN}'))
+    nan_rules = [{'id': 'r_General', 'conditions': {'department': '"General"', 'elapsed_days': '> nan'}, 'outputs': {'at_risk': 'true', 'rule': '"r_General"'}},
+                 {'id': 'r_default', 'conditions': {}, 'outputs': {'at_risk': 'false', 'rule': '"r_default"'}}]
+    silent = load_decision(decision_table([('department', 'string'), ('elapsed_days', 'number')], ['at_risk', 'rule'], nan_rules))
+    g.equal(silent.evaluate({'department': 'General', 'elapsed_days': 60.0})['result']['rule'], 'r_default')  # a nan threshold never fires and raises nothing
+    g.equal(silent.evaluate({'department': 'General', 'elapsed_days': '60'})['result']['rule'], 'r_default')
+    means = {'General': 5.42, 'Experts': 11.32}
+    out = at_risk_decisions(means, [{'case_id': 'case-10011', 'department': 'General', 'elapsed_days': 60.0}, {'case_id': 'case-10012', 'department': 'General', 'elapsed_days': 5.42}])
+    g.equal([(d['case_id'], d['at_risk'], d['rule']) for d in out['decisions']], [('case-10011', True, 'r_General'), ('case-10012', False, 'r_default')])
+    g.rejects(g.Blocked, lambda: at_risk_decisions({'General': 5.42, 'Customer contact': None}, []))
+    g.rejects(g.Blocked, lambda: at_risk_decisions({'General': float('nan')}, []))
+    g.rejects(ValidationError, lambda: at_risk_decisions(means, [{'case_id': 'x', 'department': 'General', 'elapsed_days': '60'}]))
+    g.rejects(g.Blocked, lambda: at_risk_decisions(means, [{'case_id': 'x', 'department': 'Post', 'elapsed_days': 1.0}]))
+    return {'nan_through_text_template_reproduced': True, 'tojson_emits_bare_nan_reproduced': True, 'nan_threshold_silently_never_fires_reproduced': True,
+            'boundary_samples_prove_strict_comparison': True, 'basis_labeled_not_policy': True, 'original_chain_rerun': False}
+
+
+@case(48)
+def checklist_items_carry_identity_and_no_completion():
+    items = [{'item_id': 'k1', 'fact_id': 'tsc:e3', 'sentence': 'The TSC must have a Chair.', 'quote': 'must have'},
+             {'item_id': 'k2', 'fact_id': 'tsc:e4', 'sentence': 'The TSC must have a Chair.', 'quote': 'must have'}]
+    data = checklist_document(items)
+    g.equal(read_checklist(data), items)
+    d = docx.Document(io.BytesIO(data)); g.equal([len(p.runs) for p in d.paragraphs], [3, 3])
+    d.paragraphs[0].text = d.paragraphs[0].text  # assigning text collapses the runs
+    g.equal(len(d.paragraphs[0].runs), 1); buf = io.BytesIO(); d.save(buf)
+    g.rejects(g.Blocked, lambda: read_checklist(buf.getvalue()))
+    g.rejects(g.Blocked, lambda: g.observed_action('checked_glyph', {'case_id': 'c', 'action_id': 'k1', 'receipt_id': 'r', 'timestamp': 't'}))  # a glyph is not an occurrence receipt
+    g.equal(g.observed_action('observed_completion', {'case_id': 'c', 'action_id': 'k1', 'receipt_id': 'r', 'timestamp': '2026-01-01T00:00:00Z'}), 'observed')
+    g.rejects(g.Blocked, lambda: checklist_document(items + [items[0]]))
+    g.rejects(ValidationError, lambda: checklist_document([dict(items[0], quote='shall')]))
+    return {'identity_in_hidden_run_round_trips': True, 'text_assignment_drops_runs_reproduced': True, 'glyph_state_is_not_completion': True,
+            'duplicate_identity_blocked': True, 'original_chain_rerun': False}
+
+
+@case(49)
+def cross_document_join_on_concepts():
+    charter = [{'id': 'c1', 'lemma': 'approve', 'concept': 'APPROVE_MEMBERSHIP'}, {'id': 'c2', 'lemma': 'have', 'concept': 'HAVE_CHAIR'}, {'id': 'c3', 'lemma': 'nominate', 'concept': 'NOMINATE_MEMBER'}]
+    governance = [{'id': 'g1', 'lemma': 'approve', 'concept': 'APPROVE_PULL_REQUEST'}, {'id': 'g2', 'lemma': 'nominat', 'concept': 'NOMINATE_MEMBER'}]
+    out = cross_document(charter, governance)
+    g.equal(out['shared_lemma'], ['approve']); g.equal(out['shared_concept'], ['NOMINATE_MEMBER'])  # the lemma join shares the wrong action and misses the shared one
+    g.equal(out['only_lemma'], [['a', 'have'], ['a', 'nominate'], ['b', 'nominat']])
+    g.equal(out['only_concept'], [['a', 'APPROVE_MEMBERSHIP'], ['a', 'HAVE_CHAIR'], ['b', 'APPROVE_PULL_REQUEST']])
+    g.equal(round(fuzz.ratio('nominat', 'nominate')) > 90, True)  # a lemmatizer artifact is a near candidate, not an identity
+    return {'lemma_join_conflation_reproduced': True, 'lemma_join_miss_on_artifact_reproduced': True, 'concept_join_from_approved_ids': True,
+            'grounded_through_backend_symbols': True, 'original_chain_rerun': False}
+
+
+@case(50)
+def site_readback_selects_the_content_table():
+    steps = [{'id': 'u0131:s00#e16', 'lemma': 'authorize', 'quote': 'authorize | delegate'}, {'id': 'u0089:s02#e53', 'lemma': 'make', 'quote': '<b>shall make</b>'}]
+    out = site_steps_roundtrip(steps)
+    g.equal(out['rows'], 2); g.equal(out['all_tables_rows'] > out['rows'], True)  # //table also matches theme tables
+    g.equal(out['digest'], hashlib.sha256(g.canonical_local(steps)).hexdigest())
+    g.rejects(g.Blocked, lambda: site_steps_roundtrip(steps + [steps[0]]))
+    g.rejects(ValidationError, lambda: site_steps_roundtrip([dict(steps[0], lemma='')]))
+    return {'theme_tables_in_generic_xpath_reproduced': True, 'content_table_by_role': True, 'digest_over_declared_profile': True,
+            'escaped_cells_round_trip': True, 'original_chain_rerun': False}
+
+
+def run() -> dict:
+    g.ASSERTIONS = 0; rows = []
+    for i, fn in C:
+        before = g.ASSERTIONS
+        try: r = fn(); state = 'passed'; error = None
+        except Exception: r = {}; state = 'failed'; error = traceback.format_exc()
+        rows.append({'proof': i, 'test': fn.__name__, 'status': state, 'assertions': g.ASSERTIONS - before, 'result': r, 'error': error})
+    packages = ['pydantic', 'pandas', 'numpy', 'deepdiff', 'plotly', 'networkx', 'zen-engine', 'Jinja2', 'python-dateutil', 'python-docx', 'clingo', 'rapidfuzz', 'spacy', 'mkdocs', 'Markdown', 'lxml']
+    here = Path(__file__).resolve().parent
+    return {'scope': 'Bounded authored handoff fixtures and reproduced library defaults; the original P41-P50 chains and their artifacts were not rerun.',
+            'test_cases': len(rows), 'passed': sum(r['status'] == 'passed' for r in rows), 'failed': sum(r['status'] == 'failed' for r in rows),
+            'assertions': g.ASSERTIONS, 'full_chains_executed': 0, 'network_calls': 0, 'business_actions': 0,
+            'source_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+            'dependency_sha256': {name: hashlib.sha256((here / name).read_bytes()).hexdigest() for name in ['handoff_guards_v1.py', 'handoff_guards_v3.py', 'handoff_guards_v4.py']},
+            'library_versions': {n: importlib.metadata.version(n) for n in packages}, 'results': rows}
+
+
+if __name__ == '__main__':
+    p = argparse.ArgumentParser(); p.add_argument('--report', type=Path, required=True); args = p.parse_args()
+    result = run(); args.report.parent.mkdir(parents=True, exist_ok=True)
+    args.report.write_text(json.dumps(result, indent=2, sort_keys=True, allow_nan=False) + '\n')
+    print(json.dumps({k: result[k] for k in ['test_cases', 'passed', 'failed', 'assertions', 'full_chains_executed']}))
+    if result['failed']:
+        print('\n'.join(r['error'] for r in result['results'] if r['error'])); raise SystemExit(1)
+```
+
+## Fresh local guard evidence: guards-v5.json
+
+Result file SHA256 25e84b0b0dbc754ca4c866aea1b73c4680912acadc8e1fb327eecb84c5b44ff5; bytes 5561. These results do not rerun or promote the full proof chains.
+
+```json
+{
+  "assertions": 72,
+  "business_actions": 0,
+  "dependency_sha256": {
+    "handoff_guards_v1.py": "2b3138b692ecfd02b76ae34bdb001f5046608bb2983d8709d6c55c0765f7c9b8",
+    "handoff_guards_v3.py": "e8df8d98831289c66ab705940ae2bc20ca7913a721002b811a5a77be05be2873",
+    "handoff_guards_v4.py": "90029a6917216a0ded8b685dc48c496ae8479d6204115a8ec10f8488e4076841"
+  },
+  "failed": 0,
+  "full_chains_executed": 0,
+  "library_versions": {
+    "Jinja2": "3.1.6",
+    "Markdown": "3.10.3",
+    "clingo": "5.8.2",
+    "deepdiff": "9.1.0",
+    "lxml": "6.1.3",
+    "mkdocs": "1.6.1",
+    "networkx": "3.6.1",
+    "numpy": "2.4.6",
+    "pandas": "2.2.3",
+    "plotly": "7.0.0",
+    "pydantic": "2.13.5",
+    "python-dateutil": "2.9.0.post0",
+    "python-docx": "1.2.0",
+    "rapidfuzz": "3.14.6",
+    "spacy": "3.8.16",
+    "zen-engine": "2.0.2"
+  },
+  "network_calls": 0,
+  "passed": 10,
+  "results": [
+    {
+      "assertions": 9,
+      "error": null,
+      "proof": 41,
+      "result": {
+        "cdn_page": "blocked",
+        "edge_separators_kept_as_null": true,
+        "insertion_order_in_generations_reproduced": true,
+        "original_chain_rerun": false,
+        "positions_deterministic_under_reordering": true,
+        "unit_index_carried_as_z": true
+      },
+      "status": "passed",
+      "test": "deterministic_layers_and_payload"
+    },
+    {
+      "assertions": 8,
+      "error": null,
+      "proof": 42,
+      "result": {
+        "autoescape_off_injection_reproduced": true,
+        "engine_agreement_at_samples": true,
+        "fallback_on_missing_or_string_input_reproduced": true,
+        "original_chain_rerun": false,
+        "page_rendered_from_table_structure": true,
+        "typed_inputs_before_evaluate": true
+      },
+      "status": "passed",
+      "test": "policy_page_from_structure_with_engine_agreement"
+    },
+    {
+      "assertions": 10,
+      "error": null,
+      "proof": 43,
+      "result": {
+        "cdn_page": "blocked",
+        "cross_case_lag_reproduced": true,
+        "from_json_leaves_buffer_encoded_reproduced": true,
+        "missing_cells_explicit_with_zero_counts": true,
+        "original_chain_rerun": false,
+        "payload_decoded_and_compared": true
+      },
+      "status": "passed",
+      "test": "heatmap_cells_with_partitioned_lags"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 44,
+      "result": {
+        "actor_identity_through_approved_lexicon": true,
+        "conservation_checked": true,
+        "original_chain_rerun": false,
+        "permitted_facts_excluded": true,
+        "quote_keyed_axis_fragmentation_reproduced": true
+      },
+      "status": "passed",
+      "test": "actor_axis_by_identity_not_quote"
+    },
+    {
+      "assertions": 8,
+      "error": null,
+      "proof": 45,
+      "result": {
+        "counts_in_customdata_not_only_marker_size": true,
+        "declared_pattern_and_fromisoformat": true,
+        "fuzzy_parse_invents_day_reproduced": true,
+        "original_chain_rerun": false,
+        "ties_excluded_and_reported": true
+      },
+      "status": "passed",
+      "test": "timeline_dates_from_declared_pattern"
+    },
+    {
+      "assertions": 3,
+      "error": null,
+      "proof": 46,
+      "result": {
+        "measure_labeled": true,
+        "original_chain_rerun": false,
+        "per_edge_wait_from_partitioned_shift": true,
+        "ranking_with_declared_tiebreak": true,
+        "target_mean_duplicated_across_edges_reproduced": true
+      },
+      "status": "passed",
+      "test": "edge_waits_not_target_means"
+    },
+    {
+      "assertions": 10,
+      "error": null,
+      "proof": 47,
+      "result": {
+        "basis_labeled_not_policy": true,
+        "boundary_samples_prove_strict_comparison": true,
+        "nan_threshold_silently_never_fires_reproduced": true,
+        "nan_through_text_template_reproduced": true,
+        "original_chain_rerun": false,
+        "tojson_emits_bare_nan_reproduced": true
+      },
+      "status": "passed",
+      "test": "derived_thresholds_need_finite_values_and_typed_inputs"
+    },
+    {
+      "assertions": 8,
+      "error": null,
+      "proof": 48,
+      "result": {
+        "duplicate_identity_blocked": true,
+        "glyph_state_is_not_completion": true,
+        "identity_in_hidden_run_round_trips": true,
+        "original_chain_rerun": false,
+        "text_assignment_drops_runs_reproduced": true
+      },
+      "status": "passed",
+      "test": "checklist_items_carry_identity_and_no_completion"
+    },
+    {
+      "assertions": 5,
+      "error": null,
+      "proof": 49,
+      "result": {
+        "concept_join_from_approved_ids": true,
+        "grounded_through_backend_symbols": true,
+        "lemma_join_conflation_reproduced": true,
+        "lemma_join_miss_on_artifact_reproduced": true,
+        "original_chain_rerun": false
+      },
+      "status": "passed",
+      "test": "cross_document_join_on_concepts"
+    },
+    {
+      "assertions": 5,
+      "error": null,
+      "proof": 50,
+      "result": {
+        "content_table_by_role": true,
+        "digest_over_declared_profile": true,
+        "escaped_cells_round_trip": true,
+        "original_chain_rerun": false,
+        "theme_tables_in_generic_xpath_reproduced": true
+      },
+      "status": "passed",
+      "test": "site_readback_selects_the_content_table"
+    }
+  ],
+  "scope": "Bounded authored handoff fixtures and reproduced library defaults; the original P41-P50 chains and their artifacts were not rerun.",
+  "source_sha256": "611cd01de6ee4c96b2f4260fb3a33c27e7893b4b31d2b07baaf3d8fcf614fa6f",
+  "test_cases": 10
+}
+```
+
+Checkpoint coverage: 50 of 300 proof-specific handoff amendments written, through P50. Prior cumulative TXT SHA256 a8ecce7532153b494320c117211c497459fbe912d01b445ef72916f389db952d.

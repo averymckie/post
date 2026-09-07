@@ -1,0 +1,180 @@
+{
+  "assertions": 72,
+  "business_actions": 0,
+  "dependency_sha256": {
+    "handoff_guards_v1.py": "2b3138b692ecfd02b76ae34bdb001f5046608bb2983d8709d6c55c0765f7c9b8",
+    "handoff_guards_v3.py": "e8df8d98831289c66ab705940ae2bc20ca7913a721002b811a5a77be05be2873",
+    "handoff_guards_v4.py": "90029a6917216a0ded8b685dc48c496ae8479d6204115a8ec10f8488e4076841"
+  },
+  "failed": 0,
+  "full_chains_executed": 0,
+  "library_versions": {
+    "Jinja2": "3.1.6",
+    "Markdown": "3.10.3",
+    "clingo": "5.8.2",
+    "deepdiff": "9.1.0",
+    "lxml": "6.1.3",
+    "mkdocs": "1.6.1",
+    "networkx": "3.6.1",
+    "numpy": "2.4.6",
+    "pandas": "2.2.3",
+    "plotly": "7.0.0",
+    "pydantic": "2.13.5",
+    "python-dateutil": "2.9.0.post0",
+    "python-docx": "1.2.0",
+    "rapidfuzz": "3.14.6",
+    "spacy": "3.8.16",
+    "zen-engine": "2.0.2"
+  },
+  "network_calls": 0,
+  "passed": 10,
+  "results": [
+    {
+      "assertions": 9,
+      "error": null,
+      "proof": 41,
+      "result": {
+        "cdn_page": "blocked",
+        "edge_separators_kept_as_null": true,
+        "insertion_order_in_generations_reproduced": true,
+        "original_chain_rerun": false,
+        "positions_deterministic_under_reordering": true,
+        "unit_index_carried_as_z": true
+      },
+      "status": "passed",
+      "test": "deterministic_layers_and_payload"
+    },
+    {
+      "assertions": 8,
+      "error": null,
+      "proof": 42,
+      "result": {
+        "autoescape_off_injection_reproduced": true,
+        "engine_agreement_at_samples": true,
+        "fallback_on_missing_or_string_input_reproduced": true,
+        "original_chain_rerun": false,
+        "page_rendered_from_table_structure": true,
+        "typed_inputs_before_evaluate": true
+      },
+      "status": "passed",
+      "test": "policy_page_from_structure_with_engine_agreement"
+    },
+    {
+      "assertions": 10,
+      "error": null,
+      "proof": 43,
+      "result": {
+        "cdn_page": "blocked",
+        "cross_case_lag_reproduced": true,
+        "from_json_leaves_buffer_encoded_reproduced": true,
+        "missing_cells_explicit_with_zero_counts": true,
+        "original_chain_rerun": false,
+        "payload_decoded_and_compared": true
+      },
+      "status": "passed",
+      "test": "heatmap_cells_with_partitioned_lags"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 44,
+      "result": {
+        "actor_identity_through_approved_lexicon": true,
+        "conservation_checked": true,
+        "original_chain_rerun": false,
+        "permitted_facts_excluded": true,
+        "quote_keyed_axis_fragmentation_reproduced": true
+      },
+      "status": "passed",
+      "test": "actor_axis_by_identity_not_quote"
+    },
+    {
+      "assertions": 8,
+      "error": null,
+      "proof": 45,
+      "result": {
+        "counts_in_customdata_not_only_marker_size": true,
+        "declared_pattern_and_fromisoformat": true,
+        "fuzzy_parse_invents_day_reproduced": true,
+        "original_chain_rerun": false,
+        "ties_excluded_and_reported": true
+      },
+      "status": "passed",
+      "test": "timeline_dates_from_declared_pattern"
+    },
+    {
+      "assertions": 3,
+      "error": null,
+      "proof": 46,
+      "result": {
+        "measure_labeled": true,
+        "original_chain_rerun": false,
+        "per_edge_wait_from_partitioned_shift": true,
+        "ranking_with_declared_tiebreak": true,
+        "target_mean_duplicated_across_edges_reproduced": true
+      },
+      "status": "passed",
+      "test": "edge_waits_not_target_means"
+    },
+    {
+      "assertions": 10,
+      "error": null,
+      "proof": 47,
+      "result": {
+        "basis_labeled_not_policy": true,
+        "boundary_samples_prove_strict_comparison": true,
+        "nan_threshold_silently_never_fires_reproduced": true,
+        "nan_through_text_template_reproduced": true,
+        "original_chain_rerun": false,
+        "tojson_emits_bare_nan_reproduced": true
+      },
+      "status": "passed",
+      "test": "derived_thresholds_need_finite_values_and_typed_inputs"
+    },
+    {
+      "assertions": 8,
+      "error": null,
+      "proof": 48,
+      "result": {
+        "duplicate_identity_blocked": true,
+        "glyph_state_is_not_completion": true,
+        "identity_in_hidden_run_round_trips": true,
+        "original_chain_rerun": false,
+        "text_assignment_drops_runs_reproduced": true
+      },
+      "status": "passed",
+      "test": "checklist_items_carry_identity_and_no_completion"
+    },
+    {
+      "assertions": 5,
+      "error": null,
+      "proof": 49,
+      "result": {
+        "concept_join_from_approved_ids": true,
+        "grounded_through_backend_symbols": true,
+        "lemma_join_conflation_reproduced": true,
+        "lemma_join_miss_on_artifact_reproduced": true,
+        "original_chain_rerun": false
+      },
+      "status": "passed",
+      "test": "cross_document_join_on_concepts"
+    },
+    {
+      "assertions": 5,
+      "error": null,
+      "proof": 50,
+      "result": {
+        "content_table_by_role": true,
+        "digest_over_declared_profile": true,
+        "escaped_cells_round_trip": true,
+        "original_chain_rerun": false,
+        "theme_tables_in_generic_xpath_reproduced": true
+      },
+      "status": "passed",
+      "test": "site_readback_selects_the_content_table"
+    }
+  ],
+  "scope": "Bounded authored handoff fixtures and reproduced library defaults; the original P41-P50 chains and their artifacts were not rerun.",
+  "source_sha256": "611cd01de6ee4c96b2f4260fb3a33c27e7893b4b31d2b07baaf3d8fcf614fa6f",
+  "test_cases": 10
+}
