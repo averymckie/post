@@ -1,0 +1,166 @@
+{
+  "assertions": 56,
+  "business_actions": 0,
+  "dependency_sha256": {
+    "handoff_guards_v1.py": "2b3138b692ecfd02b76ae34bdb001f5046608bb2983d8709d6c55c0765f7c9b8",
+    "handoff_guards_v6.py": "7dc3e6c5588bc9293c0c6c94802e7bb057090776647482e6ddf0b748d1c7f259",
+    "handoff_guards_v8.py": "9809d9d6df911eb5f1326a8ded8d53f7aa039679a8570eeb0c24fcb12ff8751c"
+  },
+  "failed": 0,
+  "full_chains_executed": 0,
+  "library_versions": {
+    "XlsxWriter": "3.2.9",
+    "deepdiff": "9.1.0",
+    "icalendar": "7.3.0",
+    "lxml": "6.1.3",
+    "mammoth": "1.12.1",
+    "markdownify": "1.2.3",
+    "openpyxl": "3.1.5",
+    "pydantic": "2.13.5",
+    "pymupdf": "1.28.2",
+    "python-calamine": "0.8.2",
+    "python-docx": "1.2.0",
+    "weasyprint": "69.0"
+  },
+  "messages_sent": 0,
+  "network_calls": 0,
+  "passed": 10,
+  "results": [
+    {
+      "assertions": 7,
+      "error": null,
+      "proof": 101,
+      "result": {
+        "blank_working_record": true,
+        "no_owner_or_due_date_inferred": true,
+        "order_and_quotes_retained": true,
+        "unknown_status_refused": true
+      },
+      "status": "passed",
+      "test": "action_records_infer_no_progress"
+    },
+    {
+      "assertions": 4,
+      "error": null,
+      "proof": 102,
+      "result": {
+        "invalid_imports_refused": 3,
+        "state_unchanged_on_refusal": true,
+        "unknown_action_refused": true
+      },
+      "status": "passed",
+      "test": "progress_import_is_validated_before_state_changes"
+    },
+    {
+      "assertions": 4,
+      "error": null,
+      "proof": 103,
+      "result": {
+        "blank_cells_break_the_two_reader_check": true,
+        "desktop_interaction_not_claimed": true,
+        "native_dropdown_and_date_validation_authored": true,
+        "working_fields_blank": true
+      },
+      "status": "passed",
+      "test": "tracker_keeps_working_fields_blank"
+    },
+    {
+      "assertions": 7,
+      "error": null,
+      "proof": 104,
+      "result": {
+        "canonicalization_restores_equality": true,
+        "core_xml_timestamp_is_template_not_clock": true,
+        "every_part_content_identical": true,
+        "raw_docx_bytes_differ_by_entry_timestamps_reproduced": true,
+        "text_survives_styling": true,
+        "two_second_zip_resolution_can_mask_this": true
+      },
+      "status": "passed",
+      "test": "native_document_bytes_repeat"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 105,
+      "result": {
+        "block_sequence_preserved": true,
+        "every_label_reaches_html": true,
+        "every_label_reaches_markdown": true,
+        "messages_surfaced": true
+      },
+      "status": "passed",
+      "test": "conversion_reports_its_messages"
+    },
+    {
+      "assertions": 5,
+      "error": null,
+      "proof": 106,
+      "result": {
+        "dates_parsed_strictly": true,
+        "duplicate_meeting_blocked": true,
+        "mentions_not_completions": true,
+        "roster_limit_carried": true
+      },
+      "status": "passed",
+      "test": "meeting_join_keeps_mentions_as_mentions"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 107,
+      "result": {
+        "combined_view_matches_the_rows": true,
+        "no_external_assets": true,
+        "one_packet_per_meeting": true
+      },
+      "status": "passed",
+      "test": "packets_render_one_per_meeting"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 108,
+      "result": {
+        "all_day_no_time": true,
+        "clock_dtstamp_not_reproducible_reproduced": true,
+        "no_location_attendee_or_alarm_inferred": true,
+        "pinned_dtstamp_reproducible": true,
+        "uid_stable_uuid5": true
+      },
+      "status": "passed",
+      "test": "calendar_events_are_stable_and_infer_nothing"
+    },
+    {
+      "assertions": 5,
+      "error": null,
+      "proof": 109,
+      "result": {
+        "attachment_bytes_hash_checked": true,
+        "legacy_parser_lacks_accessors_reproduced": true,
+        "messages_sent": 0,
+        "no_sender_or_recipient": true,
+        "random_boundary_reproduced": true,
+        "set_boundary_makes_drafts_reproducible": true
+      },
+      "status": "passed",
+      "test": "drafts_are_reproducible_and_never_sent"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 110,
+      "result": {
+        "bookmarks_resolve_to_pages": true,
+        "page_count_from_the_reopened_binder": true,
+        "section_order_preserved": true,
+        "zero_page_document_refused_by_the_library": true
+      },
+      "status": "passed",
+      "test": "binder_bookmarks_point_at_real_pages"
+    }
+  ],
+  "scope": "Bounded authored handoff fixtures and reproduced library defaults; the original P101-P110 chains and their artifacts were not rerun. No message is sent and no transport is opened.",
+  "source_sha256": "ee1e425d7aab3bfb84a9cde5a01ff4b134aa8ee1d47793c6fbdf1f17bfe46d72",
+  "test_cases": 10
+}

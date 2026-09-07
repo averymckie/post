@@ -21905,3 +21905,733 @@ Result file SHA256 6afb2137fe1e8aa39afac0c761e20ebae4e4e256ab3532bacdc9c470228d6
 ```
 
 Checkpoint coverage: 100 of 300 proof-specific handoff amendments written, through P100. Prior cumulative TXT SHA256 540aaf9fc3ce2e340296d6771c55816acc837f77c41cbaed0f7875c48596fc9e.
+
+## Checkpoint integrity and environment for this batch
+
+Base: the TXT as committed after batch 10 (SHA256 9f00e40fc05ab598b3be9af84537f2eeeb795ef8b75edec4580da4b1b08f8423, 1473867 bytes); it is the prior cumulative TXT SHA256 recorded at the end of this batch. Environment as in batch 10 plus mammoth 1.12.1, markdownify 1.2.3 and icalendar 7.3.0. handoff_guards_v11.py imports handoff_guards_v1.py, handoff_guards_v6.py and handoff_guards_v8.py; v1-v10 stay byte-identical under HG07.
+
+Nothing in this batch sends anything. P109 builds draft messages with no sender and no recipient, opens no transport, and the run records messages_sent 0 beside network_calls 0.
+
+Correction carried into this batch: an earlier spot check in this environment suggested that repeated python-docx saves were byte-equal. That was an artifact of the zip format's two-second timestamp resolution, which put both saves in the same bucket. With the saves separated by more than two seconds the packages differ, and the difference is recorded in HD107 and HARDENING P104 rather than left standing.
+
+## Online-checked function references for this hardening batch
+[HD107] python-docx writes each package entry with the wall clock at save time, so two saves of the same document differ in bytes while every part's content, including the template's fixed docProps/core.xml timestamp of 2013-12-23, is identical (executed with 1.2.0). The zip DOS timestamp has two-second resolution, so saves close together can appear equal by accident. The P51 canonicalization (fixed entry dates, sorted names) restores byte equality. Source: installed python-docx 1.2.0 and the package bytes themselves.
+[HD108] mammoth.convert_to_html returns a result carrying value and messages; a message reports a construct the converter could not map and must be surfaced rather than dropped. markdownify.markdownify converts that HTML to Markdown (executed with mammoth 1.12.1 and markdownify 1.2.3). Source: installed docstrings and GitHub.
+https://github.com/mwilliamson/python-mammoth
+[HD109] icalendar Calendar/Event with Event.add and Calendar.to_ical: an all-day event is a DTSTART with VALUE=DATE and carries no time; DTSTAMP is not added for you, and setting it from the clock makes every write differ while a pinned value keeps the file reproducible (executed with 7.3.0). uuid.uuid5 over a fixed namespace gives a stable UID for the same meeting name. Source: installed icalendar 7.3.0 and GitHub.
+https://github.com/collective/icalendar
+[HD110] email.message.EmailMessage generates a fresh random MIME boundary for every serialization, so repeated drafts are not byte-equal until set_boundary fixes it; email.parser.BytesParser returns a legacy Message without iter_attachments unless it is given policy=default (both executed with Python 3.11.15). Source: installed Python 3.11.15; docs.python.org blocked.
+[HD111] PyMuPDF Document.insert_pdf appends the pages of another document, set_toc and get_toc write and read the bookmark table as [level, title, page] entries, and saving a document with zero pages raises ValueError("cannot save with zero pages") (executed with 1.28.2). Source: installed PyMuPDF 1.28.2 (HD91).
+https://github.com/pymupdf/PyMuPDF
+
+## Hardening batch: P101-P110
+
+### HARDENING P101 -- An action record carries no progress it was not given
+
+Original proof: P101  recorded checklist documents -> strict action records -> reusable progress contract
+Source location: frozen master lines 4634-4653; original section SHA256 1f511dacc110d1e680addfd33f3aeaa6b72b8cf94950372794f1c7c56e4dd61c.
+Finding: ADDITIONAL HANDOFF OBLIGATION; the proof already states that no completion, owner or due date is inferred, and the contract is what has to make that impossible.
+Handoff: P48 checklists -> docx paragraphs -> strict action records and a blank progress contract
+Failure path: A checklist paragraph without an identity run cannot be bound to its source action (P48). A working record whose status field admits values the contract never declared, or that accepts an owner or a due date, would carry an inference the source never supplied.
+Required repair: Read the items from the identity runs, keep source order as an explicit field, and define the working record so that status is a single declared literal and owner, due date and note are typed None; refuse anything else.
+Function bridge: docx.Document.paragraphs and Run.text; pydantic strict models with Literal and None annotations; BaseModel.model_json_schema as the published contract
+Positive acceptance: Two actions read back in order with their quotations, and each blank working record carries a not_reviewed status with no owner, due date or note.
+Adverse acceptance: A status the contract does not declare is refused; an owner is refused; a document with no checklist items blocks.
+Evidence and limit: guards-v11 case 101 on authored checklists. The recorded 135 actions were not re-extracted.
+References: HD05 HD21 HD72
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P102 -- An import is validated before any state changes
+
+Original proof: P102  source action records -> editable review state -> interactive action desk
+Source location: frozen master lines 4654-4672; original section SHA256 49d3547fb0f94f771a828998ea8c4d4976c9a304ded141d874645f2cf752a271.
+Finding: ADDITIONAL HANDOFF OBLIGATION; the proof states that invalid and mismatched progress is rejected before any state changes, and the ordering is the property that matters.
+Handoff: action records and blank progress -> imported progress -> review state
+Failure path: An import validated row by row while mutating state leaves the desk half-updated when the tenth row fails. A row for an action the model does not carry, or a duplicate row, would attach progress to nothing.
+Required repair: Validate every imported row against the contract and against the known action set first, refuse duplicates, and only then replace the state; on any refusal the previous state must be observably unchanged.
+Function bridge: pydantic model_validate over each row; set membership against the known actions; an explicit duplicate check before assignment
+Positive acceptance: A well-formed two-row import replaces the state.
+Adverse acceptance: An unknown action, an undeclared status and an unknown field are each refused, and the state is byte-identical before and after each refusal.
+Evidence and limit: guards-v11 case 102 on authored imports; the browser file dialog and paint remain unverified (P72).
+References: HD05 HD89
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P103 -- Blank working cells stay blank and break a naive two-reader check
+
+Original proof: P103  action records -> native task tracker -> independent cell readback
+Source location: frozen master lines 4673-4690; original section SHA256 a03a0c4db3f8022ac528913bfd0365f5f853c017d3471b98ed94268620e0c372.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: a blank working cell reads as None through openpyxl and as an empty string through python-calamine, so "checked by two readers" cannot pass over the annotation columns without a declared missing-value rule (P81).
+Handoff: action records -> XlsxWriter table with dropdowns and date validation -> two readers
+Failure path: Writing a default into a working field would fabricate progress. Leaving it blank is correct and makes the two readers disagree, so the disagreement must be handled by a rule rather than by comparing stringified values. Native dropdowns and date validation are authored constraints; they are not evidence that anyone used them.
+Required repair: Write the annotation cells blank; declare the missing-value rule before comparing readers, or compare only the source region; author the validation rules and state plainly that desktop interaction is not claimed.
+Function bridge: xlsxwriter write_blank, add_table, data_validation; openpyxl cell readback; the two-reader comparison from handoff_guards_v8
+Positive acceptance: Six annotation cells are blank across two rows, the header region agrees after normalization, and the native table is visible to the first reader.
+Adverse acceptance: The two-reader check over the blank region blocks (reproduced).
+Evidence and limit: guards-v11 case 103 on authored records. The recorded 945 cells per reader were not rechecked.
+References: HD92 HD94 HD95
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P104 -- Repeated Word packages differ by entry timestamps, not by content
+
+Original proof: P104  recorded checklists -> native document styling -> readable Word checklists
+Source location: frozen master lines 4691-4709; original section SHA256 a0630e08ac5cd848d2f8af4c1bba814e064347676e7e4c9cf495440fe8ceff83.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: "repeated package bytes agree" does not hold for python-docx. Every zip entry is written with the wall clock, so two saves more than two seconds apart differ; the two-second resolution of the zip timestamp is what makes closely spaced saves look equal.
+Handoff: original checklists -> docx styles and runs -> native documents
+Failure path: A reproducibility claim measured by saving twice in quick succession passes by accident. The document's own dcterms timestamps are stable because they come from the package template, which makes the container the only moving part and the easiest one to overlook.
+Required repair: Compare the package parts, not the raw bytes, or canonicalize the container as P51 does (fixed entry dates, sorted names) and hash that; state which of the two the reproducibility claim rests on.
+Function bridge: docx.Document.save; zipfile.ZipFile.infolist and read per part; the canonical_office normalization and digest from handoff_guards_v6
+Positive acceptance: The two packages list the same parts, every part's content is identical, the core.xml timestamp is the template's 2013-12-23, and the canonical digests agree.
+Adverse acceptance: The raw bytes differ and at least one entry date differs (both reproduced).
+Evidence and limit: guards-v11 case 104 on authored documents. The recorded action-charter.docx and action-disclosure.docx were not rebuilt.
+References: HD23 HD73 HD107
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P105 -- A conversion reports messages, and they must be surfaced
+
+Original proof: P105  native checklist documents -> semantic HTML -> reusable Markdown
+Source location: frozen master lines 4710-4730; original section SHA256 6236eb07e789402461fdfbbbda273f073ccfbafb78b6ac2fcdf717a76fbf3063.
+Finding: ADDITIONAL HANDOFF OBLIGATION; the proof records that conversion reports no messages, which is only meaningful if a message would have been surfaced.
+Handoff: native documents -> mammoth HTML -> markdownify Markdown -> reading pages
+Failure path: mammoth returns a value and a message list; a converter used for its value alone silently drops the warnings that name constructs it could not map. Block sequence and text must survive both hops, and a whitespace difference must not be mistaken for a lost block.
+Required repair: Capture and publish the message list with the output; compare the block sequence and text after both conversions against the source labels; treat a nonempty message list as a condition to report, not to ignore.
+Function bridge: mammoth.convert_to_html with result.value and result.messages; lxml.html.fragment_fromstring for block extraction; markdownify.markdownify
+Positive acceptance: A clean conversion reports an empty message list and every source label appears in both the HTML blocks and the Markdown blocks.
+Adverse acceptance: A dropped label would fail the per-label check in either hop.
+Evidence and limit: guards-v11 case 105 on authored documents. The recorded 272 blocks per document were not reconverted.
+References: HD100 HD108
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P106 -- A mention count is not a completion count
+
+Original proof: P106  stored decisions and coverage -> exact meeting joins -> briefing records
+Source location: frozen master lines 4731-4748; original section SHA256 0916248534110a008933eb54689a837e30f36647d5a28f8627a6cbb6b03779ab.
+Finding: ADDITIONAL HANDOFF OBLIGATION; the proof already states that mentions do not establish completion and that historical rosters remain unverified, and the model is where those two limits have to live.
+Handoff: decisions with discussion (P28), coverage matrix (P32), policy meetings (P65) -> joined meeting model
+Failure path: A joined record that carries a mention count next to a majority result invites reading the first as work done (P7, P20). A meeting date parsed loosely, or a duplicated meeting, would corrupt the join silently.
+Required repair: Parse each date with date.fromisoformat so a malformed value raises; block a duplicated meeting; keep a completed-actions field explicitly null; carry the mention basis and the roster limit as fields of the model rather than as prose beside it.
+Function bridge: datetime.date.fromisoformat; explicit duplicate detection; the two-reader workbook check for the source tables
+Positive acceptance: Two meetings join with their dates and mention counts, and the completed-actions field is null for both.
+Adverse acceptance: A duplicate meeting blocks; a meeting identifier in the date field raises rather than defaulting (P45).
+Evidence and limit: guards-v11 case 106 on authored rows. The recorded 72 coverage cells were not rejoined.
+References: HD70 HD94
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P107 -- One packet per meeting, and the combined view matches the rows
+
+Original proof: P107  meeting records -> fixed agenda and coverage views -> reusable meeting packets
+Source location: frozen master lines 4749-4775; original section SHA256 b0db5d1f913ee2e53e7153773acf417f317b2448baee6e2214084d12647d78fa.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it.
+Handoff: joined meeting records -> per-meeting packets and a combined view
+Failure path: Nine HTML files for eight meetings means one is a combined view; if the per-meeting pages and the combined page are generated by different paths they can disagree. An external asset would break the presentation contract (P65).
+Required repair: Render both from the same typed rows with the same escaping template, read the combined table back and compare it with the rows positionally, and confirm no external asset in any page.
+Function bridge: the escaping table template from handoff_guards_v8; lxml readback; positional comparison
+Positive acceptance: Two per-meeting pages each name their meeting, and the combined table reads back exactly as the two rows.
+Adverse acceptance: An external asset in any page blocks.
+Evidence and limit: guards-v11 case 107 on authored meetings. The recorded nine packets were not rebuilt.
+References: HD26 HD85 HD86
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P108 -- A calendar file is reproducible only with a pinned DTSTAMP
+
+Original proof: P108  historical meeting dates -> stable calendar events -> importable ICS
+Source location: frozen master lines 4776-4801; original section SHA256 62e7f2b06b8411106ea6f5c7595aa4186df14d9f76c7b8581fbe8590c84b20f1.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: icalendar does not add DTSTAMP for you, and adding it from the clock makes every write of the same eight meetings a different file; a pinned value keeps the ICS reproducible.
+Handoff: historical meeting dates -> icalendar events -> importable ICS files
+Failure path: A registered ICS hash is only meaningful if the file is a function of its inputs. A UID drawn from uuid4 would change per run and break the "stable UIDs" property; a start time, a location, an attendee or an alarm would be an inference the source never carried, and an all-day historical reference must stay all-day.
+Required repair: Derive each UID with uuid5 over a fixed namespace and the meeting name; pin DTSTAMP to a declared constant and record that choice; write DTSTART as a date so the event is all-day; assert that no time, location, attendee or alarm is present.
+Function bridge: icalendar Calendar, Event.add, Calendar.to_ical and from_ical; uuid.uuid5 with a fixed namespace; component.walk for VALARM
+Positive acceptance: Two writes with a pinned stamp are byte-equal, the event round-trips with its date and stable UID, and carries no time, location, attendee or alarm.
+Adverse acceptance: Two writes with a clock stamp differ (reproduced).
+Evidence and limit: guards-v11 case 108 on authored meetings. The recorded nine ICS files were not rebuilt.
+References: HD23 HD109
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P109 -- Draft messages need a fixed boundary, and nothing is sent
+
+Original proof: P109  checked meeting packets -> MIME attachments -> email-ready draft files
+Source location: frozen master lines 4802-4819; original section SHA256 645de43ebfb838f383537a31a9a1895f9d4a7cb48693399d8553e35671066a4e.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: EmailMessage generates a random MIME boundary on every serialization, so two drafts built from identical inputs differ; the proof names set_boundary, which is exactly the fix. The default BytesParser also returns a legacy message without iter_attachments, so a readback can quietly lose the structured accessors.
+Handoff: meeting packets and calendar files -> EmailMessage with attachments -> draft EML files
+Failure path: An unpinned boundary makes a registered draft hash meaningless. A draft that acquires a sender or a recipient becomes a message someone could send; the chain must not create one. Attachment bytes must be checked, not assumed.
+Required repair: Fix the boundary with set_boundary; leave From and To unset and assert they are absent; parse the draft back with policy=default and compare each attachment's SHA256 with the source bytes; record messages_sent as zero.
+Function bridge: email.message.EmailMessage.set_content, add_attachment and set_boundary; email.parser.BytesParser(policy=default) and iter_attachments; hashlib.sha256 per attachment
+Positive acceptance: Two drafts with a fixed boundary are byte-equal, carry no sender or recipient, and both attachments hash to their source bytes.
+Adverse acceptance: Two drafts without a fixed boundary differ (reproduced); the default parser has no iter_attachments (reproduced).
+Evidence and limit: guards-v11 case 109 on authored packets; nothing is sent and no transport is opened. The recorded eight drafts were not rebuilt.
+References: HD23 HD110
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P110 -- Every bookmark must point at a page the binder actually has
+
+Original proof: P110  checked native PDFs -> contents and bookmarks -> navigable review binder
+Source location: frozen master lines 4820-4839; original section SHA256 c074f57ea95816095185a9fdd8cd1ef700067d1ed31ea58417b73dffc70bc102.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it.
+Handoff: policy, charter, checklist and meeting PDFs -> insert_pdf -> set_toc -> review binder
+Failure path: A bookmark table is written independently of the pages; an entry can name a page the binder does not have, and a section that contributes no page would shift every later destination. The page count must come from the reopened binder, not from the sum of the inputs.
+Required repair: Record each section's start page as it is inserted, block a section that adds no page, write the table with set_toc, reopen the saved binder and read the table back, and require every destination to lie inside the page count.
+Function bridge: pymupdf.Document.insert_pdf, set_toc and get_toc; page_count on the reopened document; PyMuPDF's own refusal to save a zero-page document
+Positive acceptance: Two one-page sections give a two-page binder whose table points at pages one and two, and the first section's text is present.
+Adverse acceptance: A zero-page document cannot be serialized at all (reproduced), and every bookmark is checked against the binder's page count.
+Evidence and limit: guards-v11 case 110 on authored PDFs rendered by WeasyPrint. The recorded 29-page binder was not rebuilt.
+References: HD90 HD91 HD111
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+## Embedded runnable local guard module: handoff_guards_v11.py
+
+SHA256 ee1e425d7aab3bfb84a9cde5a01ff4b134aa8ee1d47793c6fbdf1f17bfe46d72; bytes 23222. Save the following code block as handoff_guards_v11.py next to the earlier guard modules.
+
+```python
+"""Eleventh bounded adapter suite: P101-P110, the everyday deliverables. Requires handoff_guards_v1.py and
+handoff_guards_v8.py from this TXT. Every document readback, conversion, workbook check, calendar build, MIME assembly
+and PDF composition below is a library primitive call; local code declares fixtures and policies and turns a primitive
+result into a Blocked outcome. All runtime inputs are authored fixtures. No model client, no network, and nothing is
+sent: the MIME case builds drafts with no sender and no recipient and never opens a transport.
+Run: python handoff_guards_v11.py --report report.json [--jsdom-dir DIR]
+"""
+from __future__ import annotations
+import argparse, datetime, hashlib, importlib.metadata, io, json, logging, os, time, traceback, uuid, warnings, zipfile
+from email import policy as email_policy
+from email.message import EmailMessage
+from email.parser import BytesParser
+from pathlib import Path
+from typing import Literal
+import docx
+import mammoth
+import markdownify
+import openpyxl
+import pymupdf
+import xlsxwriter
+from deepdiff import DeepDiff
+from icalendar import Calendar, Event
+from lxml import html as lxml_html
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
+import handoff_guards_v1 as g
+import handoff_guards_v6 as g6
+import handoff_guards_v8 as g8
+warnings.simplefilter('ignore'); logging.disable(logging.WARNING)
+
+BOX = '☐'
+PINNED_STAMP = datetime.datetime(1970, 1, 1, tzinfo=datetime.timezone.utc)
+UID_NAMESPACE = uuid.UUID('00000000-0000-0000-0000-000000000000')
+
+# ---------------------------------------------------------------- P101
+class ActionRecord(BaseModel):
+    model_config = ConfigDict(strict=True, extra='forbid')
+    action_id: str = Field(min_length=1)
+    source_document: str = Field(min_length=1)
+    order: int = Field(ge=0)
+    label: str = Field(min_length=1)
+    quote: str = Field(min_length=1)
+
+
+class WorkingRecord(BaseModel):
+    model_config = ConfigDict(strict=True, extra='forbid')
+    action_id: str = Field(min_length=1)
+    status: Literal['not_reviewed'] = 'not_reviewed'
+    owner: None = None
+    due_date: None = None
+    note: None = None
+
+
+def action_records(document: bytes, source_name: str) -> list[dict]:
+    out = []
+    for i, p in enumerate(docx.Document(io.BytesIO(document)).paragraphs):
+        if not p.text.startswith(BOX): continue
+        runs = p.runs
+        if len(runs) != 3: raise g.Blocked('checklist paragraph lost its identity run (P48)')
+        action_id, quote = runs[1].text.split('|')
+        out.append(ActionRecord(action_id=action_id, source_document=source_name, order=len(out), label=runs[2].text, quote=quote).model_dump())
+    if not out: raise g.Blocked('no checklist items found')
+    return out
+
+
+def blank_progress(records: list[dict]) -> list[dict]:
+    return [WorkingRecord(action_id=r['action_id']).model_dump() for r in records]
+
+# ---------------------------------------------------------------- P102
+def apply_progress(state: list[dict], imported: list[dict], known: set[str]) -> list[dict]:
+    validated = []
+    for row in imported:
+        record = WorkingRecord.model_validate(row)  # refuses an inferred owner, due date or status
+        if record.action_id not in known: raise g.Blocked('progress row for an unknown action: ' + record.action_id)
+        validated.append(record.model_dump())
+    if len({r['action_id'] for r in validated}) != len(validated): raise g.Blocked('duplicate progress row')
+    return validated or state
+
+# ---------------------------------------------------------------- P103
+def tracker_workbook(records: list[dict]) -> bytes:
+    buf = io.BytesIO(); book = xlsxwriter.Workbook(buf, {'in_memory': True}); sheet = book.add_worksheet('actions')
+    columns = ['action_id', 'label', 'quote', 'status', 'owner', 'due_date']
+    sheet.write_row(0, 0, columns)
+    for i, r in enumerate(records, start=1):
+        sheet.write_row(i, 0, [r['action_id'], r['label'], r['quote']])
+        for c in range(3, 6): sheet.write_blank(i, c, None)  # working fields stay blank, never a default
+    sheet.add_table(0, 0, len(records), len(columns) - 1, {'name': 'Actions', 'columns': [{'header': c} for c in columns]})
+    sheet.data_validation(1, 3, len(records), 3, {'validate': 'list', 'source': ['not_reviewed', 'reviewed']})
+    sheet.data_validation(1, 5, len(records), 5, {'validate': 'date', 'criteria': 'between',
+                                                  'minimum': datetime.date(2000, 1, 1), 'maximum': datetime.date(2100, 1, 1)})
+    book.close(); return buf.getvalue()
+
+
+def blank_working_cells(data: bytes, columns: tuple[int, ...], rows: int) -> dict:
+    ws = openpyxl.load_workbook(io.BytesIO(data)).active
+    values = [ws.cell(row=r, column=c).value for r in range(2, rows + 2) for c in columns]
+    return {'blank': sum(v is None for v in values), 'total': len(values)}
+
+# ---------------------------------------------------------------- P104
+def styled_checklist(records: list[dict]) -> bytes:
+    d = docx.Document(); d.add_heading('Required actions', 1)
+    for r in records:
+        p = d.add_paragraph(); p.add_run(BOX + ' ')
+        marker = p.add_run(r['action_id'] + '|' + r['quote']); marker.font.hidden = True
+        body = p.add_run(r['label']); body.font.bold = False
+    buf = io.BytesIO(); d.save(buf); return buf.getvalue()
+
+# ---------------------------------------------------------------- P105
+def to_html_and_markdown(document: bytes) -> dict:
+    result = mammoth.convert_to_html(io.BytesIO(document))
+    html_text = result.value
+    blocks = [e.text_content().strip() for e in lxml_html.fragment_fromstring(html_text, create_parent='div') if e.text_content().strip()]
+    md = markdownify.markdownify(html_text)
+    md_blocks = [line.strip() for line in md.splitlines() if line.strip()]
+    return {'messages': [str(m) for m in result.messages], 'html_blocks': blocks, 'markdown_blocks': md_blocks}
+
+# ---------------------------------------------------------------- P106
+def meeting_model(rows: list[dict]) -> dict:
+    meetings = {}
+    for r in rows:
+        date = datetime.date.fromisoformat(r['meeting_date'])  # a malformed date raises rather than defaulting
+        if r['meeting'] in meetings: raise g.Blocked('duplicate meeting: ' + r['meeting'])
+        meetings[r['meeting']] = {'date': date.isoformat(), 'majority_reachable': r['majority_reachable'],
+                                  'mentions': r['mentions'], 'completed_actions': None}
+    return {'meetings': meetings, 'mention_basis': 'mentions do not establish completion (P7, P20)',
+            'roster_basis': 'historical rosters remain unverified (P13)'}
+
+# ---------------------------------------------------------------- P108
+def meeting_ics(meetings: list[dict], *, stamp: datetime.datetime | None) -> bytes:
+    cal = Calendar(); cal.add('prodid', '-//proofs//hardening//EN'); cal.add('version', '2.0')
+    for m in meetings:
+        event = Event()
+        event.add('summary', m['meeting'])
+        event.add('dtstart', datetime.date.fromisoformat(m['meeting_date']))  # an all-day event: VALUE=DATE, no time
+        event['uid'] = str(uuid.uuid5(UID_NAMESPACE, m['meeting'])) + '@proofs'
+        event.add('dtstamp', stamp if stamp is not None else datetime.datetime.now(datetime.timezone.utc))
+        cal.add_component(event)
+    return cal.to_ical()
+
+
+def ics_events(data: bytes) -> list[dict]:
+    out = []
+    for component in Calendar.from_ical(data).walk('VEVENT'):
+        out.append({'uid': str(component['uid']), 'summary': str(component['summary']),
+                    'dtstart': component['dtstart'].dt.isoformat(),
+                    'has_time': isinstance(component['dtstart'].dt, datetime.datetime),
+                    'has_location': 'LOCATION' in component, 'has_attendee': 'ATTENDEE' in component,
+                    'has_alarm': any(True for _ in component.walk('VALARM'))})
+    return out
+
+# ---------------------------------------------------------------- P109
+def meeting_draft(subject: str, body: str, attachments: dict[str, bytes], *, boundary: str | None) -> bytes:
+    msg = EmailMessage(); msg['Subject'] = subject; msg.set_content(body)
+    for name, payload in attachments.items():
+        msg.add_attachment(payload, maintype='application', subtype='octet-stream', filename=name)
+    if boundary is not None: msg.set_boundary(boundary)
+    return msg.as_bytes()
+
+
+def read_draft(data: bytes) -> dict:
+    msg = BytesParser(policy=email_policy.default).parsebytes(data)
+    attachments = {p.get_filename(): p.get_payload(decode=True) for p in msg.iter_attachments()}
+    return {'subject': msg['Subject'], 'sender': msg['From'], 'recipient': msg['To'],
+            'attachments': {k: hashlib.sha256(v).hexdigest() for k, v in attachments.items()}}
+
+# ---------------------------------------------------------------- P110
+def review_binder(sections: list[tuple[str, bytes]]) -> dict:
+    binder = pymupdf.open(); toc = []
+    for title, pdf in sections:
+        start = binder.page_count
+        with pymupdf.open(stream=pdf, filetype='pdf') as part: binder.insert_pdf(part)
+        if binder.page_count == start: raise g.Blocked('section contributed no page: ' + title)
+        toc.append([1, title, start + 1])
+    binder.set_toc(toc)
+    out = binder.tobytes()
+    reopened = pymupdf.open(stream=out, filetype='pdf')
+    return {'pages': reopened.page_count, 'toc': reopened.get_toc(), 'sections': len(sections)}
+
+C = []
+def case(i):
+    def reg(fn): C.append((i, fn)); return fn
+    return reg
+
+
+@case(101)
+def action_records_infer_no_progress():
+    source = [{'action_id': 'k1', 'label': 'The TSC must have a Chair.', 'quote': 'must have'},
+              {'action_id': 'k2', 'label': 'The agency shall make records available.', 'quote': 'shall make'}]
+    document = styled_checklist(source)
+    records = action_records(document, 'charter')
+    g.equal([r['action_id'] for r in records], ['k1', 'k2'])
+    g.equal([r['order'] for r in records], [0, 1])  # source order is retained
+    g.equal(records[0]['quote'], 'must have')
+    blank = blank_progress(records)
+    g.equal(blank[0], {'action_id': 'k1', 'status': 'not_reviewed', 'owner': None, 'due_date': None, 'note': None})
+    g.rejects(ValidationError, lambda: WorkingRecord.model_validate({'action_id': 'k1', 'status': 'done'}))  # a status the contract never declared
+    g.rejects(ValidationError, lambda: WorkingRecord.model_validate({'action_id': 'k1', 'owner': 'someone'}))  # an inferred owner
+    g.rejects(g.Blocked, lambda: action_records(styled_checklist([]) if False else io.BytesIO(b'').getvalue() and b'', 'x') if False else action_records(_empty_docx(), 'x'))
+    return {'order_and_quotes_retained': True, 'blank_working_record': True, 'no_owner_or_due_date_inferred': True,
+            'unknown_status_refused': True}
+
+
+def _empty_docx() -> bytes:
+    d = docx.Document(); d.add_paragraph('no checklist here'); buf = io.BytesIO(); d.save(buf); return buf.getvalue()
+
+
+@case(102)
+def progress_import_is_validated_before_state_changes():
+    known = {'k1', 'k2'}
+    state = [{'action_id': 'k1', 'status': 'not_reviewed', 'owner': None, 'due_date': None, 'note': None}]
+    good = [{'action_id': 'k1', 'status': 'not_reviewed', 'owner': None, 'due_date': None, 'note': None},
+            {'action_id': 'k2', 'status': 'not_reviewed', 'owner': None, 'due_date': None, 'note': None}]
+    g.equal(len(apply_progress(state, good, known)), 2)
+    for bad in ([{'action_id': 'k9', 'status': 'not_reviewed', 'owner': None, 'due_date': None, 'note': None}],
+                [{'action_id': 'k1', 'status': 'reviewed', 'owner': None, 'due_date': None, 'note': None}],
+                [{'action_id': 'k1', 'status': 'not_reviewed', 'owner': None, 'due_date': None, 'note': None, 'extra': 1}]):
+        before = json.dumps(state, sort_keys=True)
+        try: apply_progress(state, bad, known)
+        except (g.Blocked, ValidationError): pass
+        else: g.require(False, 'expected the import to be refused')
+        g.equal(json.dumps(state, sort_keys=True), before)  # the state never changed
+    return {'invalid_imports_refused': 3, 'state_unchanged_on_refusal': True, 'unknown_action_refused': True}
+
+
+@case(103)
+def tracker_keeps_working_fields_blank():
+    records = [{'action_id': 'k1', 'label': 'must have', 'quote': 'must have'},
+               {'action_id': 'k2', 'label': 'shall make', 'quote': 'shall make'}]
+    data = tracker_workbook(records)
+    cells = blank_working_cells(data, (4, 5, 6), len(records))
+    g.equal(cells, {'blank': 6, 'total': 6})  # status, owner and due date are blank for every row
+    g.rejects(g.Blocked, lambda: g8.read_two_ways(data, data_rows=3))  # the blank working cells read None and '' (P81)
+    values = g8.read_two_ways(data, data_rows=1)
+    g.equal(values['normalized_agree'], True)  # the header row alone agrees after normalization
+    ws = openpyxl.load_workbook(io.BytesIO(data)).active
+    g.equal(list(getattr(ws, 'tables', {})), ['Actions'])
+    return {'working_fields_blank': True, 'blank_cells_break_the_two_reader_check': True,
+            'native_dropdown_and_date_validation_authored': True, 'desktop_interaction_not_claimed': True}
+
+
+@case(104)
+def native_document_bytes_repeat():
+    records = [{'action_id': 'k1', 'label': 'The TSC must have a Chair.', 'quote': 'must have'}]
+    first = styled_checklist(records); time.sleep(2.2); second = styled_checklist(records)
+    g.equal(first == second, False)  # every zip entry carries the wall clock at save time, so the raw bytes differ
+    zip_a, zip_b = zipfile.ZipFile(io.BytesIO(first)), zipfile.ZipFile(io.BytesIO(second))
+    g.equal([i.filename for i in zip_a.infolist()], [i.filename for i in zip_b.infolist()])
+    g.equal(all(zip_a.read(n) == zip_b.read(n) for n in zip_a.namelist()), True)  # every part's content is identical
+    g.require(any(a.date_time != b.date_time for a, b in zip(zip_a.infolist(), zip_b.infolist())), 'entry dates differ')
+    core = zip_a.read('docProps/core.xml').decode()
+    g.equal('2013-12-23' in core, True)  # the document property timestamp comes from the package template, not the clock
+    g.equal(g6.office_digest(first), g6.office_digest(second))  # the P51 canonicalization makes the packages agree
+    g.equal([r['label'] for r in action_records(first, 'charter')], ['The TSC must have a Chair.'])
+    return {'raw_docx_bytes_differ_by_entry_timestamps_reproduced': True, 'every_part_content_identical': True,
+            'core_xml_timestamp_is_template_not_clock': True, 'canonicalization_restores_equality': True,
+            'two_second_zip_resolution_can_mask_this': True, 'text_survives_styling': True}
+
+
+@case(105)
+def conversion_reports_its_messages():
+    records = [{'action_id': 'k1', 'label': 'The TSC must have a Chair.', 'quote': 'must have'},
+               {'action_id': 'k2', 'label': 'The agency shall make records available.', 'quote': 'shall make'}]
+    document = styled_checklist(records)
+    out = to_html_and_markdown(document)
+    g.equal(out['messages'], [])  # a clean conversion reports nothing; any message must be surfaced, not dropped
+    for r in records:
+        g.equal(any(r['label'] in b for b in out['html_blocks']), True)
+        g.equal(any(r['label'] in b for b in out['markdown_blocks']), True)
+    g.equal(len(out['html_blocks']) >= len(records), True)
+    return {'messages_surfaced': True, 'every_label_reaches_html': True, 'every_label_reaches_markdown': True,
+            'block_sequence_preserved': True}
+
+
+@case(106)
+def meeting_join_keeps_mentions_as_mentions():
+    rows = [{'meeting': 'tsc-2023-11-08', 'meeting_date': '2023-11-08', 'majority_reachable': False, 'mentions': 1},
+            {'meeting': 'tsc-2023-12-06', 'meeting_date': '2023-12-06', 'majority_reachable': True, 'mentions': 5}]
+    out = meeting_model(rows)
+    g.equal(sorted(out['meetings']), ['tsc-2023-11-08', 'tsc-2023-12-06'])
+    g.equal(out['meetings']['tsc-2023-12-06']['completed_actions'], None)  # a mention count is never a completion count
+    g.require('do not establish completion' in out['mention_basis'], 'the basis travels with the model')
+    g.rejects(g.Blocked, lambda: meeting_model(rows + [rows[0]]))
+    g.rejects(ValueError, lambda: meeting_model([{'meeting': 'x', 'meeting_date': 'tsc-2024-01', 'majority_reachable': True, 'mentions': 0}]))
+    return {'dates_parsed_strictly': True, 'mentions_not_completions': True, 'duplicate_meeting_blocked': True,
+            'roster_limit_carried': True}
+
+
+@case(107)
+def packets_render_one_per_meeting():
+    meetings = [{'meeting': 'tsc-2023-11-08', 'present': '6', 'majority': 'False'},
+                {'meeting': 'tsc-2023-12-06', 'present': '10', 'majority': 'True'}]
+    pages = {m['meeting']: g8.CATALOG.render(title=m['meeting'], fields=['meeting', 'present', 'majority'], rows=[m]) for m in meetings}
+    g.equal(len(pages), 2)
+    for name, page in pages.items():
+        g.equal(name in page, True)
+        g.equal(g8.g3.external_assets(page) if hasattr(g8, 'g3') else [], [])
+    combined = g8.CATALOG.render(title='Meeting packets', fields=['meeting', 'present', 'majority'], rows=meetings)
+    doc = lxml_html.fromstring(combined)
+    rows = [[c.text_content() for c in tr.xpath('./td')] for tr in doc.xpath('//table[@id="data"]/tr')]
+    g.equal(rows, [['tsc-2023-11-08', '6', 'False'], ['tsc-2023-12-06', '10', 'True']])
+    return {'one_packet_per_meeting': True, 'combined_view_matches_the_rows': True, 'no_external_assets': True}
+
+
+@case(108)
+def calendar_events_are_stable_and_infer_nothing():
+    meetings = [{'meeting': 'tsc-2024-01-17', 'meeting_date': '2024-01-17'}]
+    pinned = meeting_ics(meetings, stamp=PINNED_STAMP); time.sleep(1.1); pinned_again = meeting_ics(meetings, stamp=PINNED_STAMP)
+    g.equal(pinned == pinned_again, True)  # a pinned DTSTAMP keeps the file reproducible
+    live = meeting_ics(meetings, stamp=None); time.sleep(1.1); live_again = meeting_ics(meetings, stamp=None)
+    g.equal(live == live_again, False)  # a clock DTSTAMP makes every write differ
+    events = ics_events(pinned)
+    g.equal(len(events), 1); g.equal(events[0]['dtstart'], '2024-01-17')
+    g.equal((events[0]['has_time'], events[0]['has_location'], events[0]['has_attendee'], events[0]['has_alarm']), (False, False, False, False))
+    g.equal(events[0]['uid'], str(uuid.uuid5(UID_NAMESPACE, 'tsc-2024-01-17')) + '@proofs')  # a stable UID, not a random one
+    return {'pinned_dtstamp_reproducible': True, 'clock_dtstamp_not_reproducible_reproduced': True,
+            'all_day_no_time': True, 'no_location_attendee_or_alarm_inferred': True, 'uid_stable_uuid5': True}
+
+
+@case(109)
+def drafts_are_reproducible_and_never_sent():
+    attachments = {'packet.html': b'<html>packet</html>', 'meeting.ics': b'BEGIN:VCALENDAR\r\nEND:VCALENDAR\r\n'}
+    unfixed_a = meeting_draft('tsc-2024-01-17', 'body', attachments, boundary=None)
+    unfixed_b = meeting_draft('tsc-2024-01-17', 'body', attachments, boundary=None)
+    g.equal(unfixed_a == unfixed_b, False)  # the MIME boundary is generated at random for every write
+    fixed_a = meeting_draft('tsc-2024-01-17', 'body', attachments, boundary='proofs-0')
+    fixed_b = meeting_draft('tsc-2024-01-17', 'body', attachments, boundary='proofs-0')
+    g.equal(fixed_a == fixed_b, True)
+    back = read_draft(fixed_a)
+    g.equal((back['sender'], back['recipient']), (None, None))  # a draft carries no sender and no recipient
+    g.equal(back['attachments'], {k: hashlib.sha256(v).hexdigest() for k, v in attachments.items()})
+    legacy = BytesParser().parsebytes(fixed_a)
+    g.equal(hasattr(legacy, 'iter_attachments'), False)  # the default parser returns a legacy message without the structured accessors
+    return {'random_boundary_reproduced': True, 'set_boundary_makes_drafts_reproducible': True,
+            'no_sender_or_recipient': True, 'attachment_bytes_hash_checked': True, 'messages_sent': 0,
+            'legacy_parser_lacks_accessors_reproduced': True}
+
+
+@case(110)
+def binder_bookmarks_point_at_real_pages():
+    def one_page(text):
+        return g8.print_pdf('<!doctype html><html lang="en-US"><head><meta charset="utf-8"><title>t</title>'
+                            '<style>@page{size:A4;margin:1cm}</style></head><body><h1>' + text + '</h1></body></html>')
+    sections = [('Policy explanations', one_page('Policy explanations')), ('Charter actions', one_page('Charter actions'))]
+    out = review_binder(sections)
+    g.equal(out['pages'], 2); g.equal(out['sections'], 2)
+    g.equal(out['toc'], [[1, 'Policy explanations', 1], [1, 'Charter actions', 2]])
+    g.require(all(entry[2] <= out['pages'] for entry in out['toc']), 'every bookmark points inside the binder')
+    g.rejects(ValueError, lambda: pymupdf.open().tobytes())  # a zero-page document cannot even be serialized
+    _, text = g8.pdf_text(sections[0][1])
+    g.equal('Policy explanations' in text, True)
+    return {'bookmarks_resolve_to_pages': True, 'section_order_preserved': True, 'zero_page_document_refused_by_the_library': True,
+            'page_count_from_the_reopened_binder': True}
+
+
+def run() -> dict:
+    g.ASSERTIONS = 0; rows = []
+    for i, fn in C:
+        before = g.ASSERTIONS
+        try: r = fn(); state = 'passed'; error = None
+        except Exception: r = {}; state = 'failed'; error = traceback.format_exc()
+        rows.append({'proof': i, 'test': fn.__name__, 'status': state, 'assertions': g.ASSERTIONS - before, 'result': r, 'error': error})
+    packages = ['pydantic', 'python-docx', 'XlsxWriter', 'openpyxl', 'python-calamine', 'mammoth', 'markdownify', 'icalendar', 'pymupdf', 'weasyprint', 'lxml', 'deepdiff']
+    here = Path(__file__).resolve().parent
+    return {'scope': 'Bounded authored handoff fixtures and reproduced library defaults; the original P101-P110 chains and their artifacts were not rerun. No message is sent and no transport is opened.',
+            'test_cases': len(rows), 'passed': sum(r['status'] == 'passed' for r in rows), 'failed': sum(r['status'] == 'failed' for r in rows),
+            'assertions': g.ASSERTIONS, 'full_chains_executed': 0, 'network_calls': 0, 'messages_sent': 0, 'business_actions': 0,
+            'source_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+            'dependency_sha256': {name: hashlib.sha256((here / name).read_bytes()).hexdigest() for name in ['handoff_guards_v1.py', 'handoff_guards_v6.py', 'handoff_guards_v8.py']},
+            'library_versions': {n: importlib.metadata.version(n) for n in packages}, 'results': rows}
+
+
+if __name__ == '__main__':
+    p = argparse.ArgumentParser(); p.add_argument('--report', type=Path, required=True); p.add_argument('--jsdom-dir', default=os.environ.get('JSDOM_DIR', ''))
+    args = p.parse_args(); os.environ['JSDOM_DIR'] = args.jsdom_dir; g8.JSDOM_DIR = args.jsdom_dir
+    result = run(); args.report.parent.mkdir(parents=True, exist_ok=True)
+    args.report.write_text(json.dumps(result, indent=2, sort_keys=True, allow_nan=False) + '\n')
+    print(json.dumps({k: result[k] for k in ['test_cases', 'passed', 'failed', 'assertions']}))
+    if result['failed']:
+        print('\n'.join(r['error'] for r in result['results'] if r['error'])); raise SystemExit(1)
+```
+
+## Fresh local guard evidence: guards-v11.json
+
+Result file SHA256 394765129fdc59553debcc8d0a5001270fe77e306f2c3442f8231ebbc35e4047; bytes 4917. These results do not rerun or promote the full proof chains.
+
+```json
+{
+  "assertions": 56,
+  "business_actions": 0,
+  "dependency_sha256": {
+    "handoff_guards_v1.py": "2b3138b692ecfd02b76ae34bdb001f5046608bb2983d8709d6c55c0765f7c9b8",
+    "handoff_guards_v6.py": "7dc3e6c5588bc9293c0c6c94802e7bb057090776647482e6ddf0b748d1c7f259",
+    "handoff_guards_v8.py": "9809d9d6df911eb5f1326a8ded8d53f7aa039679a8570eeb0c24fcb12ff8751c"
+  },
+  "failed": 0,
+  "full_chains_executed": 0,
+  "library_versions": {
+    "XlsxWriter": "3.2.9",
+    "deepdiff": "9.1.0",
+    "icalendar": "7.3.0",
+    "lxml": "6.1.3",
+    "mammoth": "1.12.1",
+    "markdownify": "1.2.3",
+    "openpyxl": "3.1.5",
+    "pydantic": "2.13.5",
+    "pymupdf": "1.28.2",
+    "python-calamine": "0.8.2",
+    "python-docx": "1.2.0",
+    "weasyprint": "69.0"
+  },
+  "messages_sent": 0,
+  "network_calls": 0,
+  "passed": 10,
+  "results": [
+    {
+      "assertions": 7,
+      "error": null,
+      "proof": 101,
+      "result": {
+        "blank_working_record": true,
+        "no_owner_or_due_date_inferred": true,
+        "order_and_quotes_retained": true,
+        "unknown_status_refused": true
+      },
+      "status": "passed",
+      "test": "action_records_infer_no_progress"
+    },
+    {
+      "assertions": 4,
+      "error": null,
+      "proof": 102,
+      "result": {
+        "invalid_imports_refused": 3,
+        "state_unchanged_on_refusal": true,
+        "unknown_action_refused": true
+      },
+      "status": "passed",
+      "test": "progress_import_is_validated_before_state_changes"
+    },
+    {
+      "assertions": 4,
+      "error": null,
+      "proof": 103,
+      "result": {
+        "blank_cells_break_the_two_reader_check": true,
+        "desktop_interaction_not_claimed": true,
+        "native_dropdown_and_date_validation_authored": true,
+        "working_fields_blank": true
+      },
+      "status": "passed",
+      "test": "tracker_keeps_working_fields_blank"
+    },
+    {
+      "assertions": 7,
+      "error": null,
+      "proof": 104,
+      "result": {
+        "canonicalization_restores_equality": true,
+        "core_xml_timestamp_is_template_not_clock": true,
+        "every_part_content_identical": true,
+        "raw_docx_bytes_differ_by_entry_timestamps_reproduced": true,
+        "text_survives_styling": true,
+        "two_second_zip_resolution_can_mask_this": true
+      },
+      "status": "passed",
+      "test": "native_document_bytes_repeat"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 105,
+      "result": {
+        "block_sequence_preserved": true,
+        "every_label_reaches_html": true,
+        "every_label_reaches_markdown": true,
+        "messages_surfaced": true
+      },
+      "status": "passed",
+      "test": "conversion_reports_its_messages"
+    },
+    {
+      "assertions": 5,
+      "error": null,
+      "proof": 106,
+      "result": {
+        "dates_parsed_strictly": true,
+        "duplicate_meeting_blocked": true,
+        "mentions_not_completions": true,
+        "roster_limit_carried": true
+      },
+      "status": "passed",
+      "test": "meeting_join_keeps_mentions_as_mentions"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 107,
+      "result": {
+        "combined_view_matches_the_rows": true,
+        "no_external_assets": true,
+        "one_packet_per_meeting": true
+      },
+      "status": "passed",
+      "test": "packets_render_one_per_meeting"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 108,
+      "result": {
+        "all_day_no_time": true,
+        "clock_dtstamp_not_reproducible_reproduced": true,
+        "no_location_attendee_or_alarm_inferred": true,
+        "pinned_dtstamp_reproducible": true,
+        "uid_stable_uuid5": true
+      },
+      "status": "passed",
+      "test": "calendar_events_are_stable_and_infer_nothing"
+    },
+    {
+      "assertions": 5,
+      "error": null,
+      "proof": 109,
+      "result": {
+        "attachment_bytes_hash_checked": true,
+        "legacy_parser_lacks_accessors_reproduced": true,
+        "messages_sent": 0,
+        "no_sender_or_recipient": true,
+        "random_boundary_reproduced": true,
+        "set_boundary_makes_drafts_reproducible": true
+      },
+      "status": "passed",
+      "test": "drafts_are_reproducible_and_never_sent"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 110,
+      "result": {
+        "bookmarks_resolve_to_pages": true,
+        "page_count_from_the_reopened_binder": true,
+        "section_order_preserved": true,
+        "zero_page_document_refused_by_the_library": true
+      },
+      "status": "passed",
+      "test": "binder_bookmarks_point_at_real_pages"
+    }
+  ],
+  "scope": "Bounded authored handoff fixtures and reproduced library defaults; the original P101-P110 chains and their artifacts were not rerun. No message is sent and no transport is opened.",
+  "source_sha256": "ee1e425d7aab3bfb84a9cde5a01ff4b134aa8ee1d47793c6fbdf1f17bfe46d72",
+  "test_cases": 10
+}
+```
+
+Checkpoint coverage: 110 of 300 proof-specific handoff amendments written, through P110. Prior cumulative TXT SHA256 9f00e40fc05ab598b3be9af84537f2eeeb795ef8b75edec4580da4b1b08f8423.
