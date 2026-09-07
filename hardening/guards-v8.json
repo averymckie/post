@@ -1,0 +1,164 @@
+{
+  "assertions": 60,
+  "business_actions": 0,
+  "dependency_sha256": {
+    "handoff_guards_v1.py": "2b3138b692ecfd02b76ae34bdb001f5046608bb2983d8709d6c55c0765f7c9b8",
+    "handoff_guards_v3.py": "e8df8d98831289c66ab705940ae2bc20ca7913a721002b811a5a77be05be2873"
+  },
+  "failed": 0,
+  "full_chains_executed": 0,
+  "jsdom_available": true,
+  "library_versions": {
+    "Jinja2": "3.1.6",
+    "XlsxWriter": "3.2.9",
+    "deepdiff": "9.1.0",
+    "lxml": "6.1.3",
+    "matplotlib": "3.11.1",
+    "numpy": "2.4.6",
+    "openpyxl": "3.1.5",
+    "plotly": "7.0.0",
+    "pydantic": "2.13.5",
+    "pymupdf": "1.28.2",
+    "python-calamine": "0.8.2",
+    "weasyprint": "69.0"
+  },
+  "network_calls": 0,
+  "passed": 10,
+  "results": [
+    {
+      "assertions": 8,
+      "error": null,
+      "proof": 71,
+      "result": {
+        "already_imported_module_bypasses_the_finder_reproduced": true,
+        "audit_hook_cannot_be_removed_once_added": true,
+        "model_client_import_blocked": true,
+        "native_library_initialization_precedes_the_guard": "recorded limit; the guard covers Python-level imports and audited events only",
+        "network_root_import_blocked": true
+      },
+      "status": "passed",
+      "test": "import_guard_and_audit_hook"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 72,
+      "result": {
+        "browser_layout_and_responsive_behavior_unverified": true,
+        "handler_wiring_checked": true,
+        "no_layout_reproduced": true,
+        "typed_rows_checked": true
+      },
+      "status": "passed",
+      "test": "dom_assertions_prove_wiring_not_layout"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 73,
+      "result": {
+        "external_resource_silently_dropped_reproduced": true,
+        "repeated_bytes_equal": true,
+        "source_date_epoch_reaches_output": true,
+        "source_scanned_before_render": true,
+        "text_preserved_checked": true
+      },
+      "status": "passed",
+      "test": "print_render_is_reproducible_and_source_checked"
+    },
+    {
+      "assertions": 7,
+      "error": null,
+      "proof": 74,
+      "result": {
+        "closed_cases_stay_unassessed": true,
+        "historical_snapshot_labeled": true,
+        "normalized_agreement_required": true,
+        "second_reader_sees_values_only": true,
+        "two_readers_disagree_before_normalization_reproduced": true
+      },
+      "status": "passed",
+      "test": "operations_model_joins_and_reads_twice"
+    },
+    {
+      "assertions": 5,
+      "error": null,
+      "proof": 75,
+      "result": {
+        "external_requests": 0,
+        "missing_state_explicit": true,
+        "records_reach_the_dom": true,
+        "risk_states_distinct": true
+      },
+      "status": "passed",
+      "test": "interface_handlers_operate_on_typed_records"
+    },
+    {
+      "assertions": 5,
+      "error": null,
+      "proof": 76,
+      "result": {
+        "gap_is_not_a_duration": true,
+        "missing_marks_kept_missing": true,
+        "payload_equals_source_values": true,
+        "svg_and_png_from_one_specification": true
+      },
+      "status": "passed",
+      "test": "figures_carry_source_values_and_label_the_measure"
+    },
+    {
+      "assertions": 4,
+      "error": null,
+      "proof": 77,
+      "result": {
+        "every_field_printed": true,
+        "missing_values_explicit": true,
+        "repeated_bytes_equal": true
+      },
+      "status": "passed",
+      "test": "case_briefs_keep_every_selected_field"
+    },
+    {
+      "assertions": 5,
+      "error": null,
+      "proof": 78,
+      "result": {
+        "browser_print_dialog_unverified": true,
+        "embedded_png_decoded_only_from_checked_hash": true,
+        "external_resource_blocked": true,
+        "repeated_sample_bytes_equal": true
+      },
+      "status": "passed",
+      "test": "print_collection_decodes_only_checked_snapshots"
+    },
+    {
+      "assertions": 5,
+      "error": null,
+      "proof": 79,
+      "result": {
+        "dom_checked": true,
+        "entries_checked_against_register": true,
+        "unknown_kind_blocked": true,
+        "wrong_digest_blocked": true
+      },
+      "status": "passed",
+      "test": "catalog_links_match_the_register"
+    },
+    {
+      "assertions": 9,
+      "error": null,
+      "proof": 80,
+      "result": {
+        "native_rendering_outside_python_audit_scope": true,
+        "table_chart_and_formula_outside_the_second_reader": true,
+        "two_readers_disagree_before_normalization": true,
+        "uncomputed_formula_caches_as_zero_reproduced": "openpyxl data_only 0 and calamine 0.0 for =SUM(B2:B4), a total no engine computed"
+      },
+      "status": "passed",
+      "test": "native_workbook_is_checked_by_two_readers"
+    }
+  ],
+  "scope": "Bounded authored handoff fixtures and reproduced library defaults; the original P71-P80 chains and their artifacts were not rerun. The import guard and audit hook are executed here, not described.",
+  "source_sha256": "9809d9d6df911eb5f1326a8ded8d53f7aa039679a8570eeb0c24fcb12ff8751c",
+  "test_cases": 10
+}
