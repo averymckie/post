@@ -22,6 +22,7 @@ from xml.sax.saxutils import escape as xml_escape
 import itertools
 import json
 import sqlite3
+from urllib.parse import urljoin
 from decimal import Decimal, ROUND_HALF_EVEN, ROUND_HALF_UP
 from fractions import Fraction
 
@@ -40,6 +41,7 @@ import jsonschema
 import markdown as python_markdown
 import portion
 import regex
+import rfc3986
 import pydantic
 from lxml import etree as lxml_etree
 from markdown_it import MarkdownIt
@@ -1215,3 +1217,147 @@ def test_pandas_shifts_months_by_the_same_clamping_rule(year, month, months):
     anchor = _month_end(year, month)
     npt.assert_array_equal((pd.Timestamp(anchor) + pd.DateOffset(months=months)).date().isoformat(),
                            (anchor + relativedelta(months=months)).isoformat())
+
+
+# ---------------------------------------------------------------- reachability and reference resolution
+REFERENCE_EDGES = st.lists(st.tuples(st.integers(min_value=0, max_value=6), st.integers(min_value=0, max_value=6)),
+                           min_size=1, max_size=14)
+NODE_NAME = st.integers(min_value=0, max_value=6)
+
+
+def _igraph_of(edges):
+    return igraph.Graph(n=7, edges=list(edges), directed=True)
+
+
+def _networkx_of(edges):
+    graph = nx.DiGraph(edges)
+    graph.add_nodes_from(range(7))
+    return graph
+
+
+@given(REFERENCE_EDGES, NODE_NAME)
+@SLOW
+def test_reachability_agrees_between_networkx_and_igraph_once_the_root_is_added_back(edges, root):
+    """networkx is pure Python and igraph is a C library. Their reachability primitives compute the same set
+    once the root convention is matched, which is the closure P196 builds over a reference graph. Replaces the
+    typed ['ac-1', 'ac-2', 'ac-3'] closure of handoff_guards_v21.py case 196."""
+    npt.assert_array_equal(sorted(nx.descendants(_networkx_of(edges), root) | {root}),
+                           sorted(_igraph_of(edges).subcomponent(root, mode='out')))
+
+
+@given(st.integers(min_value=1, max_value=6))
+@SLOW
+def test_a_root_inside_a_cycle_is_reachable_from_itself_and_networkx_omits_it(ring_size):
+    """Both projects describe the same operation in one line. python-igraph 1.0.0 documents subcomponent with
+    mode="out" as returning "the vertex IDs which are reachable from the given vertex"; networkx 3.6.1
+    documents descendants as "Returns all nodes reachable from `source` in `G`". On a ring, and on a single
+    self-loop, the root is genuinely reachable from itself: igraph returns it and networkx does not, because
+    its implementation collects the children of bfs_edges and its docstring adds, two lines below the summary,
+    that "The `source` node is not a descendant of itself, but can be included manually". A closure taken from
+    a node that participates in a reference cycle is therefore one short, and P196's claim that the closure
+    returns normally over a cycle holds while its count does not."""
+    ring = [(index, (index + 1) % ring_size) for index in range(ring_size)]
+    npt.assert_array_equal(sorted(igraph.Graph(n=ring_size, edges=ring, directed=True).subcomponent(0, mode='out')),
+                           sorted(range(ring_size)))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(sorted(nx.descendants(nx.DiGraph(ring), 0)), sorted(range(ring_size)))
+
+
+@given(REFERENCE_EDGES)
+@SLOW
+def test_strongly_connected_components_agree_between_the_two_graph_libraries(edges):
+    """The cycle test P196 runs separately from the closure. Two implementations of it agree on every
+    generated reference graph, so the cycles the proof reports are not an artefact of one library."""
+    by_networkx = sorted(sorted(component) for component in nx.strongly_connected_components(_networkx_of(edges)))
+    by_igraph = sorted(sorted(component) for component in _igraph_of(edges).connected_components(mode='strong'))
+    npt.assert_equal(by_networkx, by_igraph)
+
+
+URL_ORACLE_JS = pathlib.Path(__file__).with_name('url_resolve_oracle.js')
+node_available = shutil.which('node') is not None
+SAFE_SEGMENT = st.text(alphabet='abcdefghijklmnopqrstuvwxyz0123456789-', min_size=1, max_size=8)
+RELATIVE_PATH = st.lists(st.one_of(SAFE_SEGMENT, st.just('..'), st.just('.')), min_size=1, max_size=4).map('/'.join)
+FRAGMENT = st.one_of(st.just(''), SAFE_SEGMENT.map(lambda segment: '#' + segment))
+UPPERCASE_HOST = st.text(alphabet='ABCDEFGHIJKLMNOPQRSTUVWXYZ', min_size=1, max_size=8)
+BASE_URL = 'https://example.org/cat/base.json'
+
+
+def _rfc3986_resolve(base, reference):
+    return rfc3986.URIReference.from_string(reference).resolve_with(base).unsplit()
+
+
+def _node_resolve(base, reference):
+    completed = subprocess.run(['node', str(URL_ORACLE_JS), base, reference],
+                               capture_output=True, text=True, check=True)
+    return completed.stdout.strip()
+
+
+@pytest.mark.skipif(not node_available, reason='the node runtime is required for this oracle')
+@given(RELATIVE_PATH, FRAGMENT)
+@SLOW
+def test_three_reference_resolvers_agree_on_an_ordinary_relative_reference(path, fragment):
+    """Three implementations of reference resolution: the standard library's urljoin, rfc3986 2.0.0, whose
+    resolve_with implements RFC 3986 section 5 in its own code and whose setup.cfg at tag 2.0.0 declares no
+    install_requires, and the WHATWG URL parser in node v22.22.2 reached through a shim. On references built
+    from ordinary segments, dot segments and a fragment, all three agree. Replaces the typed
+    'https://example.org/cat/profile.json' and 'ac-1' of case 196."""
+    reference = path + fragment
+    by_urljoin = urljoin(BASE_URL, reference)
+    npt.assert_array_equal(by_urljoin, _rfc3986_resolve(BASE_URL, reference))
+    npt.assert_array_equal(by_urljoin, _node_resolve(BASE_URL, reference))
+
+
+@pytest.mark.skipif(not node_available, reason='the node runtime is required for this oracle')
+@given(UPPERCASE_HOST, SAFE_SEGMENT)
+@SLOW
+def test_only_the_standard_library_keeps_the_case_of_the_host(host, segment):
+    """RFC 3986 makes the host case-insensitive, and two of the three resolvers normalise it: rfc3986 calls
+    base_uri.normalize() before resolving and the WHATWG parser lowercases the host as part of parsing.
+    urljoin does neither, so the same reference against the same base produces two strings that are not equal,
+    and a closure that deduplicates resolved references by string keeps both."""
+    base = 'https://%s.org/cat/base.json' % host
+    by_urljoin = urljoin(base, segment)
+    by_rfc3986 = _rfc3986_resolve(base, segment)
+    npt.assert_array_equal(by_rfc3986, _node_resolve(base, segment))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(by_urljoin, by_rfc3986)
+    npt.assert_array_equal(by_urljoin.lower(), by_rfc3986.lower())
+
+
+@pytest.mark.skipif(not node_available, reason='the node runtime is required for this oracle')
+@given(SAFE_SEGMENT, SAFE_SEGMENT)
+@SLOW
+def test_only_the_standard_library_leaves_a_space_unencoded(left, right):
+    """A space inside a reference is percent-encoded by rfc3986 and by the WHATWG parser and passed through
+    literally by urljoin, so the identifier a chain stores for a referenced document depends on the resolver
+    even when every implementation reaches the same document."""
+    reference = '%s %s.json' % (left, right)
+    by_urljoin = urljoin(BASE_URL, reference)
+    by_rfc3986 = _rfc3986_resolve(BASE_URL, reference)
+    npt.assert_array_equal(by_rfc3986, _node_resolve(BASE_URL, reference))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(by_urljoin, by_rfc3986)
+    npt.assert_array_equal(' ' in by_urljoin and '%20' in by_rfc3986, True)
+
+
+@pytest.mark.skipif(not node_available, reason='the node runtime is required for this oracle')
+@given(SAFE_SEGMENT)
+@SLOW
+def test_a_backslash_reference_resolves_three_different_ways(segment):
+    """One reference, three answers, and the third is a different document. urljoin treats the backslash as an
+    ordinary path character and keeps the base directory; rfc3986 percent-encodes it as %5C and also keeps the
+    directory; the WHATWG parser treats a leading backslash as a path separator, so the reference becomes
+    absolute from the root and the base directory disappears. This is the CSV situation again in another
+    place: the resolvers do not agree with each other about what the same bytes mean, and only one of them
+    changes which document is fetched."""
+    reference = '\\%s.json' % segment
+    by_urljoin = urljoin(BASE_URL, reference)
+    by_rfc3986 = _rfc3986_resolve(BASE_URL, reference)
+    by_node = _node_resolve(BASE_URL, reference)
+    for left, right in ((by_urljoin, by_rfc3986), (by_urljoin, by_node), (by_rfc3986, by_node)):
+        with pytest.raises(AssertionError):
+            npt.assert_array_equal(left, right)
+    npt.assert_array_equal([by_urljoin.startswith('https://example.org/cat/'),
+                            by_rfc3986.startswith('https://example.org/cat/'),
+                            by_node.startswith('https://example.org/cat/')],
+                           [True, True, False])

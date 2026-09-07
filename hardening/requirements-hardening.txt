@@ -124,6 +124,7 @@ regex==2026.9.3
 reportlab==5.0.1
 repro-zipfile==0.4.1
 requests==2.34.2
+rfc3986==2.0.0
 rfc8785==0.1.4
 rich==15.0.0
 rpds-py==2026.6.3
