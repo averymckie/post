@@ -9,6 +9,7 @@ Each test names the hand-typed expectation in the frozen guard modules that it r
 """
 import contextlib
 import csv
+import unicodedata
 import datetime
 import io
 import zoneinfo
@@ -31,6 +32,7 @@ import igraph
 import jsonschema
 import markdown as python_markdown
 import portion
+import regex
 import pydantic
 from lxml import etree as lxml_etree
 from markdown_it import MarkdownIt
@@ -769,3 +771,74 @@ def test_both_renderers_wrap_plain_text_identically(word):
     """The divergence is structural, not textual: plain words render the same in both."""
     npt.assert_array_equal(MARKDOWN_IT.render(word).strip(), python_markdown.markdown(word).strip())
     npt.assert_array_equal(python_markdown.markdown(word).strip(), '<p>%s</p>' % word)
+
+
+# ---------------------------------------------------------------- unicode offsets and forms
+MULTI_CODEPOINT_GRAPHEMES = ['नि', '\U0001F44D\U0001F3FD', 'é', 'á̧']
+COMPATIBILITY_CHARS = ['ﬁ', 'Ⅻ', '½', '①']
+
+
+@given(st.sampled_from(MULTI_CODEPOINT_GRAPHEMES))
+@SLOW
+def test_a_grapheme_is_not_a_code_point_and_normalisation_does_not_close_the_gap(text):
+    """regex implements UAX#29 grapheme clustering; unicodedata implements normalisation. They are separate
+    libraries answering separate questions. Each of these is one grapheme and more than one code point, and
+    NFC does not reduce the Devanagari or emoji cases at all, so a span expressed in code points can split a
+    cluster that normalisation will never merge. P195's contract tags offsets as bytes or code points and
+    names no third space; this is that third space."""
+    graphemes = regex.findall(r'\X', text)
+    npt.assert_array_equal(len(graphemes), 1)
+    npt.assert_array_equal(len(text) > 1, True)
+    npt.assert_array_equal(len(regex.findall(r'\X', unicodedata.normalize('NFC', text))), 1)
+
+
+@given(st.sampled_from(['नि', '\U0001F44D\U0001F3FD']))
+@SLOW
+def test_normalisation_leaves_these_clusters_at_their_original_length(text):
+    """For the Devanagari consonant-plus-vowel and the emoji-plus-modifier, NFC changes nothing, so the
+    grapheme remains longer than one code point after normalisation. Grapheme safety is a separate obligation
+    from normalisation, not a consequence of it."""
+    npt.assert_array_equal(unicodedata.normalize('NFC', text), text)
+    npt.assert_array_equal(len(text), 2)
+    npt.assert_array_equal(len(regex.findall(r'\X', text)), 1)
+
+
+@given(st.sampled_from(COMPATIBILITY_CHARS))
+@SLOW
+def test_the_compatibility_form_changes_text_the_canonical_form_leaves_alone(char):
+    """NFC leaves each of these single characters alone and NFKC replaces every one of them. A normalisation
+    policy that does not pin the form is not a policy."""
+    npt.assert_array_equal(unicodedata.normalize('NFC', char), char)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(unicodedata.normalize('NFKC', char), char)
+
+
+@given(st.sampled_from(['\ufb01', '\u216b', '\u00bd']))
+@SLOW
+def test_compatibility_expansion_lengthens_the_text(char):
+    """The fi ligature becomes two letters, Roman numeral twelve becomes three, one half becomes three, so
+    every offset after them moves."""
+    npt.assert_array_equal(len(unicodedata.normalize('NFKC', char)) > len(char), True)
+
+
+@given(st.sampled_from(['\u2460', '\u2461', '\u2462']))
+@SLOW
+def test_compatibility_substitution_can_preserve_length_while_changing_the_character(char):
+    """A circled digit becomes a plain digit: one character in, one character out. The length is unchanged, so
+    an offset map built before normalisation still validates afterwards while the text underneath it is a
+    different character. A span map checked only by length cannot detect this substitution."""
+    expanded = unicodedata.normalize('NFKC', char)
+    npt.assert_array_equal(len(expanded), len(char))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(expanded, char)
+    npt.assert_array_equal(expanded.isdigit(), True)
+
+
+@given(st.sampled_from(['Café', '́', 'á']))
+@SLOW
+def test_decomposed_text_shortens_under_the_canonical_form(text):
+    """The case P195 records: the decomposed spelling loses code points under NFC, so a raw offset does not
+    index the normalised text. Both libraries agree that the result is shorter or equal."""
+    normalised = unicodedata.normalize('NFC', text)
+    npt.assert_array_equal(len(normalised) <= len(text), True)
+    npt.assert_array_equal(len(regex.findall(r'\X', normalised)), len(regex.findall(r'\X', text)))
