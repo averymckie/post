@@ -9,6 +9,9 @@ Each test names the hand-typed expectation in the frozen guard modules that it r
 """
 import contextlib
 import csv
+import pathlib
+import shutil
+import subprocess
 import unicodedata
 import datetime
 import io
@@ -842,3 +845,57 @@ def test_decomposed_text_shortens_under_the_canonical_form(text):
     normalised = unicodedata.normalize('NFC', text)
     npt.assert_array_equal(len(normalised) <= len(text), True)
     npt.assert_array_equal(len(regex.findall(r'\X', normalised)), len(regex.findall(r'\X', text)))
+
+
+# ---------------------------------------------------------------- recurrence, cross-runtime oracle
+PHP_RRULE_ORACLE = pathlib.Path(__file__).with_name('rrule_oracle.php')
+PHP_RRULE_SOURCE = pathlib.Path('/home/user/rlanvin/php-rrule/src/RRule.php')
+php_available = shutil.which('php') is not None and PHP_RRULE_SOURCE.exists()
+
+
+def _php_occurrences(rule, start):
+    completed = subprocess.run(['php', str(PHP_RRULE_ORACLE), rule, start.isoformat()],
+                               capture_output=True, text=True, check=True)
+    return [line for line in completed.stdout.split('\n') if line]
+
+
+def _dateutil_occurrences(freq, start, count, **kwargs):
+    return [moment.date().isoformat() for moment in
+            rrule.rrule(freq, dtstart=datetime.datetime(start.year, start.month, start.day), count=count, **kwargs)]
+
+
+@pytest.mark.skipif(not php_available, reason='php and a php-rrule checkout are required for this oracle')
+@given(st.integers(min_value=1, max_value=28), st.integers(min_value=1, max_value=12))
+@SLOW
+def test_monthly_recurrence_agrees_with_the_php_port_on_ordinary_days(day, count):
+    """php-rrule runs in a different runtime and language. It documents itself as having started as a port
+    of python-dateutil, so agreement corroborates the dateutil lineage rather than an independent reading of
+    RFC 5545; that is stated rather than glossed. On days 1 to 28 every month has the day."""
+    start = datetime.date(2026, 1, day)
+    npt.assert_array_equal(_php_occurrences('FREQ=MONTHLY;BYMONTHDAY=%d;COUNT=%d' % (day, count), start),
+                           _dateutil_occurrences(rrule.MONTHLY, start, count, bymonthday=day))
+
+
+@pytest.mark.skipif(not php_available, reason='php and a php-rrule checkout are required for this oracle')
+@given(st.integers(min_value=1, max_value=12))
+@SLOW
+def test_the_php_port_skips_the_same_short_months_on_day_31(count):
+    """Both implementations omit every month without a 31st and both reach the same eighth occurrence in the
+    following January. The P182 finding therefore holds in two runtimes; whether it is what the standard
+    requires is a question about RFC 5545 section 3.3.10, recorded in the register."""
+    start = datetime.date(2026, 1, 31)
+    by_php = _php_occurrences('FREQ=MONTHLY;BYMONTHDAY=31;COUNT=%d' % count, start)
+    by_dateutil = _dateutil_occurrences(rrule.MONTHLY, start, count, bymonthday=31)
+    npt.assert_array_equal(by_php, by_dateutil)
+    npt.assert_array_equal(all(item.endswith('-31') for item in by_php), True)
+    npt.assert_array_equal(any(item[5:7] == '02' for item in by_php), False)
+
+
+@pytest.mark.skipif(not php_available, reason='php and a php-rrule checkout are required for this oracle')
+@given(st.integers(min_value=1, max_value=12))
+@SLOW
+def test_the_php_port_agrees_on_the_month_end_rule(count):
+    """BYMONTHDAY=-1 selects the last day of each month in both, including 2026-02-28."""
+    start = datetime.date(2026, 1, 31)
+    npt.assert_array_equal(_php_occurrences('FREQ=MONTHLY;BYMONTHDAY=-1;COUNT=%d' % count, start),
+                           _dateutil_occurrences(rrule.MONTHLY, start, count, bymonthday=-1))

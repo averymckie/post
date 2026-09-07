@@ -60,3 +60,5 @@ npm install jsdom && ./venv/bin/python handoff_guards_v8.py --report guards-v8.j
 ```
 
 Case 26 of v3 uses the WordNet 3.0 corpus when `NLTK_DATA` points at a directory holding `corpora/wordnet.zip` (SHA256 `cbda5ea6eef7f36a97a43d4a75f85e07fccbb4f23657d27b4ccbc93e2646ab59`, 10775600 bytes, obtained once with `nltk.download('wordnet', download_dir=...)`). Without it the case still passes and records `not installed; no lexical expansion executed`. The guard runs themselves make no network call.
+
+Cross-runtime oracle for recurrence: `rrule_oracle.php` expands an RRULE with php-rrule (https://github.com/rlanvin/php-rrule, commit 93a083db12dcb6f58e4840392a22e158ce96f1ff, cloned to /home/user/rlanvin/php-rrule) under PHP 8.4.19. php-rrule documents itself as having started as a port of python-dateutil, so its agreement corroborates the dateutil lineage in a second runtime rather than an independent reading of RFC 5545; the tests say so. The three recurrence tests in `test_library_defaults.py` skip cleanly when php or the checkout is absent.
