@@ -1,0 +1,164 @@
+{
+  "assertions": 173,
+  "business_actions": 0,
+  "dependency_sha256": {
+    "handoff_guards_v1.py": "2b3138b692ecfd02b76ae34bdb001f5046608bb2983d8709d6c55c0765f7c9b8"
+  },
+  "failed": 0,
+  "full_chains_executed": 0,
+  "library_versions": {
+    "PyMuPDF": "1.28.2",
+    "apportionment": "1.0",
+    "largest-remainder": "0.1.0",
+    "numpy": "2.4.6",
+    "odfpy": "1.4.1",
+    "openpyxl": "3.1.5",
+    "pandas": "2.2.3",
+    "pandera": "0.33.1",
+    "python-pptx": "1.0.2",
+    "rapidfuzz": "3.14.6"
+  },
+  "network_calls": 0,
+  "passed": 10,
+  "results": [
+    {
+      "assertions": 15,
+      "error": null,
+      "proof": 161,
+      "result": {
+        "absent_classification_is_dropped_not_zeroed": true,
+        "coverage_is_a_schema_and_an_index_operation": true,
+        "duplicate_unknown_and_missing_are_named_separately": true,
+        "fill_value_fabricates_a_measurement": true
+      },
+      "status": "passed",
+      "test": "a_schema_names_the_identifier_a_set_comparison_would_hide"
+    },
+    {
+      "assertions": 15,
+      "error": null,
+      "proof": 162,
+      "result": {
+        "has_notes_slide_is_the_non_mutating_test": true,
+        "notes_slide_property_mutates_the_package": true,
+        "notes_text_joins_paragraphs_with_a_newline": true,
+        "parts_added_by_a_read": 5,
+        "shape_text_raises_on_a_picture": true
+      },
+      "status": "passed",
+      "test": "reading_the_notes_property_creates_the_notes"
+    },
+    {
+      "assertions": 23,
+      "error": null,
+      "proof": 163,
+      "result": {
+        "exact_comparison_is_the_only_filter": true,
+        "search_for_is_ascii_case_insensitive": true,
+        "search_for_matches_across_a_line_break": true,
+        "set_info_persists_without_update": true,
+        "textbox_of_a_hit_crosses_lines": true
+      },
+      "status": "passed",
+      "test": "a_matched_rectangle_is_not_the_matched_phrase"
+    },
+    {
+      "assertions": 17,
+      "error": null,
+      "proof": 164,
+      "result": {
+        "cutoff_meaning_flips_with_the_scorer": true,
+        "default_limit_truncates_ties": true,
+        "processor_default_is_none": true,
+        "ties_dropped": 6,
+        "transposition_needs_the_damerau_metric": true,
+        "uppercase_query_returns_nothing": true
+      },
+      "status": "passed",
+      "test": "the_default_limit_drops_the_ties_the_chain_promises"
+    },
+    {
+      "assertions": 14,
+      "error": null,
+      "proof": 165,
+      "result": {
+        "flat_paragraph_list_includes_table_cells": true,
+        "paragraph_counts_disagree": true,
+        "table_extraction_welds_cells": true,
+        "whitespace_elements_are_expanded": true
+      },
+      "status": "passed",
+      "test": "a_flat_paragraph_list_is_not_the_document_body"
+    },
+    {
+      "assertions": 14,
+      "error": null,
+      "proof": 166,
+      "result": {
+        "attribute_edit_leaves_display_text_stale": true,
+        "cached_formula_result_stays_stale": true,
+        "formula_text_survives_the_edit": true,
+        "recalculation_is_load_bearing": true
+      },
+      "status": "passed",
+      "test": "the_typed_value_moves_and_the_displayed_text_does_not"
+    },
+    {
+      "assertions": 17,
+      "error": null,
+      "proof": 167,
+      "result": {
+        "cached_amounts_are_floats": true,
+        "embedded_workbook_drops_trailing_cents": true,
+        "replace_data_rebuilds_the_workbook": true,
+        "severed_workbook_fails_with_a_bare_assert": true,
+        "unknown_value_survives_as_none": true
+      },
+      "status": "passed",
+      "test": "a_currency_amount_becomes_a_float_and_the_workbook_can_be_severed"
+    },
+    {
+      "assertions": 18,
+      "error": null,
+      "proof": 168,
+      "result": {
+        "counter_finds_the_reused_receipt": true,
+        "decimal_times_float_raises": true,
+        "float_and_string_paths_agree_at_this_magnitude": true,
+        "json_admits_nan_and_infinity": true,
+        "json_numbers_arrive_as_floats": true
+      },
+      "status": "passed",
+      "test": "a_rate_that_survives_json_is_no_longer_the_declared_rate"
+    },
+    {
+      "assertions": 16,
+      "error": null,
+      "proof": 169,
+      "result": {
+        "apportionment_loses_a_cent_on_a_credit": true,
+        "credit_pool_has_no_conserving_primitive": true,
+        "largest_remainder_refuses_a_negative_total": true,
+        "missing_weight_holds_the_pool": true
+      },
+      "status": "passed",
+      "test": "no_researched_primitive_conserves_the_credit_pool"
+    },
+    {
+      "assertions": 24,
+      "error": null,
+      "proof": 170,
+      "result": {
+        "ceiling_and_up_disagree_on_negatives": true,
+        "float_step_drops_the_endpoint": true,
+        "negative_contribution_yields_a_negative_volume": true,
+        "zero_and_undetermined_raise_different_exceptions": true
+      },
+      "status": "passed",
+      "test": "two_exceptions_mean_no_break_even_and_a_negative_one_means_nothing"
+    }
+  ],
+  "scope": "Bounded authored cash-flow, presentation, PDF, lexical, OpenDocument, chart, expense, allocation and break-even fixtures and reproduced library defaults; the original P161-P170 chains and their artifacts were not rerun.",
+  "source_sha256": "5a8a0eef367e79b7eb7d92f3593cef61bf47d007bd1bcfda4d6355c7d4592b67",
+  "test_cases": 10
+}

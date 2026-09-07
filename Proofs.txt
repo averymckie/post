@@ -27604,3 +27604,1046 @@ Result file SHA256 fcb74b752c636b49725197aa092969048fe2b37891c678e5ebc9b2cfe6558
 ```
 
 Glue elimination coverage: 17 handwritten functions in handoff_guards_v15-v17 superseded by researched library primitives; 160 of 300 proofs carry a hardening record. Prior cumulative TXT SHA256 6a1fccf75acf2dc16bc47d136c570b352431cad8412e57bc7a361da1b9212f8b.
+
+## Checkpoint integrity and environment for this batch
+
+Base: the TXT as committed after the glue elimination (SHA256 59a86dfcae9fc85001ab8a6d037b6b125f5c72ea945593d209431bfc13e02eb1, 1889886 bytes); it is the prior cumulative TXT SHA256 recorded at the end of this batch. Environment as in the glue-elimination section plus odfpy 1.4.1; pandera 0.33.1, largest-remainder 0.1.0, apportionment 1.0, pandas 2.2.3, numpy 2.4.6, PyMuPDF 1.28.2, python-pptx 1.0.2, openpyxl 3.1.5 and rapidfuzz 3.14.6 as already recorded. handoff_guards_v17.py imports handoff_guards_v1.py only; v1-v16 and v18 stay byte-identical under HG07.
+
+Note on method: this module carries no handwritten implementation of an operation a library performs. Coverage and uniqueness are pandera schema constraints with a pandas Index operation for the two-way gap, the lexical lookup is rapidfuzz alone reading the distance the call returns, and the cent apportionment is the two researched largest-remainder libraries. The earlier draft of this batch contained four handwritten functions for those jobs; they were removed before this section was written, and the glue-elimination section above records the general case.
+
+Note on versions: the P161-P170 chains pin PyMuPDF 1.26.6 and Python 3.12.13, and pin python-pptx 1.0.2, odfpy 1.4.1, openpyxl 3.1.5, pandas 2.2.3 and rapidfuzz 3.14.3, which the guards run on or within one patch of. Where a finding rests on PyMuPDF it is a reproduction on a nearby version; the versions actually executed are in guards-v17.json.
+
+## Online-checked function references for this hardening batch
+[HD154] python-pptx Slide.notes_slide is a lazily creating property: reading it, which is the natural way to ask whether a slide carries notes, adds five parts to the package (the notes slide and its relationships, a notes master and its relationships, and a second theme) and changes the saved file's digest. Slide.has_notes_slide is the non-mutating test and adds nothing. Shape.text raises AttributeError on a shape with no text frame, such as a picture, and Shape.has_text_frame is the guard. TextFrame.text joins the frame's paragraphs with a newline, so a two-paragraph note and a one-paragraph note containing a newline read back identically. Executed with python-pptx 1.0.2. Source: installed python-pptx 1.0.2 and GitHub; python-pptx.readthedocs.io blocked.
+https://github.com/scanny/python-pptx
+[HD155] PyMuPDF Page.search_for is ASCII case-insensitive by default, so a lowercase query matches a capitalised line, and it matches a phrase that spans a line break, returning one rectangle per line of the match. Each returned rectangle is a bounding box, and Page.get_textbox on it returns everything the box intersects, which for a wrapped phrase includes text from the adjacent line and clips words: a two-line phrase returned "jumps over\nletely." for its first rectangle. An exact comparison between the query and the recovered characters is therefore the only filter that establishes what was matched. Annot.set_info persists content and title in the saved file whether or not Annot.update is called afterwards. Executed with PyMuPDF 1.28.2. Source: installed PyMuPDF 1.28.2 and GitHub; pymupdf.readthedocs.io blocked.
+https://github.com/pymupdf/PyMuPDF
+[HD156] rapidfuzz process.extract defaults to limit=5 and silently truncates the result to the five best matches, so tied candidates within a declared distance bound are dropped without any signal: on eleven candidates within two edits the default returned five and discarded six, one of which was a real source word. limit=None returns them all. The processor argument defaults to None, so there is no case folding and an uppercase query against a case-folded index returns nothing at all, the DamerauLevenshtein distance between MEMBERS and members being 7. score_cutoff reverses meaning with the scorer: it is a maximum for a distance scorer and a minimum for a similarity scorer, so the same value of 1 selects one word under DamerauLevenshtein.distance and every word in the list under DamerauLevenshtein.similarity. Executed with rapidfuzz 3.14.6. Source: installed rapidfuzz 3.14.6 and GitHub.
+https://github.com/rapidfuzz/RapidFuzz
+[HD157] odfpy getElementsByType(text.P) returns a flat list of every paragraph in the document including those inside table cells, so a body-paragraph comparison against a Word document's own paragraph sequence counts more elements than the body holds and shifts position from the first table onward; walking the top-level children of the body separates paragraphs from tables. teletype.extractText applied to a table concatenates its cell values with no separator, so two cells reading "cell A" and "cell B" extract as "cell Acell B" and are not distinguishable from a single cell holding that string. The same function does expand text:s to its declared space count, text:tab to a tab and text:line-break to a newline. Executed with odfpy 1.4.1. Source: installed odfpy 1.4.1 and GitHub.
+https://github.com/eea/odfpy
+[HD158] An OpenDocument spreadsheet cell carries its typed value and its displayed text as separate children, so writing office:date-value through odfpy's setAttrNS updates the value and leaves the cell's text:p paragraph reading the old date: two readers of one cell then disagree, a value reader seeing the edit and a text reader seeing what was there before. A dependent formula cell keeps its table:formula intact and its cached office:value stale, so the edit is invisible in every computed result until the document is recalculated. Executed with odfpy 1.4.1. Source: installed odfpy 1.4.1 and GitHub; help.libreoffice.org used only for the filter names already recorded in the chain.
+https://github.com/eea/odfpy
+[HD159] A currency amount does not survive a python-pptx chart as a decimal. The chart's cached series values are Python floats, and the embedded workbook stores 2130.00 as the integer 2130, 85.00 as 85 and 0.00 as 0, so the stored form has lost the cents even though the value compares equal. Chart.replace_data rebuilds the embedded workbook from the categories and values handed to it and reproduces the same cells. A None in a series survives as None in both the cached values and the embedded workbook cell rather than becoming zero. Severing the chart's embedded workbook part makes Presentation.save fail on a bare assert in pptx.opc.package with an empty message, and under python -O, where asserts are stripped, the same case fails as AttributeError on NoneType. Executed with python-pptx 1.0.2 and openpyxl 3.1.5. Source: installed python-pptx 1.0.2 and GitHub.
+https://github.com/scanny/python-pptx
+[HD160] json.loads parses a bare decimal literal into a float, so a currency rate read from a JSON fixture is a float and Decimal refuses to multiply by it at all, raising TypeError; routing it through Decimal(str(rate)) restores the declared value while Decimal(rate) preserves the binary expansion instead. json.loads also accepts the non-standard literals NaN and Infinity by default and returns float nan and inf for them, so a nonfinite rate enters as a number unless parse_constant rejects it. A rate carried as a JSON string keeps its declared precision exactly. Executed with Python 3.11.15. Source: installed CPython 3.11.15 Lib/json and GitHub; docs.python.org blocked.
+https://github.com/python/cpython
+[HD161] Decimal signals a zero denominator with two different exceptions: a nonzero dividend over zero raises DivisionByZero, and zero over zero raises InvalidOperation, so a single except DivisionByZero misses the zero-fixed-cost case. to_integral_value with ROUND_CEILING and with ROUND_UP agree on positive quotients and disagree on negative ones, -65.9 giving -65 and -66 respectively, because ROUND_UP moves away from zero rather than toward positive infinity. A negative contribution therefore yields a negative required volume with no error at all. numpy.arange with an integer step over a declared inclusive range enumerates it exactly, while a float step is exclusive of the stop and drifts: arange(0, 1, 0.1) has ten elements ending at 0.9 and does not contain 0.7. Executed with Python 3.11.15 and numpy 2.4.6. Source: installed CPython 3.11.15 and numpy 2.4.6, and GitHub; numpy.org blocked.
+https://github.com/numpy/numpy
+
+## Hardening batch: P161-P170
+
+### HARDENING P161 -- A set comparison cannot name what it hid
+
+Original proof: P161  prior journal and declared cash classifications -> statement of cash flows
+Source location: frozen master lines 6382-6419; original section SHA256 08d45fda2dee3e32e6763d26d87ac9b61fd3812fbde55bd22f479dae804d02bb.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it. The chain requires "one explicit classification for every prior journal transaction" through exact ID coverage. Membership comparison satisfies that wording while admitting a second classification for one transaction, which then contributes twice to its statement line. Separately, pandas groupby returns only the classifications that occur, so a cash-flow category with no transaction is absent from the statement rather than reported as zero.
+Handoff: prior journal transactions and declared classifications -> classified cash movements -> statement lines
+Failure path: A duplicate classification leaves every internal check consistent. The statement lines still sum to the classified total, every line still resolves to journal pointers, and only a comparison against the journal's own transaction count exposes the extra contribution. Four authored transactions with one doubled produce an operating line of 300.00 USD against a journal total of 400.00 USD, and nothing in the statement contradicts itself. The absent-category case fails in the other direction: an investing line that never appears cannot be reconciled to zero, and filling it with a zero makes an unclassified category look measured.
+Required repair: Validate the classification frame against a schema that declares the journal identifiers as the permitted set and the identifier column as unique, and take the two-way gap from an index operation rather than a membership test; then reindex the grouped totals onto the declared classification list so an absent category is a null, not a fill value and not an omission.
+Function bridge: pandera.DataFrameSchema with Check.isin over the declared journal identifiers and unique=True; pandas.Index.symmetric_difference for the coverage gap; pandas.DataFrame.groupby with reindex onto the declared classifications
+Positive acceptance: The exactly covering frame validates and returns four rows; the symmetric difference of the declared identifiers against themselves is empty; reindexing restores the declared statement order.
+Adverse acceptance: The doubled classification is rejected and the message names J02 and field_uniqueness; an unknown journal identifier is rejected and the message names J99; a missing classification passes the schema and is named by the index gap as J04, so all three failures are separated and attributed; the unchecked frame produces the 300.00 USD operating line; a fill value of zero and a null are distinguished; an unknown completion mode is Blocked.
+Evidence and limit: guards-v17 case 161 on four authored journal identifiers and two authored statement frames. The recorded 18 postings from P155, the 2,074.75 USD operating figure and the 11,574.75 USD closing cash were not rerun.
+References: HD150
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P162 -- Asking whether the slide has notes creates the notes
+
+Original proof: P162  existing slide text -> native PowerPoint notes -> speaking copies
+Source location: frozen master lines 6420-6468; original section SHA256 0e72961591d1a38ff03dd020845f5495bea1bb6cf6e2348c690d137984ffdb1a.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: python-pptx Slide.notes_slide is a lazily creating property. Reading it on a deck that has no notes adds five parts, a notes slide and its relationships, a notes master and its relationships, and a second theme, and changes the saved package. Slide.has_notes_slide answers the same question and adds nothing.
+Handoff: recovered historical slide -> preserved and appended native notes -> saved PPTX and speaking copies
+Failure path: The chain's contract is to preserve existing notes and to leave the recovered slide untouched. An inspection pass written to find which slides already carry notes will, by reading the property, create a notes slide on every slide that did not have one, and the deck it then saves is not the deck it read. The recorded claim that 26 existing slide, layout, master, theme and media parts remain byte-identical is compatible with this: the existing parts are untouched, and the deck has silently gained a notes master and a second theme alongside them. Nothing raises, and the slide renders unchanged.
+Required repair: Test for notes with has_notes_slide and read notes_slide only on slides that have one or that are being given one deliberately; compare the saved package's part list against the source part list and account for every addition, not only for the parts that stayed identical; guard shape text access with has_text_frame; and record the note paragraph count separately, since the joined text cannot carry it.
+Function bridge: pptx.slide.Slide.has_notes_slide as the presence test; pptx.slide.Slide.notes_slide only on a deliberate write; pptx.shapes.base.BaseShape.has_text_frame as the text guard; zipfile.ZipFile.namelist for the part-level comparison
+Positive acceptance: The guarded test adds no parts; the guarded shape walk returns the title and the two-paragraph text box; the literal A & B < 5 > 2 survives python-pptx into the saved notes unchanged; every part the deck already had is still present after the write.
+Adverse acceptance: Reading notes_slide adds exactly five parts including a notes slide, a notes master and theme2.xml, and changes the package digest (reproduced); an unguarded shape walk raises AttributeError on the picture; the notes text joins two paragraphs with one newline, so the paragraph count is not recoverable from the text alone; an unknown probe mode is Blocked.
+Evidence and limit: guards-v17 case 162 on one authored three-shape slide. The recorded P18 deck, its nine text shapes and 17 source paragraphs, and the WeasyPrint speaking copies were not rerun.
+References: HD154
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P163 -- The rectangle is not the phrase
+
+Original proof: P163  literal PDF passages -> native highlights -> source-linked reading notes
+Source location: frozen master lines 6469-6518; original section SHA256 bc11a2bda3056a5a7fcc4e30dcb4152fd4b730cbc5495e7779bb69693b4e443f.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: Page.search_for returns bounding rectangles, and Page.get_textbox on one of them returns everything the rectangle intersects. For a phrase that wraps, the search returns one rectangle per line and the first rectangle's recovered text contains a fragment of the line below and a clipped word: "jumps over\nletely." for a phrase whose first line is "jumps over". The search is also ASCII case-insensitive by default and matches across the line break, neither of which the chain's single-line contract asks for.
+Handoff: declared passage text -> located page rectangle -> native highlight and recovered quote
+Failure path: The chain verifies "exact recovered characters" at the located rectangle. Compared against the query the check fails for a wrapped phrase, and compared against the rectangle's own textbox it passes trivially, because both sides are then the same call. A highlight attached to the first rectangle covers part of the passage and part of the next line, and the annotation saved from it carries coordinates that are correct for the rectangle and wrong for the phrase. The case-insensitive default separately means a query matches a differently capitalised line, which the record already constrains with an explicit comparison.
+Required repair: Compare the recovered characters to the declared query by equality and reject the match when they differ, rather than treating any returned rectangle as the passage; require the search to return exactly one rectangle for a single-line contract and Blocked when it returns more; and attach the highlight only to a rectangle that passed the equality test.
+Function bridge: pymupdf.Page.search_for with an explicit hit-count contract; pymupdf.Page.get_textbox compared by equality to the declared query; pymupdf.Page.add_highlight_annot on the filtered rectangle; pymupdf.Annot.set_info and Page.annots for readback
+Positive acceptance: The two case variants both match and their recovered characters differ, so the equality filter keeps exactly one; an absent phrase returns no rectangles; the saved annotation carries its content, title, four vertices and Highlight type.
+Adverse acceptance: The lowercase query matches the capitalised line (reproduced); the wrapped phrase returns two rectangles and the first recovers "jumps over\nletely.", which is neither the phrase nor a line, so the equality filter rejects the whole match (reproduced); search_for returns Rect and quads=True returns Quad; set_info persists with and without a following update() call, so update is not what makes the comment durable; a phrase that is not present is Blocked before any annotation is attached.
+Evidence and limit: guards-v17 case 163 on one authored four-line page. The recorded P151 meeting PDF, its three passages and the Markdown, HTML and PDF reading copies were not rerun.
+References: HD155
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P164 -- The default limit drops the ties the chain promises to retain
+
+Original proof: P164  misspelled source-word queries -> deterministic edit-distance lookup -> literal source spans
+Source location: frozen master lines 6519-6556; original section SHA256 6a692ae74c5268e9220bc50adc0a8823c48b0554fe35929ce3440c0039f66508.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: rapidfuzz process.extract defaults to limit=5 and truncates silently, so on eleven candidates within the declared bound it returns five and discards six, one of them a real source word. The processor argument defaults to None, so an uppercase query against a case-folded index returns nothing at all. And score_cutoff reverses meaning with the scorer, selecting one word under a distance scorer and every word in the list under a similarity scorer at the same numeric value.
+Handoff: misspelled query -> candidates within one declared edit -> literal source spans
+Failure path: The chain's stated property is that every word within the declared one-edit bound is retained, including tied alternatives, and that the chain makes no replacement decision. The default limit breaks exactly that property, and it breaks it by dropping candidates rather than by adding them, so the result still looks like a correct answer with fewer ties. The uppercase case fails more quietly still: an empty result reads as "this word does not appear in the sources" rather than as a missing processor. Both are configuration, and both are the library's default.
+Required repair: Pass limit=None at every extraction and assert the returned count against an independently declared bound on the candidate set; pass the processor explicitly and record that it is case folding; and pin the scorer together with the cutoff, since the same cutoff value means opposite things across the two scorer families.
+Function bridge: rapidfuzz.process.extract with limit=None, an explicit processor and a distance scorer; rapidfuzz.distance.DamerauLevenshtein.distance as the declared metric; the returned score read directly rather than recomputed
+Positive acceptance: The transposed query resolves to its single one-edit source word; the case-folded uppercase query returns the plural at distance 0 and the singular at distance 1; a query with no source word within one edit returns an empty list.
+Adverse acceptance: The default limit returns five of eleven candidates and drops six including a real source word (reproduced); the uppercase query without a processor returns nothing, the distance between the two spellings being 7 (reproduced); the same cutoff of 1 on the similarity scorer returns every word in the list, including words sharing no prefix with the query (reproduced); a plain Levenshtein scorer misses the transposition the chain's headline example depends on.
+Evidence and limit: guards-v17 case 164 on seven authored words, eight authored tie candidates and four authored queries. The recorded 3,912 token spans, 877 distinct words and ten HTML anchors were not rerun. The distance for each retained candidate is read from the extraction result; no second enumeration is performed, because a second pass over the same metric from the same library corroborates nothing.
+References: HD156
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P165 -- A flat paragraph list is not the document body
+
+Original proof: P165  existing Word collection -> native ODT conversion -> editable document reuse
+Source location: frozen master lines 6557-6621; original section SHA256 01ca31f5ee86748119f5f756c38aed52723e8e0ce4b332a1a4f32f35217aaff8.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: odfpy getElementsByType(text.P) returns every paragraph in the document, including the paragraphs inside table cells, so a four-paragraph body containing one two-cell table yields six elements. teletype.extractText applied to the table concatenates its cells with no separator, producing "cell Acell B".
+Handoff: Word body paragraphs and table cells -> converted ODT blocks -> order and cell comparison
+Failure path: The chain compares main-body paragraph order and every table cell against the Word input, and python-docx iter_inner_content yields paragraphs and tables as distinct items in document order. Compared against a flat ODT paragraph list the two sequences have different lengths, and a positional comparison shifts by the number of cells from the first table onward, so every paragraph after the table is compared against the wrong source. The welded table extraction fails in the other direction: two adjacent cells and one cell holding both values extract identically, so a lost cell boundary is invisible.
+Required repair: Walk the top-level children of the ODT body and treat a paragraph and a table as different kinds of block, matching python-docx's own document-order split; extract table cells individually through the cell elements rather than extracting the table as one string; and compare block kinds as well as block text.
+Function bridge: odf.opendocument.load with a top-level body walk; odf.teletype.extractText applied per cell through odf.table.TableCell; docx.Document.iter_inner_content as the corresponding Word-side split
+Positive acceptance: The body walk returns five blocks, four paragraphs and one table, against the flat list's six; the per-cell extraction returns the two cells separately; text:s expands to its declared three spaces, text:tab to a tab and text:line-break to a newline within one paragraph.
+Adverse acceptance: The flat list's last two entries are the table cells and are indistinguishable there from body paragraphs (reproduced); the table extracts as "cell Acell B", which equals the concatenation of the two cells and so cannot be told apart from a single welded cell (reproduced); the flat and body counts differ, so a positional comparison is misaligned from the table onward; an unknown scope is Blocked.
+Evidence and limit: guards-v17 case 165 on one authored ODT with four body paragraphs and one two-cell table. The recorded ten conversions, 295 checked body values and the LibreOffice renders were not rerun.
+References: HD157
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P166 -- The typed value moves and the displayed text does not
+
+Original proof: P166  existing Gantt workbook -> native ODS -> date edit and formula recalculation
+Source location: frozen master lines 6622-6663; original section SHA256 9c81779b1ef2e574ea89200af96e72c4915b2bad8c2780f781155f53f172f12b.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP, and it confirms why the chain's recalculation step is load bearing. An ODF cell holds its typed value and its displayed paragraph as separate children. Writing office:date-value through setAttrNS moves the value and leaves the text reading the old date, so two readers of one cell disagree; the dependent formula cell keeps its formula and its stale cached result.
+Handoff: converted ODS -> native date-cell edit -> recalculated formula and chart values
+Failure path: A checker that reads displayed text reports the edit as not applied; a checker that reads the typed value reports it as applied; both are reading the same cell in the same file. The dependent elapsed-day formula still caches its old result, so any downstream comparison against the chart or against an independently computed duration reads the pre-edit number while the source date reads the post-edit one. The document is internally inconsistent and nothing in it is malformed.
+Required repair: Treat a cell as edited only when the typed value and the displayed paragraph are both written, or force recalculation before any readback and re-read both; assert the two views agree before comparing anything downstream; and never compare a cached formula result to an independently computed value without establishing that recalculation has run.
+Function bridge: odf.opendocument.load with per-cell reads of office:value, office:date-value, table:formula and the cell paragraph; the chain's existing LibreOffice recalculation with ODFRecalcMode=0 as the step that reconciles them
+Positive acceptance: Before the edit the typed date and the displayed text agree, and the formula cell's cached value and text agree; no other cell moves; the source document is unchanged by the edit.
+Adverse acceptance: After the attribute edit the typed date reads 2014-08-01 and the displayed text still reads 2014-07-31, so the two views of one cell disagree (reproduced); the dependent formula survives intact while its cached result stays at the pre-edit number (reproduced); the edited document's digest differs from the source.
+Evidence and limit: guards-v17 case 166 on one authored three-cell ODS row. The recorded 404 cells, 91 native dates, the embedded stacked-bar chart and the 766-to-767 day change were not rerun.
+References: HD158
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P167 -- The amount is a float by the time it reaches the slide
+
+Original proof: P167  prior cost report -> executive PowerPoint -> native ODP and editable round trip
+Source location: frozen master lines 6664-6704; original section SHA256 a69ff96b257d8382e9e6a830662824a0298fddda12d957f6b757ed58d29dbae9.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: a currency amount does not survive a python-pptx chart as a decimal. The cached series values are floats and the embedded workbook stores 2130.00 as the integer 2130, 85.00 as 85 and 0.00 as 0. Severing the embedded workbook makes Presentation.save fail on a bare assert carrying an empty message, and under python -O the same case fails as AttributeError on NoneType.
+Handoff: prior cost values -> native chart cache and embedded workbook -> ODP round trip and readback
+Failure path: The chain checks that native chart cache values and embedded Excel cells agree with the prior cost report. They agree numerically and not in form: 2130 equals Decimal("2130.00") and does not display as it, so a comparison of stored representations fails while a comparison of values passes, and the two-decimal presentation the cost report declared is gone from the artifact a reader opens. The severed-workbook path fails without naming the chart or the missing part, and in an optimised interpreter it fails later and differently.
+Required repair: Compare the chart cache and the embedded workbook to the source amounts numerically, and separately assert the presentation format at the point where the deck is rendered rather than assuming the stored cell carries it; check that the embedded workbook part exists before saving and Blocked when it does not, rather than relying on a bare assert; and keep an explicitly missing value as None through the round trip rather than substituting zero.
+Function bridge: pptx.chart.chart.Chart.replace_data for the workbook rebuild; pptx.chart.data.CategoryChartData for the declared categories and values; openpyxl.load_workbook over the embedded part for independent readback
+Positive acceptance: replace_data rebuilds the same embedded cells and preserves the same cached values and categories; a missing budget survives as None in both the cache and the workbook cell rather than becoming 0.0; 1200.25 stays 1200.25 in both.
+Adverse acceptance: Every cached value is a float and the workbook stores 2130.00 as an int (reproduced); the stored form does not render as "2130.00" although it compares equal to Decimal("2130.00"); severing the workbook raises AssertionError whose message is the empty string, naming neither the chart nor the part (reproduced).
+Evidence and limit: guards-v17 case 167 on one authored five-category chart and one authored two-category chart. The recorded 35 table cells, the ODP conversion and the return trip through LibreOffice were not rerun; the python -O behaviour was observed in a separate interpreter run and is recorded in the reference rather than asserted here.
+References: HD159
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P168 -- A rate that survives JSON is no longer the declared rate
+
+Original proof: P168  receipt PDFs and declared expense policy -> exceptions -> reimbursement state
+Source location: frozen master lines 6705-6749; original section SHA256 590a5a0be8d51f4e1e21934d8938508e34bd673fd39055a6f91d40bce70304ab.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: json.loads parses a bare decimal literal into a float, and Decimal refuses to multiply by a float, raising TypeError. Constructing the Decimal from the float instead preserves the binary expansion, and json.loads additionally accepts NaN and Infinity by default and returns nan and inf for them.
+Handoff: declared dated currency rates -> converted claim amounts -> reimbursement state and exceptions
+Failure path: The interesting part is that at the fixture's magnitude the two constructions agree: 40.00 EUR at the parsed rate quantizes to 44.00 USD whether the Decimal is built from the float or from its string, so the defect passes review and survives into a larger amount where it does not agree. The nonfinite case is the chain's own stated rejection, and the parser admits those literals, so the rejection has to be explicit rather than inherited from the reader.
+Required repair: Carry rates as JSON strings and construct every Decimal from the string, or reject float-typed rates at the boundary; reject NaN and Infinity through parse_constant at the reader rather than downstream; and reject duplicate JSON members, since the default reader keeps the last silently.
+Function bridge: a strict JSON reader with parse_constant and a duplicate-member hook; decimal.Decimal constructed from a string; decimal.Decimal.quantize with an explicit rounding mode; pandera.DataFrameSchema with a unique constraint for receipt reuse
+Positive acceptance: A string-carried rate reads back as the declared 1.1 with its declared exponent; the strict reader rejects NaN and a duplicate member; the reused receipt is reported and the schema names R1; two meals on one employee-day total 110.00 USD against the declared 60.00 USD cap and neither claim is chosen.
+Adverse acceptance: The parsed rate is a float and Decimal multiplication by it raises TypeError (reproduced); Decimal built from that float is 1.100000000000000088..., and yet both paths quantize to 44.00 USD at this magnitude, so the divergence is invisible here (reproduced); json.loads returns nan and inf for the non-standard literals (reproduced); an unknown conversion mode is Blocked.
+Evidence and limit: guards-v17 case 168 on two authored rates, one authored claim amount and four authored receipt references. The recorded eight claims, six receipt PDFs, the mileage contract and the approval and payment records were not rerun.
+References: HD160 HD150
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P169 -- No researched primitive conserves the credit pool
+
+Original proof: P169  prior cost pools and declared drivers -> exact cent allocation -> department costs
+Source location: frozen master lines 6750-6788; original section SHA256 a609033015320499db111a0c6fc945a55d5361fee92aca84ef7e1a4b539f0944.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it. The chain distributes residual cents by largest fractional remainder. Both maintained implementations of that method were executed. On a non-negative pool they agree with each other and with the recorded figures. On a negative pool they do not: largest-remainder refuses a negative total outright with ValueError, and apportionment returns an allocation summing to one cent less than the pool.
+Handoff: cost pool cents and declared driver weights -> per-department cent allocation -> department subtotals
+Failure path: P169's fixture contains a -130.00 USD furniture credit that the record describes as remaining a contributor to its net pool, and the chain asserts exact pool conservation. Under apportionment the credit allocates to -12999 cents against a -13000 cent pool, so conservation fails by one cent with no error raised; under largest-remainder the call raises before producing anything. The chain's own recorded checks include positive and negative one-cent ties, which is where this lands. There is no third library-backed option here, so a credit pool cannot be allocated under this contract at all.
+Required repair: Call a researched largest-remainder implementation rather than writing the rounding rule, and Blocked the handoff when the pool is negative, since neither implementation conserves it. Do not reinstate a local sign rule to cover the case: that is the custom glue the execution contract forbids, and it would hide the fact that the operation has no primitive.
+Function bridge: largest_remainder.LargestRemainder.round for the non-negative pools; apportionment.methods.compute('hamilton', ...) as the second implementation for comparison; an explicit Blocked outcome for a negative pool and for a missing driver weight
+Positive acceptance: Both libraries return 3334, 3333 and 3333 cents for a 100.00 USD pool over three equal weights and the allocation sums to the pool exactly; 10.01 USD over two equal weights gives 501 and 500; a zero pool allocates zeros; a zero weight receives nothing; an 85.00 USD pool over weights 3 and 1 gives 6375 and 2125.
+Adverse acceptance: largest-remainder raises ValueError("the total must be non-negative") on the credit pool (reproduced); apportionment returns -4333, -4333 and -4333, summing to -129.99 USD against a -130.00 USD pool (reproduced); a pool with any missing driver weight is Blocked and stays unallocated rather than being renormalized across the remaining drivers; a negative pool is Blocked; an unknown library is Blocked.
+Evidence and limit: guards-v17 case 169 on six authored pools. The recorded five pools, fifteen department rows, 4,470.50 USD known allocation and 85.00 USD unallocated Facilities pool were not rerun. This record supersedes the earlier draft finding about floor and truncate readings of the base share: that was a property of a handwritten implementation which no longer exists.
+References: HD151
+Integration status: INTEGRATION_UNVERIFIED, and the credit-pool handoff is Blocked pending a conserving primitive. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P170 -- Two exceptions mean no break-even, and a negative answer means nothing
+
+Original proof: P170  declared cost classifications and product mix -> whole-unit break-even -> scenario analysis
+Source location: frozen master lines 6789-6831; original section SHA256 3d1b75129a3ee7675ebf5668f7483308cdf595e21b1da1f328e4d6000183989b.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: Decimal signals a zero denominator with two different exceptions, DivisionByZero for a nonzero dividend and InvalidOperation for zero over zero, so a single handler misses the zero-fixed-cost case. ROUND_CEILING and ROUND_UP agree on positive quotients and disagree on negative ones. And numpy.arange with a float step is exclusive of the stop and drifts off the declared values.
+Handoff: declared fixed costs, prices and mix -> minimum whole-bundle volume -> enumerated scenario range
+Failure path: The chain states that zero contribution with positive fixed cost has no finite break-even point, which is correct, and reaches it through an exception the caller must catch. A handler written for DivisionByZero alone passes the zero-contribution scenario and then propagates an uncaught InvalidOperation from the zero-fixed-cost one, which is a different scenario in the same table. A negative contribution produces a negative volume with no error at all, and a negative volume is arithmetically fine and not a supported plan. The float-step enumeration loses the declared endpoint, so a range declared as 0 to 100 is enumerated to 99 or to a drifted neighbour without any signal.
+Required repair: Catch both decimal signals and map each to a distinct Blocked outcome; reject a non-positive contribution before dividing rather than reporting the negative quotient; pin the rounding mode to ROUND_CEILING and state that it is toward positive infinity, not away from zero; and enumerate declared whole-unit ranges with an integer step.
+Function bridge: decimal.Decimal division with DivisionByZero and InvalidOperation handled separately; decimal.Decimal.to_integral_value with an explicit ROUND_CEILING; numpy.arange with an integer step over the declared inclusive range
+Positive acceptance: 725.25 USD over 11.00 USD contribution gives 66 bundles from a quotient of 65.93...; profit is -10.25 USD at 65, 0.75 USD at 66 and 44.75 USD at 70, reproducing the recorded figures exactly; an exact quotient is not rounded up; the integer range enumerates 101 values from 0 to 100 inclusive.
+Adverse acceptance: Zero contribution and zero-over-zero raise different exceptions and produce two distinct Blocked messages (reproduced); a negative contribution yields -725 bundles with no error, and ROUND_UP gives -726 for the same input, so the two modes disagree on the sign case (reproduced); the float-step range returns ten values ending at 0.9 and does not contain 0.7 (reproduced).
+Evidence and limit: guards-v17 case 170 on one authored fixed cost, four authored contributions and two authored ranges. The recorded five scenarios, 404 enumerated volume rows and 414 boundary checks were not rerun.
+References: HD161
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+## Embedded runnable local guard module: handoff_guards_v17.py
+
+SHA256 5a8a0eef367e79b7eb7d92f3593cef61bf47d007bd1bcfda4d6355c7d4592b67; bytes 37160. Run: python handoff_guards_v17.py --report guards-v17.json, with handoff_guards_v1.py beside it. Ten cases, 173 assertions, no network and no model client. Coverage and uniqueness are pandera constraints, the lexical lookup is rapidfuzz alone, and the cent apportionment is the two researched largest-remainder libraries.
+
+```python
+"""Seventeenth bounded adapter suite: P161-P170, cash-flow classification, native presentation notes, PDF annotation,
+edit-distance lookup, OpenDocument conversion and recalculation, chart round trips, expense policy, cent allocation
+and break-even handoffs. Requires handoff_guards_v1.py from this TXT.
+
+Every meaningful operation below is a library primitive call. Coverage and uniqueness are pandera schema constraints
+and a pandas Index operation; the edit-distance lookup is rapidfuzz alone, reading the distance the call returns;
+the cent apportionment is largest_remainder and apportionment, which is why the credit pool is Blocked rather than
+allocated. Local code declares fixtures and policies and turns a primitive result into a Blocked outcome; it does
+not reimplement an operation a library performs. All runtime inputs are authored fixtures. No model client and no
+network.
+Run: python handoff_guards_v17.py --report report.json
+"""
+from __future__ import annotations
+import argparse, hashlib, importlib.metadata, io, json, logging, traceback, warnings, zipfile
+from decimal import Decimal, DivisionByZero, InvalidOperation, ROUND_CEILING, ROUND_HALF_UP, ROUND_UP
+from pathlib import Path
+import numpy as np
+import openpyxl
+import pandas as pd
+import pandera.pandas as pandera
+import pymupdf
+import rapidfuzz
+from odf import teletype
+from odf.namespaces import OFFICENS, TABLENS
+from odf.opendocument import OpenDocumentSpreadsheet, OpenDocumentText, load as odf_load
+from odf.table import Table, TableCell, TableRow
+from odf.text import LineBreak, P, S, Tab
+from pptx import Presentation
+from pptx.chart.data import CategoryChartData
+from pptx.enum.chart import XL_CHART_TYPE
+from pptx.util import Inches
+from largest_remainder import LargestRemainder
+import apportionment.methods as apportionment
+from rapidfuzz import process
+from rapidfuzz.distance import DamerauLevenshtein, Levenshtein
+import handoff_guards_v1 as g
+warnings.simplefilter('ignore'); logging.disable(logging.WARNING)
+
+CENT = Decimal('0.01')
+CLASSES = ['operating', 'investing', 'financing']
+
+# ---------------------------------------------------------------- P161
+JOURNAL_IDS = ['J01', 'J02', 'J03', 'J04']
+CLASSIFICATION_SCHEMA = pandera.DataFrameSchema({
+    'journal': pandera.Column(str, pandera.Check.isin(JOURNAL_IDS), unique=True),
+    'classification': pandera.Column(str, pandera.Check.isin(CLASSES)),
+    'amount': pandera.Column(object),
+})
+
+
+def covers_exactly(frame: pd.DataFrame, declared: list[str]) -> pd.DataFrame:
+    """Membership and uniqueness are the schema's; the two-way gap is an Index operation."""
+    try:
+        checked = CLASSIFICATION_SCHEMA.validate(frame, lazy=True)
+    except pandera.errors.SchemaErrors as failure:
+        raise g.Blocked('classification rejected: %s'
+                        % failure.failure_cases[['check', 'failure_case']].to_dict('records'))
+    missing = pd.Index(declared).symmetric_difference(pd.Index(checked['journal']))
+    if len(missing):
+        raise g.Blocked('classification does not cover the journal: %s' % list(missing))
+    return checked
+
+
+def statement_lines(rows: list[dict], *, complete: str) -> dict:
+    """complete='observed' returns only the classes that occur; 'null' and 'zero' force all three."""
+    totals = pd.DataFrame(rows).groupby('classification')['amount'].sum()
+    if complete == 'observed':
+        pass
+    elif complete == 'null':
+        totals = totals.reindex(CLASSES)
+    elif complete == 'zero':
+        totals = totals.reindex(CLASSES, fill_value=Decimal('0.00'))
+    else:
+        raise g.Blocked('unknown completion mode %r' % complete)
+    return {k: (None if pd.isna(v) else v) for k, v in totals.items()}
+
+
+# ---------------------------------------------------------------- P162
+def small_png() -> bytes:
+    import struct, zlib
+    def chunk(tag, body):
+        payload = tag + body
+        return struct.pack('>I', len(body)) + payload + struct.pack('>I', zlib.crc32(payload) & 0xffffffff)
+    rows = b''.join(b'\x00' + bytes([9, 9, 9]) * 4 for _ in range(4))
+    return (b'\x89PNG\r\n\x1a\n' + chunk(b'IHDR', struct.pack('>IIBBBBB', 4, 4, 8, 2, 0, 0, 0))
+            + chunk(b'IDAT', zlib.compress(rows)) + chunk(b'IEND', b''))
+
+
+def slide_deck() -> bytes:
+    deck = Presentation()
+    slide = deck.slides.add_slide(deck.slide_layouts[5])
+    slide.shapes.title.text = 'Node.js TSC 2024-01-17'
+    box = slide.shapes.add_textbox(Inches(1), Inches(2), Inches(4), Inches(1))
+    box.text_frame.text = 'Line one'
+    box.text_frame.add_paragraph().text = 'Line two'
+    slide.shapes.add_picture(io.BytesIO(small_png()), Inches(5), Inches(2), Inches(1), Inches(1))
+    buf = io.BytesIO(); deck.save(buf); return buf.getvalue()
+
+
+def package_parts(document: bytes) -> set:
+    with zipfile.ZipFile(io.BytesIO(document)) as archive:
+        return set(archive.namelist())
+
+
+def notes_probe(document: bytes, *, how: str) -> bytes:
+    """how='property' reads slide.notes_slide; 'guarded' reads slide.has_notes_slide."""
+    deck = Presentation(io.BytesIO(document))
+    slide = deck.slides[0]
+    if how == 'property':
+        slide.notes_slide
+    elif how == 'guarded':
+        slide.has_notes_slide
+    else:
+        raise g.Blocked('unknown notes probe %r' % how)
+    buf = io.BytesIO(); deck.save(buf); return buf.getvalue()
+
+
+def shape_texts(document: bytes, *, guarded: bool) -> list[str]:
+    deck = Presentation(io.BytesIO(document))
+    out = []
+    for shape in deck.slides[0].shapes:
+        if guarded and not shape.has_text_frame:
+            continue
+        out.append(shape.text)
+    return out
+
+
+def write_notes(document: bytes, paragraphs: list[str]) -> bytes:
+    deck = Presentation(io.BytesIO(document))
+    frame = deck.slides[0].notes_slide.notes_text_frame
+    frame.text = paragraphs[0]
+    for extra in paragraphs[1:]:
+        frame.add_paragraph().text = extra
+    buf = io.BytesIO(); deck.save(buf); return buf.getvalue()
+
+
+def read_notes(document: bytes) -> tuple[str, int]:
+    frame = Presentation(io.BytesIO(document)).slides[0].notes_slide.notes_text_frame
+    return frame.text, len(frame.paragraphs)
+
+
+# ---------------------------------------------------------------- P163
+def review_pdf() -> bytes:
+    doc = pymupdf.open(); page = doc.new_page()
+    for y, line in ((100, 'The TSC approves the charter.'), (130, 'the tsc approves the charter.'),
+                    (190, 'A quick brown fox jumps over'), (205, 'the lazy dog completely.')):
+        page.insert_text((72, y), line)
+    return doc.tobytes()
+
+
+def find(document: bytes, phrase: str) -> list:
+    return pymupdf.open('pdf', document)[0].search_for(phrase)
+
+
+def recovered(document: bytes, rect) -> str:
+    return pymupdf.open('pdf', document)[0].get_textbox(rect)
+
+
+def highlight(document: bytes, phrase: str, comment: str, *, update: bool) -> bytes:
+    doc = pymupdf.open('pdf', document); page = doc[0]
+    hits = page.search_for(phrase)
+    if not hits:
+        raise g.Blocked('phrase not present: %r' % phrase)
+    annot = page.add_highlight_annot(hits[0])
+    annot.set_info(content=comment, title='reviewer')
+    if update:
+        annot.update()
+    return doc.tobytes()
+
+
+def saved_annotations(document: bytes) -> list[dict]:
+    page = pymupdf.open('pdf', document)[0]
+    return [{'content': a.info.get('content'), 'title': a.info.get('title'),
+             'vertices': len(a.vertices or []), 'type': a.type[1]} for a in page.annots()]
+
+
+def exact_hit(document: bytes, phrase: str) -> list:
+    """Keep only hits whose recovered characters equal the query exactly."""
+    return [r for r in find(document, phrase) if recovered(document, r) == phrase]
+
+
+# ---------------------------------------------------------------- P164
+WORDS = ['governance', 'governing', 'members', 'member', 'team', 'teams', 'term',
+         'release', 'releases', 'voting', 'vote', 'contributors', 'contributor']
+
+
+def lookup(query: str, words: list[str], *, scorer, cutoff, limit, processor=None) -> list[str]:
+    hits = process.extract(query, words, scorer=scorer, score_cutoff=cutoff, limit=limit, processor=processor)
+    return [h[0] for h in hits]
+
+
+# ---------------------------------------------------------------- P165
+def odt_document() -> bytes:
+    doc = OpenDocumentText()
+    doc.text.addElement(P(text='Body one'))
+    spaced = P(); spaced.addText('A'); spaced.addElement(S(c=3)); spaced.addText('B')
+    doc.text.addElement(spaced)
+    tabbed = P(); tabbed.addText('left'); tabbed.addElement(Tab()); tabbed.addText('right')
+    doc.text.addElement(tabbed)
+    broken = P(); broken.addText('first'); broken.addElement(LineBreak()); broken.addText('second')
+    doc.text.addElement(broken)
+    table = Table(name='T1'); row = TableRow()
+    for value in ('cell A', 'cell B'):
+        cell = TableCell(); cell.addElement(P(text=value)); row.addElement(cell)
+    table.addElement(row); doc.text.addElement(table)
+    buf = io.BytesIO(); doc.write(buf); return buf.getvalue()
+
+
+def odt_blocks(document: bytes, *, scope: str) -> list[str]:
+    """scope='flat' is getElementsByType(P); 'body' walks the top-level body children only."""
+    doc = odf_load(io.BytesIO(document))
+    if scope == 'flat':
+        return [teletype.extractText(p) for p in doc.getElementsByType(P)]
+    if scope == 'body':
+        return [teletype.extractText(n) for n in doc.text.childNodes if n.qname[1] in ('p', 'table')]
+    if scope == 'cells':
+        return [teletype.extractText(c) for c in doc.getElementsByType(TableCell)]
+    raise g.Blocked('unknown odt scope %r' % scope)
+
+
+# ---------------------------------------------------------------- P166
+def ods_document() -> bytes:
+    doc = OpenDocumentSpreadsheet(); table = Table(name='Schedule'); row = TableRow()
+    start = TableCell(valuetype='date', datevalue='2014-07-31'); start.addElement(P(text='2014-07-31'))
+    finish = TableCell(valuetype='date', datevalue='2012-06-22'); finish.addElement(P(text='2012-06-22'))
+    elapsed = TableCell(valuetype='float', value='766', formula='of:=[.A1]-[.B1]'); elapsed.addElement(P(text='766'))
+    for cell in (start, finish, elapsed):
+        row.addElement(cell)
+    table.addElement(row); doc.spreadsheet.addElement(table)
+    buf = io.BytesIO(); doc.write(buf); return buf.getvalue()
+
+
+def edit_date(document: bytes, new_date: str) -> bytes:
+    doc = odf_load(io.BytesIO(document))
+    doc.getElementsByType(TableCell)[0].setAttrNS(OFFICENS, 'date-value', new_date)
+    buf = io.BytesIO(); doc.write(buf); return buf.getvalue()
+
+
+def cell_views(document: bytes, index: int) -> dict:
+    cell = odf_load(io.BytesIO(document)).getElementsByType(TableCell)[index]
+    return {'value': cell.getAttrNS(OFFICENS, 'value'), 'date': cell.getAttrNS(OFFICENS, 'date-value'),
+            'formula': cell.getAttrNS(TABLENS, 'formula'), 'text': teletype.extractText(cell)}
+
+
+# ---------------------------------------------------------------- P167
+CATEGORIES = ['Travel', 'Software', 'Facilities', 'Contingency', 'Training']
+AMOUNTS = (1200.25, 2130.00, 85.00, 0.00, 1140.25)
+
+
+def chart_deck(categories=CATEGORIES, values=AMOUNTS, series='Actual') -> bytes:
+    deck = Presentation(); slide = deck.slides.add_slide(deck.slide_layouts[6])
+    data = CategoryChartData(); data.categories = list(categories); data.add_series(series, tuple(values))
+    slide.shapes.add_chart(XL_CHART_TYPE.COLUMN_CLUSTERED, Inches(1), Inches(1), Inches(6), Inches(4), data)
+    buf = io.BytesIO(); deck.save(buf); return buf.getvalue()
+
+
+def chart_state(document: bytes) -> dict:
+    chart = Presentation(io.BytesIO(document)).slides[0].shapes[0].chart
+    part = chart._workbook.xlsx_part
+    cells = None
+    if part is not None:
+        sheet = openpyxl.load_workbook(io.BytesIO(part.blob)).active
+        cells = [[c.value for c in row] for row in sheet.iter_rows()]
+    return {'categories': list(chart.plots[0].categories), 'values': list(chart.series[0].values),
+            'types': [type(v).__name__ for v in chart.series[0].values], 'workbook': cells}
+
+
+def rebind_workbook(document: bytes) -> bytes:
+    deck = Presentation(io.BytesIO(document)); chart = deck.slides[0].shapes[0].chart
+    data = CategoryChartData(); data.categories = list(chart.plots[0].categories)
+    data.add_series('Actual', tuple(chart.series[0].values))
+    chart.replace_data(data)
+    buf = io.BytesIO(); deck.save(buf); return buf.getvalue()
+
+
+def sever_workbook(document: bytes) -> bytes:
+    deck = Presentation(io.BytesIO(document))
+    deck.slides[0].shapes[0].chart._workbook.xlsx_part = None
+    buf = io.BytesIO(); deck.save(buf); return buf.getvalue()
+
+
+# ---------------------------------------------------------------- P168
+def parse_rates(raw: str, *, strict: bool) -> dict:
+    if strict:
+        return {k: Decimal(v) for k, v in g.strict_json_loads(raw).items()}
+    return json.loads(raw)
+
+
+def convert(amount: str, rate, *, mode: str) -> Decimal:
+    """mode='float' multiplies by the parsed JSON number; 'string' routes it through Decimal(str(...))."""
+    if mode == 'float':
+        return (Decimal(amount) * rate).quantize(CENT, rounding=ROUND_HALF_UP)
+    if mode == 'string':
+        return (Decimal(amount) * Decimal(str(rate))).quantize(CENT, rounding=ROUND_HALF_UP)
+    raise g.Blocked('unknown conversion mode %r' % mode)
+
+
+RECEIPT_SCHEMA = pandera.DataFrameSchema({'receipt_id': pandera.Column(str, unique=True)})
+
+
+def reused_receipts(references: list[str]) -> list[str]:
+    """The duplicate and its identifier come from the schema, not from a local tally."""
+    try:
+        RECEIPT_SCHEMA.validate(pd.DataFrame({'receipt_id': references}), lazy=True)
+    except pandera.errors.SchemaErrors as failure:
+        return sorted(set(failure.failure_cases['failure_case']))
+    return []
+
+
+# ---------------------------------------------------------------- P169
+def hamilton(total_cents: int, weights: list[int], *, library: str) -> list[int]:
+    """Both researched implementations of the largest-remainder method; no local rounding rule."""
+    if library == 'largest_remainder':
+        return LargestRemainder.round(list(weights), total=total_cents)
+    if library == 'apportionment':
+        return apportionment.compute('hamilton', list(weights), total_cents, verbose=False)
+    raise g.Blocked('unknown apportionment library %r' % library)
+
+
+def allocate(pool_cents: int, weights: dict, *, library: str = 'largest_remainder') -> dict:
+    if any(w is None for w in weights.values()):
+        raise g.Blocked('a driver weight is missing; the pool stays unallocated')
+    if pool_cents < 0:
+        raise g.Blocked('no researched primitive conserves a negative pool')
+    keys = sorted(weights)
+    return dict(zip(keys, hamilton(pool_cents, [weights[k] for k in keys], library=library)))
+
+
+# ---------------------------------------------------------------- P170
+def minimum_volume(fixed: str, contribution: str, *, rounding=ROUND_CEILING) -> Decimal:
+    try:
+        return (Decimal(fixed) / Decimal(contribution)).to_integral_value(rounding=rounding)
+    except DivisionByZero:
+        raise g.Blocked('zero contribution has no finite break-even volume')
+    except InvalidOperation:
+        raise g.Blocked('zero fixed cost over zero contribution is undetermined')
+
+
+def profit(volume: int, contribution: str, fixed: str) -> Decimal:
+    return Decimal(volume) * Decimal(contribution) - Decimal(fixed)
+
+
+def volume_range(low: int, high: int, *, step) -> list:
+    return [v.item() if hasattr(v, 'item') else v for v in np.arange(low, high, step)]
+
+
+C = []
+def case(i):
+    def reg(fn): C.append((i, fn)); return fn
+    return reg
+
+
+@case(161)
+def a_schema_names_the_identifier_a_set_comparison_would_hide():
+    def frame(ids, classes):
+        return pd.DataFrame({'journal': ids, 'classification': classes,
+                             'amount': [Decimal('100.00')] * len(ids)})
+    exact = frame(JOURNAL_IDS, ['operating', 'operating', 'investing', 'financing'])
+    g.equal(len(covers_exactly(exact, JOURNAL_IDS)), 4)
+    doubled = frame(['J01', 'J02', 'J02', 'J03'], ['operating'] * 4)
+    g.rejects(g.Blocked, lambda: covers_exactly(doubled, JOURNAL_IDS))
+    try:
+        covers_exactly(doubled, JOURNAL_IDS)
+    except g.Blocked as blocked:
+        g.equal('J02' in str(blocked), True)  # the duplicate identifier is named
+        g.equal('field_uniqueness' in str(blocked), True)
+    unknown = frame(['J01', 'J02', 'J03', 'J99'], ['operating'] * 4)
+    try:
+        covers_exactly(unknown, JOURNAL_IDS)
+    except g.Blocked as blocked:
+        g.equal('J99' in str(blocked), True)  # the unknown identifier is named
+    short = frame(['J01', 'J02', 'J03'], ['operating'] * 3)
+    try:
+        covers_exactly(short, JOURNAL_IDS)
+    except g.Blocked as blocked:
+        g.equal("['J04']" in str(blocked), True)  # the uncovered identifier is named
+    g.equal(len(pd.Index(JOURNAL_IDS).symmetric_difference(pd.Index(JOURNAL_IDS))), 0)
+    rows = [{'journal': j, 'classification': c, 'amount': Decimal('100.00')}
+            for j, c in zip(['J01', 'J02', 'J02', 'J03', 'J04'],
+                            ['operating', 'operating', 'operating', 'investing', 'financing'])]
+    totals = statement_lines(rows, complete='observed')
+    g.equal(totals['operating'], Decimal('300.00'))  # what the unchecked frame would have produced
+    partial = [{'journal': 'J01', 'classification': 'operating', 'amount': Decimal('10.00')},
+               {'journal': 'J02', 'classification': 'financing', 'amount': Decimal('5.00')}]
+    observed = statement_lines(partial, complete='observed')
+    g.equal(sorted(observed), ['financing', 'operating']); g.equal(len(observed), 2)
+    nulled = statement_lines(partial, complete='null')
+    g.equal(list(nulled), CLASSES); g.equal(nulled['investing'] is None, True)
+    zeroed = statement_lines(partial, complete='zero')
+    g.equal(zeroed['investing'], Decimal('0.00'))
+    g.equal(nulled['investing'] == zeroed['investing'], False)
+    g.rejects(g.Blocked, lambda: statement_lines(partial, complete='fill'))
+    return {'coverage_is_a_schema_and_an_index_operation': True,
+            'duplicate_unknown_and_missing_are_named_separately': True,
+            'absent_classification_is_dropped_not_zeroed': True,
+            'fill_value_fabricates_a_measurement': True}
+
+
+@case(162)
+def reading_the_notes_property_creates_the_notes():
+    deck = slide_deck()
+    before = package_parts(deck)
+    g.equal(any('notesSlides' in n for n in before), False)
+    touched = notes_probe(deck, how='property')
+    added = sorted(package_parts(touched) - before)
+    g.equal(len(added), 5)  # a read added a notes slide, a notes master, their relationships and a second theme
+    g.equal(any(n.startswith('ppt/notesSlides/') for n in added), True)
+    g.equal(any(n.startswith('ppt/notesMasters/') for n in added), True)
+    g.equal('ppt/theme/theme2.xml' in added, True)
+    g.equal(hashlib.sha256(touched).hexdigest() == hashlib.sha256(deck).hexdigest(), False)
+    guarded = notes_probe(deck, how='guarded')
+    g.equal(sorted(package_parts(guarded) - before), [])  # has_notes_slide adds nothing
+    g.rejects(g.Blocked, lambda: notes_probe(deck, how='xml'))
+    g.rejects(AttributeError, lambda: shape_texts(deck, guarded=False))  # a picture has no text attribute
+    g.equal(shape_texts(deck, guarded=True), ['Node.js TSC 2024-01-17', 'Line one\nLine two'])
+    written = write_notes(deck, ['A & B < 5 > 2', 'second note line'])
+    text, paragraphs = read_notes(written)
+    g.equal(text, 'A & B < 5 > 2\nsecond note line')  # the literal survives python-pptx unchanged
+    g.equal(paragraphs, 2); g.equal(text.count('\n'), 1)
+    g.equal(len(text.split('\n')), paragraphs)  # only because no paragraph contains a newline of its own
+    kept = package_parts(written) & before
+    g.equal(len(kept), len(before))  # every part the deck already had is still present
+    return {'notes_slide_property_mutates_the_package': True, 'parts_added_by_a_read': 5,
+            'has_notes_slide_is_the_non_mutating_test': True, 'shape_text_raises_on_a_picture': True,
+            'notes_text_joins_paragraphs_with_a_newline': True}
+
+
+@case(163)
+def a_matched_rectangle_is_not_the_matched_phrase():
+    pdf = review_pdf()
+    hits = find(pdf, 'the tsc approves')
+    g.equal(len(hits), 2)  # ASCII case-insensitive by default, so the capitalised line matches too
+    g.equal(recovered(pdf, hits[0]), 'The TSC approves')
+    g.equal(recovered(pdf, hits[1]), 'the tsc approves')
+    g.equal(recovered(pdf, hits[0]) == recovered(pdf, hits[1]), False)  # an exact comparison separates them
+    g.equal(len(exact_hit(pdf, 'the tsc approves')), 1)
+    g.equal(len(find(pdf, 'Budget was approved')), 0)
+    multi = find(pdf, 'jumps over the lazy dog')
+    g.equal(len(multi), 2)  # the phrase spans a line break and still matches
+    g.equal(recovered(pdf, multi[0]), 'jumps over\nletely.')  # the rectangle catches the line below it
+    g.equal(recovered(pdf, multi[0]) == 'jumps over the lazy dog', False)
+    g.equal(len(exact_hit(pdf, 'jumps over the lazy dog')), 0)  # so the exact filter rejects the whole match
+    g.equal(type(find(pdf, 'the tsc approves')[0]).__name__, 'Rect')
+    quads = pymupdf.open('pdf', pdf)[0].search_for('the tsc approves', quads=True)
+    g.equal(type(quads[0]).__name__, 'Quad')
+    for update in (False, True):
+        saved = highlight(pdf, 'the tsc approves', 'illustrative comment', update=update)
+        annots = saved_annotations(saved)
+        g.equal(len(annots), 1)
+        g.equal(annots[0]['content'], 'illustrative comment')  # set_info persists with or without update()
+        g.equal(annots[0]['title'], 'reviewer'); g.equal(annots[0]['vertices'], 4)
+        g.equal(annots[0]['type'], 'Highlight')
+    g.rejects(g.Blocked, lambda: highlight(pdf, 'Budget was approved', 'c', update=True))
+    return {'search_for_is_ascii_case_insensitive': True, 'search_for_matches_across_a_line_break': True,
+            'textbox_of_a_hit_crosses_lines': True, 'exact_comparison_is_the_only_filter': True,
+            'set_info_persists_without_update': True}
+
+
+@case(164)
+def the_default_limit_drops_the_ties_the_chain_promises():
+    exact = lookup('governacne', WORDS, scorer=DamerauLevenshtein.distance, cutoff=1, limit=None)
+    g.equal(exact, ['governance'])  # one adjacent transposition
+    g.equal(DamerauLevenshtein.distance('governacne', 'governance'), 1)
+    g.equal(Levenshtein.distance('governacne', 'governance'), 2)
+    g.equal(lookup('governacne', WORDS, scorer=Levenshtein.distance, cutoff=1, limit=None), [])
+    crowded = WORDS + ['ter%d' % i for i in range(8)]
+    capped = lookup('term', crowded, scorer=DamerauLevenshtein.distance, cutoff=2, limit=5)
+    every = lookup('term', crowded, scorer=DamerauLevenshtein.distance, cutoff=2, limit=None)
+    g.equal(len(capped), 5); g.equal(len(every), 11)
+    g.equal(set(capped) < set(every), True)
+    g.equal(sorted(set(every) - set(capped)), ['teams', 'ter3', 'ter4', 'ter5', 'ter6', 'ter7'])
+    g.equal('teams' in every and 'teams' not in capped, True)  # a real source word is among the dropped ties
+    g.equal(lookup('MEMBERS', WORDS, scorer=DamerauLevenshtein.distance, cutoff=1, limit=None), [])
+    g.equal(DamerauLevenshtein.distance('MEMBERS', 'members'), 7)  # no processor means no case folding
+    folded = lookup('MEMBERS', WORDS, scorer=DamerauLevenshtein.distance, cutoff=1, limit=None,
+                    processor=str.casefold)
+    g.equal(sorted(folded), ['member', 'members'])
+    scores = {h[0]: h[1] for h in process.extract('MEMBERS', WORDS, scorer=DamerauLevenshtein.distance,
+                                                  score_cutoff=1, limit=None, processor=str.casefold)}
+    g.equal(scores, {'members': 0, 'member': 1})  # extract already returns the distance
+    similar = lookup('governacne', WORDS, scorer=DamerauLevenshtein.similarity, cutoff=1, limit=None)
+    g.equal(len(similar), len(WORDS))  # the same cutoff on a similarity scorer returns every word
+    g.equal('team' in similar and 'release' in similar, True)
+    g.equal(lookup('governacne', WORDS, scorer=DamerauLevenshtein.normalized_similarity, cutoff=1, limit=None), [])
+    g.equal(lookup('zzzxqv', WORDS, scorer=DamerauLevenshtein.distance, cutoff=1, limit=None), [])
+    return {'default_limit_truncates_ties': True, 'ties_dropped': 6, 'processor_default_is_none': True,
+            'uppercase_query_returns_nothing': True, 'cutoff_meaning_flips_with_the_scorer': True,
+            'transposition_needs_the_damerau_metric': True}
+
+
+@case(165)
+def a_flat_paragraph_list_is_not_the_document_body():
+    document = odt_document()
+    flat = odt_blocks(document, scope='flat')
+    body = odt_blocks(document, scope='body')
+    g.equal(len(flat), 6); g.equal(len(body), 5)  # four body paragraphs and one table
+    g.equal(flat[4:], ['cell A', 'cell B'])  # the table cells are indistinguishable in the flat list
+    g.equal(body[4], 'cell Acell B')  # extracting a table welds its cells with no separator
+    g.equal(odt_blocks(document, scope='cells'), ['cell A', 'cell B'])
+    g.equal(body[4] == ''.join(odt_blocks(document, scope='cells')), True)
+    g.equal(len(flat) == len(body), False)  # a positional comparison against a Word body shifts from the table on
+    g.equal(flat[0], 'Body one')
+    g.equal(flat[1], 'A   B')  # text:s is expanded to its declared space count
+    g.equal(flat[2], 'left\tright')  # text:tab becomes a tab
+    g.equal(flat[3], 'first\nsecond')  # text:line-break becomes a newline inside one paragraph
+    g.equal(flat[3].count('\n'), 1); g.equal(len(flat[3].split('\n')), 2)
+    g.rejects(g.Blocked, lambda: odt_blocks(document, scope='headers'))
+    return {'flat_paragraph_list_includes_table_cells': True, 'table_extraction_welds_cells': True,
+            'whitespace_elements_are_expanded': True, 'paragraph_counts_disagree': True}
+
+
+@case(166)
+def the_typed_value_moves_and_the_displayed_text_does_not():
+    original = ods_document()
+    before = cell_views(original, 0)
+    g.equal(before['date'], '2014-07-31'); g.equal(before['text'], '2014-07-31')
+    formula_before = cell_views(original, 2)
+    g.equal(formula_before['formula'], 'of:=[.A1]-[.B1]')
+    g.equal(formula_before['value'], '766'); g.equal(formula_before['text'], '766')
+    edited = edit_date(original, '2014-08-01')
+    after = cell_views(edited, 0)
+    g.equal(after['date'], '2014-08-01')  # the typed value moved
+    g.equal(after['text'], '2014-07-31')  # the displayed paragraph did not
+    g.equal(after['date'] == after['text'], False)  # two readers of one cell disagree
+    dependent = cell_views(edited, 2)
+    g.equal(dependent['formula'], 'of:=[.A1]-[.B1]')  # the formula survives
+    g.equal(dependent['value'], '766')  # its cached result is stale
+    g.equal(dependent['text'], '766')
+    g.equal(cell_views(edited, 1)['date'], '2012-06-22')  # no other cell moved
+    g.equal(hashlib.sha256(edited).hexdigest() == hashlib.sha256(original).hexdigest(), False)
+    g.equal(cell_views(original, 0)['date'], '2014-07-31')  # the source document is untouched
+    return {'attribute_edit_leaves_display_text_stale': True, 'cached_formula_result_stays_stale': True,
+            'formula_text_survives_the_edit': True, 'recalculation_is_load_bearing': True}
+
+
+@case(167)
+def a_currency_amount_becomes_a_float_and_the_workbook_can_be_severed():
+    deck = chart_deck()
+    state = chart_state(deck)
+    g.equal(state['categories'], CATEGORIES)
+    g.equal(state['values'], [1200.25, 2130.0, 85.0, 0.0, 1140.25])
+    g.equal(state['types'], ['float'] * 5)  # every cached amount is a float, never a Decimal
+    g.equal(state['workbook'][2], ['Software', 2130])  # 2130.00 is stored as an integer
+    g.equal(type(state['workbook'][2][1]).__name__, 'int')
+    g.equal(state['workbook'][4], ['Contingency', 0])
+    g.equal(state['workbook'][1], ['Travel', 1200.25])
+    g.equal(Decimal('2130.00') == state['workbook'][2][1], True)  # numerically equal
+    g.equal(str(state['workbook'][2][1]) == '2130.00', False)  # but the stored form has lost the cents
+    rebound = rebind_workbook(deck)
+    after = chart_state(rebound)
+    g.equal(after['workbook'], state['workbook'])  # replace_data rebuilds the same embedded cells
+    g.equal(after['values'], state['values'])
+    g.equal(after['categories'], state['categories'])
+    unknown = chart_deck(['Travel', 'Facilities'], (1500.00, None), series='Budget')
+    known = chart_state(unknown)
+    g.equal(known['values'], [1500.0, None])  # a missing budget stays missing
+    g.equal(known['values'][1] is None, True)
+    g.equal(known['workbook'][2], ['Facilities', None])
+    g.rejects(AssertionError, lambda: sever_workbook(deck))  # a severed workbook fails save with an empty assert
+    try:
+        sever_workbook(deck)
+    except AssertionError as failure:
+        g.equal(str(failure), '')  # the failure names neither the chart nor the missing part
+    return {'cached_amounts_are_floats': True, 'embedded_workbook_drops_trailing_cents': True,
+            'replace_data_rebuilds_the_workbook': True, 'unknown_value_survives_as_none': True,
+            'severed_workbook_fails_with_a_bare_assert': True}
+
+
+@case(168)
+def a_rate_that_survives_json_is_no_longer_the_declared_rate():
+    raw = '{"EUR_USD": 1.1, "GBP_USD": 1.25}'
+    loose = parse_rates(raw, strict=False)
+    g.equal(type(loose['EUR_USD']).__name__, 'float')
+    g.rejects(TypeError, lambda: Decimal('40.00') * loose['EUR_USD'])  # a Decimal cannot multiply a float at all
+    g.equal(str(Decimal(loose['EUR_USD']))[:20], '1.100000000000000088')
+    g.equal(convert('40.00', loose['EUR_USD'], mode='string'), Decimal('44.00'))
+    g.equal(convert('40.00', Decimal(loose['EUR_USD']), mode='float'), Decimal('44.00'))
+    g.equal(convert('40.00', loose['EUR_USD'], mode='string')
+            == convert('40.00', Decimal(loose['EUR_USD']), mode='float'), True)  # agrees here, so it survives review
+    g.rejects(g.Blocked, lambda: convert('40.00', Decimal('1.1'), mode='decimal'))
+    strict = parse_rates('{"EUR_USD": "1.1"}', strict=True)
+    g.equal(strict['EUR_USD'], Decimal('1.1'))
+    g.equal(strict['EUR_USD'].as_tuple().exponent, -1)  # a string-carried rate keeps its declared precision
+    g.equal(json.loads('{"r": NaN}')['r'] != json.loads('{"r": NaN}')['r'], True)  # NaN admitted by default
+    g.equal(json.loads('{"r": Infinity}')['r'] == float('inf'), True)
+    g.rejects(g.Blocked, lambda: g.strict_json_loads('{"r": NaN}'))
+    g.rejects(g.Blocked, lambda: g.strict_json_loads('{"r": 1, "r": 2}'))
+    g.equal(reused_receipts(['R01', 'R02', 'R01', 'R03']), ['R01'])
+    g.equal(reused_receipts(['R01', 'R02']), [])
+    meals = pd.DataFrame([{'day': '2026-09-07', 'amt': Decimal('60.00')},
+                          {'day': '2026-09-07', 'amt': Decimal('50.00')}])
+    daily = meals.groupby('day')['amt'].sum()
+    g.equal(daily['2026-09-07'], Decimal('110.00'))
+    g.equal(daily['2026-09-07'] > Decimal('60.00'), True)  # both claims breach the cap; neither is chosen
+    g.equal(len(meals), 2)
+    return {'json_numbers_arrive_as_floats': True, 'decimal_times_float_raises': True,
+            'float_and_string_paths_agree_at_this_magnitude': True,
+            'json_admits_nan_and_infinity': True, 'counter_finds_the_reused_receipt': True}
+
+
+@case(169)
+def no_researched_primitive_conserves_the_credit_pool():
+    g.equal(hamilton(100_00, [1, 1, 1], library='largest_remainder'), [3334, 3333, 3333])
+    g.equal(hamilton(100_00, [1, 1, 1], library='apportionment'), [3334, 3333, 3333])
+    g.equal(sum(hamilton(100_00, [1, 1, 1], library='largest_remainder')), 100_00)
+    g.equal(hamilton(10_01, [1, 1], library='largest_remainder'), [501, 500])
+    g.equal(hamilton(0, [1, 1, 1], library='largest_remainder'), [0, 0, 0])
+    g.equal(hamilton(100_00, [0, 1], library='largest_remainder'), [0, 10000])
+    g.rejects(ValueError, lambda: hamilton(-130_00, [1, 1, 1], library='largest_remainder'))
+    credited = hamilton(-130_00, [1, 1, 1], library='apportionment')
+    g.equal(credited, [-4333, -4333, -4333]); g.equal(sum(credited), -129_99)
+    g.equal(sum(credited) == -130_00, False)  # the second library does not conserve the pool
+    g.rejects(g.Blocked, lambda: hamilton(100_00, [1, 1], library='hamilton'))
+    g.equal(allocate(100_00, {'ops': 1, 'sales': 1}), {'ops': 5000, 'sales': 5000})
+    g.equal(sum(allocate(100_00, {'ops': 1, 'sales': 1}).values()), 100_00)
+    g.equal(allocate(85_00, {'ops': 3, 'sales': 1}), {'ops': 6375, 'sales': 2125})
+    g.rejects(g.Blocked, lambda: allocate(85_00, {'ops': 3, 'sales': None}))  # the pool stays unallocated
+    g.rejects(g.Blocked, lambda: allocate(-130_00, {'ops': 1, 'sales': 1}))  # and a credit is Blocked
+    return {'largest_remainder_refuses_a_negative_total': True,
+            'apportionment_loses_a_cent_on_a_credit': True,
+            'credit_pool_has_no_conserving_primitive': True,
+            'missing_weight_holds_the_pool': True}
+
+
+@case(170)
+def two_exceptions_mean_no_break_even_and_a_negative_one_means_nothing():
+    g.equal(minimum_volume('725.25', '11.00'), Decimal('66'))
+    g.equal(str(Decimal('725.25') / Decimal('11.00'))[:8], '65.93181')
+    g.equal(profit(65, '11.00', '725.25'), Decimal('-10.25'))
+    g.equal(profit(66, '11.00', '725.25'), Decimal('0.75'))
+    g.equal(profit(70, '11.00', '725.25'), Decimal('44.75'))
+    g.rejects(g.Blocked, lambda: minimum_volume('725.25', '0.00'))  # DivisionByZero
+    g.rejects(g.Blocked, lambda: minimum_volume('0.00', '0.00'))  # InvalidOperation, a different exception
+    caught = []
+    for fixed, contribution in (('725.25', '0.00'), ('0.00', '0.00')):
+        try:
+            minimum_volume(fixed, contribution)
+        except g.Blocked as blocked:
+            caught.append(str(blocked)[:12])
+    g.equal(len(caught), 2); g.equal(caught[0] != caught[1], True)
+    g.equal(minimum_volume('725.25', '-1.00'), Decimal('-725'))  # a negative contribution yields a negative volume
+    g.equal(minimum_volume('725.25', '-1.00') < 0, True)  # arithmetically fine and not a supported volume
+    g.equal(minimum_volume('725.25', '-1.00', rounding=ROUND_UP), Decimal('-726'))
+    g.equal(minimum_volume('725.25', '-1.00') == minimum_volume('725.25', '-1.00', rounding=ROUND_UP), False)
+    g.equal(Decimal('-65.9').to_integral_value(ROUND_CEILING), Decimal('-65'))
+    g.equal(Decimal('-65.9').to_integral_value(ROUND_UP), Decimal('-66'))
+    g.equal(minimum_volume('660.00', '11.00'), Decimal('60'))  # an exact quotient is not rounded up
+    g.equal(profit(60, '11.00', '660.00'), Decimal('0.00'))
+    whole = volume_range(0, 101, step=1)
+    g.equal(len(whole), 101); g.equal(whole[0], 0); g.equal(whole[-1], 100)
+    drifting = volume_range(0, 1, step=0.1)
+    g.equal(len(drifting), 10); g.equal(drifting[-1], 0.9)  # the declared endpoint is not enumerated
+    g.equal(0.7 in drifting, False)  # nor is a value the declared step should produce
+    g.equal(len(volume_range(0, 1.0001, step=0.1)), 11)
+    return {'zero_and_undetermined_raise_different_exceptions': True,
+            'negative_contribution_yields_a_negative_volume': True,
+            'ceiling_and_up_disagree_on_negatives': True, 'float_step_drops_the_endpoint': True}
+
+
+def run() -> dict:
+    g.ASSERTIONS = 0; rows = []
+    for i, fn in C:
+        before = g.ASSERTIONS
+        try: r = fn(); state = 'passed'; error = None
+        except Exception: r = {}; state = 'failed'; error = traceback.format_exc()
+        rows.append({'proof': i, 'test': fn.__name__, 'status': state, 'assertions': g.ASSERTIONS - before, 'result': r, 'error': error})
+    packages = ['apportionment', 'largest-remainder', 'numpy', 'odfpy', 'openpyxl', 'pandas',
+                'pandera', 'PyMuPDF', 'python-pptx', 'rapidfuzz']
+    here = Path(__file__).resolve().parent
+    return {'scope': 'Bounded authored cash-flow, presentation, PDF, lexical, OpenDocument, chart, expense, allocation and break-even fixtures and reproduced library defaults; the original P161-P170 chains and their artifacts were not rerun.',
+            'test_cases': len(rows), 'passed': sum(r['status'] == 'passed' for r in rows), 'failed': sum(r['status'] == 'failed' for r in rows),
+            'assertions': g.ASSERTIONS, 'full_chains_executed': 0, 'network_calls': 0, 'business_actions': 0,
+            'source_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+            'dependency_sha256': {name: hashlib.sha256((here / name).read_bytes()).hexdigest() for name in ['handoff_guards_v1.py']},
+            'library_versions': {n: importlib.metadata.version(n) for n in packages}, 'results': rows}
+
+
+if __name__ == '__main__':
+    p = argparse.ArgumentParser(); p.add_argument('--report', type=Path, required=True)
+    args = p.parse_args()
+    result = run(); args.report.parent.mkdir(parents=True, exist_ok=True)
+    args.report.write_text(json.dumps(result, indent=2, sort_keys=True, allow_nan=False) + '\n')
+    print(json.dumps({k: result[k] for k in ['test_cases', 'passed', 'failed', 'assertions']}))
+    if result['failed']:
+        print('\n'.join(r['error'] for r in result['results'] if r['error'])); raise SystemExit(1)
+```
+
+## Fresh local guard evidence: guards-v17.json
+
+Result file SHA256 2bc238c9a3e4e6084be0b0185accc047fbca5645cd0616e5eb1244c48abfcb80; bytes 5305. Ten cases passed, zero failed, 173 assertions, full_chains_executed 0, network_calls 0, business_actions 0; a second run of the same module produced byte-identical output.
+
+```json
+{
+  "assertions": 173,
+  "business_actions": 0,
+  "dependency_sha256": {
+    "handoff_guards_v1.py": "2b3138b692ecfd02b76ae34bdb001f5046608bb2983d8709d6c55c0765f7c9b8"
+  },
+  "failed": 0,
+  "full_chains_executed": 0,
+  "library_versions": {
+    "PyMuPDF": "1.28.2",
+    "apportionment": "1.0",
+    "largest-remainder": "0.1.0",
+    "numpy": "2.4.6",
+    "odfpy": "1.4.1",
+    "openpyxl": "3.1.5",
+    "pandas": "2.2.3",
+    "pandera": "0.33.1",
+    "python-pptx": "1.0.2",
+    "rapidfuzz": "3.14.6"
+  },
+  "network_calls": 0,
+  "passed": 10,
+  "results": [
+    {
+      "assertions": 15,
+      "error": null,
+      "proof": 161,
+      "result": {
+        "absent_classification_is_dropped_not_zeroed": true,
+        "coverage_is_a_schema_and_an_index_operation": true,
+        "duplicate_unknown_and_missing_are_named_separately": true,
+        "fill_value_fabricates_a_measurement": true
+      },
+      "status": "passed",
+      "test": "a_schema_names_the_identifier_a_set_comparison_would_hide"
+    },
+    {
+      "assertions": 15,
+      "error": null,
+      "proof": 162,
+      "result": {
+        "has_notes_slide_is_the_non_mutating_test": true,
+        "notes_slide_property_mutates_the_package": true,
+        "notes_text_joins_paragraphs_with_a_newline": true,
+        "parts_added_by_a_read": 5,
+        "shape_text_raises_on_a_picture": true
+      },
+      "status": "passed",
+      "test": "reading_the_notes_property_creates_the_notes"
+    },
+    {
+      "assertions": 23,
+      "error": null,
+      "proof": 163,
+      "result": {
+        "exact_comparison_is_the_only_filter": true,
+        "search_for_is_ascii_case_insensitive": true,
+        "search_for_matches_across_a_line_break": true,
+        "set_info_persists_without_update": true,
+        "textbox_of_a_hit_crosses_lines": true
+      },
+      "status": "passed",
+      "test": "a_matched_rectangle_is_not_the_matched_phrase"
+    },
+    {
+      "assertions": 17,
+      "error": null,
+      "proof": 164,
+      "result": {
+        "cutoff_meaning_flips_with_the_scorer": true,
+        "default_limit_truncates_ties": true,
+        "processor_default_is_none": true,
+        "ties_dropped": 6,
+        "transposition_needs_the_damerau_metric": true,
+        "uppercase_query_returns_nothing": true
+      },
+      "status": "passed",
+      "test": "the_default_limit_drops_the_ties_the_chain_promises"
+    },
+    {
+      "assertions": 14,
+      "error": null,
+      "proof": 165,
+      "result": {
+        "flat_paragraph_list_includes_table_cells": true,
+        "paragraph_counts_disagree": true,
+        "table_extraction_welds_cells": true,
+        "whitespace_elements_are_expanded": true
+      },
+      "status": "passed",
+      "test": "a_flat_paragraph_list_is_not_the_document_body"
+    },
+    {
+      "assertions": 14,
+      "error": null,
+      "proof": 166,
+      "result": {
+        "attribute_edit_leaves_display_text_stale": true,
+        "cached_formula_result_stays_stale": true,
+        "formula_text_survives_the_edit": true,
+        "recalculation_is_load_bearing": true
+      },
+      "status": "passed",
+      "test": "the_typed_value_moves_and_the_displayed_text_does_not"
+    },
+    {
+      "assertions": 17,
+      "error": null,
+      "proof": 167,
+      "result": {
+        "cached_amounts_are_floats": true,
+        "embedded_workbook_drops_trailing_cents": true,
+        "replace_data_rebuilds_the_workbook": true,
+        "severed_workbook_fails_with_a_bare_assert": true,
+        "unknown_value_survives_as_none": true
+      },
+      "status": "passed",
+      "test": "a_currency_amount_becomes_a_float_and_the_workbook_can_be_severed"
+    },
+    {
+      "assertions": 18,
+      "error": null,
+      "proof": 168,
+      "result": {
+        "counter_finds_the_reused_receipt": true,
+        "decimal_times_float_raises": true,
+        "float_and_string_paths_agree_at_this_magnitude": true,
+        "json_admits_nan_and_infinity": true,
+        "json_numbers_arrive_as_floats": true
+      },
+      "status": "passed",
+      "test": "a_rate_that_survives_json_is_no_longer_the_declared_rate"
+    },
+    {
+      "assertions": 16,
+      "error": null,
+      "proof": 169,
+      "result": {
+        "apportionment_loses_a_cent_on_a_credit": true,
+        "credit_pool_has_no_conserving_primitive": true,
+        "largest_remainder_refuses_a_negative_total": true,
+        "missing_weight_holds_the_pool": true
+      },
+      "status": "passed",
+      "test": "no_researched_primitive_conserves_the_credit_pool"
+    },
+    {
+      "assertions": 24,
+      "error": null,
+      "proof": 170,
+      "result": {
+        "ceiling_and_up_disagree_on_negatives": true,
+        "float_step_drops_the_endpoint": true,
+        "negative_contribution_yields_a_negative_volume": true,
+        "zero_and_undetermined_raise_different_exceptions": true
+      },
+      "status": "passed",
+      "test": "two_exceptions_mean_no_break_even_and_a_negative_one_means_nothing"
+    }
+  ],
+  "scope": "Bounded authored cash-flow, presentation, PDF, lexical, OpenDocument, chart, expense, allocation and break-even fixtures and reproduced library defaults; the original P161-P170 chains and their artifacts were not rerun.",
+  "source_sha256": "5a8a0eef367e79b7eb7d92f3593cef61bf47d007bd1bcfda4d6355c7d4592b67",
+  "test_cases": 10
+}
+```
+
+Checkpoint coverage: 170 of 300 proofs carry a hardening record. Prior cumulative TXT SHA256 59a86dfcae9fc85001ab8a6d037b6b125f5c72ea945593d209431bfc13e02eb1.
