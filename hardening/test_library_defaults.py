@@ -486,6 +486,48 @@ def test_working_day_membership_agrees_between_the_two_libraries(day):
                            bool(np.is_busday(np.datetime64(day.isoformat()), busdaycal=NUMPY_CALENDAR)))
 
 
+def _numpy_offset_rolling(day, count, roll):
+    return datetime.date.fromisoformat(
+        str(np.busday_offset(np.datetime64(day.isoformat()), count, roll=roll, busdaycal=NUMPY_CALENDAR)))
+
+
+@given(ANY_2026_DAY, st.integers(min_value=1, max_value=20))
+@SLOW
+def test_workalendar_forward_counting_is_the_roll_numpy_calls_backward(day, count):
+    """The divergence above is not between two calendars, it is between two of the roll rules numpy already
+    documents. numpy 2.4.6 states that busday_offset "First adjusts the date to fall on a valid day according
+    to the ``roll`` rule, then applies offsets", and its own examples label roll='forward' with offset 0 as
+    "First business day on or after a date" and roll='backward' with offset 1 as "First business day after a
+    date". workalendar 17.0.0 documents no convention at all: add_working_days says only "Add `delta` working
+    days to the date", and its loop steps one calendar day at a time from the anchor and counts a day only
+    when is_working_day accepts it, so the anchor is never counted. That is numpy's roll='backward' exactly,
+    on every day of the year and not only on weekends."""
+    npt.assert_array_equal(WORKWEEK.add_working_days(day, count),
+                           _numpy_offset_rolling(day, count, 'backward'))
+
+
+@given(ANY_2026_DAY, st.integers(min_value=1, max_value=20))
+@SLOW
+def test_a_backward_offset_swaps_which_roll_the_two_libraries_share(day, count):
+    """Going the other way the correspondence flips: workalendar's negative delta matches roll='forward'.
+    The rule is that workalendar rolls the anchor away from the direction of travel, so neither roll matches
+    it in both directions and a chain cannot pick one roll and be right about both."""
+    npt.assert_array_equal(WORKWEEK.add_working_days(day, -count),
+                           _numpy_offset_rolling(day, -count, 'forward'))
+
+
+@given(ANY_2026_DAY.filter(lambda day: not bool(np.is_busday(np.datetime64(day.isoformat()),
+                                                             busdaycal=NUMPY_CALENDAR))),
+       st.integers(min_value=1, max_value=20))
+@SLOW
+def test_the_numpy_default_refuses_a_non_working_anchor_outright(day, count):
+    """numpy's documented default is roll='raise', "means to raise an exception for an invalid day", so the
+    'forward' the chains pass is a choice a person made and not a default anyone inherited. Called without it
+    on an anchor that is not a working day, the primitive refuses rather than answering."""
+    with pytest.raises(ValueError):
+        np.busday_offset(np.datetime64(day.isoformat()), count, busdaycal=NUMPY_CALENDAR)
+
+
 # ---------------------------------------------------------------- time zones and parsing
 NEW_YORK = 'America/New_York'
 
