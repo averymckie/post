@@ -16546,3 +16546,864 @@ Result file SHA256 5a8bc061e3f923569e32e2956e72344d927401b0548cc045cf3dc66cb20b7
 ```
 
 Checkpoint coverage: 30 of 300 proof-specific handoff amendments written, through P30. Prior cumulative TXT SHA256 907ec981f516c2416e32e7731beb369bf0313eac57e81ae090ba0f0162c9c097.
+
+## Checkpoint integrity and environment for this batch
+
+Base: the TXT as committed after batch 3 (SHA256 0919135f7f840310418aef6feaec823354722653733390823010136db37b1552, 1086744 bytes); it is the prior cumulative TXT SHA256 recorded at the end of this batch. Environment as in batch 3 plus rdflib 7.6.0, kuzu 0.11.3, mkdocs 1.6.1 and Markdown 3.10.3; pandas stays pinned at 2.2.3. DuckDB documentation became reachable at the docs/current path of the duckdb-web repository, so HD49-HD51 below carry the quoted sentences that HD29 and HD47 could only verify by execution. No network call occurs inside the guard run. handoff_guards_v4.py imports handoff_guards_v3.py for the BPMN fixtures, the sequence-flow graph, the execution witness, and the external-asset check; v1-v3 stay byte-identical under HG07.
+
+## Online-checked function references for this hardening batch
+[HD49] DuckDB timestamps: "Despite the name, a TIMESTAMP WITH TIME ZONE does not store time zone information. Instead, it only stores the INT64 number of non-leap microseconds since the Unix epoch." "When strings with UTC offsets are passed to a WITHOUT TIME ZONE type, the offsets or time zone specifications are ignored." "The conversion between strings with UTC offsets or time zone names and WITH TIME ZONE types is also unambiguous." The ICU extension implements binning and arithmetic under SET TimeZone. Checked on GitHub (duckdb-web, docs/current); confirms the batch-3 execution result.
+https://github.com/duckdb/duckdb-web/blob/main/docs/current/sql/data_types/timestamp.md
+[HD50] DuckDB FILTER: "The FILTER clause may optionally follow an aggregate function in a SELECT statement. This will filter the rows of data that are fed into the aggregate function in the same way that a WHERE clause filters rows, but localized to the specific aggregate function." Checked on GitHub (duckdb-web, docs/current).
+https://github.com/duckdb/duckdb-web/blob/main/docs/current/sql/query_syntax/filter.md
+[HD51] DuckDB PIVOT: "PIVOT <dataset> ON <columns> USING <values> GROUP BY <rows>"; without an IN list DuckDB "will find the distinct values in each ON clause column and create one new column for all combinations of those values"; with IN it will "only create a separate column for specific values". Checked on GitHub (duckdb-web, docs/current); executed with 1.5.5.
+https://github.com/duckdb/duckdb-web/blob/main/docs/current/sql/statements/pivot.md
+[HD52] pandas DataFrame.pivot_table fill_value: "Value to replace missing values with (in the resulting pivot table, after aggregation)"; dropna: "Do not include columns whose entries are all NaN"; columns come from the observed values, so DataFrame.reindex(index=..., columns=..., fill_value=0) declares the axes. Installed 2.2.3 docstring (the GitHub file references a shared docstring).
+https://github.com/pandas-dev/pandas/blob/v2.2.3/pandas/core/reshape/pivot.py
+[HD53] plotly Figure.add_hline: "Add a horizontal line to a plot or subplot that extends infinitely in the x-dimension"; "Shapes added with these methods are added as layout shapes". Checked on GitHub (plotly.py doc) and the installed 7.0.0 docstring.
+https://github.com/plotly/plotly.py/blob/main/doc/python/horizontal-vertical-shapes.md
+[HD54] pm4py.check_soundness "Checks if a given Petri net is a sound Workflow net (WF-net)" and returns (bool, diagnostics) from WOFLAN, whose steps run WF-net check, S-components, not-well-handled pairs, invariants, minimal coverability graph, dead tasks, liveness and deadlocks, with RETURN_ASAP_WHEN_NOT_SOUND early exits; pm4py.check_is_workflow_net checks a unique source, a unique sink, and that every node lies on a path between them. Checked on GitHub (release branch) and the installed 2.7.23.8 docstrings.
+https://github.com/process-intelligence-solutions/pm4py/blob/release/pm4py/algo/analysis/woflan/algorithm.py
+[HD55] pm4py BPMN-to-Petri-net conversion: each non-gateway node gets an entry place, one transition and an exit place; parallel and inclusive gateways with several inputs or outputs get an extra silent transition. Executed with 2.7.23.8: a node with two outgoing flows becomes one place consumed by two transitions (exclusive choice) and a node with two incoming flows one place fed by two transitions (exclusive merge). Checked on GitHub (release branch).
+https://github.com/process-intelligence-solutions/pm4py/blob/release/pm4py/objects/conversion/bpmn/variants/to_petri_net.py
+[HD56] pm4py.get_variants and get_variants_as_tuples return "A dictionary mapping activity tuples to their counts or lists of traces". Checked on GitHub (release branch) and the installed docstring.
+https://github.com/process-intelligence-solutions/pm4py/blob/release/pm4py/stats.py
+[HD57] networkx.is_directed_acyclic_graph: "Returns True if the graph G is a directed acyclic graph (DAG) or False if not." Checked on GitHub at tag networkx-3.6.1.
+https://github.com/networkx/networkx/blob/networkx-3.6.1/networkx/algorithms/dag.py
+[HD58] rdflib: URIRef logs "does not look like a valid URI, trying to serialize this will break" and the Turtle serializer raises for such an IRI (executed with 7.6.0); Literal equality "are done based on the lexical form", typed literals normalize; rdflib.compare.isomorphic "Compare graph for equality. Uses an algorithm to compute unique hashes which takes bnodes into account."; Graph.query initBindings: "Initial variable bindings to use. A type of 'prepared queries' can be realized by providing these bindings."; Namespace attribute access resolves inherited str methods (title is overridden in the source; count is not, executed). Checked on GitHub (term.py, compare.py, namespace/__init__.py, docs/intro_to_sparql.md) and the installed docstrings.
+https://github.com/RDFLib/rdflib/blob/main/rdflib/term.py
+[HD59] kuzu Connection.execute(query, parameters): "If a query string is given, a prepared statement will be created automatically"; QueryResult.get_all returns "All remaining rows in the query result"; Database(':memory:') creates an in-memory database. The repository is archived (read-only since Oct 10, 2025). Checked on GitHub and the installed 0.11.3 docstrings.
+https://github.com/kuzudb/kuzu/blob/master/tools/python_api/src_py/connection.py
+[HD60] Python-Markdown tables extension: _split_row and _split separate cells on unescaped pipes; _build_row states "We use align here rather than cells to ensure every row contains the same number of columns" and pads missing cells with empty text, so surplus cells are dropped (executed with 3.10.3). Checked on GitHub source.
+https://github.com/Python-Markdown/markdown/blob/master/markdown/extensions/tables.py
+[HD61] mkdocs.config.load_config(config_file, **kwargs): "Extra kwargs are passed to the configuration to replace any default values unless they themselves are None"; mkdocs.commands.build.build(config): "Perform a full site build" into config.site_dir with no network requirement. Executed with 1.6.1: the default theme with highlightjs enabled references https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/ assets; highlightjs false removes them. Checked on GitHub source.
+https://github.com/mkdocs/mkdocs/blob/master/mkdocs/config/base.py
+[HD62] python-docx Document.paragraphs: "The Paragraph instances in the document, in document order. Note that paragraphs within revision marks such as <w:ins> or <w:del> do not appear in this list." Paragraphs inside table cells are not in this list (executed with 1.2.0); Document.iter_inner_content: "Generate each Paragraph or Table in this document in document order." Checked on GitHub source.
+https://github.com/python-openxml/python-docx/blob/master/src/docx/document.py
+[HD63] clingo: "A grounder and solver for logic programs"; a rule with default negation (not discussed(E)) is evaluated under the stable-model semantics, so absence of a fact is treated as falsity (executed with 5.8.2). Checked on GitHub README; API references in HD45.
+https://github.com/potassco/clingo
+
+## Hardening batch: P31-P40
+
+### HARDENING P31 -- Chart thresholds must be data bound per meeting
+
+Original proof: P31  decisions -> chart -> page
+Source location: frozen master lines 761-776; original section SHA256 64d3af5c440174f9f6a3f171bf62aeaf73ee44b7361efcac2edab41094998904.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: add_hline places the threshold in layout.shapes, outside the data payload, and the recorded page draws one line at 10 for meetings whose historical voting population differs (P13).
+Handoff: decisions (P13) -> plotly bar with add_hline -> HTML page
+Failure path: A single threshold line encodes the 2026 roster for meetings from 2023-2025. A layout shape is invisible to a data readback, so a payload check cannot see which threshold was drawn. The majority flag and the drawn threshold come from different places and can disagree. The page loads plotly.js from a CDN (P24).
+Required repair: Carry the threshold per meeting as a data trace beside the attendance bars; check the majority flag against present and threshold from the same rows before drawing; compare the payload to the rows; embed plotly.js and verify that the page has no external asset.
+Function bridge: pydantic strict model; plotly.graph_objects.Bar and Scatter; plotly.io.to_json(validate=True); DeepDiff(zip_ordered_iterables=True); plotly.io.to_html(include_plotlyjs=True); lxml XPath through handoff_guards_v3.external_assets
+Positive acceptance: Three meetings with thresholds 9, 9 and 10 render two traces, present and threshold, whose payload equals the rows.
+Adverse acceptance: add_hline yields one data trace and a layout shape at 10 (reproduced). A flag that disagrees with its data blocks. A CDN page blocks. A string threshold blocks.
+Evidence and limit: guards-v4 case 31 on authored rows. The recorded attendance.html was not rebuilt; the historical thresholds remain unresolved (P13).
+References: HD05 HD26 HD34 HD38 HD53
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P32 -- A coverage matrix needs declared axes and conservation
+
+Original proof: P32  tagged actions -> coverage matrix -> workbook
+Source location: frozen master lines 777-793; original section SHA256 2f45f5d6621ad626dc50fb147c4791f1459b507956d71b8da8a2b9edbb6a1119.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: DuckDB PIVOT without an IN list and pandas pivot_table create columns only for meetings that appear in the tags; a meeting without a tagged action vanishes from the matrix.
+Handoff: tagged actions (P26) -> count per (meeting, action) -> one row per action, one column per meeting -> workbook
+Failure path: The recorded 9 x 8 matrix is complete only if every meeting and every action occurs in the tags. Tied tags count as coverage. Counts are presented as coverage without a denominator, and nothing checks that the matrix sums to the number of tags.
+Required repair: Take the axes from the authoritative decisions and required-actions tables and reindex the pivot with zero fill; count accepted tags only and report ties separately; require the matrix total to equal the accepted tags; block tags outside the declared axes and unknown states.
+Function bridge: pandas pivot_table(fill_value=0); DataFrame.reindex(index, columns, fill_value=0); Series.isin; DuckDB PIVOT ... IN (...) for the SQL form
+Positive acceptance: The fixture yields a 3 x 3 matrix with a zero column for the untagged meeting and a zero row for the untagged action; the total equals the accepted tags.
+Adverse acceptance: The m2 column is absent from both PIVOT and pivot_table (reproduced). A tag for an undeclared meeting blocks. An unknown state blocks.
+Evidence and limit: guards-v4 case 32 on authored tags. The recorded coverage_matrix.xlsx was not rebuilt.
+References: HD06 HD51 HD52
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P33 -- Negation as failure needs a coverage fact and tag states
+
+Original proof: P33  ordered steps, tagged steps -> undiscussed steps -> workbook
+Source location: frozen master lines 794-809; original section SHA256 beae142c4dafc0daf1ecdb4cae40d8d15728b4ed278ed15c012ad4bed7bbb884.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: never(E) :- step(E), not discussed(E) derives "never discussed" for a step whose only mentions were tied and for steps whose coverage is unknown; the recorded output lists the lemma "meeting" twice without identities.
+Handoff: ordered steps (P2) and tagged steps (P10) -> clingo complement -> workbook
+Failure path: Default negation reads absence as falsity. Tie-dropped tags (P10) and unmatched mentions become "never". No fact states that the tagging covered every mention. Rows keyed by lemma collide.
+Required repair: Ground steps by fact identity through the backend; keep tie facts; derive never only under coverage(complete) and no tie, possibly for ties, unknown otherwise; carry lemmas as attributes; block duplicate identities and unknown states.
+Function bridge: clingo Backend.add_atom and add_rule with Function and String symbols; Control.add, ground, solve; Model.symbols(shown=True); pandas.Index.has_duplicates
+Positive acceptance: With complete coverage the fixture yields never e3 and e4 (both lemma meeting) and possibly e2.
+Adverse acceptance: The closed-world program derives never for the tie-only step (reproduced). Without the coverage fact e3 and e4 are unknown, not never. A duplicate identity blocks. An unknown state blocks.
+Evidence and limit: guards-v4 case 33 on authored steps. The recorded 9 of 18 result was not rerun.
+References: HD09 HD45 HD63
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P34 -- An undecided structural check is not "sound: False"
+
+Original proof: P34  process model -> soundness proof
+Source location: frozen master lines 810-890; original section SHA256 25865984f4c4a661a12fd0ff799782be6870995a16c8c863db62e212318445bd. Revised chain 1: frozen master lines 3174-3181, SHA256 02f3f86a2acb3836836531e436598484d2a2b90bb731b55e09c7d8ae4a73bdbb; evidence after revision 1: frozen master lines 3718-3728, SHA256 b94183ca933e7c0b73d7c6cdc4a5ed242161277b9aa0b71c37d11a696596fc16.
+Finding: RECORDED STATE CONFLATION: the revised evidence records "sound: False" with the reason "not decided structurally" for the same process.pnml (SHA256 e75e4c1e...) that the original WOFLAN run recorded as "sound: True".
+Handoff: discovered Petri net (P8) -> WF-net check, acyclicity, marked-graph check -> soundness.json
+Failure path: An acyclic marked-graph workflow net is a sufficient condition for soundness; failing it decides nothing. Recording False for an undecided net contradicts the earlier True on identical bytes. The WOFLAN time budget that produced "did not finish within 420 s" in P35 is unmanaged.
+Required repair: Report one of sound, unsound, not_a_workflow_net, or unknown together with the deciding method; run the structural sufficient condition with source and sink degrees included; fall back to WOFLAN; record a time budget and report a timeout as unknown; never map undecided to False.
+Function bridge: pm4py.check_is_workflow_net; pm4py.check_soundness (WOFLAN); networkx.is_directed_acyclic_graph; place in-arc and out-arc counts as data
+Positive acceptance: An exclusive-choice net is structurally undecided and WOFLAN-sound; a sequence net is structurally sound; the method is named in each result.
+Adverse acceptance: The revised rule returns False for the WOFLAN-sound exclusive-choice net (reproduced). An AND-split with an XOR-join is unsound. A net with an orphan place is not a workflow net.
+Evidence and limit: guards-v4 case 34 on authored nets; the fixture nets finish immediately, so no time budget was exercised. The recorded receipt-xes net was not rerun.
+References: HD10 HD54 HD57
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P35 -- Two engines give uncontrolled flow opposite semantics and both report success
+
+Original proof: P35  process -> petri net -> soundness proof
+Source location: frozen master lines 891-918; original section SHA256 e67d75642a74733a16eb58aa5bcf8266def6418f9bf7b65ce4bff394bc6d3859. Revised chain 1: frozen master lines 3182-3191, SHA256 45f19a2c2bb4c0c37e8140a57bff2a585f06e8b50772425f892195f190d1713c; evidence after revision 1: frozen master lines 3729-3740, SHA256 9fc9e5313dcfc9a449a0701a612785a283c054e381cf9c827c4d4bbd9f0ea81a, and lines 3741-3752, SHA256 080fd8b7e457fb4fdb6492fb87ee99090d79cb30e6906256162ca3a1f4567317.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: pm4py's BPMN-to-Petri-net conversion turns a node's two outgoing flows into an exclusive choice and two incoming flows into an exclusive merge (WOFLAN: sound, the merged task fires once), while SpiffWorkflow (P29) runs both branches and the merged task twice; the P5 models declare no gateways.
+Handoff: BPMN (P5) -> pm4py.read_bpmn -> convert_to_petri_net -> soundness proof
+Failure path: The soundness verdict concerns the converted net, whose semantics are the converter's choice, not the model's. The recorded models have one incoming and one outgoing flow per task, so the engines coincide by structure, not by contract. The converter variant is version dependent: the recorded 38 places and 26 transitions for 28 nodes differ from the entry/exit-place layout produced now.
+Required repair: Require every split and join to pass through an explicit gateway (P5 typed records) and block uncontrolled flow; keep the Petri view's place and transition degrees as the semantic record; run the execution witness (P29) and require agreement between the engines before any soundness claim is attached to the process.
+Function bridge: lxml XPath through handoff_guards_v3.sequence_flow_graph; networkx in_degree and out_degree; pm4py.objects.bpmn.importer.variants.lxml.import_from_string; pm4py.convert_to_petri_net; soundness_state from P34; SpiffWorkflow witness from P29
+Positive acceptance: The parallel-gateway fixture converts to an AND-join transition with two input places, runs a, b, c once, and is sound.
+Adverse acceptance: The merge fixture converts to exi_start with one producer and two consumers and ent_c with two producers and one consumer, is WOFLAN-sound, and runs a, b, c, c in SpiffWorkflow (reproduced). The gateway contract blocks it.
+Evidence and limit: guards-v4 case 35 on the batch-3 BPMN fixtures. The recorded usc5-552-doj and nodejs-governance nets were not rerun.
+References: HD10 HD42 HD43 HD54 HD55
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P36 -- Variants are tuples under an ordering contract
+
+Original proof: P36  log -> variants -> workbook
+Source location: frozen master lines 919-934; original section SHA256 082eeb7b298e9f39efccc76d4f621d0bc18492ae35d179495b85b6b805e74a6c.
+Finding: RECORDED REPRESENTATION GAP: joining activity names with " -> " collapses distinct variants; variants of tied events inherit the row-order dependence of P23.
+Handoff: log (P8) -> get_variants_as_tuples -> workbook strings
+Failure path: An activity name containing the separator makes two variants one string. Ties and lifecycle rows change the tuple. Counts appear without the case denominator.
+Required repair: Keep variants as tuples (JSON arrays); apply the P23 ordering contract (lifecycle filter, tie detection, declared tiebreak, stable sort); require the counts to sum to the number of cases; block duplicate event identities.
+Function bridge: pm4py.format_dataframe; pm4py.filter_event_attribute_values; DataFrame.duplicated; sort_values(kind='stable'); pm4py.get_variants; Series.nunique
+Positive acceptance: Two variants stay distinct as arrays with two cases in total; tied events give the same variants under both row orders once a tiebreak is declared.
+Adverse acceptance: The joined strings collapse to one (reproduced). Ties without a contract block. A duplicate event blocks.
+Evidence and limit: guards-v4 case 36 on authored events. The recorded 116 variants were not rerun.
+References: HD10 HD37 HD56
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P37 -- IRIs, typed literals, and bound queries for the knowledge graph
+
+Original proof: P37  facts -> knowledge graph -> query results -> workbook
+Source location: frozen master lines 935-968; original section SHA256 dac6c7cb1728f63e6fef81bf56a54bd0156cdb5d6f1147aeeec320f50f201ac7.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: an IRI minted from an identifier with a space fails Turtle serialization; Namespace attribute access returns str.count for a predicate named count (the trap noted after P191); a plain literal "1" and a typed literal 1 are different terms; SPARQL text built by interpolation is parsed, not bound.
+Handoff: facts (P1) -> rdflib Graph.add -> Turtle -> SPARQL -> workbook
+Failure path: Fact identifiers such as usc5-552-doj:u0001:s00#e7 carry ':' and '#'; unencoded characters break or change IRIs. A filter on 1 misses "1". A value interpolated into the query text can change the query. Nothing checks that the serialized graph parses back to the same graph.
+Required repair: Percent-encode local names; use Namespace item access only; type literals with declared datatypes; check the Turtle round trip with rdflib.compare.isomorphic; keep the query text fixed and bind values with initBindings.
+Function bridge: urllib.parse.quote(safe=''); Namespace.__getitem__; Literal(datatype=XSD.integer); Graph.serialize and parse; rdflib.compare.isomorphic; Graph.query(initBindings=...)
+Positive acceptance: Three facts round-trip isomorphic with the encoded identifier visible in Turtle; the typed query returns the two count-1 subjects.
+Adverse acceptance: The space IRI raises on serialization (reproduced). FACTS.count is not a term (reproduced). FILTER(?v = 1) misses the plain literal (reproduced). The interpolated hostile value raises a parse error while the bound query returns nothing.
+Evidence and limit: guards-v4 case 37 on authored facts. The recorded 4191-triple graph was not rebuilt.
+References: HD14 HD58
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P38 -- A graph database load needs parameters, endpoint checks, and typed rows
+
+Original proof: P38  facts -> graph database -> query results -> workbook
+Source location: frozen master lines 969-990; original section SHA256 a8286197deaa2fdc8d82cc7c9668cc31a25d8aa2df204e424e533f77790f286d.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: an interpolated Cypher CREATE stored a different value without an error; a relationship to an unknown node was silently not created; an integer passed for a STRING key was accepted.
+Handoff: facts (P1) -> kuzu CREATE NODE TABLE, CREATE REL TABLE, CREATE -> Cypher MATCH -> workbook
+Failure path: Values placed in query text change the statement. Edges whose endpoint is not in the node table vanish with a zero count. Untyped parameters are coerced. Result order is unspecified without ORDER BY. The kuzu repository is archived, so the primitive has no maintenance path.
+Required repair: Validate typed rows first; execute parameterized statements only; require one created relationship per edge; read back with ORDER BY and compare positionally; record the archived status as an environment risk.
+Function bridge: pydantic strict model; kuzu.Database(':memory:'); Connection.execute(query, parameters); QueryResult.get_all; DeepDiff(zip_ordered_iterables=True)
+Positive acceptance: A hostile lemma round-trips exactly through parameters; two events and one edge are stored and read back equal.
+Adverse acceptance: Interpolation stores "x" for the hostile value (reproduced). An edge to an unknown node creates zero rows (reproduced) and blocks. An integer identifier blocks at the typed row.
+Evidence and limit: guards-v4 case 38 on authored rows. The recorded 621-event database was not rebuilt.
+References: HD05 HD34 HD59
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P39 -- Site tables need escaped cells, local assets, and a readback
+
+Original proof: P39  ordered steps, facts -> pages -> site
+Source location: frozen master lines 991-1007; original section SHA256 a3ac97b2cc513249042fd371359b48091f6711967b6e4db5e990f0eac2d1dfb2.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: an unescaped pipe drops the rest of a cell; inline HTML in a cell is rendered; the default mkdocs theme references highlight.js on cdnjs.cloudflare.com; theme tables sit beside the content table.
+Handoff: rows -> markdown tables -> mkdocs build -> site pages
+Failure path: The recorded row counts (index 24, facts 1869) cannot detect a cell loss. Quoted source text containing '|', '<' or '&' changes on the page. External assets contradict the presentation contract. Nothing reads the site back against the rows.
+Required repair: Encode each cell (HTML escape, backslash before pipes) as a declared cell encoding; build with the theme's external highlighter disabled; read the content table back by its main-region role and compare positionally; block any external asset.
+Function bridge: markdown.markdown(extensions=['tables']); mkdocs.config.load_config; mkdocs.commands.build.build; lxml XPath //*[@role="main"]//table[1]; DeepDiff(zip_ordered_iterables=True); handoff_guards_v3.external_assets
+Positive acceptance: Three encoded rows with a pipe, a tag, and a line break round-trip through a built site with zero external assets.
+Adverse acceptance: "a | b" renders as "a" (reproduced). "<b>bold</b>" renders as an element (reproduced). The default theme references three cdnjs assets (reproduced).
+Evidence and limit: guards-v4 case 39 on authored rows. The recorded site was not rebuilt.
+References: HD26 HD34 HD60 HD61
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P40 -- Document readback keyed by identity in body order
+
+Original proof: P40  document -> steps' -> digest' ; digest', digest -> match
+Source location: frozen master lines 1008-1023; original section SHA256 ca731ab4a1dba48e5ed3778f98d642ad6c4be2955a79c9f4c92ec5d20038a059.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: Document.paragraphs omits text inside tables; keying rows by their text collapses duplicate steps (meeting, meeting) and csv_diff.compare reports no change.
+Handoff: document (P15) -> Document.paragraphs -> digest -> csv_diff.compare -> match
+Failure path: The recorded 24 of 24 match counts paragraphs; a table-backed step is invisible to it. Steps with equal lemmas collide under a text key. The comparison is by Python equality (P30).
+Required repair: Write and read typed step rows with identities through the table in body order; key by identity, never by text; compare positionally; block duplicate identities at write and at readback.
+Function bridge: pydantic strict model; Document.add_table; Document.iter_inner_content; Table.rows and _Cell.text; pandas.Index.has_duplicates; DeepDiff(zip_ordered_iterables=True)
+Positive acceptance: Two steps with the lemma meeting and different identities round-trip equal.
+Adverse acceptance: The paragraph-only readback returns only the heading (reproduced). A text-keyed dictionary drops a row and csv_diff sees no change (reproduced). A duplicated identity on readback blocks; a duplicate at write blocks.
+Evidence and limit: guards-v4 case 40 on authored steps. The recorded roundtrip.json was not rerun.
+References: HD21 HD34 HD41 HD62
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+## Embedded runnable local guard module: handoff_guards_v4.py
+
+SHA256 90029a6917216a0ded8b685dc48c496ae8479d6204115a8ec10f8488e4076841; bytes 31777. Save the following code block as handoff_guards_v4.py next to handoff_guards_v1.py, handoff_guards_v2.py and handoff_guards_v3.py.
+
+```python
+"""Fourth bounded adapter suite: P31-P40. Requires handoff_guards_v1.py, handoff_guards_v2.py and handoff_guards_v3.py
+from this TXT. Every comparison, join, pivot, grounding, conversion, serialization, query, build, and execution below is a
+library primitive call; local code declares fixtures and policies and turns primitive results into Blocked outcomes.
+All runtime inputs are authored fixtures. No network, model client, native Office application, or business action.
+Run: python handoff_guards_v4.py --report report.json
+"""
+from __future__ import annotations
+import argparse, hashlib, html as html_text, importlib.metadata, io, json, logging, os, tempfile, traceback, warnings
+from pathlib import Path
+from typing import Literal
+from urllib.parse import quote
+import clingo
+import docx
+import duckdb
+import kuzu
+import markdown
+import mkdocs.commands.build
+import mkdocs.config
+import networkx as nx
+import pandas as pd
+import plotly.graph_objects as go
+import plotly.io as pio
+import pm4py
+from csv_diff import compare as csv_compare
+from deepdiff import DeepDiff
+from docx.table import Table
+from lxml import html
+from pm4py.objects.bpmn.importer.variants import lxml as bpmn_lxml
+from pm4py.objects.petri_net.obj import Marking, PetriNet
+from pm4py.objects.petri_net.utils import petri_utils
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
+from rdflib import Graph, Literal as RdfLiteral, Namespace, URIRef
+from rdflib.compare import isomorphic
+from rdflib.namespace import XSD
+from rdflib.term import Node
+import handoff_guards_v1 as g
+import handoff_guards_v3 as g3
+warnings.simplefilter('ignore'); logging.disable(logging.WARNING)
+
+# ---------------------------------------------------------------- P31
+class AttendanceRow(BaseModel):
+    model_config = ConfigDict(strict=True, extra='forbid')
+    meeting: str = Field(min_length=1)
+    present: int = Field(ge=0)
+    threshold: int = Field(ge=1)
+    majority_reachable: bool
+
+
+def attendance_chart(rows: list[dict], *, include_plotlyjs) -> dict:
+    typed = [AttendanceRow.model_validate(r) for r in rows]
+    for r in typed:
+        if r.majority_reachable != (r.present >= r.threshold): raise g.Blocked('majority flag disagrees with present and threshold for ' + r.meeting)
+    x = [r.meeting for r in typed]
+    fig = go.Figure([go.Bar(name='present', x=x, y=[r.present for r in typed]),
+                     go.Scatter(name='threshold', x=x, y=[r.threshold for r in typed], mode='lines+markers')])
+    data = json.loads(pio.to_json(fig, validate=True))['data']
+    diff = DeepDiff({'present': [r.present for r in typed], 'threshold': [r.threshold for r in typed]},
+                    {'present': data[0]['y'], 'threshold': data[1]['y']}, zip_ordered_iterables=True)
+    if diff: raise g.Blocked('chart payload differs from the rows: ' + diff.to_json())
+    page = pio.to_html(fig, include_plotlyjs=include_plotlyjs, full_html=True, div_id='attendance', validate=True)
+    external = g3.external_assets(page)
+    if external: raise g.Blocked('external asset dependency: ' + external[0])
+    return {'traces': [t['name'] for t in data], 'meetings': len(typed), 'bytes': len(page.encode())}
+
+# ---------------------------------------------------------------- P32
+def coverage_matrix(tags: list[dict], *, actions: list[str], meetings: list[str]) -> dict:
+    df = pd.DataFrame(tags)
+    if not df['meeting'].isin(meetings).all() or not df['action'].isin(actions).all(): raise g.Blocked('tag outside the declared axes')
+    if set(df['state']) - {'accepted', 'tie'}: raise g.Blocked('unknown tag state')
+    accepted = df[df['state'] == 'accepted']
+    matrix = accepted.assign(n=1).pivot_table(index='action', columns='meeting', values='n', aggfunc='sum', fill_value=0)
+    matrix = matrix.reindex(index=actions, columns=meetings, fill_value=0)
+    if int(matrix.to_numpy().sum()) != len(accepted): raise g.Blocked('matrix does not conserve the accepted tags')
+    return {'meetings': list(meetings), 'matrix': {a: [int(v) for v in matrix.loc[a]] for a in actions},
+            'accepted': int(len(accepted)), 'tied_excluded': int((df['state'] == 'tie').sum())}
+
+# ---------------------------------------------------------------- P33
+CLOSED_WORLD = 'never(E) :- step(E), not discussed(E). #show never/1.'
+THREE_VALUED = """never(E) :- step(E), not discussed(E), not tie(E), coverage(complete).
+possibly(E) :- step(E), tie(E).
+unknown(E) :- step(E), not discussed(E), not tie(E), not coverage(complete).
+#show never/1. #show possibly/1. #show unknown/1."""
+
+
+def ground_steps(steps: list[dict], tags: list[dict], *, coverage: str, program: str) -> dict:
+    ctl = clingo.Control(['0', '--warn=no-atom-undefined'])
+    with ctl.backend() as be:
+        for s in steps: be.add_rule([be.add_atom(clingo.Function('step', [clingo.String(s['id'])]))])
+        for t in tags:
+            if t['state'] not in {'accepted', 'tie'}: raise g.Blocked('unknown tag state')
+            name = 'discussed' if t['state'] == 'accepted' else 'tie'
+            be.add_rule([be.add_atom(clingo.Function(name, [clingo.String(t['step'])]))])
+        if coverage == 'complete': be.add_rule([be.add_atom(clingo.Function('coverage', [clingo.Function('complete')]))])
+    ctl.add('base', [], program); ctl.ground([('base', [])])
+    shown = []; ctl.solve(on_model=lambda m: shown.extend(m.symbols(shown=True)))
+    out = {}
+    for s in shown: out.setdefault(s.name, []).append(s.arguments[0].string)
+    return {k: sorted(v) for k, v in sorted(out.items())}
+
+
+def undiscussed_steps(steps: list[dict], tags: list[dict], *, coverage: str) -> dict:
+    ids = [s['id'] for s in steps]
+    if pd.Index(ids).has_duplicates: raise g.Blocked('duplicate step identity')
+    result = ground_steps(steps, tags, coverage=coverage, program=THREE_VALUED)
+    return {'never': result.get('never', []), 'possibly': result.get('possibly', []), 'unknown': result.get('unknown', []),
+            'lemmas': {s['id']: s['lemma'] for s in steps}, 'coverage': coverage}
+
+# ---------------------------------------------------------------- P34
+def build_net(name: str, places: list[str], transitions: list[tuple[str, str]], arcs: list[tuple[str, str]], source: str, sink: str):
+    net = PetriNet(name); P = {p: PetriNet.Place(p) for p in places}; T = {n: PetriNet.Transition(n, label) for n, label in transitions}
+    for p in P.values(): net.places.add(p)
+    for t in T.values(): net.transitions.add(t)
+    for a, b in arcs: petri_utils.add_arc_from_to(P.get(a) or T[a], T.get(b) or P[b], net)
+    return net, Marking({P[source]: 1}), Marking({P[sink]: 1})
+
+
+def xor_net(): return build_net('xor', ['source', 'p1', 'p2', 'sink'], [('ta', 'A'), ('tb', 'B'), ('tc', 'C'), ('td', 'D')],
+                                [('source', 'ta'), ('source', 'tb'), ('ta', 'p1'), ('tb', 'p2'), ('p1', 'tc'), ('p2', 'td'), ('tc', 'sink'), ('td', 'sink')], 'source', 'sink')
+
+
+def and_xor_net(): return build_net('and_xor', ['source', 'q1', 'q2', 'sink'], [('t0', 'split'), ('t1', 'A'), ('t2', 'B')],
+                                    [('source', 't0'), ('t0', 'q1'), ('t0', 'q2'), ('q1', 't1'), ('q2', 't2'), ('t1', 'sink'), ('t2', 'sink')], 'source', 'sink')
+
+
+def sequence_net(): return build_net('sequence', ['source', 'p1', 'sink'], [('ta', 'A'), ('tb', 'B')],
+                                     [('source', 'ta'), ('ta', 'p1'), ('p1', 'tb'), ('tb', 'sink')], 'source', 'sink')
+
+
+def structural_decision(net, im, fm) -> dict:
+    workflow = bool(pm4py.check_is_workflow_net(net))
+    # marked graph: every place has one producing and one consuming transition; the source has none before it and the sink none after it
+    marked = all(len(p.in_arcs) == (0 if p in im else 1) and len(p.out_arcs) == (0 if p in fm else 1) for p in net.places)
+    acyclic = bool(nx.is_directed_acyclic_graph(nx.DiGraph([(a.source.name, a.target.name) for a in net.arcs])))
+    return {'workflow_net': workflow, 'marked_graph': marked, 'acyclic': acyclic}
+
+
+def revised_rule(net, im, fm) -> bool:
+    # The recorded revision: True only for an acyclic marked-graph workflow net, False otherwise.
+    s = structural_decision(net, im, fm); return s['workflow_net'] and s['marked_graph'] and s['acyclic']
+
+
+def soundness_state(net, im, fm) -> dict:
+    s = structural_decision(net, im, fm)
+    if not s['workflow_net']: return {'state': 'not_a_workflow_net', 'method': 'structural', **s}
+    if s['marked_graph'] and s['acyclic']: return {'state': 'sound', 'method': 'structural: acyclic marked-graph workflow net', **s}
+    sound, _ = pm4py.check_soundness(net, im, fm)
+    return {'state': 'sound' if sound else 'unsound', 'method': 'woflan after structural undecided', **s}
+
+# ---------------------------------------------------------------- P35
+def gateway_contract(xml_text: str) -> nx.DiGraph:
+    graph = g3.sequence_flow_graph(xml_text)
+    offenders = sorted(n for n, d in graph.nodes(data=True) if not d['kind'].endswith('Gateway') and (graph.in_degree(n) > 1 or graph.out_degree(n) > 1))
+    if offenders: raise g.Blocked('uncontrolled flow without a gateway at ' + ','.join(offenders) + ': split and join semantics undeclared')
+    return graph
+
+
+def petri_view(xml_text: str) -> dict:
+    net, im, fm = pm4py.convert_to_petri_net(bpmn_lxml.import_from_string(xml_text))
+    places = {p.name: (len(p.in_arcs), len(p.out_arcs)) for p in net.places}
+    transitions = {t.label: (len(t.in_arcs), len(t.out_arcs)) for t in net.transitions if t.label}
+    return {'places': places, 'transitions': transitions, 'soundness': soundness_state(net, im, fm)}
+
+# ---------------------------------------------------------------- P36
+def ordered_events(events: list[dict], *, lifecycle: str = 'complete', tiebreak: str | None = None) -> pd.DataFrame:
+    df = pd.DataFrame(events)
+    if df[['case_id', 'event_id']].duplicated().any(): raise g.Blocked('duplicate event identity')
+    df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True, errors='raise')
+    df = pm4py.format_dataframe(df, case_id='case_id', activity_key='activity', timestamp_key='timestamp')
+    kept = pm4py.filter_event_attribute_values(df, 'lifecycle', [lifecycle], level='event', retain=True)
+    if kept.duplicated([g3.CASE, g3.TS], keep=False).any() and tiebreak is None: raise g.Blocked('timestamp ties need an ordering contract')
+    return kept.sort_values([g3.CASE, g3.TS] + ([tiebreak] if tiebreak else []), kind='stable').reset_index(drop=True)
+
+
+def checked_variants(events: list[dict], *, tiebreak: str | None = None) -> dict:
+    kept = ordered_events(events, tiebreak=tiebreak)
+    variants = pm4py.get_variants(kept, activity_key=g3.ACT, timestamp_key=g3.TS, case_id_key=g3.CASE)
+    counted = {k: (v if isinstance(v, int) else len(v)) for k, v in variants.items()}
+    if sum(counted.values()) != int(kept[g3.CASE].nunique()): raise g.Blocked('variant counts do not conserve the cases')
+    return {'variants': [{'trace': list(k), 'cases': int(v)} for k, v in sorted(counted.items())], 'cases': int(sum(counted.values()))}
+
+# ---------------------------------------------------------------- P37
+FACTS = Namespace('http://example.org/facts/')
+COUNT_QUERY = 'SELECT ?s WHERE { ?s <http://example.org/facts/count> ?v FILTER(?v = ?x) }'
+
+
+def fact_graph(facts: list[dict]) -> tuple[Graph, str]:
+    graph = Graph()
+    for f in facts:
+        subject = FACTS[quote(f['id'], safe='')]
+        graph.add((subject, FACTS['lemma'], RdfLiteral(f['lemma'])))
+        graph.add((subject, FACTS['count'], RdfLiteral(int(f['count']), datatype=XSD.integer)))
+    turtle = graph.serialize(format='turtle')
+    if not isomorphic(graph, Graph().parse(data=turtle, format='turtle')): raise g.Blocked('turtle round trip is not isomorphic')
+    return graph, turtle
+
+
+def facts_with_count(graph: Graph, value: int) -> list[str]:
+    return sorted(str(r.s) for r in graph.query(COUNT_QUERY, initBindings={'x': RdfLiteral(int(value), datatype=XSD.integer)}))
+
+# ---------------------------------------------------------------- P38
+class EventNode(BaseModel):
+    model_config = ConfigDict(strict=True, extra='forbid')
+    id: str = Field(min_length=1)
+    lemma: str = Field(min_length=1)
+
+SCHEMA = ['CREATE NODE TABLE Event(id STRING, lemma STRING, PRIMARY KEY(id))', 'CREATE REL TABLE precedes(FROM Event TO Event)']
+
+
+def graph_store(events: list[dict], edges: list[tuple[str, str]]) -> dict:
+    typed = [EventNode.model_validate(e) for e in events]
+    conn = kuzu.Connection(kuzu.Database(':memory:'))
+    for ddl in SCHEMA: conn.execute(ddl)
+    for e in typed: conn.execute('CREATE (:Event {id: $id, lemma: $lemma})', parameters={'id': e.id, 'lemma': e.lemma})
+    for a, b in edges:
+        created = conn.execute('MATCH (a:Event {id: $a}), (b:Event {id: $b}) CREATE (a)-[:precedes]->(b) RETURN count(*)', parameters={'a': a, 'b': b}).get_all()[0][0]
+        if created != 1: raise g.Blocked('edge %s->%s references an unknown event' % (a, b))
+    rows = conn.execute('MATCH (e:Event) RETURN e.id, e.lemma ORDER BY e.id').get_all()
+    if DeepDiff(sorted([[e.id, e.lemma] for e in typed]), rows, zip_ordered_iterables=True): raise g.Blocked('graph readback differs from the rows')
+    edge_count = conn.execute('MATCH (:Event)-[r:precedes]->(:Event) RETURN count(r)').get_all()[0][0]
+    return {'events': len(rows), 'precedes': int(edge_count)}
+
+# ---------------------------------------------------------------- P39
+def table_markdown(rows: list[dict], columns: list[str]) -> str:
+    cell = lambda v: html_text.escape(str(v)).replace('|', '\\|')
+    lines = ['| ' + ' | '.join(columns) + ' |', '|' + '|'.join(' --- ' for _ in columns) + '|']
+    lines += ['| ' + ' | '.join(cell(r[c]) for c in columns) + ' |' for r in rows]
+    return '\n'.join(lines) + '\n'
+
+
+def rendered_rows(html_page: str, table_xpath: str) -> list[list[str]]:
+    return [[c.text_content() for c in r.xpath('./td')] for r in html.fromstring(html_page).xpath(table_xpath + '//tbody/tr')]
+
+
+def build_site(md_text: str, *, highlightjs: bool) -> str:
+    root = tempfile.mkdtemp(); os.makedirs(root + '/docs')
+    Path(root, 'docs', 'index.md').write_text(md_text)
+    Path(root, 'mkdocs.yml').write_text('site_name: proofs\nmarkdown_extensions: [tables]\ntheme:\n  name: mkdocs\n  highlightjs: %s\n' % str(highlightjs).lower())
+    mkdocs.commands.build.build(mkdocs.config.load_config(config_file=root + '/mkdocs.yml', site_dir=root + '/site'))
+    return Path(root, 'site', 'index.html').read_text()
+
+
+def checked_site(rows: list[dict], columns: list[str]) -> dict:
+    page = build_site(table_markdown(rows, columns), highlightjs=False)
+    external = g3.external_assets(page)
+    if external: raise g.Blocked('external asset dependency: ' + external[0])
+    back = rendered_rows(page, '//*[@role="main"]//table[1]')
+    diff = DeepDiff([[str(r[c]) for c in columns] for r in rows], back, zip_ordered_iterables=True)
+    if diff: raise g.Blocked('site table differs from the rows: ' + diff.to_json())
+    return {'rows': len(back), 'external_assets': 0}
+
+# ---------------------------------------------------------------- P40
+class StepRow(BaseModel):
+    model_config = ConfigDict(strict=True, extra='forbid')
+    id: str = Field(min_length=1)
+    lemma: str = Field(min_length=1)
+    quote: str = Field(min_length=1)
+
+STEP_COLUMNS = list(StepRow.model_fields)
+
+
+def step_document(steps: list[dict]) -> bytes:
+    typed = [StepRow.model_validate(s) for s in steps]
+    if pd.Index([s.id for s in typed]).has_duplicates: raise g.Blocked('duplicate step identity')
+    d = docx.Document(); d.add_paragraph('ordered steps'); t = d.add_table(rows=1, cols=len(STEP_COLUMNS))
+    for cell, name in zip(t.rows[0].cells, STEP_COLUMNS): cell.text = name
+    for s in typed:
+        for cell, name in zip(t.add_row().cells, STEP_COLUMNS): cell.text = getattr(s, name)
+    buf = io.BytesIO(); d.save(buf); return buf.getvalue()
+
+
+def read_step_document(data: bytes) -> list[dict]:
+    d = docx.Document(io.BytesIO(data))
+    tables = [b for b in d.iter_inner_content() if isinstance(b, Table)]
+    if len(tables) != 1: raise g.Blocked('expected exactly one step table in body order')
+    rows = [StepRow.model_validate(dict(zip(STEP_COLUMNS, [c.text for c in r.cells]))).model_dump() for r in tables[0].rows[1:]]
+    if pd.Index([r['id'] for r in rows]).has_duplicates: raise g.Blocked('duplicate step identity on readback')
+    return rows
+
+C = []
+def case(i):
+    def reg(fn): C.append((i, fn)); return fn
+    return reg
+
+
+@case(31)
+def threshold_bound_to_data():
+    rows = [{'meeting': 'tsc-2023-11-08', 'present': 6, 'threshold': 9, 'majority_reachable': False},
+            {'meeting': 'tsc-2023-12-06', 'present': 10, 'threshold': 9, 'majority_reachable': True},
+            {'meeting': 'tsc-2025-02-05', 'present': 6, 'threshold': 10, 'majority_reachable': False}]
+    fig = go.Figure(go.Bar(x=[r['meeting'] for r in rows], y=[r['present'] for r in rows])); fig.add_hline(y=10)
+    payload = json.loads(pio.to_json(fig))
+    g.equal([s['y0'] for s in payload['layout']['shapes']], [10]); g.equal(len(payload['data']), 1)  # the line is a layout shape, not data
+    out = attendance_chart(rows, include_plotlyjs=True)
+    g.equal(out['traces'], ['present', 'threshold'])
+    g.rejects(g.Blocked, lambda: attendance_chart([dict(rows[1], majority_reachable=False)], include_plotlyjs=True))
+    g.rejects(g.Blocked, lambda: attendance_chart(rows, include_plotlyjs='cdn'))
+    g.rejects(ValidationError, lambda: attendance_chart([dict(rows[0], threshold='10')], include_plotlyjs=True))
+    return {'hline_is_layout_shape_reproduced': True, 'per_meeting_threshold_in_data': True, 'flag_checked_against_data': True,
+            'cdn_page': 'blocked', 'original_chain_rerun': False}
+
+
+@case(32)
+def coverage_matrix_declared_axes():
+    tags = [{'meeting': 'm1', 'action': 'approve', 'state': 'accepted'}, {'meeting': 'm1', 'action': 'open', 'state': 'accepted'},
+            {'meeting': 'm3', 'action': 'open', 'state': 'accepted'}, {'meeting': 'm3', 'action': 'approve', 'state': 'tie'}]
+    df = pd.DataFrame(tags); con = duckdb.connect(); con.register('tags', df)
+    pivoted = con.execute('PIVOT tags ON meeting USING count(*) GROUP BY action ORDER BY action').df()
+    g.equal([c for c in pivoted.columns if c != 'action'], ['m1', 'm3'])  # the absent meeting has no column
+    g.equal(list(df.assign(n=1).pivot_table(index='action', columns='meeting', values='n', aggfunc='sum', fill_value=0).columns), ['m1', 'm3'])
+    out = coverage_matrix(tags, actions=['approve', 'open', 'remedy'], meetings=['m1', 'm2', 'm3'])
+    g.equal(out['matrix'], {'approve': [1, 0, 0], 'open': [1, 0, 1], 'remedy': [0, 0, 0]}); g.equal(out['tied_excluded'], 1)
+    g.rejects(g.Blocked, lambda: coverage_matrix(tags + [{'meeting': 'm9', 'action': 'open', 'state': 'accepted'}], actions=['approve', 'open', 'remedy'], meetings=['m1', 'm2', 'm3']))
+    g.rejects(g.Blocked, lambda: coverage_matrix(tags + [{'meeting': 'm1', 'action': 'open', 'state': 'maybe'}], actions=['approve', 'open', 'remedy'], meetings=['m1', 'm2', 'm3']))
+    return {'absent_column_dropped_reproduced': 'duckdb PIVOT and pandas pivot_table', 'declared_axes_reindexed': True,
+            'ties_not_coverage': True, 'conservation_checked': True, 'original_chain_rerun': False}
+
+
+@case(33)
+def negation_as_failure_needs_coverage():
+    steps = [{'id': 'e1', 'lemma': 'share'}, {'id': 'e2', 'lemma': 'ensure'}, {'id': 'e3', 'lemma': 'meeting'}, {'id': 'e4', 'lemma': 'meeting'}]
+    tags = [{'step': 'e1', 'state': 'accepted'}, {'step': 'e2', 'state': 'tie'}]
+    g.equal(ground_steps(steps, tags, coverage='unknown', program=CLOSED_WORLD), {'never': ['e2', 'e3', 'e4']})  # the tie-only step counts as never discussed
+    complete = undiscussed_steps(steps, tags, coverage='complete')
+    g.equal((complete['never'], complete['possibly'], complete['unknown']), (['e3', 'e4'], ['e2'], []))
+    g.equal([complete['lemmas'][i] for i in complete['never']], ['meeting', 'meeting'])
+    partial = undiscussed_steps(steps, tags, coverage='unknown')
+    g.equal((partial['never'], partial['possibly'], partial['unknown']), ([], ['e2'], ['e3', 'e4']))
+    g.rejects(g.Blocked, lambda: undiscussed_steps(steps + [steps[0]], tags, coverage='complete'))
+    g.rejects(g.Blocked, lambda: undiscussed_steps(steps, tags + [{'step': 'e3', 'state': 'maybe'}], coverage='complete'))
+    return {'closed_world_never_for_tie_only_step_reproduced': True, 'three_valued_states': ['never', 'possibly', 'unknown'],
+            'coverage_fact_required_for_never': True, 'duplicate_lemma_steps_kept_distinct': True, 'original_chain_rerun': False}
+
+
+@case(34)
+def soundness_state_not_conflated():
+    xor = xor_net(); and_xor = and_xor_net(); seq = sequence_net()
+    g.equal(revised_rule(*xor), False); g.equal(soundness_state(*xor)['state'], 'sound')  # the revision's False is an undecided net that Woflan proves sound
+    g.equal(soundness_state(*xor)['method'], 'woflan after structural undecided')
+    g.equal(soundness_state(*and_xor)['state'], 'unsound'); g.equal(revised_rule(*and_xor), False)
+    g.equal(soundness_state(*seq), {'state': 'sound', 'method': 'structural: acyclic marked-graph workflow net', 'workflow_net': True, 'marked_graph': True, 'acyclic': True})
+    broken = build_net('broken', ['source', 'orphan', 'sink'], [('ta', 'A')], [('source', 'ta'), ('ta', 'sink')], 'source', 'sink')
+    g.equal(soundness_state(*broken)['state'], 'not_a_workflow_net')
+    return {'undecided_recorded_as_false_reproduced': True, 'states': ['sound', 'unsound', 'not_a_workflow_net'], 'method_named': True,
+            'woflan_time_budget': 'not applied; fixture nets finish immediately', 'original_chain_rerun': False}
+
+
+@case(35)
+def engine_semantics_of_uncontrolled_flow():
+    merge = petri_view(g3.BPMN_MERGE)
+    g.equal(merge['places']['exi_start'], (1, 2)); g.equal(merge['places']['ent_c'], (2, 1)); g.equal(merge['transitions']['c'], (1, 1))
+    g.equal(merge['soundness']['state'], 'sound')  # one branch runs and c fires once in the Petri view
+    g.equal(g3.run_witness(g3.BPMN_MERGE, 'proc'), ['a', 'b', 'c', 'c'])  # both branches run and c fires twice in SpiffWorkflow
+    g.rejects(g.Blocked, lambda: gateway_contract(g3.BPMN_MERGE))
+    join = petri_view(g3.BPMN_JOIN)
+    g.equal(join['transitions']['c'], (2, 1)); g.equal(join['soundness']['state'], 'sound')
+    g.equal(g3.run_witness(g3.BPMN_JOIN, 'proc'), ['a', 'b', 'c'])
+    g.equal(sorted(n for n, d in gateway_contract(g3.BPMN_JOIN).nodes(data=True) if d['kind'] != 'sequenceFlow'), ['a', 'b', 'c', 'end', 'join', 'split', 'start'])
+    return {'petri_conversion_exclusive_for_uncontrolled_flow': True, 'spiffworkflow_parallel_for_uncontrolled_flow': True,
+            'engines_disagree_yet_both_report_success': True, 'gateway_contract_blocks_uncontrolled_flow': True, 'original_chain_rerun': False}
+
+
+@case(36)
+def variants_as_tuples_with_ordering_contract():
+    t0, t1, t2 = '2011-01-01T00:00:00Z', '2011-01-01T00:00:10Z', '2011-01-01T00:00:20Z'
+    rows = [{'case_id': 'c1', 'event_id': 'e1', 'activity': 'A -> B', 'timestamp': t0, 'lifecycle': 'complete'},
+            {'case_id': 'c1', 'event_id': 'e2', 'activity': 'C', 'timestamp': t1, 'lifecycle': 'complete'},
+            {'case_id': 'c2', 'event_id': 'e3', 'activity': 'A', 'timestamp': t0, 'lifecycle': 'complete'},
+            {'case_id': 'c2', 'event_id': 'e4', 'activity': 'B -> C', 'timestamp': t1, 'lifecycle': 'complete'}]
+    out = checked_variants(rows)
+    g.equal(out['variants'], [{'trace': ['A', 'B -> C'], 'cases': 1}, {'trace': ['A -> B', 'C'], 'cases': 1}]); g.equal(out['cases'], 2)
+    g.equal({' -> '.join(v['trace']) for v in out['variants']}, {'A -> B -> C'})  # the joined string collapses two variants
+    tied = [{'case_id': 'c3', 'event_id': 'e5', 'activity': 'X', 'timestamp': t0, 'lifecycle': 'complete'},
+            {'case_id': 'c3', 'event_id': 'e6', 'activity': 'Y', 'timestamp': t1, 'lifecycle': 'complete'},
+            {'case_id': 'c3', 'event_id': 'e7', 'activity': 'Z', 'timestamp': t1, 'lifecycle': 'complete'}]
+    g.rejects(g.Blocked, lambda: checked_variants(tied))
+    g.equal(checked_variants(tied, tiebreak='event_id'), checked_variants([tied[0], tied[2], tied[1]], tiebreak='event_id'))
+    g.rejects(g.Blocked, lambda: checked_variants(rows + [rows[0]]))
+    return {'joined_string_collision_reproduced': True, 'tuple_keys_kept': True, 'ties_need_contract': True, 'case_conservation': True, 'original_chain_rerun': False}
+
+
+@case(37)
+def iri_minting_and_typed_query():
+    g.equal(isinstance(FACTS.count, Node), False); g.equal(isinstance(FACTS['count'], Node), True)  # attribute access returns str.count
+    raw = Graph(); raw.add((URIRef('http://example.org/facts/a b'), FACTS['lemma'], RdfLiteral('x')))
+    g.rejects(Exception, lambda: raw.serialize(format='turtle'))  # an IRI with a space cannot be serialized
+    facts = [{'id': 'usc5-552-doj:u0001:s00#e7', 'lemma': 'make', 'count': 1}, {'id': 'a b', 'lemma': 'x', 'count': 2}, {'id': 'e9', 'lemma': 'state', 'count': 1}]
+    graph, turtle = fact_graph(facts)
+    g.equal('usc5-552-doj%3Au0001%3As00%23e7' in turtle, True); g.equal(len(graph), 6)
+    g.equal(facts_with_count(graph, 1), ['http://example.org/facts/e9', 'http://example.org/facts/usc5-552-doj%3Au0001%3As00%23e7'])
+    plain = Graph(); plain.add((FACTS['p1'], FACTS['count'], RdfLiteral('1'))); plain.add((FACTS['p2'], FACTS['count'], RdfLiteral(1)))
+    g.equal([str(r.s) for r in plain.query('SELECT ?s WHERE { ?s <http://example.org/facts/count> ?v FILTER(?v = 1) }')], ['http://example.org/facts/p2'])
+    hostile = '1) } UNION { ?s ?p ?o } FILTER(true'
+    g.rejects(Exception, lambda: list(plain.query('SELECT ?s WHERE { ?s <http://example.org/facts/count> ?v FILTER(?v = ' + hostile + ') }')))
+    g.equal(list(plain.query(COUNT_QUERY, initBindings={'x': RdfLiteral(hostile)})), [])
+    return {'namespace_attribute_trap_reproduced': True, 'unencoded_iri_serialization_failure_reproduced': True, 'percent_encoded_round_trip_isomorphic': True,
+            'plain_versus_typed_literal_reproduced': True, 'query_text_fixed_values_bound': True, 'original_chain_rerun': False}
+
+
+@case(38)
+def parameterized_graph_load():
+    hostile = "x'}) RETURN 1; //"
+    events = [{'id': 'e1', 'lemma': hostile}, {'id': 'e2', 'lemma': 'make'}]
+    g.equal(graph_store(events, [('e1', 'e2')]), {'events': 2, 'precedes': 1})
+    conn = kuzu.Connection(kuzu.Database(':memory:'))
+    for ddl in SCHEMA: conn.execute(ddl)
+    conn.execute("CREATE (:Event {id: 'e3', lemma: '" + hostile + "'})")
+    g.equal(conn.execute('MATCH (e:Event) RETURN e.lemma').get_all(), [['x']])  # interpolation stored a different value without an error
+    conn.execute('CREATE (:Event {id: $id, lemma: $lemma})', parameters={'id': 'e4', 'lemma': hostile})
+    g.equal(conn.execute('MATCH (e:Event {id: $id}) RETURN e.lemma', parameters={'id': 'e4'}).get_all(), [[hostile]])
+    silent = conn.execute('MATCH (a:Event {id: $a}), (b:Event {id: $b}) CREATE (a)-[:precedes]->(b) RETURN count(*)', parameters={'a': 'e3', 'b': 'zz'}).get_all()
+    g.equal(silent, [[0]])  # an edge to an unknown event vanishes without an error
+    g.rejects(g.Blocked, lambda: graph_store(events, [('e1', 'zz')]))
+    g.rejects(ValidationError, lambda: graph_store(events + [{'id': 1, 'lemma': 'x'}], []))
+    return {'cypher_interpolation_changed_value_reproduced': True, 'parameters_keep_value': True, 'lost_edge_reproduced_and_blocked': True,
+            'typed_rows_before_load': True, 'results_ordered_explicitly': True, 'original_chain_rerun': False}
+
+
+@case(39)
+def site_tables_need_escaping_and_local_assets():
+    raw = '| id | text |\n| --- | --- |\n| s2 | a | b |\n| s3 | <b>bold</b> |\n'
+    g.equal(rendered_rows(markdown.markdown(raw, extensions=['tables']), '//table'), [['s2', 'a'], ['s3', 'bold']])  # a pipe loses a cell; HTML is rendered
+    default_page = build_site(raw, highlightjs=True)
+    g.equal([u.startswith('https://cdnjs.cloudflare.com/') for u in g3.external_assets(default_page)], [True, True, True])
+    rows = [{'id': 's2', 'text': 'a | b'}, {'id': 's3', 'text': '<b>bold</b>'}, {'id': 's4', 'text': 'line1<br>line2'}]
+    g.equal(checked_site(rows, ['id', 'text']), {'rows': 3, 'external_assets': 0})
+    g.equal(len(rendered_rows(build_site(raw, highlightjs=False), '//table')) > 2, True)  # theme tables exist beyond the content table
+    return {'pipe_cell_loss_reproduced': True, 'inline_html_rendered_reproduced': True, 'cdn_assets_in_default_theme_reproduced': True,
+            'escaped_rows_round_trip': True, 'content_table_selected_by_role': True, 'original_chain_rerun': False}
+
+
+@case(40)
+def document_readback_keyed_by_identity():
+    steps = [{'id': 'u0020:s00#e25', 'lemma': 'meeting', 'quote': 'the meeting'}, {'id': 'u0040:s01#e8', 'lemma': 'meeting', 'quote': 'a meeting'}]
+    data = step_document(steps)
+    d = docx.Document(io.BytesIO(data))
+    g.equal([p.text for p in d.paragraphs], ['ordered steps']); g.equal([type(b).__name__ for b in d.iter_inner_content()], ['Paragraph', 'Table'])
+    by_text = {s['lemma']: s for s in steps}
+    g.equal(len(by_text), 1); g.equal(csv_compare(by_text, {'meeting': steps[1]})['changed'], [])  # keying by text loses a row and reports no change
+    g.equal(bool(DeepDiff(steps, read_step_document(data), zip_ordered_iterables=True)), False)
+    d.tables[0].rows[2].cells[0].text = steps[0]['id']; buf = io.BytesIO(); d.save(buf)
+    g.rejects(g.Blocked, lambda: read_step_document(buf.getvalue()))
+    g.rejects(g.Blocked, lambda: step_document(steps + [steps[0]]))
+    return {'paragraphs_omit_table_text_reproduced': True, 'text_keyed_collapse_reproduced': True, 'identity_keyed_positional_readback': True,
+            'duplicate_identity_blocked': True, 'original_chain_rerun': False}
+
+
+def run() -> dict:
+    g.ASSERTIONS = 0; rows = []
+    for i, fn in C:
+        before = g.ASSERTIONS
+        try: r = fn(); state = 'passed'; error = None
+        except Exception: r = {}; state = 'failed'; error = traceback.format_exc()
+        rows.append({'proof': i, 'test': fn.__name__, 'status': state, 'assertions': g.ASSERTIONS - before, 'result': r, 'error': error})
+    packages = ['pydantic', 'pandas', 'duckdb', 'deepdiff', 'pm4py', 'plotly', 'lxml', 'python-docx', 'csv-diff', 'SpiffWorkflow', 'networkx', 'clingo', 'rdflib', 'kuzu', 'mkdocs', 'Markdown']
+    here = Path(__file__).resolve().parent
+    return {'scope': 'Bounded authored handoff fixtures and reproduced library defaults; the original P31-P40 chains and their artifacts were not rerun.',
+            'test_cases': len(rows), 'passed': sum(r['status'] == 'passed' for r in rows), 'failed': sum(r['status'] == 'failed' for r in rows),
+            'assertions': g.ASSERTIONS, 'full_chains_executed': 0, 'network_calls': 0, 'business_actions': 0,
+            'source_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+            'dependency_sha256': {name: hashlib.sha256((here / name).read_bytes()).hexdigest() for name in ['handoff_guards_v1.py', 'handoff_guards_v2.py', 'handoff_guards_v3.py']},
+            'library_versions': {n: importlib.metadata.version(n) for n in packages}, 'results': rows}
+
+
+if __name__ == '__main__':
+    p = argparse.ArgumentParser(); p.add_argument('--report', type=Path, required=True); args = p.parse_args()
+    result = run(); args.report.parent.mkdir(parents=True, exist_ok=True)
+    args.report.write_text(json.dumps(result, indent=2, sort_keys=True, allow_nan=False) + '\n')
+    print(json.dumps({k: result[k] for k in ['test_cases', 'passed', 'failed', 'assertions', 'full_chains_executed']}))
+    if result['failed']:
+        print('\n'.join(r['error'] for r in result['results'] if r['error'])); raise SystemExit(1)
+```
+
+## Fresh local guard evidence: guards-v4.json
+
+Result file SHA256 67ad8c101246a98bd98faaead25d00cf5f7e3d9413e4545dbfad5cbd5e58f174; bytes 5551. These results do not rerun or promote the full proof chains.
+
+```json
+{
+  "assertions": 67,
+  "business_actions": 0,
+  "dependency_sha256": {
+    "handoff_guards_v1.py": "2b3138b692ecfd02b76ae34bdb001f5046608bb2983d8709d6c55c0765f7c9b8",
+    "handoff_guards_v2.py": "0a406d0e5f6b8b1b931d6786ed1d8e95fef39b79106eae8852703f9394952538",
+    "handoff_guards_v3.py": "e8df8d98831289c66ab705940ae2bc20ca7913a721002b811a5a77be05be2873"
+  },
+  "failed": 0,
+  "full_chains_executed": 0,
+  "library_versions": {
+    "Markdown": "3.10.3",
+    "SpiffWorkflow": "3.2.0",
+    "clingo": "5.8.2",
+    "csv-diff": "1.2",
+    "deepdiff": "9.1.0",
+    "duckdb": "1.5.5",
+    "kuzu": "0.11.3",
+    "lxml": "6.1.3",
+    "mkdocs": "1.6.1",
+    "networkx": "3.6.1",
+    "pandas": "2.2.3",
+    "plotly": "7.0.0",
+    "pm4py": "2.7.23.8",
+    "pydantic": "2.13.5",
+    "python-docx": "1.2.0",
+    "rdflib": "7.6.0"
+  },
+  "network_calls": 0,
+  "passed": 10,
+  "results": [
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 31,
+      "result": {
+        "cdn_page": "blocked",
+        "flag_checked_against_data": true,
+        "hline_is_layout_shape_reproduced": true,
+        "original_chain_rerun": false,
+        "per_meeting_threshold_in_data": true
+      },
+      "status": "passed",
+      "test": "threshold_bound_to_data"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 32,
+      "result": {
+        "absent_column_dropped_reproduced": "duckdb PIVOT and pandas pivot_table",
+        "conservation_checked": true,
+        "declared_axes_reindexed": true,
+        "original_chain_rerun": false,
+        "ties_not_coverage": true
+      },
+      "status": "passed",
+      "test": "coverage_matrix_declared_axes"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 33,
+      "result": {
+        "closed_world_never_for_tie_only_step_reproduced": true,
+        "coverage_fact_required_for_never": true,
+        "duplicate_lemma_steps_kept_distinct": true,
+        "original_chain_rerun": false,
+        "three_valued_states": [
+          "never",
+          "possibly",
+          "unknown"
+        ]
+      },
+      "status": "passed",
+      "test": "negation_as_failure_needs_coverage"
+    },
+    {
+      "assertions": 7,
+      "error": null,
+      "proof": 34,
+      "result": {
+        "method_named": true,
+        "original_chain_rerun": false,
+        "states": [
+          "sound",
+          "unsound",
+          "not_a_workflow_net"
+        ],
+        "undecided_recorded_as_false_reproduced": true,
+        "woflan_time_budget": "not applied; fixture nets finish immediately"
+      },
+      "status": "passed",
+      "test": "soundness_state_not_conflated"
+    },
+    {
+      "assertions": 10,
+      "error": null,
+      "proof": 35,
+      "result": {
+        "engines_disagree_yet_both_report_success": true,
+        "gateway_contract_blocks_uncontrolled_flow": true,
+        "original_chain_rerun": false,
+        "petri_conversion_exclusive_for_uncontrolled_flow": true,
+        "spiffworkflow_parallel_for_uncontrolled_flow": true
+      },
+      "status": "passed",
+      "test": "engine_semantics_of_uncontrolled_flow"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 36,
+      "result": {
+        "case_conservation": true,
+        "joined_string_collision_reproduced": true,
+        "original_chain_rerun": false,
+        "ties_need_contract": true,
+        "tuple_keys_kept": true
+      },
+      "status": "passed",
+      "test": "variants_as_tuples_with_ordering_contract"
+    },
+    {
+      "assertions": 9,
+      "error": null,
+      "proof": 37,
+      "result": {
+        "namespace_attribute_trap_reproduced": true,
+        "original_chain_rerun": false,
+        "percent_encoded_round_trip_isomorphic": true,
+        "plain_versus_typed_literal_reproduced": true,
+        "query_text_fixed_values_bound": true,
+        "unencoded_iri_serialization_failure_reproduced": true
+      },
+      "status": "passed",
+      "test": "iri_minting_and_typed_query"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 38,
+      "result": {
+        "cypher_interpolation_changed_value_reproduced": true,
+        "lost_edge_reproduced_and_blocked": true,
+        "original_chain_rerun": false,
+        "parameters_keep_value": true,
+        "results_ordered_explicitly": true,
+        "typed_rows_before_load": true
+      },
+      "status": "passed",
+      "test": "parameterized_graph_load"
+    },
+    {
+      "assertions": 4,
+      "error": null,
+      "proof": 39,
+      "result": {
+        "cdn_assets_in_default_theme_reproduced": true,
+        "content_table_selected_by_role": true,
+        "escaped_rows_round_trip": true,
+        "inline_html_rendered_reproduced": true,
+        "original_chain_rerun": false,
+        "pipe_cell_loss_reproduced": true
+      },
+      "status": "passed",
+      "test": "site_tables_need_escaping_and_local_assets"
+    },
+    {
+      "assertions": 7,
+      "error": null,
+      "proof": 40,
+      "result": {
+        "duplicate_identity_blocked": true,
+        "identity_keyed_positional_readback": true,
+        "original_chain_rerun": false,
+        "paragraphs_omit_table_text_reproduced": true,
+        "text_keyed_collapse_reproduced": true
+      },
+      "status": "passed",
+      "test": "document_readback_keyed_by_identity"
+    }
+  ],
+  "scope": "Bounded authored handoff fixtures and reproduced library defaults; the original P31-P40 chains and their artifacts were not rerun.",
+  "source_sha256": "90029a6917216a0ded8b685dc48c496ae8479d6204115a8ec10f8488e4076841",
+  "test_cases": 10
+}
+```
+
+Checkpoint coverage: 40 of 300 proof-specific handoff amendments written, through P40. Prior cumulative TXT SHA256 0919135f7f840310418aef6feaec823354722653733390823010136db37b1552.

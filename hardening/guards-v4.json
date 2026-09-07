@@ -1,0 +1,187 @@
+{
+  "assertions": 67,
+  "business_actions": 0,
+  "dependency_sha256": {
+    "handoff_guards_v1.py": "2b3138b692ecfd02b76ae34bdb001f5046608bb2983d8709d6c55c0765f7c9b8",
+    "handoff_guards_v2.py": "0a406d0e5f6b8b1b931d6786ed1d8e95fef39b79106eae8852703f9394952538",
+    "handoff_guards_v3.py": "e8df8d98831289c66ab705940ae2bc20ca7913a721002b811a5a77be05be2873"
+  },
+  "failed": 0,
+  "full_chains_executed": 0,
+  "library_versions": {
+    "Markdown": "3.10.3",
+    "SpiffWorkflow": "3.2.0",
+    "clingo": "5.8.2",
+    "csv-diff": "1.2",
+    "deepdiff": "9.1.0",
+    "duckdb": "1.5.5",
+    "kuzu": "0.11.3",
+    "lxml": "6.1.3",
+    "mkdocs": "1.6.1",
+    "networkx": "3.6.1",
+    "pandas": "2.2.3",
+    "plotly": "7.0.0",
+    "pm4py": "2.7.23.8",
+    "pydantic": "2.13.5",
+    "python-docx": "1.2.0",
+    "rdflib": "7.6.0"
+  },
+  "network_calls": 0,
+  "passed": 10,
+  "results": [
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 31,
+      "result": {
+        "cdn_page": "blocked",
+        "flag_checked_against_data": true,
+        "hline_is_layout_shape_reproduced": true,
+        "original_chain_rerun": false,
+        "per_meeting_threshold_in_data": true
+      },
+      "status": "passed",
+      "test": "threshold_bound_to_data"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 32,
+      "result": {
+        "absent_column_dropped_reproduced": "duckdb PIVOT and pandas pivot_table",
+        "conservation_checked": true,
+        "declared_axes_reindexed": true,
+        "original_chain_rerun": false,
+        "ties_not_coverage": true
+      },
+      "status": "passed",
+      "test": "coverage_matrix_declared_axes"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 33,
+      "result": {
+        "closed_world_never_for_tie_only_step_reproduced": true,
+        "coverage_fact_required_for_never": true,
+        "duplicate_lemma_steps_kept_distinct": true,
+        "original_chain_rerun": false,
+        "three_valued_states": [
+          "never",
+          "possibly",
+          "unknown"
+        ]
+      },
+      "status": "passed",
+      "test": "negation_as_failure_needs_coverage"
+    },
+    {
+      "assertions": 7,
+      "error": null,
+      "proof": 34,
+      "result": {
+        "method_named": true,
+        "original_chain_rerun": false,
+        "states": [
+          "sound",
+          "unsound",
+          "not_a_workflow_net"
+        ],
+        "undecided_recorded_as_false_reproduced": true,
+        "woflan_time_budget": "not applied; fixture nets finish immediately"
+      },
+      "status": "passed",
+      "test": "soundness_state_not_conflated"
+    },
+    {
+      "assertions": 10,
+      "error": null,
+      "proof": 35,
+      "result": {
+        "engines_disagree_yet_both_report_success": true,
+        "gateway_contract_blocks_uncontrolled_flow": true,
+        "original_chain_rerun": false,
+        "petri_conversion_exclusive_for_uncontrolled_flow": true,
+        "spiffworkflow_parallel_for_uncontrolled_flow": true
+      },
+      "status": "passed",
+      "test": "engine_semantics_of_uncontrolled_flow"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 36,
+      "result": {
+        "case_conservation": true,
+        "joined_string_collision_reproduced": true,
+        "original_chain_rerun": false,
+        "ties_need_contract": true,
+        "tuple_keys_kept": true
+      },
+      "status": "passed",
+      "test": "variants_as_tuples_with_ordering_contract"
+    },
+    {
+      "assertions": 9,
+      "error": null,
+      "proof": 37,
+      "result": {
+        "namespace_attribute_trap_reproduced": true,
+        "original_chain_rerun": false,
+        "percent_encoded_round_trip_isomorphic": true,
+        "plain_versus_typed_literal_reproduced": true,
+        "query_text_fixed_values_bound": true,
+        "unencoded_iri_serialization_failure_reproduced": true
+      },
+      "status": "passed",
+      "test": "iri_minting_and_typed_query"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 38,
+      "result": {
+        "cypher_interpolation_changed_value_reproduced": true,
+        "lost_edge_reproduced_and_blocked": true,
+        "original_chain_rerun": false,
+        "parameters_keep_value": true,
+        "results_ordered_explicitly": true,
+        "typed_rows_before_load": true
+      },
+      "status": "passed",
+      "test": "parameterized_graph_load"
+    },
+    {
+      "assertions": 4,
+      "error": null,
+      "proof": 39,
+      "result": {
+        "cdn_assets_in_default_theme_reproduced": true,
+        "content_table_selected_by_role": true,
+        "escaped_rows_round_trip": true,
+        "inline_html_rendered_reproduced": true,
+        "original_chain_rerun": false,
+        "pipe_cell_loss_reproduced": true
+      },
+      "status": "passed",
+      "test": "site_tables_need_escaping_and_local_assets"
+    },
+    {
+      "assertions": 7,
+      "error": null,
+      "proof": 40,
+      "result": {
+        "duplicate_identity_blocked": true,
+        "identity_keyed_positional_readback": true,
+        "original_chain_rerun": false,
+        "paragraphs_omit_table_text_reproduced": true,
+        "text_keyed_collapse_reproduced": true
+      },
+      "status": "passed",
+      "test": "document_readback_keyed_by_identity"
+    }
+  ],
+  "scope": "Bounded authored handoff fixtures and reproduced library defaults; the original P31-P40 chains and their artifacts were not rerun.",
+  "source_sha256": "90029a6917216a0ded8b685dc48c496ae8479d6204115a8ec10f8488e4076841",
+  "test_cases": 10
+}
