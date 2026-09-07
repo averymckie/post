@@ -9,6 +9,7 @@ beautifulsoup4==4.15.0
 blis==1.3.3
 brotli==1.2.0
 cachebox==5.2.3
+casbin==1.43.0
 catalogue==2.0.10
 certifi==2026.7.22
 cffi==2.1.1
@@ -29,6 +30,7 @@ cymem==2.0.13
 deepdiff==9.1.0
 defusedxml==0.7.1
 dictdiffer==0.10.0
+docx2python==3.7.1
 docxcompose==2.2.0
 docxtpl==0.20.2
 duckdb==1.5.5
@@ -46,6 +48,7 @@ httpx==0.28.1
 hypothesis==6.167.1
 icalendar==7.3.0
 idna==3.19
+igraph==1.0.0
 importlib-metadata==9.0.1
 jinja2==3.1.6
 joblib==1.6.0
@@ -76,16 +79,19 @@ odfpy==1.4.1
 opencv-python-headless==5.0.0.93
 openpyxl==3.1.5
 orderly-set==5.5.0
+orjson==3.12.0
 owlrl==7.6.2
 packaging==26.3
 pandas==2.2.3
 pandera==0.33.1
 pathspec==1.1.1
+pdfplumber==0.11.10
 pillow==12.3.0
 pint==0.25.3
 platformdirs==4.11.7
 plotly==7.0.0
 pm4py==2.7.23.8
+polars==1.44.1
 portion==2.6.2
 preshed==3.0.13
 prettytable==3.18.0
@@ -130,6 +136,7 @@ spacy==3.8.16
 spacy-legacy==3.0.12
 spacy-loggers==1.0.5
 spiffworkflow==3.2.0
+splink==4.0.17
 srsly==2.5.3
 thinc==8.3.13
 threadpoolctl==3.6.0
