@@ -595,3 +595,62 @@ def test_the_two_coercing_readers_disagree_with_each_other(text):
     source = ('c\n%s\n' % text).encode()
     _, by_pandas, _, by_arrow, missing = _read_single_field(source)
     npt.assert_array_equal([missing(by_pandas), missing(by_arrow)], [True, False])
+
+
+# ---------------------------------------------------------------- workbook reader disagreements
+def _workbook_bytes(write):
+    buffer = io.BytesIO()
+    book = xlsxwriter.Workbook(buffer, {'in_memory': True})
+    sheet = book.add_worksheet('S')
+    write(book, sheet)
+    book.close()
+    return buffer.getvalue()
+
+
+def _first_cell(data, *, data_only):
+    by_openpyxl = openpyxl.load_workbook(io.BytesIO(data), data_only=data_only).active['A1'].value
+    by_calamine = CalamineWorkbook.from_filelike(io.BytesIO(data)).get_sheet_by_name('S').to_python()[0][0]
+    return by_openpyxl, by_calamine
+
+
+@given(ANY_2026_DAY)
+@SLOW
+def test_a_formatted_date_reads_as_a_different_type_in_each_reader(day):
+    """openpyxl returns datetime.datetime and python-calamine returns datetime.date for the same cell, and
+    the two are not equal in Python. Every chain claiming that both workbook readers agree on N cells is
+    claiming it after a normalisation it does not state."""
+    data = _workbook_bytes(lambda book, sheet: sheet.write_datetime(
+        0, 0, day, book.add_format({'num_format': 'yyyy-mm-dd'})))
+    by_openpyxl, by_calamine = _first_cell(data, data_only=False)
+    npt.assert_array_equal([type(by_openpyxl).__name__, type(by_calamine).__name__], ['datetime', 'date'])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(by_openpyxl, by_calamine)
+    npt.assert_array_equal(by_openpyxl.date(), by_calamine)
+
+
+@given(st.integers(min_value=-10**9, max_value=10**9))
+@SLOW
+def test_an_integer_cell_reads_as_int_and_as_float(value):
+    """The numbers compare equal and the types do not, so a comparison that checks types sees a mismatch on
+    every integer cell in the workbook."""
+    data = _workbook_bytes(lambda book, sheet: sheet.write_number(0, 0, value))
+    by_openpyxl, by_calamine = _first_cell(data, data_only=False)
+    npt.assert_array_equal([type(by_openpyxl).__name__, type(by_calamine).__name__], ['int', 'float'])
+    npt.assert_array_equal(by_openpyxl, by_calamine)
+
+
+@given(st.integers(min_value=1, max_value=500), st.integers(min_value=1, max_value=500))
+@SLOW
+def test_a_formula_cell_reads_three_different_ways(left, right):
+    """openpyxl returns the formula text by default, the cached value with data_only=True, and calamine
+    returns the cached value as a float. One cell, three answers, and the default openpyxl read is the one
+    that is not a number at all."""
+    formula, cached = '=%d+%d' % (left, right), left + right
+    data = _workbook_bytes(lambda book, sheet: sheet.write_formula(0, 0, formula, None, cached))
+    default_openpyxl, by_calamine = _first_cell(data, data_only=False)
+    cached_openpyxl, _ = _first_cell(data, data_only=True)
+    npt.assert_array_equal(default_openpyxl, formula)
+    npt.assert_array_equal(cached_openpyxl, cached)
+    npt.assert_array_equal(by_calamine, float(cached))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(default_openpyxl, by_calamine)
