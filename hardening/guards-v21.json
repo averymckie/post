@@ -1,0 +1,150 @@
+{
+  "assertions": 115,
+  "business_actions": 0,
+  "dependency_sha256": {
+    "handoff_guards_v1.py": "2b3138b692ecfd02b76ae34bdb001f5046608bb2983d8709d6c55c0765f7c9b8"
+  },
+  "failed": 0,
+  "full_chains_executed": 0,
+  "library_versions": {
+    "clingo": "5.8.2",
+    "lark": "1.3.1",
+    "networkx": "3.6.1",
+    "pandas": "2.2.3",
+    "pydantic": "2.13.5",
+    "pyshacl": "0.40.1",
+    "rdflib": "7.6.0",
+    "z3-solver": "5.1.0.0"
+  },
+  "network_calls": 0,
+  "passed": 10,
+  "results": [
+    {
+      "assertions": 17,
+      "error": null,
+      "proof": 191,
+      "result": {
+        "boundary_satisfied_at_four_not_three": true,
+        "modalities_stay_distinct": true,
+        "not_merely_is_refused_by_the_grammar": true
+      },
+      "status": "passed",
+      "test": "the_controlled_grammar_refuses_what_it_does_not_support"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 192,
+      "result": {
+        "bound_request_applies": true,
+        "missing_dimension_is_unresolved": true,
+        "out_of_scope_is_neither_applies_nor_unresolved": true
+      },
+      "status": "passed",
+      "test": "a_missing_dimension_does_not_become_every_dimension"
+    },
+    {
+      "assertions": 10,
+      "error": null,
+      "proof": 193,
+      "result": {
+        "core_is_minimal_here": true,
+        "core_omits_an_equally_conflicting_rule": true,
+        "minimality_needs_its_own_test": true
+      },
+      "status": "passed",
+      "test": "the_unsat_core_names_a_sufficient_subset_not_the_conflicting_set"
+    },
+    {
+      "assertions": 9,
+      "error": null,
+      "proof": 194,
+      "result": {
+        "empty_graph_conforms": true,
+        "independent_inventory_is_the_only_detector": true,
+        "wrong_class_node_conforms_vacuously": true
+      },
+      "status": "passed",
+      "test": "a_shape_report_conforms_when_it_targets_nothing"
+    },
+    {
+      "assertions": 14,
+      "error": null,
+      "proof": 195,
+      "result": {
+        "bytes_lost": 1,
+        "codepoints_lost": 1,
+        "nfc_is_not_length_preserving": true,
+        "normalized_equality_hides_the_composed_form": true,
+        "whitespace_and_threshold_changes_are_different_findings": true
+      },
+      "status": "passed",
+      "test": "normalization_moves_the_offsets_it_is_asked_to_preserve"
+    },
+    {
+      "assertions": 10,
+      "error": null,
+      "proof": 196,
+      "result": {
+        "closure_succeeds_over_a_cycle": true,
+        "cycle_detection_is_a_separate_call": true,
+        "fragment_resolution_is_urllib": true
+      },
+      "status": "passed",
+      "test": "a_reference_cycle_does_not_stop_the_closure"
+    },
+    {
+      "assertions": 16,
+      "error": null,
+      "proof": 197,
+      "result": {
+        "engines_agree_on_every_known_count": true,
+        "multiple_answer_sets_are_not_one_decision": true,
+        "unknown_is_both_states_in_z3_and_absent_in_clingo": true
+      },
+      "status": "passed",
+      "test": "the_two_engines_disagree_on_the_same_missing_count"
+    },
+    {
+      "assertions": 10,
+      "error": null,
+      "proof": 198,
+      "result": {
+        "gap_witness": 4,
+        "overlap_witness": 4,
+        "partition_has_no_gap": true,
+        "totality_is_relative_to_the_declared_domain": true
+      },
+      "status": "passed",
+      "test": "the_gap_is_exactly_at_the_boundary"
+    },
+    {
+      "assertions": 10,
+      "error": null,
+      "proof": 199,
+      "result": {
+        "duplicate_approval_is_refused_by_cardinality": true,
+        "each_block_reason_is_distinct": true,
+        "hash_binding_precedes_the_role_check": true,
+        "no_signature_was_authenticated": true
+      },
+      "status": "passed",
+      "test": "a_role_label_is_not_an_authentication"
+    },
+    {
+      "assertions": 13,
+      "error": null,
+      "proof": 200,
+      "result": {
+        "row_sort_is_required_for_a_stable_hash": true,
+        "sort_keys_does_not_order_rows": true,
+        "undeclared_manifest_state_is_blocked": true
+      },
+      "status": "passed",
+      "test": "canonical_key_order_is_not_canonical_row_order"
+    }
+  ],
+  "scope": "Executes the named theoretical positive and adverse tests of P191-P200 with the primitives those proofs name. The proposed chains themselves were not implemented and no proof artifact was produced.",
+  "source_sha256": "0a9f91bd3dff9a727cd535f36387e0c47f64c008d7909398812278910be93dbb",
+  "test_cases": 10
+}

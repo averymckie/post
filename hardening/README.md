@@ -1,6 +1,6 @@
 # Handoff hardening guards
 
-Runnable local guard modules embedded in `../Proofs.txt` (hardening batches P1-P10 … P141-P150, P151-P160, P161-P170, P171-P180, P181-P190) together with their evidence files. Each module's SHA256 and byte count are recorded in `Proofs.txt` next to its embedded copy; each evidence file records the `source_sha256` of the module that produced it and, from v2 on, the `dependency_sha256` of the modules it imports.
+Runnable local guard modules embedded in `../Proofs.txt` (hardening batches P1-P10 … P141-P150, P151-P160, P161-P170, P171-P180, P181-P190, P191-P200) together with their evidence files. Each module's SHA256 and byte count are recorded in `Proofs.txt` next to its embedded copy; each evidence file records the `source_sha256` of the module that produced it and, from v2 on, the `dependency_sha256` of the modules it imports.
 
 ## Files
 
@@ -26,6 +26,7 @@ Runnable local guard modules embedded in `../Proofs.txt` (hardening batches P1-P
 | `handoff_guards_v18.py` | glue elimination for v15-v17 (SHA256 `c5bddd02…`), imports v1; replaces 17 handwritten functions with portion, pandera, scipy, pandas, repro-zipfile, largest-remainder and rapidfuzz primitives |
 | `handoff_guards_v19.py` | batch P171-P180 (SHA256 `aeddd95c…`), imports v1; numpy business-day calendar, pandas Interval closures, pandera constraints, largest-remainder split, numpy-financial |
 | `handoff_guards_v20.py` | batch P181-P190 (SHA256 `0a44fac2…`), imports v1; dateutil.rrule, Pint exact rationals, merge_asof, NetworkX arborescence, DuckDB DECIMAL, python-pptx connectors |
+| `handoff_guards_v21.py` | batch P191-P200 (SHA256 `0a9f91bd…`), imports v1; executes the named theoretical tests with Lark, Pydantic, Clingo, Z3, pySHACL/rdflib, NetworkX |
 | `guards-v1.json`, `guards-v2.json` | evidence recorded with the earlier batches |
 | `rerun-v1.json`, `rerun-v2.json` | the same modules re-executed in the batch-3 environment |
 | `guards-v3.json` … `guards-v15.json` | batch-3 through batch-15 evidence |
@@ -55,6 +56,7 @@ npm install jsdom && ./venv/bin/python handoff_guards_v8.py --report guards-v8.j
 ./venv/bin/python handoff_guards_v18.py --report guards-v18.json
 ./venv/bin/python handoff_guards_v19.py --report guards-v19.json
 ./venv/bin/python handoff_guards_v20.py --report guards-v20.json
+./venv/bin/python handoff_guards_v21.py --report guards-v21.json
 ```
 
 Case 26 of v3 uses the WordNet 3.0 corpus when `NLTK_DATA` points at a directory holding `corpora/wordnet.zip` (SHA256 `cbda5ea6eef7f36a97a43d4a75f85e07fccbb4f23657d27b4ccbc93e2646ab59`, 10775600 bytes, obtained once with `nltk.download('wordnet', download_dir=...)`). Without it the case still passes and records `not installed; no lexical expansion executed`. The guard runs themselves make no network call.

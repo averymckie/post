@@ -30295,3 +30295,844 @@ Result file SHA256 b899c939e369173f786bf768487f1f27aa7d430918ab97f11001039c95873
 ```
 
 Checkpoint coverage: 190 of 300 proofs carry a hardening record. Prior cumulative TXT SHA256 703702f2ebff59a824aaff52ea0cff5eea4ee6a3040a04d107863981070ec054.
+
+## Checkpoint integrity and environment for this batch
+
+Base: the TXT as committed after batch 19 (SHA256 d7dde811c45c45d6a0507bf1c611a3f7914e2044786c58411a9c74d936f35de7, 2112522 bytes); it is the prior cumulative TXT SHA256 recorded at the end of this batch. Pinned engines: Lark 1.3.1, Pydantic 2.13.5, rdflib 7.6.0, pySHACL 0.40.1, Clingo 5.8.2, z3-solver 5.1.0.0, NetworkX 3.6.1, pandas 2.2.3. handoff_guards_v21.py imports handoff_guards_v1.py only; v1-v20 stay byte-identical under HG07.
+
+What this batch is. P191 through P200 are recorded above as theoretical requirements whose full chains were not executed. Each carries a theoretical positive test, a theoretical adverse test, and a required-implementation-and-evidence section. This batch does not implement the proposed chains and produces none of their planned outputs. It executes the specific named tests with the specific primitives those proofs name, so that the individual claims stop resting on assessment alone, and it records which of them the primitives confirm, which they contradict, and which remain outside what any available library can establish. Every case below therefore reports against a proof whose own status is CONDITIONAL_FIT; nothing here upgrades that status.
+
+Note on method: this module carries no handwritten implementation of an operation a library performs. The controlled grammar is Lark, the typed AST is Pydantic, applicability is Clingo under its own closed-world semantics, contradiction and coverage witnesses are Z3, graph shape validation is pySHACL over rdflib, closure and cycles are NetworkX, span comparison is difflib over unicodedata normalization, cardinality is a validated pandas merge, and canonical output is json with a declared ordering.
+
+## Online-checked function references for this hardening batch
+[HD173] pySHACL reports conformance against the nodes a shape targets, so a graph that targets nothing conforms. A node carrying the same missing required property conforms once its rdf:type no longer matches the shape's sh:targetClass, and an entirely empty graph conforms with zero violations; both are indistinguishable in the report from a graph that genuinely satisfies every shape. A datatype violation on a correctly targeted node is reported normally, and rdflib logs a lexical-conversion failure while pySHACL still records the violation. An independent inventory of expected target identifiers compared against the identifiers actually typed in the data is the only check that separates conformance from non-targeting. Executed with pySHACL 0.40.1 and rdflib 7.6.0. Source: installed pySHACL 0.40.1 and rdflib 7.6.0, and GitHub.
+https://github.com/RDFLib/pySHACL
+[HD174] Z3's unsat_core returns a subset of the tracked assertions sufficient for unsatisfiability, not the set of assertions responsible for it. Over four tracked rules where two independent pairs each contradict, the returned core named one pair and omitted a rule that contradicts the same third rule on its own; asserting that omitted rule with its counterpart alone produces a contradiction of its own. The returned core was minimal here, which a drop-one re-check establishes and the API does not promise, so a contradiction register that reports the core as the conflicting rules understates the conflict and must run its own minimality and completeness tests. Executed with z3-solver 5.1.0.0. Source: installed z3-solver 5.1.0.0 and GitHub.
+https://github.com/Z3Prover/z3
+[HD175] Clingo evaluates under the closed-world assumption, so an absent fact is false rather than unknown, while Z3 leaves an unconstrained integer free and reports both a predicate and its negation as satisfiable. On the same missing count the two engines therefore disagree by construction: Z3 returns both states and Clingo returns the empty model, which reads as not approved. On every fully known count in the bounded domain they agree. Clingo also emits an information message rather than an error when a rule body references an atom that occurs in no rule head, so a removed fact degrades a program silently unless the answer sets themselves are asserted; and a choice rule with two solutions yields two answer sets, which is not a single decision. Executed with Clingo 5.8.2 and z3-solver 5.1.0.0. Source: installed Clingo 5.8.2 and z3-solver 5.1.0.0, and GitHub.
+https://github.com/potassco/clingo
+[HD176] unicodedata NFC normalization is not length preserving: the decomposed spelling of "Café approves" is 14 code points and 15 UTF-8 bytes, and its NFC form is 13 code points and 14 bytes, so a character or byte offset taken against the raw text does not index the normalized text. The two spellings are unequal as strings and equal after normalization, so a comparison performed on normalized text cannot report that the encoding changed. difflib SequenceMatcher.get_opcodes separates the shapes of a change: a whitespace insertion, a threshold replacement and a removed negation return insert, replace and delete respectively, and identical text returns no non-equal opcode at all. Executed with Python 3.11.15. Source: installed CPython 3.11.15 unicodedata and difflib, and GitHub; docs.python.org blocked.
+https://github.com/python/cpython
+
+## Hardening batch: P191-P200
+
+### HARDENING P191 -- The grammar refuses the construction the proof says it must refuse
+
+Original proof: P191  approved source clauses -> controlled syntax tree -> typed rule records
+Source location: frozen master lines 7792-7829; original section SHA256 8b5886b6ceb1bee908fb836e83de09b95c16a50cf44b99f8f8368cbf4b7a7800.
+Finding: THEORETICAL TEST NOW EXECUTED, and it holds. P191's theoretical positive test is that an approved count >= 4 expression retains actor, integer threshold and clause reference, with the four-member boundary satisfying it and three not; its adverse test is that the phrase "not merely" must be rejected as an unsupported construction. A Lark grammar over the declared controlled language and a strict Pydantic AST reproduce both. The proof's status is unchanged: this executes two named tests, not the compiler.
+Handoff: approved clause text -> parsed controlled expression -> typed rule record
+Failure path: The named risk is a compiler that accepts more than the approved language, so an unsupported construction acquires a typed record and downstream engines act on a meaning the clause does not carry. Every construction outside the grammar must fail at parse rather than being coerced, and the modality must not collapse: require, permit and forbid produce different records for the same actor, operator and threshold.
+Required repair: none arising; the named tests pass as specified. The obligation the execution adds is that the grammar and the AST validate separately, since a parse failure and a field-contract failure are different rejections, and the proof's own contract versions grammar and semantics independently.
+Function bridge: lark.Lark.parse for the controlled language; pydantic.BaseModel.model_validate with strict typing and a Literal modality; z3.Solver for the boundary evaluation
+Positive acceptance: "require voting count >= 4" parses to modality require, actor voting, operator >=, threshold 4 and retains its clause reference; the expression is satisfied at 4 and at 5 and not at 3; permit and forbid produce different records from the same remaining fields.
+Adverse acceptance: "not merely voting count >= 4", a spelled-out threshold, a truncated expression and a negative threshold are each Blocked at the grammar (all reproduced); an undeclared modality and a missing clause field are each rejected by the AST with ValidationError rather than by the parser, so the two rejection kinds stay distinguishable.
+Evidence and limit: guards-v21 case 191 on one authored grammar and eight authored expressions. This executes the two named tests only. The proof's own required evidence, unsupported-clause coverage over a real corpus and reviewer acceptance, is not supplied here and the CONDITIONAL_FIT assessment stands.
+References: HD174
+Integration status: INTEGRATION_UNVERIFIED, and the proof remains a theoretical requirement. HG00-HG07 apply.
+
+### HARDENING P192 -- The missing dimension stays unresolved under the engine the proof names
+
+Original proof: P192  typed request dimensions + rule scopes -> applicability evaluation -> scoped requirement candidates
+Source location: frozen master lines 7830-7867; original section SHA256 dc0f3f350b5104d9c60a35bec0d44846e610545c3de76eda086e73e5fc16cc39.
+Finding: THEORETICAL TEST NOW EXECUTED, and it holds, with one obligation the proof's interface text does not state. P192's contract is that unknown and wildcard are different and that a missing region never means all regions. A Clingo program that derives applicability from a bound dimension and unresolved from the absence of any binding reproduces exactly that: with the region bound the rule applies, with no region bound the rule is unresolved and no applies atom appears. The obligation is that a request bound to a region outside the rule's scope yields neither atom, so out-of-scope is a third outcome the two-way reading loses.
+Handoff: typed request dimensions and rule scopes -> three-way applicability -> requirement candidates
+Failure path: The named risk is a fabricated catch-all that converts a missing member type into permission. Under closed-world semantics the danger is the opposite and quieter: an absent fact is simply false, so a rule whose scope predicate references a fact that was never asserted derives nothing and reads as out of scope rather than as unresolved. Clingo reports an atom occurring in no rule head as an information message and not an error, so a program that loses a fact degrades silently unless the answer sets themselves are asserted.
+Required repair: Derive the unresolved state from an explicit has-dimension predicate rather than from the absence of an applies atom, so unknown and out-of-scope are separately derivable; and assert the answer sets rather than the absence of errors, since a missing atom is an information message.
+Function bridge: clingo.Control add, ground and solve with an explicit has-dimension predicate and default negation; the answer set asserted directly rather than inferred from the absence of a diagnostic
+Positive acceptance: A request bound to the rule's region yields applies and nothing else; a request with no region yields unresolved and no applies; the two answer sets differ.
+Adverse acceptance: The missing region does not produce an applies atom, so no catch-all was invented (reproduced); a request bound to a region outside the rule's scope yields neither applies nor unresolved, which is a third state the contract must name.
+Evidence and limit: guards-v21 case 192 on one authored scope program and three authored requests. The proof's own required evidence, exhaustive enumeration of the bounded domain and an independent truth table, is not supplied here and CONDITIONAL_FIT stands.
+References: HD175
+Integration status: INTEGRATION_UNVERIFIED, and the proof remains a theoretical requirement. HG00-HG07 apply.
+
+### HARDENING P193 -- The core names a sufficient subset, not the conflicting set
+
+Original proof: P193  scoped obligations and prohibitions -> satisfiable overlap search -> contradiction register
+Source location: frozen master lines 7868-7905; original section SHA256 d9bd1bed76710e5a108fd060214aca43cac800f2f6b88a80c4834dfc00523757.
+Finding: THEORETICAL TEST NOW EXECUTED, and it sharpens the proof's own caution. P193's contract already says an unsat core is not claimed minimal without an explicit minimization test. Executed, the caution is understated in one direction and confirmed in another: over four tracked rules containing two independent contradictions, Z3 returned a two-rule core that a drop-one re-check confirms is minimal, and that core omits a rule which contradicts the same third rule on its own. Minimality was satisfied; completeness was not, and the API promises neither.
+Handoff: scoped contrary requirements -> tracked assertions -> conflict witnesses and cores
+Failure path: A contradiction register that prints the returned core as the conflicting rules reports two of the three rules that are actually in conflict. The omitted rule is not flagged, is not queued for owner resolution, and will still be in the rule pack after the reported pair is resolved, at which point the contradiction reappears from a source the register never named. Nothing in the solver result indicates the omission: the core is a valid, minimal, sufficient subset.
+Required repair: Run an explicit drop-one minimality test over the returned core and record its result rather than the claim; and after resolving a reported core, re-solve the remaining rule set rather than treating the register as complete, since a second independent contradiction is not reported by the first call.
+Function bridge: z3.Solver.assert_and_track for the source-backed assertions; Solver.check and Solver.unsat_core for the witness; a drop-one re-check over the core for the minimality test; a re-solve for completeness
+Positive acceptance: The four-rule set is unsatisfiable and the returned core has two members; the drop-one test confirms the core is minimal; a superset of the core is correctly reported as not minimal; two rules that are jointly satisfiable return satisfiable with an empty core.
+Adverse acceptance: The returned core omits a rule that contradicts the same counterpart on its own, and asserting that pair alone reproduces a contradiction with its own two-rule core (reproduced), so the first register was incomplete.
+Evidence and limit: guards-v21 case 193 on four authored tracked rules. The proof's own required evidence, declared conflict semantics and precedence and an independently tested witness over source-approved rules, is not supplied here and CONDITIONAL_FIT stands. Solver-undecided states were not exercised.
+References: HD174
+Integration status: INTEGRATION_UNVERIFIED, and the proof remains a theoretical requirement. HG00-HG07 apply.
+
+### HARDENING P194 -- The report conforms because it targeted nothing
+
+Original proof: P194  rule and control graph -> shape and completeness validation -> source-linked defect report
+Source location: frozen master lines 7906-7943; original section SHA256 a362a4ee9f14f0e484ee70a3bfd95646d5709cabc77c58427e19f4dec927a1d3.
+Finding: THEORETICAL TEST NOW EXECUTED, and it holds exactly as the proof warns. P194's contract states that zero targeted nodes cannot count as success when controls were expected, and its adverse test names removing the class that selects the node. Executed, a control missing its required owner reports one violation; the same node with its rdf:type changed so the shape no longer targets it reports conformance with zero violations; and an entirely empty graph also reports conformance. The three reports are indistinguishable from a genuinely valid graph.
+Handoff: rule and control graph -> shape validation -> defect register and coverage report
+Failure path: This is the vacuous-conformance failure and it is silent by construction. A defect register built from the validation report alone shows no defects for a graph in which every control has been mistyped, and shows no defects for a graph containing no controls at all. Both read as a clean run. The failure is worst where it matters most, since a typo in a class IRI during ingestion removes the entire inventory from validation while leaving the data present and queryable.
+Required repair: Reconcile the identifiers actually typed as the target class in the data against an independently declared expected inventory, and treat any expected identifier that is absent as a defect regardless of what the validation report says; assert a nonzero target count before accepting conformance; and keep the datatype and cardinality violations, which are reported normally on correctly targeted nodes, separate from the coverage finding.
+Function bridge: pyshacl.validate over an rdflib Graph for the shape report; an rdflib triple query for the identifiers actually carrying the target class; a set difference against the declared expected inventory as the independent coverage check
+Positive acceptance: A control with an owner and a well-formed evidence date conforms with zero violations, and the coverage check finds nothing missing; a control missing its owner reports one violation; an ill-formed date on a correctly targeted node reports one violation.
+Adverse acceptance: The same owner-less control with a non-matching class conforms with zero violations (reproduced); an empty graph conforms with zero violations (reproduced); the conformance flag for the mistyped graph equals the conformance flag for the valid graph, so the report alone cannot separate them; the independent inventory check names the missing identifier in both cases (reproduced).
+Evidence and limit: guards-v21 case 194 on one authored shape file and five authored graphs. The proof's own required evidence, duplicate-ID and full-report archival over the OSCAL structure, is not supplied here and CONDITIONAL_FIT stands.
+References: HD173
+Integration status: INTEGRATION_UNVERIFIED, and the proof remains a theoretical requirement. HG00-HG07 apply.
+
+### HARDENING P195 -- Normalization moves the offsets it is asked to preserve
+
+Original proof: P195  source revisions and text normalization -> stable span mapping -> semantic-change candidates
+Source location: frozen master lines 7944-7981; original section SHA256 a3f28af42eecc6beff33055688797a2cc4f102fa6d8aac357a45effb0238d8d5.
+Finding: THEORETICAL TEST NOW EXECUTED, and it holds. P195's contract states that normalization is not assumed length preserving and that a cosmetic and a semantic change are different findings. Executed, the decomposed spelling of a fourteen-code-point string normalizes to thirteen code points and from fifteen bytes to fourteen, so a raw offset does not index the normalized text; the two spellings are unequal as strings and equal after normalization, so a comparison run on normalized text cannot report that the encoding changed.
+Handoff: original and revised source text -> normalized text and span map -> cosmetic and semantic change findings
+Failure path: The proof's adverse test names a combined Unicode character being hidden by normalized text equality, and that is exactly what the measurement shows: the composed and decomposed forms are the same text after normalization and different bytes before it, so a chain that hashes the raw bytes and compares the normalized text reports a changed hash with no change found. In the other direction, a span map built on raw offsets and applied to normalized text is off by one code point from the first accent onward, so every quote extracted after it is misaligned without any error.
+Required repair: Tag every offset as raw or normalized and never mix them in one map; assert the reverse mapping from normalized back to raw for every retained span; and report an encoding-only change as its own finding rather than as either a cosmetic or a semantic one, since normalized equality cannot see it.
+Function bridge: unicodedata.normalize with the form declared and both lengths measured; difflib.SequenceMatcher.get_opcodes for the change shape; the typed AST comparison from P191 for the semantic side
+Positive acceptance: A whitespace insertion returns only an insert opcode and leaves the compiled threshold unchanged; a threshold edit returns a replace opcode and changes the compiled threshold; a removed negation returns a delete opcode; identical text returns no non-equal opcode.
+Adverse acceptance: The decomposed and precomposed spellings differ in code points, in bytes and as strings, and compare equal after NFC (all reproduced); the precomposed form is length preserving under NFC while the decomposed form is not, so the property depends on the input and cannot be assumed.
+Evidence and limit: guards-v21 case 195 on two authored spellings and four authored revisions. The proof's own required evidence, reverse span checks over real source versions and multilingual coverage, is not supplied here and CONDITIONAL_FIT stands.
+References: HD176
+Integration status: INTEGRATION_UNVERIFIED, and the proof remains a theoretical requirement. HG00-HG07 apply.
+
+### HARDENING P196 -- The closure returns normally over the cycle it should refuse
+
+Original proof: P196  control imports and clause references -> dependency closure -> complete-or-unresolved rule pack
+Source location: frozen master lines 7982-8019; original section SHA256 5deecf7da579fbe5bfd3a7c290b3b46c87deed156c1a73351c93c59cb7cfd664.
+Finding: THEORETICAL TEST NOW EXECUTED, with an obligation the interface text leaves implicit. P196's adverse test names a cycle requiring unsupported semantics as something that must block a completeness claim. Executed, networkx.descendants returns a complete-looking descendant set over a cyclic reference graph without raising, so the closure step alone cannot block anything; only a separate strongly-connected-components call or an acyclicity test reveals the cycle.
+Handoff: versioned source references -> resolved targets and dependency closure -> sealed pack or unresolved report
+Failure path: A pack sealed on the strength of a successful closure over a cyclic import graph is reported complete, and every identifier in it resolves, so the completeness claim is internally consistent and wrong. The cycle is not a workflow cycle and the proof's contract says as much, which is precisely why the closure must not be the thing that detects it. Reference resolution has the same shape: urljoin and urldefrag resolve a fragment against a base without any statement about whether the target exists.
+Required repair: Run a strongly-connected-components or acyclicity test as a separate gate before sealing, and record its result in the pack rather than inferring it from the closure succeeding; and verify every resolved target against the local source manifest, since resolution is a string operation and says nothing about availability.
+Function bridge: urllib.parse.urljoin and urldefrag for offline reference resolution; networkx.descendants for the closure; networkx.strongly_connected_components and is_directed_acyclic_graph as the separate cycle gate
+Positive acceptance: A three-level acyclic reference chain closes to its three descendants and reports no cycle; a relative reference with a fragment resolves to the expected target and fragment; a bare fragment resolves against the base.
+Adverse acceptance: The cyclic graph's closure returns its three members without raising (reproduced), while the components call names the cycle and the acyclicity test returns false (reproduced); a root absent from the reference graph is Blocked before any closure is attempted.
+Evidence and limit: guards-v21 case 196 on two authored reference graphs and three authored references. The proof's own required evidence, a supported OSCAL subset compared against published resolution fixtures, is not supplied here and CONDITIONAL_FIT stands. No network fetch was attempted, consistent with the proof's offline qualification requirement.
+References: HD146
+Integration status: INTEGRATION_UNVERIFIED, and the proof remains a theoretical requirement. HG00-HG07 apply.
+
+### HARDENING P197 -- The two engines disagree on the same missing count, by construction
+
+Original proof: P197  one approved decision AST -> independent engine adapters -> bounded decision equivalence
+Source location: frozen master lines 8020-8057; original section SHA256 96e6128a1eb68c5b31a40a036e6683a79dcf3e70e0cda8aae46eb63a688715cf.
+Finding: THEORETICAL TEST NOW EXECUTED, and the disagreement the proof names as an adverse case is not a bug to be fixed but a semantic difference between the engines. P197's adverse test states that a missing count cannot become zero in one engine and unknown in another. Executed, that is exactly what happens and it follows from each engine's own semantics: Z3 leaves an unconstrained integer free and reports both the predicate and its negation satisfiable, while Clingo under the closed-world assumption yields the empty model, which reads as not approved. On every fully known count in the bounded domain the two agree.
+Handoff: one approved AST -> independent engine representations -> compared decisions and counterexamples
+Failure path: An equivalence report that compares only known inputs finds full agreement and certifies the adapters. The first missing value in production then produces a decision in one engine and no decision in the other, and the report that was supposed to catch it never tested the case. The multiple-answer-set case has the same shape: a choice rule with two solutions yields two answer sets, and an adapter that reads the first one presents a single decision that the program does not uniquely determine.
+Required repair: Include missing values in the compared domain rather than only boundary and known values, and declare the intended reading of a missing input before comparing, since neither engine's default is wrong on its own terms; and assert the number of answer sets, treating more than one as an undetermined result rather than reading the first.
+Function bridge: z3.Solver.check over both the predicate and its negation for the three-way state; clingo.Control.solve with the answer sets enumerated and counted; the comparison performed on the declared common subset only
+Positive acceptance: At counts 3, 4 and 5 the Z3 state and the Clingo model agree in every case, reproducing the proof's positive test across the boundary; a program with a single model yields exactly one answer set.
+Adverse acceptance: With the count absent, Z3 reports both true and false satisfiable while Clingo returns the empty model (both reproduced), so the same input is unknown in one engine and not approved in the other; a two-solution choice rule yields two answer sets, so a single decision would have to pick one (reproduced).
+Evidence and limit: guards-v21 case 197 on one authored threshold and four authored inputs. The proof's own required evidence, three adapters including a Zen JDM rendering, Hypothesis-generated cases and frozen engine versions, is not supplied here; the Zen adapter was not exercised and CONDITIONAL_FIT stands.
+References: HD175
+Integration status: INTEGRATION_UNVERIFIED, and the proof remains a theoretical requirement. HG00-HG07 apply.
+
+### HARDENING P198 -- The gap is exactly at the boundary, and totality is relative to the domain
+
+Original proof: P198  scoped decision rows -> gaps and overlaps -> totality qualification
+Source location: frozen master lines 8058-8095; original section SHA256 3f2983b753a856ed23326429f4b84a649285ee08baca34d5c8aa955d62083565.
+Finding: THEORETICAL TEST NOW EXECUTED, and both named mutations produce the witnesses the proof predicts. Rows n < 4 and n >= 4 partition the declared nonnegative integer domain with no uncovered value; changing the second row to n > 4 makes n = 4 uncovered and the solver returns it as the witness; adding an n >= 3 row overlaps the n >= 4 row and the solver returns n = 4 again as the overlap witness.
+Handoff: scoped decision rows and a closed domain -> gap and overlap search -> qualified coverage statement
+Failure path: The proof's contract states that totality is relative to the declared domain, and the executed measurement shows how completely that governs the result: the same gapped row pair reports no uncovered value once the domain floor is raised above the gap. A coverage claim quoted without its domain is therefore not merely imprecise, it is reversible by a domain change that no row was edited to produce. The domain floor is itself a boundary, and a single row of n > 0 leaves the floor uncovered.
+Required repair: Archive the domain schema with the coverage statement and re-run the search whenever the domain changes, since a certified table can be made complete or incomplete by the domain alone; and test the domain endpoints explicitly, because the floor is a boundary that no interior mutation exposes.
+Function bridge: z3.Solver.check with the negated disjunction of the row predicates for the gap search and the conjunction for the overlap search, with the model extracted as the witness; itertools.product for the finite enumerated domain the result is relative to
+Positive acceptance: The partition leaves no uncovered value and no overlapping value; a single row covering the whole domain leaves nothing uncovered.
+Adverse acceptance: Replacing the second row with n > 4 returns the uncovered witness n = 4, and adding an n >= 3 row returns the overlap witness n = 4 (both reproduced); a single n > 0 row leaves the domain floor 0 uncovered; raising the domain floor to 5 makes the same gapped row pair report no gap (reproduced), so the coverage claim moved without any row changing.
+Evidence and limit: guards-v21 case 198 on five authored row sets and two authored domains. The proof's own required evidence, Hypothesis-generated threshold neighbours, a Zen trace-based row-hit comparison and retained solver-undecided labels, is not supplied here and CONDITIONAL_FIT stands.
+References: HD174
+Integration status: INTEGRATION_UNVERIFIED, and the proof remains a theoretical requirement. HG00-HG07 apply.
+
+### HARDENING P199 -- Each blocked reason has to stay its own reason
+
+Original proof: P199  required controls + dated authority and evidence -> separate gate decisions -> actionable exceptions
+Source location: frozen master lines 8096-8133; original section SHA256 796fe9ed0701e9c7aa06a0777a6a5f53352ee78b115f3878f3f0a7fc0c1189a6.
+Finding: THEORETICAL TEST NOW EXECUTED for the gate mechanics, and the proof's own TARGET_AUTHORITY_UNPROVEN qualification is confirmed rather than lifted. The five named adverse cases, a draft approval, a wrong-role approval, a stale evaluation time, a withdrawal and a modified artifact, each block the gate and each produces a distinct reason. What no library can supply is the thing the proof says it cannot: nothing here authenticates a signature or a person, and the satisfied outcome rests entirely on fixture records.
+Handoff: control requirements, evidence records and authority assignments -> separate gate decisions -> exception routing
+Failure path: The named risk is a role label being read as an authentication. The mechanical failure beside it is reason collapse: if the five blocked cases return one generic status, the exception queue cannot route them, and a modified artifact, which is an integrity failure, is queued alongside a draft approval, which is a workflow state. The hash check must also precede the role check, or a modified artifact bearing a correctly-roled signed approval reports a role-level pass on bytes that are not the approved ones.
+Required repair: Check the artifact hash first and return its own blocked reason; keep each remaining block reason distinct and routable; validate the case-to-approval binding with an explicit one-to-one cardinality check so a duplicate approval is refused rather than silently selected; and carry the fixture origin of every satisfied outcome into the record, since no authentication occurred.
+Function bridge: hashlib.sha256 over the artifact bytes as the first gate; explicit state, role and time predicates each returning a named reason; pandas.DataFrame.merge with validate='one_to_one' and indicator for the binding
+Positive acceptance: A signed, correctly-roled approval dated at or before the evaluation time over unmodified bytes satisfies the gate; the case-to-approval binding joins one-to-one with every row matched.
+Adverse acceptance: A modified artifact, a draft approval, a withdrawn approval, a wrong-role approval and an approval post-dating the evaluation time each block with a different reason (all reproduced); two approvals for one case raise pandas MergeError under the one-to-one contract; the count of distinct blocked reasons across the state and role mutations is two, so they did not collapse.
+Evidence and limit: guards-v21 case 199 on one authored artifact and six authored approval records. No signature was verified, no credential was checked and no identity provider was contacted; the proof's requirement for a real identity-provider test before operational acceptance is untouched, and TARGET_AUTHORITY_UNPROVEN stands.
+References: HD138
+Integration status: INTEGRATION_UNVERIFIED, and the proof remains a theoretical requirement. HG00-HG07 apply.
+
+### HARDENING P200 -- Canonical key order is not canonical row order
+
+Original proof: P200  scoped requirements + dependencies + gates -> deterministic resolver -> explained initiation manifest
+Source location: frozen master lines 8134-8171; original section SHA256 42899aa54eeaee66cab624264eeafbb1d61404cecf0f40648cbff9b390a097f0.
+Finding: THEORETICAL TEST NOW EXECUTED, and it exposes a gap between two of the proof's own statements. P200's positive test requires that reordering input rows preserves semantic output, and its output step specifies json.dumps with declared ordering and a sha256 seal. Executed, sort_keys normalizes key order within each object and does not order the rows: the same two rows in the other sequence produce different JSON and a different seal. Row ordering has to be declared separately or the reordering test fails on the seal while the semantics are unchanged.
+Handoff: derived requirements, dependencies and gates -> canonical manifest -> sealed output and unresolved register
+Failure path: Two runs of the resolver over the same inputs presented in a different order produce two manifests that are semantically identical and cryptographically different. Every downstream comparison that uses the seal reports a change, and a reviewer looking for the change finds none, which trains the seal to be ignored. The manifest bucketing has the opposite risk: an item whose state is not one of the five declared buckets must be refused rather than dropped, or the manifest silently loses an item while every bucket remains internally consistent.
+Required repair: Sort the rows by a declared key before serializing and assert that a reordered input produces an identical seal; and validate every item state against the five declared buckets, Blocking an undeclared state rather than discarding the item, with the bucket sizes asserted to sum to the input count.
+Function bridge: json.dumps with sort_keys, fixed separators and allow_nan disabled, over rows sorted by a declared key; hashlib.sha256 over the serialized bytes as the seal; an explicit five-bucket manifest with an undeclared-state rejection
+Positive acceptance: Key order is normalized within each object; with rows sorted, the reordered input produces byte-identical JSON and an identical sha256; the four authored items land one per bucket with the required bucket empty and the bucket sizes summing to the input count; reversing the item order produces the same manifest.
+Adverse acceptance: Without a row sort the reordered input produces different JSON and a different sha256 (reproduced), so the proof's reordering test fails on the seal alone; an item carrying an undeclared state is Blocked rather than dropped.
+Evidence and limit: guards-v21 case 200 on two authored rows and four authored manifest items. This is the composition proof and none of its upstream adapters were implemented; the proof's own required evidence, orchestration over all upstream acceptance cases with mutation propagation and an independently authored comparison manifest, is not supplied here and CONDITIONAL_FIT stands.
+References: HD176
+Integration status: INTEGRATION_UNVERIFIED, and the proof remains a theoretical requirement. HG00-HG07 apply.
+
+## Embedded runnable local guard module: handoff_guards_v21.py
+
+SHA256 0a9f91bd3dff9a727cd535f36387e0c47f64c008d7909398812278910be93dbb; bytes 26098. Run: python handoff_guards_v21.py --report guards-v21.json, with handoff_guards_v1.py beside it. Ten cases, 115 assertions, no network and no model client. The controlled grammar is Lark, the typed AST is Pydantic, applicability is Clingo, contradiction and coverage witnesses are Z3, shape validation is pySHACL over rdflib, closure and cycles are NetworkX, span comparison is difflib over unicodedata, and canonical output is json with a declared ordering.
+
+```python
+"""Twentieth bounded adapter suite: P191-P200, the theoretical-requirement proofs.
+
+These ten proofs are recorded in this TXT as "theoretical requirement; full chain not executed" and each names a
+theoretical positive test, a theoretical adverse test, and a required-implementation-and-evidence section. This
+module executes those named tests with the primitives the proofs themselves name, so that the specific claims stop
+being theoretical, and records which parts remain unexecutable. It does not implement the proposed chains.
+
+Every meaningful operation is a library primitive call: the controlled grammar is Lark, the typed AST is Pydantic,
+applicability is Clingo under its own closed-world semantics, contradiction and coverage witnesses are Z3, graph
+shape validation is pySHACL over rdflib, closure and cycles are NetworkX, span comparison is difflib over
+unicodedata normalization, cardinality is a validated pandas merge, and canonical output is json with declared
+ordering. Requires handoff_guards_v1.py from this TXT. All runtime inputs are authored fixtures. No model client
+and no network.
+Run: python handoff_guards_v21.py --report report.json
+"""
+from __future__ import annotations
+import argparse, difflib, hashlib, importlib.metadata, itertools, json, logging, traceback, unicodedata, warnings
+from pathlib import Path
+from typing import Literal
+from urllib.parse import urldefrag, urljoin
+import clingo
+import networkx as nx
+import pandas as pd
+import pyshacl
+import z3
+from lark import Lark, UnexpectedInput
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
+from rdflib import Graph
+import handoff_guards_v1 as g
+warnings.simplefilter('ignore'); logging.disable(logging.WARNING)
+
+
+def _quiet(code, message):
+    """Clingo reports undefined atoms as info messages; the guards assert on the answer sets instead."""
+    return None
+
+# ---------------------------------------------------------------- P191
+GRAMMAR = r'''
+start: MODALITY actor "count" OP INT
+MODALITY: "require" | "permit" | "forbid"
+actor: WORD
+OP: ">=" | "<=" | ">" | "<" | "=="
+%import common.WORD
+%import common.INT
+%import common.WS
+%ignore WS
+'''
+PARSER = Lark(GRAMMAR)
+
+
+class RuleAST(BaseModel):
+    model_config = ConfigDict(strict=True, extra='forbid', frozen=True)
+    modality: Literal['require', 'permit', 'forbid']
+    actor: str = Field(min_length=1)
+    operator: Literal['>=', '<=', '>', '<', '==']
+    threshold: int = Field(ge=0)
+    clause: str = Field(min_length=1)
+
+
+def compile_rule(text: str, clause: str) -> RuleAST:
+    try:
+        tree = PARSER.parse(text)
+    except UnexpectedInput as failure:
+        raise g.Blocked('controlled language does not accept %r (%s)' % (text, type(failure).__name__))
+    modality, actor, operator, threshold = tree.children
+    return RuleAST.model_validate({'modality': str(modality), 'actor': str(actor.children[0]),
+                                   'operator': str(operator), 'threshold': int(threshold), 'clause': clause})
+
+
+def satisfies(rule: RuleAST, count: int) -> bool:
+    solver = z3.Solver(); n = z3.Int('n')
+    solver.add(n == count)
+    solver.add({'>=': n >= rule.threshold, '<=': n <= rule.threshold, '>': n > rule.threshold,
+                '<': n < rule.threshold, '==': n == rule.threshold}[rule.operator])
+    return solver.check() == z3.sat
+
+
+# ---------------------------------------------------------------- P192
+SCOPE_PROGRAM = '''
+region(eu). region(us).
+rule_scope(r1, eu).
+applies(R) :- rule_scope(R, X), request_region(X).
+has_region :- request_region(_).
+unresolved(R) :- rule_scope(R, _), not has_region.
+'''
+
+
+def applicability(request_region: str | None) -> list[str]:
+    program = SCOPE_PROGRAM + ('request_region(%s).\n' % request_region if request_region else '')
+    control = clingo.Control(['0'], logger=_quiet); control.add('base', [], program); control.ground([('base', [])])
+    with control.solve(yield_=True) as handle:
+        for model in handle:
+            return sorted(str(a) for a in model.symbols(shown=True)
+                          if str(a).startswith(('applies', 'unresolved')))
+    raise g.Blocked('scope program has no answer set')
+
+
+# ---------------------------------------------------------------- P193
+def conflict_core(rules: dict) -> tuple[str, list[str]]:
+    solver = z3.Solver(); n = z3.Int('n')
+    for name, formula in rules.items():
+        solver.assert_and_track(formula(n), name)
+    state = solver.check()
+    if state == z3.unsat:
+        return 'contradiction', sorted(str(c) for c in solver.unsat_core())
+    if state == z3.sat:
+        return 'satisfiable', []
+    return 'undecided', []
+
+
+def core_is_minimal(rules: dict, core: list[str]) -> bool:
+    n = z3.Int('n')
+    for dropped in core:
+        solver = z3.Solver()
+        for name in core:
+            if name != dropped:
+                solver.assert_and_track(rules[name](n), name)
+        if solver.check() != z3.sat:
+            return False
+    return True
+
+
+# ---------------------------------------------------------------- P194
+SHAPES = """
+@prefix sh: <http://www.w3.org/ns/shacl#> . @prefix ex: <http://example.org/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+ex:ControlShape a sh:NodeShape ; sh:targetClass ex:Control ;
+  sh:property [ sh:path ex:owner ; sh:minCount 1 ] ;
+  sh:property [ sh:path ex:evidenceDate ; sh:minCount 1 ; sh:datatype xsd:date ] .
+"""
+
+
+def shacl(data: str) -> tuple[bool, int]:
+    shapes = Graph().parse(data=SHAPES, format='turtle')
+    graph = Graph().parse(data=data, format='turtle')
+    conforms, _, text = pyshacl.validate(graph, shacl_graph=shapes, advanced=True)
+    return bool(conforms), sum(1 for line in text.splitlines() if 'Constraint Violation' in line)
+
+
+def target_coverage(data: str, expected: list[str]) -> list[str]:
+    """The independent inventory check the chain requires beside the shape validation."""
+    graph = Graph().parse(data=data, format='turtle')
+    present = {str(s).rsplit('/', 1)[-1] for s, _, o in graph
+               if str(o) == 'http://example.org/Control'}
+    return sorted(set(expected) - present)
+
+
+# ---------------------------------------------------------------- P195
+def spans(raw: str) -> dict:
+    normalized = unicodedata.normalize('NFC', raw)
+    return {'raw_codepoints': len(raw), 'nfc_codepoints': len(normalized),
+            'raw_bytes': len(raw.encode('utf-8')), 'nfc_bytes': len(normalized.encode('utf-8')),
+            'length_preserved': len(raw) == len(normalized)}
+
+
+def change_kinds(before: str, after: str) -> list[str]:
+    return [op[0] for op in difflib.SequenceMatcher(None, before, after).get_opcodes() if op[0] != 'equal']
+
+
+# ---------------------------------------------------------------- P196
+def resolve_reference(base: str, reference: str) -> tuple[str, str]:
+    target, fragment = urldefrag(urljoin(base, reference))
+    return target, fragment
+
+
+def closure(edges: list[tuple[str, str]], root: str) -> list[str]:
+    graph = nx.DiGraph(edges)
+    if root not in graph:
+        raise g.Blocked('root %r is not present in the reference graph' % root)
+    return sorted(nx.descendants(graph, root))
+
+
+def cycles(edges: list[tuple[str, str]]) -> list[list[str]]:
+    graph = nx.DiGraph(edges)
+    return [sorted(component) for component in nx.strongly_connected_components(graph) if len(component) > 1]
+
+
+# ---------------------------------------------------------------- P197
+def z3_states(count: int | None, threshold: int) -> set:
+    n = z3.Int('n')
+    out = set()
+    for label, formula in (('true', n >= threshold), ('false', z3.Not(n >= threshold))):
+        solver = z3.Solver()
+        if count is not None:
+            solver.add(n == count)
+        solver.add(formula)
+        if solver.check() == z3.sat:
+            out.add(label)
+    return out
+
+
+def clingo_states(count: int | None, threshold: int) -> list[str]:
+    program = 'approved :- count(N), N >= %d.\n#show approved/0.\n' % threshold
+    if count is not None:
+        program += 'count(%d).\n' % count
+    control = clingo.Control(['0'], logger=_quiet); control.add('base', [], program); control.ground([('base', [])])
+    with control.solve(yield_=True) as handle:
+        for model in handle:
+            return sorted(str(a) for a in model.symbols(shown=True))
+    return []
+
+
+def answer_sets(program: str) -> list[list[str]]:
+    control = clingo.Control(['0'], logger=_quiet); control.add('base', [], program); control.ground([('base', [])])
+    out = []
+    with control.solve(yield_=True) as handle:
+        for model in handle:
+            out.append(sorted(str(a) for a in model.symbols(shown=True)))
+    return sorted(out)
+
+
+# ---------------------------------------------------------------- P198
+def uncovered(rows, *, domain_low: int = 0):
+    n = z3.Int('n'); solver = z3.Solver()
+    solver.add(n >= domain_low)
+    solver.add(z3.Not(z3.Or([row(n) for row in rows])))
+    if solver.check() == z3.sat:
+        return int(str(solver.model()[n]))
+    return None
+
+
+def overlapping(rows, *, domain_low: int = 0):
+    n = z3.Int('n'); solver = z3.Solver()
+    solver.add(n >= domain_low)
+    solver.add(z3.And([row(n) for row in rows]))
+    if solver.check() == z3.sat:
+        return int(str(solver.model()[n]))
+    return None
+
+
+# ---------------------------------------------------------------- P199
+def bound_approvals(cases: list[dict], approvals: list[dict]) -> pd.DataFrame:
+    return pd.DataFrame(cases).merge(pd.DataFrame(approvals), on='case',
+                                     validate='one_to_one', indicator=True)
+
+
+def gate(approval: dict, artifact: bytes, declared_sha: str, *, at: str) -> str:
+    if hashlib.sha256(artifact).hexdigest() != declared_sha:
+        return 'blocked: artifact does not match the bound hash'
+    if approval['state'] != 'signed':
+        return 'blocked: approval is %s' % approval['state']
+    if approval['role'] != 'cpc':
+        return 'blocked: approval role is %s' % approval['role']
+    if approval['on'] > at:
+        return 'blocked: approval post-dates the evaluation time'
+    return 'satisfied'
+
+
+# ---------------------------------------------------------------- P200
+def canonical(rows: list[dict], *, sort_rows: bool) -> str:
+    ordered = sorted(rows, key=lambda r: json.dumps(r, sort_keys=True)) if sort_rows else rows
+    return json.dumps(ordered, sort_keys=True, separators=(',', ':'), allow_nan=False)
+
+
+def manifest(items: list[dict]) -> dict:
+    buckets = {'required': [], 'satisfied': [], 'missing': [], 'conflicting': [], 'unresolved': []}
+    for item in items:
+        if item['state'] not in buckets:
+            raise g.Blocked('undeclared manifest state %r' % item['state'])
+        buckets[item['state']].append(item['id'])
+    return {k: sorted(v) for k, v in buckets.items()}
+
+
+C = []
+def case(i):
+    def reg(fn): C.append((i, fn)); return fn
+    return reg
+
+
+@case(191)
+def the_controlled_grammar_refuses_what_it_does_not_support():
+    rule = compile_rule('require voting count >= 4', 'S01-3.2')
+    g.equal(rule.modality, 'require'); g.equal(rule.actor, 'voting')
+    g.equal(rule.operator, '>='); g.equal(rule.threshold, 4); g.equal(rule.clause, 'S01-3.2')
+    g.equal(satisfies(rule, 4), True)  # the four-member boundary satisfies it
+    g.equal(satisfies(rule, 3), False)  # three does not
+    g.equal(satisfies(rule, 5), True)
+    for unsupported in ('not merely voting count >= 4', 'require voting count >= four',
+                        'require voting count', 'forbid voting count >= -1'):
+        g.rejects(g.Blocked, lambda t=unsupported: compile_rule(t, 'S01-3.2'))
+    g.equal(compile_rule('forbid voting count >= 4', 'S01-3.2').modality, 'forbid')
+    g.equal(compile_rule('permit voting count >= 4', 'S01-3.2').modality, 'permit')
+    g.equal(compile_rule('require voting count >= 4', 'S01').modality
+            != compile_rule('forbid voting count >= 4', 'S01').modality, True)
+    g.rejects(ValidationError, lambda: RuleAST.model_validate(
+        {'modality': 'demand', 'actor': 'voting', 'operator': '>=', 'threshold': 4, 'clause': 'S01'}))
+    g.rejects(ValidationError, lambda: RuleAST.model_validate(
+        {'modality': 'require', 'actor': 'voting', 'operator': '>=', 'threshold': 4}))
+    return {'boundary_satisfied_at_four_not_three': True,
+            'not_merely_is_refused_by_the_grammar': True,
+            'modalities_stay_distinct': True}
+
+
+@case(192)
+def a_missing_dimension_does_not_become_every_dimension():
+    bound = applicability('eu')
+    g.equal(bound, ['applies(r1)'])
+    absent = applicability(None)
+    g.equal(absent, ['unresolved(r1)'])
+    g.equal(any(a.startswith('applies') for a in absent), False)  # no catch-all was invented
+    g.equal(applicability('us'), ['unresolved(r1)'] if False else [])  # out of scope, and not unresolved either
+    g.equal(bound != absent, True)
+    g.equal(len(applicability('eu')), 1)
+    return {'bound_request_applies': True, 'missing_dimension_is_unresolved': True,
+            'out_of_scope_is_neither_applies_nor_unresolved': True}
+
+
+@case(193)
+def the_unsat_core_names_a_sufficient_subset_not_the_conflicting_set():
+    n_rules = {'r1': lambda n: n > 4, 'r2': lambda n: n > 3, 'r3': lambda n: n < 2, 'r4': lambda n: n > 0}
+    state, core = conflict_core(n_rules)
+    g.equal(state, 'contradiction')
+    g.equal(len(core), 2)
+    g.equal(core_is_minimal(n_rules, core), True)  # this core is minimal
+    g.equal('r1' in core, False)  # yet r1 also contradicts r3 and is absent from it
+    g.equal(conflict_core({'r1': n_rules['r1'], 'r3': n_rules['r3']})[0], 'contradiction')
+    g.equal(sorted(conflict_core({'r1': n_rules['r1'], 'r3': n_rules['r3']})[1]), ['r1', 'r3'])
+    disjoint = {'a': lambda n: n > 4, 'b': lambda n: n > 3}
+    g.equal(conflict_core(disjoint)[0], 'satisfiable')
+    g.equal(conflict_core(disjoint)[1], [])
+    g.equal(core_is_minimal(n_rules, ['r2', 'r3']), True)
+    g.equal(core_is_minimal(n_rules, ['r1', 'r2', 'r3']), False)  # a superset is not minimal
+    return {'core_is_minimal_here': True, 'core_omits_an_equally_conflicting_rule': True,
+            'minimality_needs_its_own_test': True}
+
+
+@case(194)
+def a_shape_report_conforms_when_it_targets_nothing():
+    valid = """@prefix ex: <http://example.org/> . @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+ex:c1 a ex:Control ; ex:owner ex:alice ; ex:evidenceDate "2026-09-07"^^xsd:date ."""
+    g.equal(shacl(valid), (True, 0))
+    no_owner = """@prefix ex: <http://example.org/> . @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+ex:c1 a ex:Control ; ex:evidenceDate "2026-09-07"^^xsd:date ."""
+    g.equal(shacl(no_owner), (False, 1))
+    bad_date = """@prefix ex: <http://example.org/> . @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+ex:c1 a ex:Control ; ex:owner ex:alice ; ex:evidenceDate "not-a-date"^^xsd:date ."""
+    g.equal(shacl(bad_date), (False, 1))
+    wrong_class = """@prefix ex: <http://example.org/> . @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+ex:c1 a ex:Widget ; ex:evidenceDate "2026-09-07"^^xsd:date ."""
+    g.equal(shacl(wrong_class), (True, 0))  # the same missing owner, now unreported
+    g.equal(shacl('@prefix ex: <http://example.org/> .'), (True, 0))  # an empty graph conforms
+    g.equal(shacl(wrong_class)[0] == shacl(valid)[0], True)  # indistinguishable by the report alone
+    g.equal(target_coverage(valid, ['c1']), [])
+    g.equal(target_coverage(wrong_class, ['c1']), ['c1'])  # only the inventory check catches it
+    g.equal(target_coverage('@prefix ex: <http://example.org/> .', ['c1', 'c2']), ['c1', 'c2'])
+    return {'wrong_class_node_conforms_vacuously': True, 'empty_graph_conforms': True,
+            'independent_inventory_is_the_only_detector': True}
+
+
+@case(195)
+def normalization_moves_the_offsets_it_is_asked_to_preserve():
+    composed = 'Café approves'
+    measured = spans(composed)
+    g.equal(measured['raw_codepoints'], 14); g.equal(measured['nfc_codepoints'], 13)
+    g.equal(measured['raw_bytes'], 15); g.equal(measured['nfc_bytes'], 14)
+    g.equal(measured['length_preserved'], False)  # an offset into the raw text does not index the normalized one
+    precomposed = 'Café approves'
+    g.equal(composed == precomposed, False)
+    g.equal(unicodedata.normalize('NFC', composed) == precomposed, True)  # normalized equality hides the difference
+    g.equal(spans(precomposed)['length_preserved'], True)
+    g.equal(change_kinds('require count >= 4', 'require  count >= 4'), ['insert'])
+    g.equal(change_kinds('require count >= 4', 'require count >= 5'), ['replace'])
+    g.equal(change_kinds('members must not vote', 'members must vote'), ['delete'])
+    g.equal(change_kinds('require count >= 4', 'require count >= 4'), [])
+    g.equal(compile_rule('require voting count >= 4', 'v1').threshold
+            != compile_rule('require voting count >= 5', 'v2').threshold, True)
+    g.equal(compile_rule('require voting count >= 4', 'v1').threshold,
+            compile_rule('require  voting count >= 4', 'v2').threshold)  # whitespace is not a semantic change
+    return {'nfc_is_not_length_preserving': True, 'codepoints_lost': 1, 'bytes_lost': 1,
+            'normalized_equality_hides_the_composed_form': True,
+            'whitespace_and_threshold_changes_are_different_findings': True}
+
+
+@case(196)
+def a_reference_cycle_does_not_stop_the_closure():
+    target, fragment = resolve_reference('https://example.org/cat/base.json', 'profile.json#ac-1')
+    g.equal(target, 'https://example.org/cat/profile.json'); g.equal(fragment, 'ac-1')
+    g.equal(resolve_reference('https://example.org/cat/base.json', '#ac-2')[1], 'ac-2')
+    g.equal(closure([('cat', 'ac-1'), ('ac-1', 'ac-2'), ('ac-2', 'ac-3')], 'cat'), ['ac-1', 'ac-2', 'ac-3'])
+    g.rejects(g.Blocked, lambda: closure([('cat', 'ac-1')], 'absent'))
+    cyclic = [('a', 'b'), ('b', 'c'), ('c', 'a'), ('d', 'a')]
+    g.equal(cycles(cyclic), [['a', 'b', 'c']])
+    g.equal(closure(cyclic, 'd'), ['a', 'b', 'c'])  # the closure returns normally over the cycle
+    g.equal(nx.is_directed_acyclic_graph(nx.DiGraph(cyclic)), False)
+    g.equal(cycles([('cat', 'ac-1'), ('ac-1', 'ac-2')]), [])  # so the cycle test must be run separately
+    g.equal(len(closure(cyclic, 'd')) == len(closure([('cat', 'ac-1'), ('ac-1', 'ac-2')], 'cat')) + 1, True)
+    return {'fragment_resolution_is_urllib': True, 'closure_succeeds_over_a_cycle': True,
+            'cycle_detection_is_a_separate_call': True}
+
+
+@case(197)
+def the_two_engines_disagree_on_the_same_missing_count():
+    g.equal(z3_states(4, 4), {'true'}); g.equal(z3_states(3, 4), {'false'}); g.equal(z3_states(5, 4), {'true'})
+    g.equal(clingo_states(4, 4), ['approved']); g.equal(clingo_states(3, 4), [])
+    g.equal(clingo_states(5, 4), ['approved'])
+    for count in (3, 4, 5):
+        g.equal(('true' in z3_states(count, 4)), (clingo_states(count, 4) == ['approved']))
+    g.equal(z3_states(None, 4), {'true', 'false'})  # unknown: both remain satisfiable
+    g.equal(clingo_states(None, 4), [])  # closed world: simply not approved
+    g.equal(len(z3_states(None, 4)) > 1 and clingo_states(None, 4) == [], True)
+    g.equal(z3_states(None, 4) == {'true'} or z3_states(None, 4) == {'false'}, False)
+    sets = answer_sets('{ a; b } = 1.')
+    g.equal(sets, [['a'], ['b']]); g.equal(len(sets), 2)  # not a unique decision
+    g.equal(len(answer_sets('a.')), 1)
+    return {'engines_agree_on_every_known_count': True,
+            'unknown_is_both_states_in_z3_and_absent_in_clingo': True,
+            'multiple_answer_sets_are_not_one_decision': True}
+
+
+@case(198)
+def the_gap_is_exactly_at_the_boundary():
+    g.equal(uncovered([lambda n: n < 4, lambda n: n >= 4]), None)  # a true partition leaves nothing
+    g.equal(uncovered([lambda n: n < 4, lambda n: n > 4]), 4)  # the mutation exposes n = 4
+    g.equal(overlapping([lambda n: n < 4, lambda n: n >= 4]), None)
+    g.equal(overlapping([lambda n: n >= 4, lambda n: n >= 3]), 4)  # the added row overlaps at n = 4
+    g.equal(overlapping([lambda n: n >= 4, lambda n: n < 3]), None)
+    g.equal(uncovered([lambda n: n >= 0]), None)
+    g.equal(uncovered([lambda n: n > 0]), 0)  # the domain floor is its own boundary
+    g.equal(uncovered([lambda n: n < 4, lambda n: n > 4], domain_low=5), None)  # totality is relative to the domain
+    g.equal(uncovered([lambda n: n < 4, lambda n: n > 4], domain_low=0), 4)
+    known = list(itertools.product(range(3), repeat=2))
+    g.equal(len(known), 9)  # the enumerated finite domain the solver result is relative to
+    return {'partition_has_no_gap': True, 'gap_witness': 4, 'overlap_witness': 4,
+            'totality_is_relative_to_the_declared_domain': True}
+
+
+@case(199)
+def a_role_label_is_not_an_authentication():
+    artifact = b'charter v1'
+    declared = hashlib.sha256(artifact).hexdigest()
+    signed = {'state': 'signed', 'role': 'cpc', 'on': '2026-09-01'}
+    g.equal(gate(signed, artifact, declared, at='2026-09-07'), 'satisfied')
+    g.equal(gate(signed, artifact + b'.', declared, at='2026-09-07'),
+            'blocked: artifact does not match the bound hash')
+    g.equal(gate({'state': 'draft', 'role': 'cpc', 'on': '2026-09-01'}, artifact, declared, at='2026-09-07'),
+            'blocked: approval is draft')
+    g.equal(gate({'state': 'withdrawn', 'role': 'cpc', 'on': '2026-09-01'}, artifact, declared, at='2026-09-07'),
+            'blocked: approval is withdrawn')
+    g.equal(gate({'state': 'signed', 'role': 'reviewer', 'on': '2026-09-01'}, artifact, declared, at='2026-09-07'),
+            'blocked: approval role is reviewer')
+    g.equal(gate(signed, artifact, declared, at='2026-08-01'),
+            'blocked: approval post-dates the evaluation time')
+    outcomes = {gate(a, artifact, declared, at='2026-09-07') for a in
+                ({'state': 'draft', 'role': 'cpc', 'on': '2026-09-01'},
+                 {'state': 'signed', 'role': 'reviewer', 'on': '2026-09-01'})}
+    g.equal(len(outcomes), 2)  # each blocked reason stays distinct
+    joined = bound_approvals([{'case': 'K1', 'artifact': 'a1'}, {'case': 'K2', 'artifact': 'a2'}],
+                             [{'case': 'K1', 'role': 'cpc'}, {'case': 'K2', 'role': 'cpc'}])
+    g.equal(len(joined), 2); g.equal(sorted(joined['_merge'].astype(str).unique()), ['both'])
+    g.rejects(pd.errors.MergeError, lambda: bound_approvals(
+        [{'case': 'K1', 'artifact': 'a1'}],
+        [{'case': 'K1', 'role': 'cpc'}, {'case': 'K1', 'role': 'reviewer'}]))
+    return {'hash_binding_precedes_the_role_check': True, 'each_block_reason_is_distinct': True,
+            'duplicate_approval_is_refused_by_cardinality': True,
+            'no_signature_was_authenticated': True}
+
+
+@case(200)
+def canonical_key_order_is_not_canonical_row_order():
+    rows = [{'b': 2, 'a': 1}, {'a': 3, 'b': 4}]
+    g.equal(canonical(rows, sort_rows=False), '[{"a":1,"b":2},{"a":3,"b":4}]')  # keys normalized
+    g.equal(canonical(rows, sort_rows=False) == canonical(list(reversed(rows)), sort_rows=False), False)
+    g.equal(canonical(rows, sort_rows=True), canonical(list(reversed(rows)), sort_rows=True))  # rows too
+    g.equal(hashlib.sha256(canonical(rows, sort_rows=True).encode()).hexdigest(),
+            hashlib.sha256(canonical(list(reversed(rows)), sort_rows=True).encode()).hexdigest())
+    g.equal(hashlib.sha256(canonical(rows, sort_rows=False).encode()).hexdigest()
+            == hashlib.sha256(canonical(list(reversed(rows)), sort_rows=False).encode()).hexdigest(), False)
+    items = [{'id': 'c1', 'state': 'satisfied'}, {'id': 'c2', 'state': 'missing'},
+             {'id': 'c3', 'state': 'conflicting'}, {'id': 'c4', 'state': 'unresolved'}]
+    built = manifest(items)
+    g.equal(built['satisfied'], ['c1']); g.equal(built['missing'], ['c2'])
+    g.equal(built['conflicting'], ['c3']); g.equal(built['unresolved'], ['c4'])
+    g.equal(built['required'], [])
+    g.equal(sum(len(v) for v in built.values()), 4)  # every item lands in exactly one bucket
+    g.rejects(g.Blocked, lambda: manifest([{'id': 'c5', 'state': 'ready'}]))
+    g.equal(manifest(items) == manifest(list(reversed(items))), True)  # input order does not change the manifest
+    return {'sort_keys_does_not_order_rows': True, 'row_sort_is_required_for_a_stable_hash': True,
+            'undeclared_manifest_state_is_blocked': True}
+
+
+def run() -> dict:
+    g.ASSERTIONS = 0; rows = []
+    for i, fn in C:
+        before = g.ASSERTIONS
+        try: r = fn(); state = 'passed'; error = None
+        except Exception: r = {}; state = 'failed'; error = traceback.format_exc()
+        rows.append({'proof': i, 'test': fn.__name__, 'status': state, 'assertions': g.ASSERTIONS - before, 'result': r, 'error': error})
+    packages = ['clingo', 'lark', 'networkx', 'pandas', 'pydantic', 'pyshacl', 'rdflib', 'z3-solver']
+    here = Path(__file__).resolve().parent
+    return {'scope': 'Executes the named theoretical positive and adverse tests of P191-P200 with the primitives those proofs name. The proposed chains themselves were not implemented and no proof artifact was produced.',
+            'test_cases': len(rows), 'passed': sum(r['status'] == 'passed' for r in rows), 'failed': sum(r['status'] == 'failed' for r in rows),
+            'assertions': g.ASSERTIONS, 'full_chains_executed': 0, 'network_calls': 0, 'business_actions': 0,
+            'source_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+            'dependency_sha256': {name: hashlib.sha256((here / name).read_bytes()).hexdigest() for name in ['handoff_guards_v1.py']},
+            'library_versions': {n: importlib.metadata.version(n) for n in packages}, 'results': rows}
+
+
+if __name__ == '__main__':
+    p = argparse.ArgumentParser(); p.add_argument('--report', type=Path, required=True)
+    args = p.parse_args()
+    result = run(); args.report.parent.mkdir(parents=True, exist_ok=True)
+    args.report.write_text(json.dumps(result, indent=2, sort_keys=True, allow_nan=False) + '\n')
+    print(json.dumps({k: result[k] for k in ['test_cases', 'passed', 'failed', 'assertions']}))
+    if result['failed']:
+        print('\n'.join(r['error'] for r in result['results'] if r['error'])); raise SystemExit(1)
+```
+
+## Fresh local guard evidence: guards-v21.json
+
+Result file SHA256 1de469fa4f277fea1dc51f90104a0b14f62e481c1b76e9735637c523c7726e1f; bytes 4442. Ten cases passed, zero failed, 115 assertions, full_chains_executed 0, network_calls 0, business_actions 0; a second run of the same module produced byte-identical output. These cases execute the named theoretical tests of P191-P200; they do not implement the proposed chains, and every one of those proofs remains a theoretical requirement at CONDITIONAL_FIT.
+
+```json
+{
+  "assertions": 115,
+  "business_actions": 0,
+  "dependency_sha256": {
+    "handoff_guards_v1.py": "2b3138b692ecfd02b76ae34bdb001f5046608bb2983d8709d6c55c0765f7c9b8"
+  },
+  "failed": 0,
+  "full_chains_executed": 0,
+  "library_versions": {
+    "clingo": "5.8.2",
+    "lark": "1.3.1",
+    "networkx": "3.6.1",
+    "pandas": "2.2.3",
+    "pydantic": "2.13.5",
+    "pyshacl": "0.40.1",
+    "rdflib": "7.6.0",
+    "z3-solver": "5.1.0.0"
+  },
+  "network_calls": 0,
+  "passed": 10,
+  "results": [
+    {
+      "assertions": 17,
+      "error": null,
+      "proof": 191,
+      "result": {
+        "boundary_satisfied_at_four_not_three": true,
+        "modalities_stay_distinct": true,
+        "not_merely_is_refused_by_the_grammar": true
+      },
+      "status": "passed",
+      "test": "the_controlled_grammar_refuses_what_it_does_not_support"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 192,
+      "result": {
+        "bound_request_applies": true,
+        "missing_dimension_is_unresolved": true,
+        "out_of_scope_is_neither_applies_nor_unresolved": true
+      },
+      "status": "passed",
+      "test": "a_missing_dimension_does_not_become_every_dimension"
+    },
+    {
+      "assertions": 10,
+      "error": null,
+      "proof": 193,
+      "result": {
+        "core_is_minimal_here": true,
+        "core_omits_an_equally_conflicting_rule": true,
+        "minimality_needs_its_own_test": true
+      },
+      "status": "passed",
+      "test": "the_unsat_core_names_a_sufficient_subset_not_the_conflicting_set"
+    },
+    {
+      "assertions": 9,
+      "error": null,
+      "proof": 194,
+      "result": {
+        "empty_graph_conforms": true,
+        "independent_inventory_is_the_only_detector": true,
+        "wrong_class_node_conforms_vacuously": true
+      },
+      "status": "passed",
+      "test": "a_shape_report_conforms_when_it_targets_nothing"
+    },
+    {
+      "assertions": 14,
+      "error": null,
+      "proof": 195,
+      "result": {
+        "bytes_lost": 1,
+        "codepoints_lost": 1,
+        "nfc_is_not_length_preserving": true,
+        "normalized_equality_hides_the_composed_form": true,
+        "whitespace_and_threshold_changes_are_different_findings": true
+      },
+      "status": "passed",
+      "test": "normalization_moves_the_offsets_it_is_asked_to_preserve"
+    },
+    {
+      "assertions": 10,
+      "error": null,
+      "proof": 196,
+      "result": {
+        "closure_succeeds_over_a_cycle": true,
+        "cycle_detection_is_a_separate_call": true,
+        "fragment_resolution_is_urllib": true
+      },
+      "status": "passed",
+      "test": "a_reference_cycle_does_not_stop_the_closure"
+    },
+    {
+      "assertions": 16,
+      "error": null,
+      "proof": 197,
+      "result": {
+        "engines_agree_on_every_known_count": true,
+        "multiple_answer_sets_are_not_one_decision": true,
+        "unknown_is_both_states_in_z3_and_absent_in_clingo": true
+      },
+      "status": "passed",
+      "test": "the_two_engines_disagree_on_the_same_missing_count"
+    },
+    {
+      "assertions": 10,
+      "error": null,
+      "proof": 198,
+      "result": {
+        "gap_witness": 4,
+        "overlap_witness": 4,
+        "partition_has_no_gap": true,
+        "totality_is_relative_to_the_declared_domain": true
+      },
+      "status": "passed",
+      "test": "the_gap_is_exactly_at_the_boundary"
+    },
+    {
+      "assertions": 10,
+      "error": null,
+      "proof": 199,
+      "result": {
+        "duplicate_approval_is_refused_by_cardinality": true,
+        "each_block_reason_is_distinct": true,
+        "hash_binding_precedes_the_role_check": true,
+        "no_signature_was_authenticated": true
+      },
+      "status": "passed",
+      "test": "a_role_label_is_not_an_authentication"
+    },
+    {
+      "assertions": 13,
+      "error": null,
+      "proof": 200,
+      "result": {
+        "row_sort_is_required_for_a_stable_hash": true,
+        "sort_keys_does_not_order_rows": true,
+        "undeclared_manifest_state_is_blocked": true
+      },
+      "status": "passed",
+      "test": "canonical_key_order_is_not_canonical_row_order"
+    }
+  ],
+  "scope": "Executes the named theoretical positive and adverse tests of P191-P200 with the primitives those proofs name. The proposed chains themselves were not implemented and no proof artifact was produced.",
+  "source_sha256": "0a9f91bd3dff9a727cd535f36387e0c47f64c008d7909398812278910be93dbb",
+  "test_cases": 10
+}
+```
+
+Checkpoint coverage: 200 of 300 proofs carry a hardening record. Prior cumulative TXT SHA256 d7dde811c45c45d6a0507bf1c611a3f7914e2044786c58411a9c74d936f35de7.
