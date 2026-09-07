@@ -42,6 +42,9 @@ import markdown as python_markdown
 import portion
 import regex
 import rfc3986
+import z3
+import clingo
+from cvc5 import pythonic as cvc5_pythonic
 import pydantic
 from lxml import etree as lxml_etree
 from markdown_it import MarkdownIt
@@ -1361,3 +1364,122 @@ def test_a_backslash_reference_resolves_three_different_ways(segment):
                             by_rfc3986.startswith('https://example.org/cat/'),
                             by_node.startswith('https://example.org/cat/')],
                            [True, True, False])
+
+
+# ---------------------------------------------------------------- two solvers and two logics
+BOUNDS = st.lists(st.tuples(st.sampled_from(('>=', '<=')), st.integers(min_value=-20, max_value=20)),
+                  min_size=1, max_size=6)
+
+
+def _bound_constraints(module, bounds):
+    variable = module.Int('n')
+    return [variable >= value if sense == '>=' else variable <= value for sense, value in bounds]
+
+
+def _z3_status_and_core(bounds):
+    solver = z3.Solver()
+    solver.set(unsat_core=True)
+    constraints = _bound_constraints(z3, bounds)
+    status = str(solver.check(*constraints))
+    core = sorted(str(term) for term in solver.unsat_core()) if status == 'unsat' else []
+    return status, core, {str(term): bound for term, bound in zip(constraints, bounds)}
+
+
+def _cvc5_status_and_core(bounds):
+    solver = cvc5_pythonic.Solver()
+    solver.set('produce-unsat-cores', True)
+    constraints = _bound_constraints(cvc5_pythonic, bounds)
+    status = str(solver.check(*constraints))
+    core = sorted(str(term) for term in solver.unsat_core()) if status == 'unsat' else []
+    return status, core, {str(term): bound for term, bound in zip(constraints, bounds)}
+
+
+@given(BOUNDS)
+@SLOW
+def test_two_smt_solvers_agree_on_the_satisfiability_of_generated_bounds(bounds):
+    """z3 5.1.0 and cvc5 1.3.4 are separate C++ solvers; the cvc5 wheel declares no Python dependencies and
+    imports no z3. Its pythonic layer imitates z3's API on purpose, but the decision procedure underneath is
+    cvc5's own. On every generated set of integer bounds the two return the same status, so the satisfiability
+    P193 reports is not one solver's opinion."""
+    npt.assert_array_equal(_z3_status_and_core(bounds)[0], _cvc5_status_and_core(bounds)[0])
+
+
+@given(BOUNDS)
+@SLOW
+def test_each_unsat_core_is_still_unsatisfiable_in_the_other_solver(bounds):
+    """A core is only useful if it is genuinely sufficient. Each solver's core, replayed as the whole problem
+    in the other solver, is still unsatisfiable, and each is a subset of what was asserted. Both projects
+    promise a subset and neither promises a minimum: z3 5.1.0 documents unsat_core as returning "a subset (as
+    an AST vector) of the assumptions provided to the last check()", and cvc5 1.3.4's own header says that
+    after a check with assumptions "A subset of those assumptions may be included in the unsatisfiable core
+    returned by this function."."""
+    z3_status, z3_core, z3_index = _z3_status_and_core(bounds)
+    assume(z3_status == 'unsat')
+    _, cvc5_core, cvc5_index = _cvc5_status_and_core(bounds)
+    npt.assert_array_equal(_cvc5_status_and_core([z3_index[text] for text in z3_core])[0], 'unsat')
+    npt.assert_array_equal(_z3_status_and_core([cvc5_index[text] for text in cvc5_core])[0], 'unsat')
+    npt.assert_array_equal([len(z3_core) <= len(bounds), len(cvc5_core) <= len(bounds)], [True, True])
+
+
+@given(st.integers(min_value=-1000, max_value=1000))
+@SLOW
+def test_the_two_solvers_name_different_sufficient_cores_for_one_contradiction(anchor):
+    """Four bounds, two of which contradict the first and one of which contradicts the second: every
+    generated anchor makes the set unsatisfiable in both solvers, both cores are strict subsets, and the two
+    cores are never the same. This is P193's finding produced by two implementations rather than asserted
+    about one: the core names a sufficient subset, not the conflicting set, and which sufficient subset you
+    are shown is a property of the solver. A rule absent from the core is not thereby consistent, and a
+    conflict report built from one solver's core is not reproducible on another."""
+    bounds = [('<=', anchor), ('>=', anchor + 1), ('>=', anchor + 2), ('<=', anchor - 1)]
+    z3_status, z3_core, _ = _z3_status_and_core(bounds)
+    cvc5_status, cvc5_core, _ = _cvc5_status_and_core(bounds)
+    npt.assert_array_equal([z3_status, cvc5_status], ['unsat', 'unsat'])
+    npt.assert_array_equal([len(z3_core) < len(bounds), len(cvc5_core) < len(bounds)], [True, True])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(z3_core, cvc5_core)
+
+
+def _z3_admits(threshold, count, negated):
+    variable = z3.Int('n')
+    solver = z3.Solver()
+    if count is not None:
+        solver.add(variable == count)
+    solver.add(z3.Not(variable >= threshold) if negated else variable >= threshold)
+    return solver.check() == z3.sat
+
+
+def _clingo_derives_approval(threshold, count):
+    program = 'approved :- count(N), N >= %d.\n#show approved/0.\n' % threshold
+    if count is not None:
+        program += 'count(%d).\n' % count
+    control = clingo.Control(['0'], logger=lambda code, message: None)
+    control.add('base', [], program)
+    control.ground([('base', [])])
+    with control.solve(yield_=True) as handle:
+        for model in handle:
+            return 'approved' in [str(atom) for atom in model.symbols(shown=True)]
+    return False
+
+
+@given(st.integers(min_value=0, max_value=20), st.integers(min_value=0, max_value=20))
+@SLOW
+def test_the_smt_solver_and_the_answer_set_solver_agree_while_the_count_is_present(count, threshold):
+    """clingo 5.8.2 computes answer sets of a logic program, which its README describes as Answer Set
+    Programming; z3 decides a formula over the integers. Two different logics, and while the count is a fact
+    they agree on every generated pair: the threshold is met in one exactly when the atom is derived in the
+    other."""
+    npt.assert_array_equal(_z3_admits(threshold, count, negated=False),
+                           _clingo_derives_approval(threshold, count))
+
+
+@given(st.integers(min_value=0, max_value=20))
+@SLOW
+def test_an_absent_count_is_unknown_to_the_smt_solver_and_false_to_the_answer_set_solver(threshold):
+    """Remove the fact and the two logics part, in the direction that matters. z3 finds both the threshold and
+    its negation satisfiable, so the question is open; clingo derives nothing, so the approval is simply
+    absent from the answer set and a caller reading "not approved" cannot tell a refusal from a missing
+    record. Replaces the typed {'true', 'false'} and [] of handoff_guards_v21.py case 197: the two engines
+    disagree about a missing count, and the disagreement is the closed-world assumption, not a bug."""
+    npt.assert_array_equal([_z3_admits(threshold, None, negated=False),
+                            _z3_admits(threshold, None, negated=True)], [True, True])
+    npt.assert_array_equal(_clingo_derives_approval(threshold, None), False)
