@@ -47,6 +47,7 @@ import pandas as pd
 import pandas.testing as pdt
 import polars as pl
 import pyarrow.csv as pyarrow_csv
+import rfc8785
 import polars.testing as plt
 import pytest
 import rapidfuzz.distance.Levenshtein as rf_levenshtein
@@ -654,3 +655,56 @@ def test_a_formula_cell_reads_three_different_ways(left, right):
     npt.assert_array_equal(by_calamine, float(cached))
     with pytest.raises(AssertionError):
         npt.assert_array_equal(default_openpyxl, by_calamine)
+
+
+# ---------------------------------------------------------------- canonical JSON
+def _sorted_json(value):
+    return json.dumps(value, sort_keys=True, separators=(',', ':'), ensure_ascii=False).encode()
+
+
+@given(st.dictionaries(st.text(min_size=1, max_size=6),
+                       st.integers(min_value=-(2**53 - 1), max_value=2**53 - 1),
+                       min_size=1, max_size=6))
+@SLOW
+def test_sorted_json_and_rfc8785_agree_on_integer_objects(mapping):
+    """Inside the shared domain the two canonicalisations produce the same bytes, so the seal is portable
+    there. Replaces the canonical-ordering expectations in handoff_guards_v21.py."""
+    npt.assert_array_equal(_sorted_json(mapping), rfc8785.dumps(mapping))
+
+
+@given(st.integers(min_value=-10**6, max_value=10**6))
+@SLOW
+def test_rfc8785_normalises_a_whole_float_that_sorted_json_keeps(value):
+    """RFC 8785 writes a float with no fractional part as an integer literal; json.dumps keeps the trailing
+    .0. The two canonical forms differ, so their sha256 seals differ for the same object. The chains seal
+    with json.dumps(sort_keys=True) and call the result canonical; P262 names RFC 8785 as the standard."""
+    subject = {'x': float(value)}
+    npt.assert_array_equal(_sorted_json(subject), ('{"x":%d.0}' % value).encode())
+    npt.assert_array_equal(rfc8785.dumps(subject), ('{"x":%d}' % value).encode())
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_sorted_json(subject), rfc8785.dumps(subject))
+
+
+@given(st.sampled_from([-0.0]))
+@SLOW
+def test_rfc8785_erases_negative_zero(value):
+    """json.dumps preserves the sign of negative zero and RFC 8785 removes it, so two objects that Python
+    considers equal seal to different bytes under one canonicalisation and the same bytes under the other."""
+    npt.assert_array_equal(_sorted_json({'x': value}), b'{"x":-0.0}')
+    npt.assert_array_equal(rfc8785.dumps({'x': value}), b'{"x":0}')
+    npt.assert_array_equal(rfc8785.dumps({'x': value}), rfc8785.dumps({'x': 0.0}))
+    npt.assert_array_equal(value == 0.0, True)
+
+
+@given(st.one_of(st.integers(min_value=2**53, max_value=2**70),
+       st.integers(min_value=-(2**70), max_value=-(2**53))))
+@SLOW
+def test_rfc8785_refuses_integers_outside_the_exactly_representable_range(value):
+    """The standard restricts integers to the range IEEE-754 doubles represent exactly. The accepted range is
+    symmetric and exclusive, plus or minus 2**53 - 1, so 2**53 itself is refused; json.dumps serialises
+    arbitrary precision. A manifest carrying a large identifier as a number cannot be sealed under the
+    standard at all. Note that orjson's limit is different again and asymmetric, so the three serializers
+    have three integer domains."""
+    _sorted_json({'x': value})
+    with pytest.raises(rfc8785.IntegerDomainError):
+        rfc8785.dumps({'x': value})

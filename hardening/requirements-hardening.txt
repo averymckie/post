@@ -3,6 +3,7 @@ annotated-doc==0.0.5
 annotated-types==0.8.0
 anyio==4.15.1
 apportionment==1.0
+arrow==1.4.0
 attrs==26.1.0
 beancount==3.2.3
 beautifulsoup4==4.15.0
@@ -122,6 +123,7 @@ regex==2026.9.3
 reportlab==5.0.1
 repro-zipfile==0.4.1
 requests==2.34.2
+rfc8785==0.1.4
 rich==15.0.0
 rpds-py==2026.6.3
 scikit-learn==1.9.0
