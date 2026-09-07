@@ -39,7 +39,9 @@ from workalendar import core as workalendar_core
 import igraph
 import jsonschema
 import markdown as python_markdown
+import pint
 import portion
+import unyt
 import regex
 import rfc3986
 import z3
@@ -1582,3 +1584,80 @@ def test_a_cutoff_before_every_event_is_missing_and_not_zero_in_both_engines(eve
     cutoff = ordered[0][0] - 1
     npt.assert_array_equal(np.isnan(_pandas_asof(ordered, cutoff, exact=True)), True)
     npt.assert_array_equal(np.isnan(_polars_asof(ordered, cutoff, exact=True)), True)
+
+
+# ---------------------------------------------------------------- units and offset scales
+UNIT_REGISTRY = pint.UnitRegistry()
+TEMPERATURE = st.floats(min_value=-200.0, max_value=1000.0, allow_nan=False, allow_infinity=False)
+PRESSURE = st.floats(min_value=0.001, max_value=10_000.0, allow_nan=False, allow_infinity=False)
+
+
+@given(TEMPERATURE)
+@SLOW
+def test_an_absolute_temperature_converts_the_same_way_in_two_unit_libraries(reading):
+    """pint 0.25.3 and unyt 3.1.0 are separate unit systems; unyt's pyproject.toml at tag v3.1.0 lists numpy,
+    sympy and packaging and does not depend on pint. They agree on the absolute Fahrenheit-to-Celsius
+    conversion for every generated reading. Replaces the typed 29.8 of handoff_guards_v20.py case 184."""
+    npt.assert_allclose(UNIT_REGISTRY.Quantity(reading, 'degF').to('degC').magnitude,
+                        float(unyt.unyt_quantity(reading, 'degF').to('degC').value), rtol=1e-9, atol=1e-9)
+
+
+@given(TEMPERATURE, TEMPERATURE)
+@SLOW
+def test_converting_a_span_as_a_temperature_shifts_it_by_one_fixed_offset_in_both_libraries(left, right):
+    """The error P184 records is converting an uncertainty as though it were a temperature. Both libraries
+    have both units and both make the same two answers, and the gap between them is one constant that does
+    not depend on the reading, which is why the mistake survives review: it looks like a plausible number.
+    Nothing here is typed; the constant is established by comparing two generated readings."""
+    def gap(module_value):
+        absolute, delta = module_value
+        return absolute - delta
+    pint_gaps = [gap((UNIT_REGISTRY.Quantity(value, 'degF').to('degC').magnitude,
+                      UNIT_REGISTRY.Quantity(value, 'delta_degF').to('delta_degC').magnitude))
+                 for value in (left, right)]
+    unyt_gaps = [gap((float(unyt.unyt_quantity(value, 'degF').to('degC').value),
+                      float(unyt.unyt_quantity(value, 'delta_degF').to('delta_degC').value)))
+                 for value in (left, right)]
+    npt.assert_allclose(pint_gaps[0], pint_gaps[1], rtol=1e-9, atol=1e-9)
+    npt.assert_allclose(unyt_gaps, pint_gaps, rtol=1e-9, atol=1e-9)
+
+
+@given(PRESSURE)
+@SLOW
+def test_a_multiplicative_conversion_agrees_between_two_unit_libraries(reading):
+    """psi to kPa involves no offset, and the two libraries agree to nine figures on every generated reading,
+    which is the corroboration P184's exact-rational pressure claim needed."""
+    npt.assert_allclose(UNIT_REGISTRY.Quantity(reading, 'psi').to('kPa').magnitude,
+                        float(unyt.unyt_quantity(reading, 'psi').to('kPa').value), rtol=1e-9)
+
+
+@given(TEMPERATURE, TEMPERATURE)
+@SLOW
+def test_only_pint_refuses_to_add_two_absolute_temperatures(left, right):
+    """pint's own documentation at 0.25.3 explains the refusal: "the addition of quantities with offset units
+    is ambiguous, e.g. for *10 degC + 100 degC* two different result are reasonable depending on the context,
+    *110 degC* or *383.15 degC (= 283.15 K + 373.15 K)*. Because of this ambiguity pint raises an error for
+    the addition of two quantities with offset units (since pint-0.6)." unyt adds them and returns the first
+    of those two readings with no warning. The guard P184 leans on is a pint policy, not a property of the
+    dimension, so a chain that changes unit library loses the check that a temperature and a temperature
+    cannot be summed. Both libraries do accept an absolute temperature plus a span, and they agree on it."""
+    with pytest.raises(pint.errors.OffsetUnitCalculusError):
+        UNIT_REGISTRY.Quantity(left, 'degC') + UNIT_REGISTRY.Quantity(right, 'degC')
+    npt.assert_allclose(float((unyt.unyt_quantity(left, 'degC') + unyt.unyt_quantity(right, 'degC')).value),
+                        left + right, rtol=1e-9, atol=1e-9)
+    npt.assert_allclose((UNIT_REGISTRY.Quantity(left, 'degC')
+                         + UNIT_REGISTRY.Quantity(right, 'delta_degC')).magnitude,
+                        float((unyt.unyt_quantity(left, 'degC')
+                               + unyt.unyt_quantity(right, 'delta_degC')).value), rtol=1e-9, atol=1e-9)
+
+
+@given(TEMPERATURE)
+@SLOW
+def test_both_libraries_refuse_a_conversion_across_dimensions(reading):
+    """Where the dimensions differ both libraries stop, so the dimensional guard of P184 does carry across
+    implementations even though the offset guard does not. The exception types differ, which is itself a
+    handoff detail: a chain that catches pint.DimensionalityError catches nothing under unyt."""
+    with pytest.raises(pint.errors.DimensionalityError):
+        UNIT_REGISTRY.Quantity(reading, 'degC').to('psi')
+    with pytest.raises(unyt.exceptions.UnitConversionError):
+        unyt.unyt_quantity(reading, 'degC').to('psi')
