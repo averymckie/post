@@ -1149,33 +1149,47 @@ def test_month_shift_agrees_between_dateutil_and_the_ruby_c_implementation(year,
                            (anchor + relativedelta(months=months)).isoformat())
 
 
+def _month_end_of_thirty_one_days(year, index):
+    """The anchor P183 and P185 use, chosen from the months the calendar module reports as having 31 days."""
+    long_months = [month for month in range(1, 13) if calendar.monthrange(year, month)[1] == 31]
+    return datetime.date(year, long_months[index % len(long_months)], 31)
+
+
+def _offsets_where_dateutil_keeps_the_day(anchor, keep):
+    """The two regions, separated by dateutil's own output: it keeps the anchor day exactly when the target
+    month is long enough, and clamps otherwise. Nothing about the calendar is typed here, and neither list is
+    ever empty, so no input is filtered out."""
+    return [months for months in range(1, 61)
+            if ((anchor + relativedelta(months=months)).day == anchor.day) == keep]
+
+
 @pytest.mark.skipif(not php_binary_available, reason='the php runtime is required for this oracle')
-@given(ANCHOR_YEAR, ANCHOR_MONTH, MONTH_OFFSET)
+@given(ANCHOR_YEAR, st.integers(min_value=0, max_value=1000), st.integers(min_value=0, max_value=1000))
 @SLOW
-def test_month_shift_agrees_with_php_when_the_target_month_has_the_anchor_day(year, month, months):
+def test_month_shift_agrees_with_php_when_the_target_month_has_the_anchor_day(year, month_index, offset_index):
     """Where the anchor day exists in the target month, PHP's DateTime::modify returns the same date as
-    dateutil, so the three runtimes agree on the ordinary case. The region is characterised by dateutil's own
-    output rather than by a calendar rule typed here: dateutil keeps the day exactly when the target month is
-    long enough."""
-    anchor = _month_end(year, month)
-    by_dateutil = anchor + relativedelta(months=months)
-    assume(by_dateutil.day == anchor.day)
-    npt.assert_array_equal(_php_modify(anchor, '%+d months' % months), by_dateutil.isoformat())
+    dateutil, so the three runtimes agree on the ordinary case."""
+    anchor = _month_end_of_thirty_one_days(year, month_index)
+    offsets = _offsets_where_dateutil_keeps_the_day(anchor, keep=True)
+    months = offsets[offset_index % len(offsets)]
+    npt.assert_array_equal(_php_modify(anchor, '%+d months' % months),
+                           (anchor + relativedelta(months=months)).isoformat())
 
 
 @pytest.mark.skipif(not php_binary_available, reason='the php runtime is required for this oracle')
-@given(ANCHOR_YEAR, ANCHOR_MONTH, MONTH_OFFSET)
+@given(ANCHOR_YEAR, st.integers(min_value=0, max_value=1000), st.integers(min_value=0, max_value=1000))
 @SLOW
-def test_php_overflows_into_the_next_month_where_dateutil_and_ruby_clamp(year, month, months):
+def test_php_overflows_into_the_next_month_where_dateutil_and_ruby_clamp(year, month_index, offset_index):
     """Where the anchor day does not exist in the target month, the two conventions part. dateutil and Ruby
     clamp to the last day of the target month; PHP counts the missing days forward into the month after,
     which its own manual documents in an example headed "Beware when adding or subtracting months" whose
     output is 2001-01-31 then 2001-03-03. The overflow is not an error and nothing raises, so a term or an
     expiry computed in PHP is later than the same term computed in Python, by one to three days, and only for
     anchors at the end of a long month. This is the anniversary date of P183 and the renewal term of P185."""
-    anchor = _month_end(year, month)
+    anchor = _month_end_of_thirty_one_days(year, month_index)
+    offsets = _offsets_where_dateutil_keeps_the_day(anchor, keep=False)
+    months = offsets[offset_index % len(offsets)]
     by_dateutil = anchor + relativedelta(months=months)
-    assume(by_dateutil.day != anchor.day)
     by_php = _php_modify(anchor, '%+d months' % months)
     with pytest.raises(AssertionError):
         npt.assert_array_equal(by_php, by_dateutil.isoformat())
