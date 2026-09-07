@@ -1,0 +1,154 @@
+{
+  "assertions": 30,
+  "business_actions": 0,
+  "dependency_sha256": {
+    "handoff_guards_v1.py": "2b3138b692ecfd02b76ae34bdb001f5046608bb2983d8709d6c55c0765f7c9b8",
+    "handoff_guards_v3.py": "e8df8d98831289c66ab705940ae2bc20ca7913a721002b811a5a77be05be2873"
+  },
+  "failed": 0,
+  "full_chains_executed": 0,
+  "library_versions": {
+    "Jinja2": "3.1.6",
+    "deepdiff": "9.1.0",
+    "lxml": "6.1.3",
+    "networkx": "3.6.1",
+    "numpy": "2.4.6",
+    "pandas": "2.2.3",
+    "plotly": "7.0.0",
+    "pm4py": "2.7.23.8",
+    "pydantic": "2.13.5"
+  },
+  "network_calls": 0,
+  "passed": 10,
+  "results": [
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 61,
+      "result": {
+        "cycle_is_a_property_not_a_defect": true,
+        "original_chain_rerun": false,
+        "reference_to_unknown_unit_blocked": true,
+        "self_reference_not_an_edge": true,
+        "sentence_in_unknown_unit_blocked": true
+      },
+      "status": "passed",
+      "test": "references_resolve_against_the_unit_set"
+    },
+    {
+      "assertions": 5,
+      "error": null,
+      "proof": 62,
+      "result": {
+        "busiest_only_marked_incomplete": true,
+        "duplicate_event_blocked": true,
+        "original_chain_rerun": false,
+        "self_handover_kept": true
+      },
+      "status": "passed",
+      "test": "handover_keeps_self_loops_and_coverage"
+    },
+    {
+      "assertions": 5,
+      "error": null,
+      "proof": 63,
+      "result": {
+        "duplicate_id_blocked": true,
+        "duplicate_labels_distinct_shapes": true,
+        "original_chain_rerun": false,
+        "parent_outside_set_blocked": true
+      },
+      "status": "passed",
+      "test": "tree_nodes_bind_to_distinct_shapes"
+    },
+    {
+      "assertions": 3,
+      "error": null,
+      "proof": 64,
+      "result": {
+        "identity_caveat_recorded": true,
+        "label_order_compared": true,
+        "original_chain_rerun": false,
+        "payload_parsed_as_json": true
+      },
+      "status": "passed",
+      "test": "page_labels_parsed_as_json_not_scraped"
+    },
+    {
+      "assertions": 3,
+      "error": null,
+      "proof": 65,
+      "result": {
+        "csp_connect_src_none": true,
+        "en_us": true,
+        "hostile_cell_escaped": true,
+        "original_chain_rerun": false,
+        "registered_bytes_checked": true
+      },
+      "status": "passed",
+      "test": "policy_interface_verifies_inputs_and_escapes"
+    },
+    {
+      "assertions": 2,
+      "error": null,
+      "proof": 66,
+      "result": {
+        "external_asset_gate": true,
+        "model_client_call_blocked": true,
+        "original_chain_rerun": false
+      },
+      "status": "passed",
+      "test": "process_explorer_rejects_external_and_model_client"
+    },
+    {
+      "assertions": 2,
+      "error": null,
+      "proof": 67,
+      "result": {
+        "original_chain_rerun": false,
+        "row_column_mismatch_blocked": true,
+        "typed_rows_roundtrip": true
+      },
+      "status": "passed",
+      "test": "records_interface_roundtrips_typed_rows"
+    },
+    {
+      "assertions": 1,
+      "error": null,
+      "proof": 68,
+      "result": {
+        "deterministic_render": true,
+        "original_chain_rerun": false
+      },
+      "status": "passed",
+      "test": "briefing_interface_is_deterministic"
+    },
+    {
+      "assertions": 1,
+      "error": null,
+      "proof": 69,
+      "result": {
+        "duplicate_text_distinct_ids": true,
+        "original_chain_rerun": false,
+        "shape_identity_carried_as_data": true
+      },
+      "status": "passed",
+      "test": "slides_interface_keeps_declared_columns"
+    },
+    {
+      "assertions": 2,
+      "error": null,
+      "proof": 70,
+      "result": {
+        "composed_from_registered_inputs": true,
+        "missing_registration_blocked": true,
+        "original_chain_rerun": false
+      },
+      "status": "passed",
+      "test": "workbench_composes_the_same_model"
+    }
+  ],
+  "scope": "Bounded authored handoff fixtures and reproduced library defaults; the original P61-P70 chains and their artifacts were not rerun. P65-P70 build a presentation page from the same primitives (escaping template, CSP, registered-input-bytes gate, typed readback), not the recorded interfaces.",
+  "source_sha256": "cfc7c9a91f4c53ac3fa96efa6db44968035318ffafa29bdfe1c1d0b208d6a06c",
+  "test_cases": 10
+}

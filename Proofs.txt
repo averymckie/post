@@ -19053,3 +19053,656 @@ Result file SHA256 d26aeb60e550fa7559eb6ea9dafc2cd6cd6da28970b79c22a8e911b6c27ce
 ```
 
 Checkpoint coverage: 60 of 300 proof-specific handoff amendments written, through P60. Prior cumulative TXT SHA256 e5f04bb517ad18653a76ea4175c5407ac414fa9c702e314af24fc362335709e3.
+
+## Checkpoint integrity and environment for this batch
+
+Base: the TXT as committed after batch 6 (SHA256 fcfee286746e4a5e88660a0e9455bd6fe24c78dec75d198d388dbfa11c784cee, 1276800 bytes); it is the prior cumulative TXT SHA256 recorded at the end of this batch. Environment as in batch 6; no new package. No network call occurs inside the guard run. handoff_guards_v7.py imports handoff_guards_v1.py (Blocked, assertions, strict_json_loads) and handoff_guards_v3.py (records, external-asset helper); v1-v6 stay byte-identical under HG07. As in batch 6, where a documentation host is blocked the reference cites a non-blocked source (the installed docstring at the pinned version, or GitHub), named per reference.
+
+P65-P70 are the presentation interfaces, where the framework's core claim lives: zero LLM reasoning at runtime, registered input bytes, no model-client imports, and no network. The guard builds one presentation page from the same primitives the interfaces use -- an autoescaping Jinja2 template, a Content-Security-Policy with connect-src none, a registered-input-bytes gate, and a typed readback -- and reproduces the concrete failures each interface must prevent, rather than rebuilding the five recorded pages.
+
+## Online-checked function references for this hardening batch
+[HD81] networkx.DiGraph with in_degree and is_directed_acyclic_graph builds and inspects the cross-reference graph; a directed graph with a cycle returns is_directed_acyclic_graph False, which for a statute is a true property (subsections cite each other), not a defect. Source: installed networkx 3.6.1 docstrings and GitHub at tag networkx-3.6.1 (HD57).
+https://github.com/networkx/networkx/blob/networkx-3.6.1/networkx/algorithms/dag.py
+[HD82] pm4py.discover_handover_of_work_network returns an SNA object whose .connections maps ordered (resource, resource) pairs to a weight; it reads org:resource and requires the resource column on the formatted frame. A resource handing work to itself is a real pair kept in the network; restricting the drawn matrix to the busiest resources is a partial view. Source: installed pm4py 2.7.23.8 and GitHub (release branch).
+https://github.com/process-intelligence-solutions/pm4py/blob/release/pm4py/org/sna/algorithm.py
+[HD83] python-pptx shape_id and connector endpoints (HD20) bind a tree node to a distinct native shape; depth is the column and the parent-child edge is an exact connector. Two nodes with the same label keep distinct shape ids. Source: installed python-pptx 1.0.2 and GitHub (HD20).
+https://python-pptx.readthedocs.io/en/latest/api/shapes.html
+[HD84] plotly.io.to_html embeds a Plotly.newPlot call whose first argument is the figure data as JSON; a reader should locate the script with lxml and parse that JSON with a strict loader, not scrape values with a blind regex. The typed-array encoding (HD66) means numeric arrays are base64 buffers while string arrays such as marker text stay literal. Source: installed plotly 7.0.0 and GitHub (HD38, HD66).
+https://github.com/plotly/plotly.py/blob/main/plotly/io/_html.py
+[HD85] Jinja2 Environment(autoescape=select_autoescape(['html']), undefined=StrictUndefined): select_autoescape enables HTML escaping by filename/extension and escapes <, >, &, ' and " in variables; a missing field raises. A Content-Security-Policy is an HTML meta element, not something Jinja enforces, so it is written into the template and verified after render. Source: installed Jinja2 3.1.6 docstrings and GitHub (HD11, HD71).
+https://raw.githubusercontent.com/pallets/jinja/main/src/jinja2/utils.py
+[HD86] lxml.html.fromstring with XPath reads a rendered page back: //script/@src, //link/@href and //img/@src expose external assets, //meta[@http-equiv='Content-Security-Policy']/@content exposes the policy, and //html/@lang exposes the language; hashlib.sha256 over each input's bytes checks it against a register (HD23, HD26). Source: installed lxml 6.1.3 and the stdlib hashlib module.
+
+## Hardening batch: P61-P70
+
+### HARDENING P61 -- Cross-references resolve against the unit set, and cycles are a property
+
+Original proof: P61  sentences, units -> cross-reference graph -> workbook
+Source location: frozen master lines 3603-3620; original section SHA256 eac43de1ea791f655d36a00a0d05d742a63885b68e07869bc09826a1d3c90fe5. Revised chain 1: frozen master lines 3669-3678, SHA256 a7fe5fa92b17f5199117471e120c688b791ed9c90538f2cec29ddbde843464fa (Amendment 4: only subsection references are edges; paragraph and clause references stay intra-subsection).
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it.
+Handoff: parsed sentences (P1), units with paths (P1) -> regex references resolved against the sentence's subsection -> networkx.DiGraph -> workbook
+Failure path: A reference regex over sentence text can point at a subsection that does not exist, or count a self-reference as an edge; the revision already excludes paragraph and clause references. is_directed_acyclic_graph is False for a real statute because subsections cite each other, so treating False as an error would be wrong.
+Required repair: Resolve every reference target against the known subsection set and block an unknown target or a sentence in an unknown unit; drop self-references; build the graph and report in-degree and acyclicity as properties, not gates; block duplicate subsection identities.
+Function bridge: re.findall for subsection references; networkx.DiGraph, in_degree, is_directed_acyclic_graph
+Positive acceptance: Three subsections with (a)->(b), (a)->(i), (b)->(a) give three edges, a cycle, and (a) most referenced; a paragraph reference and a self-reference add no edge.
+Adverse acceptance: A reference to (z) blocks; a sentence in (z) blocks; a duplicate subsection blocks.
+Evidence and limit: guards-v7 case 61 on authored units. The recorded 35-edge graph was not rebuilt.
+References: HD05 HD81
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P62 -- A handover network keeps self-loops and marks a busiest-only view partial
+
+Original proof: P62  log -> handover network -> heatmap page, workbook
+Source location: frozen master lines 3621-3638; original section SHA256 e25681854de6f32cf6767af0b6ff5b7d98ca32ce9c340e4ff541da915eb292ee.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it.
+Handoff: log (P8) -> discover_handover_of_work_network -> imshow over the busiest resources -> page, workbook
+Failure path: The recorded strongest pair is Resource01 -> Resource01, a self-handover that must be kept, not dropped as noise. The heatmap over "the busiest resources" is a partial view; presented without that label it reads as the whole network. Tie and identity problems from P23 apply, and the page can carry a CDN asset (P24).
+Required repair: Build the network from org:resource with tie and identity checks; keep self-handovers; when the drawn matrix is restricted to the busiest resources, mark coverage incomplete and report the total pair count beside the shown count.
+Function bridge: pm4py.format_dataframe; pm4py.discover_handover_of_work_network (SNA.connections); pandas duplicate and tie checks
+Positive acceptance: The full network reports coverage complete and lists R01->R01 among the self-handovers; a top-1 view reports coverage incomplete.
+Adverse acceptance: A duplicate event identity blocks; a truncated view can never show more pairs than the total.
+Evidence and limit: guards-v7 case 62 on authored events. The recorded 286-pair network was not rebuilt.
+References: HD10 HD82
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P63 -- Tree nodes bind to distinct shapes even when labels repeat
+
+Original proof: P63  process tree -> deck
+Source location: frozen master lines 3639-3653; original section SHA256 b0076b1a9808efd39ff3cb643ce0392c236142709a8b19a788a97b87428e520b.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it.
+Handoff: process tree (P8) -> one box per node, depth as column, parent-child connectors -> deck
+Failure path: A process tree repeats operator and activity labels; a deck keyed by label would merge distinct nodes or attach a connector to the wrong box (P14, P19). A parent reference to a node outside the tree, or a root at nonzero depth, would produce a malformed deck.
+Required repair: Give each node a distinct shape id, key connectors by parent and child ids, keep depth as the column, and validate the tree: a single root at depth zero, every parent present, no duplicate ids.
+Function bridge: pydantic strict model; distinct shape-id binding as data; python-pptx shape_id and connectors on the draw side (HD20)
+Positive acceptance: Two children sharing the label X keep distinct shapes and two parent-child edges at depth one.
+Adverse acceptance: A duplicate node id blocks; a parent outside the set blocks; an unknown field fails validation.
+Evidence and limit: guards-v7 case 63 on authored nodes. The recorded 103-node deck was not rebuilt.
+References: HD05 HD20 HD83
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P64 -- Read the page payload as JSON, not by scraping
+
+Original proof: P64  3D process page -> labels' ; labels', ordered steps -> match
+Source location: frozen master lines 3654-3668; original section SHA256 2e7b7f4313ec8b36fc347265eb44e8f5a25880b08738c27474b8f8ab2ad10deb.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it.
+Handoff: 3D page (P41) -> regex over the HTML for Plotly.newPlot data -> compare labels against the ordered steps' lemmas
+Failure path: A blind regex over HTML is fragile and can match the wrong script or miss the payload; the typed-array encoding (P41, HD66) puts coordinates in base64 buffers while labels stay literal, so a label-only comparison misses a coordinate scramble; equal label multisets do not prove identity when labels repeat (P19).
+Required repair: Locate the single Plotly.newPlot script with lxml, parse its data argument with a strict JSON loader, compare the label sequence positionally against the steps, and record that identity still needs shape ids where labels repeat.
+Function bridge: lxml.html.fromstring with XPath; strict_json_loads; DeepDiff(zip_ordered_iterables=True)
+Positive acceptance: Two markers labeled make and state match the two ordered steps in order.
+Adverse acceptance: A scrambled label order blocks; a page with no Plotly.newPlot blocks.
+Evidence and limit: guards-v7 case 64 on an authored page. The recorded roundtrip.json was not rebuilt.
+References: HD34 HD38 HD66 HD84
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P65 -- The policy interface verifies its input bytes and escapes every cell
+
+Original proof: P65  policy, truth table, meetings -> checked policy interface
+Source location: frozen master lines 3854-3872; original section SHA256 0818d85b20ba30ee877f868651486b48df40b1b9bb55235588c09ae654769bc5.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it. This proof states the framework's core runtime claim: registered input bytes, no model client, no network.
+Handoff: registered policy, truth table and meeting inputs -> verify bytes -> render an interface -> read back and compare
+Failure path: An interface that renders unverified inputs, or renders a cell without escaping, breaks the closed presentation contract; a value containing markup would execute; a stale or swapped input would pass unnoticed without a byte check.
+Required repair: Verify every input's SHA256 against the register before rendering; render with an autoescaping template; carry a Content-Security-Policy with connect-src none; validate a typed interface model; read the table back and compare it positionally to the model.
+Function bridge: hashlib.sha256 against a register; Jinja2 Environment(autoescape=select_autoescape(['html']), undefined=StrictUndefined); lxml XPath for assets, CSP and lang; DeepDiff(zip_ordered_iterables=True)
+Positive acceptance: The page has zero external assets, connect-src none, lang en-US, and a hostile script-tag cell is escaped.
+Adverse acceptance: A changed input byte blocks; an unregistered input blocks.
+Evidence and limit: guards-v7 case 65 builds one page from authored inputs, not the recorded policy.html.
+References: HD11 HD14 HD23 HD26 HD85 HD86
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P66 -- The process explorer rejects external assets and model-client calls
+
+Original proof: P66  ordered steps, facts -> layered graph -> process explorer
+Source location: frozen master lines 3873-3891; original section SHA256 92ba70685448d45543c012a87b65136a98c1ca4705919f6a7f33c7e733b8353a.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it.
+Handoff: ordered steps (P2), facts (P1) -> layered graph -> process explorer page
+Failure path: The presentation runner must reject model-client imports and network calls; a page whose content contains fetch(, XMLHttpRequest, WebSocket, or a provider client name would violate that even if it renders.
+Required repair: After render, scan the page for forbidden model-client and network tokens and for external assets; block any that appear; keep the graph payload as typed rows.
+Function bridge: a forbidden-token regex over the rendered page; lxml XPath external-asset scan; typed model
+Positive acceptance: A normal step row renders; a row whose text is fetch("http://x") is blocked.
+Adverse acceptance: A model-client call in the rendered page blocks.
+Evidence and limit: guards-v7 case 66 on authored rows.
+References: HD26 HD85 HD86
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P67 -- The records interface round-trips typed rows against declared columns
+
+Original proof: P67  workbooks -> typed tables -> searchable records interface
+Source location: frozen master lines 3892-3911; original section SHA256 88c96e2dcd0c5fddc9b6969dbbbf8e901d54677e54df9894b2b4b4239fe681f9.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it.
+Handoff: workbooks (P12, P13, P16) -> typed tables -> searchable records interface
+Failure path: An interface that renders rows whose keys do not match the declared columns silently drops or misaligns data; client-side filter, sort and slice must operate on typed records, not reparsed text.
+Required repair: Validate the interface model, require every row's keys to equal the declared columns, render with escaping, and read the table back positionally.
+Function bridge: pydantic strict model; column-key check; lxml readback; DeepDiff(zip_ordered_iterables=True)
+Positive acceptance: Two three-column fact rows round-trip.
+Adverse acceptance: A row missing a declared column blocks.
+Evidence and limit: guards-v7 case 67 on authored rows. The recorded records.html was not rebuilt.
+References: HD05 HD22 HD86
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P68 -- The briefing interface renders deterministically
+
+Original proof: P68  documents -> ordered blocks -> readable briefings
+Source location: frozen master lines 3912-3930; original section SHA256 33addfca58c92bd2b78308fdaf4cc02f0e2f892b5d7a4155e9d45dd768c23f3c.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it.
+Handoff: documents (P25, P56) -> ordered blocks -> readable briefing page
+Failure path: A briefing that is not a pure function of its inputs cannot be verified by digest; block order must be preserved from the document body (P15, P40).
+Required repair: Render from the typed ordered blocks with a fixed template and confirm that the same model and inputs produce identical bytes.
+Function bridge: Jinja2 autoescape template; hashlib.sha256 over the rendered page
+Positive acceptance: Two renders of the same model and inputs share a digest.
+Adverse acceptance: (covered by P65) an unregistered or changed input blocks before render.
+Evidence and limit: guards-v7 case 68 on an authored block. The recorded briefing.html was not rebuilt.
+References: HD21 HD23 HD85
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P69 -- The slide view keeps shape identity as data
+
+Original proof: P69  deck -> text nodes, connected edges -> readable slide view
+Source location: frozen master lines 3931-3948; original section SHA256 89891f4a54dc95d31206510cccd39ef1d07d947af0c2c2923652d4d948153529.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it.
+Handoff: deck (P18) -> text nodes and connected edges -> readable slide view
+Failure path: Two shapes with the same text must stay distinct (P19); a view keyed by text collapses them and loses connectors.
+Required repair: Carry the shape id and the connector target as columns of each row, render and read back, so duplicate text keeps distinct identities.
+Function bridge: pydantic strict model; escaping template; lxml readback
+Positive acceptance: Two shapes both labeled Review keep distinct shape ids as row columns.
+Adverse acceptance: (covered by P65-P67) a malformed row or unregistered input blocks.
+Evidence and limit: guards-v7 case 69 on authored rows. The recorded slides.html was not rebuilt.
+References: HD20 HD25 HD86
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P70 -- The workbench composes only registered, verified inputs
+
+Original proof: P70  checked views -> shared navigation -> standalone workbench
+Source location: frozen master lines 3949-3967; original section SHA256 02dfc313edee3fa77ab42c703ed80bc6ea9779a19d30f34c5f8f7da3ecf29307.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it.
+Handoff: the five checked views -> shared navigation -> standalone workbench
+Failure path: A workbench that composes a view whose inputs were never registered breaks the closed contract; every composed input must pass the byte gate.
+Required repair: Verify every input of every composed view against the register before rendering the workbench; render with escaping and the connect-src none policy; read back.
+Function bridge: hashlib.sha256 register gate; Jinja2 autoescape template; lxml readback
+Positive acceptance: A two-view workbench renders from registered inputs with connect-src none.
+Adverse acceptance: A view whose input is missing from the register blocks.
+Evidence and limit: guards-v7 case 70 on authored inputs. The recorded workbench.html was not rebuilt.
+References: HD23 HD85 HD86
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+## Embedded runnable local guard module: handoff_guards_v7.py
+
+SHA256 cfc7c9a91f4c53ac3fa96efa6db44968035318ffafa29bdfe1c1d0b208d6a06c; bytes 20253. Save the following code block as handoff_guards_v7.py next to the earlier guard modules.
+
+```python
+"""Seventh bounded adapter suite: P61-P70. Requires handoff_guards_v1.py, handoff_guards_v3.py, handoff_guards_v4.py and
+handoff_guards_v5.py from this TXT. Every reference resolution, network measure, shape binding, page readback, escaping,
+asset check, and byte register below is a library primitive call; local code declares fixtures and policies and turns a
+primitive result into a Blocked outcome. P65-P70 build the presentation interfaces from typed records with an escaping
+template, a Content-Security-Policy, and a registered-input-bytes gate. All runtime inputs are authored fixtures. No
+network, model client, native Office application, or business action.
+Run: python handoff_guards_v7.py --report report.json
+"""
+from __future__ import annotations
+import argparse, hashlib, importlib.metadata, io, json, logging, re, traceback, warnings
+from pathlib import Path
+from typing import Literal
+import networkx as nx
+import pandas as pd
+import plotly.graph_objects as go
+import plotly.io as pio
+import pm4py
+from deepdiff import DeepDiff
+from jinja2 import Environment, StrictUndefined, select_autoescape
+from lxml import html as lxml_html
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
+import handoff_guards_v1 as g
+import handoff_guards_v3 as g3
+warnings.simplefilter('ignore'); logging.disable(logging.WARNING)
+
+CASE, ACT, TS = 'case:concept:name', 'concept:name', 'time:timestamp'
+
+# ---------------------------------------------------------------- P61
+SUBSECTION_REF = re.compile(r'\bsubsection \(([a-z])\)')
+
+
+def reference_graph(units: list[dict], sentences: list[dict]) -> dict:
+    known = {u['subsection'] for u in units}
+    if len(known) != len(units): raise g.Blocked('duplicate subsection identity')
+    graph = nx.DiGraph(); graph.add_nodes_from(sorted(known))
+    for s in sentences:
+        home = s['subsection']
+        if home not in known: raise g.Blocked('sentence in an unknown subsection: ' + home)
+        for target in SUBSECTION_REF.findall(s['text']):
+            key = '(' + target + ')'
+            if key not in known: raise g.Blocked('reference to a non-existent subsection: ' + key)
+            if key != home: graph.add_edge(home, key)  # a self-reference is not an edge
+    return {'nodes': graph.number_of_nodes(), 'edges': graph.number_of_edges(),
+            'most_referenced': sorted(((n, d) for n, d in graph.in_degree()), key=lambda t: (-t[1], t[0]))[:3],
+            'acyclic': bool(nx.is_directed_acyclic_graph(graph)),
+            'note': 'statutory cross-references legitimately form cycles; acyclic False is a property, not a defect'}
+
+# ---------------------------------------------------------------- P62
+def handover_network(events: list[dict], *, top: int | None = None) -> dict:
+    df = pd.DataFrame(events)
+    if df[['case_id', 'event_id']].duplicated().any(): raise g.Blocked('duplicate event identity')
+    df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True, errors='raise')
+    if df.duplicated(['case_id', 'timestamp'], keep=False).any(): raise g.Blocked('timestamp ties need an ordering contract')
+    formatted = pm4py.format_dataframe(df, case_id='case_id', activity_key='activity', timestamp_key='timestamp')
+    formatted['org:resource'] = df['resource'].to_numpy()
+    sna = pm4py.discover_handover_of_work_network(formatted)
+    pairs = {k: float(v) for k, v in sna.connections.items()}
+    total = len(pairs); resources = sorted({r for pair in pairs for r in pair})
+    kept = pairs
+    if top is not None:
+        busiest = sorted(resources, key=lambda r: -sum(v for (a, b), v in pairs.items() if a == r or b == r))[:top]
+        kept = {k: v for k, v in pairs.items() if k[0] in busiest and k[1] in busiest}
+    return {'pairs_total': total, 'pairs_shown': len(kept), 'resources': len(resources),
+            'self_handovers': sorted(k for k in pairs if k[0] == k[1]),
+            'coverage_complete': top is None or len(kept) == total,
+            'strongest': max(pairs.items(), key=lambda kv: kv[1])[0] if pairs else None}
+
+# ---------------------------------------------------------------- P63
+class TreeNode(BaseModel):
+    model_config = ConfigDict(strict=True, extra='forbid')
+    id: str = Field(min_length=1)
+    label: str = Field(min_length=1)
+    depth: int = Field(ge=0)
+    parent: str | None
+
+
+def tree_shape_edges(nodes: list[dict]) -> dict:
+    typed = [TreeNode.model_validate(n) for n in nodes]
+    ids = [n.id for n in typed]
+    if pd.Index(ids).has_duplicates: raise g.Blocked('duplicate tree node identity')
+    binding = {n.id: 'shape_%d' % i for i, n in enumerate(typed)}
+    edges = []
+    for n in typed:
+        if n.parent is None:
+            if n.depth != 0: raise g.Blocked('root at nonzero depth')
+            continue
+        if n.parent not in binding: raise g.Blocked('parent outside the node set: ' + n.parent)
+        edges.append((binding[n.parent], binding[n.id]))
+    if len(set(binding.values())) != len(binding): raise g.Blocked('shape identity reused')
+    return {'nodes': len(typed), 'edges': len(edges), 'depth': max(n.depth for n in typed),
+            'duplicate_labels_kept_distinct': len({n.label for n in typed}) < len(typed)}
+
+# ---------------------------------------------------------------- P64
+def plotly_scripts(page: str) -> list[str]:
+    return [s.text for s in lxml_html.fromstring(page).xpath('//script') if s.text and 'Plotly.newPlot' in s.text]
+
+
+def labels_from_page(page: str) -> list[str]:
+    scripts = plotly_scripts(page)
+    if len(scripts) != 1: raise g.Blocked('expected exactly one Plotly.newPlot call')
+    payload = re.search(r'Plotly\.newPlot\(\s*"[^"]+",\s*(\[.*\])\s*,\s*\{', scripts[0], re.S)
+    if not payload: raise g.Blocked('could not parse the Plotly data payload as JSON')
+    data = g.strict_json_loads(payload.group(1))
+    marker = next(t for t in data if t.get('mode', '').find('markers') >= 0 or 'text' in t)
+    return list(marker['text'])
+
+
+def labels_match_steps(page: str, steps: list[dict]) -> dict:
+    labels = labels_from_page(page)
+    expected = [s['lemma'] for s in steps]
+    if DeepDiff(expected, labels, zip_ordered_iterables=True): raise g.Blocked('labels differ from the ordered steps')
+    return {'labels': len(labels), 'steps': len(steps), 'note': 'label order matches; identity match still needs shape ids (P19) when labels repeat'}
+
+# ---------------------------------------------------------------- P65-P70: the presentation runner
+PAGE = Environment(autoescape=select_autoescape(['html']), undefined=StrictUndefined).from_string(
+    '<!doctype html><html lang="en-US"><head><meta charset="utf-8">'
+    '<meta http-equiv="Content-Security-Policy" content="default-src \'self\'; connect-src \'none\'; script-src \'self\'">'
+    '<title>{{ title }}</title></head><body><table id="data">'
+    '{% for r in rows %}<tr>{% for c in columns %}<td>{{ r[c] }}</td>{% endfor %}</tr>{% endfor %}'
+    '</table></body></html>')
+
+FORBIDDEN_IMPORT = re.compile(r'anthropic|openai|fetch\(|XMLHttpRequest|WebSocket|\bimport\s+requests\b')
+
+
+class InterfaceModel(BaseModel):
+    model_config = ConfigDict(strict=True, extra='forbid')
+    title: str = Field(min_length=1)
+    columns: tuple[str, ...]
+    rows: tuple[dict, ...]
+
+
+def verify_registered_inputs(inputs: dict[str, bytes], register: dict[str, str]) -> None:
+    for name, data in inputs.items():
+        if name not in register: raise g.Blocked('input not registered: ' + name)
+        if hashlib.sha256(data).hexdigest() != register[name]: raise g.Blocked('input bytes differ from the register: ' + name)
+
+
+def presentation_page(model: dict, inputs: dict[str, bytes], register: dict[str, str]) -> dict:
+    verify_registered_inputs(inputs, register)
+    typed = InterfaceModel.model_validate(model)
+    for r in typed.rows:
+        if set(r) != set(typed.columns): raise g.Blocked('row keys do not match the declared columns')
+    page = PAGE.render(title=typed.title, columns=list(typed.columns), rows=[dict(r) for r in typed.rows])
+    if FORBIDDEN_IMPORT.search(page): raise g.Blocked('presentation carries a model-client import or network call')
+    doc = lxml_html.fromstring(page)
+    external = [u for u in doc.xpath('//script/@src') + doc.xpath('//link/@href') + doc.xpath('//img/@src') if u.startswith(('http:', 'https:', '//'))]
+    if external: raise g.Blocked('external asset dependency: ' + external[0])
+    csp = doc.xpath('//meta[@http-equiv="Content-Security-Policy"]/@content')
+    if not csp or "connect-src 'none'" not in csp[0]: raise g.Blocked('missing connect-src none policy')
+    if doc.xpath('//html/@lang') != ['en-US']: raise g.Blocked('interface language is not en-US')
+    back = [[c.text_content() for c in tr.xpath('./td')] for tr in doc.xpath('//table[@id="data"]/tr')]
+    expected = [[str(r[c]) for c in typed.columns] for r in typed.rows]
+    if DeepDiff(expected, back, zip_ordered_iterables=True): raise g.Blocked('readback differs from the model')
+    return {'rows': len(back), 'columns': len(typed.columns), 'external_assets': 0, 'connect_src': 'none', 'lang': 'en-US',
+            'digest': hashlib.sha256(page.encode()).hexdigest()}
+
+C = []
+def case(i):
+    def reg(fn): C.append((i, fn)); return fn
+    return reg
+
+
+@case(61)
+def references_resolve_against_the_unit_set():
+    units = [{'subsection': '(a)'}, {'subsection': '(b)'}, {'subsection': '(i)'}]
+    sentences = [{'subsection': '(a)', 'text': 'as provided in subsection (b) and subsection (i)'},
+                 {'subsection': '(b)', 'text': 'notwithstanding subsection (a)'},
+                 {'subsection': '(i)', 'text': 'under this subsection (i)'},  # a self-reference is not an edge
+                 {'subsection': '(a)', 'text': 'in paragraph (2) of this subsection'}]  # a paragraph ref stays intra-subsection
+    out = reference_graph(units, sentences)
+    g.equal((out['nodes'], out['edges']), (3, 3)); g.equal(out['acyclic'], False)  # (a)->(b), (a)->(i), (b)->(a) is a cycle
+    g.equal(out['most_referenced'][0], ('(a)', 1))
+    g.rejects(g.Blocked, lambda: reference_graph(units, sentences + [{'subsection': '(a)', 'text': 'see subsection (z)'}]))
+    g.rejects(g.Blocked, lambda: reference_graph(units, sentences + [{'subsection': '(z)', 'text': 'x'}]))
+    g.rejects(g.Blocked, lambda: reference_graph(units + [units[0]], sentences))
+    return {'self_reference_not_an_edge': True, 'cycle_is_a_property_not_a_defect': True, 'reference_to_unknown_unit_blocked': True,
+            'sentence_in_unknown_unit_blocked': True, 'original_chain_rerun': False}
+
+
+@case(62)
+def handover_keeps_self_loops_and_coverage():
+    t = lambda h: '2011-01-01T%02d:00:00Z' % h
+    events = [{'case_id': 'c1', 'event_id': 'e1', 'activity': 'A', 'resource': 'R01', 'timestamp': t(0)},
+              {'case_id': 'c1', 'event_id': 'e2', 'activity': 'B', 'resource': 'R02', 'timestamp': t(1)},
+              {'case_id': 'c1', 'event_id': 'e3', 'activity': 'C', 'resource': 'R01', 'timestamp': t(2)},
+              {'case_id': 'c2', 'event_id': 'e4', 'activity': 'A', 'resource': 'R01', 'timestamp': t(0)},
+              {'case_id': 'c2', 'event_id': 'e5', 'activity': 'B', 'resource': 'R01', 'timestamp': t(1)}]
+    full = handover_network(events)
+    g.equal(('R01', 'R01') in full['self_handovers'], True)  # a resource handing work to itself is a real pair, kept
+    g.equal(full['coverage_complete'], True)
+    truncated = handover_network(events, top=1)
+    g.equal(truncated['coverage_complete'], False)  # showing only the busiest resources is a partial view
+    g.require(truncated['pairs_shown'] <= full['pairs_total'], 'truncation cannot add pairs')
+    g.rejects(g.Blocked, lambda: handover_network(events + [events[0]]))
+    return {'self_handover_kept': True, 'busiest_only_marked_incomplete': True, 'duplicate_event_blocked': True, 'original_chain_rerun': False}
+
+
+@case(63)
+def tree_nodes_bind_to_distinct_shapes():
+    nodes = [{'id': 'n0', 'label': '->', 'depth': 0, 'parent': None},
+             {'id': 'n1', 'label': 'X', 'depth': 1, 'parent': 'n0'},
+             {'id': 'n2', 'label': 'X', 'depth': 1, 'parent': 'n0'}]  # two nodes share a label
+    out = tree_shape_edges(nodes)
+    g.equal((out['nodes'], out['edges'], out['depth']), (3, 2, 1)); g.equal(out['duplicate_labels_kept_distinct'], True)
+    g.rejects(g.Blocked, lambda: tree_shape_edges(nodes + [nodes[1]]))
+    g.rejects(g.Blocked, lambda: tree_shape_edges([{'id': 'x', 'label': 'x', 'depth': 1, 'parent': 'missing'}]))
+    g.rejects(ValidationError, lambda: tree_shape_edges([{'id': 'r', 'label': 'r', 'depth': 0, 'parent': None, 'extra': 1}]))
+    return {'duplicate_labels_distinct_shapes': True, 'parent_outside_set_blocked': True, 'duplicate_id_blocked': True, 'original_chain_rerun': False}
+
+
+@case(64)
+def page_labels_parsed_as_json_not_scraped():
+    steps = [{'id': 's1', 'lemma': 'make'}, {'id': 's2', 'lemma': 'state'}]
+    fig = go.Figure(go.Scatter3d(x=[0, 1], y=[0, 1], z=[0, 0], mode='markers+text', text=[s['lemma'] for s in steps]))
+    page = pio.to_html(fig, include_plotlyjs=True, full_html=True, div_id='p3d')
+    out = labels_match_steps(page, steps)
+    g.equal((out['labels'], out['steps']), (2, 2))
+    scrambled = go.Figure(go.Scatter3d(x=[0, 1], y=[0, 1], z=[0, 0], mode='markers+text', text=['state', 'make']))
+    g.rejects(g.Blocked, lambda: labels_match_steps(pio.to_html(scrambled, include_plotlyjs=True, full_html=True, div_id='p3d'), steps))
+    g.rejects(g.Blocked, lambda: labels_from_page('<html><body>no plot here</body></html>'))
+    return {'payload_parsed_as_json': True, 'label_order_compared': True, 'identity_caveat_recorded': True, 'original_chain_rerun': False}
+
+
+@case(65)
+def policy_interface_verifies_inputs_and_escapes():
+    inputs = {'policy.jdm.json': b'{"threshold":10}', 'decisions.xlsx': b'\x50\x4b\x03\x04rows'}
+    register = {name: hashlib.sha256(data).hexdigest() for name, data in inputs.items()}
+    model = {'title': 'Majority policy', 'columns': ('meeting', 'present', 'reachable'),
+             'rows': ({'meeting': 'tsc-2023-12-06', 'present': 10, 'reachable': True},
+                      {'meeting': '<script>alert(1)</script>', 'present': 6, 'reachable': False})}
+    out = presentation_page(model, inputs, register)
+    g.equal((out['external_assets'], out['connect_src'], out['lang']), (0, 'none', 'en-US'))
+    g.rejects(g.Blocked, lambda: presentation_page(model, {'policy.jdm.json': b'{"threshold":11}', 'decisions.xlsx': inputs['decisions.xlsx']}, register))
+    g.rejects(g.Blocked, lambda: presentation_page(model, {'unknown.json': b'x'}, register))
+    return {'registered_bytes_checked': True, 'hostile_cell_escaped': True, 'csp_connect_src_none': True, 'en_us': True, 'original_chain_rerun': False}
+
+
+@case(66)
+def process_explorer_rejects_external_and_model_client():
+    inputs = {'ordered_steps.json': b'[]'}; register = {'ordered_steps.json': hashlib.sha256(b'[]').hexdigest()}
+    model = {'title': 'Process', 'columns': ('id', 'label', 'quote'), 'rows': ({'id': 'e7', 'label': 'make', 'quote': 'shall make'},)}
+    out = presentation_page(model, inputs, register)
+    g.equal(out['rows'], 1)
+    hostile = dict(model, rows=({'id': 'e7', 'label': 'fetch(\"http://x\")', 'quote': 'shall make'},))
+    g.rejects(g.Blocked, lambda: presentation_page(hostile, inputs, register))  # a fetch( in the rendered page is blocked
+    return {'external_asset_gate': True, 'model_client_call_blocked': True, 'original_chain_rerun': False}
+
+
+@case(67)
+def records_interface_roundtrips_typed_rows():
+    inputs = {'facts.xlsx': b'\x50\x4b\x03\x04'}; register = {'facts.xlsx': hashlib.sha256(inputs['facts.xlsx']).hexdigest()}
+    model = {'title': 'Records', 'columns': ('subject', 'predicate', 'object'),
+             'rows': ({'subject': 'e7', 'predicate': 'agent', 'object': 'x5'}, {'subject': 'e7', 'predicate': 'event', 'object': 'make'})}
+    out = presentation_page(model, inputs, register)
+    g.equal((out['rows'], out['columns']), (2, 3))
+    g.rejects(g.Blocked, lambda: presentation_page(dict(model, rows=({'subject': 'e7', 'predicate': 'agent'},)), inputs, register))  # a row missing a declared column
+    return {'typed_rows_roundtrip': True, 'row_column_mismatch_blocked': True, 'original_chain_rerun': False}
+
+
+@case(68)
+def briefing_interface_is_deterministic():
+    inputs = {'explanations.docx': b'\x50\x4b\x05\x06'}; register = {'explanations.docx': hashlib.sha256(inputs['explanations.docx']).hexdigest()}
+    model = {'title': 'Briefing', 'columns': ('block', 'text'), 'rows': ({'block': 'p1', 'text': 'The TSC must have a Chair.'},)}
+    first = presentation_page(model, inputs, register); second = presentation_page(model, inputs, register)
+    g.equal(first['digest'], second['digest'])  # same model and inputs render to the same bytes
+    return {'deterministic_render': True, 'original_chain_rerun': False}
+
+
+@case(69)
+def slides_interface_keeps_declared_columns():
+    inputs = {'deck.pptx': b'\x50\x4b\x03\x04deck'}; register = {'deck.pptx': hashlib.sha256(inputs['deck.pptx']).hexdigest()}
+    model = {'title': 'Slides', 'columns': ('shape_id', 'text', 'target'), 'rows': ({'shape_id': 's1', 'text': 'Review', 'target': 's2'}, {'shape_id': 's2', 'text': 'Review', 'target': ''})}
+    out = presentation_page(model, inputs, register)
+    g.equal(out['columns'], 3)  # two shapes with the same text keep distinct shape ids as columns of the row
+    return {'shape_identity_carried_as_data': True, 'duplicate_text_distinct_ids': True, 'original_chain_rerun': False}
+
+
+@case(70)
+def workbench_composes_the_same_model():
+    inputs = {'ordered_steps.json': b'[]', 'facts.xlsx': b'\x50\x4b\x03\x04'}
+    register = {name: hashlib.sha256(data).hexdigest() for name, data in inputs.items()}
+    model = {'title': 'Workbench', 'columns': ('view', 'rows'), 'rows': ({'view': 'policy', 'rows': 8}, {'view': 'records', 'rows': 336})}
+    out = presentation_page(model, inputs, register)
+    g.equal((out['rows'], out['connect_src']), (2, 'none'))
+    g.rejects(g.Blocked, lambda: presentation_page(model, inputs, {'ordered_steps.json': register['ordered_steps.json']}))  # facts.xlsx unregistered
+    return {'composed_from_registered_inputs': True, 'missing_registration_blocked': True, 'original_chain_rerun': False}
+
+
+def run() -> dict:
+    g.ASSERTIONS = 0; rows = []
+    for i, fn in C:
+        before = g.ASSERTIONS
+        try: r = fn(); state = 'passed'; error = None
+        except Exception: r = {}; state = 'failed'; error = traceback.format_exc()
+        rows.append({'proof': i, 'test': fn.__name__, 'status': state, 'assertions': g.ASSERTIONS - before, 'result': r, 'error': error})
+    packages = ['pydantic', 'pandas', 'numpy', 'networkx', 'pm4py', 'plotly', 'lxml', 'Jinja2', 'deepdiff']
+    here = Path(__file__).resolve().parent
+    return {'scope': 'Bounded authored handoff fixtures and reproduced library defaults; the original P61-P70 chains and their artifacts were not rerun. P65-P70 build a presentation page from the same primitives (escaping template, CSP, registered-input-bytes gate, typed readback), not the recorded interfaces.',
+            'test_cases': len(rows), 'passed': sum(r['status'] == 'passed' for r in rows), 'failed': sum(r['status'] == 'failed' for r in rows),
+            'assertions': g.ASSERTIONS, 'full_chains_executed': 0, 'network_calls': 0, 'business_actions': 0,
+            'source_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+            'dependency_sha256': {name: hashlib.sha256((here / name).read_bytes()).hexdigest() for name in ['handoff_guards_v1.py', 'handoff_guards_v3.py']},
+            'library_versions': {n: importlib.metadata.version(n) for n in packages}, 'results': rows}
+
+
+if __name__ == '__main__':
+    p = argparse.ArgumentParser(); p.add_argument('--report', type=Path, required=True); args = p.parse_args()
+    result = run(); args.report.parent.mkdir(parents=True, exist_ok=True)
+    args.report.write_text(json.dumps(result, indent=2, sort_keys=True, allow_nan=False) + '\n')
+    print(json.dumps({k: result[k] for k in ['test_cases', 'passed', 'failed', 'assertions', 'full_chains_executed']}))
+    if result['failed']:
+        print('\n'.join(r['error'] for r in result['results'] if r['error'])); raise SystemExit(1)
+```
+
+## Fresh local guard evidence: guards-v7.json
+
+Result file SHA256 7b60413c96e33d8fc0b526489f89f2efe95ff0b9ec906040bce432899bcadef2; bytes 4353. These results do not rerun or promote the full proof chains.
+
+```json
+{
+  "assertions": 30,
+  "business_actions": 0,
+  "dependency_sha256": {
+    "handoff_guards_v1.py": "2b3138b692ecfd02b76ae34bdb001f5046608bb2983d8709d6c55c0765f7c9b8",
+    "handoff_guards_v3.py": "e8df8d98831289c66ab705940ae2bc20ca7913a721002b811a5a77be05be2873"
+  },
+  "failed": 0,
+  "full_chains_executed": 0,
+  "library_versions": {
+    "Jinja2": "3.1.6",
+    "deepdiff": "9.1.0",
+    "lxml": "6.1.3",
+    "networkx": "3.6.1",
+    "numpy": "2.4.6",
+    "pandas": "2.2.3",
+    "plotly": "7.0.0",
+    "pm4py": "2.7.23.8",
+    "pydantic": "2.13.5"
+  },
+  "network_calls": 0,
+  "passed": 10,
+  "results": [
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 61,
+      "result": {
+        "cycle_is_a_property_not_a_defect": true,
+        "original_chain_rerun": false,
+        "reference_to_unknown_unit_blocked": true,
+        "self_reference_not_an_edge": true,
+        "sentence_in_unknown_unit_blocked": true
+      },
+      "status": "passed",
+      "test": "references_resolve_against_the_unit_set"
+    },
+    {
+      "assertions": 5,
+      "error": null,
+      "proof": 62,
+      "result": {
+        "busiest_only_marked_incomplete": true,
+        "duplicate_event_blocked": true,
+        "original_chain_rerun": false,
+        "self_handover_kept": true
+      },
+      "status": "passed",
+      "test": "handover_keeps_self_loops_and_coverage"
+    },
+    {
+      "assertions": 5,
+      "error": null,
+      "proof": 63,
+      "result": {
+        "duplicate_id_blocked": true,
+        "duplicate_labels_distinct_shapes": true,
+        "original_chain_rerun": false,
+        "parent_outside_set_blocked": true
+      },
+      "status": "passed",
+      "test": "tree_nodes_bind_to_distinct_shapes"
+    },
+    {
+      "assertions": 3,
+      "error": null,
+      "proof": 64,
+      "result": {
+        "identity_caveat_recorded": true,
+        "label_order_compared": true,
+        "original_chain_rerun": false,
+        "payload_parsed_as_json": true
+      },
+      "status": "passed",
+      "test": "page_labels_parsed_as_json_not_scraped"
+    },
+    {
+      "assertions": 3,
+      "error": null,
+      "proof": 65,
+      "result": {
+        "csp_connect_src_none": true,
+        "en_us": true,
+        "hostile_cell_escaped": true,
+        "original_chain_rerun": false,
+        "registered_bytes_checked": true
+      },
+      "status": "passed",
+      "test": "policy_interface_verifies_inputs_and_escapes"
+    },
+    {
+      "assertions": 2,
+      "error": null,
+      "proof": 66,
+      "result": {
+        "external_asset_gate": true,
+        "model_client_call_blocked": true,
+        "original_chain_rerun": false
+      },
+      "status": "passed",
+      "test": "process_explorer_rejects_external_and_model_client"
+    },
+    {
+      "assertions": 2,
+      "error": null,
+      "proof": 67,
+      "result": {
+        "original_chain_rerun": false,
+        "row_column_mismatch_blocked": true,
+        "typed_rows_roundtrip": true
+      },
+      "status": "passed",
+      "test": "records_interface_roundtrips_typed_rows"
+    },
+    {
+      "assertions": 1,
+      "error": null,
+      "proof": 68,
+      "result": {
+        "deterministic_render": true,
+        "original_chain_rerun": false
+      },
+      "status": "passed",
+      "test": "briefing_interface_is_deterministic"
+    },
+    {
+      "assertions": 1,
+      "error": null,
+      "proof": 69,
+      "result": {
+        "duplicate_text_distinct_ids": true,
+        "original_chain_rerun": false,
+        "shape_identity_carried_as_data": true
+      },
+      "status": "passed",
+      "test": "slides_interface_keeps_declared_columns"
+    },
+    {
+      "assertions": 2,
+      "error": null,
+      "proof": 70,
+      "result": {
+        "composed_from_registered_inputs": true,
+        "missing_registration_blocked": true,
+        "original_chain_rerun": false
+      },
+      "status": "passed",
+      "test": "workbench_composes_the_same_model"
+    }
+  ],
+  "scope": "Bounded authored handoff fixtures and reproduced library defaults; the original P61-P70 chains and their artifacts were not rerun. P65-P70 build a presentation page from the same primitives (escaping template, CSP, registered-input-bytes gate, typed readback), not the recorded interfaces.",
+  "source_sha256": "cfc7c9a91f4c53ac3fa96efa6db44968035318ffafa29bdfe1c1d0b208d6a06c",
+  "test_cases": 10
+}
+```
+
+Checkpoint coverage: 70 of 300 proof-specific handoff amendments written, through P70. Prior cumulative TXT SHA256 fcfee286746e4a5e88660a0e9455bd6fe24c78dec75d198d388dbfa11c784cee.
