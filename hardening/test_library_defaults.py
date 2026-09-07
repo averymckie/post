@@ -1483,3 +1483,102 @@ def test_an_absent_count_is_unknown_to_the_smt_solver_and_false_to_the_answer_se
     npt.assert_array_equal([_z3_admits(threshold, None, negated=False),
                             _z3_admits(threshold, None, negated=True)], [True, True])
     npt.assert_array_equal(_clingo_derives_approval(threshold, None), False)
+
+
+# ---------------------------------------------------------------- as-of joins in two engines
+EVENTS = st.lists(st.tuples(st.integers(min_value=0, max_value=50), st.integers(min_value=0, max_value=100)),
+                  min_size=1, max_size=8, unique_by=(lambda pair: pair[0], lambda pair: pair[1]))
+SEPARATED_EVENTS = st.lists(st.tuples(st.integers(min_value=0, max_value=50), st.integers(min_value=0, max_value=100)),
+                            min_size=2, max_size=8, unique_by=(lambda pair: pair[0], lambda pair: pair[1]))
+CUTOFF = st.integers(min_value=0, max_value=50)
+
+
+def _pandas_asof(events, cutoff, *, exact, group=False):
+    left = pd.DataFrame({'task': ['t'], 'when': [cutoff]}) if group else pd.DataFrame({'when': [cutoff]})
+    right = pd.DataFrame({'when': [when for when, _ in events], 'pct': [pct for _, pct in events]})
+    if group:
+        right = right.assign(task='t')
+    merged = pd.merge_asof(left, right, on='when', direction='backward', allow_exact_matches=exact,
+                           **({'by': 'task'} if group else {}))
+    return np.asarray(merged['pct'].tolist(), dtype=float)
+
+
+def _polars_asof(events, cutoff, *, exact, group=False):
+    left = pl.DataFrame({'task': ['t'], 'when': [cutoff]}) if group else pl.DataFrame({'when': [cutoff]})
+    right = pl.DataFrame({'when': [when for when, _ in events], 'pct': [float(pct) for _, pct in events]})
+    if group:
+        right = right.with_columns(task=pl.lit('t'))
+    joined = left.join_asof(right, on='when', strategy='backward', allow_exact_matches=exact,
+                            **({'by': 'task'} if group else {}))
+    return np.asarray(joined['pct'].to_list(), dtype=float)
+
+
+@given(EVENTS, CUTOFF)
+@SLOW
+def test_the_as_of_join_agrees_between_pandas_and_polars_on_sorted_input(events, cutoff):
+    """pandas.merge_asof is Cython over numpy; polars.join_asof is Rust. On sorted event tables the two agree
+    on every generated cutoff, including the cutoff that precedes every event, where both return a missing
+    value rather than zero. Replaces the typed [{'task': 'T1', 'pct': 0.60}, ...] expectations of
+    handoff_guards_v20.py case 186."""
+    ordered = sorted(events)
+    npt.assert_array_equal(_pandas_asof(ordered, cutoff, exact=True),
+                           _polars_asof(ordered, cutoff, exact=True))
+
+
+@given(EVENTS, st.integers(min_value=0, max_value=7))
+@SLOW
+def test_the_exact_match_flag_moves_the_answer_the_same_way_in_both_engines(events, position):
+    """Both engines expose the flag and both change the answer by one row when the cutoff falls exactly on an
+    event, so the two reported percentages of case 186 are a flag rather than a fact. The cutoff is taken
+    from the generated events so that the exact case is reached rather than waited for."""
+    ordered = sorted(events)
+    cutoff = ordered[position % len(ordered)][0]
+    npt.assert_array_equal(_pandas_asof(ordered, cutoff, exact=True), _polars_asof(ordered, cutoff, exact=True))
+    npt.assert_array_equal(_pandas_asof(ordered, cutoff, exact=False), _polars_asof(ordered, cutoff, exact=False))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_pandas_asof(ordered, cutoff, exact=True),
+                               _pandas_asof(ordered, cutoff, exact=False))
+
+
+@given(SEPARATED_EVENTS)
+@SLOW
+def test_only_pandas_refuses_an_unsorted_right_frame(events):
+    """P186 records that the primitive refuses unsorted keys. That is a pandas property. Given the same rows
+    with the largest key first, pandas raises ValueError and polars returns an answer, warning only that
+    "Sortedness of columns cannot be checked when 'by' groups provided"."""
+    ordered = sorted(events)
+    unsorted = [ordered[-1]] + ordered[:-1]
+    cutoff = ordered[-1][0] - 1
+    with pytest.raises(ValueError):
+        _pandas_asof(unsorted, cutoff, exact=True, group=True)
+    npt.assert_array_equal(_polars_asof(unsorted, cutoff, exact=True, group=True).shape, (1,))
+
+
+@given(SEPARATED_EVENTS)
+@SLOW
+def test_polars_answers_an_unsorted_as_of_join_with_a_different_row(events):
+    """The answer is not merely unchecked, it is wrong, and wrong in the direction that hides work. polars
+    scans the right frame in the order given and stops at the first key past the cutoff, so putting the last
+    event first makes the join report no update at all while the sorted frame reports the last one. Without a
+    by column polars does check and raises InvalidOperationError; with a by column it cannot, and a chain that
+    groups by task, which is what case 186 does, loses the check exactly where it is grouping."""
+    ordered = sorted(events)
+    cutoff = ordered[-1][0] - 1
+    unsorted = [ordered[-1]] + ordered[:-1]
+    on_sorted = _polars_asof(ordered, cutoff, exact=True, group=True)
+    on_unsorted = _polars_asof(unsorted, cutoff, exact=True, group=True)
+    npt.assert_array_equal(np.isnan(on_sorted), False)
+    npt.assert_array_equal(np.isnan(on_unsorted), True)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(on_sorted, on_unsorted)
+
+
+@given(EVENTS)
+@SLOW
+def test_a_cutoff_before_every_event_is_missing_and_not_zero_in_both_engines(events):
+    """The unknown percentage of case 186 is a missing value in both engines, never a zero, which is the one
+    thing about the join that does not depend on which engine ran."""
+    ordered = sorted(events)
+    cutoff = ordered[0][0] - 1
+    npt.assert_array_equal(np.isnan(_pandas_asof(ordered, cutoff, exact=True)), True)
+    npt.assert_array_equal(np.isnan(_polars_asof(ordered, cutoff, exact=True)), True)
