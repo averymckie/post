@@ -1,0 +1,169 @@
+{
+  "assertions": 199,
+  "business_actions": 0,
+  "dependency_sha256": {
+    "handoff_guards_v1.py": "2b3138b692ecfd02b76ae34bdb001f5046608bb2983d8709d6c55c0765f7c9b8"
+  },
+  "failed": 0,
+  "full_chains_executed": 0,
+  "library_versions": {
+    "Jinja2": "3.1.6",
+    "PyMuPDF": "1.28.2",
+    "beancount": "3.2.3",
+    "docxtpl": "0.20.2",
+    "matplotlib": "3.11.1",
+    "networkx": "3.6.1",
+    "numpy": "2.4.6",
+    "pandas": "2.2.3",
+    "python-dateutil": "2.9.0.post0",
+    "python-docx": "1.2.0"
+  },
+  "network_calls": 0,
+  "passed": 10,
+  "results": [
+    {
+      "assertions": 24,
+      "error": null,
+      "proof": 151,
+      "result": {
+        "default_undefined_renders_empty": true,
+        "docxtpl_render_autoescape_default": false,
+        "pdf_text_default_order_is_insertion_order": true,
+        "save_stamps_the_container_with_the_wall_clock": true,
+        "strict_undefined_alone_does_not_escape": true,
+        "unescaped_literal_silently_truncated": true
+      },
+      "status": "passed",
+      "test": "template_binding_escapes_nothing_by_default"
+    },
+    {
+      "assertions": 19,
+      "error": null,
+      "proof": 152,
+      "result": {
+        "decimal_group_sum_drops_nulls": true,
+        "empty_sum_returns_int_zero": true,
+        "indicator_on_an_inner_join_is_constant": true,
+        "unmatched_left_rows_dropped": 1,
+        "validate_many_to_one_checks_the_right_side_only": true
+      },
+      "status": "passed",
+      "test": "a_checked_join_does_not_retain_unmatched_lines"
+    },
+    {
+      "assertions": 16,
+      "error": null,
+      "proof": 153,
+      "result": {
+        "drop_duplicates_hides_conflicting_payloads": true,
+        "grouped_cumsum_skips_nulls": true,
+        "grouped_cumsum_uses_row_order": true,
+        "sort_values_default_is_not_stable": true
+      },
+      "status": "passed",
+      "test": "a_running_balance_follows_row_order_not_the_posting_contract"
+    },
+    {
+      "assertions": 15,
+      "error": null,
+      "proof": 154,
+      "result": {
+        "blank_keys_survive_dropna_and_match": true,
+        "casefold_merges_sharp_s": true,
+        "components_are_unordered_sets": true,
+        "identifier_collision_merges_nodes": true,
+        "is_bipartite_is_true_by_construction": true
+      },
+      "status": "passed",
+      "test": "one_shared_identifier_collapses_two_sides_of_the_match"
+    },
+    {
+      "assertions": 19,
+      "error": null,
+      "proof": 155,
+      "result": {
+        "leaf_realaccount_is_falsy": true,
+        "load_string_returns_errors_without_raising": true,
+        "missing_amount_is_interpolated": true,
+        "one_cent_assertion_accepted_at_two_decimals": true,
+        "trailing_zero_changes_the_tolerance": true
+      },
+      "status": "passed",
+      "test": "a_journal_loader_reports_errors_it_does_not_raise"
+    },
+    {
+      "assertions": 28,
+      "error": null,
+      "proof": 156,
+      "result": {
+        "default_decimal_rounding_is_half_even": true,
+        "float_source_defeats_half_up": true,
+        "fromisoformat_accepts_naive_input": true,
+        "per_entry_and_per_group_differ_by_one_cent": true,
+        "subsecond_precision_truncated": true,
+        "touching_intervals_need_a_declared_predicate": true
+      },
+      "status": "passed",
+      "test": "rounding_mode_and_granularity_each_move_the_cent"
+    },
+    {
+      "assertions": 18,
+      "error": null,
+      "proof": 157,
+      "result": {
+        "month_end_frequency_snaps_the_anchor": true,
+        "naive_split_underallocates_one_cent": true,
+        "null_charge_sums_to_zero_by_default": true,
+        "period_end_time_is_not_a_date": true,
+        "relativedelta_month_steps_are_not_associative": true
+      },
+      "status": "passed",
+      "test": "stepping_a_month_at_a_time_drifts_off_the_month_end"
+    },
+    {
+      "assertions": 17,
+      "error": null,
+      "proof": 158,
+      "result": {
+        "bar_label_default_drops_cents": true,
+        "empty_categories_read_as_zero": true,
+        "observed_flag_changes_the_bar_count": true,
+        "unknown_category_becomes_nan_silently": true,
+        "unmapped_amount": 3000.0
+      },
+      "status": "passed",
+      "test": "an_unmapped_stage_label_leaves_the_totals_looking_consistent"
+    },
+    {
+      "assertions": 21,
+      "error": null,
+      "proof": 159,
+      "result": {
+        "cut_boundary_membership_depends_on_two_defaults": true,
+        "dropped_rows": 2,
+        "histogram2d_drops_out_of_range_rows": true,
+        "imshow_origin_default_is_upper": true,
+        "unassessed_and_out_of_scale_indistinguishable": true
+      },
+      "status": "passed",
+      "test": "a_matrix_silently_omits_what_it_cannot_place"
+    },
+    {
+      "assertions": 22,
+      "error": null,
+      "proof": 160,
+      "result": {
+        "duplicate_edge_overwrites_silently": true,
+        "empty_product_is_one": true,
+        "topological_sort_validates_only_when_consumed": true,
+        "trivial_self_path_invents_a_requirement": true,
+        "unknown_source_and_target_fail_differently": true
+      },
+      "status": "passed",
+      "test": "a_duplicate_bill_of_materials_edge_replaces_the_first"
+    }
+  ],
+  "scope": "Bounded authored document, purchasing, stock, reconciliation, journal, billing, asset, pipeline, risk and material fixtures and reproduced library defaults; the original P151-P160 chains and their artifacts were not rerun.",
+  "source_sha256": "f4d9a4823974ad0b6d2e188ed23b54f172559085964a62d3b2fdd578f8c358ba",
+  "test_cases": 10
+}

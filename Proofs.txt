@@ -25911,3 +25911,1104 @@ Result file SHA256 e6f1ebd102e2a5bfd4cc61a91a4a911955967ce90453feb4d79bb3b948f58
 ```
 
 Checkpoint coverage: 150 of 300 proofs carry a hardening record. Prior cumulative TXT SHA256 071afa646e396532bec6983d40a25fecd51a6a27a713e04ac2579db6cacd720b.
+
+## Checkpoint integrity and environment for this batch
+
+Base: the TXT as committed after batch 15 (SHA256 b3ff1fb34009e1b1e2af7dde5cc0c26869022b3b13ffe32cdd1fda854c417cd6, 1746649 bytes); it is the prior cumulative TXT SHA256 recorded at the end of this batch. Environment as in batch 15 plus docxtpl 0.20.2 and beancount 3.2.3; pandas 2.2.3, networkx 3.6.1, numpy 2.4.6, matplotlib 3.11.1, python-docx 1.2.0, Jinja2 3.1.6, python-dateutil 2.9.0.post0 and PyMuPDF 1.28.2 as already recorded. handoff_guards_v16.py imports handoff_guards_v1.py only; v1-v15 stay byte-identical under HG07.
+
+Note on versions: the P151-P160 chains pin PyMuPDF 1.26.6, matplotlib 3.10.8, numpy 2.3.5 and Python 3.12.13, and pin docxtpl 0.20.2, Jinja2 3.1.6, python-docx 1.2.0, beancount 3.2.3, pandas 2.2.3, networkx 3.6.1 and python-dateutil 2.9.0.post0, which the guards below run on exactly. Where a finding rests on PyMuPDF, matplotlib or numpy it is a reproduction on a nearby version rather than on the recorded one; the versions actually executed are in guards-v16.json.
+
+## Online-checked function references for this hardening batch
+[HD136] docxtpl DocxTemplate.render has the signature render(context, jinja_env=None, autoescape=False), so escaping is off unless the caller asks for it, and passing a jinja_env does not turn it on: docxtpl only forces autoescape onto the supplied environment when the autoescape argument is also true. Rendering the literal string "A & B < 5 > 2" through the default path writes raw & and < into the document XML; the resulting file still opens and python-docx reads the paragraph back as "A  B  5 > 2", with the ampersand and less-than fragments consumed and no error anywhere. With jinja2 StrictUndefined a missing variable raises UndefinedError, while the default Undefined renders it as an empty string. Executed with docxtpl 0.20.2, Jinja2 3.1.6 and python-docx 1.2.0. Source: installed docxtpl 0.20.2 template.py and GitHub; docxtpl.readthedocs.io blocked.
+https://github.com/elapouya/python-docx-template
+[HD137] PyMuPDF Page.get_text defaults to sort=False and returns text in the order the content stream draws it, not in reading order: three paragraphs written bottom, top, middle come back as "Third, First, Second", and two cells on one line come back right before left. get_text(sort=True) restores the vertical order but joins a two-column line into one space-padded string and inserts blank lines between blocks. python-docx Document.save stamps every entry of the saved package with the current local wall-clock time, so re-saving an unmodified template produces a different SHA256 while every part inside it is byte-identical: two saves within one second match and two saves seconds apart do not, with nothing in the document changed. Rewriting the container with a fixed entry stamp makes the bytes depend only on the parts and reproduces exactly. Executed with PyMuPDF 1.28.2 and python-docx 1.2.0. Source: installed PyMuPDF 1.28.2 and GitHub; pymupdf.readthedocs.io blocked.
+https://github.com/pymupdf/PyMuPDF
+[HD138] pandas DataFrame.merge with indicator=True on the default how='inner' produces a _merge column whose only value is 'both', because unmatched rows were already dropped before the indicator was computed; only how='outer', 'left' or 'right' makes it informative. validate='many_to_one' checks that the right key is unique and says nothing about whether the left keys exist, so a mistyped foreign key is silently discarded. merge raises ValueError("Cannot use name of an existing column for indicator column") when _merge is already taken. groupby(...).sum() over an object column of Decimals adds them exactly but drops None and NaN entries with no signal, and an empty selection sums to the integer 0 rather than to a Decimal. Executed with pandas 2.2.3. Source: installed pandas 2.2.3 and GitHub; pandas.pydata.org blocked.
+https://github.com/pandas-dev/pandas
+[HD139] pandas DataFrame.sort_values defaults to kind='quicksort', which is not stable: on 40 rows carrying two tied dates the default order differs from kind='stable' and from the input order, so ties are resolved arbitrarily. groupby(...).cumsum() accumulates in the frame's existing row order and ignores the groupby sort argument entirely, so an unsorted ledger yields a different sequence of running balances from the same rows sorted by date even though the closing balance agrees; it also steps over nulls, resuming as though the missing movement were zero. drop_duplicates(subset=[...]) keeps the first row and discards later rows that share the key but disagree on every other column, without reporting the conflict. Executed with pandas 2.2.3. Source: installed pandas 2.2.3 and GitHub.
+https://github.com/pandas-dev/pandas
+[HD140] NetworkX Graph nodes are identified by the object passed, so a row identifier reused on both sides of a bipartite candidate graph collapses two records into one node: two book rows and one bank row named B01 give a three-node graph on which is_bipartite still returns True and connected_components reports a single component. is_bipartite is true by construction for a graph built only from cross-side edges and turns false only for an edge the builder never emits. connected_components yields set objects, so membership carries no order, and a row that produced no candidate edge has no node at all rather than a degree-zero one. str.casefold maps the sharp s to "ss", so STRASSE and strasse compare equal where str.lower keeps them apart; and a reference that is only whitespace survives Series.str.strip and DataFrame.dropna as an empty string, which then joins to another empty string. Executed with networkx 3.6.1 and pandas 2.2.3. Source: installed networkx 3.6.1 and GitHub; networkx.org blocked.
+https://github.com/networkx/networkx
+[HD141] beancount loader.load_string returns the triple (entries, errors, options_map) and never raises: an unbalanced transaction comes back in errors while still appearing in entries, so a caller that does not test errors hands the bad transaction on. A posting with no amount is interpolated from the rest of the transaction and reported as zero errors. beancount.ops.balance.get_balance_tolerance derives a balance assertion's tolerance from the asserted number's own exponent as one unit in its last written decimal place (tolerance_multiplier 0.5, doubled for Balance directives), so "balance Assets:Bank 100.01 USD" against an exact 100.00 passes with no error while the numerically identical "100.010 USD" fails; an integer amount gets a tolerance of zero. realization.RealAccount subclasses dict and is keyed by child accounts, so every posting-bearing leaf account is falsy while an empty parent is truthy, and the guard "if realization.get(root, account):" drops exactly the accounts that carry balances. Executed with beancount 3.2.3. Source: installed beancount 3.2.3 ops/balance.py and parser/options.py, and GitHub.
+https://github.com/beancount/beancount
+[HD142] Python's default decimal context rounding is ROUND_HALF_EVEN, not ROUND_HALF_UP, so Decimal('1.005').quantize(Decimal('0.01')) is 1.00 by default and 1.01 only when the mode is passed at the call site; the two modes also disagree on 0.125 and 1.665. Constructing a Decimal from a float defeats the choice, because Decimal(1.005) is 1.00499999999999989341858963598497211933135986328125 and rounds down under either mode. datetime.fromisoformat is a parser and not a validator: it accepts naive strings including "2026-09-07T09:00:00", the compact "20260907T090000", a space separator and a bare date, so a UTC requirement needs an explicit tzinfo test afterwards, and it truncates sub-microsecond digits rather than rejecting them. Comparing a naive to an aware datetime then raises TypeError far from the parse. Executed with Python 3.11.15. Source: installed CPython 3.11.15 Lib/_pydecimal.py and Lib/datetime.py, and GitHub; docs.python.org blocked.
+https://github.com/python/cpython
+[HD143] dateutil relativedelta clamps a month addition to the shorter month's last day, which makes month arithmetic non-associative: 2026-01-31 plus one month twice is 2026-03-28 while plus two months at once is 2026-03-31, and plus one month then minus one month is 2026-01-28 rather than the original date. A schedule walked one month at a time therefore leaves the month end permanently after the first February. pandas Period.end_time is a Timestamp at 23:59:59.999999999, so it never equals the Timestamp of its own date; date_range with freq='ME' snaps a mid-month anchor forward to the month end, discarding the declared first period date; and groupby(...).sum() defaults to min_count=0, so a group whose only charge is null totals to 0 instead of staying unknown, with min_count=1 preserving the null. Executed with python-dateutil 2.9.0.post0 and pandas 2.2.3. Source: installed dateutil 2.9.0.post0 relativedelta.py and pandas 2.2.3, and GitHub; dateutil.readthedocs.io blocked.
+https://github.com/dateutil/dateutil
+[HD144] pandas Categorical maps any value outside the declared categories to NaN without raising, so a mistyped stage label removes its row from every subsequent aggregate while the remaining figures stay internally consistent. groupby over a categorical key emits a FutureWarning on pandas 2.2 and its observed default determines the row count: observed=False returns a row for every declared category, giving zeros for categories no record uses, and observed=True returns only the categories present, so the same frame yields five bars or three. matplotlib Axes.bar_label formats with the default '%g'-equivalent, rendering 15500.0 as "15500" and dropping the cents of a currency amount, and a zero-valued bar is still a patch with width 0.0 that is labelled but not visible. Executed with pandas 2.2.3 and matplotlib 3.11.1. Source: installed pandas 2.2.3 and matplotlib 3.11.1, and GitHub; matplotlib.org blocked.
+https://github.com/matplotlib/matplotlib
+[HD145] numpy histogram2d silently discards every observation that falls outside the bin edges and every NaN: seven ordinal pairs of which two lie outside a 1-to-5 scale return counts summing to 5.0 with no error and no warning, and an unassessed NaN row is indistinguishable in the result from an out-of-scale one. Counts are returned as float64. pandas cut is right-closed and left-open by default, so the lowest declared band edge is not a member of its own band and returns NaN; include_lowest=True admits it but relabels the left edge to a nudged value, and right=False moves the loss to the highest score and reassigns every interior boundary value to the next band up. matplotlib imshow defaults to origin='upper', so row zero of a risk matrix is drawn at the top of the axes and the y limits run from high to low. Executed with numpy 2.4.6, pandas 2.2.3 and matplotlib 3.11.1. Source: installed numpy 2.4.6, pandas 2.2.3 and matplotlib 3.11.1, and GitHub; numpy.org blocked.
+https://github.com/numpy/numpy
+[HD146] A NetworkX DiGraph stores at most one edge per ordered pair, so declaring the same parent-to-child bill-of-materials edge twice keeps only the last quantity and leaves number_of_edges at one, with no error and no way to recover the discarded declaration. topological_sort is a generator: calling it on a graph containing a cycle returns normally and raises NetworkXUnfeasible only when the iterator is consumed, while is_directed_acyclic_graph answers immediately. all_simple_paths returns the trivial one-node path when the source equals the target, and math.prod over that path's empty edge sequence is 1, so an item expanded against itself yields a requirement of one unit per demanded unit rather than an error; an unknown target returns an empty list while an unknown source raises NodeNotFound. Executed with networkx 3.6.1 and Python 3.11.15. Source: installed networkx 3.6.1 and GitHub; networkx.org blocked.
+https://github.com/networkx/networkx
+
+## Hardening batch: P151-P160
+
+### HARDENING P151 -- The template renders, the document opens, and the text is gone
+
+Original proof: P151  historical meeting workbooks -> reusable Word template -> verified document batch
+Source location: frozen master lines 5959-6014; original section SHA256 9b26dcaa84d08f2b149b8d9a8385e7bd5f840d7b24f81346cb9fdd368bc78dfe.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: docxtpl DocxTemplate.render defaults to autoescape=False, and supplying a jinja2 Environment with StrictUndefined does not change that. Binding the recorded illustrative string "A & B < 5 > 2" through the default path produces a document that opens cleanly and reads back as "A  B  5 > 2"; the ampersand and less-than fragments are consumed as markup and nothing raises. Two further gaps: PyMuPDF Page.get_text defaults to the content stream's draw order, so a paragraph-by-paragraph comparison against the PDF is comparing an order the renderer chose; and python-docx Document.save stamps the package with the current wall-clock time, so an unmodified template saved twice seconds apart has two different SHA256 values while every part inside it is byte-identical.
+Handoff: recovered workbook cells -> bound template context -> rendered DOCX and PDF pair
+Failure path: The recorded claim is that the illustrative string "survives XML escaping and Word readback". On the default render path it does not survive, and every check the chain names still passes: the file is a valid DOCX, python-docx opens it, the table cells are present, the template hash is unchanged, and the PDF renders. Only a comparison of the read-back paragraph against the exact source string catches it, and only if that comparison is on the whole string rather than on a prefix or a substring test. The failure is silent, per-value, and worse for text that contains an ampersand than for text that does not, so a batch of eight briefs can lose characters from one context and pass on the other seven.
+Required repair: Pass autoescape explicitly at every render call, or construct the Environment as Environment(undefined=StrictUndefined, autoescape=True) and assert env.autoescape before use; compare each read-back paragraph and table cell to its declared source string by equality, not by containment; read the PDF with get_text(sort=True) or with get_text("blocks", sort=True) and compare the block sequence, recording that the default order is the draw order; and identify the template by the map of its part names to part digests, or by the container rewritten with a fixed entry stamp, rather than by the saved file's SHA256.
+Function bridge: docxtpl.DocxTemplate.render with an explicit autoescape or an autoescaping Environment; jinja2.Environment(undefined=StrictUndefined, autoescape=True); docx.Document readback by equality; zipfile part-level digests as the template identity; pymupdf.Page.get_text with a declared sort argument
+Positive acceptance: With either escaping form the paragraph reads back as the exact literal "A & B < 5 > 2" and the table cells read back as the declared context values; a missing variable raises jinja2.UndefinedError; two contexts bound through the same template bytes produce two documents carrying their own meeting IDs; and two re-saves of the unmodified template carry identical part digests and normalize to identical bytes once the container stamp is fixed.
+Adverse acceptance: The default render and the StrictUndefined-only render both return "Topic: A  B  5 > 2" and Environment(undefined=StrictUndefined).autoescape is False (both reproduced); the default Undefined renders a missing variable as an empty table cell rather than raising; PDF text written bottom, top, middle reads back in that same order with sort=False and in vertical order with sort=True (reproduced); the saved package's entry stamps are a clock reading rather than a fixed epoch, so the template's own SHA256 is a function of when it was written (reproduced); an unknown escaping mode is Blocked.
+Evidence and limit: guards-v16 case 151 on one authored two-paragraph, one-table template and one authored context. The recorded eight historical briefs, their workbook sources and the LibreOffice conversion were not rebuilt, so it is not established which render form the recorded chain used; the finding is that the cited primitive's default does not produce the recorded result. The recorded claim that "the template hash stays unchanged across the batch" is consistent with a template written once and reused, and is not evidence about the save path, since a template re-saved during the batch would change hash on content that did not change.
+References: HD136 HD137
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P152 -- An indicator that can only say "both"
+
+Original proof: P152  purchase orders, accepted receipts, invoice lines -> cumulative matching -> exceptions
+Source location: frozen master lines 6015-6050; original section SHA256 30084ee20fc25b18f5117c2a14d75a99450ea79470a2f616a1145c885259b9b8.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: the chain cites merge(validate="many_to_one", indicator=True) as the step that joins each invoice to its order line and then says it retains unmatched lines. On the default how='inner' the indicator column's only value is 'both', because the unmatched rows were dropped before it was computed: six invoice lines produce five joined rows and the one carrying an unknown order ID is gone with nothing flagged. Separately, groupby(...).sum() over an object column of Decimals drops a null amount silently and an empty selection sums to the integer 0 rather than a Decimal.
+Handoff: order lines and invoice lines -> checked join -> matched result and exception list
+Failure path: The exception list is the deliverable. An invoice quoting an order ID that does not exist is exactly the exception the chain names ("an unmatched order ID remain distinct explicit exceptions"), and it is the one case the cited call cannot surface. The result looks complete: every row present carries indicator 'both', the cumulative quantities reconcile among the rows that survived, and the invoice-line amount total is simply lower than the source total by the missing line. A missing quantity on a retained line has the same shape, understating the cumulative billed total without a signal.
+Required repair: Join with how='outer' and read the indicator, treating left_only and right_only as named exception classes; assert the joined row count against the source invoice count before aggregating; check for nulls in the amount and quantity columns before any groupby sum and Blocked on them rather than letting the sum skip them; and construct every monetary zero as Decimal so an empty selection cannot change type.
+Function bridge: pandas.DataFrame.merge(how='outer', validate='many_to_one', indicator=True); pandas.DataFrame.groupby(...).sum() over a null-checked column; decimal.Decimal comparisons for the declared tolerance
+Positive acceptance: The outer join returns six rows with exactly one left_only, which resolves to the invoice quoting the unknown order ID; both invoices against one order line accumulate to three units against the ordered three; and the signed tolerance boundaries at plus and minus 0.25 USD are inside while 0.26 USD is outside.
+Adverse acceptance: The inner join returns five rows of six with indicator values ['both'] and the unmatched invoice absent (reproduced); a duplicated order line raises pandas MergeError; an existing _merge column raises ValueError; a null amount is dropped from the group sum without error; an empty selection sums to the integer 0 (all reproduced).
+Evidence and limit: guards-v16 case 152 on four authored order lines and six authored invoice lines. The recorded fixture, its 2,100.00 USD total, the four price-boundary cases and the seven malformed input sets were not rerun; whether the recorded chain used an outer join is not established from the interface text.
+References: HD138
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P153 -- A running balance in whatever order the rows arrived
+
+Original proof: P153  purchasing receipt references, declared movements -> stock ledger -> reorder suggestions
+Source location: frozen master lines 6051-6090; original section SHA256 24db2433346489e2bd2e6e9ff5c3c4347a7c0959d29b43b8bcb711eb2c6b08b2.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: groupby(...).cumsum() accumulates in the frame's existing row order and ignores the groupby sort argument, so the sequence of running balances is decided by whatever order the events happen to sit in; DataFrame.sort_values defaults to an unstable quicksort, so same-day movements are ordered arbitrarily; and drop_duplicates on a receipt ID keeps the first row and discards a later one that disagrees on quantity.
+Handoff: receipt references and declared movements -> ordered stock events -> running balances and reorder suggestions
+Failure path: The chain rejects "negative running stock". On three authored desk movements the unsorted frame gives running balances 5, 3, -1 and the date-sorted frame gives -2, -6, -1: the closing balance is identical, so a closing-balance check passes either way, but the minimum differs by two units and the unsorted run never reaches the lowest point. A negative-stock rejection therefore depends entirely on a sort the cited primitive does not perform, and on a tie-break the default sort does not fix. A null movement is stepped over, so the balance after a missing entry reads as though that movement were zero.
+Required repair: Sort by the full declared posting key before the grouped cumulative sum and assert the ordering is total, using kind='stable' or a sort key that admits no ties; refuse null quantities before accumulating rather than letting cumsum skip them; and before deduplicating receipt references, group by the receipt ID and Blocked when any other column has more than one distinct value.
+Function bridge: pandas.DataFrame.sort_values(by=<total key>, kind='stable'); pandas.DataFrame.groupby(...).cumsum() over a null-checked column; pandas.DataFrame.groupby(...).nunique() as the deduplication precondition
+Positive acceptance: The date-sorted run reproduces -2, -6, -1 and its minimum is the true low point; references that agree on quantity deduplicate to two unique receipts; and the stable sort on 40 tied rows reproduces the input order exactly.
+Adverse acceptance: The unsorted run gives 5, 3, -1 with a minimum of -1 while the sorted run reaches -6 (reproduced); the default quicksort order on tied dates differs from the stable order while holding the same multiset (reproduced); a null quantity leaves the balance resuming at 1.0 as if the gap were zero; conflicting receipt payloads are Blocked, and the unchecked path discards quantity 7 without a signal.
+Evidence and limit: guards-v16 case 153 on three authored movements, forty authored tie rows and three authored receipt references. The recorded eighteen ledger entries, five balances, transfer legs and six invalid inputs were not rerun; the recorded chain names a "declared posting contract" whose sort key and tie-break are not visible in the interface text.
+References: HD139
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P154 -- Two sides of a match with one namespace
+
+Original proof: P154  book and bank registers -> exact candidates and ambiguity -> reconciliation report
+Source location: frozen master lines 6091-6128; original section SHA256 965290bbe551069bd61f2370965b4721444bf283a6d07018918d175453665d98.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: a NetworkX Graph identifies nodes by the object passed, so a book row and a bank row sharing an identifier string become one node. Two book rows and one bank row named B01 give a three-node graph on which is_bipartite still returns True and connected_components reports one component of three, so the genuine match is not selected and the collision is not reported. is_bipartite is true by construction for a graph built only from cross-side edges. Separately, a reference that is only whitespace survives strip and dropna as an empty string and joins to another empty string, and str.casefold merges keys that str.lower keeps apart.
+Handoff: normalized reference keys -> bipartite candidate graph -> unique matches, ambiguity and unresolved rows
+Failure path: The chain's selection rule is "only isolated one-book/one-bank components", and the collision defeats it in the direction that loses evidence rather than inventing it: a match that exists is reported as ambiguity. The bipartiteness check cannot detect this, because the graph is still bipartite. The recorded claim that "null references never match each other" holds for nulls and fails for blanks: an authored whitespace-only book reference matched an empty bank reference as a candidate pair, since dropna removes only the nulls.
+Required repair: Namespace every node with its side before adding an edge and assert the two sides are disjoint sets rather than inferring separation from is_bipartite; carry the side as a node attribute and check each selected component has exactly one node of each side; treat an empty normalized key as unmatchable alongside null; declare whether casefold or lower is the normalization and record that casefold merges the sharp s; and account for rows that produced no edge outside the graph, since they have no node.
+Function bridge: networkx.Graph with side-prefixed node identifiers; networkx.connected_components with an explicit per-side cardinality check; networkx.algorithms.bipartite.sets on a labelled graph; pandas.Series.str.strip/casefold with an empty-key exclusion
+Positive acceptance: With prefixed identifiers the two-book, one-bank component is correctly a single component of three; adding a same-side edge makes is_bipartite false; excluding blank keys leaves exactly the one genuine INV-1 candidate pair; and the normalized keys are 'inv-1', '' and None respectively.
+Adverse acceptance: The collided graph has three nodes for four rows, is_bipartite returns True and there is one component of three (all reproduced); connected_components yields set objects with no order; a row with no candidate edge has no node at all; a whitespace-only book reference pairs with an empty bank reference when blanks are not excluded (reproduced); STRASSE and the sharp-s spelling are equal under casefold and unequal under lower.
+Evidence and limit: guards-v16 case 154 on four authored register rows for the collision and three per side for the key test. The recorded twelve source rows, five candidate edges, three unique matches and the 11,110.00 / 485.00 / 11,595.00 USD balance reconciliation were not rerun; whether the recorded chain namespaced its node identifiers is not visible in the interface text.
+References: HD140
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P155 -- One cent passes, one more digit fails
+
+Original proof: P155  explicit journal postings -> validated account balances -> financial statements
+Source location: frozen master lines 6129-6169; original section SHA256 9d6666f7fca0c80ff37f147d7f73da849fb3d8534ef6c7c0019c5d8df7f303b6.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP, and it sharpens the recorded claim. beancount loader.load_string never raises: an unbalanced transaction is returned in the errors list and still appears in entries. A posting with no amount is interpolated and reported as zero errors, so "reject missing amounts" is not a library default. The balance tolerance is derived from the asserted number's own exponent, so "balance Assets:Bank 100.01 USD" against an exact 100.00 passes with no error while the numerically identical "100.010 USD" is rejected. And realization.RealAccount subclasses dict keyed by child accounts, so every posting-bearing leaf is falsy.
+Handoff: parsed journal -> validated entries -> account inventories and statement totals
+Failure path: Three separate silent paths into a wrong statement. A caller that binds the triple and ignores errors publishes an unbalanced journal. A caller that expects a missing amount to be rejected gets an interpolated one that balances by construction, so the zero-sum check it then runs is a tautology. A caller that writes "if realization.get(root, account):" to test whether an account has data drops exactly the leaf accounts that carry balances and keeps the empty parents, inverting the statement. The recorded claim is that a one-cent discrepancy is rejected even though the library accepts it: the library's acceptance is real, and it is controlled by how many decimal digits the assertion is typed with rather than by the money.
+Required repair: Treat the errors list as a hard gate and Blocked on any entry; require an explicit amount on every posting before loading, since interpolation cannot be turned off at the loader; write balance assertions with an explicit tolerance rather than relying on the inferred one, or compare the computed balance to the asserted Decimal directly; and test account presence with "is not None" against realization.get, never with the node's truth value.
+Function bridge: beancount.loader.load_string with a checked errors list; an explicit-amount precondition over beancount.parser output; beancount.core.realization.get compared to None; direct Decimal comparison of the realized balance against the assertion
+Positive acceptance: The clean journal loads with zero errors; the realized Assets:Bank balance is 100.00 USD; an undeclared account returns None from realization.get; and an exactly correct assertion produces no errors.
+Adverse acceptance: The unbalanced journal returns one error without raising and still yields the transaction, and the checked wrapper Blocks it (reproduced); a missing posting amount is interpolated to -100.00 USD with zero errors (reproduced); the 100.01 USD assertion produces no errors while 100.010, 100.005 and 100.10 each produce a BalanceError, though 100.01 and 100.010 are numerically equal (reproduced); the leaf Assets:Bank is falsy while carrying 100.00 USD and the empty parent Assets is truthy (reproduced).
+Evidence and limit: guards-v16 case 155 on one authored four-line journal and six authored assertion amounts. The recorded nine transactions, 18 postings, 14,700.00 USD trial balance and seven invalid journals were not rerun; the recorded chain's own validate_raw and load_checked functions are not available, so it is not established which of these paths they close.
+References: HD141
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P156 -- The mode, the source type, and the granularity each move the cent
+
+Original proof: P156  explicit time intervals and rates -> billable service lines -> draft invoices
+Source location: frozen master lines 6170-6216; original section SHA256 841276f82f108b75e08bbb29e4e73381915a8608028c1f38eb10fc0f924012bb.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: Python's default decimal rounding is ROUND_HALF_EVEN, so quantize without an explicit mode rounds 1.005 to 1.00 where the chain's declared ROUND_HALF_UP gives 1.01; constructing the Decimal from a float defeats the mode entirely, since Decimal(1.005) is below the half. And datetime.fromisoformat is a parser rather than a validator: it accepts naive strings, the compact form, a space separator and a bare date, and truncates sub-microsecond digits. The chain's per-entry versus per-group rounding claim reproduces exactly.
+Handoff: validated time intervals and rates -> rounded billable amounts -> grouped service lines and draft invoices
+Failure path: Three cent-level divergences that no downstream check separates. A quantize call that omits the mode rounds a different way from its neighbours on exactly the half-cent values an hourly rate produces. A rate or duration that reached the Decimal through a float rounds down under both modes, so the declared HALF_UP contract is not in force even where the mode was passed. And "validate UTC timestamps (datetime.fromisoformat)" performs no validation at all: a naive timestamp parses cleanly and only fails later, at the first comparison against an aware one, as a TypeError far from the input.
+Required repair: Pass the rounding mode at every quantize call site and assert the context default is not being relied on; construct every Decimal from a string or an integer and refuse float sources; follow fromisoformat with an explicit tzinfo and UTC-offset check and Blocked on a naive result; declare whether the overlap predicate is half-open or closed, since back-to-back entries are legal under one and not the other; and record the exact rational amount alongside the rounded one so the rounding granularity is auditable.
+Function bridge: decimal.Decimal.quantize with an explicit rounding argument; string-sourced decimal.Decimal; datetime.datetime.fromisoformat followed by a tzinfo assertion; fractions.Fraction for the exact comparison
+Positive acceptance: Two one-minute entries at 100.00 USD per hour round to 1.67 each for a grouped 3.34 USD under the per-entry rule, and the exact amount is the fraction 10/3, so neither 3.34 nor 3.33 is the exact figure; an offset-bearing timestamp parses to UTC; and an overnight interval retains its exact 90 minutes.
+Adverse acceptance: The default context rounds 1.005 to 1.00, 0.125 to 0.12 and 1.665 to 1.66, each one cent below the declared HALF_UP result (reproduced); Decimal(1.005) rounds to 1.00 under HALF_UP (reproduced); four naive timestamp forms parse without error and are Blocked only by the explicit check; nine sub-microsecond digits truncate to six; touching intervals overlap under the closed predicate and not under the half-open one; an unknown granularity is Blocked.
+Evidence and limit: guards-v16 case 156 on authored one- and two-minute entries at one authored rate and eight authored timestamp strings. The recorded nine time entries, 604 net minutes, 843.50 and 153.34 USD subtotals, twelve Word table cells and 63 workbook cells were not rerun.
+References: HD142
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P157 -- A schedule that steps off the month end and never returns
+
+Original proof: P157  journal acquisition and asset policies -> monthly depreciation -> asset register
+Source location: frozen master lines 6217-6256; original section SHA256 dcc01809f1bd6e52c8aa3bc2179af8293d0b9359f556f09f00bf8ceb712740fa.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: dateutil relativedelta clamps a month addition to the shorter month's last day, which makes month arithmetic non-associative. Walking 2026-01-31 one month at a time gives 2026-03-28 where adding two months at once gives 2026-03-31, and adding then subtracting a month lands on 2026-01-28. pandas Period.end_time is a Timestamp at 23:59:59.999999999 and so never equals the Timestamp of its own date; date_range with freq='ME' snaps a mid-month anchor away; and groupby sum defaults to min_count=0, so an asset with an unresolved useful life rolls up as a hard zero rather than staying unknown.
+Handoff: acquisition posting and asset policy -> monthly charges and month ends -> annual rollup and register
+Failure path: The chain generates periods with one primitive and independently recomputes month ends with another. If the generator and the checker walk months differently, they agree for January and diverge from February onward, and the divergence is a silent date shift rather than an error, so the register's month-end column and the schedule's period column can disagree by three days with both checks passing. The comparison of a Period end against a date fails outright for the opposite reason: it is never equal, so a naive equality check reports a mismatch on every row. And the recorded claim that "the missing-life asset retains null depreciation and net book value, so the complete portfolio net book value remains unknown" is defeated by the rollup primitive itself, which converts that unknown into 0.
+Required repair: Choose one month-walk form, apply it in both the generator and the independent check, and assert associativity on the anchor dates in use, or generate periods with period_range and derive every month end from the Period rather than by repeated addition; compare month ends through Period.end_time.date() or normalize(); pass min_count=1 to every rollup that may cover an all-null group so an unknown stays null; and force the final period's charge to the remainder rather than repeating the quantized amount.
+Function bridge: pandas.period_range with Period.end_time.date(); dateutil.relativedelta applied from a fixed anchor rather than iteratively; pandas.DataFrame.groupby(...).sum(min_count=1); decimal.Decimal.quantize with a forced final remainder
+Positive acceptance: period_range returns the three declared months; Period('2026-02').end_time.date() is 2026-02-28; the forced split of 100.00 USD over three months is 33.33, 33.33 and 33.34 and sums to exactly 100.00; and min_count=1 keeps the unresolved asset's annual total null while leaving the known 66.67 USD intact.
+Adverse acceptance: Stepping a month at a time and adding two months at once give different third dates (reproduced); the add-then-subtract round trip lands on 2026-01-28; Period.end_time does not equal the Timestamp of its date; freq='ME' from a 2026-01-15 anchor returns 2026-01-31 onward, discarding the declared start day; the naive three-way split sums to 99.99 with a one-cent shortfall; the default min_count rolls the null charge up as 0 (reproduced); a non-positive useful life and an unknown month-walk method are Blocked.
+Evidence and limit: guards-v16 case 157 on one authored anchor date, one authored 100.00 USD asset and three authored rollup rows. The recorded four assets, 39 monthly rows, 1,450.00 USD scheduled total, 6,350.00 USD known net book value and 273 workbook cells were not rerun.
+References: HD143
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P158 -- A typo in a stage label, and the totals still agree with themselves
+
+Original proof: P158  opportunities and declared stage weights -> pipeline coverage -> sales forecast
+Source location: frozen master lines 6257-6297; original section SHA256 3b5457a1f10b651d39313073ef5bdd76187a8fb0a76a7b7f289340db6e5b570c.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: pandas Categorical maps a value outside the declared categories to NaN with no error, so a mistyped stage label removes its opportunity from every aggregate while the surviving figures stay internally consistent. The groupby observed flag then decides the row count: the default returns a row for every declared stage, giving measured-looking zeros for stages no opportunity uses, and observed=True returns only the stages present, so one frame yields five bars or three. matplotlib bar_label's default format drops the cents of a currency amount.
+Handoff: opportunity stages and declared weights -> ordered stage aggregates -> forecast table and bar chart
+Failure path: The unmapped amount is the dangerous part. Five authored opportunities totalling 24,250.00 USD produce stage totals summing to 21,250.00 USD under every observed setting, and the 3,000.00 USD row is simply absent. Nothing in the aggregate is inconsistent: the stage rows add up to the grouped total, the contributor IDs within each row resolve, and only a comparison against the source total exposes the gap. The chain records a 3,000.00 USD unassessed opportunity as a deliberate unknown, which is exactly the shape a silently unmapped label would take, so the two are not distinguishable from the aggregate alone. The observed flag then changes the recorded four-bar chart's bar count without touching any value.
+Required repair: After coding the stages, collect the rows whose code is null and Blocked with the offending labels rather than aggregating; assert the grouped total equals the source total in the same units; pass observed explicitly and declare whether stages with no opportunity appear as zero rows or are absent; and pass an explicit bar_label format carrying the currency precision, drawing zero-valued entries with a marker rather than a zero-width bar.
+Function bridge: pandas.Categorical with a null-code precondition; pandas.DataFrame.groupby(observed=<declared>); a source-total reconciliation assertion; matplotlib.axes.Axes.bar_label with an explicit format
+Positive acceptance: With the checked coder the four in-catalog rows code without a null; observed=True returns the three used stages; and an explicit '%.2f' format labels the bars 15500.00, 4500.00, 250.00 and 0.00.
+Adverse acceptance: The mistyped label becomes one NaN code with no error and its 3,000.00 USD leaves the aggregate, so the grouped total of 21,250.00 USD does not equal the source total of 24,250.00 USD (reproduced); observed=False returns five stage rows with Won and Lost at 0.0 while observed=True returns three (reproduced); the default bar labels are 15500, 4500, 250 and 0 with the cents gone (reproduced); the zero-valued bar has width 0.0 and is still labelled; the checked coder Blocks the unmapped label.
+Evidence and limit: guards-v16 case 158 on five authored opportunities and four authored bar values. The recorded ten opportunities, 41,500.00 USD open total, 21,250.00 USD weighted subtotal, timing splits and 118 workbook cells were not rerun; the recorded chain's four-bar chart is consistent with observed=True over four used stages, which the interface text does not state.
+References: HD144
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P159 -- A matrix that omits what it cannot place
+
+Original proof: P159  task and role outputs with risk records -> response register -> risk matrix
+Source location: frozen master lines 6298-6341; original section SHA256 378ef98020478731454713ff92c8d7c250a3698c0eff1dc8fee4434628f0cce0.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: numpy histogram2d discards every observation outside the bin edges and every NaN with no error and no warning, so an out-of-scale ordinal and an unassessed risk are indistinguishable in the result: seven pairs of which two lie outside a 1-to-5 scale return counts summing to 5.0. pandas cut's boundary membership depends on two defaults at once, so the same declared bands assign the boundary scores three different ways. And matplotlib imshow defaults to origin='upper', drawing likelihood row zero at the top of the axes.
+Handoff: ordinal assessments and declared bands -> banded scores and a 5-by-5 count matrix -> register and annotated matrix
+Failure path: The chain's own contract is that an unknown likelihood leaves a risk outside the matrix, which is correct behaviour, and the primitive delivers it by the same mechanism it uses to drop an out-of-contract value of 6 or 0. The matrix total is lower in both cases and the reason is not recoverable from the output, so a check that only compares the matrix total against the count of assessed risks passes while an invalid ordinal is being silently discarded. The band assignment is separately under-determined: with edges 1, 5, 10, 15, 25 the right-closed default leaves score 1 in no band at all, include_lowest admits it but relabels the left edge, and right=False loses the top score instead and moves score 5 and score 15 each one band up. All three are defensible readings of "nonoverlapping score bands" and they disagree on exactly the boundary scores a 5-by-5 product grid produces.
+Required repair: Validate every ordinal against the declared 1-to-5 membership set before binning and Blocked on anything outside it, so the only rows histogram2d drops are the declared-unknown ones; assert the matrix total equals the count of fully assessed risks; use half-integer bin edges so each ordinal level owns a cell; declare the band closure explicitly and assert every declared score maps to exactly one band, including both endpoints; and pass origin explicitly to imshow.
+Function bridge: an explicit membership check over the declared ordinal scale; numpy.histogram2d with half-integer edges and a checked total; pandas.cut with declared right and include_lowest arguments; matplotlib.axes.Axes.imshow with an explicit origin
+Positive acceptance: Five ordinal pairs on the diagonal produce a diagonal of ones summing to 5.0; the checked reader passes an unknown likelihood through as NaN and yields a matrix total of 1.0 for the one assessed pair; numpy.outer over 1 to 5 reproduces the product grid 1, 4, 9, 16, 25; and origin='lower' returns ascending y limits.
+Adverse acceptance: Seven pairs including a 6 and a 0 count 5.0 with no error, and a NaN row is dropped the same way (both reproduced); counts are float64; the right-closed bands leave score 1 as NaN, include_lowest relabels the left edge to 0.999, and right=False loses score 25 while moving score 5 to the next band (all reproduced); the default imshow y limits run from 4.5 down to -0.5 (reproduced); an out-of-scale ordinal is Blocked by the checked reader.
+Evidence and limit: guards-v16 case 159 on seven authored ordinal pairs and six authored scores. The recorded seven risks, six current assessments, 70 source/matrix checks, 25 score-boundary checks and 117 workbook cells were not rerun; the recorded chain's declared band edges and closure are not visible in the interface text.
+References: HD145
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P160 -- The second edge replaces the first, and the sort validates nothing
+
+Original proof: P160  multilevel bill of materials and demand -> stock netting -> material requirements
+Source location: frozen master lines 6342-6381; original section SHA256 7eea69ac3c0e6e75382aed934153a47887b58faeb1eebe27f01f4bf966b79da6.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: a NetworkX DiGraph holds one edge per ordered pair, so a duplicate bill-of-materials edge overwrites the first quantity silently: kit-to-cable declared at 2 and again at 3 leaves one edge carrying 3. topological_sort returns a generator and raises NetworkXUnfeasible only when it is consumed, so building the iterator validates nothing. math.prod of an empty sequence is 1, and all_simple_paths from a node to itself returns the trivial single-node path, so an item that is its own demand target yields a requirement of one unit rather than an error. An unknown target returns an empty path list while an unknown source raises.
+Handoff: bill-of-materials edges and demand -> expanded paths and quantities -> gross and net requirements
+Failure path: The chain's contract names "unique component edges" and the primitive it cites cannot enforce it: the duplicate is absorbed into the graph and only an edge count against the source row count reveals it, with the surviving quantity being whichever declaration was inserted last. The acyclicity check has the same shape from the other direction: a caller that builds the topological order and does not consume it gets no exception from a cyclic graph, so the cycle rejection the chain records depends on where the generator is exhausted. The empty-product and trivial-path behaviours combine into a requirement that is invented rather than derived, and the asymmetric handling of unknown nodes means a typo in a part ID reports "no requirement" while a typo in an assembly ID raises.
+Required repair: Check the declared edge pairs for duplicates before inserting them and Blocked on any repeat, and assert the graph's edge count equals the source row count; call is_directed_acyclic_graph as the predicate, or consume the topological order into a list, never leaving the generator unread; refuse a demand whose source equals its target; and treat an empty path list as an explicit unresolved outcome rather than a zero requirement, checking both node identifiers against the declared item catalog before expanding paths.
+Function bridge: networkx.DiGraph with a pre-insertion duplicate check; networkx.is_directed_acyclic_graph, or list(networkx.topological_sort(...)); networkx.all_simple_paths over catalog-checked endpoints; math.prod over a non-empty edge sequence
+Positive acceptance: The three declared edges give three stored edges; the two kit-to-cable paths carry quantities 2 and 4 for a gross requirement of 6 per kit and 12 for two kits; consuming the topological order over the acyclic graph succeeds; and a declared node keeps its attributes while the invented parent is visible as an empty attribute dict.
+Adverse acceptance: Two declared kit-to-cable edges store one edge carrying quantity 3 (reproduced), and the checked builder Blocks it; topological_sort over a three-node cycle returns without error and raises NetworkXUnfeasible only when consumed (reproduced); a self-loop is not a DAG; math.prod of an empty sequence is 1 and the trivial self-path yields a requirement of 4 for a demand of 4 (reproduced), which the checked path Blocks; an unknown target returns an empty list while an unknown source raises NodeNotFound (both reproduced); an unknown acyclicity method is Blocked.
+Evidence and limit: guards-v16 case 160 on two authored duplicate edges and three authored bill-of-materials edges. The recorded six BOM edges, two demand records, eight-cable gross requirement, Store-warehouse netting and eight invalid inputs were not rerun; whether the recorded chain checked its edge count against its source rows is not visible in the interface text.
+References: HD146 HD130
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+## Embedded runnable local guard module: handoff_guards_v16.py
+
+SHA256 f4d9a4823974ad0b6d2e188ed23b54f172559085964a62d3b2fdd578f8c358ba; bytes 41659. Run: python handoff_guards_v16.py --report guards-v16.json, with handoff_guards_v1.py beside it. Ten cases, 199 assertions, no network and no model client.
+
+```python
+"""Sixteenth bounded adapter suite: P151-P160, document templating, purchasing, stock, reconciliation, ledger,
+billing, depreciation, pipeline, risk and material handoffs. Requires handoff_guards_v1.py from this TXT. Every
+template render, join, cumulative aggregation, graph operation, journal load, decimal rounding, calendar step,
+binning and path expansion below is a library primitive call; local code declares fixtures and policies and turns a
+primitive result into a Blocked outcome. All runtime inputs are authored fixtures. No model client and no network.
+Run: python handoff_guards_v16.py --report report.json
+"""
+from __future__ import annotations
+import argparse, hashlib, importlib.metadata, io, json, logging, math, traceback, warnings, zipfile
+from datetime import date, datetime, timezone
+from decimal import Decimal, ROUND_HALF_UP, ROUND_HALF_EVEN
+from fractions import Fraction
+from pathlib import Path
+import beancount
+import docxtpl
+import networkx as nx
+import numpy as np
+import pandas as pd
+import pymupdf
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+from beancount import loader
+from beancount.core import data as bc_data, realization
+from dateutil.relativedelta import relativedelta
+from docx import Document
+from jinja2 import Environment, StrictUndefined, UndefinedError
+import handoff_guards_v1 as g
+warnings.simplefilter('ignore'); logging.disable(logging.WARNING)
+
+CENT = Decimal('0.01')
+
+# ---------------------------------------------------------------- P151
+def meeting_template() -> bytes:
+    """One authored DOCX carrying Jinja placeholders in a paragraph and in a fixed 1x2 table."""
+    d = Document()
+    d.add_paragraph('Meeting: {{ meeting_id }}')
+    d.add_paragraph('Topic: {{ topic }}')
+    t = d.add_table(rows=1, cols=2)
+    t.cell(0, 0).text = '{{ flag }}'
+    t.cell(0, 1).text = '{{ count }}'
+    buf = io.BytesIO(); d.save(buf); return buf.getvalue()
+
+
+def bind(template: bytes, context: dict, *, escaping: str) -> bytes:
+    """escaping='argument' passes render(autoescape=True); 'environment' sets it on the Environment;
+    'strict_only' passes a StrictUndefined Environment and relies on docxtpl's default, which is autoescape=False;
+    'default' calls render(context) with no environment at all."""
+    doc = docxtpl.DocxTemplate(io.BytesIO(template))
+    if escaping == 'argument':
+        doc.render(context, jinja_env=Environment(undefined=StrictUndefined), autoescape=True)
+    elif escaping == 'environment':
+        doc.render(context, jinja_env=Environment(undefined=StrictUndefined, autoescape=True))
+    elif escaping == 'strict_only':
+        doc.render(context, jinja_env=Environment(undefined=StrictUndefined))
+    elif escaping == 'default':
+        doc.render(context)
+    else:
+        raise g.Blocked('unknown escaping mode %r' % escaping)
+    buf = io.BytesIO(); doc.save(buf); return buf.getvalue()
+
+
+def read_back(document: bytes) -> dict:
+    d = Document(io.BytesIO(document))
+    return {'paragraphs': [p.text for p in d.paragraphs],
+            'cells': [c.text for row in d.tables[0].rows for c in row.cells]}
+
+
+def part_digests(document: bytes) -> dict:
+    """Content-address the package parts, ignoring the container's own metadata."""
+    with zipfile.ZipFile(io.BytesIO(document)) as archive:
+        return {name: hashlib.sha256(archive.read(name)).hexdigest() for name in sorted(archive.namelist())}
+
+
+def stamp_dates(document: bytes) -> set:
+    with zipfile.ZipFile(io.BytesIO(document)) as archive:
+        return {info.date_time[:3] for info in archive.infolist()}
+
+
+def normalized_package(document: bytes) -> bytes:
+    """Rewrite the container with a fixed stamp so the bytes depend only on the parts."""
+    out = io.BytesIO()
+    with zipfile.ZipFile(io.BytesIO(document)) as archive:
+        with zipfile.ZipFile(out, 'w', zipfile.ZIP_DEFLATED) as fixed:
+            for name in sorted(archive.namelist()):
+                fixed.writestr(zipfile.ZipInfo(name, date_time=(1980, 1, 1, 0, 0, 0)), archive.read(name))
+    return out.getvalue()
+
+
+def placed_text(fragments: list[tuple[float, float, str]], *, sort: bool) -> list[str]:
+    """Write text fragments into a PDF in list order and read them back with PyMuPDF."""
+    doc = pymupdf.open(); page = doc.new_page()
+    for x, y, text in fragments:
+        page.insert_text((x, y), text)
+    reread = pymupdf.open('pdf', doc.tobytes())[0]
+    return [line for line in reread.get_text(sort=sort).splitlines() if line.strip()]
+
+
+# ---------------------------------------------------------------- P152
+def match_invoices(invoices: pd.DataFrame, orders: pd.DataFrame, *, how: str) -> pd.DataFrame:
+    """The chain's cited call is merge(validate='many_to_one', indicator=True); how is made explicit here."""
+    return invoices.merge(orders, on='order_line', how=how, validate='many_to_one', indicator=True)
+
+
+def cumulative_billed(invoices: pd.DataFrame) -> dict:
+    return {k: v for k, v in invoices.groupby('order_line')['qty'].sum().items()}
+
+
+def decimal_totals(rows: list[dict], *, key: str) -> dict:
+    frame = pd.DataFrame(rows)
+    return {k: v for k, v in frame.groupby(key)['amount'].sum().items()}
+
+
+def within_tolerance(ordered: Decimal, billed: Decimal, tolerance: Decimal) -> bool:
+    return abs(ordered - billed) <= tolerance
+
+
+# ---------------------------------------------------------------- P153
+def running_stock(events: list[dict], *, order_by: str | None) -> list:
+    frame = pd.DataFrame(events)
+    if order_by is not None:
+        frame = frame.sort_values(order_by)
+    return list(frame.groupby('item')['qty'].cumsum())
+
+
+def tie_order(rows: list[dict], *, kind: str) -> list[int]:
+    frame = pd.DataFrame(rows)
+    return list(frame.sort_values('date', kind=kind)['seq'])
+
+
+def unique_receipts(references: list[dict], *, checked: bool) -> list[dict]:
+    """checked=True refuses references that share an ID but disagree on payload."""
+    frame = pd.DataFrame(references)
+    if checked:
+        conflicts = frame.groupby('receipt_id')['qty'].nunique()
+        bad = sorted(conflicts[conflicts > 1].index)
+        if bad:
+            raise g.Blocked('receipt references disagree on quantity: %s' % ', '.join(bad))
+    return frame.drop_duplicates(subset=['receipt_id']).to_dict('records')
+
+
+# ---------------------------------------------------------------- P154
+def candidate_graph(edges: list[tuple[str, str]]) -> nx.Graph:
+    graph = nx.Graph()
+    graph.add_edges_from(edges)
+    return graph
+
+
+def components(graph: nx.Graph) -> list[list[str]]:
+    return sorted(sorted(component) for component in nx.connected_components(graph))
+
+
+def normalized_keys(refs: list[str | None]) -> list:
+    return list(pd.Series(refs, dtype='object').str.strip().str.casefold())
+
+
+def candidate_pairs(book: list[dict], bank: list[dict], *, drop_blank: bool) -> list[tuple[str, str]]:
+    left = pd.DataFrame(book); right = pd.DataFrame(bank)
+    for frame in (left, right):
+        frame['key'] = frame['ref'].str.strip().str.casefold()
+    left = left.dropna(subset=['key']); right = right.dropna(subset=['key'])
+    if drop_blank:
+        left = left[left['key'] != '']; right = right[right['key'] != '']
+    joined = left.merge(right, on='key', suffixes=('_book', '_bank'))
+    return [(r['id_book'], r['id_bank']) for r in joined.to_dict('records')]
+
+
+# ---------------------------------------------------------------- P155
+JOURNAL = """
+2026-01-01 open Assets:Bank
+2026-01-01 open Assets:Idle
+2026-01-01 open Equity:Opening-Balances
+2026-01-05 * "opening"
+  Assets:Bank              100.00 USD
+  Equity:Opening-Balances -100.00 USD
+"""
+
+
+def load_journal(text: str, *, checked: bool):
+    entries, errors, options = loader.load_string(text)
+    if checked and errors:
+        raise g.Blocked('journal reported %d error(s): %s' % (len(errors), type(errors[0]).__name__))
+    return entries, errors
+
+
+def assertion_errors(asserted: str) -> list[str]:
+    text = JOURNAL + '2026-01-06 balance Assets:Bank  %s\n' % asserted
+    entries, errors, options = loader.load_string(text)
+    return [type(e).__name__ for e in errors]
+
+
+def interpolated_postings(text: str) -> list[tuple[str, str]]:
+    entries, errors, options = loader.load_string(text)
+    txns = [e for e in entries if isinstance(e, bc_data.Transaction)]
+    return [(p.account, str(p.units)) for p in txns[-1].postings]
+
+
+def account_node(entries, account: str):
+    return realization.get(realization.realize(entries), account)
+
+
+# ---------------------------------------------------------------- P156
+def money(value: str) -> Decimal:
+    return Decimal(value)
+
+
+def round_cents(value: Decimal, *, mode) -> Decimal:
+    return value.quantize(CENT, rounding=mode)
+
+
+def billed(minutes: int, hourly: str, *, granularity: str, mode=ROUND_HALF_UP) -> Decimal:
+    """granularity='entry' rounds each entry before aggregation; 'group' rounds the aggregate."""
+    exact = Decimal(hourly) * Decimal(minutes) / Decimal(60)
+    if granularity == 'entry':
+        return round_cents(exact, mode=mode)
+    if granularity == 'group':
+        return exact
+    raise g.Blocked('unknown granularity %r' % granularity)
+
+
+def parse_stamp(text: str, *, require_offset: bool) -> datetime:
+    stamp = datetime.fromisoformat(text)
+    if require_offset and stamp.tzinfo is None:
+        raise g.Blocked('timestamp carries no UTC offset: %r' % text)
+    return stamp
+
+
+def overlaps(first: tuple[datetime, datetime], second: tuple[datetime, datetime], *, closed: bool) -> bool:
+    return first[1] >= second[0] if closed else first[1] > second[0]
+
+
+# ---------------------------------------------------------------- P157
+def month_walk(start: date, count: int, *, method: str) -> list[date]:
+    """method='step' adds one month at a time; 'offset' adds n months to the anchor."""
+    if method == 'step':
+        out = [start]
+        for _ in range(count - 1):
+            out.append(out[-1] + relativedelta(months=1))
+        return out
+    if method == 'offset':
+        return [start + relativedelta(months=n) for n in range(count)]
+    raise g.Blocked('unknown month walk %r' % method)
+
+
+def schedule_periods(anchor: str, count: int) -> list[str]:
+    return [str(p) for p in pd.period_range(anchor, periods=count, freq='M')]
+
+
+def period_end(period: str):
+    return pd.Period(period, freq='M').end_time
+
+
+def straight_line(cost: str, residual: str, months: int, *, force_remainder: bool) -> list[Decimal]:
+    base = Decimal(cost) - Decimal(residual)
+    if months <= 0:
+        raise g.Blocked('useful life must be positive')
+    each = round_cents(base / months, mode=ROUND_HALF_UP)
+    charges = [each] * months
+    if force_remainder:
+        charges[-1] = base - each * (months - 1)
+    return charges
+
+
+def annual_rollup(rows: list[dict], *, min_count: int) -> dict:
+    frame = pd.DataFrame(rows)
+    grouped = frame.groupby(['asset', 'year'])['charge'].sum(min_count=min_count)
+    return {'%s/%s' % k: v for k, v in grouped.items()}
+
+
+# ---------------------------------------------------------------- P158
+STAGES = ['Qualify', 'Propose', 'Negotiate', 'Won', 'Lost']
+
+
+def staged(rows: list[dict], *, checked: bool) -> pd.DataFrame:
+    frame = pd.DataFrame(rows)
+    coded = pd.Categorical(frame['stage'], categories=STAGES, ordered=True)
+    if checked:
+        unmapped = sorted({s for s, c in zip(frame['stage'], coded) if pd.isna(c)})
+        if unmapped:
+            raise g.Blocked('stage labels outside the declared catalog: %s' % ', '.join(unmapped))
+    frame['coded'] = coded
+    return frame
+
+
+def stage_totals(frame: pd.DataFrame, *, observed: bool) -> dict:
+    return {str(k): float(v) for k, v in frame.groupby('coded', observed=observed)['amt'].sum().items()}
+
+
+def bar_labels(values: list[float], fmt: str | None) -> tuple[list[str], list[float]]:
+    figure, axes = plt.subplots()
+    bars = axes.barh([str(i) for i in range(len(values))], values)
+    labels = axes.bar_label(bars) if fmt is None else axes.bar_label(bars, fmt=fmt)
+    widths = [float(b.get_width()) for b in bars]
+    texts = [t.get_text() for t in labels]
+    plt.close(figure)
+    return texts, widths
+
+
+# ---------------------------------------------------------------- P159
+def score_bands(scores: list[int], edges: list[int], *, right: bool, include_lowest: bool) -> list[str]:
+    banded = pd.cut(pd.Series(scores), bins=edges, right=right, include_lowest=include_lowest)
+    return [str(b) for b in banded]
+
+
+def matrix_counts(likelihood: list, impact: list, *, edges) -> np.ndarray:
+    counted, _, _ = np.histogram2d(likelihood, impact, bins=[edges, edges])
+    return counted
+
+
+def assessed(rows: list[dict], *, checked: bool) -> tuple[list, list]:
+    levels = set(range(1, 6))
+    likelihood = [r['likelihood'] for r in rows]
+    impact = [r['impact'] for r in rows]
+    if checked:
+        outside = sorted({v for v in likelihood + impact if v is not None and v not in levels})
+        if outside:
+            raise g.Blocked('ordinal values outside the declared 1-5 scale: %s' % outside)
+    return ([np.nan if v is None else v for v in likelihood],
+            [np.nan if v is None else v for v in impact])
+
+
+def matrix_origin(origin: str) -> tuple[float, float]:
+    figure, axes = plt.subplots()
+    axes.imshow(np.zeros((5, 5)), origin=origin)
+    limits = tuple(float(v) for v in axes.get_ylim())
+    plt.close(figure)
+    return limits
+
+
+# ---------------------------------------------------------------- P160
+def bom_graph(edges: list[dict], *, checked: bool) -> nx.DiGraph:
+    if checked:
+        pairs = [(e['parent'], e['child']) for e in edges]
+        if len(set(pairs)) != len(pairs):
+            raise g.Blocked('duplicate bill-of-materials edge')
+    graph = nx.DiGraph()
+    for e in edges:
+        graph.add_edge(e['parent'], e['child'], qty=e['qty'])
+    return graph
+
+
+def acyclic(graph: nx.DiGraph, *, method: str) -> bool:
+    """method='predicate' calls is_directed_acyclic_graph; 'generator' only builds the topological_sort iterator;
+    'consumed' exhausts it, which is where NetworkXUnfeasible is raised."""
+    if method == 'predicate':
+        return nx.is_directed_acyclic_graph(graph)
+    if method == 'generator':
+        nx.topological_sort(graph)
+        return True
+    if method == 'consumed':
+        list(nx.topological_sort(graph))
+        return True
+    raise g.Blocked('unknown acyclicity method %r' % method)
+
+
+def path_quantity(graph: nx.DiGraph, source: str, target: str) -> list[tuple[list[str], int]]:
+    out = []
+    for path in nx.all_simple_paths(graph, source, target):
+        out.append((path, math.prod(graph.edges[path[i], path[i + 1]]['qty'] for i in range(len(path) - 1))))
+    return out
+
+
+def gross_requirement(graph: nx.DiGraph, source: str, target: str, demand: int, *, checked: bool) -> int:
+    if checked and source == target:
+        raise g.Blocked('an item cannot be its own requirement')
+    return demand * sum(q for _, q in path_quantity(graph, source, target))
+
+
+C = []
+def case(i):
+    def reg(fn): C.append((i, fn)); return fn
+    return reg
+
+
+@case(151)
+def template_binding_escapes_nothing_by_default():
+    template = meeting_template()
+    literal = 'A & B < 5 > 2'
+    context = {'meeting_id': 'tsc-2024-01-17', 'topic': literal, 'flag': 'reachable', 'count': '3'}
+    plain = read_back(bind(template, context, escaping='default'))
+    g.equal(plain['paragraphs'][1], 'Topic: A  B  5 > 2')  # the & and < fragments are gone
+    g.equal(literal in plain['paragraphs'][1], False)
+    g.equal(plain['paragraphs'][0], 'Meeting: tsc-2024-01-17')  # the document still opens and reads clean
+    strict = read_back(bind(template, context, escaping='strict_only'))
+    g.equal(strict['paragraphs'][1], 'Topic: A  B  5 > 2')  # a StrictUndefined environment does not turn escaping on
+    g.equal(Environment(undefined=StrictUndefined).autoescape, False)
+    for mode in ('argument', 'environment'):
+        kept = read_back(bind(template, context, escaping=mode))
+        g.equal(kept['paragraphs'][1], 'Topic: ' + literal)
+        g.equal(kept['cells'], ['reachable', '3'])
+    g.rejects(UndefinedError, lambda: bind(template, {'meeting_id': 'm', 'topic': 't', 'flag': 'f'}, escaping='environment'))
+    silent = read_back(bind(template, {'meeting_id': 'm', 'topic': 't', 'flag': 'f'}, escaping='default'))
+    g.equal(silent['cells'], ['f', ''])  # the default Undefined renders a missing variable as an empty cell
+    first = bind(template, dict(context, meeting_id='tsc-2023-11-08'), escaping='environment')
+    second = bind(template, dict(context, meeting_id='tsc-2025-03-05'), escaping='environment')
+    g.equal(read_back(first)['paragraphs'][0], 'Meeting: tsc-2023-11-08')
+    g.equal(read_back(second)['paragraphs'][0], 'Meeting: tsc-2025-03-05')
+    first = io.BytesIO(); Document(io.BytesIO(template)).save(first)
+    second = io.BytesIO(); Document(io.BytesIO(template)).save(second)
+    g.equal(part_digests(first.getvalue()), part_digests(template))  # every part is byte-identical
+    g.equal(part_digests(second.getvalue()), part_digests(template))
+    stamped = stamp_dates(first.getvalue())
+    g.equal(len(stamped), 1); g.equal(stamped, stamp_dates(second.getvalue()))
+    g.equal((1980, 1, 1) in stamped, False)  # the container carries a clock reading, not a fixed epoch
+    g.equal(date(*next(iter(stamped))) >= date(2026, 1, 1), True)
+    g.equal(normalized_package(first.getvalue()), normalized_package(second.getvalue()))
+    g.equal(hashlib.sha256(normalized_package(first.getvalue())).hexdigest(),
+            hashlib.sha256(normalized_package(template)).hexdigest())
+    g.rejects(g.Blocked, lambda: bind(template, context, escaping='none'))
+    fragments = [(72.0, 500.0, 'Third paragraph'), (72.0, 100.0, 'First paragraph'), (72.0, 300.0, 'Second paragraph')]
+    g.equal(placed_text(fragments, sort=False), ['Third paragraph', 'First paragraph', 'Second paragraph'])
+    g.equal(placed_text(fragments, sort=True), ['First paragraph', 'Second paragraph', 'Third paragraph'])
+    return {'docxtpl_render_autoescape_default': False, 'unescaped_literal_silently_truncated': True,
+            'strict_undefined_alone_does_not_escape': True, 'default_undefined_renders_empty': True,
+            'save_stamps_the_container_with_the_wall_clock': True, 'pdf_text_default_order_is_insertion_order': True}
+
+
+@case(152)
+def a_checked_join_does_not_retain_unmatched_lines():
+    orders = pd.DataFrame({'order_line': ['PO1-1', 'PO1-2', 'PO2-1', 'PO3-1'], 'qty': [3, 1, 2, 5]})
+    invoices = pd.DataFrame({'invoice_line': ['I1', 'I2', 'I3', 'I4', 'I5', 'I6'],
+                             'order_line': ['PO1-1', 'PO1-1', 'PO1-2', 'PO2-1', 'PO9-1', 'PO3-1'],
+                             'qty': [1, 2, 1, 2, 1, 5]})
+    inner = match_invoices(invoices, orders, how='inner')
+    g.equal(len(inner), 5); g.equal(len(invoices), 6)
+    g.equal(sorted(inner['_merge'].astype(str).unique()), ['both'])  # the indicator is a constant on an inner join
+    g.equal('I5' in set(inner['invoice_line']), False)  # the unmatched order ID is gone, unflagged
+    outer = match_invoices(invoices, orders, how='outer')
+    g.equal(int((outer['_merge'] == 'left_only').sum()), 1)
+    g.equal(sorted(outer[outer['_merge'] == 'left_only']['invoice_line']), ['I5'])
+    duplicated = pd.concat([orders, orders.iloc[[0]]])
+    g.rejects(pd.errors.MergeError, lambda: match_invoices(invoices, duplicated, how='inner'))
+    g.rejects(ValueError, lambda: match_invoices(invoices.assign(_merge='x'), orders, how='outer'))
+    g.equal(cumulative_billed(invoices)['PO1-1'], 3)  # both invoices against one order line accumulate
+    g.equal(cumulative_billed(invoices)['PO1-1'] > int(orders.set_index('order_line').loc['PO1-1', 'qty']), False)
+    rows = [{'k': 'a', 'amount': Decimal('10.00')}, {'k': 'a', 'amount': None}, {'k': 'b', 'amount': Decimal('5.50')}]
+    g.equal(decimal_totals(rows, key='k')['a'], Decimal('10.00'))  # the missing amount is dropped, not raised
+    g.equal(decimal_totals(rows, key='k')['b'], Decimal('5.50'))
+    empty = pd.DataFrame({'k': [], 'amount': []})['amount'].sum()
+    g.equal(empty, 0); g.equal(type(empty).__name__ in ('int', 'float64'), True)  # not Decimal('0.00')
+    g.equal(within_tolerance(Decimal('10.00'), Decimal('10.25'), Decimal('0.25')), True)
+    g.equal(within_tolerance(Decimal('10.00'), Decimal('9.75'), Decimal('0.25')), True)
+    g.equal(within_tolerance(Decimal('10.00'), Decimal('10.26'), Decimal('0.25')), False)
+    g.equal(Decimal('0.25') == 0.25, True); g.equal(Decimal('0.1') == 0.1, False)
+    return {'indicator_on_an_inner_join_is_constant': True, 'unmatched_left_rows_dropped': 1,
+            'validate_many_to_one_checks_the_right_side_only': True,
+            'decimal_group_sum_drops_nulls': True, 'empty_sum_returns_int_zero': True}
+
+
+@case(153)
+def a_running_balance_follows_row_order_not_the_posting_contract():
+    events = [{'item': 'desk', 'date': '2026-03-01', 'qty': 5},
+              {'item': 'desk', 'date': '2026-01-01', 'qty': -2},
+              {'item': 'desk', 'date': '2026-02-01', 'qty': -4}]
+    unsorted_run = running_stock(events, order_by=None)
+    sorted_run = running_stock(events, order_by='date')
+    g.equal(unsorted_run, [5, 3, -1]); g.equal(sorted_run, [-2, -6, -1])
+    g.equal(unsorted_run[-1], sorted_run[-1])  # the closing balance agrees
+    g.equal(min(unsorted_run) < 0, True); g.equal(min(sorted_run) < 0, True)
+    g.equal(any(v < -4 for v in unsorted_run), False)  # the unsorted run never reaches -6
+    g.equal(any(v < -4 for v in sorted_run), True)  # so a negative-stock rejection depends on a sort the primitive omits
+    gapped = [{'item': 'desk', 'date': '2026-01-01', 'qty': 5.0},
+              {'item': 'desk', 'date': '2026-02-01', 'qty': float('nan')},
+              {'item': 'desk', 'date': '2026-03-01', 'qty': -4.0}]
+    run = running_stock(gapped, order_by='date')
+    g.equal(math.isnan(run[1]), True); g.equal(run[2], 1.0)  # the balance resumes as if the gap were zero
+    tied = [{'date': '2026-01-05' if i < 20 else '2026-01-06', 'seq': i} for i in range(40)]
+    shuffled = [tied[i] for i in (list(range(19, -1, -1)) + list(range(20, 40)))]
+    g.equal(tie_order(shuffled, kind='stable') == [r['seq'] for r in shuffled], True)
+    g.equal(tie_order(shuffled, kind='quicksort') == tie_order(shuffled, kind='stable'), False)
+    g.equal(sorted(tie_order(shuffled, kind='quicksort')), sorted(tie_order(shuffled, kind='stable')))
+    references = [{'receipt_id': 'R1', 'qty': 2}, {'receipt_id': 'R1', 'qty': 7}, {'receipt_id': 'R2', 'qty': 1}]
+    loose = unique_receipts(references, checked=False)
+    g.equal(len(loose), 2); g.equal([r['qty'] for r in loose], [2, 1])  # quantity 7 is discarded without a signal
+    g.rejects(g.Blocked, lambda: unique_receipts(references, checked=True))
+    agreeing = [{'receipt_id': 'R1', 'qty': 2}, {'receipt_id': 'R1', 'qty': 2}, {'receipt_id': 'R2', 'qty': 1}]
+    g.equal(len(unique_receipts(agreeing, checked=True)), 2)
+    return {'grouped_cumsum_uses_row_order': True, 'sort_values_default_is_not_stable': True,
+            'grouped_cumsum_skips_nulls': True, 'drop_duplicates_hides_conflicting_payloads': True}
+
+
+@case(154)
+def one_shared_identifier_collapses_two_sides_of_the_match():
+    collided = candidate_graph([('B01', 'K01'), ('B02', 'B01')])  # a bank row happens to be named B01
+    g.equal(sorted(collided.nodes()), ['B01', 'B02', 'K01'])  # three nodes for four rows
+    g.equal(nx.is_bipartite(collided), True)  # the collision does not disturb bipartiteness
+    g.equal(components(collided), [['B01', 'B02', 'K01']])  # one component of three, so nothing is selected
+    prefixed = candidate_graph([('book:B01', 'bank:K01'), ('book:B02', 'bank:K01')])
+    g.equal(nx.is_bipartite(prefixed), True)
+    g.equal(len(components(prefixed)[0]), 3)
+    same_side = prefixed.copy(); same_side.add_edge('book:B01', 'book:B02')
+    g.equal(nx.is_bipartite(same_side), False)  # is_bipartite only reacts to an edge the builder never emits
+    g.equal(isinstance(next(iter(nx.connected_components(prefixed))), set), True)
+    g.equal([n for n in prefixed if prefixed.degree(n) == 0], [])  # unresolved rows never enter the graph
+    g.equal('STRASSE'.casefold() == 'straße'.casefold(), True)
+    g.equal('STRASSE'.lower() == 'straße'.lower(), False)  # casefold merges keys that lower keeps apart
+    keys = normalized_keys(['INV-1', '  ', None])
+    g.equal(keys[0], 'inv-1'); g.equal(keys[1], ''); g.equal(keys[2] is None, True)
+    book = [{'id': 'B1', 'ref': 'INV-1'}, {'id': 'B2', 'ref': '  '}, {'id': 'B3', 'ref': None}]
+    bank = [{'id': 'K1', 'ref': 'inv-1'}, {'id': 'K2', 'ref': ''}, {'id': 'K3', 'ref': None}]
+    loose = candidate_pairs(book, bank, drop_blank=False)
+    g.equal(sorted(loose), [('B1', 'K1'), ('B2', 'K2')])  # a whitespace-only reference matched an empty one
+    tight = candidate_pairs(book, bank, drop_blank=True)
+    g.equal(sorted(tight), [('B1', 'K1')])
+    return {'identifier_collision_merges_nodes': True, 'is_bipartite_is_true_by_construction': True,
+            'components_are_unordered_sets': True, 'blank_keys_survive_dropna_and_match': True,
+            'casefold_merges_sharp_s': True}
+
+
+@case(155)
+def a_journal_loader_reports_errors_it_does_not_raise():
+    entries, errors = load_journal(JOURNAL, checked=True)
+    g.equal(len(errors), 0)
+    unbalanced = JOURNAL.replace('-100.00 USD', '-99.99 USD')
+    entries, errors = load_journal(unbalanced, checked=False)
+    g.equal(len(errors), 1)  # returned in a list, never raised
+    g.equal(any(isinstance(e, bc_data.Transaction) for e in entries), True)  # the bad transaction is still handed on
+    g.rejects(g.Blocked, lambda: load_journal(unbalanced, checked=True))
+    missing = JOURNAL.replace('  Equity:Opening-Balances -100.00 USD', '  Equity:Opening-Balances')
+    entries, errors = load_journal(missing, checked=True)
+    g.equal(len(errors), 0)  # a missing amount is interpolated, not rejected
+    g.equal(interpolated_postings(missing), [('Assets:Bank', '100.00 USD'), ('Equity:Opening-Balances', '-100.00 USD')])
+    g.equal(assertion_errors('100.00 USD'), [])
+    g.equal(assertion_errors('100.01 USD'), [])  # one cent wrong and the loader is silent
+    g.equal(assertion_errors('100.010 USD'), ['BalanceError'])  # the same number, one more decimal digit, rejected
+    g.equal(assertion_errors('100.005 USD'), ['BalanceError'])
+    g.equal(assertion_errors('100.10 USD'), ['BalanceError'])
+    g.equal(Decimal('100.01') == Decimal('100.010'), True)  # the two assertions are numerically identical
+    entries, errors = load_journal(JOURNAL, checked=True)
+    bank = account_node(entries, 'Assets:Bank')
+    idle = account_node(entries, 'Assets:Idle')
+    g.equal(bank is not None, True); g.equal(idle is not None, True)
+    g.equal(account_node(entries, 'Assets:Nope') is None, True)
+    g.equal(str(bank.balance.get_currency_units('USD')), '100.00 USD')
+    g.equal(bool(bank), False)  # RealAccount is a dict of children, so a posting-bearing leaf is falsy
+    g.equal(bool(account_node(entries, 'Assets')), True)  # while an empty parent is truthy
+    g.equal(str(account_node(entries, 'Assets').balance.get_currency_units('USD')), '0 USD')
+    return {'load_string_returns_errors_without_raising': True, 'missing_amount_is_interpolated': True,
+            'one_cent_assertion_accepted_at_two_decimals': True, 'trailing_zero_changes_the_tolerance': True,
+            'leaf_realaccount_is_falsy': True}
+
+
+@case(156)
+def rounding_mode_and_granularity_each_move_the_cent():
+    g.equal(round_cents(Decimal('1.005'), mode=ROUND_HALF_EVEN), Decimal('1.00'))
+    g.equal(round_cents(Decimal('1.005'), mode=ROUND_HALF_UP), Decimal('1.01'))
+    g.equal(round_cents(Decimal('0.125'), mode=ROUND_HALF_EVEN), Decimal('0.12'))
+    g.equal(round_cents(Decimal('0.125'), mode=ROUND_HALF_UP), Decimal('0.13'))
+    g.equal(round_cents(Decimal('1.665'), mode=ROUND_HALF_EVEN), Decimal('1.66'))
+    g.equal(round_cents(Decimal('1.665'), mode=ROUND_HALF_UP), Decimal('1.67'))
+    g.equal(round_cents(Decimal(1.665), mode=ROUND_HALF_UP), Decimal('1.67'))
+    g.equal(str(Decimal(1.005))[:6], '1.0049')  # a float source rounds down under either mode
+    g.equal(round_cents(Decimal(1.005), mode=ROUND_HALF_UP), Decimal('1.00'))
+    per_entry = billed(1, '100.00', granularity='entry') + billed(1, '100.00', granularity='entry')
+    per_group = round_cents(billed(2, '100.00', granularity='group'), mode=ROUND_HALF_UP)
+    g.equal(per_entry, Decimal('3.34')); g.equal(per_group, Decimal('3.33'))
+    g.equal(per_entry - per_group, Decimal('0.01'))
+    g.equal(Fraction(100) * Fraction(2, 60), Fraction(10, 3))  # neither figure is the exact amount
+    g.rejects(g.Blocked, lambda: billed(1, '100.00', granularity='hour'))
+    for naive in ('2026-09-07T09:00:00', '20260907T090000', '2026-09-07 09:00:00', '2026-09-07'):
+        g.equal(parse_stamp(naive, require_offset=False).tzinfo is None, True)
+        g.rejects(g.Blocked, lambda s=naive: parse_stamp(s, require_offset=True))
+    g.equal(parse_stamp('2026-09-07T09:00:00Z', require_offset=True).tzinfo, timezone.utc)
+    g.equal(parse_stamp('2026-09-07T09:00:00+00:00:00', require_offset=True).tzinfo, timezone.utc)
+    g.equal(parse_stamp('2026-09-07T09:00:00.123456789', require_offset=False).microsecond, 123456)  # truncated
+    first = (parse_stamp('2026-09-07T09:00:00Z', require_offset=True), parse_stamp('2026-09-07T10:00:00Z', require_offset=True))
+    second = (parse_stamp('2026-09-07T10:00:00Z', require_offset=True), parse_stamp('2026-09-07T11:00:00Z', require_offset=True))
+    g.equal(overlaps(first, second, closed=False), False)
+    g.equal(overlaps(first, second, closed=True), True)  # back-to-back entries are legal or not by the chosen predicate
+    overnight = (parse_stamp('2026-09-07T23:30:00Z', require_offset=True), parse_stamp('2026-09-08T01:00:00Z', require_offset=True))
+    g.equal(int((overnight[1] - overnight[0]).total_seconds() // 60), 90)
+    return {'default_decimal_rounding_is_half_even': True, 'float_source_defeats_half_up': True,
+            'per_entry_and_per_group_differ_by_one_cent': True, 'fromisoformat_accepts_naive_input': True,
+            'subsecond_precision_truncated': True, 'touching_intervals_need_a_declared_predicate': True}
+
+
+@case(157)
+def stepping_a_month_at_a_time_drifts_off_the_month_end():
+    anchor = date(2026, 1, 31)
+    g.equal(month_walk(anchor, 3, method='step'), [date(2026, 1, 31), date(2026, 2, 28), date(2026, 3, 28)])
+    g.equal(month_walk(anchor, 3, method='offset'), [date(2026, 1, 31), date(2026, 2, 28), date(2026, 3, 31)])
+    g.equal(month_walk(anchor, 3, method='step') == month_walk(anchor, 3, method='offset'), False)
+    g.equal(anchor + relativedelta(months=1) - relativedelta(months=1), date(2026, 1, 28))  # not a round trip
+    g.rejects(g.Blocked, lambda: month_walk(anchor, 3, method='calendar'))
+    g.equal(schedule_periods('2026-01', 3), ['2026-01', '2026-02', '2026-03'])
+    g.equal(str(period_end('2026-02')), '2026-02-28 23:59:59.999999999')
+    g.equal(period_end('2026-02') == pd.Timestamp('2026-02-28'), False)  # a month end never equals its own date
+    g.equal(period_end('2026-02').date(), date(2026, 2, 28))
+    g.equal([str(d.date()) for d in pd.date_range('2026-01-15', periods=3, freq='ME')],
+            ['2026-01-31', '2026-02-28', '2026-03-31'])  # the declared first period date is snapped away
+    naive = straight_line('100.00', '0.00', 3, force_remainder=False)
+    forced = straight_line('100.00', '0.00', 3, force_remainder=True)
+    g.equal(naive, [Decimal('33.33')] * 3); g.equal(sum(naive), Decimal('99.99'))
+    g.equal(forced, [Decimal('33.33'), Decimal('33.33'), Decimal('33.34')]); g.equal(sum(forced), Decimal('100.00'))
+    g.rejects(g.Blocked, lambda: straight_line('100.00', '0.00', 0, force_remainder=True))
+    rows = [{'asset': 'A1', 'year': 2026, 'charge': Decimal('33.33')},
+            {'asset': 'A1', 'year': 2027, 'charge': Decimal('66.67')},
+            {'asset': 'A2', 'year': 2026, 'charge': None}]
+    g.equal(annual_rollup(rows, min_count=0)['A2/2026'], 0)  # the unresolved life rolls up as a hard zero
+    g.equal(pd.isna(annual_rollup(rows, min_count=1)['A2/2026']), True)  # min_count=1 keeps it unknown
+    g.equal(annual_rollup(rows, min_count=1)['A1/2027'], Decimal('66.67'))
+    return {'relativedelta_month_steps_are_not_associative': True, 'period_end_time_is_not_a_date': True,
+            'month_end_frequency_snaps_the_anchor': True, 'naive_split_underallocates_one_cent': True,
+            'null_charge_sums_to_zero_by_default': True}
+
+
+@case(158)
+def an_unmapped_stage_label_leaves_the_totals_looking_consistent():
+    rows = [{'stage': 'Qualify', 'amt': 1000.0}, {'stage': 'Propose', 'amt': 15500.0},
+            {'stage': 'Propose', 'amt': 4500.0}, {'stage': 'Negotiate', 'amt': 250.0},
+            {'stage': 'Qualifyy', 'amt': 3000.0}]
+    frame = staged(rows, checked=False)
+    g.equal(int(frame['coded'].isna().sum()), 1)  # the typo became NaN with no error
+    observed = stage_totals(frame, observed=True)
+    declared = stage_totals(frame, observed=False)
+    g.equal(sorted(observed), ['Negotiate', 'Propose', 'Qualify'])
+    g.equal(sorted(declared), ['Lost', 'Negotiate', 'Propose', 'Qualify', 'Won'])
+    g.equal(len(observed), 3); g.equal(len(declared), 5)  # three bars or five, from one frame
+    g.equal(declared['Won'], 0.0); g.equal(declared['Lost'], 0.0)  # stages with no opportunity read as measured zeros
+    g.equal(sum(observed.values()), 21250.0)
+    g.equal(sum(declared.values()), 21250.0)
+    g.equal(float(pd.DataFrame(rows)['amt'].sum()), 24250.0)  # the source total is 3,000.00 higher
+    g.equal(sum(observed.values()) == float(pd.DataFrame(rows)['amt'].sum()), False)
+    g.rejects(g.Blocked, lambda: staged(rows, checked=True))
+    g.equal(int(staged(rows[:4], checked=True)['coded'].isna().sum()), 0)
+    texts, widths = bar_labels([15500.0, 4500.0, 250.0, 0.0], None)
+    g.equal(texts, ['15500', '4500', '250', '0'])  # the default label drops the cents from a USD amount
+    g.equal(widths[3], 0.0); g.equal(len(widths), 4)  # the zero-value bar is drawn with no extent but is still labelled
+    cents, _ = bar_labels([15500.0, 4500.0, 250.0, 0.0], '%.2f')
+    g.equal(cents, ['15500.00', '4500.00', '250.00', '0.00'])
+    return {'unknown_category_becomes_nan_silently': True, 'unmapped_amount': 3000.0,
+            'observed_flag_changes_the_bar_count': True, 'empty_categories_read_as_zero': True,
+            'bar_label_default_drops_cents': True}
+
+
+@case(159)
+def a_matrix_silently_omits_what_it_cannot_place():
+    edges = np.arange(0.5, 6, 1)
+    counted = matrix_counts([1, 2, 3, 4, 5], [1, 2, 3, 4, 5], edges=edges)
+    g.equal(list(np.diag(counted)), [1.0] * 5); g.equal(counted.sum(), 5.0)
+    g.equal(counted.dtype.name, 'float64')  # a count is a float
+    outside = matrix_counts([1, 2, 3, 4, 5, 6, 0], [1, 2, 3, 4, 5, 2, 2], edges=edges)
+    g.equal(outside.sum(), 5.0)  # seven rows in, five counted, no error and no warning
+    with_gap = matrix_counts([1, 2, np.nan], [1, 2, 3], edges=edges)
+    g.equal(with_gap.sum(), 2.0)
+    g.equal(outside.sum() < 7.0 and with_gap.sum() < 3.0, True)  # unassessed and out-of-scale look identical
+    rows = [{'likelihood': 1, 'impact': 2}, {'likelihood': 6, 'impact': 2}]
+    g.rejects(g.Blocked, lambda: assessed(rows, checked=True))
+    unknown = [{'likelihood': None, 'impact': 2}, {'likelihood': 4, 'impact': 4}]
+    likelihood, impact = assessed(unknown, checked=True)
+    g.equal(math.isnan(likelihood[0]), True); g.equal(matrix_counts(likelihood, impact, edges=edges).sum(), 1.0)
+    bands = [1, 5, 10, 15, 25]
+    right_closed = score_bands([1, 5, 6, 15, 16, 25], bands, right=True, include_lowest=False)
+    g.equal(right_closed[0], 'nan')  # the lowest declared score falls outside every band
+    g.equal(right_closed[1], '(1.0, 5.0]'); g.equal(right_closed[5], '(15.0, 25.0]')
+    lowest = score_bands([1, 5, 6, 15, 16, 25], bands, right=True, include_lowest=True)
+    g.equal(lowest.count('nan'), 0); g.equal(lowest[0], '(0.999, 5.0]')
+    left_closed = score_bands([1, 5, 6, 15, 16, 25], bands, right=False, include_lowest=False)
+    g.equal(left_closed.count('nan'), 1); g.equal(left_closed[5], 'nan')  # the loss moves to the top score
+    g.equal(left_closed[1], '[5.0, 10.0)')  # and score 5 changes band
+    g.equal(right_closed[1] == left_closed[1], False)
+    g.equal(list(np.diag(np.outer(np.arange(1, 6), np.arange(1, 6)))), [1, 4, 9, 16, 25])
+    g.equal(matrix_origin('upper')[0] > matrix_origin('upper')[1], True)  # row 0 is drawn at the top by default
+    g.equal(matrix_origin('lower')[0] < matrix_origin('lower')[1], True)
+    return {'histogram2d_drops_out_of_range_rows': True, 'dropped_rows': 2,
+            'unassessed_and_out_of_scale_indistinguishable': True,
+            'cut_boundary_membership_depends_on_two_defaults': True, 'imshow_origin_default_is_upper': True}
+
+
+@case(160)
+def a_duplicate_bill_of_materials_edge_replaces_the_first():
+    edges = [{'parent': 'kit', 'child': 'cable', 'qty': 2}, {'parent': 'kit', 'child': 'cable', 'qty': 3}]
+    loose = bom_graph(edges, checked=False)
+    g.equal(loose.number_of_edges(), 1)  # two declared edges, one stored
+    g.equal(loose['kit']['cable']['qty'], 3)  # the second quantity replaced the first, silently
+    g.rejects(g.Blocked, lambda: bom_graph(edges, checked=True))
+    declared = [{'parent': 'kit', 'child': 'display', 'qty': 2}, {'parent': 'display', 'child': 'cable', 'qty': 2},
+                {'parent': 'kit', 'child': 'cable', 'qty': 2}]
+    graph = bom_graph(declared, checked=True)
+    g.equal(graph.number_of_edges(), 3)
+    paths = path_quantity(graph, 'kit', 'cable')
+    g.equal(sorted(len(p) for p, _ in paths), [2, 3])
+    g.equal(sorted(q for _, q in paths), [2, 4])  # the nested assembly multiplies along its path
+    g.equal(gross_requirement(graph, 'kit', 'cable', 1, checked=True), 6)
+    g.equal(gross_requirement(graph, 'kit', 'cable', 2, checked=True), 12)
+    cyclic = nx.DiGraph([('a', 'b'), ('b', 'c'), ('c', 'a')])
+    g.equal(acyclic(cyclic, method='predicate'), False)
+    g.equal(acyclic(cyclic, method='generator'), True)  # building the iterator validates nothing
+    g.rejects(nx.NetworkXUnfeasible, lambda: acyclic(cyclic, method='consumed'))
+    g.equal(acyclic(graph, method='consumed'), True)
+    g.rejects(g.Blocked, lambda: acyclic(graph, method='dfs'))
+    self_loop = nx.DiGraph(); self_loop.add_edge('kit', 'kit', qty=1)
+    g.equal(acyclic(self_loop, method='predicate'), False)
+    g.equal(math.prod([]), 1)  # an empty edge sequence is a quantity, not an error
+    g.equal(path_quantity(graph, 'kit', 'kit'), [(['kit'], 1)])  # the trivial path invents one unit of the assembly
+    g.equal(gross_requirement(graph, 'kit', 'kit', 4, checked=False), 4)
+    g.rejects(g.Blocked, lambda: gross_requirement(graph, 'kit', 'kit', 4, checked=True))
+    g.equal(path_quantity(graph, 'kit', 'absent'), [])  # an unknown target is silently empty
+    g.rejects(nx.NodeNotFound, lambda: path_quantity(graph, 'absent', 'cable'))  # an unknown source raises
+    attributed = nx.DiGraph(); attributed.add_node('cable', kind='part')
+    attributed.add_edge('kit', 'cable', qty=1)
+    g.equal(attributed.nodes['cable'], {'kind': 'part'})
+    g.equal(attributed.nodes['kit'], {})  # the invented parent carries no declared attributes
+    return {'duplicate_edge_overwrites_silently': True, 'topological_sort_validates_only_when_consumed': True,
+            'empty_product_is_one': True, 'trivial_self_path_invents_a_requirement': True,
+            'unknown_source_and_target_fail_differently': True}
+
+
+def run() -> dict:
+    g.ASSERTIONS = 0; rows = []
+    for i, fn in C:
+        before = g.ASSERTIONS
+        try: r = fn(); state = 'passed'; error = None
+        except Exception: r = {}; state = 'failed'; error = traceback.format_exc()
+        rows.append({'proof': i, 'test': fn.__name__, 'status': state, 'assertions': g.ASSERTIONS - before, 'result': r, 'error': error})
+    packages = ['beancount', 'docxtpl', 'Jinja2', 'matplotlib', 'networkx', 'numpy', 'pandas',
+                'PyMuPDF', 'python-dateutil', 'python-docx']
+    here = Path(__file__).resolve().parent
+    return {'scope': 'Bounded authored document, purchasing, stock, reconciliation, journal, billing, asset, pipeline, risk and material fixtures and reproduced library defaults; the original P151-P160 chains and their artifacts were not rerun.',
+            'test_cases': len(rows), 'passed': sum(r['status'] == 'passed' for r in rows), 'failed': sum(r['status'] == 'failed' for r in rows),
+            'assertions': g.ASSERTIONS, 'full_chains_executed': 0, 'network_calls': 0, 'business_actions': 0,
+            'source_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+            'dependency_sha256': {name: hashlib.sha256((here / name).read_bytes()).hexdigest() for name in ['handoff_guards_v1.py']},
+            'library_versions': {n: importlib.metadata.version(n) for n in packages}, 'results': rows}
+
+
+if __name__ == '__main__':
+    p = argparse.ArgumentParser(); p.add_argument('--report', type=Path, required=True)
+    args = p.parse_args()
+    result = run(); args.report.parent.mkdir(parents=True, exist_ok=True)
+    args.report.write_text(json.dumps(result, indent=2, sort_keys=True, allow_nan=False) + '\n')
+    print(json.dumps({k: result[k] for k in ['test_cases', 'passed', 'failed', 'assertions']}))
+    if result['failed']:
+        print('\n'.join(r['error'] for r in result['results'] if r['error'])); raise SystemExit(1)
+```
+
+## Fresh local guard evidence: guards-v16.json
+
+Result file SHA256 ccf8913e79e4ee6ed8b698850d6e38ee3c7f979afcef5cfda9076912ef7ab032; bytes 5542. Ten cases passed, zero failed, 199 assertions, full_chains_executed 0, network_calls 0, business_actions 0; a second run of the same module produced byte-identical output.
+
+```json
+{
+  "assertions": 199,
+  "business_actions": 0,
+  "dependency_sha256": {
+    "handoff_guards_v1.py": "2b3138b692ecfd02b76ae34bdb001f5046608bb2983d8709d6c55c0765f7c9b8"
+  },
+  "failed": 0,
+  "full_chains_executed": 0,
+  "library_versions": {
+    "Jinja2": "3.1.6",
+    "PyMuPDF": "1.28.2",
+    "beancount": "3.2.3",
+    "docxtpl": "0.20.2",
+    "matplotlib": "3.11.1",
+    "networkx": "3.6.1",
+    "numpy": "2.4.6",
+    "pandas": "2.2.3",
+    "python-dateutil": "2.9.0.post0",
+    "python-docx": "1.2.0"
+  },
+  "network_calls": 0,
+  "passed": 10,
+  "results": [
+    {
+      "assertions": 24,
+      "error": null,
+      "proof": 151,
+      "result": {
+        "default_undefined_renders_empty": true,
+        "docxtpl_render_autoescape_default": false,
+        "pdf_text_default_order_is_insertion_order": true,
+        "save_stamps_the_container_with_the_wall_clock": true,
+        "strict_undefined_alone_does_not_escape": true,
+        "unescaped_literal_silently_truncated": true
+      },
+      "status": "passed",
+      "test": "template_binding_escapes_nothing_by_default"
+    },
+    {
+      "assertions": 19,
+      "error": null,
+      "proof": 152,
+      "result": {
+        "decimal_group_sum_drops_nulls": true,
+        "empty_sum_returns_int_zero": true,
+        "indicator_on_an_inner_join_is_constant": true,
+        "unmatched_left_rows_dropped": 1,
+        "validate_many_to_one_checks_the_right_side_only": true
+      },
+      "status": "passed",
+      "test": "a_checked_join_does_not_retain_unmatched_lines"
+    },
+    {
+      "assertions": 16,
+      "error": null,
+      "proof": 153,
+      "result": {
+        "drop_duplicates_hides_conflicting_payloads": true,
+        "grouped_cumsum_skips_nulls": true,
+        "grouped_cumsum_uses_row_order": true,
+        "sort_values_default_is_not_stable": true
+      },
+      "status": "passed",
+      "test": "a_running_balance_follows_row_order_not_the_posting_contract"
+    },
+    {
+      "assertions": 15,
+      "error": null,
+      "proof": 154,
+      "result": {
+        "blank_keys_survive_dropna_and_match": true,
+        "casefold_merges_sharp_s": true,
+        "components_are_unordered_sets": true,
+        "identifier_collision_merges_nodes": true,
+        "is_bipartite_is_true_by_construction": true
+      },
+      "status": "passed",
+      "test": "one_shared_identifier_collapses_two_sides_of_the_match"
+    },
+    {
+      "assertions": 19,
+      "error": null,
+      "proof": 155,
+      "result": {
+        "leaf_realaccount_is_falsy": true,
+        "load_string_returns_errors_without_raising": true,
+        "missing_amount_is_interpolated": true,
+        "one_cent_assertion_accepted_at_two_decimals": true,
+        "trailing_zero_changes_the_tolerance": true
+      },
+      "status": "passed",
+      "test": "a_journal_loader_reports_errors_it_does_not_raise"
+    },
+    {
+      "assertions": 28,
+      "error": null,
+      "proof": 156,
+      "result": {
+        "default_decimal_rounding_is_half_even": true,
+        "float_source_defeats_half_up": true,
+        "fromisoformat_accepts_naive_input": true,
+        "per_entry_and_per_group_differ_by_one_cent": true,
+        "subsecond_precision_truncated": true,
+        "touching_intervals_need_a_declared_predicate": true
+      },
+      "status": "passed",
+      "test": "rounding_mode_and_granularity_each_move_the_cent"
+    },
+    {
+      "assertions": 18,
+      "error": null,
+      "proof": 157,
+      "result": {
+        "month_end_frequency_snaps_the_anchor": true,
+        "naive_split_underallocates_one_cent": true,
+        "null_charge_sums_to_zero_by_default": true,
+        "period_end_time_is_not_a_date": true,
+        "relativedelta_month_steps_are_not_associative": true
+      },
+      "status": "passed",
+      "test": "stepping_a_month_at_a_time_drifts_off_the_month_end"
+    },
+    {
+      "assertions": 17,
+      "error": null,
+      "proof": 158,
+      "result": {
+        "bar_label_default_drops_cents": true,
+        "empty_categories_read_as_zero": true,
+        "observed_flag_changes_the_bar_count": true,
+        "unknown_category_becomes_nan_silently": true,
+        "unmapped_amount": 3000.0
+      },
+      "status": "passed",
+      "test": "an_unmapped_stage_label_leaves_the_totals_looking_consistent"
+    },
+    {
+      "assertions": 21,
+      "error": null,
+      "proof": 159,
+      "result": {
+        "cut_boundary_membership_depends_on_two_defaults": true,
+        "dropped_rows": 2,
+        "histogram2d_drops_out_of_range_rows": true,
+        "imshow_origin_default_is_upper": true,
+        "unassessed_and_out_of_scale_indistinguishable": true
+      },
+      "status": "passed",
+      "test": "a_matrix_silently_omits_what_it_cannot_place"
+    },
+    {
+      "assertions": 22,
+      "error": null,
+      "proof": 160,
+      "result": {
+        "duplicate_edge_overwrites_silently": true,
+        "empty_product_is_one": true,
+        "topological_sort_validates_only_when_consumed": true,
+        "trivial_self_path_invents_a_requirement": true,
+        "unknown_source_and_target_fail_differently": true
+      },
+      "status": "passed",
+      "test": "a_duplicate_bill_of_materials_edge_replaces_the_first"
+    }
+  ],
+  "scope": "Bounded authored document, purchasing, stock, reconciliation, journal, billing, asset, pipeline, risk and material fixtures and reproduced library defaults; the original P151-P160 chains and their artifacts were not rerun.",
+  "source_sha256": "f4d9a4823974ad0b6d2e188ed23b54f172559085964a62d3b2fdd578f8c358ba",
+  "test_cases": 10
+}
+```
+
+Checkpoint coverage: 160 of 300 proofs carry a hardening record. Prior cumulative TXT SHA256 b3ff1fb34009e1b1e2af7dde5cc0c26869022b3b13ffe32cdd1fda854c417cd6.
