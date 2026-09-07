@@ -1,6 +1,6 @@
 # Handoff hardening guards
 
-Runnable local guard modules embedded in `../Proofs.txt` (hardening batches P1-P10 … P111-P120) together with their evidence files. Each module's SHA256 and byte count are recorded in `Proofs.txt` next to its embedded copy; each evidence file records the `source_sha256` of the module that produced it and, from v2 on, the `dependency_sha256` of the modules it imports.
+Runnable local guard modules embedded in `../Proofs.txt` (hardening batches P1-P10 … P121-P130) together with their evidence files. Each module's SHA256 and byte count are recorded in `Proofs.txt` next to its embedded copy; each evidence file records the `source_sha256` of the module that produced it and, from v2 on, the `dependency_sha256` of the modules it imports.
 
 ## Files
 
@@ -18,9 +18,10 @@ Runnable local guard modules embedded in `../Proofs.txt` (hardening batches P1-P
 | `handoff_guards_v10.py` | batch P91-P100 (SHA256 `5881051f…`), imports v1 and v8 |
 | `handoff_guards_v11.py` | batch P101-P110 (SHA256 `ee1e425d…`), imports v1, v6 and v8 |
 | `handoff_guards_v12.py` | batch P111-P120 (SHA256 `0bc7d97c…`), imports v1, v6 and v8 |
+| `handoff_guards_v13.py` | batch P121-P130 (SHA256 `63960f02…`), imports v1, v6, v8 and v12 |
 | `guards-v1.json`, `guards-v2.json` | evidence recorded with the earlier batches |
 | `rerun-v1.json`, `rerun-v2.json` | the same modules re-executed in the batch-3 environment |
-| `guards-v3.json` … `guards-v12.json` | batch-3 through batch-12 evidence |
+| `guards-v3.json` … `guards-v13.json` | batch-3 through batch-13 evidence |
 | `requirements-hardening.txt` | exact package versions of the batch-3 environment (`uv pip freeze`) |
 
 ## Run
@@ -39,6 +40,7 @@ npm install jsdom && ./venv/bin/python handoff_guards_v8.py --report guards-v8.j
 ./venv/bin/python handoff_guards_v10.py --report guards-v10.json --jsdom-dir .
 ./venv/bin/python handoff_guards_v11.py --report guards-v11.json --jsdom-dir .
 ./venv/bin/python handoff_guards_v12.py --report guards-v12.json
+./venv/bin/python handoff_guards_v13.py --report guards-v13.json
 ```
 
 Case 26 of v3 uses the WordNet 3.0 corpus when `NLTK_DATA` points at a directory holding `corpora/wordnet.zip` (SHA256 `cbda5ea6eef7f36a97a43d4a75f85e07fccbb4f23657d27b4ccbc93e2646ab59`, 10775600 bytes, obtained once with `nltk.download('wordnet', download_dir=...)`). Without it the case still passes and records `not installed; no lexical expansion executed`. The guard runs themselves make no network call.

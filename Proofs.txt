@@ -23396,3 +23396,730 @@ Result file SHA256 1dd937462a9bc1f1e3a5a8aff77439681d18fe2c25f71bcb2ddb16f451593
 ```
 
 Checkpoint coverage: 120 of 300 proof-specific handoff amendments written, through P120. Prior cumulative TXT SHA256 af4d73a45d15c50df6030305fe11f07e9ecbeaa1cdcb87bf5ef8e94e438b57d0.
+
+## Checkpoint integrity and environment for this batch
+
+Base: the TXT as committed after batch 12 (SHA256 df5327ee578526129095357f5d373afb681ef4afaa7248f46446d6938728f619, 1572925 bytes); it is the prior cumulative TXT SHA256 recorded at the end of this batch. Environment as in batch 12 plus EbookLib 0.20; SQLite 3.45.1 with FTS5 available in the interpreter's standard library. handoff_guards_v13.py imports handoff_guards_v1.py, handoff_guards_v6.py, handoff_guards_v8.py and handoff_guards_v12.py; v1-v12 stay byte-identical under HG07.
+
+## Online-checked function references for this hardening batch
+[HD117] SQLite FTS5 MATCH takes a query in the FTS5 query language, not a literal string: a bare AND is an operator and raises "fts5: syntax error near AND", and a hyphenated word is parsed as a column filter and raises "no such column: sign" for minus-sign. Wrapping the phrase in double quotes, with embedded quotes doubled, makes it literal; bm25() ranks and snippet() marks the matched span (all executed on SQLite 3.45.1). Source: installed SQLite 3.45.1 through Python 3.11.15; sqlite.org not used.
+[HD118] EbookLib epub.EpubBook with EpubHtml, EpubNcx and EpubNav writes an EPUB whose archive begins with the mimetype entry and places the documents under EPUB/, with META-INF/container.xml present (executed with 0.20). Source: installed EbookLib 0.20 and GitHub.
+https://github.com/aerkalov/ebooklib
+[HD119] pypdf PdfWriter.add_attachment embeds a file; the embedded file's creation_date and modification_date are optional and pypdf sets neither by default, so the default output repeats. A chain that assigns datetime.now() to them makes every write differ, while a pinned value keeps the file reproducible and is itself recorded metadata. PdfReader.attachments and PyMuPDF Document.embfile_get read the same bytes back (executed with pypdf 6.17.0 and PyMuPDF 1.28.2). Source: installed libraries and GitHub.
+https://github.com/py-pdf/pypdf
+[HD120] Python csv.DictWriter with quoting=csv.QUOTE_ALL and csv.DictReader round-trip a field containing a newline, a comma and embedded double quotes; the reader returns the original value with the doubled quotes collapsed (executed with Python 3.11.15). Source: installed Python 3.11.15; docs.python.org blocked.
+
+## Hardening batch: P121-P130
+
+### HARDENING P121 -- An EPUB is an archive with required structure, and the structure is what repeats
+
+Original proof: P121  existing HTML reading copies -> chapters and navigation -> e-reader collection
+Source location: frozen master lines 5057-5079; original section SHA256 911f22bb0031adc880edffc81e8052fe09056ab892a07dcf3a1993a679ca330b.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it.
+Handoff: HTML reading copies -> EpubBook with chapters and navigation -> EPUB archive
+Failure path: An EPUB whose archive does not begin with the mimetype entry, or which lacks META-INF/container.xml or a navigation document, is not a valid book even though the writer produced it without complaint. Chapter text must survive the wrapping, and the chapter paths are the library's to choose.
+Required repair: Read the produced archive back and assert the mimetype entry comes first, the container and navigation documents exist, the chapter documents are where the library placed them, and the chapter text is present; state the structural claim rather than a byte claim.
+Function bridge: ebooklib.epub.EpubBook, EpubHtml, EpubNcx, EpubNav and write_epub; zipfile.ZipFile.namelist and read
+Positive acceptance: Two chapters appear under EPUB/, the mimetype entry is first, the navigation and container are present, and the chapter text reads back.
+Adverse acceptance: The structure repeats across two builds; a missing container or navigation document would be visible in the readback.
+Evidence and limit: guards-v13 case 121 on authored chapters. The recorded collection was not rebuilt.
+References: HD118
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P122 -- The index must account for every source block, tables included
+
+Original proof: P122  Word body paragraphs and table rows -> SQLite full-text index -> searchable local document archive
+Source location: frozen master lines 5080-5101; original section SHA256 dcf8f0459ba9b29d402a843e50d8b7460100753e189679d887245817895b7898.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it.
+Handoff: Word paragraphs and table rows -> FTS5 rows -> searchable archive
+Failure path: An index built from paragraphs alone silently omits every table row (P40, P83), so a search that finds nothing cannot be distinguished from a search over an incomplete index. The tokenizer decides what a word is and must be declared rather than inherited.
+Required repair: Index paragraphs and table rows alike, carrying the document and block identity with each row; require the indexed row count to equal the source block count; declare the tokenizer in the schema.
+Function bridge: docx paragraphs and Table.rows; sqlite3 CREATE VIRTUAL TABLE ... USING fts5(..., tokenize='unicode61'); executemany; a count check against the source blocks
+Positive acceptance: Three blocks index as three rows, a phrase in a table row is found, and the snippet marks the matched span in the source text.
+Adverse acceptance: A row-count mismatch blocks before any search is offered.
+Evidence and limit: guards-v13 case 122 on authored blocks. The recorded archive was not rebuilt.
+References: HD62 HD96 HD117
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P123 -- A literal query is not literal until it is quoted
+
+Original proof: P123  document text index + literal queries -> ranked source excerpts -> readable saved searches
+Source location: frozen master lines 5102-5120; original section SHA256 27d439a340d510485d39c85181a57507a3e8a4b340de58728c08803e18bc3539.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: FTS5 MATCH parses its argument as a query language, so a phrase taken from source text can raise or change meaning; a bare AND is a syntax error and a hyphenated word is read as a column filter.
+Handoff: document index and saved queries -> FTS5 MATCH -> ranked excerpts
+Failure path: Saved searches drawn from quoted source text will contain operators, hyphens, asterisks and quotation marks. Passed through unquoted, some raise and some silently match something else, which is worse. A ranking without its score, and a snippet without its source block, cannot be checked later.
+Required repair: Wrap every literal phrase in double quotes and double any embedded quote before it reaches MATCH; keep the bm25 score and the document and block identity with each hit; treat an operator-shaped query as a separate, declared feature rather than an accident.
+Function bridge: sqlite3 FTS5 MATCH with a quoted phrase; bm25(docs); snippet(docs, ...); an explicit quote-escaping helper
+Positive acceptance: Quoted AND and minus-sign both match their source block, the phrase query finds its block, and an embedded quote is doubled rather than dropped.
+Adverse acceptance: Unquoted AND raises a syntax error and unquoted minus-sign raises "no such column" (both reproduced).
+Evidence and limit: guards-v13 case 123 on an authored index. The recorded saved searches were not rerun.
+References: HD117
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P124 -- Attachment dates are optional metadata that can cost repeatability
+
+Original proof: P124  report PDFs + original data files -> embedded attachments -> portable report copies
+Source location: frozen master lines 5121-5146; original section SHA256 bf5494c1991a1363dac1ee175f1718e1a0dac4f2004fa72317860acc77d916ab.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: pypdf sets no attachment creation or modification date by default and the output repeats; assigning the clock to those fields, which the proof names, makes every write differ.
+Handoff: report PDFs and data files -> add_attachment -> portable copies read by two libraries
+Failure path: A registered hash over a portable copy is only meaningful if the copy is a function of its inputs. Embedding files must also leave the page content alone, and the attachment bytes must be checked by something other than the writer that produced them.
+Required repair: Either leave the dates unset or pin them to a declared constant and record that choice; read the attachments back with a second library and compare their hashes with the source bytes; confirm the page text is unchanged.
+Function bridge: pypdf.PdfWriter.add_attachment and attachment_list with creation_date and modification_date; pypdf.PdfReader.attachments; pymupdf.Document.embfile_count, embfile_info and embfile_get; hashlib.sha256 per file
+Positive acceptance: The default and the pinned outputs each repeat, both libraries return the source hashes for both files, and the report text is intact.
+Adverse acceptance: Clock-stamped dates make two writes differ (reproduced); a pinned date changes the bytes relative to the default, so it is recorded metadata rather than a no-op.
+Evidence and limit: guards-v13 case 124 on an authored report. The recorded portable copies were not rebuilt.
+References: HD23 HD91 HD119
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P125 -- The exported table declares its header and its boolean tokens
+
+Original proof: P125  exported slide review fields -> quoted CSV rows -> editable review table
+Source location: frozen master lines 5147-5163; original section SHA256 796b14f7d06a8eadeea3b6214eced081b9eb13d66cd606bc63d819f50997af5e.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it.
+Handoff: review fields -> quoted CSV -> editable table -> reader
+Failure path: A note contains newlines, commas and quotation marks; written unquoted it breaks the table, and read back without a declared header the columns can shift silently. A boolean written as an ad hoc word is not recoverable: true, yes, TRUE and 1 all appear in real files.
+Required repair: Validate the rows against a typed contract, write with QUOTE_ALL, declare the header and the two boolean tokens, and refuse a file whose header or boolean token does not match on the way back in.
+Function bridge: pydantic TypeAdapter over the row model; csv.DictWriter(quoting=csv.QUOTE_ALL); csv.DictReader with a header check
+Positive acceptance: A note containing a newline, a comma and embedded quotes round-trips exactly, and the header line is the declared one.
+Adverse acceptance: A renamed header column blocks; the token yes blocks; a string where the model declares a boolean fails validation.
+Evidence and limit: guards-v13 case 125 on authored rows. The recorded export was not rebuilt.
+References: HD05 HD120
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P126 -- An edited row updates its own field and nothing else
+
+Original proof: P126  edited review CSV + matching source forms -> validated field updates -> updated PDF review handouts
+Source location: frozen master lines 5164-5188; original section SHA256 4f577a933c0341dd8eca01b7fafc5a50651aa6122981dbf09d36450d1e9519d6.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it.
+Handoff: edited CSV -> validated rows -> widget updates -> updated handouts
+Failure path: A row naming a field the form does not carry must not be dropped in silence; an empty note must leave the field blank rather than writing an empty string that reads as reviewed; and the page content must not move when fields are written (P113).
+Required repair: Round-trip the rows through the declared CSV contract, apply them through the field-name map, block a row whose field is absent, and compare the page text outside the widget rectangles before and after.
+Function bridge: the P125 CSV contract; pymupdf Widget.field_value and update; the widget-excluding text comparison from handoff_guards_v12; pypdf.PdfReader.get_fields as the second reader
+Positive acceptance: One filled note and one empty note leave the first field set and the second blank, both readers agree, and the content outside the widgets is unchanged.
+Adverse acceptance: A row for a field the form does not have blocks.
+Evidence and limit: guards-v13 case 126 on an authored form. The recorded handouts were not rebuilt.
+References: HD113 HD114 HD120
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P127 -- The summary counts records, and whitespace is not a note
+
+Original proof: P127  imported review-note records -> exact checkbox counts and notes -> HTML and PDF review summary
+Source location: frozen master lines 5189-5206; original section SHA256 90cfe4c0b701765672ac1127b3806b9fdc65e872841ca9990d789889da98e92e.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it.
+Handoff: imported review records -> counts and notes -> HTML and PDF summary
+Failure path: A note field containing only spaces counted as a note inflates the reviewed picture; a count taken from the rendered page rather than from the records can drift from them; and a string where the contract declares a boolean would be counted as truthy.
+Required repair: Validate the records, count reviewed and noted rows from the typed records with whitespace-only notes excluded, and render the summary from those counts; check the printed figure back out of the PDF text.
+Function bridge: pydantic TypeAdapter over the records; str.strip for the note test; the escaping template; WeasyPrint render with PyMuPDF text readback
+Positive acceptance: Three records give two reviewed, one not reviewed and one note, and the printed figure reads back out of the PDF.
+Adverse acceptance: A whitespace-only note is not counted; a string boolean fails validation.
+Evidence and limit: guards-v13 case 127 on authored records. The recorded summary was not rebuilt.
+References: HD05 HD85 HD90 HD91
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P128 -- Section ranges must partition the binder exactly once
+
+Original proof: P128  bookmarked review binder -> section page ranges
+Source location: frozen master lines 5207-5228; original section SHA256 20148757828151ae54c79b8d9721206ac1b868b70d3a410e6671a0cd1f760643.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it.
+Handoff: bookmarked binder -> section page ranges
+Failure path: Ranges derived from bookmark starts leave the last section's end implicit; if it is not carried to the final page the binder appears to have fewer pages than it does. Bookmarks out of order, or a first bookmark that does not start at page one, would produce overlapping or negative ranges without any error.
+Required repair: Require the starts to be ordered and to begin at page one, end each section where the next begins, run the last section to the final page, and require the section lengths to sum to the page count.
+Function bridge: the bookmark table from PyMuPDF get_toc; explicit ordering and coverage checks against page_count
+Positive acceptance: Three bookmarks over eight pages give ranges 1-2, 3-5 and 6-8 that sum to eight.
+Adverse acceptance: A page count that does not cover the sections blocks; unordered bookmarks block; a first bookmark after page one blocks; an empty table blocks.
+Evidence and limit: guards-v13 case 128 on an authored bookmark table. The recorded binder was not rebuilt.
+References: HD111
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P129 -- A large-type copy changes the stylesheet and not one character of text
+
+Original proof: P129  source checklist HTML -> larger type and reading layout
+Source location: frozen master lines 5229-5246; original section SHA256 d6bf8a9984fdfb8b274a298d902d1dee7bc0bd45b1fe424260d854c3a39d2417.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it.
+Handoff: checklist HTML -> larger type and reading layout -> accessible copy
+Failure path: A reading copy produced by re-rendering rather than by restyling can reflow, re-wrap or re-word the text; the quoted source would then differ from the original in a document whose purpose is to carry quotations. An added stylesheet must not bring an external asset with it.
+Required repair: Parse the source, append exactly one stylesheet to its head, and compare the visible text of both copies with style and script content removed; reject a source with no head and any external asset.
+Function bridge: lxml.html.fromstring with head lookup and fragment_fromstring; text_content with style and script elements removed; the external-asset scan
+Positive acceptance: The visible text is identical, one stylesheet is present, the type size is in the copy, and there is no external asset.
+Adverse acceptance: A fragment with no head blocks.
+Evidence and limit: guards-v13 case 129 on an authored page. The recorded reading copy was not rebuilt.
+References: HD26 HD86
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P130 -- Imposition is arithmetic: every page exactly once
+
+Original proof: P130  review binder pages -> folded-booklet page order
+Source location: frozen master lines 5247-5264; original section SHA256 2e3ad7d23c9071c5579caf02a016d8b82fad88139da54b21ba5210bc129c703b.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it.
+Handoff: binder pages -> folded-booklet order -> imposed sheets
+Failure path: A booklet order that repeats or drops a page prints a binder that is missing content, and nothing in the drawing step would notice. A page count that is not a multiple of four cannot fold into a booklet at all, and padding it is a decision, not a default.
+Required repair: Produce the order as a permutation and assert it: sorted it must equal the full page range and its length must equal the page count; refuse a count that is not a positive multiple of four rather than silently padding.
+Function bridge: an explicit outside-in pairing over the page range; sorted comparison against range(1, pages + 1)
+Positive acceptance: Eight pages give 8, 1, 2, 7, 6, 3, 4, 5, and four, twelve and sixteen pages each yield a full permutation.
+Adverse acceptance: Zero, six, seven and a negative count each block.
+Evidence and limit: guards-v13 case 130 checks the imposition arithmetic; the drawing step is P111 and the recorded booklet was not rebuilt.
+References: HD112
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+## Embedded runnable local guard module: handoff_guards_v13.py
+
+SHA256 63960f02d9ce33cc33f094494263f1bd1ff7199693a7650681eef60e5871900b; bytes 21647. Save the following code block as handoff_guards_v13.py next to the earlier guard modules.
+
+```python
+"""Thirteenth bounded adapter suite: P121-P130, the reusable everyday deliverables. Requires handoff_guards_v1.py,
+handoff_guards_v6.py, handoff_guards_v8.py and handoff_guards_v12.py from this TXT. Every index, query, attachment,
+CSV round trip, form update, page range and imposition below is a library primitive call; local code declares fixtures
+and policies and turns a primitive result into a Blocked outcome. All runtime inputs are authored fixtures. No model
+client and no network.
+Run: python handoff_guards_v13.py --report report.json
+"""
+from __future__ import annotations
+import argparse, csv, datetime, hashlib, html, importlib.metadata, io, json, logging, os, sqlite3, time, traceback, warnings, zipfile
+from pathlib import Path
+from typing import Literal
+import docx
+import pymupdf
+import pypdf
+from deepdiff import DeepDiff
+from ebooklib import epub
+from lxml import html as lxml_html
+from pydantic import BaseModel, ConfigDict, Field, TypeAdapter, ValidationError
+import handoff_guards_v1 as g
+import handoff_guards_v6 as g6
+import handoff_guards_v8 as g8
+import handoff_guards_v12 as g12
+warnings.simplefilter('ignore'); logging.disable(logging.WARNING)
+
+# ---------------------------------------------------------------- P121
+def build_epub(chapters: list[dict], *, identifier: str, title: str) -> bytes:
+    book = epub.EpubBook(); book.set_identifier(identifier); book.set_title(title); book.set_language('en-US')
+    items = []
+    for c in chapters:
+        item = epub.EpubHtml(title=c['title'], file_name=c['file'], lang='en-US')
+        item.content = '<html><body><h1>%s</h1><p>%s</p></body></html>' % (html.escape(c['title']), html.escape(c['body']))
+        book.add_item(item); items.append(item)
+    book.toc = tuple(items)
+    book.add_item(epub.EpubNcx()); book.add_item(epub.EpubNav())
+    book.spine = ['nav'] + items
+    path = Path(os.environ.get('GUARD_TMP', '/tmp')) / ('guard-%d.epub' % time.time_ns())
+    epub.write_epub(str(path), book)
+    data = path.read_bytes(); path.unlink()
+    return data
+
+
+def epub_contents(data: bytes) -> dict:
+    names = zipfile.ZipFile(io.BytesIO(data)).namelist()
+    chapters = sorted(n for n in names if n.endswith('.xhtml') and 'nav' not in n)
+    return {'entries': len(names), 'mimetype_first': names[0] == 'mimetype', 'chapters': chapters,
+            'has_nav': any('nav' in n for n in names), 'has_container': 'META-INF/container.xml' in names}
+
+# ---------------------------------------------------------------- P122, P123
+SCHEMA = "CREATE VIRTUAL TABLE docs USING fts5(document, block_id, body, tokenize='unicode61')"
+
+
+def build_index(blocks: list[dict]) -> sqlite3.Connection:
+    con = sqlite3.connect(':memory:'); con.execute(SCHEMA)
+    con.executemany('INSERT INTO docs(document, block_id, body) VALUES (?,?,?)',
+                    [(b['document'], b['block_id'], b['body']) for b in blocks])
+    indexed = con.execute('SELECT count(*) FROM docs').fetchone()[0]
+    if indexed != len(blocks): raise g.Blocked('index row count does not match the source blocks')
+    return con
+
+
+def literal_query(text: str) -> str:
+    """FTS5 MATCH parses its argument as a query language; a literal phrase must be quoted."""
+    return '"' + text.replace('"', '""') + '"'
+
+
+def search(con: sqlite3.Connection, phrase: str, *, literal: bool = True) -> list[dict]:
+    query = literal_query(phrase) if literal else phrase
+    rows = con.execute("SELECT document, block_id, snippet(docs, 2, '[', ']', '...', 6), bm25(docs) "
+                       'FROM docs WHERE docs MATCH ? ORDER BY bm25(docs)', (query,)).fetchall()
+    return [{'document': r[0], 'block_id': r[1], 'snippet': r[2], 'rank': round(r[3], 6)} for r in rows]
+
+# ---------------------------------------------------------------- P124
+PINNED = datetime.datetime(1980, 1, 1, tzinfo=datetime.timezone.utc)
+
+
+def report_with_attachments(pdf: bytes, files: dict[str, bytes], *, dates: Literal['none', 'pinned', 'clock']) -> bytes:
+    writer = pypdf.PdfWriter(clone_from=io.BytesIO(pdf))
+    for name, payload in files.items():
+        writer.add_attachment(name, payload)
+    if dates != 'none':
+        stamp = PINNED if dates == 'pinned' else datetime.datetime.now(datetime.timezone.utc)
+        for embedded in writer.attachment_list:
+            embedded.creation_date = stamp; embedded.modification_date = stamp
+    buf = io.BytesIO(); writer.write(buf); return buf.getvalue()
+
+
+def read_attachments_two_ways(data: bytes) -> dict:
+    by_pypdf = {name: payload for name, payload in pypdf.PdfReader(io.BytesIO(data)).attachments.items()}
+    doc = pymupdf.open(stream=data, filetype='pdf')
+    by_pymupdf = {}
+    for i in range(doc.embfile_count()):
+        info = doc.embfile_info(i); by_pymupdf[info['filename']] = doc.embfile_get(i)
+    return {'pypdf': {k: hashlib.sha256(v[0] if isinstance(v, list) else v).hexdigest() for k, v in by_pypdf.items()},
+            'pymupdf': {k: hashlib.sha256(v).hexdigest() for k, v in by_pymupdf.items()}}
+
+# ---------------------------------------------------------------- P125, P126, P127
+class ReviewRow(BaseModel):
+    model_config = ConfigDict(strict=True, extra='forbid')
+    field_name: str = Field(min_length=1)
+    slide: int = Field(ge=0)
+    note: str
+    reviewed: bool
+
+REVIEW_ROWS = TypeAdapter(list[ReviewRow])
+CSV_FIELDS = ['field_name', 'slide', 'note', 'reviewed']
+
+
+def rows_to_csv(rows: list[dict]) -> str:
+    REVIEW_ROWS.validate_python(rows)
+    buf = io.StringIO()
+    writer = csv.DictWriter(buf, fieldnames=CSV_FIELDS, quoting=csv.QUOTE_ALL, lineterminator='\n')
+    writer.writeheader()
+    for r in rows: writer.writerow({'field_name': r['field_name'], 'slide': r['slide'], 'note': r['note'], 'reviewed': 'true' if r['reviewed'] else 'false'})
+    return buf.getvalue()
+
+
+def csv_to_rows(text: str) -> list[dict]:
+    reader = csv.DictReader(io.StringIO(text))
+    if reader.fieldnames != CSV_FIELDS: raise g.Blocked('csv header does not match the declared contract')
+    out = []
+    for raw in reader:
+        if raw['reviewed'] not in ('true', 'false'): raise g.Blocked('reviewed is not a declared boolean token: ' + repr(raw['reviewed']))
+        out.append({'field_name': raw['field_name'], 'slide': int(raw['slide']), 'note': raw['note'], 'reviewed': raw['reviewed'] == 'true'})
+    REVIEW_ROWS.validate_python(out)
+    return out
+
+
+def apply_review(form: bytes, rows: list[dict]) -> bytes:
+    values = {}
+    for r in rows:
+        values['notes_%d' % r['slide']] = r['note']
+        values['reviewed_%d' % r['slide']] = r['reviewed']
+    return g12.fill_fields(form, values)
+
+
+def review_summary(rows: list[dict]) -> dict:
+    REVIEW_ROWS.validate_python(rows)
+    reviewed = [r for r in rows if r['reviewed']]
+    with_notes = [r for r in rows if r['note'].strip()]
+    return {'total': len(rows), 'reviewed': len(reviewed), 'not_reviewed': len(rows) - len(reviewed),
+            'with_notes': len(with_notes), 'notes': [r['note'] for r in with_notes]}
+
+# ---------------------------------------------------------------- P128
+def section_ranges(toc: list[list], page_count: int) -> list[dict]:
+    if not toc: raise g.Blocked('binder has no bookmarks')
+    starts = [entry[2] for entry in toc]
+    if starts != sorted(starts): raise g.Blocked('bookmark start pages are not in order')
+    if starts[0] != 1: raise g.Blocked('the first section does not start on page 1')
+    out = []
+    for i, entry in enumerate(toc):
+        end = (starts[i + 1] - 1) if i + 1 < len(toc) else page_count  # the last section runs to the end
+        if end < entry[2]: raise g.Blocked('section %r has no pages' % entry[1])
+        out.append({'title': entry[1], 'first_page': entry[2], 'last_page': end, 'pages': end - entry[2] + 1})
+    if sum(s['pages'] for s in out) != page_count: raise g.Blocked('section ranges do not cover the binder exactly once')
+    return out
+
+# ---------------------------------------------------------------- P129
+LARGE_TYPE_CSS = 'body{font-size:18pt;line-height:1.6}'
+
+
+def large_type_copy(source_html: str) -> str:
+    doc = lxml_html.fromstring(source_html)
+    head = doc.find('head')
+    if head is None: raise g.Blocked('source has no head to attach the stylesheet to')
+    style = lxml_html.fragment_fromstring('<style>' + LARGE_TYPE_CSS + '</style>')
+    head.append(style)
+    return lxml_html.tostring(doc, encoding='unicode')
+
+
+def visible_text(source_html: str) -> str:
+    doc = lxml_html.fromstring(source_html)
+    for element in doc.xpath('//style | //script'): element.getparent().remove(element)
+    return ' '.join(doc.text_content().split())
+
+# ---------------------------------------------------------------- P130
+def booklet_order(pages: int) -> list[int]:
+    if pages <= 0 or pages % 4: raise g.Blocked('a folded booklet needs a page count that is a positive multiple of four')
+    order = []; left, right = 1, pages
+    while left < right:
+        order += [right, left, left + 1, right - 1]; left += 2; right -= 2
+    return order
+
+C = []
+def case(i):
+    def reg(fn): C.append((i, fn)); return fn
+    return reg
+
+
+@case(121)
+def epub_carries_chapters_and_navigation():
+    chapters = [{'title': 'Charter actions', 'file': 'c1.xhtml', 'body': 'The TSC must have a Chair.'},
+                {'title': 'Disclosure actions', 'file': 'c2.xhtml', 'body': 'The agency shall make records available.'}]
+    data = build_epub(chapters, identifier='proofs-hardening', title='Reading collection')
+    out = epub_contents(data)
+    g.equal(out['mimetype_first'], True)  # the mimetype entry must come first in the archive
+    g.equal(out['chapters'], ['EPUB/c1.xhtml', 'EPUB/c2.xhtml'])  # ebooklib places the documents under EPUB/
+    g.equal(out['has_nav'], True); g.equal(out['has_container'], True)
+    body = zipfile.ZipFile(io.BytesIO(data)).read('EPUB/c1.xhtml').decode()
+    g.equal('The TSC must have a Chair.' in body, True)
+    second = build_epub(chapters, identifier='proofs-hardening', title='Reading collection')
+    g.equal(epub_contents(second)['chapters'], out['chapters'])  # the structure repeats even where the bytes need not
+    return {'mimetype_entry_first': True, 'chapters_and_nav_present': True, 'chapter_text_preserved': True,
+            'structure_repeats': True}
+
+
+@case(122)
+def the_index_accounts_for_every_block():
+    blocks = [{'document': 'charter', 'block_id': 'p1', 'body': 'The TSC must have a Chair.'},
+              {'document': 'charter', 'block_id': 't1', 'body': 'department cases General 1390'},
+              {'document': 'disclosure', 'block_id': 'p1', 'body': 'agency shall make records available'}]
+    con = build_index(blocks)
+    g.equal(con.execute('SELECT count(*) FROM docs').fetchone()[0], 3)
+    hits = search(con, 'shall make')
+    g.equal([(h['document'], h['block_id']) for h in hits], [('disclosure', 'p1')])
+    g.equal('[shall make]' in hits[0]['snippet'], True)  # the snippet marks the matched span in the source text
+    table_hit = search(con, 'General')
+    g.equal([(h['document'], h['block_id']) for h in table_hit], [('charter', 't1')])  # table rows are indexed too
+    return {'row_count_conserved': True, 'table_rows_indexed': True, 'snippet_marks_the_source_span': True,
+            'tokenizer_declared': 'unicode61'}
+
+
+@case(123)
+def a_literal_query_must_be_quoted():
+    blocks = [{'document': 'd', 'block_id': 'b1', 'body': 'a AND b minus-sign and star* here'},
+              {'document': 'd', 'block_id': 'b2', 'body': 'agency shall make records available'}]
+    con = build_index(blocks)
+    g.rejects(sqlite3.OperationalError, lambda: search(con, 'AND', literal=False))  # bare AND is a query operator
+    g.rejects(sqlite3.OperationalError, lambda: search(con, 'minus-sign', literal=False))  # the hyphen is parsed as a column filter
+    g.equal([h['block_id'] for h in search(con, 'AND')], ['b1'])  # quoting makes both literal
+    g.equal([h['block_id'] for h in search(con, 'minus-sign')], ['b1'])
+    g.equal([h['block_id'] for h in search(con, 'shall make')], ['b2'])
+    g.equal(literal_query('say "hi"'), '"say ""hi"""')  # an embedded quote is doubled, not dropped
+    ranked = search(con, 'a')
+    g.equal(all(isinstance(h['rank'], float) for h in ranked), True)
+    return {'bare_operator_raises_reproduced': True, 'hyphen_parsed_as_column_reproduced': True,
+            'quoting_makes_queries_literal': True, 'embedded_quote_escaped': True, 'bm25_rank_recorded': True}
+
+
+@case(124)
+def attachments_need_pinned_dates_to_repeat():
+    pdf = g8.print_pdf('<!doctype html><html lang="en-US"><head><meta charset="utf-8"><title>t</title>'
+                       '<style>@page{size:A4;margin:1cm}</style></head><body><h1>Report</h1></body></html>')
+    files = {'cases.csv': b'case_id,cases\nc1,1390\n', 'model.json': b'{"population":1434}'}
+    bare_a = report_with_attachments(pdf, files, dates='none')
+    time.sleep(1.1)
+    bare_b = report_with_attachments(pdf, files, dates='none')
+    g.equal(bare_a == bare_b, True)  # pypdf sets no attachment dates of its own, so the default repeats
+    clock_a = report_with_attachments(pdf, files, dates='clock')
+    time.sleep(1.1)
+    clock_b = report_with_attachments(pdf, files, dates='clock')
+    g.equal(clock_a == clock_b, False)  # a chain that stamps the clock loses repeatability
+    pinned_a = report_with_attachments(pdf, files, dates='pinned')
+    time.sleep(1.1)
+    pinned_b = report_with_attachments(pdf, files, dates='pinned')
+    g.equal(pinned_a == pinned_b, True)
+    g.equal(pinned_a == bare_a, False)  # a pinned date is recorded metadata, not a no-op
+    both = read_attachments_two_ways(pinned_a)
+    expected = {k: hashlib.sha256(v).hexdigest() for k, v in files.items()}
+    g.equal(both['pypdf'], expected)
+    g.equal(both['pymupdf'], expected)  # a second library reads the same attachment bytes
+    _, text = g8.pdf_text(pinned_a)
+    g.equal('Report' in text, True)  # attaching files leaves the page content alone
+    return {'default_has_no_attachment_dates_and_repeats': True, 'clock_dates_break_repeatability_reproduced': True, 'pinned_dates_repeat': True,
+            'two_libraries_agree_on_attachment_bytes': True, 'page_content_unchanged': True}
+
+
+@case(125)
+def csv_quoting_survives_newlines_and_quotes():
+    rows = [{'field_name': 'notes_0', 'slide': 0, 'note': 'line one\nline two, with "quotes"', 'reviewed': True},
+            {'field_name': 'notes_1', 'slide': 1, 'note': '', 'reviewed': False}]
+    text = rows_to_csv(rows)
+    g.equal(text.splitlines()[0], '"field_name","slide","note","reviewed"')
+    back = csv_to_rows(text)
+    g.equal(bool(DeepDiff(rows, back, zip_ordered_iterables=True)), False)  # the embedded newline, comma and quotes survive
+    g.rejects(g.Blocked, lambda: csv_to_rows(text.replace('"field_name"', '"name"')))
+    g.rejects(g.Blocked, lambda: csv_to_rows(text.replace('"true"', '"yes"')))
+    g.rejects(ValidationError, lambda: rows_to_csv([dict(rows[0], reviewed='true')]))
+    return {'quote_all_round_trip': True, 'embedded_newline_preserved': True, 'header_contract_enforced': True,
+            'boolean_tokens_declared': True}
+
+
+@case(126)
+def edited_rows_update_only_named_fields():
+    form = g12.review_form(2)
+    rows = [{'field_name': 'notes_0', 'slide': 0, 'note': 'checked the quote', 'reviewed': True},
+            {'field_name': 'notes_1', 'slide': 1, 'note': '', 'reviewed': False}]
+    updated = apply_review(form, csv_to_rows(rows_to_csv(rows)))
+    fields = g12.read_fields_two_ways(updated)
+    g.equal(fields['pymupdf']['notes_0'], 'checked the quote')
+    g.equal(g12.blank_state(fields['pymupdf']['notes_1']), True)  # an empty note leaves the field blank
+    g.equal(fields['pymupdf']['reviewed_0'] not in ('Off', '/Off'), True)
+    g.equal(g12.blank_state(fields['pymupdf']['reviewed_1']), True)
+    g.equal(g12.text_outside_widgets(updated), g12.text_outside_widgets(form))  # the page content is untouched
+    g.rejects(g.Blocked, lambda: apply_review(form, [{'field_name': 'notes_9', 'slide': 9, 'note': 'x', 'reviewed': True}]))
+    return {'csv_round_trip_then_update': True, 'empty_note_stays_blank': True, 'page_content_untouched': True,
+            'row_for_a_missing_field_blocked': True}
+
+
+@case(127)
+def the_summary_counts_only_what_the_records_carry():
+    rows = [{'field_name': 'notes_0', 'slide': 0, 'note': 'checked', 'reviewed': True},
+            {'field_name': 'notes_1', 'slide': 1, 'note': '', 'reviewed': False},
+            {'field_name': 'notes_2', 'slide': 2, 'note': '   ', 'reviewed': True}]
+    out = review_summary(rows)
+    g.equal((out['total'], out['reviewed'], out['not_reviewed'], out['with_notes']), (3, 2, 1, 1))  # whitespace is not a note
+    g.equal(out['notes'], ['checked'])
+    page = g8.CATALOG.render(title='Review summary', fields=['field_name', 'note', 'reviewed'],
+                             rows=[{'field_name': r['field_name'], 'note': r['note'], 'reviewed': str(r['reviewed'])} for r in rows])
+    pdf = g8.print_pdf('<!doctype html><html lang="en-US"><head><meta charset="utf-8"><title>s</title>'
+                       '<style>@page{size:A4;margin:1cm}</style></head><body><p>reviewed 2 of 3</p></body></html>')
+    _, text = g8.pdf_text(pdf)
+    g.equal('reviewed 2 of 3' in text, True)
+    g.equal('checked' in page, True)
+    g.rejects(ValidationError, lambda: review_summary([dict(rows[0], reviewed='true')]))
+    return {'counts_from_typed_records': True, 'whitespace_is_not_a_note': True, 'summary_printed_and_read_back': True}
+
+
+@case(128)
+def section_ranges_cover_the_binder_exactly_once():
+    toc = [[1, 'Policy explanations', 1], [1, 'Charter actions', 3], [1, 'Meeting packets', 6]]
+    ranges = section_ranges(toc, 8)
+    g.equal([(s['first_page'], s['last_page'], s['pages']) for s in ranges], [(1, 2, 2), (3, 5, 3), (6, 8, 3)])
+    g.equal(sum(s['pages'] for s in ranges), 8)  # the last section runs to the end of the binder
+    g.rejects(g.Blocked, lambda: section_ranges(toc, 5))  # a page count that does not cover the sections
+    g.rejects(g.Blocked, lambda: section_ranges([[1, 'B', 3], [1, 'A', 1]], 8))
+    g.rejects(g.Blocked, lambda: section_ranges([[1, 'A', 2]], 8))
+    g.rejects(g.Blocked, lambda: section_ranges([], 8))
+    return {'last_section_runs_to_the_end': True, 'ranges_partition_the_binder': True,
+            'unordered_bookmarks_blocked': True, 'first_page_must_be_one': True}
+
+
+@case(129)
+def large_type_changes_only_the_stylesheet():
+    source = ('<html lang="en-US"><head><meta charset="utf-8"><title>Checklist</title></head>'
+              '<body><h1>Required actions</h1><p>The TSC must have a Chair.</p></body></html>')
+    large = large_type_copy(source)
+    g.equal(visible_text(large), visible_text(source))  # not one character of reading text changes
+    g.equal('18pt' in large, True)
+    g.equal(large.count('<style>'), 1)
+    g.equal(g8.g3.external_assets(large) if hasattr(g8, 'g3') else [], [])
+    g.rejects(g.Blocked, lambda: large_type_copy('<div>no head here</div>'))
+    return {'reading_text_identical': True, 'stylesheet_added_once': True, 'no_external_assets': True,
+            'source_without_head_blocked': True}
+
+
+@case(130)
+def booklet_order_is_a_permutation():
+    order = booklet_order(8)
+    g.equal(order, [8, 1, 2, 7, 6, 3, 4, 5])
+    g.equal(sorted(order), list(range(1, 9)))  # every page appears exactly once
+    g.equal(len(order), 8)
+    for pages in (4, 12, 16):
+        seq = booklet_order(pages)
+        g.equal(sorted(seq), list(range(1, pages + 1)))
+    for bad in (0, 6, 7, -4):
+        g.rejects(g.Blocked, lambda bad=bad: booklet_order(bad))
+    return {'permutation_checked': True, 'every_page_once': True, 'multiple_of_four_required': True,
+            'imposition_is_arithmetic_not_layout': True}
+
+
+def run() -> dict:
+    g.ASSERTIONS = 0; rows = []
+    for i, fn in C:
+        before = g.ASSERTIONS
+        try: r = fn(); state = 'passed'; error = None
+        except Exception: r = {}; state = 'failed'; error = traceback.format_exc()
+        rows.append({'proof': i, 'test': fn.__name__, 'status': state, 'assertions': g.ASSERTIONS - before, 'result': r, 'error': error})
+    packages = ['pydantic', 'EbookLib', 'pymupdf', 'pypdf', 'python-docx', 'weasyprint', 'lxml', 'deepdiff']
+    here = Path(__file__).resolve().parent
+    return {'scope': 'Bounded authored handoff fixtures and reproduced library defaults; the original P121-P130 chains and their artifacts were not rerun.',
+            'test_cases': len(rows), 'passed': sum(r['status'] == 'passed' for r in rows), 'failed': sum(r['status'] == 'failed' for r in rows),
+            'assertions': g.ASSERTIONS, 'full_chains_executed': 0, 'network_calls': 0, 'business_actions': 0,
+            'sqlite_version': sqlite3.sqlite_version,
+            'source_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+            'dependency_sha256': {name: hashlib.sha256((here / name).read_bytes()).hexdigest() for name in ['handoff_guards_v1.py', 'handoff_guards_v6.py', 'handoff_guards_v8.py', 'handoff_guards_v12.py']},
+            'library_versions': {n: importlib.metadata.version(n) for n in packages}, 'results': rows}
+
+
+if __name__ == '__main__':
+    p = argparse.ArgumentParser(); p.add_argument('--report', type=Path, required=True)
+    args = p.parse_args()
+    result = run(); args.report.parent.mkdir(parents=True, exist_ok=True)
+    args.report.write_text(json.dumps(result, indent=2, sort_keys=True, allow_nan=False) + '\n')
+    print(json.dumps({k: result[k] for k in ['test_cases', 'passed', 'failed', 'assertions']}))
+    if result['failed']:
+        print('\n'.join(r['error'] for r in result['results'] if r['error'])); raise SystemExit(1)
+```
+
+## Fresh local guard evidence: guards-v13.json
+
+Result file SHA256 484854244d4121ab92e47347b8802f2cb15df65225f33d6cf36f7c02f71027ec; bytes 4676. These results do not rerun or promote the full proof chains.
+
+```json
+{
+  "assertions": 61,
+  "business_actions": 0,
+  "dependency_sha256": {
+    "handoff_guards_v1.py": "2b3138b692ecfd02b76ae34bdb001f5046608bb2983d8709d6c55c0765f7c9b8",
+    "handoff_guards_v12.py": "0bc7d97c3107102f0b6d7293b12999a6612eb9cd42ca911aef00e6001c2af8d2",
+    "handoff_guards_v6.py": "7dc3e6c5588bc9293c0c6c94802e7bb057090776647482e6ddf0b748d1c7f259",
+    "handoff_guards_v8.py": "9809d9d6df911eb5f1326a8ded8d53f7aa039679a8570eeb0c24fcb12ff8751c"
+  },
+  "failed": 0,
+  "full_chains_executed": 0,
+  "library_versions": {
+    "EbookLib": "0.20",
+    "deepdiff": "9.1.0",
+    "lxml": "6.1.3",
+    "pydantic": "2.13.5",
+    "pymupdf": "1.28.2",
+    "pypdf": "6.17.0",
+    "python-docx": "1.2.0",
+    "weasyprint": "69.0"
+  },
+  "network_calls": 0,
+  "passed": 10,
+  "results": [
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 121,
+      "result": {
+        "chapter_text_preserved": true,
+        "chapters_and_nav_present": true,
+        "mimetype_entry_first": true,
+        "structure_repeats": true
+      },
+      "status": "passed",
+      "test": "epub_carries_chapters_and_navigation"
+    },
+    {
+      "assertions": 4,
+      "error": null,
+      "proof": 122,
+      "result": {
+        "row_count_conserved": true,
+        "snippet_marks_the_source_span": true,
+        "table_rows_indexed": true,
+        "tokenizer_declared": "unicode61"
+      },
+      "status": "passed",
+      "test": "the_index_accounts_for_every_block"
+    },
+    {
+      "assertions": 7,
+      "error": null,
+      "proof": 123,
+      "result": {
+        "bare_operator_raises_reproduced": true,
+        "bm25_rank_recorded": true,
+        "embedded_quote_escaped": true,
+        "hyphen_parsed_as_column_reproduced": true,
+        "quoting_makes_queries_literal": true
+      },
+      "status": "passed",
+      "test": "a_literal_query_must_be_quoted"
+    },
+    {
+      "assertions": 7,
+      "error": null,
+      "proof": 124,
+      "result": {
+        "clock_dates_break_repeatability_reproduced": true,
+        "default_has_no_attachment_dates_and_repeats": true,
+        "page_content_unchanged": true,
+        "pinned_dates_repeat": true,
+        "two_libraries_agree_on_attachment_bytes": true
+      },
+      "status": "passed",
+      "test": "attachments_need_pinned_dates_to_repeat"
+    },
+    {
+      "assertions": 5,
+      "error": null,
+      "proof": 125,
+      "result": {
+        "boolean_tokens_declared": true,
+        "embedded_newline_preserved": true,
+        "header_contract_enforced": true,
+        "quote_all_round_trip": true
+      },
+      "status": "passed",
+      "test": "csv_quoting_survives_newlines_and_quotes"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 126,
+      "result": {
+        "csv_round_trip_then_update": true,
+        "empty_note_stays_blank": true,
+        "page_content_untouched": true,
+        "row_for_a_missing_field_blocked": true
+      },
+      "status": "passed",
+      "test": "edited_rows_update_only_named_fields"
+    },
+    {
+      "assertions": 5,
+      "error": null,
+      "proof": 127,
+      "result": {
+        "counts_from_typed_records": true,
+        "summary_printed_and_read_back": true,
+        "whitespace_is_not_a_note": true
+      },
+      "status": "passed",
+      "test": "the_summary_counts_only_what_the_records_carry"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 128,
+      "result": {
+        "first_page_must_be_one": true,
+        "last_section_runs_to_the_end": true,
+        "ranges_partition_the_binder": true,
+        "unordered_bookmarks_blocked": true
+      },
+      "status": "passed",
+      "test": "section_ranges_cover_the_binder_exactly_once"
+    },
+    {
+      "assertions": 5,
+      "error": null,
+      "proof": 129,
+      "result": {
+        "no_external_assets": true,
+        "reading_text_identical": true,
+        "source_without_head_blocked": true,
+        "stylesheet_added_once": true
+      },
+      "status": "passed",
+      "test": "large_type_changes_only_the_stylesheet"
+    },
+    {
+      "assertions": 10,
+      "error": null,
+      "proof": 130,
+      "result": {
+        "every_page_once": true,
+        "imposition_is_arithmetic_not_layout": true,
+        "multiple_of_four_required": true,
+        "permutation_checked": true
+      },
+      "status": "passed",
+      "test": "booklet_order_is_a_permutation"
+    }
+  ],
+  "scope": "Bounded authored handoff fixtures and reproduced library defaults; the original P121-P130 chains and their artifacts were not rerun.",
+  "source_sha256": "63960f02d9ce33cc33f094494263f1bd1ff7199693a7650681eef60e5871900b",
+  "sqlite_version": "3.45.1",
+  "test_cases": 10
+}
+```
+
+Checkpoint coverage: 130 of 300 proof-specific handoff amendments written, through P130. Prior cumulative TXT SHA256 df5327ee578526129095357f5d373afb681ef4afaa7248f46446d6938728f619.

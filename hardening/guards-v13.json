@@ -1,0 +1,161 @@
+{
+  "assertions": 61,
+  "business_actions": 0,
+  "dependency_sha256": {
+    "handoff_guards_v1.py": "2b3138b692ecfd02b76ae34bdb001f5046608bb2983d8709d6c55c0765f7c9b8",
+    "handoff_guards_v12.py": "0bc7d97c3107102f0b6d7293b12999a6612eb9cd42ca911aef00e6001c2af8d2",
+    "handoff_guards_v6.py": "7dc3e6c5588bc9293c0c6c94802e7bb057090776647482e6ddf0b748d1c7f259",
+    "handoff_guards_v8.py": "9809d9d6df911eb5f1326a8ded8d53f7aa039679a8570eeb0c24fcb12ff8751c"
+  },
+  "failed": 0,
+  "full_chains_executed": 0,
+  "library_versions": {
+    "EbookLib": "0.20",
+    "deepdiff": "9.1.0",
+    "lxml": "6.1.3",
+    "pydantic": "2.13.5",
+    "pymupdf": "1.28.2",
+    "pypdf": "6.17.0",
+    "python-docx": "1.2.0",
+    "weasyprint": "69.0"
+  },
+  "network_calls": 0,
+  "passed": 10,
+  "results": [
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 121,
+      "result": {
+        "chapter_text_preserved": true,
+        "chapters_and_nav_present": true,
+        "mimetype_entry_first": true,
+        "structure_repeats": true
+      },
+      "status": "passed",
+      "test": "epub_carries_chapters_and_navigation"
+    },
+    {
+      "assertions": 4,
+      "error": null,
+      "proof": 122,
+      "result": {
+        "row_count_conserved": true,
+        "snippet_marks_the_source_span": true,
+        "table_rows_indexed": true,
+        "tokenizer_declared": "unicode61"
+      },
+      "status": "passed",
+      "test": "the_index_accounts_for_every_block"
+    },
+    {
+      "assertions": 7,
+      "error": null,
+      "proof": 123,
+      "result": {
+        "bare_operator_raises_reproduced": true,
+        "bm25_rank_recorded": true,
+        "embedded_quote_escaped": true,
+        "hyphen_parsed_as_column_reproduced": true,
+        "quoting_makes_queries_literal": true
+      },
+      "status": "passed",
+      "test": "a_literal_query_must_be_quoted"
+    },
+    {
+      "assertions": 7,
+      "error": null,
+      "proof": 124,
+      "result": {
+        "clock_dates_break_repeatability_reproduced": true,
+        "default_has_no_attachment_dates_and_repeats": true,
+        "page_content_unchanged": true,
+        "pinned_dates_repeat": true,
+        "two_libraries_agree_on_attachment_bytes": true
+      },
+      "status": "passed",
+      "test": "attachments_need_pinned_dates_to_repeat"
+    },
+    {
+      "assertions": 5,
+      "error": null,
+      "proof": 125,
+      "result": {
+        "boolean_tokens_declared": true,
+        "embedded_newline_preserved": true,
+        "header_contract_enforced": true,
+        "quote_all_round_trip": true
+      },
+      "status": "passed",
+      "test": "csv_quoting_survives_newlines_and_quotes"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 126,
+      "result": {
+        "csv_round_trip_then_update": true,
+        "empty_note_stays_blank": true,
+        "page_content_untouched": true,
+        "row_for_a_missing_field_blocked": true
+      },
+      "status": "passed",
+      "test": "edited_rows_update_only_named_fields"
+    },
+    {
+      "assertions": 5,
+      "error": null,
+      "proof": 127,
+      "result": {
+        "counts_from_typed_records": true,
+        "summary_printed_and_read_back": true,
+        "whitespace_is_not_a_note": true
+      },
+      "status": "passed",
+      "test": "the_summary_counts_only_what_the_records_carry"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 128,
+      "result": {
+        "first_page_must_be_one": true,
+        "last_section_runs_to_the_end": true,
+        "ranges_partition_the_binder": true,
+        "unordered_bookmarks_blocked": true
+      },
+      "status": "passed",
+      "test": "section_ranges_cover_the_binder_exactly_once"
+    },
+    {
+      "assertions": 5,
+      "error": null,
+      "proof": 129,
+      "result": {
+        "no_external_assets": true,
+        "reading_text_identical": true,
+        "source_without_head_blocked": true,
+        "stylesheet_added_once": true
+      },
+      "status": "passed",
+      "test": "large_type_changes_only_the_stylesheet"
+    },
+    {
+      "assertions": 10,
+      "error": null,
+      "proof": 130,
+      "result": {
+        "every_page_once": true,
+        "imposition_is_arithmetic_not_layout": true,
+        "multiple_of_four_required": true,
+        "permutation_checked": true
+      },
+      "status": "passed",
+      "test": "booklet_order_is_a_permutation"
+    }
+  ],
+  "scope": "Bounded authored handoff fixtures and reproduced library defaults; the original P121-P130 chains and their artifacts were not rerun.",
+  "source_sha256": "63960f02d9ce33cc33f094494263f1bd1ff7199693a7650681eef60e5871900b",
+  "sqlite_version": "3.45.1",
+  "test_cases": 10
+}

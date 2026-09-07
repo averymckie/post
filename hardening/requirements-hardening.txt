@@ -28,6 +28,7 @@ deepdiff==9.1.0
 defusedxml==0.7.1
 dictdiffer==0.10.0
 duckdb==1.5.5
+ebooklib==0.20
 et-xmlfile==2.0.0
 fonttools==4.64.0
 ftfy==6.3.1
