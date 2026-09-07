@@ -29,9 +29,11 @@ import numpy as np
 from workalendar import core as workalendar_core
 import igraph
 import jsonschema
+import markdown as python_markdown
 import portion
 import pydantic
 from lxml import etree as lxml_etree
+from markdown_it import MarkdownIt
 import networkx as nx
 import openpyxl
 import orjson
@@ -662,14 +664,34 @@ def _sorted_json(value):
     return json.dumps(value, sort_keys=True, separators=(',', ':'), ensure_ascii=False).encode()
 
 
-@given(st.dictionaries(st.text(min_size=1, max_size=6),
-                       st.integers(min_value=-(2**53 - 1), max_value=2**53 - 1),
+BMP_TEXT = st.text(alphabet=st.characters(max_codepoint=0xFFFF, blacklist_categories=('Cs',)),
+                   min_size=1, max_size=6)
+
+
+@given(st.dictionaries(BMP_TEXT, st.integers(min_value=-(2**53 - 1), max_value=2**53 - 1),
                        min_size=1, max_size=6))
 @SLOW
-def test_sorted_json_and_rfc8785_agree_on_integer_objects(mapping):
-    """Inside the shared domain the two canonicalisations produce the same bytes, so the seal is portable
-    there. Replaces the canonical-ordering expectations in handoff_guards_v21.py."""
+def test_sorted_json_and_rfc8785_agree_on_basic_plane_integer_objects(mapping):
+    """Inside the shared domain, and with every key inside the Basic Multilingual Plane, the two
+    canonicalisations produce the same bytes. Replaces the canonical-ordering expectations in v21."""
     npt.assert_array_equal(_sorted_json(mapping), rfc8785.dumps(mapping))
+
+
+@given(st.sampled_from(['\ue000', '\uf8ff']), st.sampled_from(['\U00010000', '\U0001F600']))
+@SLOW
+def test_the_two_canonicalisations_order_keys_differently_across_the_plane_boundary(bmp_key, astral_key):
+    """RFC 8785 sorts keys by UTF-16 code unit as the standard requires; json.dumps(sort_keys=True) sorts by
+    code point. A supplementary-plane character encodes as a surrogate pair beginning at D800, which is below
+    E000, so the two orders are opposite for keys spanning the boundary. Key order is the substance of
+    canonicalisation, so this is a stronger divergence than the value formatting above, and hypothesis found
+    it rather than an author choosing the pair."""
+    mapping = {bmp_key: 0, astral_key: 0}
+    by_json = _sorted_json(mapping)
+    by_standard = rfc8785.dumps(mapping)
+    npt.assert_array_equal(by_json.index(bmp_key.encode()) < by_json.index(astral_key.encode()), True)
+    npt.assert_array_equal(by_standard.index(astral_key.encode()) < by_standard.index(bmp_key.encode()), True)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(by_json, by_standard)
 
 
 @given(st.integers(min_value=-10**6, max_value=10**6))
@@ -708,3 +730,42 @@ def test_rfc8785_refuses_integers_outside_the_exactly_representable_range(value)
     _sorted_json({'x': value})
     with pytest.raises(rfc8785.IntegerDomainError):
         rfc8785.dumps({'x': value})
+
+
+# ---------------------------------------------------------------- markdown rendering
+MARKDOWN_IT = MarkdownIt()
+COMMON_MARKDOWN = ['A & B < 5', 'plain text', '# head', '- a\n- b', 'a\nb', '**bold**',
+                   'http://x.com', 'a  \nb', '<b>raw</b>']
+
+
+@given(st.sampled_from(COMMON_MARKDOWN))
+@SLOW
+def test_two_markdown_renderers_agree_on_common_constructs(source):
+    """markdown-it-py and Python-Markdown are independent implementations. They agree on headings, lists,
+    emphasis, hard breaks, raw HTML and on escaping an ampersand and a less-than, which corroborates the
+    escaping claims recorded for P105 and P114."""
+    npt.assert_array_equal(MARKDOWN_IT.render(source).strip(), python_markdown.markdown(source).strip())
+
+
+@given(st.sampled_from(['>\n1', '>\na', '>\n- x']))
+@SLOW
+def test_the_two_renderers_disagree_on_a_line_after_an_empty_blockquote(source):
+    """Hypothesis found this in three characters. markdown-it-py closes the blockquote and puts the
+    following line outside it; Python-Markdown treats the line as a lazy continuation and puts it inside.
+    A quoted passage becomes unquoted, or the reverse, depending on which renderer ran, so the rendered
+    structure of a converted document is renderer-dependent."""
+    by_markdown_it = MARKDOWN_IT.render(source).strip()
+    by_python_markdown = python_markdown.markdown(source).strip()
+    npt.assert_array_equal(by_markdown_it.startswith('<blockquote></blockquote>'), True)
+    npt.assert_array_equal(by_python_markdown.startswith('<blockquote>'), True)
+    npt.assert_array_equal(by_python_markdown.endswith('</blockquote>'), True)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(by_markdown_it, by_python_markdown)
+
+
+@given(st.text(alphabet=st.characters(min_codepoint=97, max_codepoint=122), min_size=1, max_size=20))
+@SLOW
+def test_both_renderers_wrap_plain_text_identically(word):
+    """The divergence is structural, not textual: plain words render the same in both."""
+    npt.assert_array_equal(MARKDOWN_IT.render(word).strip(), python_markdown.markdown(word).strip())
+    npt.assert_array_equal(python_markdown.markdown(word).strip(), '<p>%s</p>' % word)
