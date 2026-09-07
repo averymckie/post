@@ -20482,3 +20482,748 @@ Result file SHA256 ca979be73f96b236f093c14151123365d08ff64651e578ef73bae6af2d9df
 ```
 
 Checkpoint coverage: 80 of 300 proof-specific handoff amendments written, through P80. Prior cumulative TXT SHA256 72b9d7aeef46daa2662592ee44d8e2e310f889f337b27014ff8a38b56afa5d7a.
+
+## Checkpoint integrity and environment for this batch
+
+Base: the TXT as committed after batch 8 (SHA256 0ceec259077f752aa6baf0a92d5a43c23ef1aa067cc51ede218b7534b7d685df, 1375248 bytes); it is the prior cumulative TXT SHA256 recorded at the end of this batch. Environment as in batch 8 plus markdown-it-py 4.2.0. handoff_guards_v9.py imports handoff_guards_v1.py and handoff_guards_v8.py; v1-v8 stay byte-identical under HG07.
+
+Two named dependencies of these proofs could not be executed here and are recorded as limits rather than claimed: the formulas package (the ExcelModel engine named in P80-P82) was not installed, and LibreOffice, although present at /usr/bin/soffice, cannot load any source file in this environment -- a plain text file, an HTML file and a native .docx all fail with "source file could not be loaded", so the install carries no import filters. The guard therefore supplies formula caches explicitly and checks the native packages in Python, and records the export attempt and its failure in guards-v9.json rather than reporting a rendered page count. Where a documentation host is blocked the reference cites a non-blocked source, named per reference.
+
+## Online-checked function references for this hardening batch
+[HD95] XlsxWriter Worksheet.write_formula(..., value=0) stores the cached result (HD92); write_blank keeps a cell blank rather than zero; freeze_panes and conditional_format change presentation only and never a stored value (executed with 3.2.9). Source: GitHub source signature and executed behavior; xlsxwriter.readthedocs.io blocked.
+https://github.com/jmcnamara/XlsxWriter/blob/main/xlsxwriter/worksheet.py
+[HD96] python-docx exposes no page-count API: Document has paragraphs, tables, sections, iter_inner_content and add_page_break, and nothing that reports pagination (executed with 1.2.0). An explicit page break is a w:br with w:type="page" in word/document.xml; a repeating header row is w:tblHeader and an unsplittable row is w:cantSplit in the row properties. Source: installed python-docx 1.2.0 and GitHub (HD62, HD72); readthedocs blocked.
+https://github.com/python-openxml/python-docx/blob/master/src/docx/document.py
+[HD97] networkx.weakly_connected_components groups a directed graph ignoring edge direction and keeps an isolated node as its own component; networkx.topological_sort requires a DAG and raises for a cycle, so a connector graph with a cycle has no slide order (executed with 3.6.1). Source: installed networkx 3.6.1 docstrings and GitHub (HD57, HD81).
+https://github.com/networkx/networkx/blob/networkx-3.6.1/networkx/algorithms/components/weakly_connected.py
+[HD98] python-pptx CategoryChartData with SlideShapes.add_chart writes a native chart backed by an embedded workbook; chart.plots[0].categories and chart.series[0].values read the values back. run.hyperlink.address sets an external hyperlink, which adds an external relationship to the package with no warning (executed with 1.0.2). Source: installed python-pptx 1.0.2 and GitHub (HD20).
+https://github.com/scanny/python-pptx/blob/master/src/pptx/chart/data.py
+[HD99] An OOXML package carries its links in .rels parts; a relationship whose TargetMode is "External" points outside the package. Scanning every .rels part with zipfile and lxml is the executable check that a native deliverable is self-contained (executed). Source: the package bytes themselves and the ECMA-376 OPC relationship attribute; no external documentation host required.
+[HD100] markdown-it-py MarkdownIt().parse returns a token stream in which a heading is heading_open plus an inline token and a fenced block is a single fence token carrying its literal content; Token.map gives the source line range. Heading-like text inside a fence is therefore never a heading (executed with 4.2.0). Source: installed markdown-it-py 4.2.0 and GitHub.
+https://github.com/executablebooks/markdown-it-py
+
+## Hardening batch: P81-P90
+
+### HARDENING P81 -- A formula cache must be computed, and a blank cell must stay blank
+
+Original proof: P81  recorded activity measures -> native charts and matrix formatting -> independently checked workbook
+Source location: frozen master lines 4187-4211; original section SHA256 ed5e579cc930d8b185ebcf9e57319936b1bf958f03179782dcad09f7cbca8759.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: without an explicit value, XlsxWriter caches a formula result of zero (P80); a blank source cell reads back as None through one reader and as an empty string through the other, so the two-reader check cannot reconcile it without a declared missing-value rule.
+Handoff: registered sources -> XlsxWriter tables, conditional formats and formulas -> openpyxl and Calamine checks
+Failure path: "13 formula caches independently checked" is a check of stored constants unless the value passed to write_formula came from a named engine. A missing measure written as zero becomes a measurement (P43, P76). Conditional formats and frozen panes are presentation and must not be counted as checked data.
+Required repair: Compute each formula result with a named engine and pass it to write_formula, or record the cache as uncomputed and exclude it from the checked totals; write a missing measure with write_blank; declare the missing-value rule before comparing the two readers, and treat presentation-only features as presentation.
+Function bridge: xlsxwriter write_formula(value=...), write_blank, freeze_panes, conditional_format; openpyxl.load_workbook(data_only=True) and the formula view; CalamineWorkbook; DeepDiff over the normalized data region
+Positive acceptance: The supplied cache reads back as 2857, and with one measure blank as 2802.
+Adverse acceptance: The default cache is 0 (reproduced); the blank cell reads None and '' (reproduced) and the two-reader check blocks until a missing-value rule is declared.
+Evidence and limit: guards-v9 case 81 on authored workbooks; the formulas engine named in the chain was not installed here, so the cache is supplied by the fixture rather than computed by that engine. The recorded activity-performance.xlsx was not rebuilt.
+References: HD22 HD40 HD92 HD94 HD95
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P82 -- A complete enumeration is complete only over its declared domain
+
+Original proof: P82  recorded majority rule -> native formula explorer -> complete valid and invalid input checks
+Source location: frozen master lines 4212-4237; original section SHA256 6fb8e3d301b2e9d8a66753d71f114e349767bbad0885a185974f877d3a9c7e8b.
+Finding: RECORDED SCOPE LIMIT, already partly stated in the proof: "recorded 18-member roster is not a verified historical roster". The enumeration covers nineteen integers; it is not the input space (P54).
+Handoff: recorded majority rule -> native formula explorer -> valid and invalid input checks
+Failure path: Nineteen valid values and six invalid ones exercise the rule over the integers 0..18 only; a negative, a non-integer, a boolean or a string is refused rather than decided, and a value above the ceiling is never seen. The threshold itself rests on a roster retrieved in 2026 for meetings from 2023-2025 (P13).
+Required repair: Enumerate the declared integer domain and report it as such; refuse non-integer, boolean and negative inputs explicitly; never file a value inside the domain as invalid; carry the roster limit with the result rather than in a separate note.
+Function bridge: range enumeration; explicit type and range refusal; the roster limit as a data field on the result
+Positive acceptance: Nine of nineteen values decide true; four malformed inputs are refused; the roster limit travels with the result.
+Adverse acceptance: Filing a valid in-domain value as invalid blocks.
+Evidence and limit: guards-v9 case 82 on the authored rule. The recorded majority-rule.xlsx was not rebuilt.
+References: HD05 HD64 HD76
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P83 -- python-docx cannot paginate, so a page claim needs a renderer
+
+Original proof: P83  recorded policy explanations -> Word styles and pagination -> readable native document
+Source location: frozen master lines 4238-4260; original section SHA256 1290f0cd3e04a9785336e54bf190b7718305db440ca150edeb792f36c123bda7.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: python-docx exposes no page count; "two balanced print pages" cannot be established from the .docx file alone, only from a renderer.
+Handoff: registered inputs -> docx styles and paragraph formats -> native document
+Failure path: Pagination is decided by the consuming application from styles, widths and fonts. A file-level check can see explicit page breaks and section properties and nothing else. Claiming a page count from the authoring library states a rendering result that was never rendered.
+Required repair: Report the explicit page breaks and section count as the structural facts; obtain any page count from a named renderer and record which one; check the body content twice, through python-docx and through the raw XML text nodes, and require agreement.
+Function bridge: docx.Document.iter_inner_content; zipfile plus lxml over word/document.xml; w:br with w:type="page"; Document.sections
+Positive acceptance: One explicit break is counted, the heading is present in both readbacks, and every API paragraph appears among the XML text nodes.
+Adverse acceptance: No page-count API exists (reproduced), so the balanced-pages claim is not made here.
+Evidence and limit: guards-v9 case 83 on an authored document; LibreOffice could not load any file in this environment, so no rendered page count was obtained. The recorded policy-explanations.docx was not rebuilt.
+References: HD21 HD62 HD72 HD96
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P84 -- Table formatting is XML that must round-trip, not an intention
+
+Original proof: P84  recorded charter actions -> native table formatting -> readable action document
+Source location: frozen master lines 4261-4283; original section SHA256 e1d6965ac896ec6a8e4865145e39a1f7696e4d9ec625338634283bca042af8fc.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it.
+Handoff: registered inputs -> docx table with OxmlElement row properties -> native document
+Failure path: Repeating headers and unsplittable rows are raw OOXML elements added through the low-level API; nothing in the authoring call proves they landed in the saved file, and the visual result depends on the renderer. The table content itself must survive unchanged.
+Required repair: Write the row properties through the documented elements and read them back from the saved package by their qualified names; compare the table content cell by cell and confirm each source string among the XML text nodes.
+Function bridge: docx table rows with trPr and the w:tblHeader and w:cantSplit elements; zipfile plus lxml with qualified-name lookup; Document.iter_inner_content readback
+Positive acceptance: One repeating header and three unsplittable rows are found in the saved XML, and the three-row table reads back identical.
+Adverse acceptance: Every quoted source value is present among the text nodes; a missing property would be visible as a count of zero.
+Evidence and limit: guards-v9 case 84 on an authored table; the rendered appearance was not verified. The recorded charter-actions.docx was not rebuilt.
+References: HD39 HD62 HD96
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P85 -- The slide map groups what is connected and infers nothing
+
+Original proof: P85  recorded discussion shapes -> connected-component layout -> native slide map
+Source location: frozen master lines 4284-4306; original section SHA256 e18903457778295aba8b2e86a0d7467576580becc02fda937cf5cb1bd6580ae9.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it.
+Handoff: recorded discussion shapes -> weakly_connected_components and topological_sort -> connectors attached at both ends -> native slide
+Failure path: A layout that drops isolated nodes loses shapes that had no connector; a connector drawn as a line without begin_connect and end_connect is not attached to anything (P14, P19); a cycle among connectors has no topological order and would either raise or be silently reordered.
+Required repair: Keep every node, group with weakly_connected_components, retain isolated nodes as their own components, order only when the graph is acyclic and block otherwise, attach every connector at both ends, and infer no edge that the source did not carry.
+Function bridge: networkx.weakly_connected_components, is_directed_acyclic_graph, topological_sort; pptx add_textbox and add_connector with begin_connect and end_connect; lxml check for stCxn and endCxn
+Positive acceptance: Two components, one of them the isolated node; three texts and one connector attached at both ends read back from the saved deck.
+Adverse acceptance: A cycle blocks; a connector endpoint outside the shape set blocks; no edge is inferred.
+Evidence and limit: guards-v9 case 85 on authored shapes. The recorded discussion-map.pptx was not rebuilt.
+References: HD20 HD25 HD97
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P86 -- One page break per case is a file fact; the page count is not
+
+Original proof: P86  registered case selections -> explicit field mapping -> editable case briefs
+Source location: frozen master lines 4307-4329; original section SHA256 5e78292e822597842265960936cbe143e054ab9863665500c509b193a242a4db.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it.
+Handoff: registered case selections -> field mapping -> docx headings, tables and page breaks -> editable briefs
+Failure path: "each case begins on its own page" is checkable as an explicit break between cases; "three pages" is a rendering result (P83). A missing field value printed as a null literal would misreport the case, and flagged, unflagged and unassessed states must stay distinct.
+Required repair: Emit one explicit break between consecutive cases and none before the first; print a missing value as an explicit phrase; read the tables back and compare field by field; leave the rendered page count to a named renderer.
+Function bridge: docx add_page_break, add_heading, add_table, Table.add_row; zipfile plus lxml page-break count; Document.iter_inner_content readback
+Positive acceptance: Three cases give two explicit breaks, three tables, and two explicit "not recorded" values.
+Adverse acceptance: The literal None never appears; the rendered page count is not claimed.
+Evidence and limit: guards-v9 case 86 on authored cases. The recorded case-briefs.docx was not rebuilt.
+References: HD21 HD62 HD96
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P87 -- Chart values are read back from the deck, not trusted from the call
+
+Original proof: P87  registered operation measures -> native chart and table objects -> editable briefing deck
+Source location: frozen master lines 4330-4352; original section SHA256 c260fabeaa412213c1f413ccb246c9eb13f57c1efd1cdf20442a0420a0603ee5.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it.
+Handoff: registered measures -> CategoryChartData and add_chart -> editable deck with an embedded workbook
+Failure path: A native chart carries its own embedded workbook; the values a consumer sees come from that part, not from the Python call. Without a readback the deck can disagree with the source. The package must also stay self-contained.
+Required repair: Build the chart from typed categories and values, read categories and series values back from the saved deck, compare them with the source, confirm the declared chart type, and scan the package for external relationships.
+Function bridge: pptx.chart.data.CategoryChartData; SlideShapes.add_chart; chart.plots[0].categories and chart.series[0].values; zipfile plus lxml relationship scan
+Positive acceptance: Three categories and three values read back equal, the type is the declared one, and the package has no external relationship.
+Adverse acceptance: A package carrying an external relationship blocks (case 88).
+Evidence and limit: guards-v9 case 87 on authored measures. The recorded operations-brief.pptx was not rebuilt; the missing-measure handling of the recorded deck was not reproduced.
+References: HD20 HD98 HD99
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P88 -- An external relationship is added silently and must be scanned for
+
+Original proof: P88  checked native Office files -> fixed LibreOffice export -> reviewed PDF and PNG collection
+Source location: frozen master lines 4353-4385; original section SHA256 9e4f106f4f9e3fc5affbc53d6318574d149b4d7c4cbac41f159ecb7f3a52d80f.
+Finding: REPRODUCED LIBRARY-DEFAULT GAP: setting a run hyperlink adds a relationship with TargetMode External to the saved package, and no authoring call warns; "native input packages contain no external relationships" is therefore a property to check, not one to assume.
+Handoff: checked native files -> fixed LibreOffice command -> PDF and PNG -> PyMuPDF checks
+Failure path: A package that reaches a renderer with an external relationship can pull a resource at render time, outside the Python audit hooks (P71). The recorded chain states that LibreOffice runs outside those hooks; the check that remains available in Python is the package itself.
+Required repair: Scan every .rels part of every native deliverable for TargetMode External and block any; treat the native render as outside the Python audit scope and record the renderer, its command and its outcome rather than implying a guarded render.
+Function bridge: zipfile over the package with lxml over each .rels part; subprocess.run with a fixed soffice command; PyMuPDF page count and text
+Positive acceptance: A clean deck has no external relationship; the scan names the target when one exists.
+Adverse acceptance: The hyperlink package carries exactly one external relationship (reproduced) and is blocked.
+Evidence and limit: guards-v9 case 88 on authored packages. LibreOffice is present in this environment but cannot load any source file, so the export was attempted and its failure is recorded in guards-v9.json; no rendered page count or PNG is claimed. The recorded native PDFs and PNGs were not rebuilt.
+References: HD87 HD88 HD91 HD98 HD99
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P89 -- A heading inside a fence is not a proof
+
+Original proof: P89  recorded proof Markdown -> parser tokens and strict types -> traceable proof catalog
+Source location: frozen master lines 4386-4406; original section SHA256 f9f38fee27de6ce4baa73a29bf6266f19e48444f943938f5eccf61457efc00d0.
+Finding: ADDITIONAL HANDOFF OBLIGATION; the proof already states the requirement ("heading-like text inside a code fence does not become a proof"), and the token stream is what makes it checkable.
+Handoff: recorded proof Markdown -> markdown_it tokens -> strict typed catalog entries
+Failure path: A line-oriented scan for "## P" would index the proof headings printed inside embedded code blocks, of which this TXT now contains many. Duplicate proof IDs would silently overwrite each other. A title must be retained verbatim, including its arrows and markup.
+Required repair: Parse to tokens and take only heading_open tokens with their inline content; a fence is a single token whose content is literal data; block a duplicate ID; validate each entry against a strict schema with the ID pattern; record the source line from Token.map.
+Function bridge: markdown_it.MarkdownIt().parse; Token.type, Token.tag, Token.content and Token.map; pydantic strict model with a pattern
+Positive acceptance: Two real proofs are indexed, the fenced heading is not, and its title is retained verbatim.
+Adverse acceptance: A duplicate ID blocks; a malformed ID fails validation.
+Evidence and limit: guards-v9 case 89 on an authored snapshot; the recorded catalog of 88 proofs was not rebuilt and no current artifact integrity is claimed.
+References: HD05 HD100
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+### HARDENING P90 -- The explorer renders the typed catalog and escapes its titles
+
+Original proof: P90  typed proof catalog -> fixed interface handlers -> searchable proof explorer
+Source location: frozen master lines 4407-4427; original section SHA256 c9f528e16a550db5d3249725b71294815870f94db38d6afe188c4471929a21de.
+Finding: ADDITIONAL HANDOFF OBLIGATION; absence from the named interface is not proof that unavailable implementation code lacks it.
+Handoff: typed proof catalog -> Jinja2 render and fixed handlers -> searchable explorer -> print samples
+Failure path: Proof titles contain arrows and markup characters; rendered without escaping they would be interpreted rather than displayed. Search, sort and copy handlers must act on typed entries, and the page must make no external request.
+Required repair: Render from the typed catalog entries with an autoescaping template, confirm the arrow is escaped, and assert the rows, language and zero external requests through jsdom where available.
+Function bridge: markdown_it token parse into typed entries; Jinja2 autoescape with StrictUndefined; jsdom.JSDOM row assertions
+Positive acceptance: Two entries render with their IDs first and the arrow escaped; the DOM shows both rows, en-US, and zero external requests.
+Adverse acceptance: An unescaped arrow would appear as markup; the catalog entries themselves are validated in case 89.
+Evidence and limit: guards-v9 case 90 on an authored catalog. The recorded proof-explorer.html and its print samples were not rebuilt.
+References: HD85 HD89 HD100
+Integration status: INTEGRATION_UNVERIFIED. HG00-HG07 apply in addition to this proof-specific repair.
+
+## Embedded runnable local guard module: handoff_guards_v9.py
+
+SHA256 c387cba5619cc678a11e03ce41ca8890a7da742bacf1d34e57e008929a9a0c76; bytes 23210. Save the following code block as handoff_guards_v9.py next to the earlier guard modules.
+
+```python
+"""Ninth bounded adapter suite: P81-P90, native Office authoring and the proof catalog. Requires handoff_guards_v1.py
+and handoff_guards_v3.py from this TXT. Every workbook write, document readback, package inspection, graph grouping,
+Markdown parse and DOM assertion below is a library primitive call; local code declares fixtures and policies and turns
+a primitive result into a Blocked outcome. All runtime inputs are authored fixtures. No model client and no network.
+Run: python handoff_guards_v9.py --report report.json [--jsdom-dir DIR]
+"""
+from __future__ import annotations
+import argparse, hashlib, importlib.metadata, io, json, logging, os, re, shutil, subprocess, tempfile, traceback, warnings, zipfile
+from pathlib import Path
+from typing import Literal
+import docx
+import networkx as nx
+import openpyxl
+import pptx
+import xlsxwriter
+from deepdiff import DeepDiff
+from docx.oxml.ns import qn
+from docx.table import Table as DocxTable
+from lxml import etree
+from markdown_it import MarkdownIt
+from pptx.chart.data import CategoryChartData
+from pptx.enum.chart import XL_CHART_TYPE
+from pptx.util import Emu, Inches
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
+from python_calamine import CalamineWorkbook
+import handoff_guards_v1 as g
+import handoff_guards_v8 as g8
+warnings.simplefilter('ignore'); logging.disable(logging.WARNING)
+
+# ---------------------------------------------------------------- P81, P82
+def authored_workbook(rows: list[tuple[str, int]], *, cache: Literal['computed', 'default'], missing: list[int] = ()) -> bytes:
+    buf = io.BytesIO(); book = xlsxwriter.Workbook(buf, {'in_memory': True}); sheet = book.add_worksheet('measures')
+    sheet.freeze_panes(1, 0)
+    sheet.write_row(0, 0, ['activity', 'events'])
+    for i, (name, value) in enumerate(rows, start=1):
+        sheet.write(i, 0, name)
+        if i in missing: sheet.write_blank(i, 1, None)  # a missing source cell stays blank, never zero
+        else: sheet.write_number(i, 1, value)
+    total = sum(v for i, (_, v) in enumerate(rows, start=1) if i not in missing)
+    formula_row = len(rows) + 1
+    if cache == 'computed': sheet.write_formula(formula_row, 1, '=SUM(B2:B%d)' % (len(rows) + 1), None, total)
+    else: sheet.write_formula(formula_row, 1, '=SUM(B2:B%d)' % (len(rows) + 1))
+    sheet.conditional_format(1, 1, len(rows), 1, {'type': 'cell', 'criteria': '>', 'value': 100, 'format': None})
+    book.close(); return buf.getvalue()
+
+
+def formula_cache(data: bytes) -> dict:
+    cached = openpyxl.load_workbook(io.BytesIO(data), data_only=True)
+    text = openpyxl.load_workbook(io.BytesIO(data))
+    ws_c, ws_t = cached.active, text.active
+    cells = [(c.coordinate, c.value) for row in ws_t.iter_rows() for c in row if isinstance(c.value, str) and c.value.startswith('=')]
+    if not cells: raise g.Blocked('no formula found')
+    coord = cells[0][0]
+    return {'formula': cells[0][1], 'cached': ws_c[coord].value}
+
+
+def blank_cells(data: bytes) -> dict:
+    ws = openpyxl.load_workbook(io.BytesIO(data)).active
+    by_openpyxl = [c.value for row in ws.iter_rows(min_col=2, max_col=2, min_row=2) for c in row]
+    sheet = CalamineWorkbook.from_filelike(io.BytesIO(data)).get_sheet_by_index(0).to_python(skip_empty_area=False)
+    by_calamine = [r[1] for r in sheet[1:]]
+    return {'openpyxl': by_openpyxl, 'calamine': by_calamine}
+
+# ---------------------------------------------------------------- P82
+def enumerate_workbook_rule(threshold: int, domain: range, invalid: list) -> dict:
+    decided = {n: n >= threshold for n in domain}
+    refused = []
+    for value in invalid:
+        if not isinstance(value, int) or isinstance(value, bool) or value < 0: refused.append(repr(value))
+        else: raise g.Blocked('an input the domain should have covered was routed to the invalid list: ' + repr(value))
+    return {'domain': [domain.start, domain.stop], 'threshold': threshold, 'decided': sum(decided.values()),
+            'refused_invalid': refused, 'roster_limit': 'the recorded 18-member roster is a 2026 retrieval, not a verified historical roster (P13)'}
+
+# ---------------------------------------------------------------- P83, P84, P86
+def document_blocks(data: bytes) -> dict:
+    d = docx.Document(io.BytesIO(data))
+    by_api = []
+    for block in d.iter_inner_content():
+        if isinstance(block, DocxTable): by_api.append(('table', [[c.text for c in r.cells] for r in block.rows]))
+        else: by_api.append(('paragraph', block.text))
+    body = etree.fromstring(zipfile.ZipFile(io.BytesIO(data)).read('word/document.xml'))
+    text_nodes = [t.text for t in body.iter(qn('w:t')) if t.text and t.text.strip()]
+    page_breaks = len([b for b in body.iter(qn('w:br')) if b.get(qn('w:type')) == 'page'])
+    return {'blocks': by_api, 'text_nodes': text_nodes, 'explicit_page_breaks': page_breaks,
+            'page_count_available': hasattr(d, 'page_count')}
+
+
+def repeating_header_and_unsplit(data: bytes) -> dict:
+    body = etree.fromstring(zipfile.ZipFile(io.BytesIO(data)).read('word/document.xml'))
+    return {'tblHeader': len(body.findall('.//' + qn('w:tblHeader'))), 'cantSplit': len(body.findall('.//' + qn('w:cantSplit')))}
+
+
+def action_document(rows: list[list[str]]) -> bytes:
+    d = docx.Document(); d.add_heading('Required actions', 1)
+    table = d.add_table(rows=0, cols=len(rows[0]))
+    for i, row in enumerate(rows):
+        cells = table.add_row().cells
+        for cell, value in zip(cells, row): cell.text = value
+        tr_pr = table.rows[i]._tr.get_or_add_trPr()
+        if i == 0: tr_pr.append(etree.SubElement(etree.Element('x'), qn('w:tblHeader')))  # header repeats on each page
+        tr_pr.append(etree.SubElement(etree.Element('x'), qn('w:cantSplit')))  # a row is never split across pages
+    buf = io.BytesIO(); d.save(buf); return buf.getvalue()
+
+
+def case_brief_document(cases: list[dict], fields: list[str]) -> bytes:
+    d = docx.Document()
+    for i, c in enumerate(cases):
+        if i: d.add_page_break()  # each case begins on its own page
+        d.add_heading(c['case_id'], 1)
+        table = d.add_table(rows=0, cols=2)
+        for f in fields:
+            cells = table.add_row().cells
+            cells[0].text = f; cells[1].text = 'not recorded' if c[f] is None else str(c[f])
+    buf = io.BytesIO(); d.save(buf); return buf.getvalue()
+
+# ---------------------------------------------------------------- P85
+def slide_map(nodes: list[dict], edges: list[tuple[str, str]]) -> dict:
+    graph = nx.DiGraph(); graph.add_nodes_from(n['id'] for n in nodes); graph.add_edges_from(edges)
+    if set(graph) != {n['id'] for n in nodes}: raise g.Blocked('connector endpoint outside the shape set')
+    components = [sorted(c) for c in nx.weakly_connected_components(graph)]
+    if not nx.is_directed_acyclic_graph(graph): raise g.Blocked('connector graph has a cycle; no topological order exists')
+    order = list(nx.topological_sort(graph))
+    prs = pptx.Presentation(); slide = prs.slides.add_slide(prs.slide_layouts[6])
+    shapes = {}
+    for i, n in enumerate(nodes):
+        box = slide.shapes.add_textbox(Inches(1), Inches(0.5 + 0.6 * i), Inches(3), Inches(0.4))
+        box.text_frame.text = n['text']; shapes[n['id']] = box
+    for a, b in edges:
+        connector = slide.shapes.add_connector(1, Emu(0), Emu(0), Emu(0), Emu(0))
+        connector.begin_connect(shapes[a], 0); connector.end_connect(shapes[b], 0)
+    buf = io.BytesIO(); prs.save(buf)
+    return {'components': sorted(components), 'order': order, 'isolated': sorted(c[0] for c in components if len(c) == 1),
+            'shapes': len(shapes), 'connectors': len(edges), 'bytes': buf.getvalue(), 'edges_inferred': 0}
+
+
+def deck_shapes(data: bytes) -> dict:
+    prs = pptx.Presentation(io.BytesIO(data)); slide = prs.slides[0]
+    texts = [s.text_frame.text for s in slide.shapes if s.has_text_frame]
+    connectors = [s for s in slide.shapes if s.shape_type is not None and s.element.tag.endswith('}cxnSp')]
+    attached = 0
+    for c in connectors:
+        xml = etree.tostring(c.element).decode()
+        if 'stCxn' in xml and 'endCxn' in xml: attached += 1
+    return {'texts': texts, 'connectors': len(connectors), 'attached_connectors': attached}
+
+# ---------------------------------------------------------------- P87
+def briefing_deck(categories: list[str], values: list[float]) -> bytes:
+    prs = pptx.Presentation(); slide = prs.slides.add_slide(prs.slide_layouts[6])
+    data = CategoryChartData(); data.categories = categories; data.add_series('events', values)
+    slide.shapes.add_chart(XL_CHART_TYPE.COLUMN_CLUSTERED, Inches(1), Inches(1), Inches(6), Inches(4), data)
+    buf = io.BytesIO(); prs.save(buf); return buf.getvalue()
+
+
+def chart_readback(data: bytes) -> dict:
+    prs = pptx.Presentation(io.BytesIO(data)); chart = next(s.chart for s in prs.slides[0].shapes if s.has_chart)
+    plot = chart.plots[0]
+    return {'categories': list(plot.categories), 'values': list(chart.series[0].values), 'type': str(chart.chart_type)}
+
+# ---------------------------------------------------------------- P88
+def external_relationships(package: bytes) -> list[str]:
+    out = []
+    with zipfile.ZipFile(io.BytesIO(package)) as z:
+        for name in z.namelist():
+            if not name.endswith('.rels'): continue
+            root = etree.fromstring(z.read(name))
+            for rel in root:
+                if rel.get('TargetMode') == 'External': out.append('%s -> %s' % (name, rel.get('Target')))
+    return sorted(out)
+
+
+def checked_native_package(package: bytes) -> dict:
+    external = external_relationships(package)
+    if external: raise g.Blocked('native package carries an external relationship: ' + external[0])
+    return {'external_relationships': 0}
+
+
+def libreoffice_export(package: bytes, suffix: str) -> dict:
+    if not shutil.which('soffice'): return {'available': False, 'reason': 'soffice not on PATH'}
+    tmp = Path(tempfile.mkdtemp()); src = tmp / ('input' + suffix); src.write_bytes(package)
+    run = subprocess.run(['soffice', '-env:UserInstallation=file://' + str(tmp / 'profile'), '--headless', '--norestore',
+                          '--convert-to', 'pdf', '--outdir', str(tmp), str(src)], capture_output=True, text=True, timeout=600)
+    produced = sorted(tmp.glob('*.pdf'))
+    if not produced: return {'available': False, 'reason': 'conversion produced no file: ' + (run.stderr or run.stdout).strip()[:120]}
+    return {'available': True, 'pages': g8.pdf_text(produced[0].read_bytes())[0]}
+
+# ---------------------------------------------------------------- P89
+class ProofEntry(BaseModel):
+    model_config = ConfigDict(strict=True, extra='forbid')
+    proof_id: str = Field(pattern=r'^P\d+$')
+    title: str = Field(min_length=1)
+    line: int = Field(ge=1)
+
+HEADING = re.compile(r'^(P\d+)\s+(.*)$')
+
+
+def parse_catalog(markdown_text: str) -> dict:
+    tokens = MarkdownIt().parse(markdown_text)
+    entries = []; seen = set()
+    for i, token in enumerate(tokens):
+        if token.type != 'heading_open' or token.tag != 'h2': continue
+        inline = tokens[i + 1]
+        match = HEADING.match(inline.content.strip())
+        if not match: continue
+        proof_id, title = match.group(1), match.group(2).strip()
+        if proof_id in seen: raise g.Blocked('duplicate proof id: ' + proof_id)
+        seen.add(proof_id)
+        entries.append(ProofEntry(proof_id=proof_id, title=title, line=token.map[0] + 1).model_dump())
+    fences = [t for t in tokens if t.type == 'fence']
+    return {'entries': entries, 'fences': len(fences),
+            'heading_like_lines_inside_fences': sum(len(re.findall(r'(?m)^## P\d+', t.content)) for t in fences)}
+
+C = []
+def case(i):
+    def reg(fn): C.append((i, fn)); return fn
+    return reg
+
+
+@case(81)
+def formula_caches_must_be_computed_not_defaulted():
+    rows = [('Confirmation of receipt', 1434), ('T02 Check', 1368), ('T03 Adjust', 55)]
+    defaulted = authored_workbook(rows, cache='default')
+    computed = authored_workbook(rows, cache='computed')
+    g.equal(formula_cache(defaulted)['cached'], 0)  # the default cache is a zero nobody computed (P80)
+    g.equal(formula_cache(computed)['cached'], 2857)
+    g.equal(formula_cache(computed)['formula'], '=SUM(B2:B4)')
+    with_missing = authored_workbook(rows, cache='computed', missing=[3])
+    cells = blank_cells(with_missing)
+    g.equal(cells['openpyxl'][2], None)  # a missing source cell stays blank
+    g.equal(cells['calamine'][2], '')
+    g.equal(formula_cache(with_missing)['cached'], 2802)  # and is excluded from the computed total
+    g.rejects(g.Blocked, lambda: g8.read_two_ways(with_missing, data_rows=4))  # a blank cell reads None through one reader and '' through the other
+    return {'default_cache_is_zero_reproduced': True, 'computed_cache_supplied_explicitly': True,
+            'missing_cells_stay_blank_not_zero': True, 'blank_cell_breaks_the_two_reader_check_reproduced': "openpyxl None vs calamine ''",
+            'conditional_format_and_freeze_panes_are_presentation_only': True}
+
+
+@case(82)
+def rule_explorer_enumerates_valid_and_refuses_invalid():
+    out = enumerate_workbook_rule(10, range(0, 19), [-1, 9.5, True, 'ten'])
+    g.equal(out['decided'], 9)  # 10..18 inclusive
+    g.equal(len(out['refused_invalid']), 4)
+    g.require('not a verified historical roster' in out['roster_limit'], 'the roster limit travels with the result')
+    g.rejects(g.Blocked, lambda: enumerate_workbook_rule(10, range(0, 19), [12]))  # a valid input must not be filed as invalid
+    return {'complete_domain_enumerated': True, 'invalid_inputs_refused': 4, 'roster_limit_recorded': True,
+            'domain_is_not_the_input_space': 'integers 0..18 only (P54)'}
+
+
+@case(83)
+def python_docx_cannot_paginate():
+    d = docx.Document(); d.add_heading('Policy explanations', 1)
+    for i in range(3): d.add_paragraph('meeting tsc-2023-12-0%d present 10' % i)
+    d.add_page_break(); d.add_paragraph('second page')
+    buf = io.BytesIO(); d.save(buf); data = buf.getvalue()
+    out = document_blocks(data)
+    g.equal(out['page_count_available'], False)  # python-docx exposes no page count; pagination belongs to a renderer
+    g.equal(out['explicit_page_breaks'], 1)  # only the explicit break is knowable from the file
+    g.equal([b[1] for b in out['blocks'] if b[0] == 'paragraph'][0], 'Policy explanations')
+    g.equal('Policy explanations' in out['text_nodes'], True)
+    api_text = [b[1] for b in out['blocks'] if b[0] == 'paragraph' and b[1]]
+    g.equal(all(t in out['text_nodes'] for t in api_text), True)  # python-docx and lxml readbacks agree
+    return {'no_page_count_api_reproduced': True, 'balanced_pages_claim_needs_a_renderer': True,
+            'explicit_breaks_are_the_only_structural_signal': True, 'two_readbacks_agree': True}
+
+
+@case(84)
+def table_formatting_round_trips_in_the_xml():
+    rows = [['action', 'actor', 'quote'], ['make', 'agency', 'shall make'], ['have', 'TSC', 'must have']]
+    data = action_document(rows)
+    fmt = repeating_header_and_unsplit(data)
+    g.equal(fmt['tblHeader'], 1); g.equal(fmt['cantSplit'], 3)  # header repeats once, no row may split
+    out = document_blocks(data)
+    table = [b[1] for b in out['blocks'] if b[0] == 'table'][0]
+    g.equal(table, rows)
+    for value in ['shall make', 'must have', 'agency']:
+        g.equal(value in out['text_nodes'], True)
+    return {'repeating_header_written_and_read': True, 'unsplit_rows_written_and_read': True,
+            'table_content_preserved': True, 'xml_text_nodes_checked': len(out['text_nodes'])}
+
+
+@case(85)
+def slide_map_infers_no_edges():
+    nodes = [{'id': 'n1', 'text': 'share'}, {'id': 'n2', 'text': 'ensure'}, {'id': 'n3', 'text': 'isolated'}]
+    edges = [('n1', 'n2')]
+    out = slide_map(nodes, edges)
+    g.equal(out['components'], [['n1', 'n2'], ['n3']])  # the isolated node is retained as its own component
+    g.equal(out['isolated'], ['n3']); g.equal(out['edges_inferred'], 0)
+    back = deck_shapes(out['bytes'])
+    g.equal(sorted(back['texts']), ['ensure', 'isolated', 'share'])
+    g.equal((back['connectors'], back['attached_connectors']), (1, 1))  # the connector is explicitly attached at both ends
+    g.rejects(g.Blocked, lambda: slide_map(nodes, edges + [('n2', 'n1')]))  # a cycle has no topological order
+    g.rejects(g.Blocked, lambda: slide_map(nodes, edges + [('n1', 'zz')]))
+    return {'isolated_nodes_retained': True, 'no_edges_inferred': True, 'connectors_attached_at_both_ends': True,
+            'cycle_blocked': True}
+
+
+@case(86)
+def each_case_begins_on_its_own_page():
+    fields = ['department', 'deadline', 'outcome']
+    cases = [{'case_id': 'case-10011', 'department': 'General', 'deadline': '2011-12-06', 'outcome': 'flagged'},
+             {'case_id': 'case-10017', 'department': 'Experts', 'deadline': '2011-12-06', 'outcome': 'unflagged'},
+             {'case_id': 'case-10024', 'department': 'General', 'deadline': None, 'outcome': None}]
+    data = case_brief_document(cases, fields)
+    out = document_blocks(data)
+    g.equal(out['explicit_page_breaks'], len(cases) - 1)  # a break between cases, none before the first
+    g.equal(out['text_nodes'].count('not recorded'), 2)  # the third case keeps its missing values explicit
+    g.equal('None' in out['text_nodes'], False)
+    tables = [b[1] for b in out['blocks'] if b[0] == 'table']
+    g.equal(len(tables), 3); g.equal(tables[0][0], ['department', 'General'])
+    return {'page_break_per_case': True, 'missing_values_explicit': True, 'distinct_case_states_preserved': True,
+            'rendered_page_count_still_needs_a_renderer': True}
+
+
+@case(87)
+def chart_values_read_back_from_the_deck():
+    categories = ['General', 'Experts', 'Customer contact']; values = [1390.0, 15.0, 29.0]
+    data = briefing_deck(categories, values)
+    back = chart_readback(data)
+    g.equal(back['categories'], categories); g.equal(back['values'], values)
+    g.equal(checked_native_package(data), {'external_relationships': 0})
+    g.require('COLUMN_CLUSTERED' in back['type'], 'the chart type is the declared one')
+    return {'chart_values_round_trip': True, 'categories_preserved': True, 'embedded_workbook_is_native': True,
+            'no_external_relationship': True}
+
+
+@case(88)
+def native_packages_carry_no_external_relationship():
+    prs = pptx.Presentation(); slide = prs.slides.add_slide(prs.slide_layouts[6])
+    box = slide.shapes.add_textbox(Inches(1), Inches(1), Inches(4), Inches(1)); box.text_frame.text = 'clean'
+    clean = io.BytesIO(); prs.save(clean); clean_bytes = clean.getvalue()
+    g.equal(external_relationships(clean_bytes), [])
+    run = box.text_frame.paragraphs[0].runs[0]
+    run.hyperlink.address = 'https://example.com/x'  # the authoring API adds an external relationship without complaint
+    linked = io.BytesIO(); prs.save(linked); linked_bytes = linked.getvalue()
+    external = external_relationships(linked_bytes)
+    g.equal(len(external), 1); g.require('https://example.com/x' in external[0], 'the external target is named')
+    g.rejects(g.Blocked, lambda: checked_native_package(linked_bytes))
+    export = libreoffice_export(clean_bytes, '.pptx')
+    return {'external_relationship_created_silently_reproduced': True, 'package_scan_blocks_it': True,
+            'libreoffice_export': export, 'native_render_outside_python_audit_scope': True}
+
+
+@case(89)
+def a_heading_inside_a_fence_is_not_a_proof():
+    source = ('# Proofs\n\n## P1  procedures -> facts\n\ntext\n\n```\n## P999  not a proof\n```\n\n'
+              '## P2  facts -> ordered steps\n\nmore\n')
+    out = parse_catalog(source)
+    g.equal([e['proof_id'] for e in out['entries']], ['P1', 'P2'])  # the fenced heading never becomes a proof
+    g.equal(out['heading_like_lines_inside_fences'], 1); g.equal(out['fences'], 1)
+    g.equal(out['entries'][0]['title'], 'procedures -> facts')
+    g.rejects(g.Blocked, lambda: parse_catalog(source + '\n## P1  duplicate\n'))
+    g.rejects(ValidationError, lambda: ProofEntry.model_validate({'proof_id': '1', 'title': 'x', 'line': 1}))
+    return {'fenced_heading_excluded_reproduced': True, 'ids_unique': True, 'titles_retained_verbatim': True,
+            'snapshot_does_not_claim_current_artifact_integrity': True}
+
+
+@case(90)
+def proof_explorer_renders_the_typed_catalog():
+    source = '# Proofs\n\n## P1  procedures -> facts\n\n## P2  facts -> ordered steps\n'
+    catalog = parse_catalog(source)['entries']
+    rows = [{'proof_id': e['proof_id'], 'title': e['title'], 'line': str(e['line'])} for e in catalog]
+    page = g8.CATALOG.render(title='Proof explorer', fields=['proof_id', 'title', 'line'], rows=rows)
+    g.equal('procedures -&gt; facts' in page, True)  # the arrow in a title is escaped, not interpreted
+    if g8.jsdom_available():
+        dom = g8.run_dom(page)
+        g.equal([r[0] for r in dom['rows']], ['P1', 'P2'])
+        g.equal(dom['externalRequests'], 0); g.equal(dom['lang'], 'en-US')
+    return {'catalog_rendered_from_typed_entries': True, 'titles_escaped': True, 'dom_checked': g8.jsdom_available(),
+            'print_states_not_rebuilt': True}
+
+
+def run() -> dict:
+    g.ASSERTIONS = 0; rows = []
+    for i, fn in C:
+        before = g.ASSERTIONS
+        try: r = fn(); state = 'passed'; error = None
+        except Exception: r = {}; state = 'failed'; error = traceback.format_exc()
+        rows.append({'proof': i, 'test': fn.__name__, 'status': state, 'assertions': g.ASSERTIONS - before, 'result': r, 'error': error})
+    packages = ['pydantic', 'python-docx', 'python-pptx', 'XlsxWriter', 'openpyxl', 'python-calamine', 'networkx', 'lxml', 'markdown-it-py', 'deepdiff']
+    here = Path(__file__).resolve().parent
+    return {'scope': 'Bounded authored handoff fixtures and reproduced library defaults; the original P81-P90 chains and their artifacts were not rerun. The formulas engine and a working LibreOffice import filter were not available, and those limits are recorded rather than claimed.',
+            'test_cases': len(rows), 'passed': sum(r['status'] == 'passed' for r in rows), 'failed': sum(r['status'] == 'failed' for r in rows),
+            'assertions': g.ASSERTIONS, 'full_chains_executed': 0, 'network_calls': 0, 'business_actions': 0,
+            'source_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+            'dependency_sha256': {name: hashlib.sha256((here / name).read_bytes()).hexdigest() for name in ['handoff_guards_v1.py', 'handoff_guards_v8.py']},
+            'library_versions': {n: importlib.metadata.version(n) for n in packages}, 'results': rows}
+
+
+if __name__ == '__main__':
+    p = argparse.ArgumentParser(); p.add_argument('--report', type=Path, required=True); p.add_argument('--jsdom-dir', default=os.environ.get('JSDOM_DIR', ''))
+    args = p.parse_args(); os.environ['JSDOM_DIR'] = args.jsdom_dir; g8.JSDOM_DIR = args.jsdom_dir
+    result = run(); args.report.parent.mkdir(parents=True, exist_ok=True)
+    args.report.write_text(json.dumps(result, indent=2, sort_keys=True, allow_nan=False) + '\n')
+    print(json.dumps({k: result[k] for k in ['test_cases', 'passed', 'failed', 'assertions']}))
+    if result['failed']:
+        print('\n'.join(r['error'] for r in result['results'] if r['error'])); raise SystemExit(1)
+```
+
+## Fresh local guard evidence: guards-v9.json
+
+Result file SHA256 44b0338b5173e26d6e73ac127e69b23a4daacb59c343f334f74bab407de20fbd; bytes 5020. These results do not rerun or promote the full proof chains.
+
+```json
+{
+  "assertions": 52,
+  "business_actions": 0,
+  "dependency_sha256": {
+    "handoff_guards_v1.py": "2b3138b692ecfd02b76ae34bdb001f5046608bb2983d8709d6c55c0765f7c9b8",
+    "handoff_guards_v8.py": "9809d9d6df911eb5f1326a8ded8d53f7aa039679a8570eeb0c24fcb12ff8751c"
+  },
+  "failed": 0,
+  "full_chains_executed": 0,
+  "library_versions": {
+    "XlsxWriter": "3.2.9",
+    "deepdiff": "9.1.0",
+    "lxml": "6.1.3",
+    "markdown-it-py": "4.2.0",
+    "networkx": "3.6.1",
+    "openpyxl": "3.1.5",
+    "pydantic": "2.13.5",
+    "python-calamine": "0.8.2",
+    "python-docx": "1.2.0",
+    "python-pptx": "1.0.2"
+  },
+  "network_calls": 0,
+  "passed": 10,
+  "results": [
+    {
+      "assertions": 7,
+      "error": null,
+      "proof": 81,
+      "result": {
+        "blank_cell_breaks_the_two_reader_check_reproduced": "openpyxl None vs calamine ''",
+        "computed_cache_supplied_explicitly": true,
+        "conditional_format_and_freeze_panes_are_presentation_only": true,
+        "default_cache_is_zero_reproduced": true,
+        "missing_cells_stay_blank_not_zero": true
+      },
+      "status": "passed",
+      "test": "formula_caches_must_be_computed_not_defaulted"
+    },
+    {
+      "assertions": 4,
+      "error": null,
+      "proof": 82,
+      "result": {
+        "complete_domain_enumerated": true,
+        "domain_is_not_the_input_space": "integers 0..18 only (P54)",
+        "invalid_inputs_refused": 4,
+        "roster_limit_recorded": true
+      },
+      "status": "passed",
+      "test": "rule_explorer_enumerates_valid_and_refuses_invalid"
+    },
+    {
+      "assertions": 5,
+      "error": null,
+      "proof": 83,
+      "result": {
+        "balanced_pages_claim_needs_a_renderer": true,
+        "explicit_breaks_are_the_only_structural_signal": true,
+        "no_page_count_api_reproduced": true,
+        "two_readbacks_agree": true
+      },
+      "status": "passed",
+      "test": "python_docx_cannot_paginate"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 84,
+      "result": {
+        "repeating_header_written_and_read": true,
+        "table_content_preserved": true,
+        "unsplit_rows_written_and_read": true,
+        "xml_text_nodes_checked": 10
+      },
+      "status": "passed",
+      "test": "table_formatting_round_trips_in_the_xml"
+    },
+    {
+      "assertions": 7,
+      "error": null,
+      "proof": 85,
+      "result": {
+        "connectors_attached_at_both_ends": true,
+        "cycle_blocked": true,
+        "isolated_nodes_retained": true,
+        "no_edges_inferred": true
+      },
+      "status": "passed",
+      "test": "slide_map_infers_no_edges"
+    },
+    {
+      "assertions": 5,
+      "error": null,
+      "proof": 86,
+      "result": {
+        "distinct_case_states_preserved": true,
+        "missing_values_explicit": true,
+        "page_break_per_case": true,
+        "rendered_page_count_still_needs_a_renderer": true
+      },
+      "status": "passed",
+      "test": "each_case_begins_on_its_own_page"
+    },
+    {
+      "assertions": 4,
+      "error": null,
+      "proof": 87,
+      "result": {
+        "categories_preserved": true,
+        "chart_values_round_trip": true,
+        "embedded_workbook_is_native": true,
+        "no_external_relationship": true
+      },
+      "status": "passed",
+      "test": "chart_values_read_back_from_the_deck"
+    },
+    {
+      "assertions": 4,
+      "error": null,
+      "proof": 88,
+      "result": {
+        "external_relationship_created_silently_reproduced": true,
+        "libreoffice_export": {
+          "available": false,
+          "reason": "conversion produced no file: Warning: failed to launch javaldx - java may not function correctly\nError: source file could not be loaded"
+        },
+        "native_render_outside_python_audit_scope": true,
+        "package_scan_blocks_it": true
+      },
+      "status": "passed",
+      "test": "native_packages_carry_no_external_relationship"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 89,
+      "result": {
+        "fenced_heading_excluded_reproduced": true,
+        "ids_unique": true,
+        "snapshot_does_not_claim_current_artifact_integrity": true,
+        "titles_retained_verbatim": true
+      },
+      "status": "passed",
+      "test": "a_heading_inside_a_fence_is_not_a_proof"
+    },
+    {
+      "assertions": 4,
+      "error": null,
+      "proof": 90,
+      "result": {
+        "catalog_rendered_from_typed_entries": true,
+        "dom_checked": true,
+        "print_states_not_rebuilt": true,
+        "titles_escaped": true
+      },
+      "status": "passed",
+      "test": "proof_explorer_renders_the_typed_catalog"
+    }
+  ],
+  "scope": "Bounded authored handoff fixtures and reproduced library defaults; the original P81-P90 chains and their artifacts were not rerun. The formulas engine and a working LibreOffice import filter were not available, and those limits are recorded rather than claimed.",
+  "source_sha256": "c387cba5619cc678a11e03ce41ca8890a7da742bacf1d34e57e008929a9a0c76",
+  "test_cases": 10
+}
+```
+
+Checkpoint coverage: 90 of 300 proof-specific handoff amendments written, through P90. Prior cumulative TXT SHA256 0ceec259077f752aa6baf0a92d5a43c23ef1aa067cc51ede218b7534b7d685df.

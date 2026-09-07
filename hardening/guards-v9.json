@@ -1,0 +1,163 @@
+{
+  "assertions": 52,
+  "business_actions": 0,
+  "dependency_sha256": {
+    "handoff_guards_v1.py": "2b3138b692ecfd02b76ae34bdb001f5046608bb2983d8709d6c55c0765f7c9b8",
+    "handoff_guards_v8.py": "9809d9d6df911eb5f1326a8ded8d53f7aa039679a8570eeb0c24fcb12ff8751c"
+  },
+  "failed": 0,
+  "full_chains_executed": 0,
+  "library_versions": {
+    "XlsxWriter": "3.2.9",
+    "deepdiff": "9.1.0",
+    "lxml": "6.1.3",
+    "markdown-it-py": "4.2.0",
+    "networkx": "3.6.1",
+    "openpyxl": "3.1.5",
+    "pydantic": "2.13.5",
+    "python-calamine": "0.8.2",
+    "python-docx": "1.2.0",
+    "python-pptx": "1.0.2"
+  },
+  "network_calls": 0,
+  "passed": 10,
+  "results": [
+    {
+      "assertions": 7,
+      "error": null,
+      "proof": 81,
+      "result": {
+        "blank_cell_breaks_the_two_reader_check_reproduced": "openpyxl None vs calamine ''",
+        "computed_cache_supplied_explicitly": true,
+        "conditional_format_and_freeze_panes_are_presentation_only": true,
+        "default_cache_is_zero_reproduced": true,
+        "missing_cells_stay_blank_not_zero": true
+      },
+      "status": "passed",
+      "test": "formula_caches_must_be_computed_not_defaulted"
+    },
+    {
+      "assertions": 4,
+      "error": null,
+      "proof": 82,
+      "result": {
+        "complete_domain_enumerated": true,
+        "domain_is_not_the_input_space": "integers 0..18 only (P54)",
+        "invalid_inputs_refused": 4,
+        "roster_limit_recorded": true
+      },
+      "status": "passed",
+      "test": "rule_explorer_enumerates_valid_and_refuses_invalid"
+    },
+    {
+      "assertions": 5,
+      "error": null,
+      "proof": 83,
+      "result": {
+        "balanced_pages_claim_needs_a_renderer": true,
+        "explicit_breaks_are_the_only_structural_signal": true,
+        "no_page_count_api_reproduced": true,
+        "two_readbacks_agree": true
+      },
+      "status": "passed",
+      "test": "python_docx_cannot_paginate"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 84,
+      "result": {
+        "repeating_header_written_and_read": true,
+        "table_content_preserved": true,
+        "unsplit_rows_written_and_read": true,
+        "xml_text_nodes_checked": 10
+      },
+      "status": "passed",
+      "test": "table_formatting_round_trips_in_the_xml"
+    },
+    {
+      "assertions": 7,
+      "error": null,
+      "proof": 85,
+      "result": {
+        "connectors_attached_at_both_ends": true,
+        "cycle_blocked": true,
+        "isolated_nodes_retained": true,
+        "no_edges_inferred": true
+      },
+      "status": "passed",
+      "test": "slide_map_infers_no_edges"
+    },
+    {
+      "assertions": 5,
+      "error": null,
+      "proof": 86,
+      "result": {
+        "distinct_case_states_preserved": true,
+        "missing_values_explicit": true,
+        "page_break_per_case": true,
+        "rendered_page_count_still_needs_a_renderer": true
+      },
+      "status": "passed",
+      "test": "each_case_begins_on_its_own_page"
+    },
+    {
+      "assertions": 4,
+      "error": null,
+      "proof": 87,
+      "result": {
+        "categories_preserved": true,
+        "chart_values_round_trip": true,
+        "embedded_workbook_is_native": true,
+        "no_external_relationship": true
+      },
+      "status": "passed",
+      "test": "chart_values_read_back_from_the_deck"
+    },
+    {
+      "assertions": 4,
+      "error": null,
+      "proof": 88,
+      "result": {
+        "external_relationship_created_silently_reproduced": true,
+        "libreoffice_export": {
+          "available": false,
+          "reason": "conversion produced no file: Warning: failed to launch javaldx - java may not function correctly\nError: source file could not be loaded"
+        },
+        "native_render_outside_python_audit_scope": true,
+        "package_scan_blocks_it": true
+      },
+      "status": "passed",
+      "test": "native_packages_carry_no_external_relationship"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 89,
+      "result": {
+        "fenced_heading_excluded_reproduced": true,
+        "ids_unique": true,
+        "snapshot_does_not_claim_current_artifact_integrity": true,
+        "titles_retained_verbatim": true
+      },
+      "status": "passed",
+      "test": "a_heading_inside_a_fence_is_not_a_proof"
+    },
+    {
+      "assertions": 4,
+      "error": null,
+      "proof": 90,
+      "result": {
+        "catalog_rendered_from_typed_entries": true,
+        "dom_checked": true,
+        "print_states_not_rebuilt": true,
+        "titles_escaped": true
+      },
+      "status": "passed",
+      "test": "proof_explorer_renders_the_typed_catalog"
+    }
+  ],
+  "scope": "Bounded authored handoff fixtures and reproduced library defaults; the original P81-P90 chains and their artifacts were not rerun. The formulas engine and a working LibreOffice import filter were not available, and those limits are recorded rather than claimed.",
+  "source_sha256": "c387cba5619cc678a11e03ce41ca8890a7da742bacf1d34e57e008929a9a0c76",
+  "test_cases": 10
+}
