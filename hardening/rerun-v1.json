@@ -1,0 +1,150 @@
+{
+  "assertions": 70,
+  "business_actions": 0,
+  "failed": 0,
+  "full_chains_executed": 0,
+  "library_versions": {
+    "Jinja2": "3.1.6",
+    "lark": "1.3.1",
+    "networkx": "3.6.1",
+    "pandas": "2.2.3",
+    "pydantic": "2.13.5",
+    "python-dateutil": "2.9.0.post0",
+    "rapidfuzz": "3.14.6",
+    "regex": "2026.9.3",
+    "spacy": "3.8.16"
+  },
+  "network_calls": 0,
+  "passed": 10,
+  "results": [
+    {
+      "assertions": 7,
+      "error": null,
+      "proof": 1,
+      "result": {
+        "dependency_matcher": "checked on authored parse",
+        "normalization_mapping": "checked",
+        "statistical_parser_accuracy": "not tested",
+        "unannotated_document_rejected_for_dependency_use": true
+      },
+      "status": "passed",
+      "test": "source_span_and_missing_parser"
+    },
+    {
+      "assertions": 7,
+      "error": null,
+      "proof": 2,
+      "result": {
+        "metadata_loss_reproduced": true,
+        "retained_and_removed_edge_lineage": "checked",
+        "z3_entailment": "not run"
+      },
+      "status": "passed",
+      "test": "reduction_retains_evidence"
+    },
+    {
+      "assertions": 7,
+      "error": null,
+      "proof": 3,
+      "result": {
+        "DST_gap_and_fold": "detected",
+        "TIMEX_extraction": "not run",
+        "calendar_month": "checked",
+        "unanchored_duration": "blocked"
+      },
+      "status": "passed",
+      "test": "dates_need_clock_contract"
+    },
+    {
+      "assertions": 7,
+      "error": null,
+      "proof": 4,
+      "result": {
+        "legal_interpretation": "not established",
+        "missing_template_field": "blocked",
+        "supported_modalities": 3,
+        "unmodeled_scope_clauses": "blocked"
+      },
+      "status": "passed",
+      "test": "modality_and_unsupported_exception_gate"
+    },
+    {
+      "assertions": 4,
+      "error": null,
+      "proof": 5,
+      "result": {
+        "BPMN_conversion": "not run",
+        "duplicate_id": "blocked",
+        "gateway_mutation": "blocked",
+        "missing_node": "blocked"
+      },
+      "status": "passed",
+      "test": "gateway_identity_and_type_gate"
+    },
+    {
+      "assertions": 12,
+      "error": null,
+      "proof": 6,
+      "result": {
+        "clingo_symbol_adapter": "not run",
+        "coercion_and_extra_fields": "rejected",
+        "duplicate_JSON_keys": "rejected"
+      },
+      "status": "passed",
+      "test": "strict_fact_transport"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 7,
+      "result": {
+        "receipt_completeness": "checked",
+        "speech_act_classifier": "not implemented",
+        "speech_act_promotions_blocked": 4
+      },
+      "status": "passed",
+      "test": "discussion_is_not_completion"
+    },
+    {
+      "assertions": 5,
+      "error": null,
+      "proof": 8,
+      "result": {
+        "empty_or_overlapping_partitions": "blocked",
+        "entity_leakage": "blocked",
+        "process_discovery": "not run"
+      },
+      "status": "passed",
+      "test": "process_discovery_partition_gate"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 9,
+      "result": {
+        "replay_population": "reconciled",
+        "token_replay_engine": "not run",
+        "unknown_is_fit": false
+      },
+      "status": "passed",
+      "test": "replay_completeness_and_role"
+    },
+    {
+      "assertions": 9,
+      "error": null,
+      "proof": 10,
+      "result": {
+        "WordNet_corpus": "not installed; no lexical expansion executed",
+        "fuzzy_output": "candidate only",
+        "multiword_aliases": "checked",
+        "polarity_change": "blocked",
+        "polysemy": "unresolved"
+      },
+      "status": "passed",
+      "test": "scoped_synonym_and_fuzzy_candidate_gates"
+    }
+  ],
+  "scope": "Local handoff adapters and authored counterexamples only; full proof chains and production integration not executed.",
+  "source_sha256": "2b3138b692ecfd02b76ae34bdb001f5046608bb2983d8709d6c55c0765f7c9b8",
+  "test_cases": 10
+}

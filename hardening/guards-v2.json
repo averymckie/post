@@ -1,0 +1,121 @@
+{
+  "assertions": 34,
+  "dependency_sha256": "2b3138b692ecfd02b76ae34bdb001f5046608bb2983d8709d6c55c0765f7c9b8",
+  "failed": 0,
+  "full_chains_executed": 0,
+  "passed": 10,
+  "results": [
+    {
+      "assertions": 2,
+      "error": null,
+      "proof": 11,
+      "result": {
+        "denominator_keeps_ambiguity": true,
+        "duplicate_mention_rejected": true
+      },
+      "status": "passed",
+      "test": "mention_counts"
+    },
+    {
+      "assertions": 5,
+      "error": null,
+      "proof": 12,
+      "result": {
+        "case_partitioned_gaps": true,
+        "guard_blocks_null_and_fanout": true,
+        "pandas_null_match_reproduced": true
+      },
+      "status": "passed",
+      "test": "partitioned_lag_and_null_join"
+    },
+    {
+      "assertions": 5,
+      "error": null,
+      "proof": 13,
+      "result": {
+        "actual_vote_not_inferred": true,
+        "time_specific_population": true
+      },
+      "status": "passed",
+      "test": "historical_roster"
+    },
+    {
+      "assertions": 3,
+      "error": null,
+      "proof": 14,
+      "result": {
+        "bindings_checked_as_data": true,
+        "native_pptx_not_created": true
+      },
+      "status": "passed",
+      "test": "duplicate_labels_distinct_nodes"
+    },
+    {
+      "assertions": 3,
+      "error": null,
+      "proof": 15,
+      "result": {
+        "native_docx_not_created": true,
+        "paragraph_table_order_and_negation": "checked"
+      },
+      "status": "passed",
+      "test": "document_body_order"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 16,
+      "result": {
+        "native_spreadsheet_not_created": true,
+        "null_empty_bool_numeric_and_formula_like_text_distinguished": true
+      },
+      "status": "passed",
+      "test": "typed_cells"
+    },
+    {
+      "assertions": 4,
+      "error": null,
+      "proof": 17,
+      "result": {
+        "JCS_compliance_or_signer_authority": false,
+        "local_json_profile_checked": true
+      },
+      "status": "passed",
+      "test": "local_digest_scope"
+    },
+    {
+      "assertions": 2,
+      "error": null,
+      "proof": 18,
+      "result": {
+        "discussion_subset_not_an_executable_plan": true,
+        "omitted_prerequisite_detected": true
+      },
+      "status": "passed",
+      "test": "predecessor_closed_selection"
+    },
+    {
+      "assertions": 2,
+      "error": null,
+      "proof": 19,
+      "result": {
+        "duplicate_labels_do_not_hide_lost_identity": true
+      },
+      "status": "passed",
+      "test": "keyed_reverse_read"
+    },
+    {
+      "assertions": 2,
+      "error": null,
+      "proof": 20,
+      "result": {
+        "mention_to_execution_promotion_blocked": true
+      },
+      "status": "passed",
+      "test": "discourse_order_veto"
+    }
+  ],
+  "scope": "Bounded authored handoff fixtures; actual original chain integrations and native Office exporters not executed.",
+  "source_sha256": "0a406d0e5f6b8b1b931d6786ed1d8e95fef39b79106eae8852703f9394952538",
+  "test_cases": 10
+}

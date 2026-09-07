@@ -1,0 +1,215 @@
+{
+  "assertions": 92,
+  "business_actions": 0,
+  "dependency_sha256": {
+    "handoff_guards_v1.py": "2b3138b692ecfd02b76ae34bdb001f5046608bb2983d8709d6c55c0765f7c9b8",
+    "handoff_guards_v2.py": "0a406d0e5f6b8b1b931d6786ed1d8e95fef39b79106eae8852703f9394952538"
+  },
+  "failed": 0,
+  "full_chains_executed": 0,
+  "library_versions": {
+    "Jinja2": "3.1.6",
+    "SpiffWorkflow": "3.2.0",
+    "clingo": "5.8.2",
+    "csv-diff": "1.2",
+    "deepdiff": "9.1.0",
+    "duckdb": "1.5.5",
+    "ftfy": "6.3.1",
+    "lxml": "6.1.3",
+    "networkx": "3.6.1",
+    "nltk": "3.10.3",
+    "numpy": "2.4.6",
+    "openpyxl": "3.1.5",
+    "pandas": "2.2.3",
+    "plotly": "7.0.0",
+    "pm4py": "2.7.23.8",
+    "portion": "2.6.2",
+    "pydantic": "2.13.5",
+    "python-calamine": "0.8.2",
+    "python-docx": "1.2.0",
+    "scikit-learn": "1.9.0",
+    "spacy": "3.8.16"
+  },
+  "network_calls": 0,
+  "passed": 11,
+  "results": [
+    {
+      "assertions": 14,
+      "error": null,
+      "proof": 21,
+      "result": {
+        "boundary_policy_explicit": true,
+        "instant_comparison": "TIMESTAMPTZ",
+        "null_deadline_state": "unknown_deadline",
+        "open_cases_split_by_cutoff": true,
+        "original_chain_rerun": false,
+        "pandas_mixed_offsets_default": "object dtype with FutureWarning",
+        "string_and_naive_timestamp_order_reproduced_wrong": true
+      },
+      "status": "passed",
+      "test": "deadline_instants_and_censoring"
+    },
+    {
+      "assertions": 8,
+      "error": null,
+      "proof": 22,
+      "result": {
+        "duration_only_for_closed_cases": true,
+        "label_variants_not_normalized": "blocked",
+        "missing_group_retained": true,
+        "original_chain_rerun": false,
+        "pandas_dropna_default_loss_reproduced": true,
+        "population_conserved": true
+      },
+      "status": "passed",
+      "test": "group_measures_keep_missing_and_censored"
+    },
+    {
+      "assertions": 10,
+      "error": null,
+      "proof": 23,
+      "result": {
+        "lifecycle_self_loop_reproduced": true,
+        "original_chain_rerun": false,
+        "row_order_dependence_reproduced": true,
+        "tie_without_contract": "blocked",
+        "two_engine_agreement_on_declared_order": true
+      },
+      "status": "passed",
+      "test": "dfg_tie_and_lifecycle_contract"
+    },
+    {
+      "assertions": 7,
+      "error": null,
+      "proof": 24,
+      "result": {
+        "cdn_dependency_reproduced": true,
+        "counts_carried_per_bar": true,
+        "list_payload_keeps_null": true,
+        "none_to_nan_in_binary_payload_reproduced": true,
+        "original_chain_rerun": false,
+        "payload_equals_source_rows": true
+      },
+      "status": "passed",
+      "test": "chart_payload_and_asset_contract"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 25,
+      "result": {
+        "edited_cell_detected": true,
+        "empty_actor": "blocked",
+        "missing_condition_field": "blocked",
+        "original_chain_rerun": false,
+        "quote_outside_sentence": "blocked",
+        "typed_rows_roundtrip_native_docx": true
+      },
+      "status": "passed",
+      "test": "required_action_rows_survive_the_document"
+    },
+    {
+      "assertions": 13,
+      "error": null,
+      "proof": 26,
+      "result": {
+        "candidates_never_approved": true,
+        "ftfy_restores_two_decode_rounds": true,
+        "idf_weighted_winner": "remedy",
+        "original_chain_rerun": false,
+        "overlap_tie_among_frequent_token_actions": 7,
+        "recorded_mojibake_reproduced_and_blocked": true,
+        "wordnet": {
+          "antonyms": [
+            "disapprove"
+          ],
+          "corpus_sha256": "cbda5ea6eef7f36a97a43d4a75f85e07fccbb4f23657d27b4ccbc93e2646ab59",
+          "forms": [
+            "approve",
+            "O.K.",
+            "okay",
+            "sanction"
+          ],
+          "sense": "approve.v.01",
+          "version": "3.0"
+        }
+      },
+      "status": "passed",
+      "test": "lexical_candidates_are_not_authorizations"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 27,
+      "result": {
+        "coverage_mismatch": "blocked",
+        "inner_join_loss_reproduced": true,
+        "original_chain_rerun": false,
+        "training_cases_separated": true,
+        "unassessed_excluded_from_mean": true
+      },
+      "status": "passed",
+      "test": "conformance_groups_need_full_coverage"
+    },
+    {
+      "assertions": 6,
+      "error": null,
+      "proof": 28,
+      "result": {
+        "attendance_is_a_scenario_not_a_vote": true,
+        "conflicting_attendance_rows": "blocked",
+        "hostile_id_stays_one_literal": true,
+        "original_chain_rerun": false,
+        "tied_and_untagged_distinguished_from_zero": true,
+        "unmatched_meeting_reported": true
+      },
+      "status": "passed",
+      "test": "meeting_join_keeps_tag_states"
+    },
+    {
+      "assertions": 8,
+      "error": null,
+      "proof": 29,
+      "result": {
+        "completion_flag_insufficient": true,
+        "double_execution_under_uncontrolled_merge_reproduced": true,
+        "forced_edges_checked_by_has_path": true,
+        "original_chain_rerun": false,
+        "scheduling_order_not_evidence": true
+      },
+      "status": "passed",
+      "test": "execution_witness_versus_structural_precedence"
+    },
+    {
+      "assertions": 9,
+      "error": null,
+      "proof": 30,
+      "result": {
+        "csv_diff_bool_int_conflation_reproduced": true,
+        "declared_json_text_profile_roundtrips": true,
+        "formula_like_text_lost_reproduced": true,
+        "int_to_float_reproduced": true,
+        "none_to_empty_string_reproduced": true,
+        "original_chain_rerun": false
+      },
+      "status": "passed",
+      "test": "workbook_readback_typed_diff"
+    },
+    {
+      "assertions": 5,
+      "error": null,
+      "proof": 0,
+      "result": {
+        "majority_at interval selection": "portion.closedopen containment, 4 of 4 verdicts agree",
+        "observed_action": "pydantic strict model with Literal kind, 4 of 4 verdicts agree",
+        "typed_readback": "deepdiff.DeepDiff(zip_ordered_iterables=True), 6 of 6 verdicts agree; default pairing agrees on 5 of 6",
+        "validate_process_map": "deepdiff.DeepDiff + pandas.Index.has_duplicates, 4 of 4 verdicts agree"
+      },
+      "status": "passed",
+      "test": "library_primitive_substitutions_for_earlier_glue"
+    }
+  ],
+  "scope": "Bounded authored handoff fixtures and reproduced library defaults; the original P21-P30 chains and their artifacts were not rerun.",
+  "source_sha256": "e8df8d98831289c66ab705940ae2bc20ca7913a721002b811a5a77be05be2873",
+  "test_cases": 11
+}
