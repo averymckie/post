@@ -64,6 +64,8 @@ import openpyxl
 import orjson
 import pdfplumber
 import pymupdf
+import pypdf
+import pypdfium2
 import xlsxwriter
 from docx2python import docx2python
 from python_calamine import CalamineWorkbook
@@ -3420,3 +3422,190 @@ def test_an_item_that_is_not_in_the_graph_raises_as_a_source_and_is_silent_as_a_
         in_igraph.get_all_simple_paths(absent, to=names[0])
     with pytest.raises(ValueError):
         in_igraph.get_all_simple_paths(names[0], to=absent)
+
+
+# ---------------------------------------------------------------- a search rectangle and what it holds
+PDF_WORD = st.text(alphabet=st.characters(min_codepoint=97, max_codepoint=109), min_size=3, max_size=7)
+PDF_OTHER_WORD = st.text(alphabet=st.characters(min_codepoint=110, max_codepoint=122), min_size=3, max_size=7)
+PDF_WORDS = st.lists(PDF_WORD, min_size=2, max_size=4)
+PDF_OTHER_WORDS = st.lists(PDF_OTHER_WORD, min_size=2, max_size=4)
+ACCENTED_LETTER = st.sampled_from('àáâãäåçèéêëìíîïñòóôõöùúûüý')
+CLOSE_GAP = st.integers(min_value=12, max_value=14)
+CLEAR_GAP = st.integers(min_value=16, max_value=40)
+
+
+def _two_line_pdf(first, second, gap):
+    """PyMuPDF writes both lines; only the strings and the line spacing are generated."""
+    document = pymupdf.open()
+    page = document.new_page()
+    page.insert_text((72, 100), first)
+    page.insert_text((72, 100 + gap), second)
+    return document.tobytes()
+
+
+def _pdfium_matches(data, phrase, **options):
+    """PDFium's own search, driven by pypdfium2. Each hit is returned as the characters it covers."""
+    textpage = pypdfium2.PdfDocument(io.BytesIO(data))[0].get_textpage()
+    searcher = textpage.search(phrase, **options)
+    found = []
+    while True:
+        hit = searcher.get_next()
+        if hit is None:
+            break
+        found.append(textpage.get_text_range(*hit))
+    return found
+
+
+def _pdfium_inside(data, rect):
+    """The same rectangle read by PDFium. PyMuPDF's own transformation_matrix maps its top-left
+    coordinates back to the PDF canvas coordinates pdfium expects; no arithmetic is done here."""
+    page = pymupdf.open('pdf', data)[0]
+    on_canvas = rect * ~page.transformation_matrix
+    textpage = pypdfium2.PdfDocument(io.BytesIO(data))[0].get_textpage()
+    return textpage.get_text_bounded(left=on_canvas.x0, bottom=on_canvas.y0,
+                                     right=on_canvas.x1, top=on_canvas.y1)
+
+
+@given(PDF_WORDS, PDF_OTHER_WORDS, st.integers(min_value=1, max_value=4), CLEAR_GAP)
+@SLOW
+def test_the_two_pdf_engines_count_the_same_occurrences_of_a_generated_phrase(first, second, take, gap):
+    """MuPDF through PyMuPDF and PDFium through pypdfium2 read the same page with no shared code:
+    pypdfium2 declares no dependencies at all. On a phrase that occurs on one line and never twice in
+    a row, the two engines return the same number of occurrences and PDFium's matched characters are
+    the phrase. This is the agreeing region for the P163 passage location."""
+    line, other = ' '.join(first), ' '.join(second)
+    phrase = ' '.join(first[:take])
+    assume(phrase + phrase not in line)
+    data = _two_line_pdf(line, other, gap)
+    found = pymupdf.open('pdf', data)[0].search_for(phrase)
+    matched = _pdfium_matches(data, phrase)
+    npt.assert_equal(len(found), len(matched))
+    npt.assert_array_equal(matched, [phrase] * len(matched))
+
+
+@given(PDF_WORD, PDF_OTHER_WORDS, CLEAR_GAP)
+@SLOW
+def test_two_touching_occurrences_are_one_rectangle_to_mupdf_and_two_matches_to_pdfium(word, second, gap):
+    """PyMuPDF's own documentation calls this out: "the search logic regards **contiguous multiple
+    occurrences** of *needle* as one". PDFium reports each occurrence separately, so the count of
+    highlighted passages depends on the engine and one rectangle can cover two quotations. Replaces
+    the typed len(hits) expectations of case 163."""
+    data = _two_line_pdf(word + word, ' '.join(second), gap)
+    found = pymupdf.open('pdf', data)[0].search_for(word)
+    matched = _pdfium_matches(data, word)
+    with pytest.raises(AssertionError):
+        npt.assert_equal(len(found), len(matched))
+    npt.assert_array_less(len(found), len(matched))
+    npt.assert_equal(pymupdf.open('pdf', data)[0].get_textbox(found[0]), word + word)
+
+
+@given(PDF_WORD, CLEAR_GAP)
+@SLOW
+def test_both_engines_find_a_case_changed_copy_of_an_ascii_phrase(word, gap):
+    """The default search ignores case in both engines, so an exact-text comparison after the search
+    is what separates a quotation from its case-changed twin. The agreeing region for the ASCII part
+    of the P163 case-insensitivity claim."""
+    data = _two_line_pdf(word, word.upper(), gap)
+    found = pymupdf.open('pdf', data)[0].search_for(word)
+    npt.assert_equal(len(found), len(_pdfium_matches(data, word)))
+    npt.assert_array_less(len(_pdfium_matches(data, word, match_case=True)), len(found))
+
+
+@given(PDF_WORD, ACCENTED_LETTER, CLEAR_GAP)
+@SLOW
+def test_the_case_insensitive_search_stops_at_ascii_in_one_engine_only(word, letter, gap):
+    """PyMuPDF documents the limit: "Upper / lower case is ignored, but only works for ASCII
+    characters". PDFium folds the accented letter too, so the same needle finds one passage in one
+    engine and two in the other, and a chain that constrains an ASCII-insensitive search with an
+    exact comparison is not constraining the same candidate set another reader would produce."""
+    spelled = word + letter + word
+    data = _two_line_pdf(spelled, spelled.upper(), gap)
+    found = pymupdf.open('pdf', data)[0].search_for(spelled)
+    matched = _pdfium_matches(data, spelled)
+    with pytest.raises(AssertionError):
+        npt.assert_equal(len(found), len(matched))
+    npt.assert_array_less(len(found), len(matched))
+
+
+@given(PDF_WORDS, PDF_OTHER_WORDS, CLEAR_GAP)
+@SLOW
+def test_a_phrase_crossing_a_line_break_is_one_match_and_more_than_one_rectangle(first, second, gap):
+    """PyMuPDF documents that "if parts of *needle* occur on more than one line, then a separate item
+    is generated for each these parts". PDFium returns the single character range that carries the
+    whole phrase across the break. Highlighting hits[0], as the P163 chain does, therefore marks only
+    the first line of a quotation that wraps."""
+    line, other = ' '.join(first), ' '.join(second)
+    phrase = line + ' ' + other
+    data = _two_line_pdf(line, other, gap)
+    found = pymupdf.open('pdf', data)[0].search_for(phrase)
+    matched = _pdfium_matches(data, phrase)
+    with pytest.raises(AssertionError):
+        npt.assert_equal(len(found), len(matched))
+    npt.assert_array_less(len(matched), len(found))
+    npt.assert_array_equal([''.join(hit.split()) for hit in matched], [''.join(phrase.split())])
+    page = pymupdf.open('pdf', data)[0]
+    for rectangle in found:
+        with pytest.raises(AssertionError):
+            npt.assert_equal(page.get_textbox(rectangle), phrase)
+
+
+@given(PDF_WORDS, PDF_OTHER_WORDS, st.integers(min_value=1, max_value=4), CLEAR_GAP)
+@SLOW
+def test_the_matched_rectangle_holds_the_phrase_when_the_next_line_clears_it(first, second, take, gap):
+    """With the following line far enough away, PyMuPDF's get_textbox returns the phrase and PDFium's
+    bounded read of the same rectangle returns the same characters once spacing is set aside. This is
+    the region in which the P163 exact-text check means what it says."""
+    line, other = ' '.join(first), ' '.join(second)
+    phrase = ' '.join(first[:take])
+    assume(phrase + phrase not in line)
+    data = _two_line_pdf(line, other, gap)
+    rectangle = pymupdf.open('pdf', data)[0].search_for(phrase)[0]
+    npt.assert_equal(pymupdf.open('pdf', data)[0].get_textbox(rectangle), phrase)
+    npt.assert_array_equal(''.join(_pdfium_inside(data, rectangle).split()), ''.join(phrase.split()))
+
+
+@given(PDF_WORDS, PDF_OTHER_WORDS, st.integers(min_value=1, max_value=4), CLOSE_GAP)
+@SLOW
+def test_the_matched_rectangle_holds_the_line_below_it_when_the_lines_are_close(first, second, take, gap):
+    """At ordinary single line spacing the rectangle PyMuPDF returns for a match recovers the line
+    underneath it as well, so the exact-text check the chain runs compares the query against two
+    lines of text and rejects a passage that was found correctly. PDFium's bounded read of the same
+    rectangle returns only the matched line, and so does PyMuPDF's own clip extraction, whose
+    documented rule is that "a character becomes part of the output, if its bbox is contained in
+    clip". Replaces the typed recovered(pdf, multi[0]) == 'jumps over\\nletely.' of case 163."""
+    line, other = ' '.join(first), ' '.join(second)
+    phrase = ' '.join(first[:take])
+    assume(phrase + phrase not in line)
+    data = _two_line_pdf(line, other, gap)
+    page = pymupdf.open('pdf', data)[0]
+    rectangle = page.search_for(phrase)[0]
+    inside = _pdfium_inside(data, rectangle)
+    with pytest.raises(AssertionError):
+        npt.assert_equal(page.get_textbox(rectangle), phrase)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(''.join(page.get_textbox(rectangle).split()), ''.join(inside.split()))
+    npt.assert_array_equal(''.join(page.get_text(clip=rectangle).split()), ''.join(inside.split()))
+
+
+@given(PDF_WORDS, SAFE_LINE, SAFE_LINE, CLEAR_GAP)
+@SLOW
+def test_a_highlight_comment_and_its_author_survive_without_the_appearance_update(first, comment,
+                                                                                 title, gap):
+    """set_info writes the comment and the author into the annotation dictionary, and both are read
+    back by PyMuPDF and by pypdf, which parses the PDF object model in pure Python and does not
+    depend on MuPDF. Calling Annot.update is not what persists them. Replaces the typed
+    annots[0]['content'] == 'illustrative comment' expectations of case 163."""
+    line = ' '.join(first)
+    data = _two_line_pdf(line, line, gap)
+    document = pymupdf.open('pdf', data)
+    page = document[0]
+    annotation = page.add_highlight_annot(page.search_for(first[0])[0])
+    annotation.set_info(content=comment, title=title)
+    saved = document.tobytes()
+    in_mupdf = [(note.info['content'], note.info['title'], note.type[1])
+                for note in pymupdf.open('pdf', saved)[0].annots()]
+    in_pypdf = [(str(entry.get_object()['/Contents']), str(entry.get_object()['/T']),
+                 str(entry.get_object()['/Subtype']).lstrip('/'))
+                for entry in pypdf.PdfReader(io.BytesIO(saved)).pages[0]['/Annots']]
+    npt.assert_array_equal(in_mupdf, in_pypdf)
+    npt.assert_array_equal([note[:2] for note in in_mupdf], [(comment, title)])
