@@ -46,6 +46,7 @@ from beancount.core import data as beancount_data
 import docx
 from docx.oxml.ns import qn
 import duckdb
+import fastexcel
 import icalendar
 from dateutil import rrule, tz as dateutil_tz
 from dateutil.relativedelta import relativedelta
@@ -10900,3 +10901,190 @@ def test_the_order_the_two_row_properties_are_appended_in_changes_nothing_a_seco
         npt.assert_array_equal(zipfile.ZipFile(io.BytesIO(appended)).read('word/document.xml'),
                                zipfile.ZipFile(io.BytesIO(swapped)).read('word/document.xml'))
     npt.assert_array_equal(_poi_table(appended, 'ROW'), _poi_table(swapped, 'ROW'))
+
+
+# --------------------------------------------------------------------------------------------------
+# handoff_guards_v8.py, case native_workbook_is_checked_by_two_readers: what the second reader reads
+# --------------------------------------------------------------------------------------------------
+EXCEL_OBJECTS_ORACLE_JAVA = pathlib.Path(__file__).with_name('excel_objects_oracle.java')
+SHEET_WORD = st.text(alphabet=st.characters(min_codepoint=97, max_codepoint=122), min_size=3, max_size=8)
+CASE_HEADERS = st.lists(SHEET_WORD, min_size=2, max_size=2, unique=True)
+CASE_ROWS = st.lists(st.tuples(SHEET_WORD, st.integers(min_value=0, max_value=10 ** 6)),
+                     min_size=1, max_size=5)
+CHART_COUNT = st.integers(min_value=0, max_value=2)
+
+
+def _case_workbook(headers, rows, name, charts=1, table=True, formula=False):
+    """The workbook the case writes: a header row, some counted rows, a declared table over them, a
+    column chart on the same range, and optionally the formula row the case puts below the table."""
+    buffer = io.BytesIO()
+    book = xlsxwriter.Workbook(buffer, {'in_memory': True})
+    sheet = book.add_worksheet('cases')
+    sheet.write_row(0, 0, headers)
+    for number, (label, count) in enumerate(rows, start=1):
+        sheet.write_row(number, 0, [label, count])
+    if table:
+        sheet.add_table(0, 0, len(rows), 1,
+                        {'name': name, 'columns': [{'header': header} for header in headers]})
+    for number in range(charts):
+        chart = book.add_chart({'type': 'column'})
+        chart.add_series({'categories': ['cases', 1, 0, len(rows), 0],
+                          'values': ['cases', 1, 1, len(rows), 1], 'name': headers[1]})
+        sheet.insert_chart(1 + 20 * number, 3, chart)
+    if formula:
+        sheet.write_formula(len(rows) + 1, 1, '=SUM(B2:B%d)' % (len(rows) + 1))
+    book.close()
+    return buffer.getvalue()
+
+
+def _case_sheet(data):
+    """openpyxl's worksheet object for that workbook, which is where the case reads its tables and
+    charts."""
+    return openpyxl.load_workbook(io.BytesIO(data)).active
+
+
+def _case_openpyxl_grid(data):
+    """The cells openpyxl returns, exactly as the case's read_two_ways collects them."""
+    return [[cell.value for cell in row] for row in _case_sheet(data).iter_rows()]
+
+
+def _case_calamine_grid(data):
+    """The same cells from the Rust calamine reader through python-calamine 0.8.2."""
+    return CalamineWorkbook.from_filelike(io.BytesIO(data)).get_sheet_by_index(0).to_python(
+        skip_empty_area=False)
+
+
+def _case_frame(grid):
+    """The rows below the header as a pandas frame, so the comparison is pandas' own assertion callable
+    and the question of the cell type is put to it rather than settled by a normaliser written here."""
+    return pd.DataFrame(grid[1:], columns=grid[0])
+
+
+def _fastexcel_tables(data):
+    """fastexcel 0.21.0 asked which tables the workbook declares. Its `table_names` is documented at tag
+    v0.21.0 as "The list of table names. Will return an empty list if no tables are found." It is a
+    second binding of the same Rust crate python-calamine binds -- its Cargo.toml at that tag requires
+    calamine ^0.36.1 where python-calamine 0.8.2 requires calamine 0.36.0 -- so it is not independent of
+    that reader's backend; POI carries the independence in this cluster. Its own Python dependency list
+    at that tag is `typing-extensions` for Python below 3.10 and nothing else."""
+    with tempfile.TemporaryDirectory() as directory:
+        path = pathlib.Path(directory) / 'cases.xlsx'
+        path.write_bytes(data)
+        return fastexcel.read_excel(str(path)).table_names()
+
+
+def _poi_objects(data, kind):
+    """The same workbook read by Apache POI 5.4.1 under Java. The shim parses argv, calls the library
+    and prints one line per table, with the name and the area `AreaReference` formats, and one per chart
+    the sheet's drawing holds."""
+    with tempfile.TemporaryDirectory() as directory:
+        path = pathlib.Path(directory) / 'cases.xlsx'
+        path.write_bytes(data)
+        completed = subprocess.run(
+            ['java', '-Dlog4j2.statusLoggerLevel=OFF', '-cp', str(POI_DIRECTORY / 'jars' / '*'),
+             str(EXCEL_OBJECTS_ORACLE_JAVA), str(path)],
+            capture_output=True, encoding='utf-8', check=True)
+    return [line.split('\t')[1:] for line in completed.stdout.split('\n')[:-1]
+            if line.startswith(kind + '\t')]
+
+
+@given(CASE_HEADERS, CASE_ROWS, SHEET_WORD)
+@SLOW
+def test_the_two_readers_disagree_about_every_whole_number_in_the_workbook(headers, rows, name):
+    """handoff_guards_v8.py's case native_workbook_is_checked_by_two_readers makes eight typed
+    comparisons about one workbook, the first being `g.equal(out['raw_agree'], False)`. What the two
+    readers disagree about is not a value but a type: openpyxl returns a whole number as a Python int
+    and the Rust calamine reader returns it as a float, so pandas builds an int64 column from one and a
+    float64 column from the other and `assert_frame_equal`, which compares the dtype by default, refuses
+    every generated workbook."""
+    data = _case_workbook(headers, rows, name)
+    with pytest.raises(AssertionError):
+        pdt.assert_frame_equal(_case_frame(_case_openpyxl_grid(data)),
+                               _case_frame(_case_calamine_grid(data)))
+
+
+@given(CASE_HEADERS, CASE_ROWS, SHEET_WORD)
+@SLOW
+def test_the_two_readers_agree_as_soon_as_pandas_is_asked_to_ignore_the_type(headers, rows, name):
+    """And `g.equal(out['normalized_agree'], True)` holds, with the normalisation done by the library
+    rather than by the guard. The case reaches agreement through `normalized_cells`, a loop that tests
+    `isinstance(v, float) and v.is_integer()` and calls `int` -- a hand-written conversion with a
+    published option one argument away. `assert_frame_equal(check_dtype=False)` is that option, and
+    under it the two readers agree cell for cell on every generated workbook."""
+    data = _case_workbook(headers, rows, name)
+    pdt.assert_frame_equal(_case_frame(_case_openpyxl_grid(data)),
+                           _case_frame(_case_calamine_grid(data)), check_dtype=False)
+
+
+@pytest.mark.skipif(not poi_available, reason='java and the Apache POI jars are required for this oracle')
+@given(CASE_HEADERS, CASE_ROWS, SHEET_WORD)
+@JAVA_ORACLE
+def test_the_table_the_first_reader_names_is_the_one_two_further_readers_name(headers, rows, name):
+    """The case's `g.equal(out['tables_seen_by_openpyxl'], ['CasesTable'])` against a generated name and
+    two more readers. Apache POI 5.4.1's `XSSFSheet.getTables`, "Returns any tables associated with this
+    Sheet", hands back the same name and the same area string openpyxl's `Table.ref` carries, and
+    fastexcel's `table_names` returns that name too. So the declared table is in the file and three
+    implementations agree about its name and extent."""
+    data = _case_workbook(headers, rows, name)
+    tables = _case_sheet(data).tables
+    reported = _poi_objects(data, 'TABLE')
+    npt.assert_array_equal([fields[1] for fields in reported], list(tables))
+    npt.assert_array_equal([fields[2] for fields in reported],
+                           [table.ref for table in tables.values()])
+    npt.assert_array_equal(_fastexcel_tables(data), list(tables))
+
+
+@pytest.mark.skipif(not poi_available, reason='java and the Apache POI jars are required for this oracle')
+@given(CASE_HEADERS, CASE_ROWS, SHEET_WORD, CHART_COUNT)
+@JAVA_ORACLE
+def test_the_chart_the_case_counts_through_a_private_attribute_is_counted_publicly_elsewhere(
+        headers, rows, name, charts):
+    """`g.equal(out['charts_seen_by_openpyxl'], 1)` is read off `ws._charts`, an attribute openpyxl marks
+    private, and the case types the one. Neither is necessary: the number of charts is generated here,
+    POI returns exactly that many through `XSSFDrawing.getCharts`, "Returns all charts in this drawing.",
+    which is public, and openpyxl's private list agrees with it. A workbook with no chart has no drawing
+    for POI to walk and the two agree there as well."""
+    data = _case_workbook(headers, rows, name, charts=charts)
+    npt.assert_array_equal([len(_poi_objects(data, 'CHART')), len(_case_sheet(data)._charts)],
+                           [charts, charts])
+
+
+@given(CASE_HEADERS, CASE_ROWS, SHEET_WORD)
+@SLOW
+def test_it_is_the_binding_and_not_the_reader_that_cannot_see_the_declared_table(headers, rows, name):
+    """`g.equal(out['charts_seen_by_calamine'], 0)` is not a reading at all: `read_two_ways` writes the
+    zero into its own return value as a literal, under the comment that "a second reader checks cell
+    values only". The half of that comment about cells is exactly right and is the stronger statement:
+    the cells calamine returns are identical whether the table and the chart are in the workbook or not,
+    and so are openpyxl's. The half about the reader is wrong. fastexcel 0.21.0 binds the same Rust
+    calamine crate python-calamine binds and returns the table's name from the same bytes, and returns
+    an empty list when the table is not there, so the table is visible to that reader and it is the
+    binding that does not expose it."""
+    with_objects = _case_workbook(headers, rows, name)
+    without_objects = _case_workbook(headers, rows, name, charts=0, table=False)
+    npt.assert_array_equal(np.array(_case_calamine_grid(with_objects), dtype=object),
+                           np.array(_case_calamine_grid(without_objects), dtype=object))
+    npt.assert_array_equal(np.array(_case_openpyxl_grid(with_objects), dtype=object),
+                           np.array(_case_openpyxl_grid(without_objects), dtype=object))
+    npt.assert_array_equal(_fastexcel_tables(with_objects), [name])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_fastexcel_tables(with_objects), _fastexcel_tables(without_objects))
+
+
+@given(CASE_HEADERS, CASE_ROWS, SHEET_WORD)
+@SLOW
+def test_the_region_the_case_slices_leaves_out_the_only_row_the_readers_cannot_agree_on(
+        headers, rows, name):
+    """And the agreement the case records is an agreement about a slice. `read_two_ways` is called with
+    `data_rows=4` and compares only the rows above the formula, "formulas and blanks below it are
+    reported separately". Over the whole sheet the two readers do not agree at all and no normalisation
+    reaches it: openpyxl returns the formula's text and calamine returns the cached number, which are
+    not the same kind of thing. Cut to the declared data region the same two readings agree, so the
+    two-reader check the case performs is a check on the rows nobody was worried about."""
+    data = _case_workbook(headers, rows, name, formula=True)
+    region = len(rows) + 1
+    pdt.assert_frame_equal(_case_frame(_case_openpyxl_grid(data)[:region]),
+                           _case_frame(_case_calamine_grid(data)[:region]), check_dtype=False)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(np.array(_case_openpyxl_grid(data), dtype=object),
+                               np.array(_case_calamine_grid(data), dtype=object))
