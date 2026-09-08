@@ -4952,3 +4952,107 @@ def test_the_unattributed_days_leave_one_engine_and_stay_in_the_other_two(rows):
     npt.assert_array_less(dropped, booked)
     with pytest.raises(AssertionError):
         npt.assert_array_equal(dropped, booked)
+
+
+# ---------------------------------------------------------------- costs through a cutoff, and the ratios after
+COST_TASK = st.sampled_from(['T01', 'T02', 'T03'])
+COST_AMOUNT = st.integers(min_value=-500000, max_value=500000).map(lambda n: Decimal(n).scaleb(-2))
+COST_DAY = st.dates(min_value=datetime.date(2026, 9, 1), max_value=datetime.date(2026, 9, 30))
+COST_RECORD = st.tuples(COST_TASK, COST_DAY, COST_AMOUNT)
+COST_ANCHOR = datetime.date(2026, 9, 15)
+EARNED_VALUE = st.fractions(min_value=Fraction(1), max_value=Fraction(100000), max_denominator=100)
+
+
+def _cost_in_duckdb(records, cutoff, operator):
+    connection = duckdb.connect()
+    connection.execute('CREATE TABLE cost(task VARCHAR, spent_on DATE, amount DECIMAL(18,2))')
+    connection.executemany('INSERT INTO cost VALUES (?, ?, ?)', records)
+    rows = connection.execute('SELECT task, sum(amount) FROM cost WHERE spent_on %s ? '
+                              'GROUP BY task ORDER BY task' % operator, [cutoff]).fetchall()
+    connection.close()
+    return [(task, str(total)) for task, total in rows]
+
+
+def _cost_in_pandas(records, cutoff, operator):
+    frame = pd.DataFrame(records, columns=['task', 'spent_on', 'amount'])
+    kept = frame[frame['spent_on'] <= cutoff] if operator == '<=' else frame[frame['spent_on'] < cutoff]
+    totals = kept.groupby('task')['amount'].sum().sort_index()
+    return [(task, str(total)) for task, total in totals.items()]
+
+
+def _cost_in_polars(records, cutoff, operator):
+    frame = pl.DataFrame({'task': [record[0] for record in records],
+                          'spent_on': [record[1] for record in records],
+                          'amount': [record[2] for record in records]},
+                         schema_overrides={'amount': pl.Decimal(18, 2)})
+    kept = (frame.filter(pl.col('spent_on') <= cutoff) if operator == '<='
+            else frame.filter(pl.col('spent_on') < cutoff))
+    totals = kept.group_by('task').agg(pl.col('amount').sum()).sort('task')
+    return [(row['task'], str(row['amount'])) for row in totals.to_dicts()]
+
+
+@given(st.lists(COST_RECORD, min_size=1, max_size=8), COST_DAY)
+@SLOW
+def test_three_engines_total_the_same_signed_costs_through_the_same_cutoff(records, cutoff):
+    """A DuckDB DECIMAL(18,2) column, a pandas object column of Decimal and a polars Decimal column
+    are three engines summing the same signed amounts through the same date, and they return the same
+    cents on every generated ledger, credits included. Replaces the typed 1200.25 and 889.75 of case
+    187."""
+    npt.assert_array_equal(_cost_in_duckdb(records, cutoff, '<='),
+                           _cost_in_pandas(records, cutoff, '<='))
+    npt.assert_array_equal(_cost_in_duckdb(records, cutoff, '<='),
+                           _cost_in_polars(records, cutoff, '<='))
+
+
+@given(st.lists(st.tuples(COST_TASK, st.integers(min_value=1, max_value=14).map(
+    lambda offset: COST_ANCHOR + datetime.timedelta(days=offset)), COST_AMOUNT), max_size=6),
+       COST_TASK, COST_AMOUNT.filter(lambda amount: amount != 0))
+@SLOW
+def test_the_record_dated_on_the_cutoff_is_the_whole_difference_between_the_two_predicates(
+        later, task, amount):
+    """One cost dated exactly on the cutoff and every other cost dated after it. The two engines
+    agree with each other on both predicates, and each of them reports a different total depending on
+    whether the predicate is `<=` or `<`: the difference is that record and nothing else. Replaces
+    the typed exclusion of the September 20 record of case 187."""
+    records = [(task, COST_ANCHOR, amount)] + list(later)
+    inclusive = _cost_in_duckdb(records, COST_ANCHOR, '<=')
+    exclusive = _cost_in_duckdb(records, COST_ANCHOR, '<')
+    npt.assert_array_equal(inclusive, _cost_in_pandas(records, COST_ANCHOR, '<='))
+    npt.assert_array_equal(exclusive, _cost_in_pandas(records, COST_ANCHOR, '<'))
+    npt.assert_array_equal(inclusive, [(task, str(amount))])
+    npt.assert_array_equal(exclusive, [])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(inclusive, exclusive)
+
+
+@given(EARNED_VALUE, EARNED_VALUE, EARNED_VALUE)
+@SLOW
+def test_the_two_completion_assumptions_are_one_formula(budget, actual, earned):
+    """The chain names two ways to estimate the cost at completion, the remaining work at budget and
+    the budget plus the variance to date. On generated rationals they return the same number every
+    time, and z3 says why: the difference of the two expressions is unsatisfiable over the reals, so
+    they are one formula written twice. The third assumption is not: z3 finds a model where it
+    differs. Replaces the typed 3190 of case 187."""
+    npt.assert_array_equal(actual + (budget - earned), budget + (actual - earned))
+    bac, ac, ev = z3.Real('bac'), z3.Real('ac'), z3.Real('ev')
+    same = z3.Solver()
+    same.add(ac + (bac - ev) != bac + (ac - ev))
+    npt.assert_array_equal(str(same.check()), 'unsat')
+    different = z3.Solver()
+    different.add(ev != 0, ac + (bac - ev) * (ac / ev) != ac + (bac - ev))
+    npt.assert_array_equal(str(different.check()), 'sat')
+
+
+@given(st.integers(min_value=1, max_value=10 ** 9).filter(lambda n: n % 3))
+@SLOW
+def test_the_rational_index_is_not_the_float_the_chain_would_have_divided(earned):
+    """An index whose denominator is three is not a binary fraction, so the float of it is a
+    different number: multiplying the rational by its denominator returns the earned value exactly
+    and the float does not equal the rational at all. It does equal the quotient the same chain would
+    have computed with two floats, which is why the loss is invisible at the point it happens.
+    Replaces the typed Fraction(10, 11) of case 187."""
+    index = Fraction(earned, 3)
+    npt.assert_array_equal(index * 3, Fraction(earned))
+    npt.assert_array_equal(float(index), float(earned) / 3.0)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(index, Fraction(float(index)))
