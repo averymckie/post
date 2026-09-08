@@ -10,6 +10,7 @@ Each test names the hand-typed expectation in the frozen guard modules that it r
 import calendar
 import contextlib
 import csv
+import functools
 import pathlib
 import shutil
 import tempfile
@@ -2179,3 +2180,155 @@ def test_an_unbalanced_journal_is_a_returned_error_and_a_clean_parse_to_the_othe
     npt.assert_array_equal(bool(errors), True)
     npt.assert_array_equal(any(isinstance(entry, beancount_data.Transaction) for entry in entries), True)
     npt.assert_array_equal(_lima_parses_cleanly(text), True)
+
+
+# ---------------------------------------------------------------- folding a key and lowercasing it
+CASE_ORACLE_RB = pathlib.Path(__file__).with_name('case_fold_oracle.rb')
+CASE_ORACLE_PHP = pathlib.Path(__file__).with_name('case_fold_oracle.php')
+_CODE_POINTS = list(map(chr, range(0x20, 0x30000)))
+_CASED_CHARACTERS = [character for character in _CODE_POINTS
+                     if unicodedata.category(character) not in ('Cs', 'Cn', 'Co', 'Cc')]
+FOLD_MERGES_A_PAIR = [character for character in _CASED_CHARACTERS
+                      if character.casefold() == character.casefold().casefold()
+                      and character.lower() != character.casefold().lower()]
+FOLD_LEAVES_THE_CASE = [character for character in _CASED_CHARACTERS
+                        if character.casefold() == character != character.lower()]
+UNKNOWN_UPPERCASE = [character for character in _CODE_POINTS
+                     if unicodedata.category(character) == 'Cn'
+                     and regex.compile(r'\p{Lu}').fullmatch(character)]
+CASE_ALPHABET = sorted({form
+                        for character in FOLD_MERGES_A_PAIR + FOLD_LEAVES_THE_CASE
+                        for form in (character, character.lower(), character.casefold())
+                        if len(form) == 1})
+CASED_TEXT = st.text(alphabet=st.characters(codec='utf-8', exclude_categories=('Cs', 'Cc', 'Cn', 'Co')),
+                     max_size=12)
+CASE_WORDS = st.lists(st.text(alphabet=st.sampled_from(CASE_ALPHABET), max_size=4), min_size=1, max_size=8)
+both_case_runtimes = ruby_available and php_binary_available
+
+
+def _runtime_case_forms(runner, script, text):
+    """The full case fold and the lowercase of one string as one other runtime reports them. The shim prints
+    two lines; the Python side runs it and splits."""
+    completed = subprocess.run([runner, str(script), text], capture_output=True, encoding='utf-8', check=True)
+    return completed.stdout.split('\n')[:2]
+
+
+def _other_runtimes_case_forms(text):
+    """The same two values from Ruby and from PHP."""
+    return [_runtime_case_forms('ruby', CASE_ORACLE_RB, text),
+            _runtime_case_forms('php', CASE_ORACLE_PHP, text)]
+
+
+@pytest.mark.skipif(not both_case_runtimes, reason='both runtimes are required for this oracle')
+@given(CASED_TEXT)
+@ORACLE_PROCESS
+def test_three_runtimes_agree_on_the_case_fold_and_the_lowercase_of_generated_text(text):
+    """All three implement the same published algorithm and say so. CPython's Doc/library/stdtypes.rst at
+    tag v3.11.15 says of str.casefold that "The casefolding algorithm is described in section 3.13 of the
+    Unicode Standard"; Ruby's doc/case_mapping.rdoc at tag v3_3_6 says its methods "use full Unicode case
+    mapping" and cites the same section, and documents :fold as "Unicode case folding, which is more
+    far-reaching than Unicode case mapping"; PHP's manual lists MB_CASE_FOLD as a mode of mb_convert_case.
+    Executed on generated text they agree exactly, on both the fold and the lowercase. This is the opposite
+    of the month arithmetic above: here the convention does carry across runtimes."""
+    npt.assert_array_equal(_other_runtimes_case_forms(text), [[text.casefold(), text.lower()]] * 2)
+
+
+@pytest.mark.skipif(not both_case_runtimes, reason='both runtimes are required for this oracle')
+@given(st.sampled_from(FOLD_MERGES_A_PAIR))
+@ORACLE_PROCESS
+def test_the_fold_merges_a_pair_the_lowercase_keeps_apart_in_all_three_runtimes(character):
+    """The claim of case 154, generated rather than chosen. For every character whose fold is not its
+    lowercase, the character and its own folded form are one key under folding and two keys under
+    lowercasing, in Python and in both other runtimes. The list of such characters is selected by Python's
+    own case mappings over every assigned code point below U+30000, not typed here. Replaces the typed
+    'STRASSE'.casefold() == 'straße'.casefold() of handoff_guards_v16.py case 154."""
+    folded_form = character.casefold()
+    left, right = _other_runtimes_case_forms(character), _other_runtimes_case_forms(folded_form)
+    npt.assert_array_equal([forms[0] for forms in left], [forms[0] for forms in right])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal([forms[1] for forms in left], [forms[1] for forms in right])
+    npt.assert_array_equal(character.casefold(), folded_form.casefold())
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(character.lower(), folded_form.lower())
+
+
+@pytest.mark.skipif(not both_case_runtimes, reason='both runtimes are required for this oracle')
+@given(st.sampled_from(FOLD_LEAVES_THE_CASE))
+@ORACLE_PROCESS
+def test_a_folded_key_can_still_be_uppercase_in_all_three_runtimes(character):
+    """Folding is not a stronger lowercase. For a whole block of assigned letters the fold is the identity
+    while the lowercase is not, so the key a chain builds by folding still carries case that lowercasing
+    would remove, and folding it again will not remove it. All three runtimes do the same thing, so this is
+    a property of the published algorithm rather than of any implementation."""
+    forms = _other_runtimes_case_forms(character)
+    npt.assert_array_equal([runtime[0] for runtime in forms], [character, character])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal([runtime[1] for runtime in forms], [character, character])
+    npt.assert_array_equal(character.casefold(), character)
+    npt.assert_array_equal(character.casefold().lower() != character.casefold(), True)
+
+
+@pytest.mark.skipif(not both_case_runtimes, reason='both runtimes are required for this oracle')
+@given(CASED_TEXT)
+@ORACLE_PROCESS
+def test_folding_a_lowercased_string_gives_the_key_that_folding_it_directly_gives(text):
+    """Each runtime is asked to fold its own lowercase of the generated text, and gets back the key it
+    produces by folding the text directly. So a chain that lowercases before folding loses nothing, which
+    is the one ordering question about these two operations that has a safe answer."""
+    ruby_fold, ruby_lower = _runtime_case_forms('ruby', CASE_ORACLE_RB, text)
+    php_fold, php_lower = _runtime_case_forms('php', CASE_ORACLE_PHP, text)
+    npt.assert_array_equal([_runtime_case_forms('ruby', CASE_ORACLE_RB, ruby_lower)[0],
+                            _runtime_case_forms('php', CASE_ORACLE_PHP, php_lower)[0]],
+                           [ruby_fold, php_fold])
+    npt.assert_array_equal(text.lower().casefold(), text.casefold())
+
+
+@given(CASE_WORDS)
+@SLOW
+def test_the_fold_never_separates_two_words_the_lowercase_joins(words):
+    """The consequence for deduplication, as an invariant of the output rather than a comparison: over words
+    generated from the characters where the two operations differ, folding produces no more distinct keys
+    than lowercasing. The merge only ever runs one way, so a chain that switches from lower to casefold can
+    lose rows to collision but can never gain them."""
+    npt.assert_array_equal(len({word.casefold() for word in words})
+                           <= len({word.lower() for word in words}), True)
+
+
+@given(st.sampled_from(UNKNOWN_UPPERCASE))
+@SLOW
+def test_the_standard_library_fold_does_not_know_these_letters_have_case(character):
+    """Two Unicode databases in this one process disagree. regex 2026.9.3 carries its own tables and matches
+    each of these characters as \\p{Lu}; the standard library's unicodedata, at the Unicode version this
+    Python was built against, files the same character as unassigned, and its casefold and lower both leave
+    it exactly as it is. A key folded by the standard library therefore keeps a case distinction that a
+    newer table would remove, and the set of characters this happens to changes with the interpreter, not
+    with the data."""
+    npt.assert_array_equal([character.casefold(), character.lower()], [character, character])
+    npt.assert_array_equal(unicodedata.category(character), 'Cn')
+    npt.assert_array_equal(bool(regex.compile(r'\p{Lu}').fullmatch(character)), True)
+
+
+@functools.lru_cache(maxsize=1)
+def _characters_the_php_runtime_folds():
+    """A region selector like the offset regions above, except that the implementation separating the two
+    regions runs in another process: the characters the standard library does not know are letters that the
+    php runtime nevertheless folds."""
+    return [character for character in UNKNOWN_UPPERCASE
+            if _runtime_case_forms('php', CASE_ORACLE_PHP, character)[0] != character]
+
+
+@pytest.mark.skipif(not php_binary_available, reason='the php runtime is required for this oracle')
+@given(st.integers(min_value=0, max_value=1000))
+@ORACLE_PROCESS
+def test_another_runtime_folds_letters_this_python_leaves_alone(index):
+    """And the disagreement crosses the process boundary. PHP 8.4.19 ships a newer Unicode version than this
+    Python and folds letters this Python leaves untouched, so the same deduplication key computed on each
+    side of a service boundary is not the same key, silently, for those letters. Which letters they are is
+    established by asking the runtime, not by naming them here."""
+    folded_elsewhere = _characters_the_php_runtime_folds()
+    if not folded_elsewhere:
+        pytest.skip('this Python and this php runtime agree on the case of every unassigned letter')
+    character = folded_elsewhere[index % len(folded_elsewhere)]
+    npt.assert_array_equal(character.casefold(), character)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_runtime_case_forms('php', CASE_ORACLE_PHP, character)[0], character)
