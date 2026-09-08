@@ -20,6 +20,7 @@ import subprocess
 import unicodedata
 import datetime
 import io
+import zipfile
 import zoneinfo
 from xml.etree import ElementTree
 from xml.sax.saxutils import escape as xml_escape
@@ -61,6 +62,11 @@ from lxml import etree as lxml_etree
 from markdown_it import MarkdownIt
 import networkx as nx
 import openpyxl
+import odf.opendocument
+import odf.table
+import odf.teletype
+import odf.text
+from odf.namespaces import OFFICENS, TABLENS
 import orjson
 import pdfplumber
 import pymupdf
@@ -4114,3 +4120,111 @@ def test_a_negative_contribution_returns_a_volume_the_chain_s_rounding_gets_wron
         npt.assert_array_equal(toward_infinity, away_from_zero)
     npt.assert_array_less(Fraction(int(toward_infinity)) * Fraction(contribution), Fraction(fixed))
     npt.assert_array_less(Fraction(fixed), Fraction(int(away_from_zero)) * Fraction(contribution))
+
+
+# ---------------------------------------------------------------- one spreadsheet cell, three readers
+ODS_DATE = st.dates(min_value=datetime.date(1900, 1, 1), max_value=datetime.date(2100, 12, 31))
+ODF_CELL_TAG = '{%s}table-cell' % TABLENS
+ODF_DATE_ATTRIBUTE = '{%s}date-value' % OFFICENS
+ODF_VALUE_ATTRIBUTE = '{%s}value' % OFFICENS
+ODF_FORMULA_ATTRIBUTE = '{%s}formula' % TABLENS
+
+
+def _ods_bytes(start, finish):
+    """odfpy writes the cells; the dates and the elapsed days come from the strategy."""
+    document = odf.opendocument.OpenDocumentSpreadsheet()
+    table = odf.table.Table(name='Schedule')
+    row = odf.table.TableRow()
+    for moment in (start, finish):
+        cell = odf.table.TableCell(valuetype='date', datevalue=moment.isoformat())
+        cell.addElement(odf.text.P(text=moment.isoformat()))
+        row.addElement(cell)
+    elapsed = odf.table.TableCell(valuetype='float', value=str((start - finish).days),
+                                  formula='of:=[.A1]-[.B1]')
+    elapsed.addElement(odf.text.P(text=str((start - finish).days)))
+    row.addElement(elapsed)
+    table.addElement(row)
+    document.spreadsheet.addElement(table)
+    written = io.BytesIO()
+    document.write(written)
+    return written.getvalue()
+
+
+def _ods_typed_edit(data, moment):
+    """Set only the typed date on the first cell, which is what an editor of the value would write."""
+    document = odf.opendocument.load(io.BytesIO(data))
+    document.getElementsByType(odf.table.TableCell)[0].setAttrNS(OFFICENS, 'date-value',
+                                                                 moment.isoformat())
+    written = io.BytesIO()
+    document.write(written)
+    return written.getvalue()
+
+
+def _ods_displayed(data, index):
+    cell = odf.opendocument.load(io.BytesIO(data)).getElementsByType(odf.table.TableCell)[index]
+    return odf.teletype.extractText(cell)
+
+
+def _ods_in_calamine(data):
+    return CalamineWorkbook.from_filelike(io.BytesIO(data)).get_sheet_by_index(0).to_python()[0]
+
+
+def _ods_in_lxml(data, index):
+    content = zipfile.ZipFile(io.BytesIO(data)).read('content.xml')
+    cell = list(lxml_etree.fromstring(content).iter(ODF_CELL_TAG))[index]
+    return (cell.get(ODF_DATE_ATTRIBUTE), cell.get(ODF_VALUE_ATTRIBUTE),
+            cell.get(ODF_FORMULA_ATTRIBUTE), [paragraph.text for paragraph in cell])
+
+
+@given(ODS_DATE, ODS_DATE)
+@SLOW
+def test_three_readers_of_one_spreadsheet_cell_agree_before_it_is_edited(start, finish):
+    """odfpy builds the document, python-calamine 0.8.2 reads it through the Rust calamine crate and
+    declares no Python dependencies, and libxml2 through lxml reads content.xml out of the same zip.
+    On a cell whose typed date and displayed paragraph were written together, all three report the
+    same day. This is the agreeing region for P166's readback."""
+    data = _ods_bytes(start, finish)
+    npt.assert_array_equal(_ods_in_calamine(data)[0].isoformat(), start.isoformat())
+    npt.assert_array_equal(_ods_displayed(data, 0), start.isoformat())
+    npt.assert_array_equal(_ods_in_lxml(data, 0)[0], start.isoformat())
+    npt.assert_array_equal(_ods_in_lxml(data, 0)[3], [start.isoformat()])
+
+
+@given(ODS_DATE, ODS_DATE, ODS_DATE)
+@SLOW
+def test_moving_the_typed_date_leaves_two_readers_reporting_two_different_days(start, finish, moved):
+    """An edit that sets office:date-value, which is the attribute a value carries, moves the day
+    python-calamine reports and leaves the text:p paragraph beside it untouched, so the two readers of
+    one cell name two different days and lxml shows both of them sitting in content.xml. Neither
+    reader is wrong and neither raises. Replaces the typed after['date'] and after['text'] of case
+    166."""
+    assume(moved != start)
+    data = _ods_bytes(start, finish)
+    edited = _ods_typed_edit(data, moved)
+    npt.assert_array_equal(_ods_in_calamine(edited)[0].isoformat(), moved.isoformat())
+    npt.assert_array_equal(_ods_displayed(edited, 0), start.isoformat())
+    npt.assert_array_equal(_ods_in_lxml(edited, 0)[0], moved.isoformat())
+    npt.assert_array_equal(_ods_in_lxml(edited, 0)[3], [start.isoformat()])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_ods_in_calamine(edited)[0].isoformat(), _ods_displayed(edited, 0))
+    npt.assert_array_equal(_ods_in_calamine(data)[0].isoformat(), start.isoformat())
+    npt.assert_array_equal(_ods_displayed(data, 0), start.isoformat())
+
+
+@given(ODS_DATE, ODS_DATE, ODS_DATE)
+@SLOW
+def test_the_cached_result_beside_the_formula_still_answers_the_old_question(start, finish, moved):
+    """The elapsed-days cell carries both a formula and the result of that formula. Moving the date it
+    refers to changes neither: lxml finds the same office:value and the same table:formula in the
+    edited file, python-calamine returns the same number it returned before, and that number is the
+    difference of the dates before the edit rather than after it. Nothing in the package recomputes,
+    and the reader that sees only values cannot tell that the number is stale. Replaces the typed
+    dependent['value'] == '766' of case 166."""
+    assume(moved != start)
+    data = _ods_bytes(start, finish)
+    edited = _ods_typed_edit(data, moved)
+    npt.assert_array_equal(_ods_in_calamine(edited)[2], _ods_in_calamine(data)[2])
+    npt.assert_array_equal(_ods_in_lxml(edited, 2)[1:3], _ods_in_lxml(data, 2)[1:3])
+    npt.assert_array_equal(_ods_in_calamine(edited)[2], (start - finish).days)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_ods_in_calamine(edited)[2], (moved - finish).days)
