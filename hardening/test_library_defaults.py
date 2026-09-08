@@ -13878,9 +13878,17 @@ ATTACHED_FILES = st.lists(st.tuples(ATTACHED_NAME, ATTACHED_PAYLOAD),
                           min_size=1, max_size=3, unique_by=lambda pair: pair[0])
 ATTACHED_PAIR = st.lists(st.tuples(ATTACHED_NAME, ATTACHED_PAYLOAD),
                          min_size=2, max_size=3, unique_by=lambda pair: pair[0])
-# PDFDocEncoding and Latin-1 agree over this range, so what a reader returns is its own decoding.
-PDFDOC_NAME = st.text(alphabet=st.characters(min_codepoint=0xa1, max_codepoint=0xff,
-                                             exclude_characters='\xad'), min_size=1, max_size=4)
+# PDFDocEncoding and Latin-1 agree over 0xa1-0xff, so what a reader returns is its own decoding.
+# Every byte in 0xa1-0xbf is a UTF-8 continuation byte, so a name built only from these characters is
+# written as a byte string that is not valid UTF-8 at any position.
+PDFDOC_CONTINUATION_NAME = st.text(alphabet=st.characters(min_codepoint=0xa1, max_codepoint=0xbf,
+                                                          exclude_characters='\xad'),
+                                   min_size=1, max_size=4)
+# A byte in 0xc2-0xdf followed by one in 0xa1-0xbf is exactly a valid two-byte UTF-8 sequence, so a
+# name built as that pair is written as a byte string that IS valid UTF-8.
+PDFDOC_UTF8_NAME = st.tuples(st.characters(min_codepoint=0xc2, max_codepoint=0xdf),
+                             st.characters(min_codepoint=0xa1, max_codepoint=0xbf,
+                                           exclude_characters='\xad')).map(''.join)
 # Nothing in this range is in PDFDocEncoding at all, so pypdf writes a UTF-16BE string with a BOM.
 OUTSIDE_PDFDOC_NAME = st.text(alphabet=st.characters(min_codepoint=0x4e00, max_codepoint=0x9fff),
                               min_size=1, max_size=3)
@@ -14085,7 +14093,7 @@ def test_four_readers_return_the_same_attachment_bytes(line, files):
     npt.assert_array_equal(sorted(read['digest'] for read in _pdfminer_embedded(data, 'CreationDate')), digests)
 
 
-@given(SAFE_LINE, PDFDOC_NAME, ATTACHED_PAYLOAD)
+@given(SAFE_LINE, PDFDOC_CONTINUATION_NAME, ATTACHED_PAYLOAD)
 @ATTACHMENTS
 def test_the_readers_that_agree_on_the_bytes_do_not_agree_on_the_name(line, name, payload):
     """The other half of "a second library reads the same attachment bytes". They do; they do not
@@ -14094,7 +14102,9 @@ def test_the_readers_that_agree_on_the_bytes_do_not_agree_on_the_name(line, name
     pypdf and PDFium return the name that was attached while MuPDF returns its UTF-8 bytes decoded
     as Latin-1, which is exactly the mis-decoding CPython's own codecs perform. MuPDF's `ufilename`,
     documented as one of the keys `embfile_info` returns, is the empty string, because the key it
-    would come from was never written."""
+    would come from was never written. The name here is drawn from 0xa1-0xbf, so the byte string
+    pypdf writes is a run of UTF-8 continuation bytes and is not valid UTF-8 at any position; the
+    test below draws from the region where it is, and MuPDF answers differently there."""
     pdf = _pdf_bytes([line])
     data = _attached(pdf, [(name, payload)])
     npt.assert_array_equal(list(_pypdf_attachments(data)), [name])
@@ -14105,6 +14115,29 @@ def test_the_readers_that_agree_on_the_bytes_do_not_agree_on_the_name(line, name
                            [read['unicode_name'] for read in _pdfminer_embedded(data, 'CreationDate')])
     with pytest.raises(AssertionError):
         npt.assert_array_equal(info['filename'], name)
+
+
+@given(SAFE_LINE, PDFDOC_UTF8_NAME, ATTACHED_PAYLOAD)
+@ATTACHMENTS
+def test_the_name_mupdf_returns_unchanged_is_the_one_already_spelled_in_utf_8(line, name, payload):
+    """The region the mis-decoding above does not reach, generated directly rather than filtered for.
+    The name is a character in 0xc2-0xdf followed by one in 0xa1-0xbf, so the PDFDocEncoding byte
+    string pypdf writes into /F is exactly a valid two-byte UTF-8 sequence, and MuPDF hands it back
+    unchanged: all three readers return the attached name and the mis-decoding does not happen. So
+    the divergence recorded above is not a property of MuPDF's reading of every name; it is a
+    property of the bytes the writer chose, and whether a chain sees it depends on which characters
+    a filename happens to hold. The `ufilename` key is still empty, because /UF is still not
+    written."""
+    pdf = _pdf_bytes([line])
+    data = _attached(pdf, [(name, payload)])
+    npt.assert_array_equal(list(_pypdf_attachments(data)), [name])
+    npt.assert_array_equal([found for found, _, _ in _pdfium_attachments(data, b'CreationDate')], [name])
+    [(info, _)] = _mupdf_attachments(data)
+    npt.assert_array_equal(info['filename'], name)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(info['filename'], name.encode('utf-8').decode('latin-1'))
+    npt.assert_array_equal([bool(info['ufilename'])],
+                           [read['unicode_name'] for read in _pdfminer_embedded(data, 'CreationDate')])
 
 
 @given(SAFE_LINE, OUTSIDE_PDFDOC_NAME, ATTACHED_PAYLOAD)
