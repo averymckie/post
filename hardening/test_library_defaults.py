@@ -59,6 +59,8 @@ from workalendar import core as workalendar_core
 import html5lib
 import igraph
 import jinja2
+from lark import Lark
+from lark.exceptions import UnexpectedInput
 import jsonschema
 from junitparser import JUnitXml
 import markdown as python_markdown
@@ -11403,3 +11405,177 @@ def test_an_undeclared_state_is_refused_by_a_schema_rather_than_by_a_check_writt
     jsonschema.validate({'id': identifier, 'state': declared}, MANIFEST_SCHEMA)
     with pytest.raises(jsonschema.ValidationError):
         jsonschema.validate({'id': identifier, 'state': undeclared}, MANIFEST_SCHEMA)
+
+
+# --------------------------------------------------------------------------------------------------
+# handoff_guards_v21.py, case the_controlled_grammar_refuses_what_it_does_not_support: what it accepts
+# --------------------------------------------------------------------------------------------------
+CONTROLLED_GRAMMAR = r'''
+start: MODALITY actor "count" OP INT
+MODALITY: "require" | "permit" | "forbid"
+actor: WORD
+OP: ">=" | "<=" | ">" | "<" | "=="
+%import common.WORD
+%import common.INT
+%import common.WS
+%ignore WS
+'''
+CONTROLLED_PARSER = Lark(CONTROLLED_GRAMMAR)
+MODALITY_WORDS = ['require', 'permit', 'forbid']
+COMPARISONS = {'>=': operator.ge, '<=': operator.le, '>': operator.gt, '<': operator.lt,
+               '==': operator.eq}
+ASCII_ACTOR = st.text(alphabet=st.characters(min_codepoint=97, max_codepoint=122),
+                      min_size=1, max_size=8)
+LETTER_OUTSIDE_ASCII = st.characters(whitelist_categories=('Lu', 'Ll'), min_codepoint=0x00C0,
+                                     max_codepoint=0x024F)
+UNDECLARED_WORD = st.text(alphabet=st.characters(min_codepoint=97, max_codepoint=122),
+                          min_size=8, max_size=12)
+
+
+class ControlledRule(pydantic.BaseModel):
+    """The case's own RuleAST, declared with the same pydantic options it declares: strict, no extra
+    keys, frozen, the modality and the operator as Literal sets and the threshold at or above zero."""
+    model_config = pydantic.ConfigDict(strict=True, extra='forbid', frozen=True)
+    modality: Literal['require', 'permit', 'forbid']
+    actor: str = pydantic.Field(min_length=1)
+    operator: Literal['>=', '<=', '>', '<', '==']
+    threshold: int = pydantic.Field(ge=0)
+    clause: str = pydantic.Field(min_length=1)
+
+
+def _sentence(modality, actor, comparison, threshold, gap=' '):
+    """A sentence of the controlled language, assembled from generated parts."""
+    return '%s%s%s count %s %s' % (modality, gap, actor, comparison, threshold)
+
+
+def _parsed_fields(text):
+    """The four fields lark's tree carries for a sentence, as text, before anything converts them."""
+    modality, actor, comparison, threshold = CONTROLLED_PARSER.parse(text).children
+    return [str(modality), str(actor.children[0]), str(comparison), str(threshold)]
+
+
+@given(st.sampled_from(MODALITY_WORDS), ASCII_ACTOR, st.sampled_from(sorted(COMPARISONS)),
+       st.integers(min_value=0, max_value=10 ** 6), ASCII_ACTOR)
+@SLOW
+def test_every_sentence_the_grammar_accepts_carries_back_the_parts_it_was_built_from(
+        modality, actor, comparison, threshold, clause):
+    """handoff_guards_v21.py's case the_controlled_grammar_refuses_what_it_does_not_support makes eleven
+    typed comparisons and six refusals about one sentence, 'require voting count >= 4', typing each of
+    its four fields back. The fields need no typing: over a generated modality, actor, comparison and
+    threshold the sentence lark 1.3.1 parses carries exactly the parts it was assembled from, and the
+    declared pydantic model accepts the result."""
+    text = _sentence(modality, actor, comparison, threshold)
+    npt.assert_array_equal(_parsed_fields(text), [modality, actor, comparison, str(threshold)])
+    rule = ControlledRule.model_validate({'modality': modality, 'actor': actor,
+                                          'operator': comparison, 'threshold': threshold,
+                                          'clause': clause})
+    npt.assert_array_equal([rule.modality, rule.actor, rule.operator, str(rule.threshold)],
+                           [modality, actor, comparison, str(threshold)])
+
+
+@given(st.sampled_from(MODALITY_WORDS), ASCII_ACTOR, st.sampled_from(sorted(COMPARISONS)),
+       st.integers(min_value=0, max_value=10 ** 6))
+@SLOW
+def test_the_controlled_language_needs_no_space_between_the_modality_and_the_actor(
+        modality, actor, comparison, threshold):
+    """What the grammar accepts is wider than the sentences the case writes. `%ignore WS` makes
+    whitespace optional rather than significant, and the modality is a terminal rather than a word, so
+    the sentence with the space between the modality and the actor removed parses to the same four
+    fields for every generated rule. A reviewer reading "requirevoting count >= 4" is reading a valid
+    rule of the controlled language, and the refusals the case demonstrates do not include this one."""
+    spaced = _sentence(modality, actor, comparison, threshold)
+    joined = _sentence(modality, actor, comparison, threshold, gap='')
+    npt.assert_array_equal(_parsed_fields(joined), _parsed_fields(spaced))
+
+
+@given(st.sampled_from(MODALITY_WORDS), ASCII_ACTOR, st.sampled_from(sorted(COMPARISONS)),
+       st.integers(min_value=0, max_value=10 ** 6), st.integers(min_value=1, max_value=4), ASCII_ACTOR)
+@SLOW
+def test_two_sentences_compile_to_one_rule_when_the_threshold_carries_leading_zeros(
+        modality, actor, comparison, threshold, zeros, clause):
+    """`INT` is `DIGIT+` in lark's own common.lark at tag 1.3.1, so a threshold may be written with any
+    number of leading zeros. Two sentences that differ in the file therefore compile to one rule: the
+    token text lark returns is not the same, and the integer the declared model holds is. The clause
+    reference a rule carries points at a sentence the rule cannot reproduce."""
+    plain = _sentence(modality, actor, comparison, threshold)
+    padded = _sentence(modality, actor, comparison, '0' * zeros + str(threshold))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_parsed_fields(padded), _parsed_fields(plain))
+    rules = [ControlledRule.model_validate({'modality': modality, 'actor': actor,
+                                            'operator': comparison,
+                                            'threshold': int(_parsed_fields(text)[3]),
+                                            'clause': clause})
+             for text in (plain, padded)]
+    npt.assert_array_equal(rules[0], rules[1])
+
+
+@given(st.sampled_from(MODALITY_WORDS), ASCII_ACTOR, LETTER_OUTSIDE_ASCII,
+       st.sampled_from(sorted(COMPARISONS)), st.integers(min_value=0, max_value=10 ** 6), ASCII_ACTOR)
+@SLOW
+def test_the_grammar_refuses_an_actor_the_declared_model_accepts(modality, prefix, letter, comparison,
+                                                                 threshold, clause):
+    """And it is narrower than the model in a place the case does not test. `WORD` is `LETTER+` and
+    `LETTER` is `UCASE_LETTER | LCASE_LETTER`, which common.lark defines as "A".."Z" and "a".."z", so an
+    actor named with any letter outside ASCII cannot be written in the controlled language at all. The
+    declared model accepts that same actor without complaint, its `actor` field being a string of at
+    least one character. Two declarations of one controlled language therefore accept different sets, and
+    a rule about a body whose name carries an accent can be validated and not written."""
+    actor = prefix + letter
+    with pytest.raises(UnexpectedInput):
+        CONTROLLED_PARSER.parse(_sentence(modality, actor, comparison, threshold))
+    rule = ControlledRule.model_validate({'modality': modality, 'actor': actor, 'operator': comparison,
+                                          'threshold': threshold, 'clause': clause})
+    npt.assert_array_equal(rule.actor, actor)
+
+
+@given(st.sampled_from(MODALITY_WORDS), ASCII_ACTOR, st.sampled_from(sorted(COMPARISONS)),
+       st.integers(max_value=-1), ASCII_ACTOR)
+@SLOW
+def test_a_negative_threshold_is_refused_by_the_grammar_before_the_model_is_reached(
+        modality, actor, comparison, threshold, clause):
+    """Where the two do agree, they agree twice over. `INT` has no sign, so a negative threshold is a
+    parse failure, and the declared model's `ge=0` refuses the same number if it ever arrives another
+    way. The case reaches only the first of those, because its sentence never gets past the parser."""
+    with pytest.raises(UnexpectedInput):
+        CONTROLLED_PARSER.parse(_sentence(modality, actor, comparison, threshold))
+    with pytest.raises(pydantic.ValidationError):
+        ControlledRule.model_validate({'modality': modality, 'actor': actor, 'operator': comparison,
+                                       'threshold': threshold, 'clause': clause})
+
+
+@given(st.sampled_from(sorted(COMPARISONS)), st.integers(min_value=0, max_value=10 ** 6),
+       st.integers(min_value=0, max_value=10 ** 6))
+@SLOW
+def test_the_solver_check_the_chain_uses_is_the_comparison_a_database_engine_performs(
+        comparison, threshold, count):
+    """`satisfies` asks Z3 whether a count meets the threshold, which is the case's three typed
+    comparisons about the four-member boundary. The boundary needs no typing and neither does the
+    answer: over a generated comparison, threshold and count, the satisfiability of the solver's two
+    constraints agrees with the same comparison evaluated by DuckDB 1.5.5, which spells all five
+    operators the grammar names, including `==`, exactly as the grammar does."""
+    solver = z3.Solver()
+    number = z3.Int('n')
+    solver.add(number == count)
+    solver.add(COMPARISONS[comparison](number, threshold))
+    engine = duckdb.connect().execute('select %d %s %d' % (count, comparison, threshold)).fetchone()
+    npt.assert_array_equal(solver.check() == z3.sat, engine[0])
+
+
+@given(ASCII_ACTOR, st.sampled_from(sorted(COMPARISONS)), st.integers(min_value=0, max_value=10 ** 6),
+       ASCII_ACTOR, UNDECLARED_WORD)
+@SLOW
+def test_the_model_refuses_a_modality_the_grammar_never_produces_and_a_rule_without_its_clause(
+        actor, comparison, threshold, clause, undeclared):
+    """The case's two ValidationError refusals, against a generated word rather than 'demand'. The
+    Literal set is the declared modality vocabulary, so any other word is refused; `extra='forbid'`
+    refuses a key the contract does not name; and a payload without its clause reference is refused for
+    being incomplete rather than for being wrong."""
+    payload = {'modality': 'require', 'actor': actor, 'operator': comparison, 'threshold': threshold,
+               'clause': clause}
+    ControlledRule.model_validate(payload)
+    with pytest.raises(pydantic.ValidationError):
+        ControlledRule.model_validate(dict(payload, modality=undeclared))
+    with pytest.raises(pydantic.ValidationError):
+        ControlledRule.model_validate(dict(payload, source=clause))
+    with pytest.raises(pydantic.ValidationError):
+        ControlledRule.model_validate({key: value for key, value in payload.items() if key != 'clause'})
