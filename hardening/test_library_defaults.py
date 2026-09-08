@@ -16229,3 +16229,290 @@ def test_composing_a_master_with_nothing_appended_returns_it_unchanged(family):
     Composer(docx.Document(io.BytesIO(parts[0]))).save(written)
     npt.assert_array_equal(_docx_page_widths(written.getvalue()), _docx_page_widths(parts[0]))
     npt.assert_array_equal(_docx_blocks(written.getvalue()), _docx_blocks(parts[0]))
+
+
+# --------------------------------------------------------------------------------------------------
+# handoff_guards_v5.py, case heatmap_cells_with_partitioned_lags: what a waiting time is measured over
+# --------------------------------------------------------------------------------------------------
+WAITING_CASES = ['c1', 'c2', 'c3']
+WAITING_CASE = st.sampled_from(WAITING_CASES)
+WAITING_DEPARTMENT = st.sampled_from(['Experts', 'General', 'Legal', 'Customer contact', 'Registry'])
+WAITING_ACTIVITY = st.sampled_from(['T02', 'T03', 'T04'])
+WAITING_HOUR = st.integers(min_value=0, max_value=400)
+WAITING_ROWS = st.lists(st.tuples(WAITING_CASE, WAITING_ACTIVITY, WAITING_HOUR),
+                        min_size=2, max_size=12, unique_by=lambda row: (row[0], row[2]))
+WAITING_DEPARTMENTS = st.lists(WAITING_DEPARTMENT, min_size=len(WAITING_CASES),
+                               max_size=len(WAITING_CASES)).map(
+    lambda drawn: dict(zip(WAITING_CASES, drawn)))
+CASE_EVENTS = st.lists(st.tuples(WAITING_ACTIVITY, WAITING_HOUR),
+                       min_size=2, max_size=5, unique_by=lambda pair: pair[1])
+WAITING = settings(max_examples=25, deadline=None)
+WAITING_EPOCH = datetime.datetime(2011, 10, 1, tzinfo=datetime.timezone.utc)
+
+
+def _waiting_frame(rows, departments_by_case):
+    """The event log the case builds, ordered the way the chain orders it before measuring anything:
+    `DataFrame.sort_values(['case_id', 'timestamp'], kind='stable')`. The hours are generated and are
+    unique inside a case, so this order is total and no engine has to break a tie."""
+    return pd.DataFrame([{'case_id': case, 'department': departments_by_case[case],
+                          'activity': activity,
+                          'timestamp': WAITING_EPOCH + datetime.timedelta(hours=hour)}
+                         for case, activity, hour in rows]).sort_values(
+        ['case_id', 'timestamp'], kind='stable').reset_index(drop=True)
+
+
+def _reversed_within_case(frame):
+    """The same rows with each case's events in descending time order, which is a log that was never
+    put in time order rather than one that was put in the wrong one. Generated that way directly."""
+    return frame.sort_values(['case_id', 'timestamp'], ascending=[True, False],
+                             kind='stable').reset_index(drop=True)
+
+
+def _pandas_gaps(frame):
+    """The waiting time in hours the chain measures, through pandas 2.2.3. `DataFrameGroupBy.shift`
+    at v2.2.3 takes `periods`, `freq`, `axis`, `fill_value` and `suffix` and nothing that names an
+    order, so which row is "previous" is whatever order the frame is already in."""
+    return ((frame['timestamp'] - frame.groupby('case_id')['timestamp'].shift(1))
+            .dt.total_seconds() / 3600).to_numpy()
+
+
+def _polars_gaps(frame):
+    """The same measurement in polars 1.44.1, whose `Expr.over` at py-1.44.1 documents `order_by` as
+    "Order rows within each partition group before evaluating the expression. Useful for
+    order-sensitive operations such as" the ones it goes on to list, so the order is an argument."""
+    return (pl.from_pandas(frame).select(
+        (pl.col('timestamp').diff().over('case_id', order_by='timestamp')
+         .dt.total_seconds() / 3600).alias('gap'))['gap'].to_numpy())
+
+
+def _duckdb_gaps(frame):
+    """The same measurement in DuckDB 1.5.5, where the order is part of the window itself: `lag()` is
+    the WindowLeadLagExecutor of src/function/window/window_value_function.cpp at tag v1.5.5, and the
+    OVER clause names both the partition and the ordering. The row position is carried across only so
+    that the three answers can be lined up row for row."""
+    with duckdb.connect() as connection:
+        connection.register('events', frame.assign(_position=range(len(frame))))
+        return np.array([row[0] for row in connection.execute(
+            "SELECT date_diff('second', lag(timestamp) OVER "
+            "(PARTITION BY case_id ORDER BY timestamp), timestamp) / 3600.0 "
+            "FROM events ORDER BY _position").fetchall()], dtype=float)
+
+
+def _measured_gaps(frame):
+    """The rows the chain keeps: `dropna(subset=['gap_hours'])`, which is every event that had a
+    predecessor inside its own case."""
+    return frame.assign(gap_hours=_pandas_gaps(frame)).dropna(subset=['gap_hours'])
+
+
+def _waiting_matrix(measured, departments, activities):
+    """The two matrices the chain builds: a pivot_table of means and a pivot_table of counts over the
+    measured gaps, each reindexed onto the declared axes. pandas 2.2.3 documents `fill_value` at
+    v2.2.3 as the "Value to replace missing values with (in the resulting pivot table, after
+    aggregation)" and `reindex` as "Conform {klass} to new index with optional filling logic", which
+    "Places NA/NaN in locations having no value in the previous index"; neither sentence mentions the
+    labels a reindex removes."""
+    means = measured.pivot_table(index='department', columns='activity', values='gap_hours',
+                                 aggfunc='mean').reindex(index=departments, columns=activities)
+    counts = measured.pivot_table(index='department', columns='activity', values='gap_hours',
+                                  aggfunc='count', fill_value=0).reindex(
+        index=departments, columns=activities, fill_value=0).astype(int)
+    return means, counts
+
+
+def _pandas_grid(measured, departments, activities):
+    """The same two matrices flattened along both axes sorted, which is the one order the other two
+    engines can also be asked for, so that what is compared across engines below is the measurement
+    in each declared cell and not the layout the declared axes give it."""
+    means, counts = _waiting_matrix(measured, departments, activities)
+    rows, columns = sorted(departments), sorted(activities)
+    return (means.reindex(index=rows, columns=columns).to_numpy(dtype=float).ravel(),
+            counts.reindex(index=rows, columns=columns).to_numpy(dtype=int).ravel())
+
+
+def _duckdb_grid(measured, departments, activities):
+    """The same declared grid in DuckDB 1.5.5: the declared axes crossed, left-joined to the measured
+    gaps, and aggregated with avg() and count()."""
+    with duckdb.connect() as connection:
+        connection.register('measured', measured[['department', 'activity', 'gap_hours']])
+        connection.register('declared', pd.DataFrame({'department': sorted(departments)}))
+        connection.register('axis', pd.DataFrame({'activity': sorted(activities)}))
+        rows = connection.execute(
+            "SELECT avg(m.gap_hours), count(m.gap_hours) FROM declared d CROSS JOIN axis a "
+            "LEFT JOIN measured m ON m.department = d.department AND m.activity = a.activity "
+            "GROUP BY d.department, a.activity ORDER BY d.department, a.activity").fetchall()
+    return (np.array([np.nan if row[0] is None else row[0] for row in rows], dtype=float),
+            np.array([row[1] for row in rows], dtype=int))
+
+
+def _polars_grid(measured, departments, activities):
+    """The same declared grid in polars 1.44.1: a cross join for the axes, a left join for the
+    measurements, and mean() and count() per cell."""
+    grid = pl.DataFrame({'department': sorted(departments)}).join(
+        pl.DataFrame({'activity': sorted(activities)}), how='cross')
+    aggregated = grid.join(pl.from_pandas(measured[['department', 'activity', 'gap_hours']]),
+                           on=['department', 'activity'], how='left').group_by(
+        ['department', 'activity']).agg(
+        pl.col('gap_hours').mean().alias('mean_gap'),
+        pl.col('gap_hours').count().alias('measured')).sort(['department', 'activity'])
+    return (aggregated['mean_gap'].to_numpy().astype(float),
+            aggregated['measured'].to_numpy().astype(int))
+
+
+@given(WAITING_ROWS, WAITING_DEPARTMENTS)
+@WAITING
+def test_an_unpartitioned_difference_measures_across_case_boundaries(rows, departments_by_case):
+    """Replaces `g.equal(crossed.tolist()[1:], [1.0, 3.0, 7.0])` of handoff_guards_v5.py case
+    heatmap_cells_with_partitioned_lags, which types the three lags a four-row two-case log produces
+    when the difference is taken over the whole frame. Nothing is typed here. pandas 2.2.3 documents
+    Series.diff at v2.2.3 as calculating "the difference of a {klass} element compared with another
+    element in the {klass} (default is element in previous row)", and the previous row is the whole
+    of the contract: sorted by timestamp alone the difference is defined at every row but the first,
+    so it returns a measurement at every case boundary it crosses, where the partitioned measurement
+    returns none."""
+    frame = _waiting_frame(rows, departments_by_case)
+    by_time = frame.sort_values('timestamp', kind='stable')
+    crossed = (by_time['timestamp'].diff().dt.total_seconds() / 3600).to_numpy()
+    npt.assert_array_equal(np.isnan(crossed).sum(), 1)
+    npt.assert_array_equal(np.isnan(_pandas_gaps(frame)).sum(), frame['case_id'].nunique())
+
+
+@given(WAITING_ROWS, WAITING_DEPARTMENTS)
+@WAITING
+def test_the_partitioned_waiting_time_agrees_across_three_engines(rows, departments_by_case):
+    """The measurement the chain actually wants, under three implementations that share no code:
+    pandas 2.2.3's groupby shift, polars 1.44.1's diff over a partition and DuckDB 1.5.5's lag() over
+    a window. On a log already in time order all three return the same hours at the same rows,
+    including the same nulls, so the divergence found below belongs to the ordering and to no one
+    engine."""
+    frame = _waiting_frame(rows, departments_by_case)
+    npt.assert_array_equal(_pandas_gaps(frame), _polars_gaps(frame))
+    npt.assert_array_equal(_pandas_gaps(frame), _duckdb_gaps(frame))
+
+
+@given(WAITING_ROWS, WAITING_DEPARTMENTS)
+@WAITING
+def test_the_number_of_events_with_no_measurable_wait_is_the_number_of_cases(rows, departments_by_case):
+    """Replaces `g.equal(matrix['first_events_excluded'], 2)` of the same case, which types the two
+    cases its own fixture holds. The number is not a fact about that log: every case has exactly one
+    event with no predecessor inside it, so the count the chain reports is the number of cases, and
+    all three engines say so."""
+    frame = _waiting_frame(rows, departments_by_case)
+    cases = frame['case_id'].nunique()
+    npt.assert_array_equal(np.isnan(_pandas_gaps(frame)).sum(), cases)
+    npt.assert_array_equal(np.isnan(_polars_gaps(frame)).sum(), cases)
+    npt.assert_array_equal(np.isnan(_duckdb_gaps(frame)).sum(), cases)
+
+
+@given(CASE_EVENTS, WAITING_DEPARTMENT)
+@WAITING
+def test_a_log_not_already_in_time_order_measures_negative_waits_in_only_one_engine(events, department):
+    """The finding the case does not reach, and the reason its own fixture never sees it. The chain
+    sorts before it measures, so the ordering is a precondition rather than a contract, and pandas
+    has nowhere to state it: DataFrameGroupBy.shift at v2.2.3 takes no ordering argument, so the
+    previous row is whichever row precedes this one in the frame. Handed the same events with the
+    case in descending time order -- generated that way rather than filtered for -- pandas returns a
+    negative waiting time at every measured event, while polars, told the order through `over(...,
+    order_by=...)`, and DuckDB, told it in the OVER clause, return the same positive hours as before
+    and the same multiset of measurements. Nothing in the chain refuses a negative duration, and the
+    divergence is asserted rather than sorted away."""
+    frame = _waiting_frame([('c1', activity, hour) for activity, hour in events], {'c1': department})
+    reordered = _reversed_within_case(frame)
+    npt.assert_array_equal(_pandas_gaps(reordered)[1:] < 0, np.ones(len(events) - 1, dtype=bool))
+    npt.assert_array_equal(_polars_gaps(reordered)[:-1] > 0, np.ones(len(events) - 1, dtype=bool))
+    npt.assert_array_equal(_polars_gaps(reordered), _duckdb_gaps(reordered))
+    npt.assert_allclose(np.sort(_polars_gaps(reordered)), np.sort(_polars_gaps(frame)))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_pandas_gaps(reordered), _polars_gaps(reordered))
+
+
+@given(WAITING_ROWS, WAITING_DEPARTMENTS,
+       st.lists(WAITING_DEPARTMENT, min_size=1, max_size=5, unique=True),
+       st.lists(WAITING_ACTIVITY, min_size=1, max_size=3, unique=True))
+@WAITING
+def test_a_declared_cell_with_no_measurement_is_an_unknown_mean_and_a_count_of_zero(
+        rows, departments_by_case, departments, activities):
+    """Replaces `g.equal(bool(np.isnan(matrix['means'].loc['Customer contact', 'T03'])), True)` and
+    `g.equal(int(matrix['counts'].loc['Customer contact', 'T03']), 0)` of the same case, which type
+    one cell of one matrix. Over generated logs and generated declared axes the same asymmetry holds
+    in every cell and in three engines: a declared cell nothing was measured for carries an unknown
+    mean and a count of zero in the same pair of matrices, so one half says the value is missing and
+    the other half states a number. pandas gets there through pivot_table and reindex, DuckDB through
+    a cross join and a left join, polars through the same two joins, and all three agree on every
+    declared cell. The reindex also decides the layout: the matrices come back with the declared axes
+    in the declared order, which is not the sorted order pivot_table produced on its own."""
+    measured = _measured_gaps(_waiting_frame(rows, departments_by_case))
+    pandas_means, pandas_counts = _pandas_grid(measured, departments, activities)
+    duckdb_means, duckdb_counts = _duckdb_grid(measured, departments, activities)
+    polars_means, polars_counts = _polars_grid(measured, departments, activities)
+    npt.assert_allclose(pandas_means, duckdb_means)
+    npt.assert_allclose(pandas_means, polars_means)
+    npt.assert_array_equal(pandas_counts, duckdb_counts)
+    npt.assert_array_equal(pandas_counts, polars_counts)
+    npt.assert_array_equal(np.isnan(pandas_means), pandas_counts == 0)
+    means_frame, counts_frame = _waiting_matrix(measured, departments, activities)
+    npt.assert_array_equal(list(means_frame.columns), activities)
+    npt.assert_array_equal(list(counts_frame.index), departments)
+
+
+@given(WAITING_ROWS, WAITING_DEPARTMENTS)
+@WAITING
+def test_the_declared_grid_conserves_every_gap_whose_axes_it_declares(rows, departments_by_case):
+    """The agreeing region. When the declared axes are the departments and activities the measured
+    gaps actually carry, the counts of the matrix sum to the number of measured gaps, so the matrix
+    accounts for every measurement and the chain's `first_events_excluded` accounts for the rest of
+    the log. Both axes are read off the generated log rather than chosen."""
+    frame = _waiting_frame(rows, departments_by_case)
+    measured = _measured_gaps(frame)
+    departments = sorted(set(measured['department'])) or sorted(set(frame['department']))
+    activities = sorted(set(measured['activity'])) or sorted(set(frame['activity']))
+    _, counts = _pandas_grid(measured, departments, activities)
+    npt.assert_array_equal(counts.sum(), len(measured))
+    npt.assert_array_equal(len(measured) + int(np.isnan(_pandas_gaps(frame)).sum()), len(frame))
+
+
+@given(st.lists(WAITING_DEPARTMENT, min_size=2, max_size=5, unique=True), CASE_EVENTS)
+@WAITING
+def test_the_declared_grid_silently_drops_every_gap_outside_it(pool, events):
+    """The second finding. `reindex` is documented at v2.2.3 only for the labels it adds -- it
+    "Places NA/NaN in locations having no value in the previous index" -- and it is also what removes
+    every label the declared axes leave out, with no count, no warning and no refusal. Here the log's
+    one case carries a department drawn from the generated pool and the declared axis is the rest of
+    that pool, so every measured gap belongs to a department the matrix does not declare. The matrix
+    reports a total of zero measurements while the log holds one for every event after the first, and
+    the only exclusion figure the chain publishes is the number of cases, which is one. Nothing in
+    the output tells this matrix apart from the matrix of a log that measured nothing at all."""
+    declared, hidden = pool[:-1], pool[-1]
+    frame = _waiting_frame([('c1', activity, hour) for activity, hour in events], {'c1': hidden})
+    measured = _measured_gaps(frame)
+    activities = sorted({activity for activity, _ in events})
+    _, counts = _pandas_grid(measured, declared, activities)
+    npt.assert_array_equal(counts.sum(), 0)
+    npt.assert_array_equal(len(measured), len(events) - 1)
+    npt.assert_array_equal(int(np.isnan(_pandas_gaps(frame)).sum()), frame['case_id'].nunique())
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(counts.sum(), len(measured))
+
+
+@given(st.lists(st.tuples(WAITING_CASE, WAITING_ACTIVITY, WAITING_HOUR),
+                min_size=1, max_size=3, unique_by=lambda row: row[0]),
+       WAITING_DEPARTMENTS,
+       st.lists(WAITING_DEPARTMENT, min_size=1, max_size=4, unique=True),
+       st.lists(WAITING_ACTIVITY, min_size=1, max_size=3, unique=True))
+@WAITING
+def test_a_log_where_no_case_has_a_second_event_yields_a_grid_and_not_a_refusal(
+        rows, departments_by_case, departments, activities):
+    """Replaces `g.equal((out['cells'], out['missing_cells']), (6, 4))` of the same case, which types
+    the six cells and four blanks of one matrix. The cell count is a property of the declared axes
+    alone: it is the size of their product whatever the log holds, which is why it can be stated
+    without looking at the data. The boundary the case never reaches is a log in which every case has
+    one event and nothing is measurable at all. pandas does not refuse it: pivot_table over the empty
+    measured frame returns a frame with no rows and no columns, and the reindex turns that into a
+    full grid of unknown means and zero counts, which the other two engines return as well."""
+    measured = _measured_gaps(_waiting_frame(rows, departments_by_case))
+    means, counts = _pandas_grid(measured, departments, activities)
+    npt.assert_array_equal(len(measured), 0)
+    npt.assert_array_equal(means.size, len(departments) * len(activities))
+    npt.assert_array_equal(np.isnan(means).sum(), means.size)
+    npt.assert_array_equal(counts.sum(), 0)
+    npt.assert_allclose(means, _duckdb_grid(measured, departments, activities)[0])
+    npt.assert_array_equal(counts, _polars_grid(measured, departments, activities)[1])
