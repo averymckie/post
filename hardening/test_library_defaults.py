@@ -38,6 +38,7 @@ from typing import Literal
 from xml.sax.saxutils import escape as xml_escape
 import itertools
 import json
+import logging
 import math
 import sqlite3
 from urllib.parse import urljoin, quote as urllib_quote
@@ -62,6 +63,7 @@ import icalendar.parser
 from dateutil import rrule, tz as dateutil_tz
 from dateutil.relativedelta import relativedelta
 from fontTools.ttLib import TTFont
+from fontTools.misc import timeTools
 import numpy as np
 import numpy_financial as npf
 import pyxirr
@@ -144,10 +146,12 @@ import pypdfium2.raw as pdfium_c
 from pdfminer.pdfdocument import PDFDocument as PdfminerDocument
 from pdfminer.pdfparser import PDFParser as PdfminerParser
 from pdfminer.pdftypes import resolve1 as pdfminer_resolve
+from pdfminer.high_level import extract_text as pdfminer_extract_text
 from pypdf.generic import NameObject
 from reportlab.pdfgen import canvas as rl_canvas
 from reportlab.lib.utils import ImageReader
 import repro_zipfile
+import weasyprint
 import xlsxwriter
 import xlsxwriter.exceptions
 from docx2python import docx2python
@@ -16759,3 +16763,289 @@ def test_agreement_over_a_bounded_domain_does_not_identify_the_policy(first, sec
     inside.add(separates, present >= domain[0], present <= domain[-1])
     npt.assert_array_equal(str(inside.check()), str(z3.unsat))
     npt.assert_array_equal(str(unbounded.check()), str(z3.sat if first != second else z3.unsat))
+
+
+# ---------------------------------------------------------------- printing, two HTML-to-PDF renderers
+# Replaces handoff_guards_v8.py case 73 print_render_is_reproducible_and_source_checked, whose three typed
+# comparisons and two Blocked rejections asserted that repeated renders are byte-equal under a fixed
+# SOURCE_DATE_EPOCH, that the epoch reaches the output, that the printed text survives, and that an
+# unfetchable external resource is dropped while a PDF is still produced.
+DOMPDF_ORACLE = pathlib.Path(__file__).with_name('dompdf_oracle.php')
+DOMPDF_AUTOLOAD = pathlib.Path('/root/dompdf-oracle/vendor/autoload.php')
+dompdf_available = shutil.which('php') is not None and DOMPDF_AUTOLOAD.is_file()
+
+PRINT_RENDER = settings(max_examples=12, deadline=None)
+PRINT_READERS = settings(max_examples=8, deadline=None)
+DROPPED_RESOURCE = settings(max_examples=6, deadline=None)
+PRINT_TOKENS = st.lists(st.from_regex(r'\A[A-Za-z0-9]{3,10}\Z'), min_size=1, max_size=4, unique=True)
+PRINT_EPOCHS = st.integers(min_value=0, max_value=2_000_000_000)
+PRINT_EPOCH_STEPS = st.integers(min_value=1, max_value=100_000_000)
+PRINT_MILLIMETRES = st.integers(min_value=1, max_value=90)
+UNFETCHABLE_URLS = st.lists(st.from_regex(r'\A[a-z0-9]{3,10}\Z'), min_size=1, max_size=3, unique=True)
+
+
+def _print_page(tokens, extra=''):
+    """Assembles the generated tokens into the input format both renderers take. No value is computed here."""
+    return ('<!doctype html><html lang="en-US"><head><meta charset="utf-8">'
+            '<style>@page{size:A4;margin:1cm}</style><title>t</title></head><body>'
+            + extra + ''.join('<p>' + token + '</p>' for token in tokens) + '</body></html>')
+
+
+def _textless_page(width, height):
+    return ('<!doctype html><html lang="en-US"><head><meta charset="utf-8">'
+            '<style>@page{size:A4;margin:1cm}</style></head><body>'
+            '<div style="width:%dmm;height:%dmm;background:#000"></div></body></html>' % (width, height))
+
+
+def _dated_page(tokens):
+    return _print_page(tokens).replace(
+        '<title>t</title>',
+        '<title>t</title><meta name="dcterms.created" content="2019-04-07">'
+        '<meta name="dcterms.modified" content="2019-04-07">')
+
+
+def _unfetchable_images(names):
+    return ''.join('<img src="https://%s.invalid/%s.png">' % (name, name) for name in names)
+
+
+def _weasyprint_pdf(page):
+    return weasyprint.HTML(string=page).write_pdf()
+
+
+def _dompdf_pdf(page):
+    completed = subprocess.run(['php', str(DOMPDF_ORACLE), str(DOMPDF_AUTOLOAD)],
+                               input=page.encode('utf-8'), capture_output=True, check=True)
+    return base64.b64decode(completed.stdout)
+
+
+def _pdf_digest(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def _mupdf_page_text(data):
+    with pymupdf.open(stream=data, filetype='pdf') as document:
+        return '\n'.join(page.get_text() for page in document)
+
+
+def _pypdf_page_text(data):
+    return '\n'.join(page.extract_text() or '' for page in pypdf.PdfReader(io.BytesIO(data)).pages)
+
+
+def _pdfium_page_text(data):
+    document = pypdfium2.PdfDocument(data)
+    return '\n'.join(document[index].get_textpage().get_text_bounded() for index in range(len(document)))
+
+
+def _pypdf_info_keys(data):
+    return sorted(str(key) for key in pypdf.PdfReader(io.BytesIO(data)).trailer['/Info'])
+
+
+def _pdfminer_info_keys(data):
+    document = PdfminerDocument(PdfminerParser(io.BytesIO(data)))
+    return sorted(NameObject.prefix.decode() + str(key) for key in document.info[0])
+
+
+def _embedded_font_heads(data):
+    heads = []
+    for page in pypdf.PdfReader(io.BytesIO(data)).pages:
+        for font in page['/Resources']['/Font'].values():
+            described = font['/DescendantFonts'][0] if '/DescendantFonts' in font else font
+            descriptor = described['/FontDescriptor']
+            for key in ('/FontFile', '/FontFile2', '/FontFile3'):
+                if key in descriptor:
+                    heads.append(TTFont(io.BytesIO(descriptor[key].get_data()))['head'])
+    return heads
+
+
+@given(PRINT_TOKENS, PRINT_EPOCHS)
+@PRINT_RENDER
+def test_two_weasyprint_renders_of_one_page_are_byte_equal_under_a_fixed_epoch(tokens, epoch):
+    """The reproducibility half of case 73's first typed comparison, over generated text and a generated
+    epoch rather than one fixture. WeasyPrint's own tests/test_api.py at tag v69.0 makes the same claim by
+    setting `SOURCE_DATE_EPOCH` to '0' and asserting two renders of one file have equal bytes."""
+    page = _print_page(tokens)
+    with mock.patch.dict(os.environ, {'SOURCE_DATE_EPOCH': str(epoch)}):
+        first, second = _weasyprint_pdf(page), _weasyprint_pdf(page)
+    npt.assert_equal(_pdf_digest(first), _pdf_digest(second))
+
+
+@given(PRINT_TOKENS, PRINT_EPOCHS, PRINT_EPOCH_STEPS)
+@PRINT_RENDER
+def test_a_page_that_prints_text_carries_the_epoch_into_its_bytes(tokens, epoch, step):
+    """Case 73's `g.require(print_pdf(page, epoch='1000000') != first, 'the epoch reaches the output')`,
+    generated. It holds for a page that prints text; the next test shows it does not hold in general."""
+    page = _print_page(tokens)
+    with mock.patch.dict(os.environ, {'SOURCE_DATE_EPOCH': str(epoch)}):
+        early = _weasyprint_pdf(page)
+    with mock.patch.dict(os.environ, {'SOURCE_DATE_EPOCH': str(epoch + step)}):
+        later = _weasyprint_pdf(page)
+    with pytest.raises(AssertionError):
+        npt.assert_equal(_pdf_digest(early), _pdf_digest(later))
+
+
+@given(PRINT_MILLIMETRES, PRINT_MILLIMETRES, PRINT_EPOCHS, PRINT_EPOCH_STEPS)
+@PRINT_RENDER
+def test_a_page_that_prints_no_text_at_all_ignores_the_epoch(width, height, epoch, step):
+    """The disagreeing region of the claim above, generated directly rather than filtered. `SOURCE_DATE_EPOCH`
+    appears nowhere in weasyprint/ at tag v69.0 -- only in tests/test_api.py -- and the library declares
+    `fonttools[woff] >=4.59.2`, whose timeTools.timestampNow() is the code that reads the variable. A page
+    that embeds no font therefore has nothing for the epoch to reach, and two epochs give one file."""
+    page = _textless_page(width, height)
+    with mock.patch.dict(os.environ, {'SOURCE_DATE_EPOCH': str(epoch)}):
+        early = _weasyprint_pdf(page)
+    with mock.patch.dict(os.environ, {'SOURCE_DATE_EPOCH': str(epoch + step)}):
+        later = _weasyprint_pdf(page)
+    npt.assert_equal(_pdf_digest(early), _pdf_digest(later))
+    npt.assert_array_equal(_embedded_font_heads(early), [])
+
+
+@given(PRINT_TOKENS, PRINT_EPOCHS, PRINT_EPOCH_STEPS)
+@PRINT_RENDER
+def test_the_epoch_is_the_modified_timestamp_of_the_embedded_font_subset(tokens, epoch, step):
+    """Where the epoch lands: fontTools 4.64.0 timeTools.timestampNow() returns
+    `int(source_date_epoch) - epoch_diff`, which is timestampSinceEpoch of the same value, and the head
+    table of the subset WeasyPrint embeds carries exactly that. The expected value is that published
+    conversion applied to the generated epoch, never a typed number. The final raises makes the comparison
+    non-vacuous: a font is embedded and its stamp moved."""
+    page = _print_page(tokens)
+    with mock.patch.dict(os.environ, {'SOURCE_DATE_EPOCH': str(epoch)}):
+        early = _embedded_font_heads(_weasyprint_pdf(page))
+    with mock.patch.dict(os.environ, {'SOURCE_DATE_EPOCH': str(epoch + step)}):
+        later = _embedded_font_heads(_weasyprint_pdf(page))
+    npt.assert_array_equal([head.modified for head in early],
+                           [timeTools.timestampSinceEpoch(epoch) for head in early])
+    npt.assert_array_equal([head.modified for head in later],
+                           [timeTools.timestampSinceEpoch(epoch + step) for head in later])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal([head.modified for head in early], [head.modified for head in later])
+
+
+@given(PRINT_TOKENS, PRINT_EPOCHS, PRINT_EPOCH_STEPS)
+@PRINT_RENDER
+def test_the_created_timestamp_of_the_embedded_font_does_not_move_with_the_epoch(tokens, epoch, step):
+    """Only head.modified is rewritten. head.created stays at the value the source font shipped, so the
+    epoch canonicalises one of the two timestamps the format carries and leaves the other alone."""
+    page = _print_page(tokens)
+    with mock.patch.dict(os.environ, {'SOURCE_DATE_EPOCH': str(epoch)}):
+        early = _embedded_font_heads(_weasyprint_pdf(page))
+    with mock.patch.dict(os.environ, {'SOURCE_DATE_EPOCH': str(epoch + step)}):
+        later = _embedded_font_heads(_weasyprint_pdf(page))
+    npt.assert_array_equal([head.created for head in early], [head.created for head in later])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal([head.modified for head in early], [head.modified for head in later])
+
+
+@given(PRINT_TOKENS, PRINT_EPOCHS)
+@PRINT_READERS
+def test_two_readers_agree_on_the_info_keys_each_renderer_writes(tokens, epoch):
+    """pypdf 6.17.0 reads the trailer /Info dictionary through its own object model and pdfminer.six
+    20260107 through its; both are compared in pypdf's spelling, using NameObject.prefix as pypdf's
+    published account of the solidus its name values carry."""
+    page = _print_page(tokens)
+    with mock.patch.dict(os.environ, {'SOURCE_DATE_EPOCH': str(epoch)}):
+        rendered = _weasyprint_pdf(page)
+    npt.assert_array_equal(_pypdf_info_keys(rendered), _pdfminer_info_keys(rendered))
+
+
+@pytest.mark.skipif(not dompdf_available, reason='php and a dompdf checkout are required for this oracle')
+@given(PRINT_TOKENS, PRINT_EPOCHS)
+@PRINT_READERS
+def test_the_two_info_keys_weasyprint_must_be_asked_for_are_the_two_dompdf_writes_unasked(tokens, epoch):
+    """WeasyPrint writes /CreationDate and /ModDate only when the source carries dcterms.created and
+    dcterms.modified: weasyprint/pdf/__init__.py at v69.0 guards both on `if metadata.created:` and
+    `if metadata.modified:`. dompdf 3.1.4 writes both from the wall clock and offers no way to be asked.
+    The two key sets are equal, so the keys a WeasyPrint document must request are exactly the keys the
+    other renderer stamps by default."""
+    plain = _print_page(tokens)
+    with mock.patch.dict(os.environ, {'SOURCE_DATE_EPOCH': str(epoch)}):
+        without = _pypdf_info_keys(_weasyprint_pdf(plain))
+        asked_for = _pypdf_info_keys(_weasyprint_pdf(_dated_page(tokens)))
+        stamped = _pypdf_info_keys(_dompdf_pdf(plain))
+    npt.assert_array_equal(sorted(set(asked_for) - set(without)), sorted(set(stamped) - set(without)))
+
+
+@pytest.mark.skipif(not dompdf_available, reason='php and a dompdf checkout are required for this oracle')
+@given(PRINT_TOKENS, PRINT_EPOCHS)
+@PRINT_READERS
+def test_dompdf_gives_every_render_a_fresh_document_identifier(tokens, epoch):
+    """The reproducibility of case 73's first comparison is a property of this renderer, not of the
+    operation. dompdf 3.1.4 reads no SOURCE_DATE_EPOCH and writes a fresh trailer /ID on every render, so
+    two renders of one page differ even inside one wall-clock second. WeasyPrint writes no /ID at all."""
+    page = _print_page(tokens)
+    with mock.patch.dict(os.environ, {'SOURCE_DATE_EPOCH': str(epoch)}):
+        first, second = _dompdf_pdf(page), _dompdf_pdf(page)
+        weasyprint_trailer = pypdf.PdfReader(io.BytesIO(_weasyprint_pdf(page))).trailer
+    with pytest.raises(AssertionError):
+        npt.assert_equal(_pdf_digest(first), _pdf_digest(second))
+    with pytest.raises(AssertionError):
+        npt.assert_equal(str(pypdf.PdfReader(io.BytesIO(first)).trailer['/ID']),
+                         str(pypdf.PdfReader(io.BytesIO(second)).trailer['/ID']))
+    npt.assert_array_equal(sorted(set(pypdf.PdfReader(io.BytesIO(first)).trailer) - set(weasyprint_trailer)),
+                           [NameObject.prefix.decode() + 'ID'])
+
+
+@pytest.mark.skipif(not dompdf_available, reason='php and a dompdf checkout are required for this oracle')
+@given(PRINT_TOKENS, PRINT_EPOCHS)
+@PRINT_READERS
+def test_four_readers_find_every_generated_token_in_the_output_of_both_renderers(tokens, epoch):
+    """Case 73's printed_values_present, generated and read by four independent PDF readers against two
+    independent renderers. The expected presence vector is the presence of the same tokens in the source
+    HTML, an invariant of the generated input rather than an oracle value."""
+    page = _print_page(tokens)
+    with mock.patch.dict(os.environ, {'SOURCE_DATE_EPOCH': str(epoch)}):
+        rendered = [_weasyprint_pdf(page), _dompdf_pdf(page)]
+    for data in rendered:
+        for extracted in (_mupdf_page_text(data), _pypdf_page_text(data),
+                          pdfminer_extract_text(io.BytesIO(data)), _pdfium_page_text(data)):
+            npt.assert_array_equal([token in extracted for token in tokens],
+                                   [token in page for token in tokens])
+
+
+@given(PRINT_TOKENS, UNFETCHABLE_URLS, PRINT_EPOCHS)
+@DROPPED_RESOURCE
+def test_an_unfetchable_external_image_leaves_the_weasyprint_bytes_unchanged(tokens, names, epoch):
+    """Case 73 records that the renderer drops an unfetchable external resource and still produces a PDF.
+    It is stronger than that: the file is byte-for-byte the file the same page produces with the img
+    elements deleted, so no reader and no digest can tell that the source named a resource at all. That is
+    the reason the source must be scanned before rendering rather than the output inspected after it."""
+    with_images = _print_page(tokens, _unfetchable_images(names))
+    without_images = _print_page(tokens)
+    with mock.patch.dict(os.environ, {'SOURCE_DATE_EPOCH': str(epoch)}):
+        dropped, never_named = _weasyprint_pdf(with_images), _weasyprint_pdf(without_images)
+    npt.assert_equal(_pdf_digest(dropped), _pdf_digest(never_named))
+    npt.assert_array_equal(pymupdf.open(stream=dropped, filetype='pdf')[0].get_images(), [])
+
+
+@given(PRINT_TOKENS, UNFETCHABLE_URLS, PRINT_EPOCHS)
+@DROPPED_RESOURCE
+def test_weasyprint_reports_every_unfetchable_url_on_its_own_logger(tokens, names, epoch):
+    """The drop is not unreported. weasyprint/logger.py at v69.0 documents the levels: "errors are used in
+    ``LOGGER`` for unreachable or unusable external resources, including unreachable stylesheets,
+    unreachables images and unreadable images", and weasyprint/images.py calls
+    `LOGGER.error('Failed to load image at %r: %s', url, exception)` once per image. The same file adds a
+    logging.NullHandler to that logger, so the report reaches nothing unless the caller attaches a handler:
+    the record exists, and reading it is the caller's obligation."""
+    page = _print_page(tokens, _unfetchable_images(names))
+    logger = logging.getLogger('weasyprint')
+    with mock.patch.dict(os.environ, {'SOURCE_DATE_EPOCH': str(epoch)}):
+        with mock.patch.object(logger, 'error') as reported:
+            rendered = _weasyprint_pdf(page)
+    npt.assert_array_equal(sorted(call.args[1] for call in reported.call_args_list),
+                           sorted('https://%s.invalid/%s.png' % (name, name) for name in names))
+    npt.assert_array_equal(pymupdf.open(stream=rendered, filetype='pdf')[0].get_images(), [])
+
+
+@pytest.mark.skipif(not dompdf_available, reason='php and a dompdf checkout are required for this oracle')
+@given(PRINT_TOKENS, UNFETCHABLE_URLS, PRINT_EPOCHS)
+@DROPPED_RESOURCE
+def test_dompdf_also_prints_the_page_whose_external_image_cannot_be_fetched(tokens, names, epoch):
+    """The second renderer agrees on the behaviour and not on the report: dompdf 3.1.4 produces a PDF whose
+    text is the text of the page that never named the images, and writes nothing to stderr. Continuing past
+    an unreachable resource is a property of HTML-to-PDF rendering, not a WeasyPrint choice."""
+    with_images = _print_page(tokens, _unfetchable_images(names))
+    without_images = _print_page(tokens)
+    with mock.patch.dict(os.environ, {'SOURCE_DATE_EPOCH': str(epoch)}):
+        dropped, never_named = _dompdf_pdf(with_images), _dompdf_pdf(without_images)
+    npt.assert_array_equal(_mupdf_page_text(dropped), _mupdf_page_text(never_named))
+    npt.assert_array_equal([token in _mupdf_page_text(dropped) for token in tokens],
+                           [token in with_images for token in tokens])
