@@ -5928,3 +5928,117 @@ def test_the_enumerated_domain_is_the_same_grid_in_two_libraries(size):
     points. Replaces the typed `len(known) == 9` of case 198."""
     npt.assert_array_equal(list(itertools.product(range(size), repeat=2)),
                            np.indices((size, size)).reshape(2, -1).T)
+
+
+# ---------------------------------------------------------------- a uniqueness contract, and the index under it
+MANIFEST_KEY = st.from_regex(r'\A[A-Z][0-9]\Z')
+MANIFEST_ROWS = st.lists(st.tuples(MANIFEST_KEY, MANIFEST_KEY), min_size=1, max_size=6, unique=True)
+
+
+def _manifest_schema(movements=None):
+    """P177's manifest contract: two text columns that together identify a row, and optionally the
+    declared set of movements a row may name."""
+    columns = {'movement': pandera.Column(str) if movements is None
+               else pandera.Column(str, pandera.Check.isin(list(movements))),
+               'package': pandera.Column(str)}
+    return pandera.DataFrameSchema(columns, unique=['movement', 'package'])
+
+
+def _manifest_frame(rows):
+    return pd.DataFrame(list(rows), columns=['movement', 'package'])
+
+
+def _manifest_in_duckdb(rows):
+    """The same two columns as a DuckDB table whose primary key is the pair, which is the same
+    contract stated to a different engine. Returns the number of rows the engine kept."""
+    with duckdb.connect() as connection:
+        connection.execute('create table manifest(movement VARCHAR, package VARCHAR, '
+                           'primary key (movement, package))')
+        connection.executemany('insert into manifest values (?, ?)', [list(row) for row in rows])
+        return connection.execute('select count(*) from manifest').fetchone()[0]
+
+
+@given(MANIFEST_ROWS)
+@SLOW
+def test_a_manifest_of_distinct_rows_passes_the_uniqueness_contract_in_three_engines(rows):
+    """P177 states the identity of a manifest row with pandera's `unique=['movement', 'package']`.
+    On generated rows that are distinct, pandera returns the frame unchanged, polars counts as many
+    unique rows as it has rows, and DuckDB accepts every row into a table whose primary key is the
+    same pair. Replaces the typed `len(checked) == 6` of handoff_guards_v19.py case 177."""
+    frame = _manifest_frame(rows)
+    pdt.assert_frame_equal(_manifest_schema().validate(frame, lazy=True), frame)
+    in_polars = pl.from_pandas(frame)
+    npt.assert_equal(in_polars.n_unique(), in_polars.height)
+    npt.assert_equal(_manifest_in_duckdb(rows), len(rows))
+
+
+@given(MANIFEST_ROWS, st.data())
+@SLOW
+def test_a_repeated_manifest_row_is_found_by_the_schema_and_by_two_other_engines(rows, source):
+    """The same manifest with one of its rows declared twice. pandera reports it as
+    `multiple_fields_uniqueness`, polars flags both copies and nothing else, and DuckDB refuses the
+    insert on the primary key. Replaces the typed rejection of the duplicated manifest of case 177."""
+    repeated = source.draw(st.sampled_from(rows))
+    declared = list(rows) + [repeated]
+    frame = _manifest_frame(declared)
+    with pytest.raises(pandera.errors.SchemaErrors) as rejection:
+        _manifest_schema().validate(frame, lazy=True)
+    npt.assert_array_equal(sorted({str(case) for case in rejection.value.failure_cases['check']}),
+                           ['multiple_fields_uniqueness'])
+    in_polars = pl.from_pandas(frame)
+    plt.assert_frame_equal(in_polars.filter(in_polars.is_duplicated()).unique(maintain_order=True),
+                           pl.DataFrame({'movement': [repeated[0]], 'package': [repeated[1]]}))
+    with pytest.raises(duckdb.ConstraintException):
+        _manifest_in_duckdb(declared)
+
+
+@given(MANIFEST_ROWS)
+@SLOW
+def test_the_index_a_concatenation_repeats_defeats_the_uniqueness_report(rows):
+    """Appending a row with `pd.concat` keeps that row's index label, so the frame carries the label
+    twice, and pandera's uniqueness report then fails inside pandas' reshaping with "Columns with
+    duplicate values are not supported in stack" -- a ValueError, not a schema error, so a caller
+    that catches schema errors does not catch it and the manifest is neither accepted nor rejected.
+    Resetting the index first turns the same frame into an ordinary rejection. polars has no index at
+    all, and its verdict on the two frames is the same one. Replaces the typed
+    `list(duplicated.index) == [0, 1, 2, 3, 4, 5, 0]` of case 177."""
+    frame = _manifest_frame(rows)
+    concatenated = pd.concat([frame, frame.iloc[[0]]])
+    npt.assert_array_equal(list(concatenated.index), list(frame.index) + [frame.index[0]])
+    with pytest.raises(ValueError,
+                       match='Columns with duplicate values are not supported in stack'):
+        _manifest_schema().validate(concatenated, lazy=True)
+    with pytest.raises(pandera.errors.SchemaErrors):
+        _manifest_schema().validate(concatenated.reset_index(drop=True), lazy=True)
+    plt.assert_series_equal(pl.from_pandas(concatenated).is_duplicated(),
+                            pl.from_pandas(concatenated.reset_index(drop=True)).is_duplicated())
+
+
+@given(MANIFEST_ROWS, MANIFEST_KEY)
+@SLOW
+def test_a_movement_outside_the_declared_set_is_rejected_by_the_schema_and_by_a_check_constraint(
+        rows, absent):
+    """The declared movement set is the other half of P177's contract. A row naming a movement
+    outside it is rejected by pandera's isin check, and by a DuckDB foreign key into a table holding
+    the same declared movements, and polars' is_in names the same row. Each engine is told the
+    declared set once and finds the one row that is not in it. Replaces the typed rejection of the
+    unknown movement of case 177."""
+    movements = sorted({movement for movement, _ in rows})
+    assume(absent not in movements)
+    declared = list(rows) + [(absent, absent)]
+    frame = _manifest_frame(declared)
+    with pytest.raises(pandera.errors.SchemaErrors) as rejection:
+        _manifest_schema(movements).validate(frame, lazy=True)
+    npt.assert_array_equal(sorted({str(case) for case
+                                   in rejection.value.failure_cases['failure_case']}), [absent])
+    npt.assert_array_equal(pl.from_pandas(frame).filter(
+        ~pl.col('movement').is_in(movements))['movement'].to_list(), [absent])
+    with duckdb.connect() as connection:
+        connection.execute('create table declared(movement VARCHAR primary key)')
+        connection.executemany('insert into declared values (?)',
+                               [[movement] for movement in movements])
+        connection.execute('create table manifest(movement VARCHAR, package VARCHAR, '
+                           'foreign key (movement) references declared(movement))')
+        with pytest.raises(duckdb.ConstraintException):
+            connection.executemany('insert into manifest values (?, ?)',
+                                   [list(row) for row in declared])
