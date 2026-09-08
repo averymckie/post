@@ -73,6 +73,7 @@ import pdfplumber
 import pptx
 import pptx.chart.data
 from pptx.enum.chart import XL_CHART_TYPE
+from pptx.enum.shapes import MSO_CONNECTOR, MSO_SHAPE
 import pptx.oxml.ns as pptx_ns
 from pptx.util import Inches
 import pymupdf
@@ -5056,3 +5057,365 @@ def test_the_rational_index_is_not_the_float_the_chain_would_have_divided(earned
     npt.assert_array_equal(float(index), float(earned) / 3.0)
     with pytest.raises(AssertionError):
         npt.assert_array_equal(index, Fraction(float(index)))
+
+
+# ---------------------------------------------------------------- a reporting tree, and the deck drawn from it
+POI_DIRECTORY = pathlib.Path(os.environ.get('POI_DIR', str(pathlib.Path.home() / 'poi-oracle')))
+PPTX_CONNECTOR_ORACLE_JAVA = pathlib.Path(__file__).with_name('pptx_connector_oracle.java')
+poi_available = shutil.which('java') is not None and (POI_DIRECTORY / 'jars').is_dir()
+JAVA_ORACLE = settings(max_examples=8, deadline=None)
+CONNECTION_INDEX = st.integers(min_value=0, max_value=3)
+SLIDE_INCH = st.integers(min_value=1, max_value=5)
+START_CXN = pptx_ns.qn('a:stCxn')
+END_CXN = pptx_ns.qn('a:endCxn')
+
+
+@st.composite
+def _reporting_lines(draw, minimum=2, maximum=12):
+    """One rooted reporting structure, as a position count and a list of manager-to-report pairs.
+    Every position after the first reports to one drawn from the positions before it, so the shape of
+    the tree comes out of the strategy and nothing about it is authored here."""
+    size = draw(st.integers(min_value=minimum, max_value=maximum))
+    return size, [(draw(st.integers(min_value=0, max_value=report - 1)), report)
+                  for report in range(1, size)]
+
+
+@st.composite
+def _reporting_lines_and_a_second_manager(draw):
+    """The same structure and one more reporting line into a position that already has a manager,
+    drawn from the positions before it so the extra line cannot close a cycle."""
+    size, lines = draw(_reporting_lines(minimum=3))
+    report = draw(st.integers(min_value=2, max_value=size - 1))
+    managers = dict((child, parent) for parent, child in lines)
+    manager = draw(st.integers(min_value=0, max_value=report - 1)
+                   .filter(lambda candidate: candidate != managers[report]))
+    return size, lines, (manager, report)
+
+
+def _generation_levels(graph):
+    """The chain's own levelling: the index of the generation `topological_generations` puts each
+    position in, one level per position in position order."""
+    levels = {position: index
+              for index, generation in enumerate(nx.topological_generations(graph))
+              for position in generation}
+    return [levels[position] for position in sorted(levels)]
+
+
+@given(_reporting_lines_and_a_second_manager())
+@SLOW
+def test_a_reporting_tree_and_its_second_reporting_line_get_opposite_verdicts_in_two_libraries(structure):
+    """P188 validates the hierarchy with `networkx.is_arborescence`, whose source at 3.6.1 reads
+    `is_tree(G) and max(d for n, d in G.in_degree()) <= 1` and whose own `is_tree` says of directed
+    graphs that "the underlying graph is obtained by treating each directed edge as a single
+    undirected edge in a multigraph". igraph's C source documents the same predicate directly: a
+    directed tree requires "that all edges are oriented away from a root (out-tree or arborescence)".
+    On generated structures the two agree, and both flip when one position is given a second manager,
+    which is the rejection case 188 typed by hand. Replaces the typed rejection of the second parent
+    and the accompanying `is_directed_acyclic_graph(...) == True` of handoff_guards_v20.py case 188."""
+    size, lines, second = structure
+    tree, loose = nx.DiGraph(lines), nx.DiGraph(lines + [second])
+    in_igraph = igraph.Graph(n=size, edges=lines, directed=True)
+    in_igraph_loose = igraph.Graph(n=size, edges=lines + [second], directed=True)
+    npt.assert_equal(nx.is_arborescence(tree), in_igraph.is_tree(mode='out'))
+    npt.assert_equal(nx.is_arborescence(loose), in_igraph_loose.is_tree(mode='out'))
+    with pytest.raises(AssertionError):
+        npt.assert_equal(nx.is_arborescence(tree), nx.is_arborescence(loose))
+    npt.assert_equal(nx.is_directed_acyclic_graph(loose), in_igraph_loose.is_dag())
+    npt.assert_equal(nx.is_directed_acyclic_graph(tree), in_igraph_loose.is_dag())
+
+
+@given(_reporting_lines(), st.data())
+@SLOW
+def test_a_repeated_reporting_line_is_one_line_in_one_library_and_two_in_the_other(structure, source):
+    """The same reporting line declared twice. `DiGraph` holds at most one edge per ordered pair, so
+    the file that says it twice and the file that says it once are the same graph and both pass
+    `is_arborescence`; igraph stores both declarations as parallel edges and its `is_tree` rejects the
+    structure. Nothing is corrupted: what differs is how many reporting lines the same file describes,
+    and therefore whether it is a tree at all. Replaces the typed
+    `g.equal(len(bindings), 2)` edge accounting of case 188."""
+    size, lines = structure
+    repeated = source.draw(st.sampled_from(lines))
+    declared = lines + [repeated]
+    graph = nx.DiGraph(declared)
+    in_igraph = igraph.Graph(n=size, edges=declared, directed=True)
+    npt.assert_equal(nx.is_arborescence(graph), nx.is_arborescence(nx.DiGraph(lines)))
+    with pytest.raises(AssertionError):
+        npt.assert_equal(graph.number_of_edges(), in_igraph.ecount())
+    with pytest.raises(AssertionError):
+        npt.assert_equal(nx.is_arborescence(graph), in_igraph.is_tree(mode='out'))
+    npt.assert_equal(in_igraph.ecount(), len(declared))
+
+
+@given(_reporting_lines())
+@SLOW
+def test_the_level_of_a_position_is_its_distance_from_the_root_while_the_structure_is_a_tree(structure):
+    """`topological_generations` layers a directed acyclic graph by removing the positions with no
+    manager, then the next such positions, and so on. While the structure is a tree that index is the
+    reporting distance from the root, which igraph computes independently with `distances`. Replaces
+    the typed `levels(tree) == [['CEO'], ['Ops', 'Sales'], ['A', 'B', 'C']]` of case 188."""
+    size, lines = structure
+    graph = nx.DiGraph(lines)
+    in_igraph = igraph.Graph(n=size, edges=lines, directed=True)
+    npt.assert_array_equal(_generation_levels(graph), in_igraph.distances(source=0, mode='out')[0])
+    npt.assert_array_equal([graph.out_degree(position) for position in sorted(graph)],
+                           in_igraph.degree(mode='out'))
+
+
+@given(st.integers(min_value=3, max_value=12))
+@SLOW
+def test_a_second_reporting_line_makes_the_level_the_longest_chain_not_the_distance(size):
+    """One chain of positions and one more reporting line from the root straight to the last of them.
+    The structure is still a directed acyclic graph, and both libraries say so, but the level
+    `topological_generations` reports for that last position is the length of the long way round while
+    its distance from the root is one line. The level a chart draws is therefore the longest chain to
+    a position, not its distance from the top, and the two stop agreeing at exactly the point
+    `is_arborescence` stops accepting the structure."""
+    chain = [(step - 1, step) for step in range(1, size)]
+    lines = chain + [(0, size - 1)]
+    graph = nx.DiGraph(lines)
+    in_igraph = igraph.Graph(n=size, edges=lines, directed=True)
+    npt.assert_equal(nx.is_directed_acyclic_graph(graph), in_igraph.is_dag())
+    npt.assert_equal(nx.is_arborescence(graph), in_igraph.is_tree(mode='out'))
+    npt.assert_array_equal(_generation_levels(nx.DiGraph(chain)),
+                           igraph.Graph(n=size, edges=chain, directed=True).distances(
+                               source=0, mode='out')[0])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_generation_levels(graph),
+                               in_igraph.distances(source=0, mode='out')[0])
+
+
+@given(st.sampled_from(('out', 'in', 'all')))
+@SLOW
+def test_an_organisation_with_no_positions_is_a_refusal_in_one_library_and_a_verdict_in_the_other(mode):
+    """An empty reporting structure is not a rejected structure in NetworkX: `is_tree` raises
+    `NetworkXPointlessConcept` before `is_arborescence` can return, so the validator's refusal path is
+    an exception of a different class from the one a malformed structure raises. igraph answers
+    instead, and its C source at 1.0.0 says why: "By convention, the null graph (i.e. the graph with
+    no vertices) is considered not to be connected, and therefore not a tree." Its answer is the
+    answer it gives for positions with no reporting lines at all, in every mode."""
+    with pytest.raises(nx.NetworkXPointlessConcept):
+        nx.is_arborescence(nx.DiGraph())
+    npt.assert_equal(igraph.Graph(n=0, directed=True).is_tree(mode=mode),
+                     igraph.Graph(n=2, directed=True).is_tree(mode=mode))
+    npt.assert_equal(nx.is_arborescence(nx.empty_graph(2, create_using=nx.DiGraph)),
+                     igraph.Graph(n=2, directed=True).is_tree(mode=mode))
+
+
+@given(_reporting_lines(), _reporting_lines())
+@SLOW
+def test_two_reporting_roots_are_a_forest_and_no_arborescence_in_either_library(first, second):
+    """Two rooted structures joined by each library's own disjoint union. Both libraries reject the
+    result as one tree and both say it is still acyclic and no longer connected; NetworkX also calls
+    it a forest, which is the distinction case 188 recorded, and which is a different verdict from
+    the one its own `is_arborescence` returns for the same graph. python-igraph 1.0.0 exposes no
+    `is_forest` at all, although the C library it wraps documents `igraph_is_forest`, so the
+    corroboration of that half is connectivity rather than the same predicate. Replaces the typed
+    two-roots rejection and `is_forest(...) == True` of case 188."""
+    left_size, left = first
+    right_size, right = second
+    graph = nx.disjoint_union(nx.DiGraph(left), nx.DiGraph(right))
+    in_igraph = igraph.Graph(n=left_size, edges=left, directed=True).disjoint_union(
+        igraph.Graph(n=right_size, edges=right, directed=True))
+    npt.assert_equal(nx.is_arborescence(graph), in_igraph.is_tree(mode='out'))
+    npt.assert_equal(nx.is_weakly_connected(graph), in_igraph.is_connected(mode='weak'))
+    npt.assert_equal(nx.is_directed_acyclic_graph(graph), in_igraph.is_dag())
+    with pytest.raises(AssertionError):
+        npt.assert_equal(nx.is_forest(graph), nx.is_arborescence(graph))
+
+
+@given(_reporting_lines(), st.data())
+@SLOW
+def test_the_positions_under_a_manager_are_the_same_set_under_two_reachability_conventions(structure,
+                                                                                          source):
+    """`networkx.descendants` and igraph's `subcomponent(mode='out')` return the same reachable set
+    apart from the position asked about, which one convention includes and the other does not. A
+    head count taken from the second without subtracting one is therefore one too many for every
+    position in the chart. Replaces the typed `sorted(nx.descendants(tree, 'Ops')) == ['A', 'B']` and
+    the leaf list of case 188."""
+    size, lines = structure
+    manager = source.draw(st.integers(min_value=0, max_value=size - 1))
+    graph = nx.DiGraph(lines)
+    in_igraph = igraph.Graph(n=size, edges=lines, directed=True)
+    reachable = in_igraph.subcomponent(manager, mode='out')
+    npt.assert_array_equal(sorted(nx.descendants(graph, manager)), sorted(set(reachable) - {manager}))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(sorted(nx.descendants(graph, manager)), sorted(reachable))
+
+
+def _org_chart(lines, begin_at, end_at):
+    """The chain's own deck: one rounded rectangle per position, one straight connector per reporting
+    line, both ends bound with `Connector.begin_connect` and `Connector.end_connect`. Returns the
+    package and the pairs of shape ids python-pptx reports for the bound shapes."""
+    deck = pptx.Presentation()
+    slide = deck.slides.add_slide(deck.slide_layouts[6])
+    boxes = {}
+    for row, position in enumerate(sorted({end for line in lines for end in line})):
+        shape = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(1), Inches(1 + row),
+                                       Inches(2), Inches(0.8))
+        shape.text_frame.text = str(position)
+        boxes[position] = shape
+    for manager, report in lines:
+        connector = slide.shapes.add_connector(MSO_CONNECTOR.STRAIGHT, Inches(2), Inches(2),
+                                               Inches(2), Inches(3))
+        connector.begin_connect(boxes[manager], begin_at)
+        connector.end_connect(boxes[report], end_at)
+    written = io.BytesIO()
+    deck.save(written)
+    return written.getvalue(), [(boxes[manager].shape_id, boxes[report].shape_id)
+                                for manager, report in lines]
+
+
+def _pptx_connections(data, tag):
+    """Every stCxn or endCxn in the package, read with the standard library's expat parser rather
+    than the lxml tree python-pptx writes with. The qualified name comes from python-pptx's own
+    ns.qn, so no namespace URI is written here."""
+    found = []
+    with zipfile.ZipFile(io.BytesIO(data)) as archive:
+        for name in archive.namelist():
+            if name.endswith('.xml'):
+                found.extend(element.attrib for element
+                             in ElementTree.fromstring(archive.read(name)).iter(tag))
+    return found
+
+
+def _pptx_in_poi(data):
+    """The same package read by Apache POI 5.4.1 under Java. The shim parses argv, calls the library
+    and prints one tab-separated line per shape and per bound connector end."""
+    with tempfile.TemporaryDirectory() as directory:
+        path = pathlib.Path(directory) / 'deck.pptx'
+        path.write_bytes(data)
+        completed = subprocess.run(
+            ['java', '-Dlog4j2.statusLoggerLevel=OFF', '-cp', str(POI_DIRECTORY / 'jars' / '*'),
+             str(PPTX_CONNECTOR_ORACLE_JAVA), str(path)],
+            capture_output=True, encoding='utf-8', check=True)
+    return [line.split('\t') for line in completed.stdout.split('\n')[:-1]]
+
+
+@pytest.mark.skipif(not poi_available, reason='java and the Apache POI jars are required for this oracle')
+@given(_reporting_lines(minimum=2, maximum=5), CONNECTION_INDEX, CONNECTION_INDEX)
+@JAVA_ORACLE
+def test_a_bound_connector_carries_the_shape_ids_a_second_ooxml_reader_finds(structure, begin_at,
+                                                                            end_at):
+    """python-pptx writes the binding as `stCxn`/`endCxn` under the connector's `cNvCxnSpPr`, and its
+    source at v1.0.2 sets `stCxn.id = shape.shape_id`. Apache POI, a Java implementation of the same
+    package format that shares nothing with python-pptx, reads back exactly those ids and indices, and
+    so does the standard library's expat parser. POI also reports each shape's anchor in points, which
+    is the same rectangle python-pptx reports through `Length.pt`. Replaces the typed
+    `sorted(bindings[0]) == sorted([str(ids['CEO']), str(ids['Ops'])])` pair of case 188."""
+    _, lines = structure
+    data, bound = _org_chart(lines, begin_at, end_at)
+    by_poi = _pptx_in_poi(data)
+    npt.assert_array_equal(np.array([row[2] for row in by_poi if row[0] == 'ST'], dtype=int),
+                           [manager for manager, _ in bound])
+    npt.assert_array_equal(np.array([row[2] for row in by_poi if row[0] == 'END'], dtype=int),
+                           [report for _, report in bound])
+    npt.assert_array_equal(np.array([row[3] for row in by_poi if row[0] == 'ST'], dtype=int),
+                           np.full(len(bound), begin_at))
+    npt.assert_array_equal(np.array([row[3] for row in by_poi if row[0] == 'END'], dtype=int),
+                           np.full(len(bound), end_at))
+    npt.assert_array_equal(np.array([row['id'] for row in _pptx_connections(data, START_CXN)],
+                                    dtype=int),
+                           np.array([row[2] for row in by_poi if row[0] == 'ST'], dtype=int))
+    npt.assert_array_equal(np.array([row['id'] for row in _pptx_connections(data, END_CXN)], dtype=int),
+                           np.array([row[2] for row in by_poi if row[0] == 'END'], dtype=int))
+    shapes = pptx.Presentation(io.BytesIO(data)).slides[0].shapes
+    npt.assert_allclose([[shape.left.pt, shape.top.pt, shape.width.pt, shape.height.pt]
+                         for shape in shapes],
+                        [[float(field) for field in row[3:]] for row in by_poi if row[0] == 'SHAPE'])
+
+
+@pytest.mark.skipif(not poi_available, reason='java and the Apache POI jars are required for this oracle')
+@given(CONNECTION_INDEX, st.integers(min_value=4, max_value=9))
+@JAVA_ORACLE
+def test_a_connection_index_outside_the_placement_table_is_written_before_it_is_rejected(inside,
+                                                                                        beyond):
+    """`Connector.begin_connect` writes the binding and then places the connector, in that order: its
+    source at v1.0.2 is `self._connect_begin_to(shape, cxn_pt_idx)` followed by
+    `self._move_begin_to_cxn(shape, cxn_pt_idx)`, and the second of those is a dictionary of four
+    entries subscripted by the index. A fifth connection point therefore raises `KeyError` after the
+    `stCxn` element is already in the tree. The deck still saves, the connector keeps the geometry it
+    had before the call, and Apache POI reads the binding out of the saved package, so the failure
+    leaves a connector bound to a connection point the library that wrote it cannot place. The
+    library's own docstring warns only that a `cxn_pt_idx` beyond the shape's connection points
+    "could lead to a load error"."""
+    deck = pptx.Presentation()
+    slide = deck.slides.add_slide(deck.slide_layouts[6])
+    box = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(1), Inches(1), Inches(2),
+                                 Inches(0.8))
+    connector = slide.shapes.add_connector(MSO_CONNECTOR.STRAIGHT, Inches(2), Inches(2), Inches(2),
+                                           Inches(3))
+    placed = [connector.begin_x, connector.begin_y]
+    with pytest.raises(KeyError):
+        connector.begin_connect(box, beyond)
+    npt.assert_array_equal([connector.begin_x, connector.begin_y], placed)
+    written = io.BytesIO()
+    deck.save(written)
+    data = written.getvalue()
+    npt.assert_array_equal(np.array([row['idx'] for row in _pptx_connections(data, START_CXN)],
+                                    dtype=int), [beyond])
+    npt.assert_array_equal(_pptx_connections(data, END_CXN), [])
+    by_poi = _pptx_in_poi(data)
+    npt.assert_array_equal(np.array([row[3] for row in by_poi if row[0] == 'ST'], dtype=int), [beyond])
+    npt.assert_array_equal(np.array([row[2] for row in by_poi if row[0] == 'ST'], dtype=int),
+                           [box.shape_id])
+    npt.assert_array_equal([row[0] for row in by_poi if row[0] == 'END'], [])
+    connector.begin_connect(box, inside)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal([connector.begin_x, connector.begin_y], placed)
+
+
+@given(CONNECTION_INDEX, SLIDE_INCH, SLIDE_INCH)
+@ORACLE_PROCESS
+def test_a_bound_connector_keeps_the_point_the_shape_was_at_when_it_was_bound(at, left, top):
+    """Binding a connector to a shape copies that shape's connection point into the connector once.
+    Moving the shape afterwards leaves the connector where it was: the same binding drawn again
+    against the moved shape lands somewhere else, while the id in the file is the same shape both
+    times. What the package records is a reference plus a stale position, and only an application
+    that re-routes on open reconciles them."""
+    deck = pptx.Presentation()
+    slide = deck.slides.add_slide(deck.slide_layouts[6])
+    box = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(1), Inches(1), Inches(2),
+                                 Inches(0.8))
+    bound = slide.shapes.add_connector(MSO_CONNECTOR.STRAIGHT, Inches(2), Inches(2), Inches(2),
+                                       Inches(3))
+    bound.begin_connect(box, at)
+    placed = [bound.begin_x, bound.begin_y]
+    box.left, box.top = Inches(1 + left), Inches(1 + top)
+    npt.assert_array_equal([bound.begin_x, bound.begin_y], placed)
+    again = slide.shapes.add_connector(MSO_CONNECTOR.STRAIGHT, Inches(2), Inches(2), Inches(2),
+                                       Inches(3))
+    again.begin_connect(box, at)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal([again.begin_x, again.begin_y], placed)
+    written = io.BytesIO()
+    deck.save(written)
+    npt.assert_array_equal(np.array([row['id'] for row in _pptx_connections(written.getvalue(),
+                                                                            START_CXN)], dtype=int),
+                           np.full(2, box.shape_id))
+
+
+@given(CONNECTION_INDEX, SLIDE_INCH, SLIDE_INCH, SLIDE_INCH, SLIDE_INCH)
+@ORACLE_PROCESS
+def test_the_two_ends_of_a_connector_place_it_at_one_point_for_one_connection(at, left, top, width,
+                                                                             height):
+    """The connection point of a shape is a property of the shape and the index, not of the connector
+    that asks for it: `begin_connect` and `end_connect` place their own end at the same point, and a
+    connector drawn from anywhere on the slide ends up there too. That invariant is what makes the
+    ids in the package mean a position at all."""
+    deck = pptx.Presentation()
+    slide = deck.slides.add_slide(deck.slide_layouts[6])
+    box = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(left), Inches(top),
+                                 Inches(width), Inches(height))
+    from_begin = slide.shapes.add_connector(MSO_CONNECTOR.STRAIGHT, Inches(1), Inches(1), Inches(2),
+                                            Inches(2))
+    from_begin.begin_connect(box, at)
+    from_end = slide.shapes.add_connector(MSO_CONNECTOR.STRAIGHT, Inches(4), Inches(5), Inches(1),
+                                          Inches(1))
+    from_end.end_connect(box, at)
+    elsewhere = slide.shapes.add_connector(MSO_CONNECTOR.STRAIGHT, Inches(6), Inches(6), Inches(1),
+                                           Inches(3))
+    elsewhere.begin_connect(box, at)
+    npt.assert_array_equal([from_begin.begin_x, from_begin.begin_y],
+                           [from_end.end_x, from_end.end_y])
+    npt.assert_array_equal([from_begin.begin_x, from_begin.begin_y],
+                           [elsewhere.begin_x, elsewhere.begin_y])
