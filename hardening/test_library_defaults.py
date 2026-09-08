@@ -50,7 +50,10 @@ import cv2
 from beancount import loader as beancount_loader
 from beancount.core import data as beancount_data
 import docx
+from docx.enum.section import WD_SECTION
 from docx.oxml.ns import qn
+from docx.shared import Twips
+from docxcompose.composer import Composer
 import duckdb
 from ebooklib import epub as ebooklib_epub
 import fastexcel
@@ -15925,3 +15928,304 @@ def test_the_page_pins_the_remote_bundle_to_the_bytes_the_library_ships(amounts)
         page.xpath('//script/@src'))
     with pytest.raises(AssertionError):
         npt.assert_array_equal(page.xpath('//script/@src'), embedded.xpath('//script/@src'))
+
+
+# --------------------------------------------------------------------------------------------------
+# handoff_guards_v14.py, case composition_keeps_blocks_and_sections: which section survives a compose
+# --------------------------------------------------------------------------------------------------
+DOCX_SECTION_ORACLE_JAVA = pathlib.Path(__file__).with_name('docx_section_oracle.java')
+DOCX_MERGER_DIRECTORY = pathlib.Path(os.environ.get('DOCX_MERGER_DIR',
+                                                    str(pathlib.Path.home() / 'docx-merger-oracle')))
+DOCX_MERGER_ORACLE_JS = pathlib.Path(__file__).with_name('docx_merger_oracle.js')
+docx_merger_available = (shutil.which('node') is not None
+                         and (DOCX_MERGER_DIRECTORY / 'node_modules' / 'docx-merger').is_dir())
+BLOCK_TEXT = st.text(alphabet=st.characters(min_codepoint=97, max_codepoint=122),
+                     min_size=1, max_size=8)
+PAGE_WIDTH_TWIPS = st.integers(min_value=4000, max_value=20000)
+COMPOSITION = settings(max_examples=10, deadline=None)
+
+
+def _section_family(counts, widths, blocks):
+    """Deal the generated page widths and text blocks out into one list of sections per document:
+    `counts` says how many sections each document has, and each section is a page width and the
+    blocks written under it. Nothing is chosen here, every value came from a strategy."""
+    sections = list(zip(widths, blocks))
+    family, start = [], 0
+    for count in counts:
+        family.append(sections[start:start + count])
+        start += count
+    return family
+
+
+def _composition_family(counts):
+    """A family of documents whose section counts are drawn from `counts`, with a distinct page width
+    for every section in the whole family, so that a width found in the composed document names the
+    one section it came from."""
+    return counts.flatmap(lambda drawn: st.tuples(
+        st.just(drawn),
+        st.lists(PAGE_WIDTH_TWIPS, min_size=sum(drawn), max_size=sum(drawn), unique=True),
+        st.lists(st.lists(BLOCK_TEXT, min_size=1, max_size=2),
+                 min_size=sum(drawn), max_size=sum(drawn))).map(
+        lambda parts: _section_family(*parts)))
+
+
+FLAT_FAMILY = _composition_family(st.lists(st.just(1), min_size=2, max_size=3))
+DEEP_FAMILY = _composition_family(
+    st.lists(st.integers(min_value=2, max_value=3), min_size=1, max_size=2).map(
+        lambda counts: [1] + counts))
+MIXED_FAMILY = _composition_family(st.lists(st.integers(min_value=1, max_value=3),
+                                            min_size=2, max_size=3))
+
+
+def _sectioned_document(sections):
+    """One .docx carrying the generated sections, written with python-docx 1.2.0. `Document.add_section`
+    at tag `v1.2.0` is documented as returning a "|Section| object newly added at the end of the
+    document", `Section.page_width` as the "Total page width used for this section", and the width is
+    set in the library's own twips unit, whose constructor docstring at that tag reads "Convenience
+    constructor for length in twips, e.g. ``width = Twips(42)``. A twip is a twentieth of a point,
+    635 EMU." """
+    document = docx.Document()
+    for number, (width, blocks) in enumerate(sections):
+        if number:
+            document.add_section(WD_SECTION.NEW_PAGE)
+        for block in blocks:
+            document.add_paragraph(block)
+        document.sections[number].page_width = Twips(width)
+    written = io.BytesIO()
+    document.save(written)
+    return written.getvalue()
+
+
+def _composed_family(family):
+    """The composition the case performs: the first document is the master, every later one is handed
+    to docxcompose 2.2.0's `Composer.append`, whose whole docstring at tag 2.2.0 is "Append the given
+    document". Returns the source packages and the composed one."""
+    parts = [_sectioned_document(sections) for sections in family]
+    master = docx.Document(io.BytesIO(parts[0]))
+    composer = Composer(master)
+    for part in parts[1:]:
+        composer.append(docx.Document(io.BytesIO(part)))
+    written = io.BytesIO()
+    composer.save(written)
+    return parts, written.getvalue()
+
+
+def _docx_page_widths(data):
+    """The page widths python-docx reports for the document's sections, in the library's own twips."""
+    return [section.page_width.twips for section in docx.Document(io.BytesIO(data)).sections]
+
+
+def _docx_blocks(data):
+    """The nonempty paragraph texts python-docx reports, in document order. The empty paragraphs are
+    the ones a section break is carried in, which no writer here asked for."""
+    return [paragraph.text for paragraph in docx.Document(io.BytesIO(data)).paragraphs
+            if paragraph.text]
+
+
+def _xml_page_widths(data):
+    """The same widths read straight out of word/document.xml by libxml2 through lxml: every `w:sectPr`
+    carries its page size in `w:pgSz/@w:w`, and that attribute is in twips."""
+    body = lxml_etree.fromstring(zipfile.ZipFile(io.BytesIO(data)).read('word/document.xml'))
+    return [int(value) for value in body.xpath('.//w:sectPr/w:pgSz/@w:w', namespaces=WORDPROCESSING)]
+
+
+def _docx2python_blocks(data):
+    """docx2python 3.7.1 reading the same body straight out of the XML, flattened to the nonempty
+    strings it returns. It declares lxml, paragraphs and typing-extensions and nothing from
+    python-docx or docxcompose."""
+    collected = []
+
+    def flatten(item):
+        if isinstance(item, str):
+            if item:
+                collected.append(item)
+        else:
+            for inner in item:
+                flatten(inner)
+
+    with docx2python(io.BytesIO(data)) as parsed:
+        flatten(parsed.body)
+    return collected
+
+
+def _poi_section_lines(data, kind):
+    """The same document read by Apache POI 5.4.1 under Java. The shim parses argv, calls the library
+    and prints one PARA line per XWPFParagraph.getText() in document order and one SECT line per
+    CTSectPr, the paragraph-level ones first and CTBody.getSectPr() last; this returns the fields of
+    the lines of one kind."""
+    with tempfile.TemporaryDirectory() as directory:
+        path = pathlib.Path(directory) / 'composed.docx'
+        path.write_bytes(data)
+        completed = subprocess.run(
+            ['java', '-Dlog4j2.statusLoggerLevel=OFF', '-cp', str(POI_DIRECTORY / 'jars' / '*'),
+             str(DOCX_SECTION_ORACLE_JAVA), str(path)],
+            capture_output=True, encoding='utf-8', check=True)
+    return [line.split('\t')[1:] for line in completed.stdout.split('\n')[:-1]
+            if line.startswith(kind + '\t')]
+
+
+def _merged_family(parts):
+    """The same source packages composed by docx-merger 1.2.2 under node, an implementation of the
+    same operation in another runtime whose package.json at 1.2.2 declares jszip and xmldom and
+    nothing else."""
+    with tempfile.TemporaryDirectory() as directory:
+        paths = []
+        for number, part in enumerate(parts):
+            path = pathlib.Path(directory) / ('part%d.docx' % number)
+            path.write_bytes(part)
+            paths.append(str(path))
+        target = pathlib.Path(directory) / 'merged.docx'
+        subprocess.run(['node', str(DOCX_MERGER_ORACLE_JS), str(target)] + paths,
+                       capture_output=True, check=True,
+                       env={**os.environ, 'NODE_PATH': str(DOCX_MERGER_DIRECTORY / 'node_modules')})
+        return target.read_bytes()
+
+
+@given(MIXED_FAMILY)
+@COMPOSITION
+def test_composition_keeps_every_source_block_in_the_order_it_was_written(family):
+    """Replaces the loop `for expected in [five hand-typed strings]: g.equal(expected in blocks, True)`
+    and the `g.equal(blocks.index('Charter actions') < blocks.index('Disclosure actions'), True)` of
+    handoff_guards_v14.py case composition_keeps_blocks_and_sections. No string is typed here: the
+    blocks are generated, and what the composed document must hold is the generated blocks of every
+    source document concatenated in source order, which is a property of the input rather than a
+    value an author chose. The case only asked whether five strings were present and compared two
+    positions; this compares the whole ordered list."""
+    _, composed = _composed_family(family)
+    npt.assert_array_equal(_docx_blocks(composed),
+                           [block for document in family for _, blocks in document
+                            for block in blocks])
+
+
+@pytest.mark.skipif(not poi_available, reason='java and the Apache POI jars are required for this oracle')
+@given(MIXED_FAMILY)
+@JAVA_ORACLE
+def test_apache_poi_reads_the_composed_blocks_in_the_same_order(family):
+    """The same claim under a second reader that shares no code with python-docx: Apache POI 5.4.1
+    under Java, reading XWPFParagraph.getText() over XWPFDocument.getParagraphs()."""
+    _, composed = _composed_family(family)
+    npt.assert_array_equal([fields[1] for fields in _poi_section_lines(composed, 'PARA')
+                            if fields[1]],
+                           [block for document in family for _, blocks in document
+                            for block in blocks])
+
+
+@given(MIXED_FAMILY)
+@COMPOSITION
+def test_docx2python_reads_the_composed_blocks_in_the_same_order(family):
+    """The same claim under a third reader, docx2python 3.7.1, which parses word/document.xml itself
+    rather than going through python-docx's object model."""
+    _, composed = _composed_family(family)
+    npt.assert_array_equal(_docx2python_blocks(composed),
+                           [block for document in family for _, blocks in document
+                            for block in blocks])
+
+
+@given(MIXED_FAMILY)
+@COMPOSITION
+def test_each_source_document_carries_the_page_widths_it_was_written_with(family):
+    """Replaces `g.equal(document_sections(a), [7772400])` and `g.equal(document_sections(b),
+    [6858000])` of the same case, which type the two page widths the case itself passed in. Here the
+    widths are generated and read back three ways: through python-docx's Section.page_width, through
+    libxml2's own XPath over the `w:pgSz/@w:w` attribute of word/document.xml, and, once composed,
+    through Apache POI. Before any composition every source document reports exactly the sections it
+    was written with, which is what makes the composed reading below a statement about the compose."""
+    parts, _ = _composed_family(family)
+    for part, sections in zip(parts, family):
+        npt.assert_array_equal(_docx_page_widths(part), [width for width, _ in sections])
+        npt.assert_array_equal(_xml_page_widths(part), [width for width, _ in sections])
+
+
+@given(FLAT_FAMILY)
+@COMPOSITION
+def test_a_single_section_append_leaves_only_the_master_page_widths(family):
+    """Replaces `g.equal(len(widths), 1)`, `g.equal(widths, [7772400])` and `g.equal(6858000 in
+    widths, False)` of the same case, over generated widths rather than the two the case typed. When
+    every appended document has exactly one section the case's claim holds: the composed document
+    reports the master's page widths and none of the appended ones, so each appended document's own
+    page geometry is gone and nothing in the file records that it ever existed. docxcompose's
+    Composer.insert at tag 2.2.0 is where it goes, in the branch `if isinstance(element, CT_SectPr):
+    continue`, under a comment that reads "This will lead to unexpected behaviors, for example if one
+    of the added documents with landscape set for the last section the page orientation will get lost
+    here." The library's README at that tag says nothing about sections or page size at all; what it
+    does document is that "The first document is considered as the main template and headers and
+    footers from the other documents are ignored"."""
+    parts, composed = _composed_family(family)
+    npt.assert_array_equal(_docx_page_widths(composed),
+                           [width for width, _ in family[0]])
+    npt.assert_array_equal(_xml_page_widths(composed),
+                           [width for width, _ in family[0]])
+
+
+@given(MIXED_FAMILY)
+@COMPOSITION
+def test_composition_drops_the_final_section_of_every_appended_document(family):
+    """The general rule the case's single example is one instance of, established over generated
+    section counts. Every document's non-final sections survive the compose, in order, and the final
+    section of each appended document does not: it is the one that lives in `w:body` rather than
+    inside a paragraph, and it is the one docxcompose skips. The master's own final section survives
+    and is moved to the end. Neither the count nor any width is typed; both are read off the
+    generated family."""
+    _, composed = _composed_family(family)
+    master = [width for width, _ in family[0]]
+    npt.assert_array_equal(
+        _docx_page_widths(composed),
+        master[:-1] + [width for document in family[1:] for width, _ in document[:-1]] + master[-1:])
+    for document in family[1:]:
+        npt.assert_array_equal(document[-1][0] in _docx_page_widths(composed), False)
+
+
+@given(DEEP_FAMILY)
+@COMPOSITION
+def test_a_multi_section_append_moves_the_master_page_width_off_its_own_blocks(family):
+    """The finding the case does not reach. Its `g.equal(widths, [7772400])` reads as "the master's
+    page geometry wins", and that is true only because the document it appended had exactly one
+    section. Here the master has one section and every appended document has two or three, generated
+    directly rather than filtered for, and the composed document's first section is the first appended
+    document's first section: the master's own blocks are now governed by a page width that came out
+    of a document appended after them, and the master's declared width has moved to the end. The
+    library's own source says so, in the comment on Composer.insert at tag 2.2.0: "for the first such
+    document added, the properties of its first section will get applied to the everything that came
+    before". Both halves of the case's claim fail here, and the failure is asserted rather than
+    smoothed away."""
+    _, composed = _composed_family(family)
+    npt.assert_array_equal(_docx_page_widths(composed)[0], family[1][0][0])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_docx_page_widths(composed), [width for width, _ in family[0]])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(family[1][0][0] in _docx_page_widths(composed), False)
+
+
+@pytest.mark.skipif(not docx_merger_available,
+                    reason='node and the docx-merger checkout are required for this oracle')
+@given(MIXED_FAMILY)
+@JAVA_ORACLE
+def test_an_independent_javascript_merger_folds_the_same_sections_away(family):
+    """The rule 2a oracle for the operation itself. docx-merger 1.2.2 under node is a second
+    implementation of docx composition that shares no code with docxcompose: its package.json at
+    1.2.2 declares jszip and xmldom and nothing else, and its dist/index.js reaches the same place by
+    a different route, truncating each body at `xml.lastIndexOf("<w:sectPr")` instead of walking the
+    element tree. Its README lists what it claims to keep -- "The Library Preserves the Styles,
+    Tables, Images, Bullets and Numberings of input files" -- and sections are not on that list
+    either. On every generated family the two implementations produce the same page widths and the
+    same blocks in the same order, so the silent loss of an appended document's page geometry is not
+    one library's defect: it is what composing .docx bodies does."""
+    parts, composed = _composed_family(family)
+    merged = _merged_family(parts)
+    npt.assert_array_equal(_docx_page_widths(merged), _docx_page_widths(composed))
+    npt.assert_array_equal(_docx_blocks(merged), _docx_blocks(composed))
+
+
+@given(MIXED_FAMILY)
+@COMPOSITION
+def test_composing_a_master_with_nothing_appended_returns_it_unchanged(family):
+    """Replaces `g.rejects(g.Blocked, lambda: compose_documents([]))` of the same case, which asserts
+    that local code refuses an empty list rather than that any library does anything. docxcompose has
+    no such refusal to make: a Composer built on a master and given nothing to append saves the master
+    back, with every section and every block it had. That identity is the boundary the case was
+    reaching for, and it is a property of the output rather than a value typed here."""
+    parts, _ = _composed_family(family)
+    written = io.BytesIO()
+    Composer(docx.Document(io.BytesIO(parts[0]))).save(written)
+    npt.assert_array_equal(_docx_page_widths(written.getvalue()), _docx_page_widths(parts[0]))
+    npt.assert_array_equal(_docx_blocks(written.getvalue()), _docx_blocks(parts[0]))
