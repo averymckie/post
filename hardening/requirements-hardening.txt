@@ -39,6 +39,7 @@ docxtpl==0.20.2
 duckdb==1.5.5
 ebooklib==0.20
 et-xmlfile==2.0.0
+execnet==2.1.2
 fonttools==4.64.0
 ftfy==6.3.1
 ghp-import==2.1.0
@@ -114,6 +115,7 @@ pypdfium2==5.13.0
 pyphen==0.18.1
 pyshacl==0.40.1
 pytest==9.1.1
+pytest-xdist==3.8.0
 python-calamine==0.8.2
 python-dateutil==2.9.0.post0
 python-docx==1.2.0

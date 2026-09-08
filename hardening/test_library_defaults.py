@@ -9954,7 +9954,7 @@ def test_set_toc_refuses_a_level_that_jumps_by_more_than_one(binder_and_row, lev
 @given(BINDER_TITLE)
 @BINDER_OUTLINE
 def test_the_zero_page_refusal_belongs_to_one_writer_and_not_to_the_format(title):
-    """The case ends by asserting that `pymupdf.open().tobytes()` raises, with the comment that "a
+    """The case also asserts that `pymupdf.open().tobytes()` raises, with the comment that "a
     zero-page document cannot even be serialized". The refusal is real and it is MuPDF's. pypdf writes a
     zero-page PDF without complaint, carrying the generated title; MuPDF opens that file and hands the
     title back, and refuses only when asked to write it out again; PDFium will not open it at all. Three
@@ -10092,7 +10092,7 @@ def _numpy_mask(coords):
 @given(EXACT_PAIRS)
 @SLOW
 def test_scipy_duckdb_and_numpy_accumulate_a_pair_list_identically_when_every_sum_is_exact(pairs):
-    """handoff_guards_v10.py's case sparse_matrix_sums_duplicates_silently types seven expectations
+    """handoff_guards_v10.py's case sparse_matrix_sums_duplicates_silently makes six typed comparisons
     about a resource matrix, the first two of them about what coo_matrix does with duplicate
     coordinates. scipy documents that in scipy/sparse/_coo.py at tag v1.17.1: "By default when
     converting to CSR or CSC format, duplicate (i,j) entries will be summed together", and "Duplicate
@@ -10353,8 +10353,8 @@ def _poi_column(data, policy):
 @given(MEASURE_ROWS)
 @JAVA_ORACLE
 def test_the_default_formula_cache_is_the_zero_the_writer_signature_names(rows):
-    """handoff_guards_v9.py's case formula_caches_must_be_computed_not_defaulted types seven
-    expectations about a workbook of measures, the first being that a formula written without a value
+    """handoff_guards_v9.py's case formula_caches_must_be_computed_not_defaulted makes six typed
+    comparisons about a workbook of measures, the first being that a formula written without a value
     reads back as 0, "the default cache is a zero nobody computed". The zero is not typed here: it is
     read off XlsxWriter's own signature, whose `value` parameter defaults to 0 at tag RELEASE_3.2.9,
     and three readers that share nothing hand it back -- openpyxl 3.1.5 with `data_only`, the Rust
@@ -10529,10 +10529,10 @@ def _poi_document_properties(data):
 @given(DOCX_LINES, DOCX_BREAKS)
 @SLOW
 def test_the_page_count_the_package_states_is_the_templates_and_never_moves(lines, breaks):
-    """handoff_guards_v9.py's case python_docx_cannot_paginate types six expectations, the first two
-    being that `page_count_available` is False because "python-docx exposes no page count; pagination
-    belongs to a renderer" and that the explicit break is "only the explicit break ... knowable from the
-    file". The first is true of the library and false of the file. Every document python-docx writes is
+    """handoff_guards_v9.py's case python_docx_cannot_paginate makes five typed comparisons, the first
+    two being that `page_count_available` is False, under the comment "python-docx exposes no page
+    count; pagination belongs to a renderer", and that one explicit page break is found, under the
+    comment "only the explicit break is knowable from the file". The first is true of the library and false of the file. Every document python-docx writes is
     written from the .docx its own api.py names, `os.path.join(_thisdir, "templates", "default.docx")`,
     and that package states a page count in docProps/app.xml. Over generated paragraphs and a generated
     number of page breaks the number written out is the template's own, unchanged."""
