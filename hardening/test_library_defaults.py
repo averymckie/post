@@ -19,6 +19,7 @@ import os
 import pathlib
 import shutil
 import struct
+import sys
 import tempfile
 import subprocess
 import unicodedata
@@ -59,6 +60,7 @@ import html5lib
 import igraph
 import jinja2
 import jsonschema
+from junitparser import JUnitXml
 import markdown as python_markdown
 import pint
 import portion
@@ -11088,3 +11090,154 @@ def test_the_region_the_case_slices_leaves_out_the_only_row_the_readers_cannot_a
     with pytest.raises(AssertionError):
         npt.assert_array_equal(np.array(_case_openpyxl_grid(data), dtype=object),
                                np.array(_case_calamine_grid(data), dtype=object))
+
+
+# --------------------------------------------------------------------------------------------------
+# handoff_guards_v15.py, case a_pass_is_the_absence_of_a_child_element: what a report element declares
+# --------------------------------------------------------------------------------------------------
+REPORT_RUN = settings(max_examples=12, deadline=None)
+JUNIT_BODIES = {
+    'pass': 'def test_{n}():\n    assert True\n',
+    'fail': 'def test_{n}():\n    assert False\n',
+    'skip': "@pytest.mark.skip(reason='not executed here')\ndef test_{n}():\n    assert True\n",
+    'xfail': "@pytest.mark.xfail(reason='known')\ndef test_{n}():\n    assert False\n",
+    'error': ('@pytest.fixture\ndef broken_{n}():\n'
+              "    raise RuntimeError('fixture could not build the input')\n\n"
+              'def test_{n}(broken_{n}):\n    assert True\n'),
+    'record': ("def test_{n}(record_property):\n    record_property('checked', 'yes')\n"
+               '    assert True\n'),
+}
+SETTLED_OUTCOME = st.sampled_from(['pass', 'fail'])
+UNSETTLED_OUTCOME = st.sampled_from(['skip', 'xfail', 'error'])
+ANY_OUTCOME = st.sampled_from(sorted(JUNIT_BODIES))
+
+
+def _junit_report(modules):
+    """The report the chain reads. Each generated outcome becomes one test written with pytest's own
+    published marks and fixtures -- `pytest.mark.skip`, `pytest.mark.xfail`, a fixture that raises, and
+    `record_property`, "Add extra properties to the calling test" -- and pytest 9.1.1 is then run over
+    them with `--junitxml`, exactly as the case's `run_named_tests` does. Nothing about the report is
+    written here; it is what the writer under test produces."""
+    with tempfile.TemporaryDirectory() as directory:
+        root = pathlib.Path(directory)
+        for number, outcomes in enumerate(modules):
+            source = ['import pytest', '']
+            for position, outcome in enumerate(outcomes):
+                source.append(JUNIT_BODIES[outcome].format(n=position))
+            (root / ('test_module_%d.py' % number)).write_text('\n'.join(source))
+        report = root / 'report.xml'
+        subprocess.run([sys.executable, '-m', 'pytest', '-q', '-p', 'no:cacheprovider',
+                        '-p', 'no:randomly', '--junitxml', str(report), str(root)],
+                       cwd=str(root), capture_output=True, check=False)
+        return report.read_bytes()
+
+
+def _junit_selected(data, path):
+    """The testcase names libxml2's XPath selects, which is how the case's two rules are put to the
+    report here rather than as a loop with a lookup table."""
+    return [node.get('name') for node in lxml_etree.fromstring(data).xpath(path)]
+
+
+def _junit_cases(data):
+    """The same report read by junitparser 5.0.3, an independent implementation of the format with no
+    published runtime dependencies. Its `result` is documented at tag v5.0.3 as "A list of
+    :class:`Failure`, :class:`Skipped`, or :class:`Error` objects" and `is_passed` as "Whether this
+    testcase was a success (i.e. if it isn't skipped, failed, or errored)".
+    """
+    return [case for suite in JUnitXml.fromstring(data) for case in suite]
+
+
+@given(st.lists(SETTLED_OUTCOME, max_size=4), UNSETTLED_OUTCOME, st.lists(SETTLED_OUTCOME, max_size=4))
+@REPORT_RUN
+def test_the_naive_rule_calls_a_skipped_or_errored_test_a_pass(before, unsettled, after):
+    """handoff_guards_v15.py's case a_pass_is_the_absence_of_a_child_element makes twelve typed
+    comparisons about a report of five named tests, among them that the naive rule counts four passes
+    where the declared rule counts two, "the naive rule counts the skip and the error as passes". The
+    rule itself is written into the guard as a loop over tags; here the naive reading is the XPath
+    `testcase[not(failure)]` and the declared reading is junitparser's own `is_passed`, and over
+    generated outcomes with one skipped, expected-failure or errored test placed among them the two
+    readings do not return the same tests."""
+    data = _junit_report([before + [unsettled] + after])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_junit_selected(data, './/testcase[not(failure)]'),
+                               [case.name for case in _junit_cases(data) if case.is_passed])
+
+
+@given(st.lists(SETTLED_OUTCOME, min_size=1, max_size=6))
+@REPORT_RUN
+def test_the_two_rules_agree_on_a_report_with_nothing_skipped_or_errored(outcomes):
+    """And they agree everywhere else. Where every generated test either passes or fails, the absence of
+    a `failure` element is the same set of tests as the independent reader's `is_passed`, so the naive
+    rule is not wrong about failures; it is silent about the two states the case is warning about."""
+    data = _junit_report([outcomes])
+    npt.assert_array_equal(_junit_selected(data, './/testcase[not(failure)]'),
+                           [case.name for case in _junit_cases(data) if case.is_passed])
+
+
+@given(st.lists(st.sampled_from(['pass', 'record']), min_size=1, max_size=6))
+@REPORT_RUN
+def test_a_passing_testcase_can_carry_a_child_element_after_all(outcomes):
+    """The case's title and its return value say that a passing testcase has no child element. pytest
+    9.1.1's own writer says otherwise: `to_xml` at tag 9.1.1 calls `make_properties_node`, "Return a
+    Junit node containing custom properties, if any.", and appends it to the testcase before any result
+    node and whatever the outcome was. Over a generated mixture of plain passes and passes that call
+    `record_property`, every test passes for the independent reader while exactly the recording ones
+    carry a `properties` child, so the absence of a child element is not what a pass looks like."""
+    data = _junit_report([outcomes])
+    names = _junit_selected(data, './/testcase')
+    npt.assert_array_equal([case.name for case in _junit_cases(data) if case.is_passed], names)
+    npt.assert_array_equal(_junit_selected(data, './/testcase[properties]'),
+                           [name for name, outcome in zip(names, outcomes) if outcome == 'record'])
+
+
+@given(st.lists(st.sampled_from(['skip', 'xfail']), max_size=4))
+@REPORT_RUN
+def test_a_skip_and_an_expected_failure_are_one_element_apart_only_in_a_type_the_rule_discards(extra):
+    """The declared rule maps three tags onto four states and reads the tag alone. pytest writes an
+    expected failure as the same `skipped` element it writes a skip as, differing only in an attribute:
+    `append_skipped` at tag 9.1.1 builds `ET.Element("skipped", type="pytest.xfail", message=...)` for a
+    test marked xfail. The independent reader returns the same result class for both, so under the
+    declared rule an expected failure is reported as a skipped test; the `type` attribute that tells
+    them apart is in the file and is what the rule throws away."""
+    outcomes = extra + ['skip', 'xfail']
+    data = _junit_report([outcomes])
+    results = [case.result for case in _junit_cases(data)]
+    npt.assert_array_equal([type(result[0]).__name__ for result in results[-2:]],
+                           [type(results[-1][0]).__name__] * 2)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(results[-2][0].type, results[-1][0].type)
+
+
+@given(st.integers(min_value=2, max_value=4), st.lists(SETTLED_OUTCOME, min_size=1, max_size=1))
+@REPORT_RUN
+def test_two_tests_of_one_name_in_two_modules_collapse_into_a_single_entry(modules, outcome):
+    """`g.equal(len(declared), 5)` counts the entries of a dictionary the guard builds with
+    `out[case.get('name')] = ...`, which keys a test by its name and drops the `classname` the same
+    element carries. Over a generated number of modules each holding one test of the same name, the
+    report holds one `testcase` element per module and the independent reader returns them all, each
+    with its own classname, while the set of names has a single member. So the number the case reports
+    as tests executed is a count of distinct names, and where two modules test the same thing the state
+    that survives is whichever the reader saw last."""
+    data = _junit_report([outcome] * modules)
+    cases = _junit_cases(data)
+    npt.assert_array_equal([len(_junit_selected(data, './/testcase')), len(cases),
+                            len({case.classname for case in cases})], [modules, modules, modules])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(len({case.name for case in cases}), modules)
+
+
+@given(st.lists(ANY_OUTCOME, min_size=1, max_size=6))
+@REPORT_RUN
+def test_the_counters_pytest_writes_on_the_suite_count_the_children_it_wrote(outcomes):
+    """The case also reads the suite's own `errors`, `failures` and `skipped` attributes and types a one
+    for each. They need no typing: the counters pytest writes agree with the elements it wrote, counted
+    by the independent reader and by an XPath over the same file, for every generated report. The
+    skipped counter is the one worth reading twice, because it counts the expected failures alongside
+    the skips, which is the same conflation the declared rule makes one level down."""
+    data = _junit_report([outcomes])
+    suite = list(JUnitXml.fromstring(data))[0]
+    npt.assert_array_equal([suite.failures, suite.errors, suite.skipped],
+                           [len(_junit_selected(data, './/testcase[failure]')),
+                            len(_junit_selected(data, './/testcase[error]')),
+                            len(_junit_selected(data, './/testcase[skipped]'))])
+    npt.assert_array_equal(suite.skipped, outcomes.count('skip') + outcomes.count('xfail'))
