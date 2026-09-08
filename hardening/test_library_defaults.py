@@ -47,6 +47,8 @@ from fractions import Fraction
 
 import arrow
 import beancount_parser_lima as lima
+import csv_diff
+import csvdiff
 import cv2
 from beancount import loader as beancount_loader
 from beancount.core import data as beancount_data
@@ -17411,3 +17413,263 @@ def test_the_same_missing_reference_is_a_silent_zero_in_sql_and_a_refusal_under_
     npt.assert_array_equal(connection.execute('SELECT count(*) FROM pre').fetchall(), [(0,)])
     with pytest.raises(duckdb.ConstraintException):
         connection.execute('INSERT INTO pre VALUES (?, ?)', [pairs[0][0], absent])
+
+
+DIFF_KEYS = st.text(alphabet='abcde', min_size=1, max_size=3)
+DIFF_VALUES = st.text(alphabet='xyz', min_size=1, max_size=3)
+ROW_FAMILY = st.dictionaries(DIFF_KEYS, DIFF_VALUES, min_size=1, max_size=6)
+BINARY_FAMILY = st.dictionaries(DIFF_KEYS, st.integers(min_value=0, max_value=1), min_size=1, max_size=6)
+RETYPINGS = st.sampled_from([bool, float, Decimal, Fraction])
+COLUMN_RETYPINGS = st.sampled_from([bool, float, Decimal])
+ROW_DIFF = settings(max_examples=100, deadline=None)
+
+
+def _keyed_rows(mapping):
+    """The shape csv_diff.compare takes: one row per key, in a dictionary keyed by the key column."""
+    return {key: {'id': key, 'v': value} for key, value in mapping.items()}
+
+
+def _csv_diff_sections(previous, current):
+    """csv-diff 1.2's own answer, projected to the key column of each of its three row sections."""
+    result = csv_diff.compare(_keyed_rows(previous), _keyed_rows(current))
+    return (sorted(row['id'] for row in result['added']),
+            sorted(row['id'] for row in result['removed']),
+            sorted(entry['key'] for entry in result['changed']))
+
+
+def _csvdiff_sections(previous, current):
+    """csvdiff 0.3.3's answer over the same rows, whose key is a tuple of the index columns."""
+    result = csvdiff.diff_records(list(_keyed_rows(previous).values()),
+                                  list(_keyed_rows(current).values()), ['id'])
+    return (sorted(row['id'] for row in result['added']),
+            sorted(row['id'] for row in result['removed']),
+            sorted(entry['key'][0] for entry in result['changed']))
+
+
+def _duckdb_sections(previous, current):
+    """The same three sections in SQL: two set differences and one join with IS DISTINCT FROM."""
+    with duckdb.connect() as connection:
+        connection.execute('CREATE TABLE previous(id VARCHAR, v VARCHAR)')
+        connection.execute('CREATE TABLE current(id VARCHAR, v VARCHAR)')
+        connection.executemany('INSERT INTO previous VALUES (?, ?)', list(previous.items()))
+        connection.executemany('INSERT INTO current VALUES (?, ?)', list(current.items()))
+        return ([row[0] for row in connection.execute(
+                    'SELECT id FROM current EXCEPT SELECT id FROM previous ORDER BY id').fetchall()],
+                [row[0] for row in connection.execute(
+                    'SELECT id FROM previous EXCEPT SELECT id FROM current ORDER BY id').fetchall()],
+                [row[0] for row in connection.execute(
+                    'SELECT c.id FROM current c JOIN previous p USING (id) '
+                    'WHERE c.v IS DISTINCT FROM p.v ORDER BY c.id').fetchall()])
+
+
+def _polars_frame(mapping):
+    return pl.DataFrame({'id': list(mapping), 'v': list(mapping.values())},
+                        schema={'id': pl.String, 'v': pl.String})
+
+
+def _polars_sections(previous, current):
+    """And in polars, where added and removed are the two anti joins and changed is an inner join."""
+    before, after = _polars_frame(previous), _polars_frame(current)
+    return (after.join(before, on='id', how='anti')['id'].sort().to_list(),
+            before.join(after, on='id', how='anti')['id'].sort().to_list(),
+            after.join(before, on='id', how='inner', suffix='_before')
+                 .filter(pl.col('v') != pl.col('v_before'))['id'].sort().to_list())
+
+
+def _duckdb_changed_keys(keys, before, after, after_type):
+    """The changed rows when the two sides of one column are typed differently in the same engine."""
+    with duckdb.connect() as connection:
+        connection.execute('CREATE TABLE previous(id VARCHAR, v INTEGER)')
+        connection.execute('CREATE TABLE current(id VARCHAR, v ' + after_type + ')')
+        connection.executemany('INSERT INTO previous VALUES (?, ?)', list(zip(keys, before)))
+        connection.executemany('INSERT INTO current VALUES (?, ?)', list(zip(keys, after)))
+        return [row[0] for row in connection.execute(
+            'SELECT c.id FROM current c JOIN previous p USING (id) '
+            'WHERE c.v IS DISTINCT FROM p.v ORDER BY c.id').fetchall()]
+
+
+def _csv_diff_loaded(rows):
+    """csv-diff's own loader, over the CSV text the csv module writes for those rows."""
+    text = io.StringIO()
+    writer = csv.DictWriter(text, fieldnames=['id', 'v'])
+    writer.writeheader()
+    writer.writerows(rows)
+    return csv_diff.load_csv(io.StringIO(text.getvalue()), key='id')
+
+
+def _duckdb_rows_only_in_previous(rows, current):
+    """The rows one side carries and the other does not, counted over the whole row with EXCEPT ALL."""
+    with duckdb.connect() as connection:
+        connection.execute('CREATE TABLE previous(id VARCHAR, v VARCHAR)')
+        connection.execute('CREATE TABLE current(id VARCHAR, v VARCHAR)')
+        connection.executemany('INSERT INTO previous VALUES (?, ?)',
+                               [(row['id'], row['v']) for row in rows])
+        connection.executemany('INSERT INTO current VALUES (?, ?)',
+                               [(row['id'], row['v']) for row in current.values()])
+        return connection.execute('SELECT count(*) FROM '
+                                  '(SELECT * FROM previous EXCEPT ALL SELECT * FROM current)').fetchall()
+
+
+@given(ROW_FAMILY, ROW_FAMILY)
+@ROW_DIFF
+def test_the_rows_a_keyed_diff_calls_added_are_the_rows_of_an_anti_join(previous, current):
+    """P30 seals a workbook readback and then compares it with csv_diff.compare, and case 30 of
+    handoff_guards_v3.py types the result of that comparison by hand. Over rows whose key and whose one
+    value are distinct strings, four implementations agree about which rows are new: csv-diff 1.2, whose
+    compare() computes `added = [id for id in current if id not in previous]`; csvdiff 0.3.3, whose
+    patch._compare_keys computes `added = to_keys.difference(from_keys)`; DuckDB 1.5.5's EXCEPT over the
+    key column; and polars 1.44.1's join(how='anti'), documented as returning the rows of the left frame
+    that have no match on the right. This is the agreeing region, and it is the region the recorded 1869-row
+    round trip lived in, because every cell that reaches csv_diff.load_csv is a string."""
+    by_csv_diff, by_csvdiff = _csv_diff_sections(previous, current), _csvdiff_sections(previous, current)
+    by_sql, by_polars = _duckdb_sections(previous, current), _polars_sections(previous, current)
+    npt.assert_array_equal(by_csv_diff[0], by_csvdiff[0])
+    npt.assert_array_equal(by_csv_diff[0], by_sql[0])
+    npt.assert_array_equal(by_csv_diff[0], by_polars[0])
+
+
+@given(ROW_FAMILY, ROW_FAMILY)
+@ROW_DIFF
+def test_the_rows_a_keyed_diff_calls_removed_are_the_rows_of_the_reverse_anti_join(previous, current):
+    """The same four implementations on the other side of the same pair of keyed families. csv-diff computes
+    `removed = [id for id in previous if id not in current]` and csvdiff computes
+    `removed = from_keys.difference(to_keys)`; in SQL it is the EXCEPT taken the other way round and in
+    polars the anti join with the frames swapped."""
+    by_csv_diff, by_csvdiff = _csv_diff_sections(previous, current), _csvdiff_sections(previous, current)
+    by_sql, by_polars = _duckdb_sections(previous, current), _polars_sections(previous, current)
+    npt.assert_array_equal(by_csv_diff[1], by_csvdiff[1])
+    npt.assert_array_equal(by_csv_diff[1], by_sql[1])
+    npt.assert_array_equal(by_csv_diff[1], by_polars[1])
+
+
+@given(ROW_FAMILY, ROW_FAMILY)
+@ROW_DIFF
+def test_the_rows_a_keyed_diff_calls_changed_are_the_shared_keys_whose_value_differs(previous, current):
+    """The third section, and the one the P30 handoff reads as its verdict. csv-diff selects it with
+    `changed = [id for id in potential_changes if current[id] != previous[id]]` and then asks dictdiffer for
+    the field-level entries; csvdiff selects it with `sorted(from_recs[k].items()) != sorted(to_recs[k].items())`.
+    Both are Python equality on the row. The two engines say the same thing with a join: IS DISTINCT FROM in
+    SQL, and a filter on the suffixed column after an inner join in polars."""
+    by_csv_diff, by_csvdiff = _csv_diff_sections(previous, current), _csvdiff_sections(previous, current)
+    by_sql, by_polars = _duckdb_sections(previous, current), _polars_sections(previous, current)
+    npt.assert_array_equal(by_csv_diff[2], by_csvdiff[2])
+    npt.assert_array_equal(by_csv_diff[2], by_sql[2])
+    npt.assert_array_equal(by_csv_diff[2], by_polars[2])
+
+
+@given(BINARY_FAMILY, RETYPINGS)
+@ROW_DIFF
+def test_a_retyped_number_is_one_value_to_both_keyed_diffs_and_two_to_deepdiff(mapping, retype):
+    """The finding case 30 of handoff_guards_v3.py records as csv_diff_bool_int_conflation_reproduced, now
+    executed on generated rows and against a second row diff. Both keyed diffs decide what changed with
+    Python equality, so a value rewritten as bool, float, Decimal or Fraction of the same number is not a
+    change at all: each library's answer for the retyped side is its own answer for the untouched side.
+    DeepDiff 9.1.0, whose published dependencies at 9.1.0 are cachebox and orderly-set and which therefore
+    shares nothing with csv-diff or with the dictdiffer csv-diff calls, reports type_changes for every one
+    of the four retypings, so its answer for the retyped side is not its answer for the untouched side.
+    Replaces `g.equal(csv_compare(..., v=1, ..., v=True)['changed'], [])` and
+    `g.equal(list(DeepDiff({'v': 1}, {'v': True})), ['type_changes'])`."""
+    previous = _keyed_rows(mapping)
+    current = _keyed_rows({key: retype(value) for key, value in mapping.items()})
+    npt.assert_equal(csv_diff.compare(previous, current), csv_diff.compare(previous, previous))
+    npt.assert_equal(csvdiff.diff_records(list(previous.values()), list(current.values()), ['id']),
+                     csvdiff.diff_records(list(previous.values()), list(previous.values()), ['id']))
+    with pytest.raises(AssertionError):
+        npt.assert_equal(dict(DeepDiff(previous, current)), dict(DeepDiff(previous, previous)))
+
+
+@given(BINARY_FAMILY, COLUMN_RETYPINGS)
+@ROW_DIFF
+def test_polars_separates_the_same_retyping_by_dtype_until_it_is_asked_not_to(mapping, retype):
+    """The same retyping stated by a frame engine rather than by a row diff. polars 1.44.1 builds a Boolean,
+    a Float64 or a Decimal column where the untouched side is Int64, and its own published assertion callable
+    assert_frame_equal fails on the dtype; passing check_dtypes=False, which its signature offers and csv-diff
+    has no equivalent of, makes the two frames equal again. So the conflation is a choice one engine exposes
+    as an argument and the two row diffs make silently."""
+    before = pl.DataFrame({'id': list(mapping), 'v': list(mapping.values())})
+    after = pl.DataFrame({'id': list(mapping), 'v': [retype(value) for value in mapping.values()]})
+    with pytest.raises(AssertionError):
+        plt.assert_frame_equal(before, after)
+    plt.assert_frame_equal(before, after, check_dtypes=False)
+
+
+@given(BINARY_FAMILY)
+@ROW_DIFF
+def test_the_digit_and_its_text_are_two_values_to_both_keyed_diffs_and_one_to_sql(mapping):
+    """The conflation runs the other way as well, and the P30 chain crosses both directions because the
+    workbook readback is compared as text while the facts it came from are typed. Rewriting each integer as
+    its decimal text is a change to both keyed diffs, because Python equality separates 1 from '1'. In DuckDB
+    the same two columns typed INTEGER and VARCHAR compare equal: the engine casts the text to the integer
+    type, so its changed-row list for the retyped side is its changed-row list for the untouched side."""
+    keys, values = list(mapping), list(mapping.values())
+    previous = _keyed_rows(mapping)
+    current = _keyed_rows({key: str(value) for key, value in mapping.items()})
+    with pytest.raises(AssertionError):
+        npt.assert_equal(csv_diff.compare(previous, current), csv_diff.compare(previous, previous))
+    with pytest.raises(AssertionError):
+        npt.assert_equal(csvdiff.diff_records(list(previous.values()), list(current.values()), ['id']),
+                         csvdiff.diff_records(list(previous.values()), list(previous.values()), ['id']))
+    npt.assert_array_equal(_duckdb_changed_keys(keys, values, [str(value) for value in values], 'VARCHAR'),
+                           _duckdb_changed_keys(keys, values, values, 'INTEGER'))
+
+
+@given(ROW_FAMILY, DIFF_KEYS)
+@ROW_DIFF
+def test_a_column_only_one_side_carries_is_ignored_by_one_keyed_diff_and_refused_by_the_other(mapping, extra):
+    """csv-diff's README says of a column change that "those added or removed columns will be ignored when
+    calculating changes made to specific rows", and its compare() implements that by passing the symmetric
+    difference of the two column sets to dictdiffer as ignore=. So a side that carries an extra column
+    produces the same changed section as comparing the untouched side with itself. csvdiff 0.3.3 has no such
+    provision: its record_diff loops over `set(lhs).union(rhs)` and indexes both rows with every name it
+    finds, so the extra column is a KeyError and the whole diff is refused. Two libraries for one operation,
+    one of which answers and one of which stops."""
+    previous = _keyed_rows(mapping)
+    current = {key: dict(row, **{extra: row['v']}) for key, row in previous.items()}
+    npt.assert_equal(csv_diff.compare(previous, current)['changed'],
+                     csv_diff.compare(previous, previous)['changed'])
+    with pytest.raises(KeyError):
+        csvdiff.diff_records(list(previous.values()), list(current.values()), ['id'])
+
+
+@given(ROW_FAMILY)
+@ROW_DIFF
+def test_a_side_with_no_rows_stops_one_keyed_diff_and_is_every_row_added_to_the_others(mapping):
+    """P30's chain compares a readback against the facts it was sealed from, and the case the chain never
+    reaches is the readback that came back with nothing. csv-diff 1.2 reads the column names from
+    `next(iter(previous.values())).keys()` before it looks at any row, so an empty side raises StopIteration
+    out of compare() rather than reporting anything; a caller that treats a raised StopIteration as the end
+    of an iteration will see an empty result. csvdiff 0.3.3 takes the same input as set differences and
+    reports every row as added, which is what polars' anti join against an empty frame returns as well."""
+    current = _keyed_rows(mapping)
+    with pytest.raises(StopIteration):
+        csv_diff.compare({}, current)
+    with pytest.raises(StopIteration):
+        csv_diff.compare(current, {})
+    added = csvdiff.diff_records([], list(current.values()), ['id'])['added']
+    empty = pl.DataFrame({'id': [], 'v': []}, schema={'id': pl.String, 'v': pl.String})
+    npt.assert_array_equal(sorted(row['id'] for row in added),
+                           _polars_frame(mapping).join(empty, on='id', how='anti')['id'].sort().to_list())
+
+
+@given(ROW_FAMILY, DIFF_VALUES)
+@ROW_DIFF
+def test_a_repeated_key_is_collapsed_to_its_last_row_before_either_keyed_diff_begins(mapping, spare):
+    """Both libraries index their rows with a dictionary comprehension keyed by the key column --
+    `{keyfn(r): r for r in rows}` in csv_diff.load_csv and `{tuple(r[i] for i in index_columns): r for r in
+    record_seq}` in csvdiff's records.index -- so a repeated key keeps the last row and loses the others
+    before any comparison happens. A previous side carrying one key twice therefore diffs exactly as the
+    deduplicated side does, in both libraries, with nothing reported about the row that was dropped. The two
+    engines see it: DuckDB's EXCEPT ALL and polars' anti join over the whole row both count the lost row, so
+    the count for the duplicated side is not the count for the deduplicated side."""
+    key = sorted(mapping)[0]
+    assume(spare != mapping[key])
+    duplicated = [{'id': key, 'v': spare}] + list(_keyed_rows(mapping).values())
+    deduplicated = list(_keyed_rows(mapping).values())
+    current = _keyed_rows(mapping)
+    npt.assert_equal(csv_diff.compare(_csv_diff_loaded(duplicated), current),
+                     csv_diff.compare(_csv_diff_loaded(deduplicated), current))
+    npt.assert_equal(csvdiff.diff_records(duplicated, list(current.values()), ['id']),
+                     csvdiff.diff_records(deduplicated, list(current.values()), ['id']))
+    with pytest.raises(AssertionError):
+        npt.assert_equal(_duckdb_rows_only_in_previous(duplicated, current),
+                         _duckdb_rows_only_in_previous(deduplicated, current))
