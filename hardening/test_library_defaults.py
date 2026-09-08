@@ -18,6 +18,7 @@ import operator
 import os
 import pathlib
 import shutil
+import struct
 import tempfile
 import subprocess
 import unicodedata
@@ -86,6 +87,7 @@ from pptx.util import Inches
 import pymupdf
 import pypdf
 import pypdfium2
+import repro_zipfile
 import xlsxwriter
 from docx2python import docx2python
 from python_calamine import CalamineWorkbook
@@ -107,6 +109,8 @@ import rapidfuzz.distance.DamerauLevenshtein as rf_damerau
 import rapidfuzz.distance.Levenshtein as rf_levenshtein
 import rapidfuzz.distance.OSA as rf_osa
 import rapidfuzz.process as rf_process
+from unittest import mock
+
 from hypothesis import assume, given, settings, strategies as st
 from largest_remainder import LargestRemainder
 import apportionment.methods as apportionment_methods
@@ -7130,3 +7134,325 @@ def test_the_two_solvers_part_company_on_a_loop_that_returns_exactly_one_unit(le
         _, solution = _sparse_totals(edges, nodes[0], units)
     npt.assert_array_equal(np.flatnonzero(np.isfinite(solution)),
                            np.flatnonzero(np.isfinite(np.full(len(nodes), np.nan))))
+
+
+# ------------------------------------------- a package whose digest is supposed to stand for its content
+ZIP_PACKAGE_ORACLE_JAVA = pathlib.Path(__file__).with_name('zip_package_oracle.java')
+ZIP_STAMP_ORACLE_PHP = pathlib.Path(__file__).with_name('zip_stamp_oracle.php')
+java_runtime_available = shutil.which('java') is not None
+PART_NAME = st.text(alphabet='abcdefghijklmnopqrstuvwxyz', min_size=1, max_size=8)
+PACKAGE_PARTS = st.dictionaries(PART_NAME, st.binary(max_size=48), min_size=1, max_size=4)
+DOS_EPOCH_HALVES = st.integers(min_value=315532800 // 2, max_value=2145916800 // 2)
+LATER_DOS_EPOCH_HALVES = st.integers(min_value=315532800 // 2 + 1, max_value=2145916800 // 2)
+BEFORE_DOS_EPOCH = st.integers(min_value=0, max_value=315532800 - 1)
+READER_ZONE = st.sampled_from(('America/New_York', 'America/Sao_Paulo', 'Asia/Kolkata',
+                               'Asia/Tokyo', 'Europe/Berlin', 'Pacific/Auckland'))
+
+
+def _reproducible_package(parts, order=None):
+    """One package written by the primitive under test: repro_zipfile.ReproducibleZipFile, which its
+    own source at v0.4.1 documents as a ZipFile that "overwrites file-modified timestamps and
+    file/directory permissions modes in write mode in order to create a reproducible ZIP archive"."""
+    buffer = io.BytesIO()
+    with repro_zipfile.ReproducibleZipFile(buffer, 'w') as archive:
+        for name in (sorted(parts) if order is None else order):
+            archive.writestr(name, parts[name])
+    return buffer.getvalue()
+
+
+def _plain_package(parts):
+    """The same parts through the standard library writer the primitive replaces."""
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, 'w') as archive:
+        for name in sorted(parts):
+            archive.writestr(name, parts[name])
+    return buffer.getvalue()
+
+
+def _java_package(package, zone='UTC'):
+    """The same archive through the java.util.zip implementation in the OpenJDK class library: what
+    that runtime reads out of it, and a second archive it writes from the entries it read, stored,
+    under the same names in the same order with the same MS-DOS local date-times. The shim parses
+    argv, calls the library and prints; the Python side writes the bytes out, runs it in the named
+    zone and splits stdout."""
+    with tempfile.TemporaryDirectory() as directory:
+        given, written = pathlib.Path(directory) / 'given.zip', pathlib.Path(directory) / 'java.zip'
+        given.write_bytes(package)
+        completed = subprocess.run(['java', str(ZIP_PACKAGE_ORACLE_JAVA), str(given), str(written)],
+                                   capture_output=True, encoding='utf-8', check=True,
+                                   env=dict(os.environ, TZ=zone))
+        rows = [line.split('\t') for line in completed.stdout.split('\n')[:-1]]
+        return ([(bytes.fromhex(row[0]).decode(), [int(field) for field in row[1:7]],
+                  int(row[7]), int(row[8]), int(row[9])) for row in rows], written.read_bytes())
+
+
+def _libzip_instants(package, zone):
+    """The last-modified instant PHP's zip extension (libzip 1.7.3) resolves each entry to, run in the
+    named zone. The shim parses argv, calls the library and prints; the Python side splits stdout."""
+    with tempfile.TemporaryDirectory() as directory:
+        given = pathlib.Path(directory) / 'given.zip'
+        given.write_bytes(package)
+        completed = subprocess.run(['php', str(ZIP_STAMP_ORACLE_PHP), str(given)],
+                                   capture_output=True, encoding='utf-8', check=True,
+                                   env=dict(os.environ, TZ=zone))
+        return [int(line.split('\t')[1]) for line in completed.stdout.split('\n')[:-1]]
+
+
+@given(PACKAGE_PARTS)
+@SLOW
+def test_two_packages_written_from_the_same_parts_in_the_same_order_have_one_digest(parts):
+    """The claim the primitive is there to support, in its README's own words at v0.4.1:
+    ""Reproducible" or "deterministic" in this context means that the binary content of the ZIP
+    archive is identical if you add files with identical binary content in the same order." On
+    generated parts it holds exactly: the two packages are the same bytes, so the two digests are one
+    digest. Replaces the typed digest equality and the typed `stamps(first) == stamps(second)` of
+    handoff_guards_v18.py case a_deterministic_package_is_a_library_writer."""
+    first, second = _reproducible_package(parts), _reproducible_package(parts)
+    npt.assert_equal(hashlib.sha256(first).hexdigest(), hashlib.sha256(second).hexdigest())
+    npt.assert_equal(hmac.compare_digest(first, second), hmac.compare_digest(first, first))
+    with zipfile.ZipFile(io.BytesIO(first)) as archive:
+        with zipfile.ZipFile(io.BytesIO(second)) as again:
+            npt.assert_array_equal([info.date_time for info in archive.infolist()],
+                                   [info.date_time for info in again.infolist()])
+
+
+@given(PACKAGE_PARTS, st.data())
+@SLOW
+def test_the_same_parts_written_in_a_different_order_are_a_different_package(parts, source):
+    """The README's own caveat, quoted at v0.4.1: "Note that files must be written to the archive in
+    the same order to reproduce an identical archive." Generated parts written in a generated
+    permutation come back out as the same mapping of name to bytes and hash to a different digest, so
+    the digest answers a question about the writing, not only about the content."""
+    assume(len(parts) > 1)
+    order = source.draw(st.permutations(sorted(parts)))
+    assume(order != sorted(parts))
+    sorted_package, permuted = _reproducible_package(parts), _reproducible_package(parts, order)
+    with zipfile.ZipFile(io.BytesIO(sorted_package)) as archive:
+        with zipfile.ZipFile(io.BytesIO(permuted)) as other:
+            npt.assert_equal({name: archive.read(name) for name in archive.namelist()},
+                             {name: other.read(name) for name in other.namelist()})
+    with pytest.raises(AssertionError):
+        npt.assert_equal(hashlib.sha256(permuted).hexdigest(),
+                         hashlib.sha256(sorted_package).hexdigest())
+
+
+@pytest.mark.skipif(not java_runtime_available, reason='java is required for this oracle')
+@given(PACKAGE_PARTS)
+@JAVA_ORACLE
+def test_a_second_writer_gives_the_same_parts_the_same_entries_and_a_different_digest(parts):
+    """The finding. Handed the package, the java.util.zip writer in the OpenJDK class library writes
+    the same names in the same order carrying the same bytes with the same MS-DOS local date-times,
+    stored uncompressed as this one is, and the two archives are not the same bytes: the entry
+    inventory and the contents match, the digests do not. Byte-level reproducibility is therefore a
+    property of one writer rather than of the format, and the README's "you can reliably check
+    equality of the contents of two ZIP archives by simply comparing checksums of the archive" holds
+    only between packages written by that writer. Replaces the typed digest equality of case
+    a_deterministic_package_is_a_library_writer, which asserted it of one writer twice."""
+    package = _reproducible_package(parts)
+    inventory, by_java = _java_package(package)
+    npt.assert_array_equal([entry[0] for entry in inventory], sorted(parts))
+    with zipfile.ZipFile(io.BytesIO(by_java)) as archive:
+        npt.assert_equal({name: archive.read(name) for name in archive.namelist()}, parts)
+        npt.assert_array_equal([info.date_time for info in archive.infolist()],
+                               [entry[1] for entry in inventory])
+    with pytest.raises(AssertionError):
+        npt.assert_equal(hashlib.sha256(by_java).hexdigest(), hashlib.sha256(package).hexdigest())
+
+
+@pytest.mark.skipif(not java_runtime_available, reason='java is required for this oracle')
+@given(PACKAGE_PARTS)
+@JAVA_ORACLE
+def test_the_stamp_the_package_carries_is_the_one_the_library_publishes(parts):
+    """`repro_zipfile.date_time()` is the package's published account of what it writes, documented at
+    v0.4.1 as the value "used to force overwrite on all ZipInfo objects. Defaults to 1980-01-01
+    00:00:00." Another runtime reading the archive's MS-DOS date and time fields, through
+    `ZipEntry.getTimeLocal`, reports that same date-time for every entry. Replaces the typed
+    `g.equal(stamps(first), {(1980, 1, 1, 0, 0, 0)})` of case
+    a_deterministic_package_is_a_library_writer."""
+    inventory, _ = _java_package(_reproducible_package(parts))
+    npt.assert_array_equal([entry[1] for entry in inventory],
+                           [list(repro_zipfile.date_time())] * len(parts))
+
+
+@pytest.mark.skipif(not java_runtime_available, reason='java is required for this oracle')
+@given(PACKAGE_PARTS, st.binary(max_size=48), st.data())
+@JAVA_ORACLE
+def test_changing_one_part_changes_the_package_digest(parts, replacement, source):
+    """One generated part replaced by generated bytes that are not the bytes it had. The digest of the
+    package changes, and so does the size and CRC-32 the second runtime reads for that entry, so the
+    change is in the archive and not only in the hash. Replaces the typed
+    `g.equal(sha256(changed) == sha256(first), False)` of case
+    a_deterministic_package_is_a_library_writer."""
+    name = source.draw(st.sampled_from(sorted(parts)))
+    assume(parts[name] != replacement)
+    package = _reproducible_package(parts)
+    changed = _reproducible_package(dict(parts, **{name: replacement}))
+    before, _ = _java_package(package)
+    after, _ = _java_package(changed)
+    with pytest.raises(AssertionError):
+        npt.assert_equal(hashlib.sha256(changed).hexdigest(), hashlib.sha256(package).hexdigest())
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal([entry[3:] for entry in before], [entry[3:] for entry in after])
+
+
+@pytest.mark.skipif(not java_runtime_available, reason='java is required for this oracle')
+@given(PACKAGE_PARTS)
+@JAVA_ORACLE
+def test_every_part_comes_back_out_of_the_package_under_its_own_name(parts):
+    """The round trip, in both runtimes: every generated part is in the archive under the name it was
+    written with, at the length it was written with, stored uncompressed, and reading it back gives
+    the bytes that went in. Replaces the typed `sorted(archive.namelist()) == [...]` and
+    `archive.read('word/document.xml') == b'<w:p/>'` of case
+    a_deterministic_package_is_a_library_writer."""
+    package = _reproducible_package(parts)
+    with zipfile.ZipFile(io.BytesIO(package)) as archive:
+        npt.assert_equal({name: archive.read(name) for name in archive.namelist()}, parts)
+    inventory, _ = _java_package(package)
+    npt.assert_array_equal([entry[0] for entry in inventory], sorted(parts))
+    npt.assert_array_equal([entry[3] for entry in inventory],
+                           [len(parts[name]) for name in sorted(parts)])
+    npt.assert_array_equal([entry[2] for entry in inventory], [zipfile.ZIP_STORED] * len(parts))
+
+
+@given(PACKAGE_PARTS)
+@SLOW
+def test_the_standard_library_writer_stamps_the_clock_where_the_reproducible_one_stamps_a_constant(parts):
+    """The reason the primitive exists, stated by its README at v0.4.1: "ZIP archives are not normally
+    reproducible even when containing files with identical content because of file metadata. In
+    particular, the usual culprits are: 1. Last-modified timestamps". The standard library writer
+    stamps every entry with the clock, so its archive does not carry the published fixed value; the
+    replacement writer's does. Replaces the typed
+    `g.equal(stamps(plain.getvalue()) == {(1980, 1, 1, 0, 0, 0)}, False)` of case
+    a_deterministic_package_is_a_library_writer."""
+    with zipfile.ZipFile(io.BytesIO(_reproducible_package(parts))) as archive:
+        fixed = [info.date_time for info in archive.infolist()]
+    with zipfile.ZipFile(io.BytesIO(_plain_package(parts))) as archive:
+        clocked = [info.date_time for info in archive.infolist()]
+    npt.assert_array_equal(fixed, [repro_zipfile.date_time()] * len(parts))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(clocked, fixed)
+
+
+@pytest.mark.skipif(not java_runtime_available, reason='java is required for this oracle')
+@given(DOS_EPOCH_HALVES, PACKAGE_PARTS)
+@JAVA_ORACLE
+def test_an_even_source_date_epoch_is_the_stamp_the_package_carries(half, parts):
+    """`SOURCE_DATE_EPOCH` is the Reproducible Builds standard the README points at, and at v0.4.1
+    `date_time()` returns `time.gmtime(int(source_date_epoch))[:6]` when it is set. For a generated
+    epoch that falls on an even second inside the range the format can carry, the second runtime reads
+    back exactly the date-time the library publishes."""
+    with mock.patch.dict(os.environ, {'SOURCE_DATE_EPOCH': str(half * 2)}):
+        package, published = _reproducible_package(parts), repro_zipfile.date_time()
+    inventory, _ = _java_package(package)
+    npt.assert_array_equal([entry[1] for entry in inventory], [list(published)] * len(parts))
+
+
+@given(DOS_EPOCH_HALVES, PACKAGE_PARTS)
+@SLOW
+def test_an_odd_source_date_epoch_is_not_the_stamp_the_package_carries(half, parts):
+    """The MS-DOS time field stores seconds in units of two -- libzip's own reader spells the decode
+    out as `tm.tm_sec = (dtime << 1) & 62` -- so an odd `SOURCE_DATE_EPOCH` cannot be written down.
+    `date_time()` still reports the odd second, and the archive carries the even one, so the value the
+    library publishes as the fixed stamp is not the value in the file. Two epochs a second apart
+    produce one archive, byte for byte, which is the same fact from the other side: a build cannot
+    move its stamp by one second."""
+    with mock.patch.dict(os.environ, {'SOURCE_DATE_EPOCH': str(half * 2 + 1)}):
+        odd, published = _reproducible_package(parts), repro_zipfile.date_time()
+    with mock.patch.dict(os.environ, {'SOURCE_DATE_EPOCH': str(half * 2)}):
+        even = _reproducible_package(parts)
+    with zipfile.ZipFile(io.BytesIO(odd)) as archive:
+        carried = [info.date_time for info in archive.infolist()]
+    npt.assert_equal(hashlib.sha256(odd).hexdigest(), hashlib.sha256(even).hexdigest())
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(carried, [published] * len(parts))
+
+
+@given(BEFORE_DOS_EPOCH, PART_NAME, st.binary(max_size=48))
+@SLOW
+def test_a_source_date_epoch_before_the_format_begins_fails_the_pack_not_the_documented_check(epoch,
+                                                                                             name,
+                                                                                             content):
+    """The Reproducible Builds standard puts no floor under `SOURCE_DATE_EPOCH`, and the ZIP format
+    has one: the README calls 1980-01-01 "the earliest timestamp that is supported by the ZIP format
+    specifications". CPython guards it -- `ZipInfo.__init__` raises `ValueError('ZIP does not support
+    timestamps before 1980')` -- but the replacement writer assigns `zinfo.date_time` after the
+    ZipInfo is constructed, so the guard never runs and the write dies inside `struct.pack` instead,
+    with a message about an unsigned short. The build stops either way; what it says is not what the
+    format documents."""
+    with mock.patch.dict(os.environ, {'SOURCE_DATE_EPOCH': str(epoch)}):
+        published = repro_zipfile.date_time()
+        with pytest.raises(ValueError):
+            zipfile.ZipInfo(name, date_time=published)
+        with pytest.raises(struct.error):
+            _reproducible_package({name: content})
+
+
+@pytest.mark.skipif(not php_binary_available, reason='php is required for this oracle')
+@given(PACKAGE_PARTS, READER_ZONE)
+@ORACLE_PROCESS
+def test_a_second_reader_dates_the_package_in_its_own_time_zone(parts, zone):
+    """The MS-DOS date and time fields carry no zone, and libzip resolves them with `mktime`, which
+    reads the reader's: its `_zip_d2u_time` fills a `struct tm` from the field bits, sets
+    `tm.tm_isdst = -1` with the comment "let mktime decide if DST is in effect", and returns
+    `mktime(&tm)`. Run in a generated zone, PHP's `ZipArchive::statIndex` reports exactly the instant
+    zoneinfo gives for the published date-time read as local time there."""
+    package = _reproducible_package(parts)
+    stamp = repro_zipfile.date_time()
+    local = datetime.datetime(*stamp, tzinfo=zoneinfo.ZoneInfo(zone)).timestamp()
+    npt.assert_array_equal(_libzip_instants(package, zone), [local] * len(parts))
+
+
+@pytest.mark.skipif(not php_binary_available, reason='php is required for this oracle')
+@given(PACKAGE_PARTS, READER_ZONE)
+@ORACLE_PROCESS
+def test_two_readers_in_two_zones_disagree_about_when_the_package_was_written(parts, zone):
+    """The README says of the fixed stamp that it is "1980-01-01 00:00 UTC". The archive does not say
+    UTC: what it carries is the bare MS-DOS field, and a reader in any of these zones dates the same
+    package to a different instant from a reader in UTC, by that zone's offset. The stamp is stable
+    across machines only as a calendar reading, and any chain that turns it into an instant -- a
+    retention window, an age check, an ordering against a wall-clock event -- gets a different answer
+    on a differently configured machine."""
+    package = _reproducible_package(parts)
+    stamp = repro_zipfile.date_time()
+    utc = datetime.datetime(*stamp, tzinfo=datetime.timezone.utc).timestamp()
+    npt.assert_array_equal(_libzip_instants(package, 'UTC'), [utc] * len(parts))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_libzip_instants(package, zone), [utc] * len(parts))
+
+
+@pytest.mark.skipif(not java_runtime_available, reason='java is required for this oracle')
+@given(PACKAGE_PARTS, READER_ZONE)
+@JAVA_ORACLE
+def test_the_second_writer_is_not_reproducible_across_zones_at_the_stamp_the_format_begins_at(parts,
+                                                                                             zone):
+    """OpenJDK's `ZipEntry` encodes 1980-01-01 00:00:00 -- the primitive's default stamp, and the
+    earliest the format admits -- as `(1 << 21) | (1 << 16)`, which is the same bit pattern it keeps
+    as the sentinel `DOSTIME_BEFORE_1980`. `setTimeLocal` tests `xdostime != DOSTIME_BEFORE_1980`
+    before it discards the modification time, so at exactly this stamp it keeps one, converting
+    through `ZoneId.systemDefault()`; `ZipOutputStream` then writes an Info-ZIP extended timestamp
+    extra field holding that instant. The same parts written by the same writer in two zones are
+    therefore two different archives, and the one date the format's own floor names is the one date
+    at which this writer is not reproducible."""
+    package = _reproducible_package(parts)
+    _, from_utc = _java_package(package, zone='UTC')
+    _, from_zone = _java_package(package, zone=zone)
+    with zipfile.ZipFile(io.BytesIO(from_zone)) as archive:
+        npt.assert_equal({name: archive.read(name) for name in archive.namelist()}, parts)
+    with pytest.raises(AssertionError):
+        npt.assert_equal(hashlib.sha256(from_zone).hexdigest(),
+                         hashlib.sha256(from_utc).hexdigest())
+
+
+@pytest.mark.skipif(not java_runtime_available, reason='java is required for this oracle')
+@given(PACKAGE_PARTS, READER_ZONE, LATER_DOS_EPOCH_HALVES)
+@JAVA_ORACLE
+def test_the_second_writer_is_reproducible_across_zones_at_every_later_stamp(parts, zone, half):
+    """The agreeing region of the same comparison. Move the stamp off the sentinel with any generated
+    `SOURCE_DATE_EPOCH` at a later even second, and `setTimeLocal` discards the modification time as
+    it does everywhere else in the format's range, no extended timestamp is written, and the second
+    writer produces one archive in both zones."""
+    with mock.patch.dict(os.environ, {'SOURCE_DATE_EPOCH': str(half * 2)}):
+        package = _reproducible_package(parts)
+    _, from_utc = _java_package(package, zone='UTC')
+    _, from_zone = _java_package(package, zone=zone)
+    npt.assert_equal(hashlib.sha256(from_zone).hexdigest(), hashlib.sha256(from_utc).hexdigest())
