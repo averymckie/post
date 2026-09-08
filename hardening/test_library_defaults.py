@@ -44,6 +44,7 @@ import cv2
 from beancount import loader as beancount_loader
 from beancount.core import data as beancount_data
 import docx
+from docx.oxml.ns import qn
 import duckdb
 import icalendar
 from dateutil import rrule, tz as dateutil_tz
@@ -10612,3 +10613,290 @@ def test_every_document_carries_the_templates_part_list_and_its_thumbnail(lines,
     npt.assert_array_equal(sorted(written.namelist()), sorted(template.namelist()))
     npt.assert_array_equal(written.read('docProps/thumbnail.jpeg'),
                            template.read('docProps/thumbnail.jpeg'))
+
+
+# --------------------------------------------------------------------------------------------------
+# handoff_guards_v9.py, case table_formatting_round_trips_in_the_xml: what a repeating header repeats
+# --------------------------------------------------------------------------------------------------
+DOCX_TABLE_ORACLE_JAVA = pathlib.Path(__file__).with_name('docx_table_oracle.java')
+WORDPROCESSING = {'w': WORDPROCESSING_NS}
+TABLE_TEXT = st.text(alphabet=st.characters(min_codepoint=97, max_codepoint=122), min_size=1, max_size=8)
+TABLE_BODY = st.integers(min_value=1, max_value=3).flatmap(
+    lambda columns: st.lists(st.lists(TABLE_TEXT, min_size=columns, max_size=columns),
+                             min_size=1, max_size=4))
+LONGER_TABLE_BODY = st.integers(min_value=1, max_value=3).flatmap(
+    lambda columns: st.lists(st.lists(TABLE_TEXT, min_size=columns, max_size=columns),
+                             min_size=2, max_size=4))
+CELL_PARAGRAPHS = st.lists(TABLE_TEXT, min_size=2, max_size=4)
+
+
+def _row_flags(rows, data):
+    """One boolean per generated row, drawn rather than chosen."""
+    return data.draw(st.lists(st.booleans(), min_size=len(rows), max_size=len(rows)))
+
+
+def _action_document(heading, rows, repeating, unsplittable, swap=False):
+    """The document the case writes, with the rows carrying each row property generated rather than
+    fixed. python-docx 1.2.0 exposes neither property, so the case reaches past the object model and
+    appends the raw elements to `w:trPr`, which is what this does; `swap` appends the same two elements
+    in the other order. `qn` is python-docx's own "qualified name" helper."""
+    document = docx.Document()
+    document.add_heading(heading, 1)
+    table = document.add_table(rows=0, cols=len(rows[0]))
+    for number, row in enumerate(rows):
+        cells = table.add_row().cells
+        for cell, value in zip(cells, row):
+            cell.text = value
+        properties = table.rows[number]._tr.get_or_add_trPr()
+        tags = ([qn('w:tblHeader')] if repeating[number] else []
+                ) + ([qn('w:cantSplit')] if unsplittable[number] else [])
+        for tag in (list(reversed(tags)) if swap else tags):
+            lxml_etree.SubElement(properties, tag)
+    written = io.BytesIO()
+    document.save(written)
+    return written.getvalue()
+
+
+def _multi_paragraph_document(paragraphs):
+    """A one-cell table whose cell holds several paragraphs, written with python-docx's own
+    `_Cell.add_paragraph`, whose docstring at tag `v1.2.0` opens with "Return a paragraph newly added
+    to the end of the content in this cell".
+    """
+    document = docx.Document()
+    cell = document.add_table(rows=1, cols=1).rows[0].cells[0]
+    cell.text = paragraphs[0]
+    for text in paragraphs[1:]:
+        cell.add_paragraph(text)
+    written = io.BytesIO()
+    document.save(written)
+    return written.getvalue()
+
+
+def _rows_carrying(data, tag):
+    """The positions of the table rows whose properties carry the named element, selected by libxml2's
+    own XPath predicate rather than by a search written here."""
+    body = lxml_etree.fromstring(zipfile.ZipFile(io.BytesIO(data)).read('word/document.xml'))
+    rows = body.xpath('.//w:tr', namespaces=WORDPROCESSING)
+    return [rows.index(row) for row in
+            body.xpath('.//w:tr[.//w:%s]' % tag, namespaces=WORDPROCESSING)]
+
+
+def _elements_named(data, tag):
+    """The same elements counted by expat through ElementTree, which is the count the case makes."""
+    body = ElementTree.fromstring(zipfile.ZipFile(io.BytesIO(data)).read('word/document.xml'))
+    return len(list(body.iter('{%s}%s' % (WORDPROCESSING_NS, tag))))
+
+
+def _text_nodes(data):
+    """The nonempty `w:t` nodes, in document order, which is where the case looks for its values."""
+    body = lxml_etree.fromstring(zipfile.ZipFile(io.BytesIO(data)).read('word/document.xml'))
+    return [node.text for node in body.iter(qn('w:t')) if node.text and node.text.strip()]
+
+
+def _docx_grid(data):
+    """python-docx's object model reading the table back, cell by cell, as the case does."""
+    table = docx.Document(io.BytesIO(data)).tables[0]
+    return [[cell.text for cell in row.cells] for row in table.rows]
+
+
+def _docx_paragraphs(data):
+    """The same cells one level down, as the paragraphs python-docx says they hold."""
+    table = docx.Document(io.BytesIO(data)).tables[0]
+    return [[[paragraph.text for paragraph in cell.paragraphs] for cell in row.cells]
+            for row in table.rows]
+
+
+def _docx2python_grid(data):
+    """docx2python 3.7.1 reading the same table straight out of the XML. Its README at tag 3.7.1
+    documents `body` as the "contents of the docx in the return format described herein" and that
+    "Text will be returned in a nested list, with paragraphs always at depth 4", so a cell is the list
+    of its paragraphs and never a joined string. It declares lxml, paragraphs and typing-extensions and
+    nothing from python-docx."""
+    with docx2python(io.BytesIO(data)) as parsed:
+        return parsed.body[-1]
+
+
+def _poi_table(data, kind):
+    """The same document read by Apache POI 5.4.1 under Java. The shim parses argv, calls the library
+    and prints one line per row, per cell and per paragraph inside a cell; this returns the fields of
+    the lines of one kind, with Java's own `true`/`false` spelling of a boolean left as it printed it."""
+    with tempfile.TemporaryDirectory() as directory:
+        path = pathlib.Path(directory) / 'actions.docx'
+        path.write_bytes(data)
+        completed = subprocess.run(
+            ['java', '-Dlog4j2.statusLoggerLevel=OFF', '-cp', str(POI_DIRECTORY / 'jars' / '*'),
+             str(DOCX_TABLE_ORACLE_JAVA), str(path)],
+            capture_output=True, encoding='utf-8', check=True)
+    return [line.split('\t')[1:] for line in completed.stdout.split('\n')[:-1]
+            if line.startswith(kind + '\t')]
+
+
+@given(TABLE_TEXT, TABLE_BODY, st.data())
+@SLOW
+def test_the_row_property_counts_the_case_types_are_the_rows_the_writer_marked(heading, rows, data):
+    """handoff_guards_v9.py's case table_formatting_round_trips_in_the_xml makes four typed comparisons
+    about a three-row table, the last of them run over three hand-chosen strings. The first two are
+    counts of elements in word/document.xml: `g.equal(fmt['tblHeader'], 1)` under the comment "header
+    repeats once" and `g.equal(fmt['cantSplit'], 3)` under "a row is never split across pages". Neither
+    number is typed here. The rows carrying each property are generated, the elements the file holds are
+    the rows the writer marked, selected by libxml2's own XPath predicate, and the counts are made again
+    by expat through ElementTree."""
+    repeating = _row_flags(rows, data)
+    unsplittable = _row_flags(rows, data)
+    written = _action_document(heading, rows, repeating, unsplittable)
+    npt.assert_array_equal(_rows_carrying(written, 'tblHeader'),
+                           [number for number, flag in enumerate(repeating) if flag])
+    npt.assert_array_equal(_rows_carrying(written, 'cantSplit'),
+                           [number for number, flag in enumerate(unsplittable) if flag])
+    npt.assert_array_equal([_elements_named(written, 'tblHeader'),
+                            _elements_named(written, 'cantSplit')],
+                           [sum(repeating), sum(unsplittable)])
+
+
+@pytest.mark.skipif(not poi_available, reason='java and the Apache POI jars are required for this oracle')
+@given(TABLE_TEXT, TABLE_BODY, st.data())
+@JAVA_ORACLE
+def test_a_second_implementation_reads_the_no_split_flag_on_exactly_the_rows_it_was_written_on(
+        heading, rows, data):
+    """A second implementation of the format returns the second property row for row. Apache POI 5.4.1's
+    `XWPFTableRow.isCantSplitRow` is documented at tag `REL_5_4_1` as "Return true if the "can't split
+    row" value is true. The logic for this attribute is a little unusual: a TRUE value means DON'T allow
+    rows to split, FALSE means allow rows to split.", and its body reads that row's own `cantSplit`
+    array and nothing else. Over generated rows and a generated choice of which carry the element, POI's
+    answer is that choice, so the case's count of three does correspond to three rows a reader will
+    treat as unsplittable."""
+    unsplittable = _row_flags(rows, data)
+    written = _action_document(heading, rows, _row_flags(rows, data), unsplittable)
+    npt.assert_array_equal([fields[3] for fields in _poi_table(written, 'ROW')],
+                           [str(flag).lower() for flag in unsplittable])
+
+
+@pytest.mark.skipif(not poi_available, reason='java and the Apache POI jars are required for this oracle')
+@given(TABLE_TEXT, TABLE_BODY, st.data())
+@JAVA_ORACLE
+def test_the_header_repeats_for_the_second_implementation_when_the_flag_starts_at_the_first_row(
+        heading, rows, data):
+    """The first property is not read that way, and in the case's own arrangement the difference does not
+    show. `isRepeatHeader` is documented at the same tag as "Return true if a table's header row should
+    be repeated at the top of a table split across pages. NOTE - Word will not repeat a table row unless
+    all preceding rows of the table are also repeated. This function returns false if the row will not be
+    repeated even if the repeat tag is present for this row." Written on a run of rows that begins at the
+    first one, which is where the case writes it, POI reports exactly those rows, and the two properties
+    written on the same rows read back as the same list."""
+    length = data.draw(st.integers(min_value=1, max_value=len(rows)))
+    marked = [number < length for number in range(len(rows))]
+    written = _action_document(heading, rows, marked, marked)
+    reported = _poi_table(written, 'ROW')
+    npt.assert_array_equal([fields[2] for fields in reported],
+                           [str(flag).lower() for flag in marked])
+    npt.assert_array_equal([fields[2] for fields in reported], [fields[3] for fields in reported])
+
+
+@pytest.mark.skipif(not poi_available, reason='java and the Apache POI jars are required for this oracle')
+@given(TABLE_TEXT, LONGER_TABLE_BODY, st.data())
+@JAVA_ORACLE
+def test_a_flag_written_past_the_first_row_repeats_nothing_though_the_file_records_it_the_same(
+        heading, rows, data):
+    """Written anywhere else it repeats nothing at all. The two elements go on exactly the same generated
+    run of rows, one beginning after the first row, so the file records the identical set of rows for
+    both properties -- one XPath predicate returns one list for both -- and the count the case checks is
+    the count it would make of a run at the top of the table. POI reads the two apart: the unsplittable
+    rows are the marked ones, and no row repeats, because the repeat rule is about the rows before a row
+    rather than about the row. So `fmt['tblHeader']` counts elements in a file and not headers on a page,
+    and "header repeats once" is a claim that comparison cannot make."""
+    start = data.draw(st.integers(min_value=1, max_value=len(rows) - 1))
+    marked = [number >= start for number in range(len(rows))]
+    written = _action_document(heading, rows, marked, marked)
+    npt.assert_array_equal(_rows_carrying(written, 'tblHeader'),
+                           _rows_carrying(written, 'cantSplit'))
+    reported = _poi_table(written, 'ROW')
+    npt.assert_array_equal([fields[3] for fields in reported],
+                           [str(flag).lower() for flag in marked])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal([fields[2] for fields in reported],
+                               [fields[3] for fields in reported])
+
+
+@given(TABLE_TEXT, TABLE_BODY, st.data())
+@SLOW
+def test_the_table_python_docx_reads_back_is_the_table_it_was_given(heading, rows, data):
+    """The case's third comparison, `g.equal(table, rows)`, against a table hypothesis generated rather
+    than one typed above it. python-docx's `_Cell.text` is documented at tag `v1.2.0` as "The entire
+    contents of this cell as a string of text" and returns `"\\n".join(p.text for p in self.paragraphs)`;
+    with one paragraph per cell it hands back what was written, cell for cell."""
+    written = _action_document(heading, rows, _row_flags(rows, data), _row_flags(rows, data))
+    npt.assert_array_equal(_docx_grid(written), rows)
+
+
+@pytest.mark.skipif(not poi_available, reason='java and the Apache POI jars are required for this oracle')
+@given(TABLE_TEXT, TABLE_BODY, st.data())
+@JAVA_ORACLE
+def test_two_further_readers_return_the_same_table_body(heading, rows, data):
+    """And the same table comes back from two readers that share nothing with python-docx: docx2python
+    3.7.1, which parses the XML directly, and POI's `XWPFTableCell.getText` under Java. For
+    single-paragraph cells all three agree with the generated body, so the round trip the case records is
+    real and holds in three implementations of the format."""
+    written = _action_document(heading, rows, _row_flags(rows, data), _row_flags(rows, data))
+    npt.assert_array_equal(_docx2python_grid(written), [[[value] for value in row] for row in rows])
+    npt.assert_array_equal([fields[3] for fields in _poi_table(written, 'CELL')],
+                           [value for row in rows for value in row])
+
+
+@given(TABLE_TEXT, TABLE_BODY, st.data())
+@SLOW
+def test_the_text_nodes_the_case_searches_are_the_heading_and_every_cell(heading, rows, data):
+    """The case's fourth comparison asks whether three hand-chosen strings appear among the nonempty
+    `w:t` nodes and returns the number of nodes as its evidence. The nodes are not a set to search: they
+    are the heading followed by every cell in document order, so membership holds for each generated
+    value by construction, and the sequence is the stronger statement."""
+    written = _action_document(heading, rows, _row_flags(rows, data), _row_flags(rows, data))
+    npt.assert_array_equal(_text_nodes(written), [heading] + [value for row in rows for value in row])
+
+
+@pytest.mark.skipif(not poi_available, reason='java and the Apache POI jars are required for this oracle')
+@given(CELL_PARAGRAPHS)
+@JAVA_ORACLE
+def test_every_reader_agrees_about_the_paragraphs_inside_one_cell(paragraphs):
+    """A cell is not a string, and where the case's cells hold one paragraph each the difference cannot
+    arise. Asked for the paragraphs rather than for the cell, all three readers return the generated
+    list: python-docx's `_Cell.paragraphs`, docx2python's cell, and POI's
+    `XWPFTableCell.getParagraphs`."""
+    written = _multi_paragraph_document(paragraphs)
+    npt.assert_array_equal(_docx_paragraphs(written), [[paragraphs]])
+    npt.assert_array_equal(_docx2python_grid(written), [[paragraphs]])
+    npt.assert_array_equal([fields[4] for fields in _poi_table(written, 'PARA')], paragraphs)
+
+
+@pytest.mark.skipif(not poi_available, reason='java and the Apache POI jars are required for this oracle')
+@given(CELL_PARAGRAPHS)
+@JAVA_ORACLE
+def test_the_cell_text_the_case_compares_is_a_join_only_one_of_the_readers_performs(paragraphs):
+    """Asked for the cell, they disagree. python-docx joins the paragraphs with a newline; POI's
+    `getText` at tag `REL_5_4_1` is a `StringBuilder` that appends each paragraph's text with nothing
+    between them, "for (XWPFParagraph p : paragraphs) { text.append(p.getText()); }"; and docx2python
+    performs no join at all. So the nested list of cell strings the case compares against its typed table
+    is a python-docx artefact wherever a cell holds more than one paragraph, and a chain that checks a
+    table across two readers of the format is comparing two flattenings rather than two tables."""
+    written = _multi_paragraph_document(paragraphs)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_docx_grid(written),
+                               [[fields[3] for fields in _poi_table(written, 'CELL')]])
+
+
+@pytest.mark.skipif(not poi_available, reason='java and the Apache POI jars are required for this oracle')
+@given(TABLE_TEXT, TABLE_BODY)
+@JAVA_ORACLE
+def test_the_order_the_two_row_properties_are_appended_in_changes_nothing_a_second_reader_sees(
+        heading, rows):
+    """One thing the case's route past the object model does not cost it. Appending the raw elements puts
+    `w:tblHeader` before `w:cantSplit`, the order python-docx's own `CT_TrPr` tag sequence reverses, and
+    the two orders are different bytes in word/document.xml. A schema-aware second implementation reads
+    them alike: POI returns the same row lines for both files, the `validate` its XMLBeans row element
+    answers included, so the ordering is not the reason a repeating header does not repeat."""
+    marked = [True] * len(rows)
+    appended = _action_document(heading, rows, marked, marked)
+    swapped = _action_document(heading, rows, marked, marked, swap=True)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(zipfile.ZipFile(io.BytesIO(appended)).read('word/document.xml'),
+                               zipfile.ZipFile(io.BytesIO(swapped)).read('word/document.xml'))
+    npt.assert_array_equal(_poi_table(appended, 'ROW'), _poi_table(swapped, 'ROW'))
