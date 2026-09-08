@@ -3735,3 +3735,124 @@ def test_the_lookup_folds_no_case_until_a_processor_is_passed(choices, index):
                             for word in choices])
     with pytest.raises(AssertionError):
         npt.assert_array_equal(sorted(shouted), sorted(plain))
+
+
+# ---------------------------------------------------------------- a declared rate and what JSON returns
+JSON_ORACLE_JS = pathlib.Path(__file__).with_name('json_number_oracle.js')
+RATE_KEY = st.text(alphabet='ABCDEFGHIJKLMNOPQRSTUVWXYZ_', min_size=3, max_size=7)
+RATE_UNITS = st.integers(min_value=0, max_value=99)
+TENTH_THAT_IS_NOT_A_HALF = st.sampled_from('12346789')
+BINARY_NUMERATOR = st.integers(min_value=1, max_value=255)
+LONG_FRACTION = st.tuples(st.sampled_from('123456789'),
+                          st.text(alphabet='0123456789', min_size=17, max_size=24)).map(''.join)
+NONFINITE_LITERAL = st.sampled_from(['NaN', 'Infinity', '-Infinity'])
+
+
+def _node_json_member(document, name):
+    completed = subprocess.run(['node', str(JSON_ORACLE_JS), document, name],
+                               capture_output=True, text=True, check=True)
+    return completed.stdout.strip()
+
+
+@pytest.mark.skipif(not node_available, reason='the node runtime is required for this oracle')
+@given(RATE_KEY, RATE_UNITS, TENTH_THAT_IS_NOT_A_HALF)
+@ORACLE_PROCESS
+def test_three_json_parsers_return_the_same_double_for_a_declared_rate(key, units, tenth):
+    """The standard library's C scanner, orjson's Rust parser -- whose Cargo.toml at tag 3.12.0 depends
+    on no Python package and reimplements the format -- and V8's JSON.parse under node all return the
+    same double for the same declared rate, so what the next test records is a property of the format
+    and not of one reader."""
+    document = '{"%s": %d.%s}' % (key, units, tenth)
+    npt.assert_array_equal(json.loads(document)[key], orjson.loads(document)[key])
+    npt.assert_array_equal(json.loads(document)[key], float(_node_json_member(document, key)))
+
+
+@given(RATE_KEY, RATE_UNITS, TENTH_THAT_IS_NOT_A_HALF)
+@SLOW
+def test_a_declared_rate_that_is_not_a_binary_fraction_is_not_the_number_json_returns(key, units,
+                                                                                     tenth):
+    """One decimal place that is not a half is never a binary fraction, so the double the parser
+    returns is a different rational number from the one written in the file, which fractions.Fraction
+    reads off both exactly. The declared digits survive only if parse_float is passed, documented as
+    "*parse_float*, if specified, will be called with the string of every JSON float to be decoded.
+    By default, this is equivalent to ``float(num_str)``." And the value that arrives by default
+    cannot be used in the chain's own arithmetic at all: a Decimal refuses to multiply a float.
+    Replaces the typed str(Decimal(loose['EUR_USD']))[:20] of case 168."""
+    text = '%d.%s' % (units, tenth)
+    document = '{"%s": %s}' % (key, text)
+    npt.assert_array_equal(str(json.loads(document, parse_float=Decimal)[key]), text)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(Fraction(Decimal(text)), Fraction(json.loads(document)[key]))
+    with pytest.raises(TypeError):
+        Decimal(text) * json.loads(document)[key]
+
+
+@given(RATE_KEY, RATE_UNITS, BINARY_NUMERATOR)
+@SLOW
+def test_a_declared_rate_that_is_a_binary_fraction_survives_the_double_exactly(key, units, numerator):
+    """The agreeing region: a rate whose fractional part is a multiple of one two-hundred-and-fifty-
+    sixth is the same rational number before and after the parse, and the string spelling comes back
+    unchanged from repr as well. Whether a declared rate is destroyed by the format is decided by its
+    denominator, not by its length."""
+    text = str(Decimal(units) + Decimal(numerator) / Decimal(256))
+    document = '{"%s": %s}' % (key, text)
+    npt.assert_array_equal(Fraction(Decimal(text)), Fraction(json.loads(document)[key]))
+    npt.assert_array_equal(repr(json.loads(document)[key]), text)
+
+
+@given(RATE_KEY, RATE_UNITS, LONG_FRACTION)
+@SLOW
+def test_a_rate_written_to_more_digits_than_a_double_holds_comes_back_shortened(key, units, digits):
+    """A rate declared to eighteen or more decimal places is returned by both parsers as the same
+    shorter number, because a double carries at most seventeen significant decimal digits. Nothing
+    raises and no field records that digits were dropped; passing parse_float=Decimal returns every
+    digit that was written."""
+    text = '%d.%s' % (units, digits)
+    document = '{"%s": %s}' % (key, text)
+    npt.assert_array_equal(str(json.loads(document, parse_float=Decimal)[key]), text)
+    npt.assert_array_equal(json.loads(document)[key], orjson.loads(document)[key])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(repr(json.loads(document)[key]), text)
+
+
+@pytest.mark.skipif(not node_available, reason='the node runtime is required for this oracle')
+@given(RATE_KEY, NONFINITE_LITERAL)
+@ORACLE_PROCESS
+def test_the_standard_library_reads_three_literals_the_other_two_parsers_refuse(key, literal):
+    """The standard library documents the extension itself: "This module does not comply with the RFC
+    in a strict fashion, implementing some extensions that are valid JavaScript but not valid JSON. In
+    particular: - Infinite and NaN number values are accepted and output". orjson documents the other
+    side: "It raises `JSONDecodeError` if given an invalid type or invalid JSON. This includes if the
+    input contains `NaN`, `Infinity`, or `-Infinity`, which the standard library allows, but is not
+    valid JSON." V8 refuses them too, so a rates file carrying one of the three loads in this chain
+    and is rejected by the next reader of the same bytes. parse_constant returns the literal that was
+    written, which is how the value is recovered here without one being typed. Replaces the typed
+    NaN and Infinity expectations of case 168."""
+    document = '{"%s": %s}' % (key, literal)
+    npt.assert_array_equal(json.loads(document, parse_constant=str)[key], literal)
+    with pytest.raises(orjson.JSONDecodeError):
+        orjson.loads(document)
+    with pytest.raises(subprocess.CalledProcessError):
+        _node_json_member(document, key)
+
+
+@pytest.mark.skipif(not node_available, reason='the node runtime is required for this oracle')
+@given(RATE_KEY, RATE_UNITS, TENTH_THAT_IS_NOT_A_HALF, RATE_UNITS, TENTH_THAT_IS_NOT_A_HALF)
+@ORACLE_PROCESS
+def test_a_repeated_rate_name_is_accepted_by_three_parsers_and_only_the_last_value_survives(
+        key, first_units, first_tenth, second_units, second_tenth):
+    """The standard library documents this one as an extension as well -- "Repeated names within an
+    object are accepted, and only the value of the last name-value pair is used" -- but unlike the
+    nonfinite literals it is not a divergence: orjson and V8 do the same, so a rates document that
+    declares one currency twice is accepted everywhere and the earlier rate is unrecoverable from any
+    of the three. The strict loader case 168 calls is stricter than every parser it could be
+    compared with."""
+    first = '%d.%s' % (first_units, first_tenth)
+    second = '%d.%s' % (second_units, second_tenth)
+    assume(first != second)
+    document = '{"%s": %s, "%s": %s}' % (key, first, key, second)
+    npt.assert_array_equal(json.loads(document)[key], json.loads('{"%s": %s}' % (key, second))[key])
+    npt.assert_array_equal(orjson.loads(document)[key], json.loads(document)[key])
+    npt.assert_array_equal(float(_node_json_member(document, key)), json.loads(document)[key])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(json.loads(document)[key], json.loads('{"%s": %s}' % (key, first))[key])
