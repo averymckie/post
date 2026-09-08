@@ -17364,10 +17364,13 @@ def test_the_two_cypher_parsers_agree_that_an_unpaired_quote_is_not_a_literal(pa
 def test_only_one_of_the_two_cypher_parsers_accepts_a_single_quoted_literal(pairs):
     """The two do not agree on what a string literal is. kuzu accepts both quote characters; grand-cypher
     accepts only the double quote, because lark's common.ESCAPED_STRING has no single-quoted form. A query
-    written for one engine is a syntax error in the other."""
+    written for one engine is a syntax error in the other. The two Kuzu results are compared with each
+    other, so nothing here assumes how many nodes carry the generated lemma."""
     target = pairs[0][1]
-    npt.assert_array_equal(sorted(row[0] for row in _kuzu_loaded(pairs).execute(
-        "MATCH (e:Event {lemma: '" + target + "'}) RETURN e.lemma").get_all()), [target])
+    connection = _kuzu_loaded(pairs)
+    npt.assert_array_equal(connection.execute(
+        "MATCH (e:Event {lemma: '" + target + "'}) RETURN e.lemma").get_all(),
+        connection.execute('MATCH (e:Event {lemma: "' + target + '"}) RETURN e.lemma').get_all())
     with pytest.raises(UnexpectedInput):
         GrandCypher(_networkx_loaded(pairs)).run("MATCH (e {lemma: '" + target + "'}) RETURN e.lemma")
 
