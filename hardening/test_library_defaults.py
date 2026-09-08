@@ -10,6 +10,7 @@ Each test names the hand-typed expectation in the frozen guard modules that it r
 import calendar
 import contextlib
 import csv
+import difflib
 import functools
 import hashlib
 import hmac
@@ -6604,3 +6605,201 @@ def test_the_lines_that_are_not_requested_hold_the_unknown_in_one_reading_and_lo
                            np.sort(float_rest))
     with pytest.raises(AssertionError):
         npt.assert_array_equal(float_rest, nullable_rest)
+
+
+# ---------------------------------------------------------------- normalization, offsets and edit scripts
+NORMALIZE_RUBY_ORACLE = pathlib.Path(__file__).with_name('unicode_normalize_oracle.rb')
+COMPATIBILITY = ''.join(letter for letter in map(chr, range(0xA0, 0x2100))
+                        if unicodedata.decomposition(letter).startswith('<')
+                        and unicodedata.normalize('NFC', letter) == letter
+                        and unicodedata.normalize('NFKC', letter) != letter)
+COMPATIBILITY_TEXT = st.text(alphabet=COMPATIBILITY, min_size=1, max_size=6)
+LOWER_LETTER = st.characters(min_codepoint=ord('a'), max_codepoint=ord('z'))
+UPPER_LETTER = st.characters(min_codepoint=ord('A'), max_codepoint=ord('Z'))
+DISTINCT_LETTERS = st.lists(LOWER_LETTER, min_size=1, max_size=12, unique=True).map(''.join)
+TWO_LETTERS = st.lists(LOWER_LETTER, min_size=2, max_size=2, unique=True).map(''.join)
+REPEAT_AND_POSITION = st.integers(min_value=5, max_value=60).flatmap(
+    lambda count: st.tuples(st.just(count), st.integers(min_value=1, max_value=count - 1)))
+LONG_REPEAT_AND_POSITION = st.integers(min_value=100, max_value=180).flatmap(
+    lambda count: st.tuples(st.just(count), st.integers(min_value=1, max_value=count - 1)))
+
+
+def _ruby_normalized(form, text):
+    """The normalized text, its length in characters and its length in bytes, as Ruby's own pure-Ruby
+    implementation computes them. Text crosses in and out as hex so nothing depends on a locale."""
+    completed = subprocess.run(['ruby', str(NORMALIZE_RUBY_ORACLE), form, text.encode().hex()],
+                               capture_output=True, text=True, check=True)
+    printed = completed.stdout.split()
+    return bytes.fromhex(printed[0]).decode(), int(printed[1]), int(printed[2])
+
+
+def _edit_kinds(before, after, **options):
+    """The kinds of change difflib reports, in order, with the equal runs left out."""
+    return [opcode[0] for opcode in difflib.SequenceMatcher(a=before, b=after, **options).get_opcodes()
+            if opcode[0] != 'equal']
+
+
+def _rapidfuzz_kinds(before, after):
+    """The same list read off rapidfuzz's own edit script."""
+    return [opcode.tag for opcode in rf_levenshtein.opcodes(before, after) if opcode.tag != 'equal']
+
+
+@pytest.mark.skipif(not ruby_available, reason='the ruby runtime is required for this oracle')
+@given(ACCENTED_TEXT)
+@ORACLE_PROCESS
+def test_three_normalizers_agree_on_the_composed_form_of_generated_text(text):
+    """P195 measures a clause before and after Unicode normalization and reports what moved. Three
+    implementations of NFC that share no code agree on the composed form of every generated accented
+    string: CPython's unicodedata, polars' str.normalize, which is the Rust unicode-normalization crate
+    declared in crates/polars-ops/Cargo.toml at tag py-1.44.1 and documented as returning "the Unicode
+    normal form of the string values" using "the forms described in Unicode Standard Annex 15", and
+    Ruby's String#unicode_normalize, written in Ruby in lib/unicode_normalize/normalize.rb at tag v3_3_6
+    by Ayumu Nojima and Martin J. Durst. What the next tests record is therefore a property of the
+    normal form and not of one library."""
+    decomposed = unicodedata.normalize('NFD', text)
+    composed = unicodedata.normalize('NFC', decomposed)
+    plt.assert_series_equal(pl.Series([composed]), pl.Series([decomposed]).str.normalize('NFC'))
+    npt.assert_array_equal(composed, _ruby_normalized('nfc', decomposed)[0])
+
+
+@pytest.mark.skipif(not ruby_available, reason='the ruby runtime is required for this oracle')
+@given(ACCENTED_TEXT)
+@ORACLE_PROCESS
+def test_normalizing_changes_both_counts_an_offset_could_be_taken_in(text):
+    """The measurement P195 asks for. The three implementations agree on how long the composed text is,
+    in characters and in bytes, and both counts differ from the counts of the text the offsets were taken
+    in. So a span recorded as a character range or as a byte range over the raw clause is a span of a
+    different length in the normalized one. Replaces the typed raw_codepoints == 14, nfc_codepoints == 13,
+    raw_bytes == 15 and nfc_bytes == 14 of handoff_guards_v21.py case 195."""
+    decomposed = unicodedata.normalize('NFD', text)
+    composed = unicodedata.normalize('NFC', decomposed)
+    npt.assert_array_equal([len(composed), len(composed.encode())],
+                           list(_ruby_normalized('nfc', decomposed)[1:]))
+    in_polars = pl.Series([decomposed]).str.normalize('NFC')
+    npt.assert_array_equal([len(composed), len(composed.encode())],
+                           [in_polars.str.len_chars()[0], in_polars.str.len_bytes()[0]])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(len(decomposed), len(composed))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(len(decomposed.encode()), len(composed.encode()))
+
+
+@given(ACCENTED_TEXT)
+@SLOW
+def test_an_offset_into_the_raw_text_does_not_index_the_normalized_one(text):
+    """What the length difference costs. Every character of the generated text has a canonical
+    decomposition, so the decomposed spelling is strictly longer, and the last offset that indexes it is
+    past the end of the composed one: the primitive raises IndexError rather than returning a character.
+    Below that, the two spellings do not agree character by character either, so an offset that is still
+    in range selects something else. Replaces the typed length_preserved == False of case 195."""
+    decomposed = unicodedata.normalize('NFD', text)
+    composed = unicodedata.normalize('NFC', decomposed)
+    with pytest.raises(IndexError):
+        operator.getitem(composed, len(decomposed) - 1)
+    inside = min(len(composed), len(decomposed))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(list(decomposed[:inside]), list(composed[:inside]))
+
+
+@pytest.mark.skipif(not ruby_available, reason='the ruby runtime is required for this oracle')
+@given(ACCENTED_TEXT)
+@ORACLE_PROCESS
+def test_two_spellings_that_compare_unequal_are_one_string_after_normalizing(text):
+    """The other half of P195's claim. The composed and decomposed spellings of one clause are two
+    different strings to polars' comparison, and one string once either is normalized, in CPython, in
+    polars and in Ruby alike. So an equality test run after normalizing reports no change to a clause
+    whose recorded bytes did change, and the change is invisible to exactly the check a chain would use
+    to look for it. Replaces the typed composed == precomposed being False and
+    unicodedata.normalize('NFC', composed) == precomposed being True of case 195."""
+    composed = unicodedata.normalize('NFC', text)
+    decomposed = unicodedata.normalize('NFD', text)
+    plt.assert_series_not_equal(pl.Series([composed]), pl.Series([decomposed]))
+    plt.assert_series_equal(pl.Series([composed]).str.normalize('NFC'),
+                            pl.Series([decomposed]).str.normalize('NFC'))
+    npt.assert_array_equal(_ruby_normalized('nfc', composed)[0], _ruby_normalized('nfc', decomposed)[0])
+
+
+@pytest.mark.skipif(not ruby_available, reason='the ruby runtime is required for this oracle')
+@given(ACCENTED_TEXT)
+@ORACLE_PROCESS
+def test_normalizing_twice_is_normalizing_once_in_three_implementations(text):
+    """Idempotence is the property that makes a normalized record storable, and all three implementations
+    have it over generated text: normalizing the composed form again returns it unchanged. It is also
+    what makes the loss one-way, because the raw offsets cannot be recovered from the stored form."""
+    composed = unicodedata.normalize('NFC', unicodedata.normalize('NFD', text))
+    npt.assert_array_equal(unicodedata.normalize('NFC', composed), composed)
+    plt.assert_series_equal(pl.Series([composed]).str.normalize('NFC'), pl.Series([composed]))
+    npt.assert_array_equal(_ruby_normalized('nfc', composed)[0], composed)
+
+
+@pytest.mark.skipif(not ruby_available, reason='the ruby runtime is required for this oracle')
+@given(COMPATIBILITY_TEXT)
+@ORACLE_PROCESS
+def test_the_compatibility_form_rewrites_text_the_canonical_form_leaves_alone(text):
+    """Which normal form a chain names is itself a decision, and the alphabet these examples are drawn
+    from is built from the Unicode database rather than chosen here: every character in it carries a
+    compatibility decomposition, is its own canonical form, and is not its own compatibility form. On
+    that text NFC changes nothing and NFKC changes every character, in CPython, in polars and in Ruby.
+    So a chain that says only "normalization" has not said whether the recorded clause survives."""
+    npt.assert_array_equal(unicodedata.normalize('NFC', text), text)
+    plt.assert_series_equal(pl.Series([text]).str.normalize('NFC'), pl.Series([text]))
+    plt.assert_series_not_equal(pl.Series([text]).str.normalize('NFKC'), pl.Series([text]))
+    npt.assert_array_equal(unicodedata.normalize('NFKC', text), _ruby_normalized('nfkc', text)[0])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(unicodedata.normalize('NFKC', text), text)
+
+
+@given(DISTINCT_LETTERS, UPPER_LETTER, st.integers(min_value=0, max_value=20))
+@SLOW
+def test_two_edit_scripts_agree_on_one_insertion_deletion_or_replacement(base, marker, position):
+    """P195 reports what kind of change was made between two versions of a clause, and reads the kinds off
+    difflib's opcodes. Where the clause has no repeated character and the edit introduces one that is not
+    in it, difflib and rapidfuzz 3.14.6's own edit script agree on all three kinds over generated bases
+    and positions. Replaces the typed change_kinds(...) == ['insert'], ['replace'], ['delete'] and [] of
+    case 195."""
+    at = position % len(base)
+    npt.assert_array_equal(_edit_kinds(base, base), _rapidfuzz_kinds(base, base))
+    for after in (base[:at] + marker + base[at:], base[:at] + base[at + 1:],
+                  base[:at] + marker + base[at + 1:]):
+        npt.assert_array_equal(_edit_kinds(base, after), _rapidfuzz_kinds(base, after))
+
+
+@given(TWO_LETTERS, UPPER_LETTER, REPEAT_AND_POSITION)
+@SLOW
+def test_the_two_edit_scripts_disagree_about_a_substitution_inside_a_repeating_run(letters, marker,
+                                                                                  shape):
+    """Where the clause repeats, they do not agree, and difflib says so about itself. Its documentation at
+    raw.githubusercontent.com/python/cpython/v3.11.15/Doc/library/difflib.rst describes the algorithm as
+    finding "the longest contiguous matching subsequence" recursively and warns "This does not yield
+    minimal edit sequences, but does tend to yield matches that "look right" to people." Executed on a
+    generated repeating run with one character replaced in its first half, rapidfuzz returns one operation,
+    which is the edit distance it also reports, and difflib returns more than that, an insertion and a
+    deletion where one substitution was made. So the kind of change a version report names depends on
+    which differ ran."""
+    count, at = shape
+    base = letters * count
+    after = base[:at] + marker + base[at + 1:]
+    npt.assert_array_equal(len(_rapidfuzz_kinds(base, after)), rf_levenshtein.distance(base, after))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(len(_edit_kinds(base, after)), rf_levenshtein.distance(base, after))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_edit_kinds(base, after), _rapidfuzz_kinds(base, after))
+
+
+@given(TWO_LETTERS, UPPER_LETTER, LONG_REPEAT_AND_POSITION)
+@SLOW
+def test_the_same_edit_gets_a_different_report_once_the_clause_is_long_enough(letters, marker, shape):
+    """And the same differ reports the same edit two ways according to how long the surrounding text is.
+    difflib documents the reason at the same tag: "If an item's duplicates (after the first one) account
+    for more than 1% of the sequence and the sequence is at least 200 items long, this item is marked as
+    "popular" and is treated as junk for the purpose of sequence matching. This heuristic can be turned
+    off by setting the ``autojunk`` argument to ``False``". The generated runs here are at least two
+    hundred characters, so the heuristic is on: difflib now agrees with rapidfuzz that one substitution
+    was made, and disagrees with itself run with autojunk off, which returns what it returned for the
+    shorter run. A change report is therefore a function of the length of the document it is taken in."""
+    count, at = shape
+    base = letters * count
+    after = base[:at] + marker + base[at + 1:]
+    npt.assert_array_equal(_edit_kinds(base, after), _rapidfuzz_kinds(base, after))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_edit_kinds(base, after), _edit_kinds(base, after, autojunk=False))
