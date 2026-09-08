@@ -125,8 +125,11 @@ from pm4py.objects.bpmn.importer.variants import lxml as pm4py_bpmn
 from pm4py.objects.petri_net import obj as pm4py_petri
 from pm4py.objects.petri_net.utils import petri_utils as pm4py_utils
 import snakes.nets as snakes_nets
+import zen
 from SpiffWorkflow.bpmn.parser.BpmnParser import BpmnParser as SpiffBpmnParser
 from SpiffWorkflow.bpmn.workflow import BpmnWorkflow as SpiffBpmnWorkflow
+from SpiffWorkflow.camunda.parser.CamundaParser import CamundaParser as SpiffCamundaParser
+from SpiffWorkflow.bpmn.exceptions import WorkflowTaskException as SpiffWorkflowException
 from SpiffWorkflow.util.task import TaskState as SpiffTaskState
 import pptx
 import pptx.chart.data
@@ -16516,3 +16519,210 @@ def test_a_log_where_no_case_has_a_second_event_yields_a_grid_and_not_a_refusal(
     npt.assert_array_equal(counts.sum(), 0)
     npt.assert_allclose(means, _duckdb_grid(measured, departments, activities)[0])
     npt.assert_array_equal(counts, _polars_grid(measured, departments, activities)[1])
+
+
+# --------------------------------------------------------------------------------------------------
+# handoff_guards_v6.py, case dmn_and_zen_agree_over_the_whole_domain: what the two engines agree about
+# --------------------------------------------------------------------------------------------------
+DECISION_DOMAIN = st.integers(min_value=0, max_value=18)
+DECISION_LEVEL = st.integers(min_value=1, max_value=18)
+DECISION = settings(max_examples=15, deadline=None)
+DMN_DOCUMENT = (
+    '<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" id="defs" name="d"'
+    ' namespace="http://e"><decision id="majority" name="majority">'
+    '<decisionTable id="t" hitPolicy="FIRST">'
+    '<input id="in1" label="present"><inputExpression id="ie1" typeRef="integer">'
+    '<text>present</text></inputExpression></input>'
+    '<output id="out1" label="reachable" name="reachable" typeRef="boolean"/>'
+    '<rule id="r1"><inputEntry id="ier1"><text>&gt;= {threshold}</text></inputEntry>'
+    '<outputEntry id="oer1"><text>True</text></outputEntry></rule>'
+    '<rule id="r2"><inputEntry id="ier2"><text></text></inputEntry>'
+    '<outputEntry id="oer2"><text>False</text></outputEntry></rule>'
+    '</decisionTable></decision></definitions>')
+BUSINESS_RULE_BPMN = (
+    '<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"'
+    ' xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="d1" targetNamespace="http://e">'
+    '<bpmn:process id="proc" isExecutable="true">'
+    '<bpmn:startEvent id="start"><bpmn:outgoing>f1</bpmn:outgoing></bpmn:startEvent>'
+    '<bpmn:businessRuleTask id="rule" name="rule" camunda:decisionRef="majority">'
+    '<bpmn:incoming>f1</bpmn:incoming><bpmn:outgoing>f2</bpmn:outgoing></bpmn:businessRuleTask>'
+    '<bpmn:endEvent id="end"><bpmn:incoming>f2</bpmn:incoming></bpmn:endEvent>'
+    '<bpmn:sequenceFlow id="f1" sourceRef="start" targetRef="rule"/>'
+    '<bpmn:sequenceFlow id="f2" sourceRef="rule" targetRef="end"/>'
+    '</bpmn:process></bpmn:definitions>')
+
+
+DECLARED_INPUT_SCHEMA = {'type': 'object', 'properties': {'present': {'type': 'integer'}},
+                          'required': ['present']}
+
+
+class DeclaredHeadCount(pydantic.BaseModel):
+    """The input both documents declare, stated once as a model that does enforce it. The DMN
+    document declares `typeRef="integer"` and the JDM document declares an expression field; this is
+    the same declaration as a pydantic 2.13.5 model in strict mode, whose accepted set is compared
+    below with what the two engines accept."""
+    model_config = pydantic.ConfigDict(strict=True, extra='forbid')
+    present: int
+
+
+def _jdm_table(threshold):
+    """The same two-rule table as a GoRules JDM graph, which is the document zen-engine reads. This
+    builds the input document, not the decision: the threshold is generated and the first rule fires
+    at or above it while the second has an empty condition cell, which is the catch-all in both
+    formats. The hit policy is declared `first` here and `FIRST` in the DMN document."""
+    return {'nodes': [
+        {'id': 'in', 'type': 'inputNode', 'name': 'request', 'position': {'x': 0, 'y': 0}},
+        {'id': 'dt', 'type': 'decisionTableNode', 'name': 'policy', 'position': {'x': 0, 'y': 0},
+         'content': {'hitPolicy': 'first',
+                     'inputs': [{'id': 'i0', 'field': 'present', 'name': 'present',
+                                 'type': 'expression'}],
+                     'outputs': [{'id': 'o0', 'field': 'reachable', 'name': 'reachable',
+                                  'type': 'expression'}],
+                     'rules': [{'_id': 'r1', 'i0': '>= %d' % threshold, 'o0': 'true'},
+                               {'_id': 'r2', 'i0': '', 'o0': 'false'}]}},
+        {'id': 'out', 'type': 'outputNode', 'name': 'response', 'position': {'x': 0, 'y': 0}}],
+        'edges': [{'id': 'e1', 'type': 'edge', 'sourceId': 'in', 'targetId': 'dt'},
+                  {'id': 'e2', 'type': 'edge', 'sourceId': 'dt', 'targetId': 'out'}]}
+
+
+def _zen_answer(threshold, payload):
+    """zen-engine 2.0.2 deciding. The Python package is the pyo3 binding `zen-python` of the Rust
+    crates zen-engine and zen-expression: its Cargo.toml at tag python-v2.0.2 lists pyo3, pythonize,
+    serde and those two crates, and its pyproject.toml at that tag declares a maturin build with no
+    Python dependencies at all, so it shares nothing with SpiffWorkflow or with CPython's evaluator."""
+    decision = zen.ZenEngine().create_decision(json.dumps(_jdm_table(threshold)))
+    return decision.evaluate(payload)['result'].get('reachable')
+
+
+def _dmn_answer(threshold, payload):
+    """SpiffWorkflow 3.2.0 deciding, through its own published route rather than through a stand-in
+    task: the Camunda parser reads a BPMN process whose business rule task names the decision, the
+    DMN document is added to the same parser, and the engine runs the workflow. Its DMNEngine.evaluate
+    at tag v3.2.0 builds `input_expr + match_expr` and hands it to `script_engine.evaluate(task, expr)`,
+    and that script engine is PythonScriptEngine, whose class docstring at that tag says it "should
+    serve as a base for all scripting & expression evaluation operations that are done within both
+    BPMN and BMN" and that "Eventually it will also serve as a base for FEEL expressions as well" --
+    so the input entry of a DMN table is evaluated here as a Python expression and not as FEEL."""
+    parser = SpiffCamundaParser()
+    parser.add_bpmn_xml(lxml_etree.fromstring(BUSINESS_RULE_BPMN.encode()), filename='rule.bpmn')
+    parser.add_dmn_xml(lxml_etree.fromstring(DMN_DOCUMENT.format(threshold=threshold).encode()),
+                       filename='rule.dmn')
+    workflow = SpiffBpmnWorkflow(parser.get_spec('proc'))
+    workflow.task_tree.set_data(**payload)
+    workflow.do_engine_steps()
+    return workflow.last_task.data.get('reachable')
+
+
+@given(DECISION_LEVEL, st.lists(DECISION_DOMAIN, min_size=1, max_size=8))
+@DECISION
+def test_two_decision_engines_agree_on_every_generated_head_count(threshold, counts):
+    """Replaces `g.equal([bool(dmn.result(...)) for n in (6, 9, 10, 12)], [False, False, True, True])`
+    and the eight-meeting `sampled` list of handoff_guards_v6.py case dmn_and_zen_agree_over_the_whole
+    _domain, both of which type the answers for hand-chosen head counts at one hand-chosen threshold.
+    Here the threshold and the counts are generated, and neither answer is typed: the two engines are
+    compared with each other. zen-engine 2.0.2 is Rust reached through pyo3 and SpiffWorkflow 3.2.0
+    is pure Python, and on whole numbers they return the same verdict every time."""
+    npt.assert_array_equal([_zen_answer(threshold, {'present': count}) for count in counts],
+                           [_dmn_answer(threshold, {'present': count}) for count in counts])
+
+
+@given(DECISION_LEVEL, st.floats(min_value=0, max_value=18, allow_nan=False, allow_infinity=False))
+@DECISION
+def test_the_declared_integer_input_accepts_a_fraction_in_both_engines(threshold, count):
+    """The DMN document declares its input as `typeRef="integer"` and the JDM document declares the
+    same field as an expression. Neither engine enforces the declaration: a fractional head count is
+    decided rather than refused, and the two engines agree on what it decides. The declared type is
+    checked here by two implementations that do refuse it -- pydantic 2.13.5 in strict mode and a
+    jsonschema 4.26.0 `"type": "integer"` -- so the gap is between what the table declares and what
+    either engine checks, not between the two engines. The two checkers do not agree with each other
+    either: pydantic in strict mode refuses a float whatever its value, while JSON Schema counts a
+    float with nothing after the point as an integer and accepts it."""
+    npt.assert_array_equal(_zen_answer(threshold, {'present': count}),
+                           _dmn_answer(threshold, {'present': count}))
+    with pytest.raises(pydantic.ValidationError):
+        DeclaredHeadCount(present=count)
+    if count != int(count):
+        with pytest.raises(jsonschema.ValidationError):
+            jsonschema.validate({'present': count}, DECLARED_INPUT_SCHEMA)
+    else:
+        jsonschema.validate({'present': count}, DECLARED_INPUT_SCHEMA)
+
+
+@given(st.integers(min_value=-8, max_value=0), st.booleans())
+@DECISION
+def test_a_boolean_head_count_is_a_number_in_one_engine_and_not_in_the_other(threshold, present):
+    """The divergence the case's enumerated integer domain cannot see, generated directly rather than
+    filtered for: a threshold at or below zero and a boolean where the head count should be. In
+    CPython a bool is an int, so the expression SpiffWorkflow builds and evaluates -- `present>= 0`
+    with `present` bound to True or False -- is true, and the DMN table fires its first rule. zen's
+    expression language does not treat a boolean as a number, so the condition does not match and the
+    catch-all rule fires instead. One decision table, one input, two opposite verdicts, and the
+    declared `typeRef="integer"` refuses neither: pydantic in strict mode does, and so does a
+    jsonschema integer, because JSON Schema does not count a boolean as an integer."""
+    npt.assert_array_equal(_dmn_answer(threshold, {'present': present}), True)
+    npt.assert_array_equal(_zen_answer(threshold, {'present': present}), False)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_zen_answer(threshold, {'present': present}),
+                               _dmn_answer(threshold, {'present': present}))
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.validate({'present': present}, DECLARED_INPUT_SCHEMA)
+    with pytest.raises(pydantic.ValidationError):
+        DeclaredHeadCount(present=present)
+
+
+@given(DECISION_LEVEL, st.text(alphabet=st.characters(min_codepoint=48, max_codepoint=57),
+                               min_size=1, max_size=3))
+@DECISION
+def test_a_head_count_that_is_not_a_number_is_a_verdict_in_one_engine_and_a_refusal_in_the_other(
+        threshold, digits):
+    """The same input crosses the two engines as text. zen decides it: no rule condition matches a
+    string, so the catch-all fires and the caller receives a verdict that reads exactly like a
+    quorum that was not reached. SpiffWorkflow refuses it, because the Python expression it builds
+    compares a string with an integer and CPython raises, which the engine wraps in its own
+    WorkflowTaskException. Neither behaviour is wrong and the chain sees only one of them."""
+    npt.assert_array_equal(_zen_answer(threshold, {'present': digits}), False)
+    with pytest.raises(SpiffWorkflowException):
+        _dmn_answer(threshold, {'present': digits})
+
+
+@given(DECISION_LEVEL)
+@DECISION
+def test_a_missing_head_count_is_a_verdict_in_one_engine_and_a_refusal_in_the_other(threshold):
+    """The boundary neither the case nor the proof states. Handed a request with no head count at
+    all, zen returns the catch-all output -- a decision that nothing was reached, indistinguishable
+    from a meeting that was counted and fell short -- while SpiffWorkflow refuses, because the name
+    is unbound in the Python expression it evaluates. A pydantic model declaring the field and a
+    jsonschema `required` both refuse it too, so the engine that answers is the odd one out."""
+    npt.assert_array_equal(_zen_answer(threshold, {}), False)
+    with pytest.raises(SpiffWorkflowException):
+        _dmn_answer(threshold, {})
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.validate({}, DECLARED_INPUT_SCHEMA)
+    with pytest.raises(pydantic.ValidationError):
+        DeclaredHeadCount()
+
+
+@given(st.integers(min_value=19, max_value=400), st.integers(min_value=19, max_value=400))
+@DECISION
+def test_agreement_over_a_bounded_domain_does_not_identify_the_policy(first, second):
+    """The caveat the case records as a note and never executes: its own `cross_engine_agreement`
+    returns `agree_over_domain` for `range(0, 19)` under a comment that sample agreement "is not
+    universal equivalence (HG05)". Two thresholds are generated above that domain, so the two tables
+    are different policies that return the same verdict at every point the case checked, in both
+    engines. What settles it is not another enumeration but z3 5.1.0: Solver.check reports sat for an
+    unbounded integer that the two thresholds separate and unsat for one inside the checked domain,
+    so the domain provably cannot contain a witness and agreement over it is no evidence at all about
+    the thresholds themselves."""
+    domain = list(range(0, 19))
+    npt.assert_array_equal([_zen_answer(first, {'present': count}) for count in domain],
+                           [_zen_answer(second, {'present': count}) for count in domain])
+    npt.assert_array_equal([_dmn_answer(first, {'present': count}) for count in domain],
+                           [_dmn_answer(second, {'present': count}) for count in domain])
+    present = z3.Int('present')
+    separates = (present >= first) != (present >= second)
+    unbounded = z3.Solver()
+    unbounded.add(separates)
+    inside = z3.Solver()
+    inside.add(separates, present >= domain[0], present <= domain[-1])
+    npt.assert_array_equal(str(inside.check()), str(z3.unsat))
+    npt.assert_array_equal(str(unbounded.check()), str(z3.sat if first != second else z3.unsat))
