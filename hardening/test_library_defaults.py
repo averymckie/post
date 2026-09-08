@@ -9130,3 +9130,251 @@ def test_two_fields_of_one_name_answer_differently_and_only_one_is_read(names, c
     npt.assert_array_equal(fields['status_' + names[0]]['/V'], values[-1])
     with pytest.raises(AssertionError):
         npt.assert_array_equal(fields['status_' + names[0]]['/V'], choices[1])
+
+
+# ---------------------------------------------------------------- a month grid and where a day sits in it
+WEEK_GRID_ORACLE_JAVA = pathlib.Path(__file__).with_name('week_grid_oracle.java')
+WEEK_GRID_ORACLE_PHP = pathlib.Path(__file__).with_name('week_grid_oracle.php')
+java_available = shutil.which('java') is not None
+intl_available = shutil.which('php') is not None and subprocess.run(
+    ['php', '-r', 'echo class_exists("IntlCalendar") ? "yes" : "no";'],
+    capture_output=True, encoding='utf-8').stdout == 'yes'
+GRID_YEAR = st.integers(min_value=1900, max_value=2400)
+GRID_MONTH = st.integers(min_value=1, max_value=12)
+GRID_FIRST_WEEKDAY = st.integers(min_value=calendar.MONDAY, max_value=calendar.SUNDAY)
+TWO_DECLARED_STARTS = st.lists(GRID_FIRST_WEEKDAY, min_size=2, max_size=2, unique=True)
+GRID_BEFORE_THE_CUTOVER = st.integers(min_value=1501, max_value=1581)
+FIRST_WEEK_HOLDS_THE_WHOLE_MONTH = 1
+
+
+def _cpython_cells(year, month, first_weekday):
+    """Where CPython's calendar puts every day of one month, read off the matrix itself: the row and the
+    column of each day in order, both counted from one. `monthdayscalendar` is documented at v3.11.15 as
+    returning "a matrix representing a month's calendar. Each row represents a week; days outside this
+    month are zero", so the days of the month are exactly its non-zero entries."""
+    grid = calendar.Calendar(firstweekday=first_weekday).monthdayscalendar(year, month)
+    placed = {day: (row + 1, column + 1)
+              for row, week in enumerate(grid) for column, day in enumerate(week) if day}
+    return [placed[day] for day in sorted(placed)]
+
+
+def _first_week_length(year, month, first_weekday):
+    """How many days of the month fall in the matrix's first row, read off that row."""
+    return len([day for day in
+                calendar.Calendar(firstweekday=first_weekday).monthdayscalendar(year, month)[0] if day])
+
+
+def _oracle_cells(runtime, shim, months):
+    """The same months laid out by an independent runtime. The shim parses argv, calls the library and
+    prints one line per month: the length of the month, then one field per day carrying the week of the
+    month and the day of the week. Nothing here but subprocess and split."""
+    arguments = [str(value) for month in months for value in month]
+    completed = subprocess.run([runtime, str(shim)] + arguments,
+                               capture_output=True, encoding='utf-8', check=True)
+    lines = completed.stdout.split('\n')[:-1]
+    return [(int(line.split('\t')[0]),
+             [tuple(int(part) for part in field.split(',')) for field in line.split('\t')[1:]])
+            for line in lines]
+
+
+@pytest.mark.skipif(not (java_available and intl_available),
+                    reason='java and php with the intl extension are required for these oracles')
+@given(GRID_YEAR, GRID_MONTH, GRID_FIRST_WEEKDAY)
+@JAVA_ORACLE
+def test_two_runtimes_put_every_day_in_the_row_cpython_does_and_java_in_the_column(year, month,
+                                                                                  first_weekday):
+    """handoff_guards_v12.py's case the_month_grid_needs_a_declared_week_start types the first row of
+    January 2024 twice, once for each of two week starts. Here the month and the week start are
+    generated and the layout is checked against two implementations that share nothing with CPython's
+    calendar module: java.time.temporal.WeekFields under OpenJDK 21.0.10, whose class documentation at
+    tag jdk-21.0.10-ga says a week is defined by "The first day-of-week" and "The minimal number of days
+    in the first week", and ICU 74.2's calendar through PHP's intl extension. With the minimum set to
+    one day, so that the first week is simply the week holding the first of the month, both runtimes
+    report the same number of days and put every one of them in the row CPython does. Java's
+    `dayOfWeek()`, documented as numbering the days "from 1 to 7 where the getFirstDayOfWeek() first
+    day-of-week is assigned the value 1", is also the column CPython's matrix uses."""
+    months = [(year, month, first_weekday, FIRST_WEEK_HOLDS_THE_WHOLE_MONTH)]
+    cells = _cpython_cells(year, month, first_weekday)
+    (java_length, java_cells), = _oracle_cells('java', WEEK_GRID_ORACLE_JAVA, months)
+    (icu_length, icu_cells), = _oracle_cells('php', WEEK_GRID_ORACLE_PHP, months)
+    npt.assert_array_equal([java_length, icu_length], [len(cells), len(cells)])
+    npt.assert_array_equal([row for row, column in java_cells], [row for row, column in cells])
+    npt.assert_array_equal([row for row, column in icu_cells], [row for row, column in cells])
+    npt.assert_array_equal([column for row, column in java_cells],
+                           [column for row, column in cells])
+
+
+@pytest.mark.skipif(not intl_available, reason='php with the intl extension is required for this oracle')
+@given(GRID_YEAR, GRID_MONTH)
+@ORACLE_PROCESS
+def test_icu_numbers_the_weekday_from_sunday_and_so_matches_the_column_only_then(year, month):
+    """The two libraries do not mean the same thing by a day of the week. ICU's field is absolute -- its
+    `EDaysOfWeek` enum in icu4c/source/i18n/unicode/calendar.h at tag release-74-2 sets `SUNDAY = 1` --
+    while the column of CPython's matrix counts from whichever weekday was declared. When the declared
+    start is Sunday the two numberings coincide, and every day of every generated month lands on the
+    same number in both."""
+    cells = _cpython_cells(year, month, calendar.SUNDAY)
+    (icu_length, icu_cells), = _oracle_cells(
+        'php', WEEK_GRID_ORACLE_PHP,
+        [(year, month, calendar.SUNDAY, FIRST_WEEK_HOLDS_THE_WHOLE_MONTH)])
+    npt.assert_array_equal(icu_length, len(cells))
+    npt.assert_array_equal([weekday for row, weekday in icu_cells],
+                           [column for row, column in cells])
+
+
+@pytest.mark.skipif(not intl_available, reason='php with the intl extension is required for this oracle')
+@given(GRID_YEAR, GRID_MONTH,
+       st.integers(min_value=calendar.MONDAY, max_value=calendar.SATURDAY))
+@ORACLE_PROCESS
+def test_icus_weekday_disagrees_with_the_column_for_every_other_declared_start(year, month,
+                                                                              first_weekday):
+    """And for the other six starts they never coincide, on any day of any generated month, because the
+    whole column is shifted by the distance between Sunday and the declared start. So a grid position
+    read out of one library and a weekday read out of the other are not the same quantity, and the row
+    they agree about is the only part of the position that travels."""
+    cells = _cpython_cells(year, month, first_weekday)
+    (icu_length, icu_cells), = _oracle_cells(
+        'php', WEEK_GRID_ORACLE_PHP,
+        [(year, month, first_weekday, FIRST_WEEK_HOLDS_THE_WHOLE_MONTH)])
+    npt.assert_array_equal(icu_length, len(cells))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal([weekday for row, weekday in icu_cells],
+                               [column for row, column in cells])
+
+
+@st.composite
+def _a_month_whose_first_week_meets_the_minimum(draw):
+    """A month, a declared week start, and a minimum drawn from one up to the number of days the matrix
+    itself puts in its first row, so the region where the three implementations agree is generated
+    rather than filtered for."""
+    year, month = draw(GRID_YEAR), draw(GRID_MONTH)
+    first_weekday = draw(GRID_FIRST_WEEKDAY)
+    length = _first_week_length(year, month, first_weekday)
+    return year, month, first_weekday, draw(st.integers(min_value=1, max_value=length))
+
+
+@st.composite
+def _a_month_whose_first_week_misses_the_minimum(draw):
+    """The same, with the minimum drawn above that number instead. A first row of seven days meets every
+    minimum, so those months cannot enter this region and the row length is drawn short of seven."""
+    year, month = draw(GRID_YEAR), draw(GRID_MONTH)
+    first_weekday = draw(GRID_FIRST_WEEKDAY)
+    length = _first_week_length(year, month, first_weekday)
+    assume(length < 7)
+    return year, month, first_weekday, draw(st.integers(min_value=length + 1, max_value=7))
+
+
+@pytest.mark.skipif(not (java_available and intl_available),
+                    reason='java and php with the intl extension are required for these oracles')
+@given(_a_month_whose_first_week_meets_the_minimum())
+@JAVA_ORACLE
+def test_the_rows_agree_while_the_first_week_meets_the_declared_minimum(month):
+    """Both oracles carry a second setting CPython's calendar has no equivalent for: how many days the
+    first week must hold before it counts as the first week. Java's factory documentation at
+    jdk-21.0.10-ga says the minimum "defines how many days must be present in a month or year, starting
+    from the first day-of-week, before the week is counted as the first week", and ICU's
+    `setMinimalDaysInFirstWeek` at release-74-2 says to "call the method with value 1" if "the first
+    week is defined as one that contains the first day of the first month of a year". While the first
+    row of CPython's matrix is long enough to meet the generated minimum, both runtimes number the rows
+    exactly as that matrix does."""
+    year, month_of_year, first_weekday, minimum = month
+    rows = [row for row, column in _cpython_cells(year, month_of_year, first_weekday)]
+    months = [(year, month_of_year, first_weekday, minimum)]
+    (java_length, java_cells), = _oracle_cells('java', WEEK_GRID_ORACLE_JAVA, months)
+    (icu_length, icu_cells), = _oracle_cells('php', WEEK_GRID_ORACLE_PHP, months)
+    npt.assert_array_equal([java_length, icu_length], [len(rows), len(rows)])
+    npt.assert_array_equal([row for row, column in java_cells], rows)
+    npt.assert_array_equal([row for row, column in icu_cells], rows)
+
+
+@pytest.mark.skipif(not (java_available and intl_available),
+                    reason='java and php with the intl extension are required for these oracles')
+@given(_a_month_whose_first_week_misses_the_minimum())
+@JAVA_ORACLE
+def test_a_minimum_the_first_week_misses_renumbers_every_row_of_the_month(month):
+    """And where the first row is shorter than the generated minimum, both runtimes renumber the whole
+    month and CPython cannot follow, because it has no such setting to declare: Java's `weekOfMonth()`
+    documentation says "If the first week starts after the start of the month then the period before is
+    week zero (0)", and ICU does the same. The two oracles still agree with each other exactly, so the
+    disagreement is not between them but between a grid that carries the rule and a matrix that has no
+    place to record it. `WeekFields.ISO`, declared at that tag as `WeekFields.of(DayOfWeek.MONDAY, 4)`,
+    is inside this region for every month whose first Monday-week is shorter than four days."""
+    year, month_of_year, first_weekday, minimum = month
+    rows = [row for row, column in _cpython_cells(year, month_of_year, first_weekday)]
+    months = [(year, month_of_year, first_weekday, minimum)]
+    (java_length, java_cells), = _oracle_cells('java', WEEK_GRID_ORACLE_JAVA, months)
+    (icu_length, icu_cells), = _oracle_cells('php', WEEK_GRID_ORACLE_PHP, months)
+    npt.assert_array_equal([java_length, icu_length], [len(rows), len(rows)])
+    npt.assert_array_equal([row for row, column in java_cells],
+                           [row for row, column in icu_cells])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal([row for row, column in java_cells], rows)
+
+
+@pytest.mark.skipif(not (java_available and intl_available),
+                    reason='java and php with the intl extension are required for these oracles')
+@given(GRID_BEFORE_THE_CUTOVER, GRID_MONTH, GRID_FIRST_WEEKDAY)
+@JAVA_ORACLE
+def test_icu_reads_a_month_before_1582_from_the_julian_calendar_and_java_does_not(year, month,
+                                                                                 first_weekday):
+    """The grid also depends on something neither the week start nor the minimum can express. CPython's
+    calendar and java.time are both proleptic Gregorian and place every day of these months identically,
+    row and column alike. ICU's Gregorian calendar reverts to the Julian calendar before its default
+    cutover of 15 October 1582, so for every generated month of the eighty years before that date it
+    reports the same number of days in a different arrangement -- the weekday of the first of the month
+    differs by the ten days the two calendars had drifted apart, and every row moves with it."""
+    months = [(year, month, first_weekday, FIRST_WEEK_HOLDS_THE_WHOLE_MONTH)]
+    cells = _cpython_cells(year, month, first_weekday)
+    (java_length, java_cells), = _oracle_cells('java', WEEK_GRID_ORACLE_JAVA, months)
+    (icu_length, icu_cells), = _oracle_cells('php', WEEK_GRID_ORACLE_PHP, months)
+    npt.assert_array_equal([java_length, icu_length], [len(cells), len(cells)])
+    npt.assert_array_equal(java_cells, cells)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal([row for row, column in icu_cells],
+                               [row for row, column in cells])
+
+
+@given(GRID_YEAR, GRID_MONTH, TWO_DECLARED_STARTS)
+@SLOW
+def test_the_declared_start_moves_the_rows_but_never_the_days_of_the_month(year, month, starts):
+    """The case types both grids to show that the same month lays out differently, and then that the
+    days themselves are the same. Both halves are invariants of the output rather than values anyone
+    needs to know, and hold for any two distinct generated week starts: the non-zero entries of the two
+    matrices are one list, that list is every day of the month once and in order -- an invariant read
+    off the output's own length -- and the two placements are not the same placement. Nothing is typed
+    and no oracle is needed for any of the three."""
+    first_weekday, other = starts
+    grid = calendar.Calendar(firstweekday=first_weekday).monthdayscalendar(year, month)
+    alternative = calendar.Calendar(firstweekday=other).monthdayscalendar(year, month)
+    days = sorted(day for week in grid for day in week if day)
+    npt.assert_array_equal(days, sorted(day for week in alternative for day in week if day))
+    npt.assert_array_equal(days, list(range(1, len(days) + 1)))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_cpython_cells(year, month, first_weekday),
+                               _cpython_cells(year, month, other))
+
+
+@given(GRID_YEAR, GRID_MONTH, TWO_DECLARED_STARTS)
+@SLOW
+def test_the_module_grid_reads_process_state_that_the_object_grid_declares(year, month, starts):
+    """What the case calls process-global state, executed. At v3.11.15 the calendar module ends with
+    `c = TextCalendar()` and binds `monthcalendar = c.monthdayscalendar` and `firstweekday =
+    c.getfirstweekday`, so the module-level grid is one shared object's grid and `setfirstweekday`
+    rebinds it for every caller in the process. Whatever generated start is set, the module function
+    returns the matrix an object built with that start returns, and it stops agreeing with an object
+    built with any other. Neither oracle has an equivalent: Java's `WeekFields` and ICU's calendar carry
+    the start on the instance, so there is nothing a distant import could change under them."""
+    first_weekday, other = starts
+    was = calendar.firstweekday()
+    try:
+        calendar.setfirstweekday(first_weekday)
+        npt.assert_array_equal(calendar.firstweekday(), first_weekday)
+        npt.assert_array_equal(calendar.monthcalendar(year, month),
+                               calendar.Calendar(firstweekday=first_weekday)
+                               .monthdayscalendar(year, month))
+        with pytest.raises(AssertionError):
+            npt.assert_array_equal(calendar.monthcalendar(year, month),
+                                   calendar.Calendar(firstweekday=other)
+                                   .monthdayscalendar(year, month))
+    finally:
+        calendar.setfirstweekday(was)
