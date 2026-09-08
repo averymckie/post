@@ -14513,3 +14513,216 @@ def test_the_undeprecated_successor_accepts_the_net_woflan_refuses(branches):
     with pytest.raises(AssertionError):
         npt.assert_array_equal(_conditions(net, initial, final)['reached'],
                                _conditions(matched, matched_initial, matched_final)['reached'])
+
+
+# ---------------------------------------------------------------- a graph hash, an isomorphism and a canonical form
+GRAPH_FILTER = settings(max_examples=25, deadline=None)
+CYCLE_LENGTH = st.integers(min_value=3, max_value=6)
+WL_ITERATIONS = st.integers(min_value=1, max_value=8)
+PATH_LENGTH = st.integers(min_value=3, max_value=7)
+NODE_COUNT = st.integers(min_value=4, max_value=6)
+XML_NAME = st.text(alphabet=st.characters(min_codepoint=97, max_codepoint=122), min_size=1, max_size=5)
+XML_VALUE = st.text(alphabet=st.characters(min_codepoint=97, max_codepoint=122), min_size=1, max_size=6)
+INDENT = st.integers(min_value=1, max_value=4)
+
+
+def _edge_lists(count):
+    """An edge list over a fixed vertex set, so two graphs drawn from it are comparable."""
+    return st.lists(st.tuples(st.integers(min_value=0, max_value=count - 1),
+                              st.integers(min_value=0, max_value=count - 1))
+                    .filter(lambda pair: pair[0] != pair[1]),
+                    min_size=1, max_size=count * 2, unique_by=lambda pair: tuple(sorted(pair)))
+
+
+def _networkx_graph(count, edges, directed=False):
+    graph = nx.DiGraph() if directed else nx.Graph()
+    graph.add_nodes_from(range(count))
+    graph.add_edges_from(edges)
+    return graph
+
+
+def _igraph_of(graph, directed=False):
+    """The same graph in igraph 1.0.0, whose C core shares nothing with NetworkX. `isomorphic` is
+    documented in src/_igraph/graphobject.c at tag 1.0.0 as checking "whether the graph is isomorphic
+    to another graph", choosing "the VF2 isomorphism algorithm" for directed graphs and otherwise
+    "the BLISS isomorphism algorithm"."""
+    nodes = list(graph.nodes())
+    position = {name: index for index, name in enumerate(nodes)}
+    return igraph.Graph(n=len(nodes), directed=directed,
+                        edges=[(position[tail], position[head]) for tail, head in graph.edges()])
+
+
+def _canonical_edges(graph):
+    """igraph's canonical form of a graph, which is a complete invariant where a hash is not.
+    `canonical_permutation` is documented at tag 1.0.0 as calculating "the canonical permutation of a
+    graph using the BLISS isomorphism algorithm", and "Passing the permutation returned here to
+    L{permute_vertices()} will transform the graph into its canonical form"."""
+    canonical = graph.permute_vertices(graph.canonical_permutation())
+    return sorted(tuple(sorted(edge)) for edge in canonical.get_edgelist())
+
+
+@given(CYCLE_LENGTH, CYCLE_LENGTH, WL_ITERATIONS)
+@GRAPH_FILTER
+def test_the_graph_hash_cannot_separate_a_cycle_from_a_pair_of_cycles_at_any_iteration_count(
+        first, second, iterations):
+    """`g.equal(nx.weisfeiler_lehman_graph_hash(c6), nx.weisfeiler_lehman_graph_hash(two_c3))` records
+    one collision. It is a family: for every generated pair of cycle lengths, the single cycle of
+    their sum and the disjoint pair hash the same, at every generated iteration count, because both
+    are two-regular and the initial label the function uses is the degree -- "If no node or edge
+    attributes are provided, the degree of each node is used as its initial label", networkx 3.6.1's
+    own docstring. Raising `iterations`, the parameter documented as one that "Should be larger for
+    larger graphs", never separates them. NetworkX's own isomorphism check and igraph's BLISS
+    canonical form both do."""
+    single = nx.cycle_graph(first + second)
+    pair = nx.disjoint_union(nx.cycle_graph(first), nx.cycle_graph(second))
+    npt.assert_array_equal(nx.weisfeiler_lehman_graph_hash(single, iterations=iterations),
+                           nx.weisfeiler_lehman_graph_hash(pair, iterations=iterations))
+    npt.assert_array_equal(nx.is_isomorphic(single, pair), _igraph_of(single).isomorphic(_igraph_of(pair)))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_canonical_edges(_igraph_of(single)), _canonical_edges(_igraph_of(pair)))
+
+
+@given(NODE_COUNT.flatmap(lambda count: st.tuples(st.just(count), _edge_lists(count), _edge_lists(count))))
+@GRAPH_FILTER
+def test_two_isomorphism_deciders_that_share_no_code_agree_on_every_generated_pair(drawn):
+    """The confirm step of the case's filter-then-confirm, over generated graphs rather than the four
+    it names. NetworkX's is_isomorphic and igraph's isomorphic return the same verdict for every pair
+    drawn over the same vertex set, and igraph's canonical form agrees with both: two graphs are
+    isomorphic exactly when their canonical edge lists are equal."""
+    count, left_edges, right_edges = drawn
+    left, right = _networkx_graph(count, left_edges), _networkx_graph(count, right_edges)
+    decided = nx.is_isomorphic(left, right)
+    npt.assert_array_equal(decided, _igraph_of(left).isomorphic(_igraph_of(right)))
+    npt.assert_array_equal(decided,
+                           _canonical_edges(_igraph_of(left)) == _canonical_edges(_igraph_of(right)))
+
+
+@given(NODE_COUNT.flatmap(lambda count: st.tuples(st.just(count), _edge_lists(count),
+                                                  st.permutations(range(count)))))
+@GRAPH_FILTER
+def test_the_hash_and_the_canonical_form_both_survive_a_relabelling(drawn):
+    """What makes the hash usable as a filter at all, stated as the property it is: relabelling the
+    nodes changes neither the hash NetworkX computes nor the canonical form igraph computes, and both
+    libraries call the two graphs isomorphic. The permutation is generated."""
+    count, edges, permutation = drawn
+    graph = _networkx_graph(count, edges)
+    relabelled = nx.relabel_nodes(graph, dict(zip(range(count), permutation)))
+    npt.assert_array_equal(nx.weisfeiler_lehman_graph_hash(graph),
+                           nx.weisfeiler_lehman_graph_hash(relabelled))
+    npt.assert_array_equal(_canonical_edges(_igraph_of(graph)), _canonical_edges(_igraph_of(relabelled)))
+    npt.assert_array_equal(nx.is_isomorphic(graph, relabelled),
+                           _igraph_of(graph).isomorphic(_igraph_of(relabelled)))
+
+
+@given(CYCLE_LENGTH)
+@GRAPH_FILTER
+def test_the_graph_hash_warns_that_the_values_it_returns_have_changed(length):
+    """The equality the case records survives; the values do not. Every call raises the warning
+    networkx 3.6.1 attaches to this function, whose docstring opens "Hash values for directed graphs
+    and graphs without edge or node attributes have changed in v3.5. In previous versions, directed
+    graphs did not distinguish in- and outgoing edges. Also, graphs without attributes set initial
+    states such that effectively one extra iteration of WL occurred than indicated by `iterations`."
+    So a hash recorded by a chain before that release is not the hash this one returns, and the
+    library says so at every call."""
+    with pytest.warns(UserWarning):
+        nx.weisfeiler_lehman_graph_hash(nx.cycle_graph(length))
+    with pytest.warns(UserWarning):
+        nx.weisfeiler_lehman_graph_hash(nx.DiGraph([(index, index + 1) for index in range(length)]))
+
+
+@given(PATH_LENGTH)
+@GRAPH_FILTER
+def test_the_directed_hash_separates_two_orientations_of_one_undirected_path(length):
+    """The other half of that warning, executed. Reversing the first edge of a directed path gives a
+    digraph the hash now separates from the path, and both isomorphism deciders agree they are not
+    isomorphic -- while the undirected graph underneath the two is one graph, which the hash also
+    says. Before v3.5 the directed hash did not distinguish in- from outgoing edges, so this pair
+    hashed alike."""
+    forwards = nx.DiGraph([(index, index + 1) for index in range(length - 1)])
+    turned = nx.DiGraph([(1, 0)] + [(index, index + 1) for index in range(1, length - 1)])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(nx.weisfeiler_lehman_graph_hash(forwards),
+                               nx.weisfeiler_lehman_graph_hash(turned))
+    npt.assert_array_equal(nx.weisfeiler_lehman_graph_hash(nx.Graph(forwards)),
+                           nx.weisfeiler_lehman_graph_hash(nx.Graph(turned)))
+    npt.assert_array_equal(nx.is_isomorphic(forwards, turned),
+                           _igraph_of(forwards, directed=True).isomorphic(_igraph_of(turned, directed=True)))
+
+
+@given(XML_NAME, XML_NAME, XML_NAME, XML_VALUE, XML_VALUE, INDENT)
+@GRAPH_FILTER
+def test_canonicalisation_orders_the_attributes_and_leaves_the_indentation_alone(
+        root, child, other, first, second, indent):
+    """`g.equal(canonical_xml('<a><b id="2" x="1"/><c/></a>'), canonical_xml('<a>\\n  <b x="1"
+    id="2"/>\\n  <c/>\\n</a>'))` carries the comment "C14N normalizes attribute order and
+    indentation". Half of that is the canonicaliser's. Over generated names and values, writing the
+    same two attributes in either order canonicalises to one text; adding generated indentation
+    between the elements does not, and the two documents stay different until `strip_text` is named,
+    which is the option C14N 2.0 carries for it. What made the case's two documents equal was the
+    parser option its helper passes before canonicalising, remove_blank_text, and not the
+    canonicalisation."""
+    assume(len({root, child, other, first, second}) == 5)
+    plain = f'<{root}><{child} {first}="1" {second}="2"/><{other}/></{root}>'
+    swapped = f'<{root}><{child} {second}="2" {first}="1"/><{other}/></{root}>'
+    spaced = '\n'.join([f'<{root}>', ' ' * indent + f'<{child} {second}="2" {first}="1"/>',
+                        ' ' * indent + f'<{other}/>', f'</{root}>'])
+    npt.assert_array_equal(lxml_etree.canonicalize(plain), lxml_etree.canonicalize(swapped))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(lxml_etree.canonicalize(plain), lxml_etree.canonicalize(spaced))
+    npt.assert_array_equal(lxml_etree.canonicalize(plain, strip_text=True),
+                           lxml_etree.canonicalize(spaced, strip_text=True))
+
+
+@given(XML_NAME, XML_NAME, XML_NAME, XML_VALUE, XML_VALUE, INDENT)
+@GRAPH_FILTER
+def test_the_two_c14n_writers_return_the_same_text_for_every_generated_document(
+        root, child, other, first, second, indent):
+    """lxml 6.1.3 and CPython 3.11.15 both expose a `canonicalize` whose docstring is the same
+    sentence, "Convert XML to its C14N 2.0 serialised form", and both build the same
+    `C14NWriterTarget` and feed a parser with it, so they are one design in two runtimes rather than
+    two implementations -- recorded here rather than claimed as independence. They agree exactly,
+    with and without `strip_text`, on every generated document, which is what makes the divergence
+    in the next test a fact about the two canonical forms and not about a parser."""
+    assume(len({root, child, other, first, second}) == 5)
+    spaced = '\n'.join([f'<{root}>', ' ' * indent + f'<{child} {second}="2" {first}="1"/>',
+                        ' ' * indent + f'<{other}/>', f'</{root}>'])
+    npt.assert_array_equal(lxml_etree.canonicalize(spaced), ElementTree.canonicalize(spaced))
+    npt.assert_array_equal(lxml_etree.canonicalize(spaced, strip_text=True),
+                           ElementTree.canonicalize(spaced, strip_text=True))
+
+
+@given(XML_NAME, XML_NAME, XML_VALUE, XML_VALUE)
+@GRAPH_FILTER
+def test_the_older_canonical_form_the_same_library_ships_keeps_what_the_newer_one_drops(
+        root, child, prefix, comment):
+    """There is not one canonical form. libxml2's own C14N, reached through lxml as
+    `tostring(method='c14n')`, keeps a comment that `canonicalize` drops, and leaves a namespace
+    declaration on the element that declared it where the C14N 2.0 writer moves it down to the
+    element that uses it. Both are lxml 6.1.3 calls on the same document, so a chain that compares
+    canonical forms produced by two of its own calls compares two different normalisations."""
+    assume(prefix != child and prefix != root and comment.strip())
+    document = f'<{root} xmlns:{prefix}="urn:x"><!-- {comment} --><{prefix}:{child}/></{root}>'
+    tree = lxml_etree.fromstring(document.encode())
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(lxml_etree.tostring(tree, method='c14n').decode(),
+                               lxml_etree.canonicalize(document))
+    npt.assert_array_equal('<!--' in lxml_etree.tostring(tree, method='c14n').decode(),
+                           '<!--' not in lxml_etree.canonicalize(document))
+    npt.assert_array_equal(f'xmlns:{prefix}' in lxml_etree.tostring(tree, method='c14n').decode().split('>')[0],
+                           f'xmlns:{prefix}' not in lxml_etree.canonicalize(document).split('>')[0])
+
+
+@given(XML_NAME, XML_NAME, XML_NAME)
+@GRAPH_FILTER
+def test_canonicalisation_does_not_reorder_siblings(root, first, second):
+    """`g.require(canonical_xml('<a><b/><c/></a>') != canonical_xml('<a><c/><b/></a>'), 'C14N must not
+    reorder siblings')`, over generated element names and through both writers. Sibling order is
+    content, so no canonicaliser touches it, and a chain that needs two documents with the same
+    children in a different order to compare equal needs a labelling of its own."""
+    assume(len({root, first, second}) == 3)
+    forwards = f'<{root}><{first}/><{second}/></{root}>'
+    backwards = f'<{root}><{second}/><{first}/></{root}>'
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(lxml_etree.canonicalize(forwards), lxml_etree.canonicalize(backwards))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(ElementTree.canonicalize(forwards), ElementTree.canonicalize(backwards))
