@@ -98,6 +98,7 @@ import rapidfuzz.distance.OSA as rf_osa
 import rapidfuzz.process as rf_process
 from hypothesis import assume, given, settings, strategies as st
 from largest_remainder import LargestRemainder
+import apportionment.methods as apportionment_methods
 
 SLOW = settings(max_examples=200, deadline=None)
 AMOUNTS = st.lists(st.integers(min_value=-1000, max_value=1000), min_size=1, max_size=40)
@@ -4733,3 +4734,100 @@ def test_a_missing_amount_is_none_to_one_reader_and_an_empty_string_to_the_other
     with pytest.raises(AssertionError):
         npt.assert_array_equal([value is None for value in by_calamine],
                                [value is None for value in by_openpyxl])
+
+
+# ---------------------------------------------------------------- two libraries dividing one pool
+POOL_WEIGHTS = st.lists(st.integers(min_value=1, max_value=40), min_size=2, max_size=6)
+POOL_MULTIPLIER = st.integers(min_value=1, max_value=2000)
+TIED_SCALE = st.integers(min_value=1, max_value=30)
+TIED_STEP = st.integers(min_value=0, max_value=5000)
+ZEROED_WEIGHTS = st.builds(lambda positives, index: positives[:index] + [0] + positives[index:],
+                           st.lists(st.integers(min_value=1, max_value=40), min_size=1, max_size=5),
+                           st.integers(min_value=0, max_value=5))
+
+
+def _hamilton_pair(weights, total):
+    return (LargestRemainder.round(list(weights), total),
+            apportionment_methods.compute('hamilton', list(weights), total, verbose=False))
+
+
+@given(POOL_WEIGHTS, POOL_MULTIPLIER)
+@SLOW
+def test_two_apportionment_libraries_agree_when_every_quota_is_exact(weights, multiplier):
+    """largest-remainder-py 0.1.0 declares no dependencies at all and apportionment 1.0 declares
+    numpy, so the two implementations of the largest remainder method share nothing. On a pool that
+    divides the weights exactly there is no remainder to award and both return the same allocation,
+    which is the agreeing region for P169's split. Replaces the typed [3334, 3333, 3333] pair of
+    case 169."""
+    total = sum(weights) * multiplier
+    by_largest_remainder, by_apportionment = _hamilton_pair(weights, total)
+    npt.assert_array_equal(by_largest_remainder, by_apportionment)
+    npt.assert_array_equal(sum(by_largest_remainder), total)
+    npt.assert_array_equal(sum(by_apportionment), total)
+
+
+@given(TIED_SCALE, TIED_STEP)
+@SLOW
+def test_the_two_libraries_award_the_last_cents_to_different_parties(scale, step):
+    """Weights of a, a and 3a against a pool of 5k+3 leave every party a fractional quota and two
+    cents to award, and the largest of those fractions belongs to the third party. largest-remainder
+    sorts the remainders and pays it; apportionment walks the parties in index order, pays the two
+    tied smaller remainders first and finds the pool empty when it reaches the largest one, which its
+    own source records as a tie broken "to the disadvantage of" that party. Both conserve the pool,
+    and the two allocations are not the same allocation."""
+    weights = [scale, scale, 3 * scale]
+    total = 5 * step + 3
+    by_largest_remainder, by_apportionment = _hamilton_pair(weights, total)
+    npt.assert_array_equal(sum(by_largest_remainder), total)
+    npt.assert_array_equal(sum(by_apportionment), total)
+    npt.assert_array_less(by_apportionment[2], by_largest_remainder[2])
+    npt.assert_array_less(by_largest_remainder[1], by_apportionment[1])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(by_largest_remainder, by_apportionment)
+
+
+@given(TIED_SCALE, TIED_STEP)
+@SLOW
+def test_the_exact_mode_of_the_second_library_allocates_exactly_what_its_floats_did(scale, step):
+    """apportionment offers fractions=True, which computes the quotas as fractions.Fraction instead
+    of numpy floats. On the same pools it returns the same allocation its default returns, so the
+    party that loses a cent there loses it to the shape of the award loop and not to floating point,
+    and no option in that library moves it."""
+    weights = [scale, scale, 3 * scale]
+    total = 5 * step + 3
+    exact = apportionment_methods.compute('hamilton', list(weights), total, fractions=True,
+                                          verbose=False)
+    npt.assert_array_equal(exact, _hamilton_pair(weights, total)[1])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(exact, _hamilton_pair(weights, total)[0])
+
+
+@given(st.integers(min_value=2, max_value=6), POOL_MULTIPLIER, st.data())
+@SLOW
+def test_a_credit_pool_is_truncated_by_one_library_and_refused_by_the_other(parties, multiplier,
+                                                                           source):
+    """A negative pool is a credit to distribute. largest-remainder refuses it, because its own
+    check is that "the total must be non-negative". apportionment truncates each quota toward zero
+    and then tests whether it has awarded too few, which a negative total never is, so it returns an
+    allocation that is short of the pool by up to one cent per party and raises nothing. The pool
+    the caller handed it is not the pool it divided."""
+    shortfall = source.draw(st.integers(min_value=1, max_value=parties - 1))
+    total = -(parties * multiplier + shortfall)
+    weights = [1] * parties
+    with pytest.raises(ValueError):
+        LargestRemainder.round(list(weights), total)
+    credited = apportionment_methods.compute('hamilton', list(weights), total, verbose=False)
+    npt.assert_array_less(total, sum(credited))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(sum(credited), total)
+
+
+@given(ZEROED_WEIGHTS, st.integers(min_value=0, max_value=1_000_000))
+@SLOW
+def test_a_party_with_no_weight_changes_nothing_in_either_library(weights, total):
+    """Dropping the unweighted parties from the list leaves both allocations exactly as they were,
+    so a driver with no weight neither takes a cent nor moves one, in the library that sorts the
+    remainders and in the library that walks them. Replaces the typed [0, 10000] of case 169."""
+    carried = [weight for weight in weights if weight]
+    for whole, without in zip(_hamilton_pair(weights, total), _hamilton_pair(carried, total)):
+        npt.assert_array_equal([paid for paid, weight in zip(whole, weights) if weight], without)
