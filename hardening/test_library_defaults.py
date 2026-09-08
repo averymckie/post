@@ -27,6 +27,7 @@ import io
 import zipfile
 import zoneinfo
 from xml.etree import ElementTree
+from typing import Literal
 from xml.sax.saxutils import escape as xml_escape
 import itertools
 import json
@@ -8987,3 +8988,145 @@ def test_the_displayed_list_follows_the_content_stream_and_not_the_page(arrays):
     npt.assert_array_equal(_mupdf_displayed(pdf), arrays)
     npt.assert_array_equal(_pdfium_drawn(pdf), arrays)
     npt.assert_array_equal(_mupdf_displayed_by_box(pdf), arrays[::-1])
+
+
+# ---------------------------------------------------------------- a checklist form and its choices
+FORM_PAGE = (595, 842)
+FORM_FIELD_NAME = st.text(alphabet='abcdefghijklmnopqrstuvwxyz', min_size=1, max_size=8)
+FORM_CHOICE = st.text(alphabet='abcdefghijklmnopqrstuvwxyz_', min_size=1, max_size=12)
+FORM_CHOICES = st.lists(FORM_CHOICE, min_size=2, max_size=5, unique=True)
+FORM_NAMES = st.lists(FORM_FIELD_NAME, min_size=1, max_size=3, unique=True)
+
+
+def _checklist_form(names, choices, value=None, repeat=1):
+    """The chain's own writer: reportlab's AcroForm puts one combo box and one text field on the page for
+    each action. `choice` is handed the option list and an initial value and nothing else here touches
+    the file."""
+    written = io.BytesIO()
+    page = rl_canvas.Canvas(written, pagesize=FORM_PAGE)
+    form = page.acroForm
+    for index, name in enumerate(list(names) * repeat):
+        top = 780 - index * 120
+        form.choice(name='status_' + name, options=list(choices),
+                    value=choices[0] if value is None else value,
+                    x=40, y=top - 45, width=150, height=20)
+        form.textfield(name='owner_' + name, value='', x=200, y=top - 45, width=150, height=20)
+    page.showPage()
+    page.save()
+    return written.getvalue()
+
+
+def _pypdf_fields(pdf):
+    """Every interactive field pypdf finds. `get_fields` is documented at tag 6.17.0 as returning "A
+    dictionary where each key is a field name, and each value is a `Field` object"."""
+    return pypdf.PdfReader(io.BytesIO(pdf)).get_fields()
+
+
+def _mupdf_widgets(pdf):
+    """The same page's widgets through MuPDF, in the order that library reports them."""
+    return list(pymupdf.open(stream=pdf, filetype='pdf')[0].widgets())
+
+
+def _form_answered(pdf, name, value):
+    """The value of the first widget of that name set by the other library, and the file written out
+    again. Only `Widget.field_value` and `Widget.update` are used."""
+    document = pymupdf.open(stream=pdf, filetype='pdf')
+    for widget in document[0].widgets():
+        if widget.field_name == name:
+            widget.field_value = value
+            widget.update()
+            break
+    return document.tobytes()
+
+
+@given(FORM_NAMES, FORM_CHOICES)
+@SLOW
+def test_both_readers_report_the_field_names_and_the_declared_choices(names, choices):
+    """handoff_guards_v14.py's case form_choices_match_the_declared_contract types the six field names of
+    its two actions, the three status choices and the initial value. Here the names and the choices are
+    generated and read back by two implementations that share nothing: pypdf 6.17.0 parses the object
+    model in pure Python, and MuPDF through PyMuPDF 1.28.2 reports the same page as widgets, whose
+    `choice_values` docs/widget.rst at tag 1.28.2 calls a "Python sequence of strings defining the valid
+    choices of list boxes and combo boxes". Both return exactly the generated option list for every
+    field, and pypdf's key set is exactly the names reportlab was given. Replaces the typed
+    `g.equal(sorted(fields), [...])` and `g.equal(list(fields['status_0'].get('/Opt')), STATUS_CHOICES)`."""
+    pdf = _checklist_form(names, choices)
+    fields = _pypdf_fields(pdf)
+    npt.assert_array_equal(sorted(fields),
+                           sorted(['owner_' + name for name in names] + ['status_' + name for name in names]))
+    widgets = {widget.field_name: widget for widget in _mupdf_widgets(pdf)}
+    for name in names:
+        npt.assert_array_equal(list(fields['status_' + name]['/Opt']), choices)
+        npt.assert_array_equal(list(widgets['status_' + name].choice_values), choices)
+        npt.assert_array_equal(fields['status_' + name]['/V'], choices[0])
+        npt.assert_array_equal(widgets['status_' + name].field_value, choices[0])
+
+
+@given(FORM_NAMES, FORM_CHOICES, FORM_CHOICE)
+@SLOW
+def test_the_writer_refuses_an_initial_value_outside_its_own_option_list(names, choices, intruder):
+    """Where the contract is actually enforced. reportlab 5.0.1 checks the initial value against the
+    options as it writes: `_textfield` in src/reportlab/pdfbase/acroform.py of the sdist published for
+    that version raises `ValueError('%s value %r is not in option\\nvalues %r\\nor labels %r')`, and it
+    does so for every generated value outside the generated list."""
+    assume(intruder not in choices)
+    with pytest.raises(ValueError):
+        _checklist_form(names, choices, value=intruder)
+
+
+@given(FORM_NAMES, FORM_CHOICES, FORM_CHOICE)
+@SLOW
+def test_a_value_outside_the_declared_choices_survives_in_the_file(names, choices, intruder):
+    """And where it is not enforced. The check above lives in the writer and not in the artefact: the
+    same value the writer refused can be put into the same field afterwards through MuPDF's
+    `Widget.field_value`, and both readers then return it beside an option list that still excludes it.
+    So a form whose choices were declared once carries no record that they were a constraint, and the
+    declared list and the stored value can disagree in a file both libraries read without complaint."""
+    assume(intruder not in choices)
+    answered = _form_answered(_checklist_form(names, choices), 'status_' + names[0], intruder)
+    fields = _pypdf_fields(answered)
+    widgets = {widget.field_name: widget for widget in _mupdf_widgets(answered)}
+    npt.assert_array_equal(fields['status_' + names[0]]['/V'], intruder)
+    npt.assert_array_equal(widgets['status_' + names[0]].field_value, intruder)
+    npt.assert_array_equal(list(fields['status_' + names[0]]['/Opt']), choices)
+
+
+@given(FORM_NAMES, FORM_CHOICES, FORM_CHOICE)
+@SLOW
+def test_the_declared_contract_holds_only_in_the_validator(names, choices, intruder):
+    """The case reads the same field into a pydantic model whose status is a `Literal` of the three
+    declared choices, and the model is where the contract is. Built dynamically over the generated
+    options -- `create_model` is documented at v2.13.5 as a function that "dynamically creates a subclass
+    of `BaseModel`" -- it accepts the value the form was written with and rejects the one the file
+    happily returned, so the two halves of the chain disagree about the same file and only the second
+    half says so. Replaces `g.rejects(ValidationError, ...)` for an undeclared status."""
+    assume(intruder not in choices)
+    answered = _form_answered(_checklist_form(names, choices), 'status_' + names[0], intruder)
+    declared = pydantic.create_model('Progress', status=(Literal[tuple(choices)], ...))
+    npt.assert_array_equal(declared.model_validate({'status': choices[0]}).status, choices[0])
+    stored = _pypdf_fields(answered)['status_' + names[0]]['/V']
+    with pytest.raises(pydantic.ValidationError):
+        declared.model_validate({'status': stored})
+
+
+@given(FORM_NAMES, FORM_CHOICES)
+@SLOW
+def test_two_fields_of_one_name_answer_differently_and_only_one_is_read(names, choices):
+    """Field names are not required to be unique and nothing checks them: PyMuPDF documents `field_name`
+    at tag 1.28.2 as "A mandatory string defining the field's name. No checking for duplicates takes
+    place." Written twice under one name, the two widgets are two independent answers -- setting the
+    first leaves the second at the value it was written with, which MuPDF reports -- while pypdf's
+    dictionary keyed by name has one entry for both, and the value in it is the second widget's. So the
+    answer recorded in the form is not the answer the read-back returns, and no error is raised on either
+    side."""
+    pdf = _checklist_form(names, choices, repeat=2)
+    answered = _form_answered(pdf, 'status_' + names[0], choices[1])
+    values = [widget.field_value for widget in _mupdf_widgets(answered)
+              if widget.field_name == 'status_' + names[0]]
+    npt.assert_array_equal(values, [choices[1], choices[0]])
+    fields = _pypdf_fields(answered)
+    npt.assert_array_equal(sorted(fields),
+                           sorted(['owner_' + name for name in names] + ['status_' + name for name in names]))
+    npt.assert_array_equal(fields['status_' + names[0]]['/V'], values[-1])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(fields['status_' + names[0]]['/V'], choices[1])
