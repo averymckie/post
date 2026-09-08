@@ -129,6 +129,7 @@ import pandas as pd
 import pandera.pandas as pandera
 import pandas.testing as pdt
 import polars as pl
+import pyarrow as pa
 import pyarrow.csv as pyarrow_csv
 import rfc8785
 import segno
@@ -12644,3 +12645,240 @@ def test_a_long_title_is_folded_within_the_libraries_own_limit_and_unfolds_in_bo
                          len(_meeting_ics([short], day, stamp).decode().split('\r\n')))
     npt.assert_array_equal(_icalendar_events(data)[0][1], long_title)
     npt.assert_array_equal(_ical_js_events(data)[0][1], long_title)
+
+
+# --------------------------------------------------------------------------------------------------
+# handoff_guards_v14.py, case csv_inference_destroys_a_leading_zero: absent, empty, and zero-padded
+# --------------------------------------------------------------------------------------------------
+CSV_FIELD_ORACLE_RB = pathlib.Path(__file__).with_name('csv_field_oracle.rb')
+CSV_WORD = st.text(alphabet='abcdefghijklmnopqrstuvwxyz', min_size=1, max_size=5)
+CSV_FIELD = st.one_of(st.none(), st.just(''), CSV_WORD)
+CSV_COLUMN = st.lists(CSV_FIELD, min_size=1, max_size=5)
+PADDED_CODE = st.text(alphabet='0123456789', min_size=1, max_size=4).map(lambda digits: '0' + digits)
+CSV_READERS = settings(max_examples=20, deadline=None)
+
+
+@st.composite
+def _keyed_column(draw):
+    """A column of absent values, empty strings and words, beside a column of words that is never
+    empty, so that no row of the file is a blank line. What each reader does with a blank line is a
+    separate question, and it has its own test below."""
+    values = draw(CSV_COLUMN)
+    return draw(st.lists(CSV_WORD, min_size=len(values), max_size=len(values))), values
+
+
+@st.composite
+def _keyed_codes(draw):
+    """The same shape for the zero-padded codes: a key column of words exactly as long as the codes."""
+    codes = draw(st.lists(PADDED_CODE, min_size=1, max_size=4))
+    return draw(st.lists(CSV_WORD, min_size=len(codes), max_size=len(codes))), codes
+
+
+def _quoted_csv(columns):
+    """The writer the case uses: one string column a name, written by pyarrow with
+    `quoting_style='all_valid'`, so every value that has text is quoted and an absent value is not."""
+    table = pa.table({name: pa.array(values, type=pa.string()) for name, values in columns.items()})
+    sink = io.BytesIO()
+    pyarrow_csv.write_csv(table, sink,
+                          pyarrow_csv.WriteOptions(include_header=True, quoting_style='all_valid'))
+    return sink.getvalue()
+
+
+def _keyed_csv(keys, values):
+    """That writer applied to the two generated columns."""
+    return _quoted_csv({'key': keys, 'a': values})
+
+
+def _arrow_column(data, **options):
+    """The file read back by pyarrow with the string type declared for every column, under whichever
+    of its two null options the caller names. `_csv.pyx` at tag apache-arrow-25.0.1 documents
+    "strings_can_be_null : bool, optional (default False)" as "Whether string / binary columns can
+    have null values ... If false, then all strings are valid string values" and
+    "quoted_strings_can_be_null : bool, optional (default True)" as "Whether quoted values can be null
+    ... Otherwise, quoted values are never considered null"."""
+    names = pyarrow_csv.read_csv(io.BytesIO(data)).column_names
+    convert = pyarrow_csv.ConvertOptions(column_types={name: pa.string() for name in names}, **options)
+    return pyarrow_csv.read_csv(io.BytesIO(data), convert_options=convert).column('a').to_pylist()
+
+
+def _ruby_csv_column(data):
+    """The same file through Ruby 3.3.6's own CSV library, whose documented defaults in lib/csv.rb at
+    tag v3.2.8 are `nil_value: nil`, "Specifies the object that is to be substituted for each null
+    (no-text) field", and `empty_value: ""`, "Specifies the object that is to be substituted for each
+    empty field" -- two named options for two things it already tells apart. The shim parses argv,
+    calls the library and prints; the Python side splits stdout and decodes the hex."""
+    with tempfile.TemporaryDirectory() as directory:
+        written = pathlib.Path(directory) / 'rows.csv'
+        written.write_bytes(data)
+        completed = subprocess.run(['ruby', str(CSV_FIELD_ORACLE_RB), str(written)],
+                                   capture_output=True, encoding='utf-8', check=True)
+        rows = [[None if field == 'NULL' else bytes.fromhex(field[1:]).decode()
+                 for field in line.split('\t')]
+                for line in completed.stdout.split('\n')[:-1]]
+        return [row[rows[0].index('a')] for row in rows[1:]]
+
+
+def _duckdb_csv_column(data, **options):
+    """And through DuckDB 1.5.5's own CSV reader, whose csv_reader_options.hpp at tag v1.5.5 carries
+    `bool allow_quoted_nulls = true;` under the comment "Option to convert quoted values to NULL
+    values"."""
+    with tempfile.TemporaryDirectory() as directory:
+        written = pathlib.Path(directory) / 'rows.csv'
+        written.write_bytes(data)
+        chosen = ''.join(', %s=%s' % (key, str(value).lower()) for key, value in options.items())
+        return [row[0] for row in duckdb.execute(
+            "select a from read_csv(?, header=true, all_varchar=true%s)" % chosen,
+            [str(written)]).fetchall()]
+
+
+def _polars_csv_column(data):
+    """And through polars 1.44.1's reader, with type inference switched off so that every column is
+    text and only the null question is left."""
+    return pl.read_csv(io.BytesIO(data), infer_schema_length=0)['a'].to_list()
+
+
+@pytest.mark.skipif(not shutil.which('ruby'), reason='the ruby runtime is required for this oracle')
+@given(_keyed_column())
+@CSV_READERS
+def test_two_readers_recover_the_absent_and_the_empty_field_with_no_options_at_all(pair):
+    """handoff_guards_v14.py's case csv_inference_destroys_a_leading_zero types the bytes of a
+    three-row CSV and four readings of it, and concludes that one pair of pyarrow options "keeps the
+    two apart, and only because the writer quoted one of them". Two implementations keep them apart
+    with no options: Ruby's CSV library, whose defaults name a null field and an empty field
+    separately, and polars 1.44.1's reader. Over a generated column holding absent values, empty
+    strings and words, both return the column that was written, so the distinction is in the file and
+    not only in one reader's options."""
+    keys, values = pair
+    data = _keyed_csv(keys, values)
+    npt.assert_array_equal(_ruby_csv_column(data), values)
+    npt.assert_array_equal(_polars_csv_column(data), values)
+
+
+@given(_keyed_column())
+@CSV_READERS
+def test_the_writers_own_reader_cannot_tell_the_two_apart_by_default(pair):
+    """What pyarrow does with the file pyarrow wrote. Its documented default is
+    `strings_can_be_null=False`, "If false, then all strings are valid string values", so every empty
+    field becomes an empty string and the absent value is gone. Replaces `g.equal(default_read, [{'a':
+    'x', 'b': ''}, ...])` and `g.equal(default_read == expected, False)` for a generated column."""
+    keys, values = pair
+    assume(None in values)
+    read_back = _arrow_column(_keyed_csv(keys, values))
+    npt.assert_array_equal([value is None for value in read_back], [False] * len(values))
+    with pytest.raises(AssertionError):
+        npt.assert_equal(read_back, values)
+
+
+@given(_keyed_column())
+@CSV_READERS
+def test_letting_strings_be_null_swaps_the_confusion_instead_of_removing_it(pair):
+    """The option on its own does not recover the column, it loses the other half of it: with
+    `strings_can_be_null=True` and `quoted_strings_can_be_null` left at its documented default of True,
+    every empty field becomes null, including the ones the writer quoted. Replaces `g.equal(all_null,
+    [{'a': 'x', 'b': None}, ...])`."""
+    keys, values = pair
+    assume('' in values)
+    read_back = _arrow_column(_keyed_csv(keys, values), strings_can_be_null=True)
+    npt.assert_array_equal([value is None for value in read_back],
+                           [value in (None, '') for value in values])
+    with pytest.raises(AssertionError):
+        npt.assert_equal(read_back, values)
+
+
+@pytest.mark.skipif(not shutil.which('ruby'), reason='the ruby runtime is required for this oracle')
+@given(_keyed_column())
+@CSV_READERS
+def test_the_option_pair_returns_what_the_other_readers_already_returned(pair):
+    """And the pair that does work returns exactly what Ruby's CSV and polars return without being
+    asked. So the case's third reading is right about the file and wrong about why: quoting is what
+    makes the distinction expressible, and two of the readers act on it by default while pyarrow has
+    to be told twice."""
+    keys, values = pair
+    data = _keyed_csv(keys, values)
+    read_back = _arrow_column(data, strings_can_be_null=True, quoted_strings_can_be_null=False)
+    npt.assert_array_equal(read_back, values)
+    npt.assert_array_equal(read_back, _ruby_csv_column(data))
+    npt.assert_array_equal(read_back, _polars_csv_column(data))
+
+
+@given(_keyed_column())
+@CSV_READERS
+def test_a_further_engine_needs_its_own_option_for_the_same_distinction(pair):
+    """A third convention for the same file. DuckDB 1.5.5 ships `allow_quoted_nulls = true`, so by
+    default it reads a quoted empty string as null exactly as pyarrow does under
+    `strings_can_be_null=True`; turned off, it returns the column that was written. The option is
+    spelled differently in each engine and the file is the same file."""
+    keys, values = pair
+    assume('' in values)
+    data = _keyed_csv(keys, values)
+    npt.assert_array_equal(_duckdb_csv_column(data),
+                           _arrow_column(data, strings_can_be_null=True))
+    npt.assert_array_equal(_duckdb_csv_column(data, allow_quoted_nulls=False), values)
+
+
+@given(_keyed_column())
+@CSV_READERS
+def test_the_standard_library_reader_cannot_express_the_distinction_at_all(pair):
+    """And the reader with no options for it. CPython's csv module has no concept of an absent field,
+    so the two become one empty string and the column cannot be recovered from what it returns however
+    the file was written."""
+    keys, values = pair
+    assume(None in values)
+    data = _keyed_csv(keys, values)
+    rows = list(csv.reader(io.StringIO(data.decode())))
+    read_back = [row[rows[0].index('a')] for row in rows[1:]]
+    npt.assert_array_equal(read_back, ['' if value is None else value for value in values])
+    with pytest.raises(AssertionError):
+        npt.assert_equal(read_back, values)
+
+
+@given(CSV_COLUMN)
+@CSV_READERS
+def test_a_one_column_row_with_no_value_is_a_blank_line_the_writers_reader_drops(values):
+    """The case's fixture has two columns, which hides this. A one-column table whose value is absent
+    is written as a line with no characters at all, and pyarrow then reads back a shorter column than
+    it wrote -- silently, with no error and no null -- while polars and DuckDB return every row. So a
+    round trip through the writer's own reader can lose rows, and how many depends on how many columns
+    the table happened to have."""
+    assume(None in values)
+    data = _quoted_csv({'a': values})
+    npt.assert_array_equal(_polars_csv_column(data), values)
+    npt.assert_array_equal(len(_duckdb_csv_column(data)), len(values))
+    with pytest.raises(AssertionError):
+        npt.assert_equal(len(_arrow_column(data)), len(values))
+
+
+@pytest.mark.skipif(not shutil.which('ruby'), reason='the ruby runtime is required for this oracle')
+@given(_keyed_codes())
+@CSV_READERS
+def test_three_inferring_readers_lose_a_zero_padded_code_and_a_fourth_keeps_it(pair):
+    """The other half of the case. A quoted code with a leading zero is read as a number by pyarrow, by
+    polars and by pandas, so `g.equal(inferred[0]['case_id'], 1)` is right about three readers of the
+    same file -- and DuckDB's sniffer refuses the conversion and returns the text, as do Ruby's CSV and
+    CPython's csv module, which infer nothing at all. Quoting every value, which the writer does, stops
+    none of the three."""
+    keys, codes = pair
+    data = _keyed_csv(keys, codes)
+    npt.assert_array_equal(pyarrow_csv.read_csv(io.BytesIO(data)).column('a').to_pylist(),
+                           [int(code) for code in codes])
+    npt.assert_array_equal(pl.read_csv(io.BytesIO(data))['a'].to_list(), [int(code) for code in codes])
+    npt.assert_array_equal(pd.read_csv(io.BytesIO(data))['a'].tolist(), [int(code) for code in codes])
+    npt.assert_array_equal(_duckdb_csv_column(data), codes)
+    npt.assert_array_equal(_ruby_csv_column(data), codes)
+
+
+@pytest.mark.skipif(not shutil.which('ruby'), reason='the ruby runtime is required for this oracle')
+@given(_keyed_codes())
+@CSV_READERS
+def test_declaring_the_column_as_text_restores_the_code_in_every_reader(pair):
+    """The repair the case records, executed in each reader's own spelling: pyarrow's column_types,
+    polars' infer_schema_length of zero, pandas' dtype and DuckDB's all_varchar each return the codes
+    that were written, and they agree with the runtime that never inferred anything. Replaces
+    `g.equal(bool(DeepDiff(rows, declared, zip_ordered_iterables=True)), False)`."""
+    keys, codes = pair
+    data = _keyed_csv(keys, codes)
+    npt.assert_array_equal(_arrow_column(data), codes)
+    npt.assert_array_equal(_polars_csv_column(data), codes)
+    npt.assert_array_equal(pd.read_csv(io.BytesIO(data), dtype=str)['a'].tolist(), codes)
+    npt.assert_array_equal(_duckdb_csv_column(data), codes)
+    npt.assert_array_equal(_ruby_csv_column(data), codes)
