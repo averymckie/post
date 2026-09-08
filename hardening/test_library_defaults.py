@@ -15072,3 +15072,274 @@ def test_query_text_that_is_concatenated_is_parsed_and_a_bound_value_is_not(numb
     npt.assert_array_equal(
         sorted(str(row.s) for row in graph.query(bound, initBindings={'x': rdflib.Literal(number)})),
         [base + typed])
+
+
+PM4JS_DIRECTORY = pathlib.Path(os.environ.get('PM4JS_DIR', str(pathlib.Path.home() / 'pm4js-oracle')))
+DFG_ORACLE_JS = pathlib.Path(__file__).with_name('dfg_oracle.js')
+pm4js_available = (shutil.which('node') is not None
+                   and (PM4JS_DIRECTORY / 'node_modules' / 'pm4js').is_dir())
+EVENT_LOG = settings(max_examples=25, deadline=None)
+LOG_EPOCH = datetime.datetime(2011, 1, 1, tzinfo=datetime.timezone.utc)
+ACTIVITY_NAME = st.text(alphabet='ABCDEFGHIJ', min_size=1, max_size=2)
+CASE_NAME = st.sampled_from(['c1', 'c2', 'c3'])
+DECLARED_EVENT_ORDER = ['case_id', 'timestamp', 'activity']
+
+
+def _event_rows(case, activities, offsets):
+    """One event row per activity, at the epoch plus the matching offset in seconds."""
+    return [{'case_id': case, 'activity': activity,
+             'timestamp': LOG_EPOCH + datetime.timedelta(seconds=offset)}
+            for activity, offset in zip(activities, offsets)]
+
+
+@st.composite
+def _time_ordered_log(draw):
+    """Cases whose rows are recorded in non-decreasing timestamp order, ties included."""
+    rows = []
+    for case in draw(st.lists(CASE_NAME, min_size=1, max_size=3, unique=True)):
+        activities = draw(st.lists(ACTIVITY_NAME, min_size=1, max_size=6))
+        rows.extend(_event_rows(case, activities,
+                                sorted(draw(st.lists(st.integers(min_value=0, max_value=6),
+                                                     min_size=len(activities),
+                                                     max_size=len(activities))))))
+    return rows
+
+
+@st.composite
+def _one_case_out_of_time_order(draw):
+    """One case whose last event by time is recorded first: the file order is not the time order."""
+    activities = draw(st.lists(ACTIVITY_NAME, min_size=2, max_size=6, unique=True))
+    offsets = sorted(draw(st.lists(st.integers(min_value=0, max_value=30), unique=True,
+                                   min_size=len(activities), max_size=len(activities))))
+    rows = _event_rows(draw(CASE_NAME), activities, offsets)
+    return rows[-1:] + rows[:-1]
+
+
+@st.composite
+def _simultaneous_events(draw):
+    """One case whose events all carry the same timestamp and pairwise different activities."""
+    activities = draw(st.lists(ACTIVITY_NAME, min_size=2, max_size=6, unique=True))
+    return _event_rows(draw(CASE_NAME), activities, [0] * len(activities))
+
+
+@st.composite
+def _tied_log_and_a_permutation(draw):
+    """A case with tied timestamps, and the same events in a drawn order."""
+    activities = draw(st.lists(ACTIVITY_NAME, min_size=2, max_size=5, unique=True))
+    rows = _event_rows(draw(CASE_NAME), activities,
+                       draw(st.lists(st.integers(min_value=0, max_value=3),
+                                     min_size=len(activities), max_size=len(activities))))
+    return rows, list(draw(st.permutations(rows)))
+
+
+@st.composite
+def _lifecycle_log(draw):
+    """A start row and a complete row for each of several different activities."""
+    activities = draw(st.lists(ACTIVITY_NAME, min_size=1, max_size=5, unique=True))
+    case = draw(CASE_NAME)
+    rows = []
+    for index, activity in enumerate(activities):
+        for step, phase in enumerate(('start', 'complete')):
+            rows.extend(dict(row, lifecycle=phase)
+                        for row in _event_rows(case, [activity], [2 * index + step]))
+    return rows
+
+
+def _formatted_event_log(rows):
+    """pm4py's own formatter, which inserts an @@index column holding the input row position and
+    then sorts by case, timestamp and that column."""
+    frame = pd.DataFrame(rows)
+    frame['timestamp'] = pd.to_datetime(frame['timestamp'], utc=True)
+    return pm4py.format_dataframe(frame, case_id='case_id', activity_key='activity',
+                                  timestamp_key='timestamp')
+
+
+def _edge_frame(pairs):
+    """Whatever activity pairs an engine returned, as one frame ordered by the pair."""
+    return pd.DataFrame([{'source': source, 'target': target, 'count': count}
+                         for (source, target), count in pairs.items()],
+                        columns=['source', 'target', 'count']).sort_values(
+                            ['source', 'target']).reset_index(drop=True)
+
+
+def _pm4py_edges(rows):
+    """The directly-follows graph pm4py 2.7.23.8 discovers from the formatted log."""
+    graph, _, _ = pm4py.discover_dfg(_formatted_event_log(rows))
+    return _edge_frame(dict(graph))
+
+
+def _polars_edges(rows):
+    """The same relation as a polars shift of one row backwards over the case partition, after a
+    sort that names the recorded row index as the last key."""
+    ordered = pl.DataFrame(rows).with_row_index('row').sort(
+        ['case_id', 'timestamp', 'row'], maintain_order=True)
+    followed = ordered.with_columns(
+        pl.col('activity').shift(-1).over('case_id').alias('target')).drop_nulls('target')
+    return followed.group_by(['activity', 'target']).len('count').rename(
+        {'activity': 'source'}).select('source', 'target', 'count').to_pandas().sort_values(
+            ['source', 'target']).reset_index(drop=True)
+
+
+def _duckdb_edges(rows):
+    """The same relation as a DuckDB 1.5.5 lead() over a window partitioned by case."""
+    events = pd.DataFrame(rows).reset_index(names='row')
+    with duckdb.connect() as connection:
+        connection.register('events', events)
+        return connection.execute(
+            'SELECT source, target, count(*) AS count FROM ('
+            ' SELECT activity AS source,'
+            ' lead(activity) OVER (PARTITION BY case_id ORDER BY timestamp, row) AS target'
+            ' FROM events) WHERE target IS NOT NULL'
+            ' GROUP BY source, target ORDER BY source, target').df()
+
+
+def _pm4js_graph(rows):
+    """The frequency directly-follows graph pm4js 0.0.38 discovers under node from the same log
+    written as a CSV by pandas. The shim imports the CSV and prints what the library returns."""
+    with tempfile.TemporaryDirectory() as directory:
+        written = pathlib.Path(directory) / 'log.csv'
+        pd.DataFrame(rows).to_csv(written, index=False)
+        completed = subprocess.run(
+            ['node', str(DFG_ORACLE_JS), str(written), 'case_id', 'activity', 'timestamp'],
+            capture_output=True, encoding='utf-8', check=True,
+            env={**os.environ, 'NODE_PATH': str(PM4JS_DIRECTORY / 'node_modules')})
+    return json.loads(completed.stdout)
+
+
+def _pm4js_edges(rows):
+    """pm4js names each path by joining the two activities with a comma."""
+    return _edge_frame({tuple(path.split(',')): count
+                        for path, count in _pm4js_graph(rows)['paths'].items()})
+
+
+def _rows_sorted_by_the_declared_key(rows):
+    """The events under a total order the reader can state, rather than under the order they
+    happen to be recorded in."""
+    return pd.DataFrame(rows).sort_values(DECLARED_EVENT_ORDER).to_dict('records')
+
+
+@given(_time_ordered_log())
+@EVENT_LOG
+def test_directly_follows_edges_agree_across_three_engines_on_a_recorded_order(rows):
+    """Replaces `g.equal(raw_dfg(rows), {'A->B': 1, 'B->C': 1, 'C->D': 1})` of handoff_guards_v3.py
+    case 23. pm4py's discover_dfg, a polars shift of one row backwards over the case partition and
+    a DuckDB lead() over the same window return the same edge table for a log whose rows are
+    recorded in non-decreasing timestamp order, ties included -- because all three break the tie
+    the same way, by the row's recorded position, which pm4py's format_dataframe makes an explicit
+    third sort key and the two oracles are told to use."""
+    edges = _pm4py_edges(rows)
+    pdt.assert_frame_equal(edges, _polars_edges(rows), check_dtype=False)
+    pdt.assert_frame_equal(edges, _duckdb_edges(rows), check_dtype=False)
+
+
+@pytest.mark.skipif(not pm4js_available, reason='node and a pm4js install are required')
+@given(_time_ordered_log())
+@EVENT_LOG
+def test_the_javascript_port_discovers_the_same_graph_from_a_recorded_order(rows):
+    """Replaces `g.equal(first['basis'], 'observation')` of handoff_guards_v3.py case 23: what the
+    graph is an observation OF is the recorded order. pm4js 0.0.38 never sorts -- its
+    FrequencyDfgDiscovery walks trace.events as the CSV importer pushed them -- and it returns
+    pm4py's edges, start activities and end activities exactly, for every log whose rows are already
+    in timestamp order."""
+    discovered = _pm4js_graph(rows)
+    graph, starts, ends = pm4py.discover_dfg(_formatted_event_log(rows))
+    pdt.assert_frame_equal(_edge_frame(dict(graph)),
+                           _edge_frame({tuple(path.split(',')): count
+                                        for path, count in discovered['paths'].items()}),
+                           check_dtype=False)
+    pdt.assert_series_equal(pd.Series(dict(starts)).sort_index(),
+                            pd.Series(discovered['start']).sort_index(), check_dtype=False)
+    pdt.assert_series_equal(pd.Series(dict(ends)).sort_index(),
+                            pd.Series(discovered['end']).sort_index(), check_dtype=False)
+
+
+@pytest.mark.skipif(not pm4js_available, reason='node and a pm4js install are required')
+@given(_one_case_out_of_time_order())
+@EVENT_LOG
+def test_the_javascript_port_diverges_once_the_rows_are_not_in_time_order(rows):
+    """The divergent region, generated rather than filtered: one case whose latest event is recorded
+    first. pm4py sorts the rows by timestamp before pairing them and pm4js does not, so the two
+    libraries disagree about every log that is not already ordered. Replaces the second typed edge
+    dictionary of handoff_guards_v3.py case 23 by showing what the row order decides."""
+    with pytest.raises(AssertionError):
+        pdt.assert_frame_equal(_pm4py_edges(rows), _pm4js_edges(rows), check_dtype=False)
+
+
+@given(_simultaneous_events())
+@EVENT_LOG
+def test_swapping_events_that_share_a_timestamp_changes_the_discovered_edges(rows):
+    """Replaces `g.equal(raw_dfg(swapped), {'A->C': 1, 'C->B': 1, 'B->D': 1})  # same events,
+    different edges` of handoff_guards_v3.py case 23. Events that carry one timestamp and different
+    activities produce one graph in the order recorded and the reversed graph when recorded the
+    other way round, with no warning and no diagnostic: pandas sorts on more than one key through
+    lexsort_indexer, which is stable, so the tie is decided by the file."""
+    with pytest.raises(AssertionError):
+        pdt.assert_frame_equal(_pm4py_edges(rows), _pm4py_edges(list(reversed(rows))),
+                               check_dtype=False)
+
+
+@given(_tied_log_and_a_permutation())
+@EVENT_LOG
+def test_a_declared_total_order_makes_the_graph_independent_of_the_row_order(pair):
+    """Replaces `g.equal(first, second)` of handoff_guards_v3.py case 23. Sorting the events by a
+    key that is total -- case, timestamp and activity -- before discovery makes pm4py's graph a
+    function of the events and not of the order they arrived in, for a drawn permutation of the
+    same rows. The guard reaches this with a tiebreak= argument of its own; pandas.DataFrame
+    .sort_values is the primitive that does it."""
+    rows, permuted = pair
+    pdt.assert_frame_equal(_pm4py_edges(_rows_sorted_by_the_declared_key(rows)),
+                           _pm4py_edges(_rows_sorted_by_the_declared_key(permuted)),
+                           check_dtype=False)
+
+
+@given(_lifecycle_log())
+@EVENT_LOG
+def test_a_lifecycle_pair_and_a_repeated_event_discover_the_same_graph(rows):
+    """Replaces `g.equal('A->A' in raw_dfg(with_start), True)  # unfiltered lifecycle rows create a
+    self-loop` of handoff_guards_v3.py case 23, and states what that self-loop does not distinguish.
+    A log carrying a start row and a complete row for each activity, and a log carrying each
+    complete row twice, are different data and one discovered graph: pm4py has no notion of event
+    identity and no lifecycle parameter on discover_dfg, so a duplicated record and a genuine
+    lifecycle pair are the same edge."""
+    completed = [row for row in rows if row['lifecycle'] == 'complete']
+    pdt.assert_frame_equal(_pm4py_edges(rows),
+                           _pm4py_edges([row for row in completed for _ in range(2)]),
+                           check_dtype=False)
+
+
+@given(_lifecycle_log())
+@EVENT_LOG
+def test_the_lifecycle_filter_keeps_exactly_the_rows_two_other_engines_keep(rows):
+    """Replaces `g.equal(filtered['events_excluded_by_lifecycle'], 1)` of handoff_guards_v3.py
+    case 23. pm4py's filter_event_attribute_values at level='event' with retain=True keeps the same
+    rows as a polars filter and a DuckDB WHERE clause on the same column and value, over generated
+    logs rather than the one five-row log the case counts by hand."""
+    kept = pm4py.filter_event_attribute_values(_formatted_event_log(rows), 'lifecycle',
+                                               ['complete'], level='event', retain=True)
+    selected = kept[['case_id', 'activity', 'timestamp']].sort_values(
+        DECLARED_EVENT_ORDER).reset_index(drop=True)
+    pdt.assert_frame_equal(
+        selected,
+        pl.DataFrame(rows).filter(pl.col('lifecycle') == 'complete').select(
+            'case_id', 'activity', 'timestamp').to_pandas().sort_values(
+                DECLARED_EVENT_ORDER).reset_index(drop=True), check_dtype=False)
+    with duckdb.connect() as connection:
+        connection.register('staged', pd.DataFrame(rows))
+        pdt.assert_frame_equal(
+            selected,
+            connection.execute("SELECT case_id, activity, timestamp FROM staged"
+                               " WHERE lifecycle = 'complete'"
+                               " ORDER BY case_id, timestamp, activity").df(), check_dtype=False)
+
+
+@given(_lifecycle_log())
+@EVENT_LOG
+def test_the_filtered_graph_loses_edges_the_unfiltered_graph_carries(rows):
+    """Replaces `g.equal('A->A' in filtered['edges'], False)` of handoff_guards_v3.py case 23. The
+    graph discovered from the complete rows alone is the one a DuckDB lead() over those rows
+    returns, and it is not the graph discovered from the log with its start rows still in it -- so
+    the lifecycle filter is not a tidying step but the step that decides which edges exist."""
+    completed = [row for row in rows if row['lifecycle'] == 'complete']
+    pdt.assert_frame_equal(_pm4py_edges(completed), _duckdb_edges(completed), check_dtype=False)
+    with pytest.raises(AssertionError):
+        pdt.assert_frame_equal(_pm4py_edges(completed), _pm4py_edges(rows), check_dtype=False)
