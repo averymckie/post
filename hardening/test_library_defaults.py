@@ -70,6 +70,8 @@ from lark.exceptions import UnexpectedInput
 import jsonschema
 from junitparser import JUnitXml
 import markdown as python_markdown
+import markdownify
+import html2text
 import pint
 import portion
 import unyt
@@ -13159,3 +13161,164 @@ def test_the_third_reader_returns_the_chart_as_a_shape_carrying_none_of_its_numb
         npt.assert_array_equal(seen[0], seen[1])
     npt.assert_array_equal(json.dumps(_deck_in_officeparser(written[0]), sort_keys=True),
                            json.dumps(_deck_in_officeparser(written[1]), sort_keys=True))
+
+
+# ---------------------------------------------------------------- the outline rendered as a page, and read back
+TURNDOWN_DIRECTORY = pathlib.Path(os.environ.get('TURNDOWN_DIR',
+                                                 str(pathlib.Path.home() / 'turndown-oracle')))
+HTML_MARKDOWN_ORACLE_JS = pathlib.Path(__file__).with_name('html_markdown_oracle.js')
+turndown_available = (shutil.which('node') is not None
+                      and (TURNDOWN_DIRECTORY / 'node_modules' / 'turndown').is_dir())
+MARKDOWN_CONVERTERS = settings(max_examples=25, deadline=None)
+MARKDOWN_WORD = st.text(alphabet=st.characters(whitelist_categories=('Lu', 'Ll')),
+                        min_size=1, max_size=8)
+MARKER_WORD = st.text(alphabet=st.characters(whitelist_categories=('Lu', 'Ll'),
+                                             whitelist_characters='*_'),
+                      min_size=1, max_size=8)
+
+
+@st.composite
+def _markdown_table(draw, cell=MARKDOWN_WORD, minimum=2):
+    """One table of generated words as a pandas frame: unique column names and at least one row."""
+    names = draw(st.lists(MARKDOWN_WORD, min_size=minimum, max_size=3, unique=True))
+    height = draw(st.integers(min_value=1, max_value=3))
+    return pd.DataFrame({name: [draw(cell) for _ in range(height)] for name in names})
+
+
+@st.composite
+def _markdown_table_with_a_pipe(draw):
+    """The same, plus one cell whose word carries a pipe, and where in the frame it was put."""
+    frame = draw(_markdown_table())
+    row = draw(st.integers(min_value=0, max_value=len(frame.index) - 1))
+    column = draw(st.sampled_from(list(frame.columns)))
+    left, right = draw(MARKDOWN_WORD), draw(MARKDOWN_WORD)
+    frame.loc[row, column] = left + '|' + right
+    return frame, row, column, left
+
+
+def _markdown_read_back(text, columns):
+    """Render Markdown back to HTML with Python-Markdown's own tables extension and read the table
+    out of it with pandas, naming both options that stop pandas inferring anything from the words."""
+    rendered = python_markdown.markdown(text, extensions=['tables'])
+    return pd.read_html(io.StringIO(rendered), keep_default_na=False,
+                        converters={name: str for name in columns})[0]
+
+
+def _markdown_in_turndown(html):
+    """The same HTML converted by turndown 7.2.4 under node. The shim reads stdin, calls the library
+    and writes what it returns."""
+    completed = subprocess.run(['node', str(HTML_MARKDOWN_ORACLE_JS)], input=html,
+                               capture_output=True, encoding='utf-8', check=True,
+                               env={**os.environ,
+                                    'NODE_PATH': str(TURNDOWN_DIRECTORY / 'node_modules')})
+    return completed.stdout
+
+
+@given(_markdown_table())
+@MARKDOWN_CONVERTERS
+def test_two_converters_return_the_table_the_page_carried(frame):
+    """P114 renders the outline to HTML and then checks one word of it with `'Coverage' in markdown`.
+    Over generated tables the claim can be made properly: markdownify 1.2.3 and html2text 2025.4.15,
+    which share no code and no HTML parser -- markdownify's pyproject at 1.2.3 requires beautifulsoup4
+    and six, html2text's published metadata at 2025.4.15 requires nothing -- both emit a delimited
+    table, and Python-Markdown's own tables extension reads each of them back into the frame the page
+    was rendered from. Replaces `g.equal('Coverage' in markdown, True)` and `g.equal('1390' in page,
+    True)` of handoff_guards_v12.py case 114."""
+    html = frame.to_html(index=False)
+    pdt.assert_frame_equal(_markdown_read_back(markdownify.markdownify(html), frame.columns), frame)
+    pdt.assert_frame_equal(_markdown_read_back(html2text.html2text(html), frame.columns), frame)
+
+
+@pytest.mark.skipif(not turndown_available,
+                    reason='node and a turndown checkout are required for this oracle')
+@given(_markdown_table())
+@MARKDOWN_CONVERTERS
+def test_the_third_converter_returns_every_cell_as_its_own_paragraph_and_no_table(frame):
+    """turndown 7.2.4, whose package.json at 7.2.4 declares only @mixmark-io/domino and nothing from
+    Python, converts the same page with no rule for tables at all: every heading and every cell comes
+    back as a paragraph of its own, in the order the page listed them, and the table is gone. So the
+    words all survive -- a containment test passes -- while nothing says any more which column a word
+    was in, and pandas finds no table to read."""
+    html = frame.to_html(index=False)
+    converted = _markdown_in_turndown(html)
+    npt.assert_array_equal(converted.split('\n\n'),
+                           list(frame.columns) + [value for row in frame.itertuples(index=False)
+                                                  for value in row])
+    with pytest.raises(ValueError):
+        _markdown_read_back(converted, frame.columns)
+
+
+@given(_markdown_table_with_a_pipe())
+@MARKDOWN_CONVERTERS
+def test_a_value_carrying_a_pipe_becomes_a_column_boundary_and_the_rest_is_dropped(table):
+    """markdownify's README at 1.2.3 documents escape_misc as "If set to ``True``, escape
+    miscellaneous punctuation characters that sometimes have Markdown significance in text. Defaults
+    to ``False``.", and its source at that tag lists the pipe in the character class that option
+    governs, `re_escape_misc_chars = re.compile(r'([]\\\\&<`[>~=+|])')`. Its `convert_td` meanwhile
+    ends every cell with the same pipe. So under the default a value carrying a pipe is written out
+    as a cell boundary: the row has more cells than the header, Python-Markdown keeps as many as the
+    header declares, and everything from the pipe onward is gone from the page with no error
+    anywhere. html2text does not escape it either, so both converters lose it."""
+    frame, row, column, left = table
+    html = frame.to_html(index=False)
+    for text in (markdownify.markdownify(html), html2text.html2text(html)):
+        read = _markdown_read_back(text, frame.columns)
+        npt.assert_array_equal(read.loc[row, column], left)
+        with pytest.raises(AssertionError):
+            pdt.assert_frame_equal(read, frame)
+
+
+@given(_markdown_table_with_a_pipe())
+@MARKDOWN_CONVERTERS
+def test_the_option_the_library_documents_escapes_the_pipe_and_restores_the_value(table):
+    """The repair is the library's own option and not a rewriting of the value: asked for
+    escape_misc, markdownify writes the pipe as `\\|`, Python-Markdown reads the escape back as the
+    character it stands for, and the frame the page was rendered from comes back cell for cell."""
+    frame, _, _, _ = table
+    html = frame.to_html(index=False)
+    pdt.assert_frame_equal(
+        _markdown_read_back(markdownify.markdownify(html, escape_misc=True), frame.columns), frame)
+
+
+@given(_markdown_table(cell=MARKER_WORD))
+@MARKDOWN_CONVERTERS
+def test_the_default_escaping_adds_one_character_for_every_marker_in_the_page(frame):
+    """The other half of a containment test. markdownify documents escape_asterisks and
+    escape_underscores as "Defaults to ``True``", so a value carrying an asterisk or an underscore is
+    not a substring of the Markdown at all: the text it writes is longer than the text it writes with
+    both options off by exactly one backslash per marker character in the table. Nothing is lost --
+    both spellings read back as the same frame, and so does html2text's, which escapes neither -- so
+    `'Coverage' in markdown` is a test that passes when the word happens to carry no Markdown
+    punctuation and fails when it does, in both directions and for different reasons."""
+    html = frame.to_html(index=False)
+    escaped = markdownify.markdownify(html)
+    plain = markdownify.markdownify(html, escape_asterisks=False, escape_underscores=False)
+    markers = sum(value.count('*') + value.count('_')
+                  for row in frame.itertuples(index=False) for value in row)
+    markers += sum(name.count('*') + name.count('_') for name in frame.columns)
+    npt.assert_array_equal(len(escaped) - len(plain), markers)
+    pdt.assert_frame_equal(_markdown_read_back(escaped, frame.columns), frame)
+    pdt.assert_frame_equal(_markdown_read_back(plain, frame.columns), frame)
+    pdt.assert_frame_equal(_markdown_read_back(html2text.html2text(html), frame.columns), frame)
+
+
+@given(_markdown_table(minimum=1).filter(lambda frame: len(frame.columns) == 1))
+@MARKDOWN_CONVERTERS
+def test_a_one_column_table_is_a_table_to_one_converter_and_a_heading_to_the_other(frame):
+    """The narrow table is where the two converters part. markdownify writes a leading and a trailing
+    pipe on every row whatever the width, so Python-Markdown reads a one-column table back as the
+    table it was. html2text joins the cells of a row with a pipe, so a row of one cell carries no
+    pipe at all, and what it writes is a word above a rule of dashes -- which is valid Markdown for
+    something else entirely: Python-Markdown reads it as a setext heading, the column name becomes
+    that heading, the rows below it become the text under it, and pandas finds no table. Nothing
+    warns, and the page's single column is the shape the outline renders when a deck holds one
+    block."""
+    html = frame.to_html(index=False)
+    pdt.assert_frame_equal(_markdown_read_back(markdownify.markdownify(html), frame.columns), frame)
+    converted = html2text.html2text(html)
+    with pytest.raises(ValueError):
+        _markdown_read_back(converted, frame.columns)
+    rendered = ElementTree.fromstring(
+        '<div>' + python_markdown.markdown(converted, extensions=['tables']) + '</div>')
+    npt.assert_array_equal(rendered[0].tag, 'h2')
+    npt.assert_array_equal(rendered[0].text, frame.columns[0])
