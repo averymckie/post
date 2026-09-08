@@ -18813,3 +18813,224 @@ def test_the_stop_word_default_is_what_the_overlap_winners_are_tied_on(words):
     with pytest.raises(AssertionError):
         npt.assert_array_equal(_sklearn_overlap(documents, query),
                                _sklearn_overlap(documents, query, stop_words='english'))
+
+
+# ---------------------------------------------------------------------------------------------------
+# P150, case a_missing_day_does_not_stop_a_running_total of handoff_guards_v15.py: a running cash
+# balance over days some of which carry no declared movement, and the weekly rollup of that balance.
+# pandas 2.2.3 is the library under test; polars 1.44.1 and DuckDB 1.5.5 are the two engines outside
+# it, and itertools.accumulate is the second running total the proof itself names.
+CASH_DAYS = settings(max_examples=60, deadline=None)
+AMOUNT = st.floats(min_value=-5000, max_value=5000, allow_nan=False, allow_infinity=False, width=32)
+COMPLETE_MOVES = st.lists(AMOUNT, min_size=2, max_size=10)
+GAPPED_MOVES = st.builds(lambda before, after, tail: before + [None] + [after] + tail,
+                         st.lists(AMOUNT, min_size=1, max_size=4), AMOUNT,
+                         st.lists(st.one_of(st.none(), AMOUNT), min_size=0, max_size=4))
+_SUNDAY = pd.tseries.offsets.Week(weekday=6)
+
+
+def _daily_span(start, weeks, past_the_anchor):
+    """A run of consecutive days that ends `past_the_anchor` days after a Sunday, so the region where a
+    weekly grid has a partial last week is generated directly rather than filtered for."""
+    first = pd.Timestamp(start)
+    last = _SUNDAY.rollforward(first) + pd.Timedelta(weeks=weeks) + pd.Timedelta(days=past_the_anchor)
+    return pd.date_range(first, last)
+
+
+SPAN_START = st.dates(min_value=datetime.date(2000, 1, 1), max_value=datetime.date(2050, 12, 31))
+WEEKS_IN_SPAN = st.integers(min_value=1, max_value=6)
+WEEK_ALIGNED_SPAN = st.builds(_daily_span, SPAN_START, WEEKS_IN_SPAN, st.just(0))
+PARTIAL_WEEK_SPAN = st.builds(_daily_span, SPAN_START, WEEKS_IN_SPAN, st.integers(min_value=1, max_value=6))
+
+
+def _duckdb_running_total(moves):
+    """The same running balance as a SQL window sum, with an undeclared movement carried across as NULL."""
+    with duckdb.connect() as connection:
+        connection.execute('create table cash(day integer, movement double)')
+        connection.executemany('insert into cash values (?, ?)', list(enumerate(moves)))
+        rows = connection.execute('select sum(movement) over (order by day rows between unbounded '
+                                  'preceding and current row) from cash order by day').fetchall()
+    return np.array([np.nan if row[0] is None else row[0] for row in rows], dtype='float64')
+
+
+def _duckdb_week_column(days, expression):
+    """One weekly value per day from DuckDB's own date_trunc, whose WeekOperator returns the Monday of
+    the current week."""
+    with duckdb.connect() as connection:
+        rows = connection.execute('select %s from (select unnest(?::DATE[]) as day)' % expression,
+                                  [list(days)]).fetchall()
+    return np.array([row[0] for row in rows], dtype=object)
+
+
+def _polars_week_starts(days):
+    """The same bucket from polars, whose truncate documentation says weekly buckets start on Monday."""
+    return pl.Series('day', list(days), dtype=pl.Date).dt.truncate('1w').to_numpy()
+
+
+def _polars_week_counts(days):
+    """How many of the generated days fall in each of those buckets."""
+    frame = pl.DataFrame({'day': pl.Series(list(days), dtype=pl.Date)})
+    grouped = frame.group_by(pl.col('day').dt.truncate('1w').alias('week')).len().sort('week')
+    return grouped.get_column('len').to_numpy()
+
+
+def _duckdb_week_counts(days):
+    """And how many DuckDB puts in each."""
+    with duckdb.connect() as connection:
+        rows = connection.execute("select count(*) from (select unnest(?::DATE[]) as day) "
+                                  "group by date_trunc('week', day) order by date_trunc('week', day)",
+                                  [list(days)]).fetchall()
+    return np.array([row[0] for row in rows])
+
+
+@given(GAPPED_MOVES)
+@CASH_DAYS
+def test_a_skipping_running_total_is_the_zero_filled_one_at_every_day_but_the_missing_ones(moves):
+    """`Series.cumsum` documents its default as `skipna : bool, default True -- Exclude NA/null values`.
+    What `nanops.na_accum_func` does for that default is read from the table it selects on: the entry for
+    `np.cumsum` is `(0.0, np.nan)`, so the missing days are set to zero, the accumulation runs, and the
+    NaN is written back only at those positions. The running total therefore equals the one taken over a
+    series whose gaps were filled with zero at every day that declares a movement, and differs from it
+    only at the days that do not: the balance after a missing day is the balance of a day whose movement
+    was assumed to be nothing."""
+    series = pd.Series(moves, dtype='float64')
+    declared = series.notna()
+    pdt.assert_series_equal(series.cumsum()[declared], series.fillna(0.0).cumsum()[declared])
+    with pytest.raises(AssertionError):
+        pdt.assert_series_equal(series.cumsum(), series.fillna(0.0).cumsum())
+
+
+@given(GAPPED_MOVES)
+@CASH_DAYS
+def test_polars_offers_only_the_skipping_reading_of_a_running_total(moves):
+    """polars 1.44.1 declares `def cum_sum(self, *, reverse: bool = False)` and no null policy at all, so
+    the engine outside pandas has one reading of this operation where pandas has two. That one reading is
+    pandas' default, matched here at every day including the missing ones; asking polars for the other
+    reading is a TypeError, and the other reading is what pandas' non-default gives."""
+    series = pd.Series(moves, dtype='float64')
+    running = pl.Series('movement', moves, dtype=pl.Float64).cum_sum()
+    npt.assert_allclose(series.cumsum().to_numpy(), running.to_numpy())
+    with pytest.raises(TypeError):
+        pl.Series('movement', moves, dtype=pl.Float64).cum_sum(skipna=False)
+    with pytest.raises(AssertionError):
+        npt.assert_allclose(series.cumsum(skipna=False).to_numpy(), running.to_numpy())
+
+
+@given(COMPLETE_MOVES)
+@CASH_DAYS
+def test_three_running_totals_agree_when_every_day_declares_a_movement(moves):
+    """The agreeing region. With no gap the question of a null policy does not arise, and pandas' cumsum,
+    the itertools.accumulate the proof names beside it, polars' cum_sum and a SQL window sum over an
+    unbounded preceding frame return the same balance for every day."""
+    running = pd.Series(moves, dtype='float64').cumsum().to_numpy()
+    npt.assert_allclose(running, np.array(list(itertools.accumulate(moves)), dtype='float64'))
+    npt.assert_allclose(running, pl.Series('movement', moves, dtype=pl.Float64).cum_sum().to_numpy())
+    npt.assert_allclose(running, _duckdb_running_total(moves))
+
+
+@given(GAPPED_MOVES)
+@CASH_DAYS
+def test_a_sql_window_sum_reports_a_balance_on_a_day_the_dataframes_leave_unknown(moves):
+    """The disagreeing region, and a third reading of the same operation. SQL's SUM ignores NULL inside
+    the window frame rather than propagating it into the row, so DuckDB returns the balance carried
+    forward on a day with no declared movement where both dataframe libraries return a gap. A forecast
+    read from the SQL engine has a number on every day; the same forecast read from pandas or polars is
+    blank there, and neither is more nearly the running total the other computes."""
+    running = pd.Series(moves, dtype='float64').cumsum().to_numpy()
+    npt.assert_allclose(running, pl.Series('movement', moves, dtype=pl.Float64).cum_sum().to_numpy())
+    with pytest.raises(AssertionError):
+        npt.assert_allclose(running, _duckdb_running_total(moves))
+
+
+@given(GAPPED_MOVES)
+@CASH_DAYS
+def test_the_propagating_reading_marks_every_later_day_unknown_not_only_the_missing_one(moves):
+    """`skipna=False` does not merely decline to fill the gap: the mask of the result is the running
+    maximum of the input's own missing mask, which is pandas' way of saying that every day from the first
+    undeclared one onward is unknown. The two readings of the same series therefore disagree wherever a
+    declared day follows an undeclared one, which is exactly the case the proof's fixture contains."""
+    series = pd.Series(moves, dtype='float64')
+    pdt.assert_series_equal(series.cumsum(skipna=False).isna(), series.isna().cummax())
+    with pytest.raises(AssertionError):
+        pdt.assert_series_equal(series.cumsum(skipna=False), series.cumsum())
+
+
+@given(PARTIAL_WEEK_SPAN)
+@CASH_DAYS
+def test_three_engines_agree_on_the_week_each_day_belongs_to(spanned):
+    """The weekly rollup, taken as a bucket per day. pandas' `to_period('W')`, polars' `dt.truncate('1w')`
+    -- whose documentation says `Weekly buckets start on Monday` -- and DuckDB's `date_trunc('week', ...)`
+    -- whose WeekOperator is `Date::GetMondayOfCurrentWeek(input)` -- put every generated day in the same
+    week. Which week a day belongs to is not in dispute; which weeks the rollup has rows for is."""
+    days = [stamp.date() for stamp in spanned]
+    npt.assert_array_equal(spanned.to_period('W').start_time.date, _polars_week_starts(days))
+    npt.assert_array_equal(spanned.to_period('W').start_time.date,
+                           _duckdb_week_column(days, "date_trunc('week', day)::DATE"))
+
+
+@given(PARTIAL_WEEK_SPAN)
+@CASH_DAYS
+def test_a_weekly_resample_labels_its_last_bucket_after_the_end_of_the_span(spanned):
+    """`TimeGrouper` puts `W` in its `end_types` set, so a weekly resample takes `closed = 'right'` and
+    `label = 'right'` without being asked. Its labels are the period ends of the same weeks, which means
+    the final label of a span that does not end on a Sunday is a date the span does not contain -- a
+    weekly summary row dated in the future of the forecast it summarises. The anchors `date_range` emits
+    over the same span are a different list."""
+    labels = pd.Series(1, index=spanned).resample('W').sum().index
+    npt.assert_array_equal(labels.date, spanned.to_period('W').unique().end_time.date)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(labels.date, pd.date_range(spanned[0], spanned[-1], freq='W').date)
+
+
+@given(PARTIAL_WEEK_SPAN)
+@CASH_DAYS
+def test_the_days_after_the_last_weekly_anchor_belong_to_no_bucket(spanned):
+    """What that different list costs. `date_range(start, end, freq='W')` returns the week ends that lie
+    inside the span, so on a span that does not end on a Sunday the days after the last anchor are in no
+    week the grid names, and a rollup built from the anchors silently reports less than the daily series
+    it was built from. Every day of the same span is at or before the last resample label."""
+    anchors = pd.date_range(spanned[0], spanned[-1], freq='W')
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(spanned.date, spanned[spanned <= anchors[-1]].date)
+    labels = pd.Series(1, index=spanned).resample('W').sum().index
+    npt.assert_array_equal(spanned.date, spanned[spanned <= labels[-1]].date)
+
+
+@given(PARTIAL_WEEK_SPAN)
+@CASH_DAYS
+def test_the_resample_counts_are_the_counts_both_outside_engines_take(spanned):
+    """And the rollup that keeps the partial week is the one the outside engines take. Counting the days
+    per week in DuckDB and in polars gives the resample's own counts, including the short final week; the
+    three implementations differ only in which end of the week they label the row with."""
+    days = [stamp.date() for stamp in spanned]
+    counts = pd.Series(1, index=spanned).resample('W').sum().to_numpy()
+    npt.assert_array_equal(counts, _duckdb_week_counts(days))
+    npt.assert_array_equal(counts, _polars_week_counts(days))
+
+
+@given(WEEK_ALIGNED_SPAN)
+@CASH_DAYS
+def test_the_anchor_grid_matches_both_engines_on_a_span_that_ends_on_a_sunday(spanned):
+    """The agreeing region for the grid. When the span happens to end on a Sunday the anchors `date_range`
+    emits are exactly the week ends DuckDB computes from its own Monday buckets, and the resample labels
+    are the same list again, so the three rollups have the same rows and the choice between them is
+    invisible."""
+    days = [stamp.date() for stamp in spanned]
+    anchors = pd.date_range(spanned[0], spanned[-1], freq='W')
+    week_ends = np.unique(_duckdb_week_column(days, "(date_trunc('week', day) + INTERVAL 6 DAY)::DATE"))
+    npt.assert_array_equal(anchors.date, week_ends)
+    npt.assert_array_equal(anchors.date, pd.Series(1, index=spanned).resample('W').sum().index.date)
+
+
+@given(PARTIAL_WEEK_SPAN)
+@CASH_DAYS
+def test_the_anchor_grid_loses_a_week_the_outside_engines_keep(spanned):
+    """And the disagreeing one. On a span that does not end on a Sunday the anchor grid is missing the
+    week DuckDB and polars both have a bucket for, while the resample labels still match the engines'
+    week ends exactly -- so the two pandas rollups the proof's chain could use differ from each other,
+    and only one of them agrees with what an engine outside pandas counts."""
+    days = [stamp.date() for stamp in spanned]
+    week_ends = np.unique(_duckdb_week_column(days, "(date_trunc('week', day) + INTERVAL 6 DAY)::DATE"))
+    npt.assert_array_equal(pd.Series(1, index=spanned).resample('W').sum().index.date, week_ends)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(pd.date_range(spanned[0], spanned[-1], freq='W').date, week_ends)
