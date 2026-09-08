@@ -97,6 +97,7 @@ import ftfy
 import ftfy.badness
 import jsonpatch
 from deepdiff import DeepDiff
+import mammoth
 import markdown as python_markdown
 import markdownify
 import html2text
@@ -18311,3 +18312,259 @@ def test_a_variable_the_context_does_not_carry_is_an_empty_cell_by_default_and_a
     with pytest.raises(jinja2.UndefinedError):
         _bound_document(template, {'topic': topic},
                         jinja_env=jinja2.Environment(undefined=jinja2.StrictUndefined))
+
+
+# --------------------------------------------------------------------------------------------------
+# handoff_guards_v11.py, case 105 (P105): what a conversion that reports nothing has published
+# --------------------------------------------------------------------------------------------------
+DOCX_HTML_ORACLE_PHP = pathlib.Path(__file__).with_name('docx_html_oracle.php')
+PHPWORD_AUTOLOAD = pathlib.Path(os.environ.get('PHPWORD_DIR',
+                                               str(pathlib.Path.home() / 'phpword-oracle'))) / 'vendor' / 'autoload.php'
+phpword_available = shutil.which('php') is not None and PHPWORD_AUTOLOAD.is_file()
+BOX_MARK = '☐'  # the ballot box the frozen case writes at the head of every checklist paragraph
+CHECKLIST_WORD = st.text(alphabet='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
+                         min_size=1, max_size=6)
+CHECKLIST_PHRASE = st.lists(CHECKLIST_WORD, min_size=1, max_size=4).map(' '.join)
+CHECKLIST_RECORDS = st.lists(st.fixed_dictionaries({'action_id': CHECKLIST_WORD,
+                                                    'label': CHECKLIST_PHRASE,
+                                                    'quote': CHECKLIST_PHRASE}),
+                             min_size=1, max_size=3)
+CONVERSION = settings(max_examples=12, deadline=None)
+
+
+def _checklist_document(records, marking=None, marker=True):
+    """The P104 checklist document, written with python-docx 1.2.0: a heading, then one paragraph per
+    record made of a ballot-box run, a marker run carrying the record's identifier and its quotation,
+    and the label. `marking` is the name of the run-font property to set on the marker run and nothing
+    else -- python-docx 1.2.0 documents `Font.hidden` at tag `v1.2.0` in `src/docx/text/font.py` as
+    "Read/write tri-state value. When |True|, causes the text in the run to be hidden from display,
+    unless applications settings force hidden text to be shown", and writes it as the `w:vanish`
+    element of `w:rPr`. `marker=False` leaves the marker run out of the document altogether, which is
+    the only way to compare a conversion that publishes the marker with one that has nothing to
+    publish."""
+    document = docx.Document()
+    document.add_heading('Required actions', 1)
+    for record in records:
+        paragraph = document.add_paragraph()
+        paragraph.add_run(BOX_MARK + ' ')
+        if marker:
+            run = paragraph.add_run(record['action_id'] + '|' + record['quote'])
+            if marking is not None:
+                setattr(run.font, marking, True)
+        paragraph.add_run(record['label'])
+    written = io.BytesIO()
+    document.save(written)
+    return written.getvalue()
+
+
+def _vanish_marked_runs(document):
+    """Every run of the package whose run properties carry `w:vanish`, as libxml2 selects them and as
+    its own `string()` renders each one. This is the reader that says what the document declares,
+    against the converters that say what reaches a page."""
+    with zipfile.ZipFile(io.BytesIO(document)) as archive:
+        tree = lxml_etree.fromstring(archive.read('word/document.xml'))
+    return [run.xpath('string(.)')
+            for run in tree.xpath('//w:r[w:rPr/w:vanish]', namespaces=WORD_NAMESPACE)]
+
+
+def _mammoth_html(document):
+    """mammoth 1.12.1's `convert_to_html`, whose README at tag `1.12.1` documents the return as an
+    object with "`value`: the generated HTML" and "`messages`: any messages, such as errors and
+    warnings, generated during the conversion"."""
+    return mammoth.convert_to_html(io.BytesIO(document)).value
+
+
+def _mammoth_messages(document, convert):
+    """The message list of one mammoth conversion, rendered as the frozen case renders it."""
+    return [str(message) for message in convert(io.BytesIO(document)).messages]
+
+
+def _mammoth_block_markup(html):
+    """The blocks of a mammoth conversion as markup, parsed the way case 105 parses them."""
+    return [lxml_etree.tostring(element, encoding='unicode')
+            for element in lxml_html.fragment_fromstring(html, create_parent='div')]
+
+
+def _mammoth_block_texts(html):
+    """The reading case 105 takes of those blocks: lxml's own `text_content()`, which is what the
+    case's `label in block` checks are evaluated against."""
+    return [element.text_content()
+            for element in lxml_html.fragment_fromstring(html, create_parent='div')]
+
+
+def _phpword_html(document):
+    """The same package converted by PHPWord 1.4.0 under PHP 8.4.19, an implementation of the same
+    operation that shares no code with mammoth: its `composer.json` at tag `1.4.0` requires `php`,
+    `ext-dom`, `ext-gd`, `ext-zip`, `ext-json`, `ext-xml` and `phpoffice/math` and nothing from
+    Python. The shim parses argv, calls the library and prints."""
+    with tempfile.TemporaryDirectory() as directory:
+        path = pathlib.Path(directory) / 'checklist.docx'
+        path.write_bytes(document)
+        completed = subprocess.run(
+            ['php', str(DOCX_HTML_ORACLE_PHP), str(PHPWORD_AUTOLOAD), str(path)],
+            capture_output=True, encoding='utf-8', check=True)
+    return completed.stdout
+
+
+def _phpword_block_markup(html):
+    """The block elements of PHPWord's body, as markup, selected by libxml2."""
+    return [lxml_etree.tostring(element, encoding='unicode')
+            for element in lxml_html.fromstring(html).xpath('//body//h1 | //body//p')]
+
+
+def _phpword_block_texts(html):
+    """The same blocks under the same `text_content()` reading case 105 applies to mammoth's."""
+    return [element.text_content()
+            for element in lxml_html.fromstring(html).xpath('//body//h1 | //body//p')]
+
+
+@given(CHECKLIST_RECORDS)
+@CONVERSION
+def test_the_checklist_marks_one_run_hidden_for_every_record_and_libxml2_reads_them_all(records):
+    """The document under conversion really does declare the marker text hidden. libxml2 selecting
+    `//w:r[w:rPr/w:vanish]` returns exactly the markers the generated records were built from, one per
+    record, and returns something different for the same records written without the marking. Whatever
+    the converters go on to do, the declaration is in the package and a reader can find it."""
+    marked = _checklist_document(records, marking='hidden')
+    npt.assert_array_equal(_vanish_marked_runs(marked),
+                           [record['action_id'] + '|' + record['quote'] for record in records])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_vanish_marked_runs(marked),
+                               _vanish_marked_runs(_checklist_document(records)))
+
+
+@given(CHECKLIST_RECORDS)
+@CONVERSION
+def test_mammoth_returns_the_same_html_whether_or_not_the_marker_run_is_marked_hidden(records):
+    """The conversion is blind to the marking. mammoth 1.12.1's HTML for the document that declares the
+    marker hidden is the same string as its HTML for the document that does not, so the property makes
+    no difference at all to what is published -- not a class, not an attribute, not an omission."""
+    npt.assert_equal(_mammoth_html(_checklist_document(records, marking='hidden')),
+                     _mammoth_html(_checklist_document(records)))
+
+
+@given(CHECKLIST_RECORDS)
+@CONVERSION
+def test_mammoth_reflects_the_run_property_it_reads_and_drops_the_one_it_does_not(records):
+    """Not blindness to run properties in general. `_read_run_properties` in `mammoth/docx/body_xml.py`
+    at tag `1.12.1` reads exactly ten of them -- `w:vertAlign`, `w:rFonts`, `w:sz`, `w:b`, `w:i`,
+    `w:u`, `w:strike`, `w:caps`, `w:smallCaps` and `w:highlight` -- and `w:vanish` is not among them.
+    Bold, which is on that list, changes the conversion; hidden, which is not, does not. The whole
+    `w:rPr` element is in the reader's `_ignored_elements` set, so a property outside the ten is
+    skipped rather than reported."""
+    with pytest.raises(AssertionError):
+        npt.assert_equal(_mammoth_html(_checklist_document(records, marking='bold')),
+                         _mammoth_html(_checklist_document(records)))
+    npt.assert_equal(_mammoth_html(_checklist_document(records, marking='hidden')),
+                     _mammoth_html(_checklist_document(records)))
+
+
+@given(CHECKLIST_RECORDS)
+@CONVERSION
+def test_mammoth_reports_the_same_messages_whether_it_publishes_the_hidden_marker_or_not(records):
+    """Case 105's `g.equal(out['messages'], [])`, executed and stated without typing the empty list.
+    The message list of the conversion that publishes the hidden marker is the message list of the
+    conversion of a document that has no marker run at all, while the two HTML documents differ by
+    exactly that text. So "a clean conversion reports nothing" is true at the moment the conversion has
+    published text the document declared hidden: the warning channel is not measuring this, and a
+    caller that gates on an empty message list has gated on nothing."""
+    published = _checklist_document(records, marking='hidden')
+    absent = _checklist_document(records, marker=False)
+    npt.assert_array_equal(_mammoth_messages(published, mammoth.convert_to_html),
+                           _mammoth_messages(absent, mammoth.convert_to_html))
+    with pytest.raises(AssertionError):
+        npt.assert_equal(_mammoth_html(published), _mammoth_html(absent))
+
+
+@given(CHECKLIST_RECORDS)
+@CONVERSION
+def test_extract_raw_text_publishes_the_hidden_marker_under_the_same_silent_message_list(records):
+    """The other published entry point, which the same proof's chain reaches for when HTML is not
+    wanted. `extract_raw_text` returns the same kind of result object, its message list is likewise
+    unchanged by whether the hidden marker is there to publish, and the text it returns carries it."""
+    published = _checklist_document(records, marking='hidden')
+    absent = _checklist_document(records, marker=False)
+    npt.assert_array_equal(_mammoth_messages(published, mammoth.extract_raw_text),
+                           _mammoth_messages(absent, mammoth.extract_raw_text))
+    with pytest.raises(AssertionError):
+        npt.assert_equal(mammoth.extract_raw_text(io.BytesIO(published)).value,
+                         mammoth.extract_raw_text(io.BytesIO(absent)).value)
+
+
+@pytest.mark.skipif(not phpword_available,
+                    reason='php and the PHPWord checkout are required for this oracle')
+@given(CHECKLIST_RECORDS)
+@CONVERSION
+def test_the_independent_converter_carries_the_marking_into_the_html_that_mammoth_drops(records):
+    """The rule 2a search for a second implementation of converting a .docx to HTML ("independent
+    implementation convert docx to html library not mammoth PHPWord docx4j") found PHPWord's HTML
+    writer, which was installed. It reads `w:vanish` -- `AbstractPart.php` at tag `1.4.0` maps
+    `'hidden' => [self::READ_TRUE, 'w:vanish']` -- and writes it -- `Writer/HTML/Style/Font.php` at
+    that tag sets `$css['display'] = $this->getValueIf($style->isHidden(), 'none')`. So its HTML for
+    the marked document differs from its HTML for the unmarked one, where mammoth's is the same string
+    for both. Publishing the marking is a choice one of the two implementations makes; dropping it is
+    not a limit of the operation."""
+    marked = _checklist_document(records, marking='hidden')
+    plain = _checklist_document(records)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_phpword_block_markup(_phpword_html(marked)),
+                               _phpword_block_markup(_phpword_html(plain)))
+    npt.assert_equal(_mammoth_html(marked), _mammoth_html(plain))
+
+
+@pytest.mark.skipif(not phpword_available,
+                    reason='php and the PHPWord checkout are required for this oracle')
+@given(CHECKLIST_RECORDS)
+@CONVERSION
+def test_both_converters_publish_the_marker_text_in_the_reading_the_case_takes(records):
+    """And the marking the second converter kept is invisible to the case's own reading. Case 105
+    measures each block with lxml's `text_content()`, and that reading of PHPWord's blocks is
+    character-for-character the same list as that reading of mammoth's, hidden span and all. The
+    checks the case then runs -- every label reaches HTML, at least as many blocks as records -- pass
+    identically for the converter that marked the text and the converter that did not, which is why
+    they cannot distinguish the two."""
+    marked = _checklist_document(records, marking='hidden')
+    npt.assert_array_equal(_mammoth_block_texts(_mammoth_html(marked)),
+                           _phpword_block_texts(_phpword_html(marked)))
+
+
+@pytest.mark.skipif(not phpword_available,
+                    reason='php and the PHPWord checkout are required for this oracle')
+@given(CHECKLIST_RECORDS)
+@CONVERSION
+def test_the_markdown_step_erases_the_marking_the_second_converter_kept(records):
+    """The chain's last transformation removes the distinction even where it was made. markdownify
+    1.2.3 has no rule for a `display: none` span, so it renders the span's text as text: block by
+    block, the Markdown of PHPWord's HTML is the Markdown of mammoth's. By the time the deliverable is
+    reached, the two conversions are one document, and the hidden marker is ordinary prose in both."""
+    marked = _checklist_document(records, marking='hidden')
+    npt.assert_array_equal(
+        [markdownify.markdownify(block).strip()
+         for block in _mammoth_block_markup(_mammoth_html(marked))],
+        [markdownify.markdownify(block).strip()
+         for block in _phpword_block_markup(_phpword_html(marked))])
+
+
+@given(CHECKLIST_RECORDS)
+@CONVERSION
+def test_a_second_reader_of_the_package_publishes_the_hidden_marker_as_well(records):
+    """docx2python 3.7.1, which parses the package XML itself rather than through mammoth, returns the
+    same paragraphs the conversion returns, marker text included. A reader that agrees is not a check:
+    the marking is a run property, and a reader that joins run texts has already discarded it before
+    it can be asked about."""
+    marked = _checklist_document(records, marking='hidden')
+    with docx2python(io.BytesIO(marked)) as parsed:
+        npt.assert_array_equal(_mammoth_block_texts(_mammoth_html(marked)), parsed.body[0][0][0])
+
+
+@pytest.mark.skipif(not poi_available, reason='java and the Apache POI jars are required for this oracle')
+@given(CHECKLIST_RECORDS)
+@CONVERSION
+def test_apache_poi_publishes_the_hidden_marker_from_the_same_package(records):
+    """The third reader, in another runtime and over another object model: Apache POI 5.4.1's
+    `XWPFParagraph.getText()` returns the same paragraphs, so the marker text is in every reading of
+    the document that anyone here can take, and the only reading that separates it out is the one that
+    asks about the run property itself."""
+    marked = _checklist_document(records, marking='hidden')
+    npt.assert_array_equal(_mammoth_block_texts(_mammoth_html(marked)),
+                           [row[1] for row in _poi_section_lines(marked, 'PARA')])
