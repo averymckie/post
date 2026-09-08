@@ -110,6 +110,11 @@ from odf.namespaces import OFFICENS, TABLENS
 import odfdo
 import orjson
 import pdfplumber
+import pm4py
+import pm4py.analysis as pm4py_analysis
+from pm4py.objects.petri_net import obj as pm4py_petri
+from pm4py.objects.petri_net.utils import petri_utils as pm4py_utils
+import snakes.nets as snakes_nets
 import pptx
 import pptx.chart.data
 from pptx.enum.chart import XL_CHART_TYPE
@@ -14161,3 +14166,350 @@ def test_attaching_files_leaves_the_page_text_alone(line, files):
     after = _both_extractions(_attached(pdf, files))
     npt.assert_array_equal(after[0], before[0])
     npt.assert_array_equal(after[1], before[1])
+
+
+# ---------------------------------------------------------------- a workflow net and what makes it sound
+WORKFLOW = settings(max_examples=12, deadline=None)
+BRANCHES = st.integers(min_value=2, max_value=3)
+GATEWAYS = st.sampled_from(['and', 'xor'])
+
+
+def _petri(places, transitions, arcs, source, sink):
+    """A net in pm4py 2.7.23.8's own object model, built with its own `petri_utils.add_arc_from_to`.
+    Nothing about the net is decided here: the places, the transitions and the arcs are the strategy's,
+    and every question asked of the net below is asked of a library."""
+    net = pm4py_petri.PetriNet('generated')
+    holders = {name: pm4py_petri.PetriNet.Place(name) for name in places}
+    firings = {name: pm4py_petri.PetriNet.Transition(name, name) for name in transitions}
+    for place in holders.values():
+        net.places.add(place)
+    for transition in firings.values():
+        net.transitions.add(transition)
+    for tail, head in arcs:
+        pm4py_utils.add_arc_from_to(holders.get(tail) or firings[tail],
+                                    firings.get(head) or holders[head], net)
+    return net, pm4py_petri.Marking({holders[source]: 1}), pm4py_petri.Marking({holders[sink]: 1})
+
+
+def _gateway_net(split, join, branches):
+    """The four ways a split and a join can be paired over a generated number of branches: a
+    transition that feeds every branch at once, or one transition per branch competing for the same
+    token, and the same two shapes on the way back in."""
+    places = ['source'] + [f'p{index}' for index in range(branches)] + \
+             [f'q{index}' for index in range(branches)] + ['sink']
+    transitions, arcs = [], []
+    if split == 'and':
+        transitions.append('split')
+        arcs.append(('source', 'split'))
+        arcs += [('split', f'p{index}') for index in range(branches)]
+    else:
+        for index in range(branches):
+            transitions.append(f'pick{index}')
+            arcs += [('source', f'pick{index}'), (f'pick{index}', f'p{index}')]
+    for index in range(branches):
+        transitions.append(f'step{index}')
+        arcs += [(f'p{index}', f'step{index}'), (f'step{index}', f'q{index}')]
+    if join == 'and':
+        transitions.append('join')
+        arcs += [(f'q{index}', 'join') for index in range(branches)]
+        arcs.append(('join', 'sink'))
+    else:
+        for index in range(branches):
+            transitions.append(f'close{index}')
+            arcs += [(f'q{index}', f'close{index}'), (f'close{index}', 'sink')]
+    return _petri(places, transitions, arcs, 'source', 'sink')
+
+
+def _flow_graph(net):
+    """The net's flow relation as an igraph 1.0.0 graph -- a C implementation with no Python
+    dependency on pm4py, which itself reaches for NetworkX. Every structural question below is one
+    of igraph's published calls on this graph."""
+    names = [place.name for place in net.places] + [transition.name for transition in net.transitions]
+    graph = igraph.Graph(directed=True)
+    graph.add_vertices(names)
+    graph.add_edges([(arc.source.name, arc.target.name) for arc in net.arcs])
+    return graph
+
+
+def _igraph_workflow_net(net):
+    """pm4py's documented definition of a WF-net, read at 2.7.23.8 in pm4py/analysis.py -- "1. It has
+    a unique source place. 2. It has a unique sink place. 3. Every node is on a path from the source
+    to the sink." -- answered by igraph rather than by pm4py. pm4py's own implementation takes a
+    different route: `_short_circuit_petri_net` joins the sink back to the source and
+    `pm4py.algo.analysis.workflow_net.variants.petri_net.apply` returns
+    `nx_utils.is_strongly_connected` of that."""
+    graph = _flow_graph(net)
+    places = [place.name for place in net.places]
+    sources = [name for name in places if graph.degree(name, mode='in') == 0]
+    sinks = [name for name in places if graph.degree(name, mode='out') == 0]
+    if len(sources) != 1 or len(sinks) != 1:
+        return False
+    forward = set(graph.subcomponent(sources[0], mode='out'))
+    backward = set(graph.subcomponent(sinks[0], mode='in'))
+    return len(forward & backward) == graph.vcount()
+
+
+def _structural_rule(net, initial, final):
+    """The rule handoff_guards_v4.py records as the revision: an acyclic marked-graph workflow net.
+    Each of its three parts is a library's answer -- pm4py for the workflow-net question, igraph's
+    `degree` for the marked-graph one and igraph's `is_dag` for acyclicity -- so what is under test
+    is the rule's shape and not an implementation of it."""
+    graph = _flow_graph(net)
+    marked = all(graph.degree(place.name, mode='in') == (0 if place in initial else 1)
+                 and graph.degree(place.name, mode='out') == (0 if place in final else 1)
+                 for place in net.places)
+    return bool(pm4py.check_is_workflow_net(net)) and marked and graph.is_dag()
+
+
+def _reachable(net, initial):
+    """The reachable marking graph, built by SNAKES 0.9.33 -- Franck Pommereau's Petri net library,
+    whose setup.py at that version declares no dependencies at all and which knows nothing of pm4py.
+    `StateGraph` is documented there as "The graph of reachable markings of a net", `build` walks it
+    to exhaustion and `successors` returns "an iterator over triples `(succ, trans, mode)`
+    representing the number of the successor, the name of the transition and the binding needed to
+    reach the new state". The triples are handed to NetworkX as a multigraph, so two transitions
+    joining the same pair of markings stay two edges."""
+    source = snakes_nets.PetriNet('generated')
+    for place in net.places:
+        source.add_place(snakes_nets.Place(place.name, [snakes_nets.dot] * initial.get(place, 0)))
+    for transition in net.transitions:
+        source.add_transition(snakes_nets.Transition(transition.name))
+    for arc in net.arcs:
+        if isinstance(arc.source, pm4py_petri.PetriNet.Place):
+            source.add_input(arc.source.name, arc.target.name, snakes_nets.Value(snakes_nets.dot))
+        else:
+            source.add_output(arc.target.name, arc.source.name, snakes_nets.Value(snakes_nets.dot))
+    states = snakes_nets.StateGraph(source)
+    states.build()
+    graph, markings = nx.MultiDiGraph(), {}
+    for state in states:
+        states.goto(state)
+        markings[state] = tuple(sorted((name, len(tokens))
+                                       for name, tokens in states.net.get_marking().items()))
+        graph.add_node(state)
+        for successor, transition, _ in states.successors():
+            graph.add_edge(state, successor, transition=transition.name)
+    return graph, markings
+
+
+def _final_state(markings, final):
+    """Which reachable marking is the final marking, by comparing the markings themselves."""
+    wanted = tuple(sorted((place.name, count) for place, count in final.items()))
+    return [state for state, marking in markings.items() if marking == wanted]
+
+
+def _conditions(net, initial, final):
+    """The three conditions van der Aalst's definition names, each answered by one published call
+    over the marking graph SNAKES built: the final marking is reachable from every reachable marking
+    (`networkx.ancestors`), nothing is enabled once it is reached (`out_degree`), and every
+    transition labels some edge. pm4py's own docstring for check_soundness names only the first two
+    of these and the absence of live-locks."""
+    graph, markings = _reachable(net, initial)
+    finals = _final_state(markings, final)
+    fired = {data['transition'] for _, _, data in graph.edges(data=True)}
+    dead = sorted({transition.name for transition in net.transitions} - fired)
+    stuck = sorted(state for state in graph
+                   if graph.out_degree(state) == 0 and state not in finals)
+    if not finals:
+        return {'option': False, 'proper': False, 'dead': dead, 'stuck': stuck, 'reached': False}
+    return {'option': set(graph) == nx.ancestors(graph, finals[0]) | set(finals),
+            'proper': graph.out_degree(finals[0]) == 0,
+            'dead': dead, 'stuck': stuck, 'reached': True}
+
+
+@given(GATEWAYS, GATEWAYS, BRANCHES)
+@WORKFLOW
+def test_two_graph_libraries_agree_on_which_petri_nets_are_workflow_nets(split, join, branches):
+    """`g.equal(soundness_state(*broken)['state'], 'not_a_workflow_net')` types the verdict for one
+    hand-built net carrying an orphan place. The question is a graph question, and pm4py publishes
+    the definition, so it can be asked of a second graph library: over every generated gateway net
+    and over the same net with a place nothing produces or consumes, igraph's reading of "unique
+    source place, unique sink place, every node on a path from the source to the sink" returns what
+    pm4py's short-circuit-and-strongly-connect implementation returns."""
+    net, initial, final = _gateway_net(split, join, branches)
+    before = bool(pm4py.check_is_workflow_net(net))
+    npt.assert_array_equal(before, _igraph_workflow_net(net))
+    net.places.add(pm4py_petri.PetriNet.Place('orphan'))
+    after = bool(pm4py.check_is_workflow_net(net))
+    npt.assert_array_equal(after, _igraph_workflow_net(net))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(before, after)
+
+
+@given(GATEWAYS, GATEWAYS, BRANCHES)
+@WORKFLOW
+def test_the_structural_rule_is_true_only_where_woflan_calls_the_net_sound(split, join, branches):
+    """The revision handoff_guards_v4.py records returns True only for an acyclic marked-graph
+    workflow net. Over the generated family that implication holds in the direction it claims:
+    wherever the three structural answers are all True, Woflan agrees the net is sound. Nothing here
+    types either verdict."""
+    net, initial, final = _gateway_net(split, join, branches)
+    assume(_structural_rule(net, initial, final))
+    npt.assert_array_equal(pm4py.check_soundness(net, initial, final)[0],
+                           _structural_rule(net, initial, final))
+
+
+@given(BRANCHES)
+@WORKFLOW
+def test_the_false_of_the_structural_rule_is_a_net_woflan_proves_sound(branches):
+    """`g.equal(revised_rule(*xor), False); g.equal(soundness_state(*xor)['state'], 'sound')`, over a
+    generated number of branches rather than the two the case writes out. A choice between branches
+    is a workflow net and is sound, and the structural rule is False for it, because a place with
+    more than one consuming transition is not a marked graph. So the rule's False is not a verdict
+    of unsoundness."""
+    net, initial, final = _gateway_net('xor', 'xor', branches)
+    conditions = _conditions(net, initial, final)
+    sound = pm4py.check_soundness(net, initial, final)[0]
+    npt.assert_array_equal(sound, conditions['option'] and conditions['proper'] and not conditions['dead'])
+    npt.assert_array_equal(bool(pm4py.check_is_workflow_net(net)), _igraph_workflow_net(net))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_structural_rule(net, initial, final), sound)
+
+
+@given(BRANCHES)
+@WORKFLOW
+def test_one_false_covers_a_sound_net_and_a_net_that_is_not_a_workflow_net(branches):
+    """The conflation the case names, made from the two nets it names. The structural rule returns
+    the same False for a sound choice net and for a net with an orphan place that no reading calls a
+    workflow net, while the two nets differ on every other question asked of them, so the rule's
+    False carries none of that difference."""
+    sound_net, initial, final = _gateway_net('xor', 'xor', branches)
+    broken_net, broken_initial, broken_final = _gateway_net('xor', 'xor', branches)
+    broken_net.places.add(pm4py_petri.PetriNet.Place('orphan'))
+    npt.assert_array_equal(_structural_rule(sound_net, initial, final),
+                           _structural_rule(broken_net, broken_initial, broken_final))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(bool(pm4py.check_is_workflow_net(sound_net)),
+                               bool(pm4py.check_is_workflow_net(broken_net)))
+
+
+@given(GATEWAYS, GATEWAYS, BRANCHES)
+@WORKFLOW
+def test_woflan_agrees_with_the_reachable_marking_graph_a_second_library_builds(split, join, branches):
+    """`g.equal(soundness_state(*and_xor)['state'], 'unsound')` types one verdict for one net. Over
+    every generated gateway net, pm4py's Woflan returns what the three conditions of the definition
+    return when each is read off the marking graph SNAKES 0.9.33 builds by its own firing semantics:
+    the final marking reachable from everywhere, nothing enabled once it is reached, and no
+    transition that never fires."""
+    net, initial, final = _gateway_net(split, join, branches)
+    conditions = _conditions(net, initial, final)
+    npt.assert_array_equal(pm4py.check_soundness(net, initial, final)[0],
+                           conditions['option'] and conditions['proper'] and not conditions['dead'])
+
+
+@given(BRANCHES)
+@WORKFLOW
+def test_a_parallel_split_into_a_choice_join_never_reaches_the_final_marking(branches):
+    """What makes the case's and_xor net unsound, stated as what the marking graph shows rather than
+    as the word unsound. Every branch is filled at once and each is closed by its own transition, so
+    the token count at the sink runs past one: the final marking is not among the reachable markings
+    at all, and the marking the net stops in is a deadlock that is not it."""
+    net, initial, final = _gateway_net('and', 'xor', branches)
+    matched, matched_initial, matched_final = _gateway_net('and', 'and', branches)
+    conditions, matches = _conditions(net, initial, final), _conditions(matched, matched_initial, matched_final)
+    npt.assert_array_equal(conditions['dead'], matches['dead'])
+    npt.assert_array_equal(pm4py.check_soundness(net, initial, final)[0],
+                           conditions['option'] and conditions['proper'] and not conditions['dead'])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(conditions['reached'], matches['reached'])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(conditions['stuck'], matches['stuck'])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(pm4py.check_soundness(net, initial, final)[0],
+                               pm4py.check_soundness(matched, matched_initial, matched_final)[0])
+
+
+@given(BRANCHES)
+@WORKFLOW
+def test_a_choice_split_into_a_synchronising_join_leaves_the_join_dead(branches):
+    """The other mismatched pair, and a different reason. One branch is chosen, so the joining
+    transition never has the tokens it consumes: it labels no edge of the marking graph SNAKES
+    builds, the run stops before the sink, and Woflan calls the net unsound. Two nets, two reasons,
+    one word."""
+    net, initial, final = _gateway_net('xor', 'and', branches)
+    matched, matched_initial, matched_final = _gateway_net('xor', 'xor', branches)
+    conditions, matches = _conditions(net, initial, final), _conditions(matched, matched_initial, matched_final)
+    npt.assert_array_equal(conditions['dead'],
+                           sorted({transition.name for transition in net.transitions}
+                                  - {transition.name for transition in matched.transitions}))
+    npt.assert_array_equal(pm4py.check_soundness(net, initial, final)[0],
+                           conditions['option'] and conditions['proper'] and not conditions['dead'])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(conditions['reached'], matches['reached'])
+
+
+@given(BRANCHES)
+@WORKFLOW
+def test_woflan_refuses_a_net_that_meets_every_condition_its_own_docstring_names(branches):
+    """The finding. pm4py 2.7.23.8 documents check_soundness with "A WF-net is sound if and only if:
+    - It contains no live-locks. - It contains no deadlocks. - It is always possible to reach the
+    final marking from any reachable marking." A choice net with one further transition that
+    consumes every branch place at once meets all three: the marking graph SNAKES builds has no
+    deadlock, the final marking is reached and is reachable from every reachable marking, and it is
+    a workflow net by both readings. Woflan returns False, because that further transition can never
+    fire -- a fourth condition the definition it points at carries and its docstring does not."""
+    places = ['source'] + [f'p{index}' for index in range(branches)] + ['sink']
+    transitions = [f'pick{index}' for index in range(branches)] + \
+                  [f'close{index}' for index in range(branches)] + ['all']
+    arcs = []
+    for index in range(branches):
+        arcs += [('source', f'pick{index}'), (f'pick{index}', f'p{index}'),
+                 (f'p{index}', f'close{index}'), (f'close{index}', 'sink'),
+                 (f'p{index}', 'all')]
+    arcs.append(('all', 'sink'))
+    net, initial, final = _petri(places, transitions, arcs, 'source', 'sink')
+    matched, matched_initial, matched_final = _gateway_net('xor', 'xor', branches)
+    conditions, matches = _conditions(net, initial, final), _conditions(matched, matched_initial, matched_final)
+    npt.assert_array_equal([conditions['option'], conditions['proper'], conditions['reached']],
+                           [matches['option'], matches['proper'], matches['reached']])
+    npt.assert_array_equal(conditions['stuck'], matches['stuck'])
+    npt.assert_array_equal(bool(pm4py.check_is_workflow_net(net)), _igraph_workflow_net(net))
+    npt.assert_array_equal(conditions['dead'],
+                           sorted({transition.name for transition in net.transitions}
+                                  - {transition.name for transition in matched.transitions}))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(pm4py.check_soundness(net, initial, final)[0],
+                               pm4py.check_soundness(matched, matched_initial, matched_final)[0])
+
+
+@given(BRANCHES)
+@WORKFLOW
+def test_the_only_soundness_call_the_package_exports_is_the_deprecated_one(branches):
+    """The primitive P34's chain names is one pm4py 2.7.23.8 has marked for removal: its definition
+    in pm4py/analysis.py carries `@deprecation.deprecated(deprecated_in="2.3.0", removed_in="3.0.0",
+    details="this method will be removed in a future release.")`, and calling it raises the
+    DeprecationWarning that decorator builds. The call that is not deprecated, check_is_sound, sits
+    in the same module and is not among the names pm4py/__init__.py re-exports, so the only
+    soundness call reachable as `pm4py.<name>` is the one being withdrawn."""
+    net, initial, final = _gateway_net('xor', 'xor', branches)
+    with pytest.warns(DeprecationWarning):
+        pm4py.check_soundness(net, initial, final)
+    npt.assert_array_equal(hasattr(pm4py_analysis, 'check_is_sound'),
+                           hasattr(pm4py_analysis, 'check_soundness'))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal([hasattr(pm4py, name) for name in ('check_soundness', 'check_is_sound')],
+                               [hasattr(pm4py_analysis, name) for name in ('check_soundness', 'check_is_sound')])
+
+
+@given(BRANCHES)
+@WORKFLOW
+def test_the_undeprecated_successor_accepts_the_net_woflan_refuses(branches):
+    """And the two do not decide the same thing. check_is_sound opens with a conversion --
+    `powl_model = convert_to_powl(petri_net, initial_marking, final_marking); return True` inside a
+    `try`, with a bare `except: pass` behind it -- so a net that converts is sound by that call
+    without Woflan ever running. The parallel split into a choice join is such a net: it returns
+    what the matched parallel net returns, while Woflan separates them, and the marking graph SNAKES
+    builds says the final marking is never reached at all."""
+    net, initial, final = _gateway_net('and', 'xor', branches)
+    matched, matched_initial, matched_final = _gateway_net('and', 'and', branches)
+    npt.assert_array_equal(pm4py_analysis.check_is_sound(net, initial, final),
+                           pm4py_analysis.check_is_sound(matched, matched_initial, matched_final))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(pm4py.check_soundness(net, initial, final)[0],
+                               pm4py.check_soundness(matched, matched_initial, matched_final)[0])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(pm4py_analysis.check_is_sound(net, initial, final),
+                               pm4py.check_soundness(net, initial, final)[0])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_conditions(net, initial, final)['reached'],
+                               _conditions(matched, matched_initial, matched_final)['reached'])
