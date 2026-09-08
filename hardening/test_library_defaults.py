@@ -69,6 +69,8 @@ from lark import Lark
 from lark.exceptions import UnexpectedInput
 import jsonschema
 from junitparser import JUnitXml
+import altair as alt
+import vl_convert
 import markdown as python_markdown
 import markdownify
 import html2text
@@ -13322,3 +13324,142 @@ def test_a_one_column_table_is_a_table_to_one_converter_and_a_heading_to_the_oth
         '<div>' + python_markdown.markdown(converted, extensions=['tables']) + '</div>')
     npt.assert_array_equal(rendered[0].tag, 'h2')
     npt.assert_array_equal(rendered[0].text, frame.columns[0])
+
+
+# ---------------------------------------------------------------- a chart specification and what draws it
+CHART_SPEC = settings(max_examples=20, deadline=None)
+CHART_LABEL = st.text(alphabet=st.characters(whitelist_categories=('Lu', 'Ll')),
+                      min_size=1, max_size=8)
+CHART_NAME = st.text(alphabet=st.characters(whitelist_categories=('Lu', 'Ll')),
+                     min_size=3, max_size=8)
+
+
+@st.composite
+def _chart_rows(draw):
+    """One table to chart: a category column of distinct labels, a numeric column, and the name of a
+    column that is not in it. Column names are three letters or more, which keeps the two-letter
+    Vega expression keyword out of this strategy; it has a test of its own below. No column name is
+    also a value of the category column, so that a name printed on the chart cannot be mistaken for
+    a category the data carries."""
+    names = draw(st.lists(CHART_NAME, min_size=3, max_size=3, unique=True))
+    height = draw(st.integers(min_value=2, max_value=5))
+    values = draw(st.lists(CHART_LABEL, min_size=height, max_size=height, unique=True))
+    assume(not set(names) & set(values))
+    frame = pd.DataFrame({names[0]: values,
+                          names[1]: draw(st.lists(st.integers(min_value=1, max_value=10 ** 4),
+                                                  min_size=height, max_size=height))})
+    return frame, names[0], names[1], names[2]
+
+
+def _chart_spec(frame, category, amount):
+    """The Vega-Lite specification altair 6.2.2 builds for a bar chart of one column against another."""
+    return alt.Chart(frame).mark_bar().encode(x=alt.X(category + ':N'),
+                                              y=alt.Y(amount + ':Q')).to_dict()
+
+
+def _vega_marks(specification):
+    """The mark items Vega's own renderer places, read out of the scenegraph vl-convert returns."""
+    scene = vl_convert.vegalite_to_scenegraph(json.dumps(specification))
+    return [group for group in scene['scenegraph']['items'][0]['items']
+            if group['role'] == 'mark'][0]['items']
+
+
+def _vega_labels(specification):
+    """Every piece of text the rendered chart carries, read out of the SVG with expat."""
+    root = ElementTree.fromstring(vl_convert.vegalite_to_svg(json.dumps(specification)).encode())
+    return [element.text for element in root.iter('{http://www.w3.org/2000/svg}text')]
+
+
+@given(_chart_rows())
+@CHART_SPEC
+def test_the_rows_travel_as_a_named_dataset_and_arrive_inline_in_the_compiled_chart(table):
+    """P96 checks that the specification carries its data rather than a URL, with `g.equal(out
+    ['external_data_url'], False)` and `g.equal('values' in spec['data'], False)`, and compares the
+    embedded rows with the source through DeepDiff. Altair 6.2.2 puts a name where the data would be
+    and the rows under `datasets`, so the whole of `spec['data']` is that one key; two dataframe
+    libraries read the rows back as the frame that was charted; and vl-convert 1.9.0, which runs the
+    reference Vega-Lite compiler and declares no dependency on altair, resolves the name and hands
+    back a Vega specification carrying the same rows inline. Replaces the DeepDiff comparison and
+    both typed booleans of handoff_guards_v10.py case 96."""
+    frame, category, amount, _ = table
+    specification = _chart_spec(frame, category, amount)
+    npt.assert_array_equal(sorted(specification['data'].keys()), ['name'])
+    embedded = specification['datasets'][specification['data']['name']]
+    pdt.assert_frame_equal(pd.DataFrame(embedded), frame)
+    plt.assert_frame_equal(pl.DataFrame(embedded), pl.from_pandas(frame))
+    compiled = vl_convert.vegalite_to_vega(json.dumps(specification))
+    pdt.assert_frame_equal(pd.DataFrame(compiled['data'][0]['values']), frame)
+
+
+@given(_chart_rows())
+@CHART_SPEC
+def test_a_field_that_is_not_a_column_compiles_and_renders_like_any_other(table):
+    """`g.equal(unchecked['encoding']['x']['field'], 'missing_column')` records that altair builds a
+    specification for a column that does not exist. What the case does not say is that nothing
+    downstream minds either: the reference Vega-Lite compiler turns the same specification into a
+    Vega specification, the Vega renderer draws it, the drawing is repeatable, and it carries one
+    mark for every row exactly as the correct chart does -- so `mark_elements > 0` and
+    `svg_repeatable` are true of both. The only thing that refuses it is a schema over the data, and
+    that refusal is a library primitive: pandera names the column and reports it missing."""
+    frame, category, amount, absent = table
+    specification = _chart_spec(frame, absent, amount)
+    npt.assert_array_equal(specification['encoding']['x']['field'], absent)
+    drawn = vl_convert.vegalite_to_svg(json.dumps(specification))
+    npt.assert_array_equal(drawn, vl_convert.vegalite_to_svg(json.dumps(specification)))
+    npt.assert_array_equal(len(_vega_marks(specification)), len(frame.index))
+    npt.assert_array_equal(len(_vega_marks(_chart_spec(frame, category, amount))), len(frame.index))
+    pandera.DataFrameSchema({category: pandera.Column(), amount: pandera.Column()}).validate(frame)
+    with pytest.raises(pandera.errors.SchemaError):
+        pandera.DataFrameSchema({absent: pandera.Column()}).validate(frame)
+
+
+@given(_chart_rows())
+@CHART_SPEC
+def test_every_bar_of_the_broken_chart_is_drawn_in_the_same_place(table):
+    """What the picture does with a field that is not there. Vega places one bar per row either way,
+    and the correct chart puts them at as many positions as the category column has values, so the
+    reader sees each of them; in the broken chart every bar is placed at one position, so they are
+    drawn on top of one another and the reader sees the tallest. Nothing in the specification, the
+    compilation or the rendering reports it."""
+    frame, category, amount, absent = table
+    placed = [item['x'] for item in _vega_marks(_chart_spec(frame, category, amount))]
+    npt.assert_array_equal(len(set(placed)), frame[category].nunique())
+    collapsed = [item['x'] for item in _vega_marks(_chart_spec(frame, absent, amount))]
+    npt.assert_allclose(collapsed, [collapsed[0]] * len(collapsed))
+    with pytest.raises(AssertionError):
+        npt.assert_allclose(placed, [placed[0]] * len(placed))
+
+
+@given(_chart_rows())
+@CHART_SPEC
+def test_the_broken_chart_prints_the_name_of_the_column_it_has_not_got(table):
+    """The rendered chart says what it was asked for and nothing about what it found. The correct
+    chart's text carries every value of the category column; the broken chart's carries none of them
+    and carries instead the name of the absent column, as the axis title Vega writes from the field
+    name. A reader looking at the picture sees a labelled axis over a category the data never had."""
+    frame, category, amount, absent = table
+    labels = _vega_labels(_chart_spec(frame, category, amount))
+    npt.assert_array_equal(sorted(set(labels) & set(frame[category])), sorted(frame[category]))
+    broken = _vega_labels(_chart_spec(frame, absent, amount))
+    npt.assert_array_equal(sorted(set(broken) & set(frame[category])), [])
+    npt.assert_array_equal([text for text in broken if text == absent], [absent])
+
+
+@given(_chart_rows())
+@CHART_SPEC
+def test_a_column_named_for_a_vega_keyword_compiles_and_then_will_not_render(table):
+    """The one field name in this cluster that the chain cannot draw, and the failure is not where
+    the case would look for it. Renaming the category column to the two letters of the Vega
+    expression language's conditional, altair builds the specification as it does for any other name
+    and the reference Vega-Lite compiler turns it into a Vega specification carrying the same rows;
+    it is the Vega parser, one step further on, that refuses it -- `Unrecognized signal name` -- so
+    the chart fails at the moment a picture is asked for and not at the moment the field is named."""
+    frame, category, amount, _ = table
+    renamed = frame.rename(columns={category: 'if'})
+    specification = _chart_spec(renamed, 'if', amount)
+    npt.assert_array_equal(specification['encoding']['x']['field'], 'if')
+    compiled = vl_convert.vegalite_to_vega(json.dumps(specification))
+    pdt.assert_frame_equal(pd.DataFrame(compiled['data'][0]['values']), renamed)
+    with pytest.raises(ValueError):
+        vl_convert.vegalite_to_svg(json.dumps(specification))
+    vl_convert.vegalite_to_svg(json.dumps(_chart_spec(frame, category, amount)))
