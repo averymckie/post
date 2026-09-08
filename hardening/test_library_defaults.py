@@ -3051,3 +3051,213 @@ def test_deduplicating_on_the_reference_discards_a_disagreeing_quantity_in_three
     with pytest.raises(AssertionError):
         npt.assert_equal(len(kept), len(frame.drop_duplicates(subset=['receipt_id', 'qty'])))
 
+
+# ---------------------------------------------------------------- reading one timestamp in three runtimes
+ISO_ORACLE_RB = pathlib.Path(__file__).with_name('iso_stamp_oracle.rb')
+ISO_ORACLE_PHP = pathlib.Path(__file__).with_name('iso_stamp_oracle.php')
+both_stamp_runtimes = ruby_available and php_binary_available
+MOMENTS = st.datetimes(min_value=datetime.datetime(2000, 1, 1), max_value=datetime.datetime(2099, 12, 31))
+OFFSET_MINUTES = st.integers(min_value=-14 * 60, max_value=14 * 60)
+OFFSET_SECONDS = st.integers(min_value=1, max_value=59)
+MICROSECONDS = st.integers(min_value=1, max_value=999999)
+EXTRA_DIGITS = st.integers(min_value=1, max_value=999)
+
+
+def _runtime_reads_stamp(runner, script, text):
+    """One ISO 8601 timestamp as another runtime reads it: the wall clock, the sub-second field, and the
+    offset, exactly as that runtime's own accessors report them. The shim prints the lines; the Python side
+    runs it and splits. A refusal is a non-zero exit and reaches the test as CalledProcessError."""
+    completed = subprocess.run([runner, str(script), text], capture_output=True, encoding='utf-8', check=True)
+    return completed.stdout.split('\n')[:4]
+
+
+@pytest.mark.skipif(not both_stamp_runtimes, reason='both runtimes are required for this oracle')
+@given(MOMENTS, OFFSET_MINUTES)
+@ORACLE_PROCESS
+def test_three_runtimes_read_one_extended_timestamp_as_the_same_instant(moment, offset_minutes):
+    """P156 parses declared service intervals from ISO 8601 text and requires an offset. Where the text is
+    the extended form with a whole-minute offset, all three runtimes read the same instant: CPython's
+    datetime.fromisoformat, Ruby 3.3.6's Time.iso8601 and PHP 8.4.19's DateTimeImmutable agree on the wall
+    clock and on the offset, over generated moments and generated offsets. That agreement is what makes the
+    disagreements below properties of the spellings rather than of the runtimes."""
+    stamp = moment.replace(microsecond=0,
+                           tzinfo=datetime.timezone(datetime.timedelta(minutes=offset_minutes)))
+    text = stamp.isoformat()
+    parsed = datetime.datetime.fromisoformat(text)
+    in_ruby = _runtime_reads_stamp('ruby', ISO_ORACLE_RB, text)
+    in_php = _runtime_reads_stamp('php', ISO_ORACLE_PHP, text)
+    npt.assert_array_equal([in_ruby[0], in_php[0]], [parsed.strftime('%Y-%m-%dT%H:%M:%S')] * 2)
+    npt.assert_array_equal([datetime.timedelta(seconds=int(in_ruby[3])),
+                            datetime.timedelta(seconds=int(in_php[2]))], [parsed.utcoffset()] * 2)
+
+
+@pytest.mark.skipif(not both_stamp_runtimes, reason='both runtimes are required for this oracle')
+@given(MOMENTS)
+@ORACLE_PROCESS
+def test_a_timestamp_with_no_offset_is_left_naive_by_one_runtime_and_placed_by_the_others(moment):
+    """Case 156 records that the parse accepts a timestamp with no offset, and that the chain has to refuse
+    it separately. The two other runtimes do not leave it undecided: given the same text they return an
+    instant with an offset, taken from their own configured zone rather than from the text, while CPython
+    returns a datetime with no offset at all. All three read the same wall clock. So the same service entry
+    is a time without a place in one runtime and a fixed instant in the other two, and nothing in the text
+    distinguishes the cases."""
+    text = moment.replace(microsecond=0).isoformat()
+    parsed = datetime.datetime.fromisoformat(text)
+    in_ruby = _runtime_reads_stamp('ruby', ISO_ORACLE_RB, text)
+    in_php = _runtime_reads_stamp('php', ISO_ORACLE_PHP, text)
+    npt.assert_array_equal([in_ruby[0], in_php[0]], [parsed.strftime('%Y-%m-%dT%H:%M:%S')] * 2)
+    with pytest.raises(AssertionError):
+        npt.assert_equal(parsed.utcoffset(), datetime.timedelta(seconds=int(in_ruby[3])))
+    with pytest.raises(AssertionError):
+        npt.assert_equal(parsed.utcoffset(), datetime.timedelta(seconds=int(in_php[2])))
+
+
+@pytest.mark.skipif(not both_stamp_runtimes, reason='both runtimes are required for this oracle')
+@given(MOMENTS)
+@ORACLE_PROCESS
+def test_the_basic_spelling_of_a_timestamp_is_read_by_two_runtimes_and_refused_by_the_third(moment):
+    """The same moment written without its separators, which case 156 lists among the spellings the parse
+    accepts. CPython and PHP read it as the same wall clock; Ruby's Time.iso8601 refuses it outright. An
+    entry a chain accepts in Python is therefore not an entry every reader of the same file can parse, and
+    the text is the only thing that differs."""
+    text = moment.replace(microsecond=0).strftime('%Y%m%dT%H%M%S')
+    parsed = datetime.datetime.fromisoformat(text)
+    in_php = _runtime_reads_stamp('php', ISO_ORACLE_PHP, text)
+    npt.assert_array_equal(in_php[0], parsed.strftime('%Y-%m-%dT%H:%M:%S'))
+    with pytest.raises(subprocess.CalledProcessError):
+        _runtime_reads_stamp('ruby', ISO_ORACLE_RB, text)
+
+
+@pytest.mark.skipif(not both_stamp_runtimes, reason='both runtimes are required for this oracle')
+@given(MOMENTS)
+@ORACLE_PROCESS
+def test_a_date_with_no_time_becomes_a_midnight_in_two_runtimes_and_a_refusal_in_the_third(moment):
+    """And a date with no time at all is a timestamp to two of the three: CPython and PHP both return the
+    midnight that begins it, which is a value no one wrote down, and Ruby refuses to read it."""
+    text = moment.date().isoformat()
+    parsed = datetime.datetime.fromisoformat(text)
+    in_php = _runtime_reads_stamp('php', ISO_ORACLE_PHP, text)
+    npt.assert_array_equal(in_php[0], parsed.strftime('%Y-%m-%dT%H:%M:%S'))
+    with pytest.raises(subprocess.CalledProcessError):
+        _runtime_reads_stamp('ruby', ISO_ORACLE_RB, text)
+
+
+@pytest.mark.skipif(not both_stamp_runtimes, reason='both runtimes are required for this oracle')
+@given(MOMENTS, OFFSET_MINUTES, OFFSET_SECONDS)
+@ORACLE_PROCESS
+def test_an_offset_that_is_not_a_whole_number_of_minutes_survives_only_one_of_three_readings(moment,
+                                                                                            offset_minutes,
+                                                                                            seconds):
+    """Case 156 types one offset written with seconds in it, '+00:00:00'. Generated over offsets that carry
+    a real seconds part, the three runtimes give three answers to the same text. CPython reads it and keeps
+    it: the offset it returns is the offset the text names. Ruby refuses the text. PHP reads it correctly --
+    its getOffset agrees with CPython to the second -- and then cannot write it back: the timestamp it
+    formats carries an offset a second reading of PHP's own output does not agree with. So an offset that is
+    not a whole number of minutes is preserved, rejected or quietly rounded according to the runtime, and
+    only the third of those is silent."""
+    stamp = moment.replace(microsecond=0,
+                           tzinfo=datetime.timezone(datetime.timedelta(minutes=offset_minutes,
+                                                                       seconds=seconds)))
+    text = stamp.isoformat()
+    parsed = datetime.datetime.fromisoformat(text)
+    npt.assert_equal(parsed.utcoffset(), stamp.utcoffset())
+    with pytest.raises(subprocess.CalledProcessError):
+        _runtime_reads_stamp('ruby', ISO_ORACLE_RB, text)
+    in_php = _runtime_reads_stamp('php', ISO_ORACLE_PHP, text)
+    npt.assert_equal(datetime.timedelta(seconds=int(in_php[2])), parsed.utcoffset())
+    with pytest.raises(AssertionError):
+        npt.assert_equal(datetime.datetime.fromisoformat(in_php[0] + in_php[3]).utcoffset(),
+                         datetime.timedelta(seconds=int(in_php[2])))
+
+
+@pytest.mark.skipif(not both_stamp_runtimes, reason='both runtimes are required for this oracle')
+@given(MOMENTS, MICROSECONDS, EXTRA_DIGITS)
+@ORACLE_PROCESS
+def test_a_digit_below_the_microsecond_is_kept_by_one_runtime_and_dropped_by_the_other_two(moment,
+                                                                                          microseconds,
+                                                                                          extra):
+    """Case 156 records that sub-second precision is truncated. It is truncated in two of the three
+    runtimes: given the same text, CPython and PHP report the same microsecond and neither has a field
+    below it, while Ruby's parse holds a nanosecond count its own microsecond accessor cannot express. The
+    three digits past the microsecond are generated and the rest of the text is written by the datetime
+    itself. So a timestamp that is equal in one runtime is not equal in another, and the entry that decides
+    whether two service intervals touch may differ in a digit Python cannot see."""
+    text = '%s%03d' % (moment.replace(microsecond=microseconds).isoformat(), extra)
+    parsed = datetime.datetime.fromisoformat(text)
+    in_ruby = _runtime_reads_stamp('ruby', ISO_ORACLE_RB, text)
+    in_php = _runtime_reads_stamp('php', ISO_ORACLE_PHP, text)
+    npt.assert_array_equal([int(in_ruby[1]), int(in_php[1])], [parsed.microsecond] * 2)
+    with pytest.raises(AssertionError):
+        npt.assert_equal(int(in_ruby[2]), int(in_ruby[1]))
+
+
+@functools.lru_cache(maxsize=1)
+def _rounded_ties():
+    """One row per cent from nothing to two hundred: the amount with half a cent added, what Decimal's two
+    half-way modes make of it, and what DuckDB makes of the same figure in a decimal column and in a double
+    column. Half a cent is computed from the cent rather than typed, and the regions below are read off this
+    table rather than named. Four hundred and two queries, once per session."""
+    quantum = Decimal(1).scaleb(-2)
+    rows = []
+    with duckdb.connect() as connection:
+        for cents in range(0, 201):
+            tie = Decimal(cents).scaleb(-2) + quantum / 2
+            rows.append((tie,
+                         tie.quantize(quantum, rounding=ROUND_HALF_EVEN),
+                         tie.quantize(quantum, rounding=ROUND_HALF_UP),
+                         connection.execute('select round(cast(? as decimal(18,3)), 2)',
+                                            [str(tie)]).fetchone()[0],
+                         connection.execute('select round(cast(? as double), 2)',
+                                            [float(tie)]).fetchone()[0]))
+    return tuple(rows)
+
+
+@given(st.integers(min_value=0, max_value=10 ** 4))
+@SLOW
+def test_the_sql_engine_rounds_every_half_cent_away_from_zero(index):
+    """P156's cents are rounded in Python, whose decimal default is half to even, and read back through a
+    workbook and a SQL engine. DuckDB 1.5.5 rounds a decimal column half away from zero on every generated
+    tie, which is Python's ROUND_HALF_UP and not its default. Replaces the typed
+    round_cents(Decimal('1.005'), mode=ROUND_HALF_UP) == Decimal('1.01') of handoff_guards_v16.py
+    case 156."""
+    tie, to_even, away, in_decimal, in_double = _rounded_ties()[index % len(_rounded_ties())]
+    npt.assert_equal(in_decimal, away)
+
+
+@given(st.integers(min_value=0, max_value=10 ** 4))
+@SLOW
+def test_the_sql_engine_and_the_python_default_disagree_on_the_cents_the_two_modes_split(index):
+    """On the ties where Decimal's two half-way modes give different cents, the engine gives the half-up
+    one, so the cent a chain computes in Python and the cent the same figure gets in SQL are not the same
+    cent. Which ties those are is read off Decimal, not named here."""
+    split = [row for row in _rounded_ties() if row[1] != row[2]]
+    tie, to_even, away, in_decimal, in_double = split[index % len(split)]
+    with pytest.raises(AssertionError):
+        npt.assert_equal(in_decimal, to_even)
+
+
+@given(st.integers(min_value=0, max_value=10 ** 4))
+@SLOW
+def test_the_same_engine_gives_another_cent_when_the_column_is_a_double(index):
+    """And the engine does not have one answer either. On some of the same ties, rounding the figure in a
+    double column gives a different cent from rounding it in a decimal column, inside one engine, on one
+    number; which ties those are is settled by asking the engine both ways rather than by predicting it
+    from the binary value. So the cent depends on the mode, on the engine and on the column type the
+    workbook was written with."""
+    apart = [row for row in _rounded_ties() if row[4] != row[3]]
+    if not apart:
+        pytest.skip('this build rounds a double column and a decimal column to the same cent')
+    tie, to_even, away, in_decimal, in_double = apart[index % len(apart)]
+    with pytest.raises(AssertionError):
+        npt.assert_equal(in_double, in_decimal)
+
+
+@given(st.integers(min_value=0, max_value=10 ** 4))
+@SLOW
+def test_the_two_column_types_agree_on_the_rest_of_the_ties(index):
+    """On the remaining ties the two column types agree, so the divergence above is particular figures
+    rather than a difference of rule."""
+    together = [row for row in _rounded_ties() if row[4] == row[3]]
+    tie, to_even, away, in_decimal, in_double = together[index % len(together)]
+    npt.assert_equal(in_double, in_decimal)
+
