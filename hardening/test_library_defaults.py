@@ -50,6 +50,7 @@ from beancount.core import data as beancount_data
 import docx
 from docx.oxml.ns import qn
 import duckdb
+from ebooklib import epub as ebooklib_epub
 import fastexcel
 import icalendar
 from dateutil import rrule, tz as dateutil_tz
@@ -12153,3 +12154,263 @@ def test_away_from_the_deadline_the_two_policies_and_the_engine_agree(instant, o
                      _duckdb_compare(earlier_text, text, 'TIMESTAMPTZ', '<='))
     npt.assert_equal(_duckdb_compare(earlier_text, text, 'TIMESTAMPTZ', '<='),
                      _duckdb_compare(earlier_text, text, 'TIMESTAMPTZ', '<'))
+
+
+# --------------------------------------------------------------------------------------------------
+# handoff_guards_v13.py, case epub_carries_chapters_and_navigation: what an EPUB the library writes is
+# --------------------------------------------------------------------------------------------------
+EPUBCHECK_JAR = pathlib.Path(os.environ.get(
+    'EPUBCHECK_JAR', str(pathlib.Path.home() / 'epubcheck-oracle' / 'epubcheck-5.2.1' / 'epubcheck.jar')))
+epubcheck_available = shutil.which('java') is not None and EPUBCHECK_JAR.is_file()
+EPUB_STEM = st.text(alphabet='abcdefghijklmnopqrstuvwxyz', min_size=1,
+                    max_size=6).filter(lambda stem: 'nav' not in stem)
+EPUB_TEXT = st.text(alphabet='abcdefghijklmnopqrstuvwxyz <>&"\'', min_size=1,
+                    max_size=20).filter(lambda text: text.strip() == text)
+EPUB_CHAPTER = st.builds(lambda stem, title, body: {'file': stem + '.xhtml', 'title': title,
+                                                    'body': body},
+                         EPUB_STEM, EPUB_TEXT, EPUB_TEXT)
+EPUB_CHAPTERS = st.lists(EPUB_CHAPTER, min_size=2, max_size=4, unique_by=lambda chapter: chapter['file'])
+EPUB_BOOK = settings(max_examples=25, deadline=None)
+EPUB_ORACLE = settings(max_examples=3, deadline=None)
+XHTML = '{http://www.w3.org/1999/xhtml}'
+OPF = '{http://www.idpf.org/2007/opf}'
+
+
+def _epub_bytes(chapters, mtime=None):
+    """The book the case builds, with its two authored chapters replaced by generated ones. EbookLib
+    0.20 does the writing: `EpubBook.FOLDER_NAME` is "EPUB" in ebooklib/epub.py at tag v0.20, and
+    `write_epub` puts every item under it. The escaping is the case's own `html.escape`."""
+    book = ebooklib_epub.EpubBook()
+    book.set_identifier('proofs-hardening')
+    book.set_title('Reading collection')
+    book.set_language('en-US')
+    items = []
+    for chapter in chapters:
+        item = ebooklib_epub.EpubHtml(title=chapter['title'], file_name=chapter['file'], lang='en-US')
+        item.content = '<html><body><h1>%s</h1><p>%s</p></body></html>' % (
+            xml_escape(chapter['title'], {'"': '&quot;', "'": '&#x27;'}),
+            xml_escape(chapter['body'], {'"': '&quot;', "'": '&#x27;'}))
+        book.add_item(item)
+        items.append(item)
+    book.toc = tuple(items)
+    book.add_item(ebooklib_epub.EpubNcx())
+    book.add_item(ebooklib_epub.EpubNav())
+    book.spine = ['nav'] + items
+    with tempfile.TemporaryDirectory() as directory:
+        written = pathlib.Path(directory) / 'book.epub'
+        ebooklib_epub.write_epub(str(written), book, {} if mtime is None else {'mtime': mtime})
+        return written.read_bytes()
+
+
+def _epub_entry_names(data):
+    """Every archive entry, in the order the archive lists them."""
+    return zipfile.ZipFile(io.BytesIO(data)).namelist()
+
+
+def _case_chapter_list(data):
+    """The chapter list the case builds out of those names: every entry ending in .xhtml whose name
+    does not contain the three letters nav, sorted."""
+    return sorted(name for name in _epub_entry_names(data)
+                  if name.endswith('.xhtml') and 'nav' not in name)
+
+
+def _epub_spine(data):
+    """The reading order the book itself declares: each itemref in the package document resolved
+    through the manifest to the href it points at, read with libxml2 through lxml."""
+    package = lxml_etree.fromstring(zipfile.ZipFile(io.BytesIO(data)).read('EPUB/content.opf'))
+    manifest = {item.get('id'): item.get('href')
+                for item in package.iter(OPF + 'item') if item.get('id')}
+    return [manifest[reference.get('idref')] for reference in package.iter(OPF + 'itemref')]
+
+
+def _epubcheck(data):
+    """EPUBCheck 5.2.1, which its README at tag v5.2.1 calls "the official conformance checker for EPUB
+    publications". The jar is run on the file and its own JSON report is read; what comes back is the
+    list of message identifiers and severities it recorded. Nothing is computed here."""
+    with tempfile.TemporaryDirectory() as directory:
+        written = pathlib.Path(directory) / 'book.epub'
+        written.write_bytes(data)
+        completed = subprocess.run(['java', '-jar', str(EPUBCHECK_JAR), str(written), '--json', '-',
+                                    '--quiet'], capture_output=True, encoding='utf-8')
+        report = json.loads(completed.stdout)
+        return sorted((message['ID'], message['severity']) for message in report['messages'])
+
+
+def _package_document(data, without_modified=False):
+    """The package document as bytes, optionally with the one element that carries the clock removed.
+    ebooklib/epub.py at tag v0.20 writes it as `etree.SubElement(metadata, "meta", {"property":
+    "dcterms:modified"})` whose text is `mtime.strftime("%Y-%m-%dT%H:%M:%SZ")`, and `mtime` is
+    `datetime.datetime.now()` unless the caller passes an mtime option."""
+    raw = zipfile.ZipFile(io.BytesIO(data)).read('EPUB/content.opf')
+    if not without_modified:
+        return raw
+    package = lxml_etree.fromstring(raw)
+    for element in list(package.iter(OPF + 'meta')):
+        if element.get('property') == 'dcterms:modified':
+            element.getparent().remove(element)
+    return lxml_etree.tostring(package)
+
+
+@pytest.mark.skipif(not epubcheck_available,
+                    reason='java and an EPUBCheck jar are required for this oracle')
+@given(EPUB_CHAPTERS)
+@EPUB_ORACLE
+def test_the_conformance_checker_and_the_case_checks_disagree_about_a_duplicated_name(chapters):
+    """handoff_guards_v13.py's case epub_carries_chapters_and_navigation types the two chapter paths of
+    its fixture and four booleans about the archive. Those booleans are what the case knows about the
+    book, and they cannot tell a conforming publication from one the reference checker rejects: giving
+    two chapters the same file name leaves the mimetype entry first, the container present and a
+    navigation document present, exactly as before, while EPUBCheck 5.2.1 reports errors against the
+    package document. So the case's checks pass on a book no conforming reading system is required to
+    open."""
+    distinct = _epub_bytes(chapters)
+    repeated = _epub_bytes([dict(chapter, file=chapters[0]['file']) for chapter in chapters])
+    npt.assert_array_equal(_epub_entry_names(distinct)[0], _epub_entry_names(repeated)[0])
+    npt.assert_array_equal('META-INF/container.xml' in _epub_entry_names(distinct),
+                           'META-INF/container.xml' in _epub_entry_names(repeated))
+    npt.assert_array_equal(any('nav' in name for name in _epub_entry_names(distinct)),
+                           any('nav' in name for name in _epub_entry_names(repeated)))
+    with pytest.raises(AssertionError):
+        npt.assert_equal(_epubcheck(distinct), _epubcheck(repeated))
+
+
+@given(EPUB_CHAPTERS, st.integers(min_value=0, max_value=3))
+@EPUB_BOOK
+def test_a_chapter_file_name_that_contains_nav_is_dropped_from_the_case_list(chapters, position):
+    """The case's chapter list is a substring filter, and the substring is three letters that occur in
+    ordinary words. One generated chapter renamed so that its stem contains nav is written into the
+    archive and declared in the spine like any other, and the list the case builds simply omits it. The
+    book is unchanged; only the reading of it is wrong."""
+    renamed = list(chapters)
+    index = position % len(renamed)
+    renamed[index] = dict(renamed[index], file='nav' + renamed[index]['file'])
+    data = _epub_bytes(renamed)
+    folder = ebooklib_epub.EpubBook().FOLDER_NAME
+    npt.assert_array_equal(_epub_spine(data)[1:], [chapter['file'] for chapter in renamed])
+    with pytest.raises(AssertionError):
+        npt.assert_equal(_case_chapter_list(data),
+                         sorted(folder + '/' + chapter['file'] for chapter in renamed))
+
+
+@given(EPUB_CHAPTERS)
+@EPUB_BOOK
+def test_the_case_list_is_alphabetical_where_the_book_declares_a_reading_order(chapters):
+    """And the list is sorted, so even when it holds every chapter it is not the order they are read
+    in. The spine the package document declares is the order the chapters were added, after the
+    navigation document ebooklib puts first; the case's list is the same names in the order the
+    alphabet puts them, and the two coincide only when the names were already sorted. Replaces
+    `g.equal(out['chapters'], ['EPUB/c1.xhtml', 'EPUB/c2.xhtml'])`, which is true of that fixture
+    because c1 sorts before c2."""
+    assume(sorted(chapter['file'] for chapter in chapters) != [chapter['file'] for chapter in chapters])
+    data = _epub_bytes(chapters)
+    folder = ebooklib_epub.EpubBook().FOLDER_NAME
+    npt.assert_array_equal(_epub_spine(data)[1:], [chapter['file'] for chapter in chapters])
+    npt.assert_array_equal(_case_chapter_list(data),
+                           sorted(folder + '/' + chapter['file'] for chapter in chapters))
+    with pytest.raises(AssertionError):
+        npt.assert_equal(_case_chapter_list(data),
+                         [folder + '/' + chapter['file'] for chapter in chapters])
+
+
+@given(EPUB_CHAPTERS)
+@EPUB_BOOK
+def test_two_chapters_of_one_name_become_two_entries_and_one_readable_file(chapters):
+    """What the duplicate name does to the archive itself. CPython's zipfile warns as it writes the
+    second entry -- the warning is the library's, not this file's -- the name appears twice in the
+    entry list, and reading it back returns one of the two, so one generated chapter body is in the
+    file and cannot be reached by name. The case reads chapters through exactly that call."""
+    repeated = [dict(chapter, file=chapters[0]['file']) for chapter in chapters]
+    with pytest.warns(UserWarning):
+        data = _epub_bytes(repeated)
+    folder = ebooklib_epub.EpubBook().FOLDER_NAME
+    entry = folder + '/' + chapters[0]['file']
+    npt.assert_array_equal(_epub_entry_names(data).count(entry), len(repeated))
+    archive = zipfile.ZipFile(io.BytesIO(data))
+    npt.assert_array_equal(len(set(archive.read(entry) for _ in repeated)), 1)
+
+
+@pytest.mark.skipif(not shutil.which('java'), reason='the java runtime is required for this oracle')
+@given(EPUB_CHAPTERS)
+@JAVA_ORACLE
+def test_the_mimetype_entry_is_written_first_and_stored_in_both_zip_readers(chapters):
+    """The case's `g.equal(out['mimetype_first'], True)`, read by two implementations of the format.
+    ebooklib/epub.py at tag v0.20 opens the archive deflated and then writes `self.out.writestr(
+    "mimetype", "application/epub+zip", compress_type=zipfile.ZIP_STORED)` before anything else, so the
+    first entry is that name and its storage method is the one CPython's zipfile names ZIP_STORED --
+    which is what java.util.zip reports for it too, while every other entry is deflated."""
+    data = _epub_bytes(chapters)
+    entries, _ = _java_package(data)
+    first = zipfile.ZipFile(io.BytesIO(data)).infolist()[0]
+    npt.assert_array_equal(entries[0][0], first.filename)
+    npt.assert_array_equal(entries[0][2], first.compress_type)
+    npt.assert_array_equal(first.compress_type, zipfile.ZIP_STORED)
+    npt.assert_array_equal([entry[2] for entry in entries[1:]],
+                           [zipfile.ZIP_DEFLATED] * (len(entries) - 1))
+
+
+@given(EPUB_CHAPTERS)
+@EPUB_BOOK
+def test_the_package_document_carries_the_clock_and_that_is_why_two_builds_differ(chapters):
+    """The case says the structure repeats "even where the bytes need not", and the reason is inside a
+    file the format requires. ebooklib writes one meta element whose property is dcterms:modified and
+    whose text is the current time to the second; two builds pinned to two different times give two
+    different package documents, and removing that one element with lxml leaves two documents that are
+    equal byte for byte. So the package document is reproducible apart from one element, and that
+    element is the whole of the difference."""
+    first = _epub_bytes(chapters, mtime=datetime.datetime(2020, 1, 1, 0, 0, 0))
+    second = _epub_bytes(chapters, mtime=datetime.datetime(2021, 6, 30, 12, 0, 0))
+    with pytest.raises(AssertionError):
+        npt.assert_equal(_package_document(first), _package_document(second))
+    npt.assert_array_equal(_package_document(first, without_modified=True),
+                           _package_document(second, without_modified=True))
+
+
+@given(EPUB_CHAPTERS)
+@EPUB_BOOK
+def test_pinning_the_documented_option_repeats_the_package_document_and_not_the_archive(chapters):
+    """And the repair the library already carries, executed. `write_epub` takes an options mapping and
+    reads `self.options["mtime"]` in place of `datetime.datetime.now()`, so two builds under one pinned
+    time produce the same package document. The archive around it still does not repeat, because every
+    entry's MS-DOS stamp is taken from the clock as CPython's zipfile writes it, which is the same
+    finding already recorded for deterministic packaging: two repairs are needed, not one."""
+    pinned = datetime.datetime(2020, 1, 1, 0, 0, 0)
+    first = _epub_bytes(chapters, mtime=pinned)
+    second = _epub_bytes(chapters, mtime=pinned)
+    npt.assert_array_equal(_package_document(first), _package_document(second))
+    npt.assert_array_equal(_epub_entry_names(first), _epub_entry_names(second))
+    npt.assert_array_equal([info.date_time for info in
+                            zipfile.ZipFile(io.BytesIO(first)).infolist()],
+                           [info.date_time for info in
+                            zipfile.ZipFile(io.BytesIO(_epub_bytes(chapters, mtime=pinned))).infolist()])
+
+
+@given(EPUB_CHAPTERS)
+@EPUB_BOOK
+def test_the_chapter_markup_the_case_supplies_is_replaced_by_the_library(chapters):
+    """The html and body the case writes into `EpubHtml.content` are not what the archive holds.
+    ebooklib parses the fragment and writes an XHTML document of its own around it: the root carries
+    the XHTML namespace and the epub one, a head is added with a title element holding the chapter
+    title, and the title therefore appears twice in a file the case supplied once. A reader that
+    searched the entry for the string the case wrote would find its text and not its markup."""
+    data = _epub_bytes(chapters)
+    folder = ebooklib_epub.EpubBook().FOLDER_NAME
+    for chapter in chapters:
+        document = lxml_etree.fromstring(
+            zipfile.ZipFile(io.BytesIO(data)).read(folder + '/' + chapter['file']))
+        npt.assert_array_equal(document.tag, XHTML + 'html')
+        npt.assert_array_equal(document.findtext('.//' + XHTML + 'title'), chapter['title'])
+        npt.assert_array_equal(document.findtext('.//' + XHTML + 'h1'), chapter['title'])
+
+
+@given(EPUB_CHAPTERS)
+@EPUB_BOOK
+def test_every_chapter_body_survives_as_text_in_the_file_the_spine_names(chapters):
+    """The case's `g.equal('The TSC must have a Chair.' in body, True)` as a parse rather than a
+    substring search. Each generated body, escaped on the way in, comes back as the text of the
+    paragraph in the file the spine points at, for every character the generator produced including the
+    ones escaping exists for. Replaces the typed sentence with the generated one."""
+    data = _epub_bytes(chapters)
+    folder = ebooklib_epub.EpubBook().FOLDER_NAME
+    for href, chapter in zip(_epub_spine(data)[1:], chapters):
+        document = lxml_etree.fromstring(zipfile.ZipFile(io.BytesIO(data)).read(folder + '/' + href))
+        npt.assert_array_equal(document.findtext('.//' + XHTML + 'p'), chapter['body'])
