@@ -7,6 +7,7 @@ this repository, which is the point of rule 5 of the hardening assurance.
 
 Each test names the hand-typed expectation in the frozen guard modules that it replaces.
 """
+import base64
 import calendar
 import codecs
 import contextlib
@@ -112,6 +113,9 @@ from odf.namespaces import OFFICENS, TABLENS
 import odfdo
 import orjson
 import pdfplumber
+import plotly.graph_objects as plotly_go
+import plotly.io as plotly_io
+import plotly.offline as plotly_offline
 import pm4py
 import pm4py.analysis as pm4py_analysis
 from pm4py.objects.bpmn.importer.variants import lxml as pm4py_bpmn
@@ -15730,3 +15734,194 @@ def test_the_count_paragraph_is_unchanged_when_only_the_date_moves(record):
     npt.assert_array_equal(_docx_paragraph_texts(document)[-1], _docx_paragraph_texts(moved)[-1])
     with pytest.raises(AssertionError):
         npt.assert_array_equal(_docx_paragraph_texts(document), _docx_paragraph_texts(moved))
+
+
+PLOTLY_DIRECTORY = pathlib.Path(os.environ.get('PLOTLY_JS_DIR',
+                                               str(pathlib.Path.home() / 'plotly-oracle')))
+PLOTLY_DECODE_ORACLE_JS = pathlib.Path(__file__).with_name('plotly_decode_oracle.js')
+PLOTLY_SPEC_ORACLE_JS = pathlib.Path(__file__).with_name('plotly_spec_oracle.js')
+plotly_js_available = (shutil.which('node') is not None
+                       and (PLOTLY_DIRECTORY / 'node_modules' / 'plotly.js').is_dir())
+PLOTLY = settings(max_examples=25, deadline=None)
+CHART_AMOUNT = st.floats(min_value=-1e6, max_value=1e6, allow_nan=False, allow_infinity=False)
+CHART_AMOUNTS = st.lists(CHART_AMOUNT, min_size=1, max_size=8)
+
+
+@st.composite
+def _amounts_with_a_missing_one(draw):
+    """Amounts of which at least one was measured and at least one was never measured."""
+    rest = draw(st.lists(st.one_of(CHART_AMOUNT, st.none()), max_size=5))
+    return list(draw(st.permutations([draw(CHART_AMOUNT), None] + rest)))
+
+
+@st.composite
+def _two_integer_columns_of_different_widths(draw):
+    """One column whose values fit in a signed byte and one whose values need two."""
+    return (draw(st.lists(st.integers(min_value=-128, max_value=127), min_size=1, max_size=6)),
+            draw(st.lists(st.integers(min_value=128, max_value=32767), min_size=1, max_size=6)))
+
+
+def _plotly_payload(values):
+    """What plotly 7.0.0 writes into its JSON document for the y values of one bar trace."""
+    figure = plotly_go.Figure(plotly_go.Bar(y=values))
+    return json.loads(plotly_io.to_json(figure))['data'][0].get('y')
+
+
+def _numpy_decoded(specification):
+    """The buffer read back with CPython's base64 and numpy.frombuffer, neither of which plotly
+    requires: its published metadata at 7.0.0 lists narwhals and packaging and puts numpy under the
+    dev and express extras only."""
+    return np.frombuffer(base64.b64decode(specification['bdata']), dtype=specification['dtype'])
+
+
+def _plotly_js_decoded(specification):
+    """The same specification through decodeTypedArraySpec, the decoder that ships in plotly.js
+    4.0.0 -- the version plotly.offline.get_plotlyjs_version() reports. The shim parses argv, calls
+    the library and prints; the Python side splits stdout."""
+    completed = subprocess.run(
+        ['node', str(PLOTLY_DECODE_ORACLE_JS), json.dumps(specification)],
+        capture_output=True, encoding='utf-8', check=True,
+        env={**os.environ, 'NODE_PATH': str(PLOTLY_DIRECTORY / 'node_modules')})
+    lines = completed.stdout.split('\n')
+    return lines[0], [float(value) for value in lines[1:]]
+
+
+def _plotly_js_calls_it_a_specification(value):
+    """What plotly.js's own isTypedArraySpec says about one JSON value."""
+    completed = subprocess.run(
+        ['node', str(PLOTLY_SPEC_ORACLE_JS), json.dumps(value)],
+        capture_output=True, encoding='utf-8', check=True,
+        env={**os.environ, 'NODE_PATH': str(PLOTLY_DIRECTORY / 'node_modules')})
+    return completed.stdout
+
+
+@pytest.mark.skipif(not plotly_js_available, reason='node and a plotly.js install are required')
+@given(CHART_AMOUNTS)
+@PLOTLY
+def test_one_series_of_numbers_is_two_different_documents(amounts):
+    """Replaces `g.equal(sorted(encoded), ['bdata', 'dtype'])  # the pandas path stores a typed
+    binary array` of handoff_guards_v3.py case 24. The same numbers handed to the same figure as a
+    pandas Series and as a Python list produce two different JSON documents, and plotly.js's own
+    isTypedArraySpec says so: one is a typed-array specification and the other is a plain array.
+    _plotly_utils/utils.py at tag v7.0.0 states the condition -- to_typed_array_spec will "Skip b64
+    encoding if numpy is not installed, or if v is not a numpy array, or if v is empty" -- so which
+    document a chart becomes is decided by the type of the container it was built from."""
+    buffered, listed = _plotly_payload(pd.Series(amounts)), _plotly_payload(list(amounts))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_plotly_js_calls_it_a_specification(buffered),
+                               _plotly_js_calls_it_a_specification(listed))
+    npt.assert_array_equal(listed, amounts)
+
+
+@pytest.mark.skipif(not plotly_js_available, reason='node and a plotly.js install are required')
+@given(CHART_AMOUNTS)
+@PLOTLY
+def test_two_decoders_read_the_same_numbers_out_of_the_buffer(amounts):
+    """The buffer is not opaque and not plotly's private business: CPython's base64 with
+    numpy.frombuffer and the decodeTypedArraySpec that ships in plotly.js 4.0.0 return the same
+    numbers, and they are the numbers the figure was built from. Replaces the case's hand-decoded
+    np.frombuffer line with a comparison against the format's own reference implementation."""
+    specification = _plotly_payload(pd.Series(amounts))
+    npt.assert_array_equal(_numpy_decoded(specification), amounts)
+    npt.assert_array_equal(_plotly_js_decoded(specification)[1], amounts)
+
+
+@given(_amounts_with_a_missing_one())
+@PLOTLY
+def test_a_missing_amount_becomes_not_a_number_in_the_buffer_and_stays_null_in_the_list(amounts):
+    """Replaces `g.equal(bool(np.isnan(decoded[0])), True)  # the missing value became NaN inside the
+    payload` of handoff_guards_v3.py case 24. Down the pandas path the gap is the IEEE quiet NaN of
+    the float64 buffer, which is what pandas itself makes of the column; down the list path the same
+    figure keeps a JSON null. So the two documents disagree about whether the amount is missing or
+    is a number that is not a number, and only one of them can still be told apart from a measured
+    value."""
+    buffered, listed = _plotly_payload(pd.Series(amounts)), _plotly_payload(list(amounts))
+    npt.assert_array_equal(_numpy_decoded(buffered), pd.Series(amounts).to_numpy(dtype='float64'))
+    npt.assert_array_equal(listed, amounts)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(listed, _numpy_decoded(buffered))
+
+
+@given(st.lists(st.none(), min_size=1, max_size=5))
+@PLOTLY
+def test_a_column_with_nothing_measured_is_not_a_buffer_at_all(amounts):
+    """The disagreeing region of the same encoder, generated rather than filtered. A column in which
+    nothing was measured is an object column to pandas, and to_typed_array_spec at tag v7.0.0 only
+    encodes a numpy numeric array, so the identical call that produced a base64 buffer for a
+    measured column produces a JSON array of nulls here. Whether a chart's numbers are readable text
+    or an opaque buffer therefore depends on whether any of them was measured."""
+    npt.assert_array_equal(_plotly_payload(pd.Series(amounts)), amounts)
+
+
+@pytest.mark.skipif(not plotly_js_available, reason='node and a plotly.js install are required')
+@given(CHART_AMOUNTS)
+@PLOTLY
+def test_reading_the_document_back_returns_the_specification_and_not_the_array(amounts):
+    """Replaces `g.equal(sorted(back.data[0].z.keys()) if isinstance(back.data[0].z, dict) else
+    'array', ['bdata', 'dtype', 'shape'])  # from_json returns the typed buffer undecoded` of
+    handoff_guards_v5.py case 43. plotly.io.from_json of plotly.io.to_json is not the identity: what
+    goes in as a column comes back as the dictionary that describes it, which plotly.js still calls
+    a specification, and the numbers are reachable only by decoding it. A figure that has been
+    through the document is not the figure."""
+    figure = plotly_go.Figure(plotly_go.Bar(y=pd.Series(amounts)))
+    returned = plotly_io.from_json(plotly_io.to_json(figure)).data[0].y
+    npt.assert_array_equal(_plotly_js_calls_it_a_specification(returned),
+                           _plotly_js_calls_it_a_specification(_plotly_payload(pd.Series(amounts))))
+    npt.assert_array_equal(_numpy_decoded(returned), amounts)
+
+
+@pytest.mark.skipif(not plotly_js_available, reason='node and a plotly.js install are required')
+@given(_two_integer_columns_of_different_widths())
+@PLOTLY
+def test_the_integer_width_written_is_decided_by_the_values_not_by_the_column(pair):
+    """Two int64 columns are written at two different widths. _plotly_utils/utils.py at tag v7.0.0
+    narrows an int64 column to int8, int16 or int32 by its own maximum and minimum -- the comment
+    there reads "convert default Big Ints until we could support them in plotly.js" -- so the dtype
+    in the document is a property of the values it happens to hold, not of the column's declared
+    type, and two documents written from one dtype are read back as two different array types by
+    plotly.js. Both decode to the integers written."""
+    narrow, wider = pair
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_plotly_js_decoded(_plotly_payload(np.array(narrow, dtype='int64')))[0],
+                               _plotly_js_decoded(_plotly_payload(np.array(wider, dtype='int64')))[0])
+    npt.assert_array_equal(_plotly_js_decoded(_plotly_payload(np.array(narrow, dtype='int64')))[1],
+                           narrow)
+    npt.assert_array_equal(_plotly_js_decoded(_plotly_payload(np.array(wider, dtype='int64')))[1],
+                           wider)
+
+
+@given(st.lists(st.integers(min_value=2 ** 31, max_value=2 ** 53), min_size=1, max_size=4))
+@PLOTLY
+def test_an_integer_beyond_the_widths_plotly_js_declares_is_written_as_a_plain_list(amounts):
+    """The same narrowing has a floor. A column holding a value past int32 is returned unencoded by
+    to_typed_array_spec, so the identical call that produced a base64 buffer for smaller numbers
+    produces a JSON array of decimal integers here, and the document's shape depends on the size of
+    the numbers in it."""
+    npt.assert_array_equal(_plotly_payload(np.array(amounts, dtype='int64')), amounts)
+
+
+@given(CHART_AMOUNTS)
+@PLOTLY
+def test_the_page_pins_the_remote_bundle_to_the_bytes_the_library_ships(amounts):
+    """Replaces `g.equal([u.startswith('https://cdn.plot.ly/') for u in external_assets(cdn_page)],
+    [True])` of handoff_guards_v3.py case 24, and finds more than the case looked for. The page
+    written with include_plotlyjs='cdn' carries exactly one external script, and the src is not all
+    it carries: the tag also carries a subresource-integrity attribute, and that attribute is the
+    base64 SHA-256 of the bundle plotly.offline.get_plotlyjs() returns, so the remote dependency is
+    pinned byte for byte to the copy the library ships. The page written with include_plotlyjs=True
+    has no external reference at all. The external assets are selected with an lxml XPath rather
+    than with the case's own scan."""
+    figure = plotly_go.Figure(plotly_go.Bar(y=pd.Series(amounts)))
+    page = lxml_html.fromstring(plotly_io.to_html(figure, include_plotlyjs='cdn', full_html=True))
+    embedded = lxml_html.fromstring(
+        plotly_io.to_html(figure, include_plotlyjs=True, full_html=True))
+    declared = 'sha256-' + base64.b64encode(
+        hashlib.sha256(plotly_offline.get_plotlyjs().encode()).digest()).decode()
+    npt.assert_array_equal(page.xpath('//script[@integrity=$value]/@src', value=declared),
+                           page.xpath('//script/@src'))
+    npt.assert_array_equal(
+        page.xpath('//script[contains(@src, $version)]/@src',
+                   version=plotly_offline.get_plotlyjs_version()),
+        page.xpath('//script/@src'))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(page.xpath('//script/@src'), embedded.xpath('//script/@src'))
