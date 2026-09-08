@@ -11,6 +11,7 @@ import calendar
 import contextlib
 import csv
 import functools
+import operator
 import os
 import pathlib
 import shutil
@@ -2577,3 +2578,317 @@ def test_asking_either_engine_to_refuse_a_missing_variable_leaves_its_escaping_w
     npt.assert_array_equal(STRICT_ENVIRONMENT.from_string(ESCAPING_TEMPLATE).render(value=value), value)
     npt.assert_array_equal(_nunjucks_renders(TEMPLATE_STRICT_JS, {'value': value})[0],
                            _nunjucks_renders(TEMPLATE_ORACLE_JS, {'value': value})[0])
+
+
+# ---------------------------------------------------------------- matching an invoice to an order line
+ORDER_KEYS = st.lists(st.integers(min_value=0, max_value=12), min_size=1, max_size=8, unique=True)
+INVOICE_POSITIONS = st.lists(st.integers(min_value=0, max_value=40), min_size=1, max_size=10)
+ABSENT_KEYS = st.lists(st.integers(min_value=100, max_value=120), min_size=1, max_size=6, unique=True)
+MISSING_KEYS = st.lists(st.none(), min_size=2, max_size=5)
+CENTS = st.integers(min_value=1, max_value=10 ** 6)
+
+
+def _purchase_frames(order_keys, positions, absent_keys):
+    """One order line per generated key and one invoice row per reference. The references that match are
+    drawn from the order keys themselves and the ones that do not are drawn from a disjoint range, so the
+    region where the join loses rows is generated rather than filtered for."""
+    orders = pd.DataFrame({'order_line': order_keys, 'ordered': range(len(order_keys))})
+    references = [order_keys[position % len(order_keys)] for position in positions] + list(absent_keys)
+    invoices = pd.DataFrame({'invoice_line': range(len(references)), 'order_line': references})
+    return orders, invoices
+
+
+def _missing_key_frames(order_nulls, invoice_nulls):
+    """The same two frames with every key missing, as pandas' nullable integer type so that all three
+    engines see a null and not a string."""
+    orders = pd.DataFrame({'order_line': pd.Series(order_nulls, dtype='Int64'),
+                           'ordered': range(len(order_nulls))})
+    invoices = pd.DataFrame({'invoice_line': range(len(invoice_nulls)),
+                             'order_line': pd.Series(invoice_nulls, dtype='Int64')})
+    return orders, invoices
+
+
+def _duckdb_matched_invoice_lines(orders, invoices):
+    """The same inner join in SQL. DuckDB is a third engine, written in C++, and shares no code with either
+    dataframe library; its aggregates page documents the null conventions the joins below turn on."""
+    with duckdb.connect() as connection:
+        connection.execute('create table orders(order_line BIGINT, ordered BIGINT)')
+        connection.execute('create table invoices(invoice_line BIGINT, order_line BIGINT)')
+        connection.executemany('insert into orders values (?, ?)', orders.astype(object).to_numpy().tolist())
+        connection.executemany('insert into invoices values (?, ?)',
+                               invoices.astype(object).to_numpy().tolist())
+        return [row[0] for row in connection.execute(
+            'select invoices.invoice_line from invoices join orders '
+            'on invoices.order_line = orders.order_line '
+            'order by invoices.invoice_line').fetchall()]
+
+
+@given(ORDER_KEYS, INVOICE_POSITIONS, ABSENT_KEYS)
+@SLOW
+def test_a_checked_inner_join_drops_the_invoice_rows_two_other_engines_also_drop(order_keys, positions,
+                                                                                absent_keys):
+    """P152 joins each invoice to its order line with merge(validate='many_to_one', indicator=True) and the
+    chain is required to retain unmatched lines. The join does not retain them. polars 1.44.1, whose
+    pyproject.toml at tag py-1.44.1 declares polars-runtime-32 and nothing else, and DuckDB 1.5.5 drop
+    exactly the same invoice lines, so the loss is the join and not pandas. What the outer join marks
+    left_only is precisely what the inner join lost, which is the invariant the three engines are checked
+    against. Replaces the typed len(inner) == 5 and 'I5' in set(...) == False of handoff_guards_v16.py
+    case 152."""
+    orders, invoices = _purchase_frames(order_keys, positions, absent_keys)
+    inner = invoices.merge(orders, on='order_line', how='inner', validate='many_to_one', indicator=True)
+    in_polars = pl.from_pandas(invoices).join(pl.from_pandas(orders), on='order_line', how='inner',
+                                              validate='m:1')
+    npt.assert_array_equal(np.sort(inner['invoice_line'].to_numpy()),
+                           np.sort(in_polars['invoice_line'].to_numpy()))
+    npt.assert_array_equal(np.sort(inner['invoice_line'].to_numpy()),
+                           _duckdb_matched_invoice_lines(orders, invoices))
+    outer = invoices.merge(orders, on='order_line', how='outer', indicator=True)
+    lost = outer.loc[outer['_merge'] == 'left_only', 'invoice_line'].to_numpy()
+    npt.assert_array_equal(np.sort(np.concatenate([inner['invoice_line'].to_numpy(), lost])),
+                           np.sort(invoices['invoice_line'].to_numpy()))
+
+
+@given(ORDER_KEYS, INVOICE_POSITIONS, ABSENT_KEYS)
+@SLOW
+def test_the_indicator_that_would_report_the_drop_is_a_constant_on_an_inner_join(order_keys, positions,
+                                                                                absent_keys):
+    """indicator=True is the setting that reports where each row came from, and pandas' merge docstring at
+    v2.2.3 says the column carries "left_only" for observations whose merge key only appears in the left
+    DataFrame and "both" if the observation's merge key is found in both. On an inner join no row can be
+    anything but both, so the flag the chain reads to find dropped lines takes one value however many lines
+    were dropped, and only the outer join's flag takes more than one. Replaces the typed
+    sorted(inner['_merge'].astype(str).unique()) == ['both'] of case 152."""
+    orders, invoices = _purchase_frames(order_keys, positions, absent_keys)
+    inner = invoices.merge(orders, on='order_line', how='inner', validate='many_to_one', indicator=True)
+    outer = invoices.merge(orders, on='order_line', how='outer', indicator=True)
+    matched = outer.loc[outer['invoice_line'].isin(inner['invoice_line']), '_merge']
+    npt.assert_array_equal(np.unique(inner['_merge'].astype(str).to_numpy()),
+                           np.unique(matched.astype(str).to_numpy()))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(np.unique(outer['_merge'].astype(str).to_numpy()),
+                               np.unique(inner['_merge'].astype(str).to_numpy()))
+
+
+@given(ORDER_KEYS, INVOICE_POSITIONS)
+@SLOW
+def test_both_cardinality_checkers_refuse_a_repeated_order_line_and_accept_a_repeated_invoice(order_keys,
+                                                                                             positions):
+    """Two independent implementations of the same check agree about which side it checks. pandas documents
+    "many_to_one" or "m:1": check if merge keys are unique in right dataset; polars' join docstring at tag
+    py-1.44.1 documents m:1 as "Many-to-one. Check if join keys are unique in right dataset." Executed, both
+    refuse a duplicated order line and both accept a duplicated invoice line, and on the accepted side they
+    return the same rows. So a second invoice against one order line passes the check that a second order
+    line does not, and the chain's cumulative comparison is the only thing standing between that and a
+    double payment. Replaces the typed g.rejects(pd.errors.MergeError, ...) of case 152."""
+    orders, invoices = _purchase_frames(order_keys, positions, [])
+    repeated_orders = pd.concat([orders, orders.iloc[[0]]])
+    with pytest.raises(pd.errors.MergeError):
+        invoices.merge(repeated_orders, on='order_line', how='inner', validate='many_to_one')
+    with pytest.raises(pl.exceptions.ComputeError):
+        pl.from_pandas(invoices).join(pl.from_pandas(repeated_orders), on='order_line', how='inner',
+                                      validate='m:1')
+    repeated_invoices = pd.concat([invoices, invoices.iloc[[0]]])
+    npt.assert_array_equal(
+        np.sort(repeated_invoices.merge(orders, on='order_line', how='inner',
+                                        validate='many_to_one')['invoice_line'].to_numpy()),
+        np.sort(pl.from_pandas(repeated_invoices).join(pl.from_pandas(orders), on='order_line',
+                                                       how='inner', validate='m:1')['invoice_line'].to_numpy()))
+
+
+@given(MISSING_KEYS, MISSING_KEYS)
+@SLOW
+def test_a_missing_order_line_is_a_repeated_key_to_one_checker_and_not_to_the_other(order_nulls,
+                                                                                   invoice_nulls):
+    """The same check on the same data, one refusal and one acceptance. Where every order line is missing,
+    pandas' validate='many_to_one' raises MergeError because it counts two missing keys as one key twice,
+    while polars' validate='m:1' passes and returns what the unvalidated join returns, because its
+    docstring's "By default null values will never produce matches" applies to the check as well. So the
+    cardinality guard P152 relies on fires or does not fire according to which engine holds the frame, on
+    data neither engine considers malformed."""
+    orders, invoices = _missing_key_frames(order_nulls, invoice_nulls)
+    with pytest.raises(pd.errors.MergeError):
+        invoices.merge(orders, on='order_line', how='inner', validate='many_to_one')
+    validated = pl.from_pandas(invoices).join(pl.from_pandas(orders), on='order_line', how='inner',
+                                              validate='m:1')
+    unvalidated = pl.from_pandas(invoices).join(pl.from_pandas(orders), on='order_line', how='inner')
+    npt.assert_array_equal(validated['invoice_line'].to_numpy(), unvalidated['invoice_line'].to_numpy())
+
+
+@given(MISSING_KEYS, MISSING_KEYS)
+@SLOW
+def test_a_missing_key_matches_every_other_missing_key_in_one_engine_and_nowhere_else(order_nulls,
+                                                                                      invoice_nulls):
+    """pandas' merge docstring at v2.2.3 carries the warning "If both key columns contain rows where the key
+    is a null value, those rows will be matched against each other. This is different from usual SQL join
+    behaviour and can lead to unexpected results." Executed, it is a full cross product: every invoice whose
+    order reference is missing matches every order line whose key is missing. The usual SQL join behaviour
+    is the other engine the chain also uses, and DuckDB returns nothing at all, as does polars, whose
+    nulls_equal=True reproduces pandas exactly. So an invoice with no order ID is silently matched, and
+    which rows come out of the match depends on the engine rather than on the data."""
+    orders, invoices = _missing_key_frames(order_nulls, invoice_nulls)
+    matched = invoices.merge(orders, on='order_line', how='inner')
+    dropped = pl.from_pandas(invoices).join(pl.from_pandas(orders), on='order_line', how='inner')
+    told_to_match = pl.from_pandas(invoices).join(pl.from_pandas(orders), on='order_line', how='inner',
+                                                  nulls_equal=True)
+    npt.assert_array_equal(np.sort(matched['invoice_line'].to_numpy()),
+                           np.sort(told_to_match['invoice_line'].to_numpy()))
+    npt.assert_array_equal(dropped['invoice_line'].to_numpy(),
+                           _duckdb_matched_invoice_lines(orders, invoices))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(np.sort(matched['invoice_line'].to_numpy()),
+                               dropped['invoice_line'].to_numpy())
+
+
+def _duckdb_group_totals(frame):
+    """The same rollup in SQL, ordered by the group key."""
+    with duckdb.connect() as connection:
+        connection.execute('create table amounts("group" BIGINT, amount DOUBLE)')
+        connection.executemany('insert into amounts values (?, ?)',
+                               frame.astype(object).where(frame.notna(), None).to_numpy().tolist())
+        return [row[1] for row in connection.execute(
+            'select "group", sum(amount) from amounts group by "group" order by "group"').fetchall()]
+
+
+@given(st.lists(st.none(), min_size=1, max_size=5), st.lists(CENTS, min_size=1, max_size=6))
+@SLOW
+def test_a_group_of_only_missing_amounts_totals_zero_in_two_engines_and_nothing_in_the_third(missing, cents):
+    """P152 aggregates invoice quantities by order line before comparing them, and case 152 records that a
+    missing amount is dropped rather than raised. Where a group has nothing but missing amounts the three
+    engines split two to one, and each documents its own answer. pandas' groupby sum takes min_count=0 by
+    default, whose docstring reads "The required number of valid values to perform the operation. If fewer
+    than ``min_count`` non-NA values are present the result will be NA", so with the default no value is
+    required and the total is zero; polars' Expr.sum docstring at py-1.44.1 says "If there are no non-null
+    values, then the output is `0`"; DuckDB's aggregate page says sum "Calculates the sum of all non-null
+    values" and that "All general aggregate functions except count return NULL on empty groups". So a line
+    with no quantity at all reads as a measured zero in both dataframe engines and as nothing in SQL, and
+    asking pandas for min_count=1 moves it back to SQL's answer. Replaces the typed
+    decimal_totals(rows, key='k')['a'] == Decimal('10.00') of handoff_guards_v16.py case 152."""
+    frame = pd.DataFrame({'group': [0] * len(missing) + [1] * len(cents),
+                          'amount': pd.Series(list(missing) + list(cents), dtype='float64')})
+    in_pandas = frame.groupby('group')['amount'].sum()
+    in_polars = pl.from_pandas(frame).group_by('group').agg(pl.col('amount').sum()).sort('group')
+    npt.assert_allclose(in_pandas.to_numpy(), in_polars['amount'].to_numpy())
+    in_sql = pd.Series(_duckdb_group_totals(frame), dtype='object')
+    npt.assert_allclose(in_pandas.to_numpy()[in_sql.notna().to_numpy()],
+                        in_sql.dropna().astype(float).to_numpy())
+    npt.assert_array_equal(frame.groupby('group')['amount'].sum(min_count=1).isna().to_numpy(),
+                           in_sql.isna().to_numpy())
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(in_pandas.isna().to_numpy(), in_sql.isna().to_numpy())
+
+
+@given(st.lists(CENTS, min_size=1, max_size=6))
+@SLOW
+def test_a_total_over_no_amounts_is_not_the_same_kind_of_number_as_a_total_over_some(cents):
+    """The amounts P152 totals are decimal currency and the total of some of them is decimal currency too,
+    exactly, which fractions.Fraction confirms against the sum of the same amounts as rationals. The total
+    of none of them is not: pandas returns a plain integer zero from a column of Decimals, so it carries no
+    scale, no currency and no quantize, and the next comparison against a Decimal tolerance is a mixed
+    comparison rather than a decimal one. Replaces the typed empty == 0 and type(empty).__name__ in
+    ('int', 'float64') of case 152."""
+    amounts = pd.Series([Decimal(value).scaleb(-2) for value in cents], dtype='object')
+    filled = amounts.sum()
+    empty = amounts.iloc[:0].sum()
+    npt.assert_equal(Fraction(filled), sum(Fraction(amount) for amount in amounts))
+    with pytest.raises(AssertionError):
+        npt.assert_equal(type(empty), type(filled))
+    with pytest.raises(AttributeError):
+        empty.as_tuple()
+
+
+@functools.lru_cache(maxsize=1)
+def _tolerance_table():
+    """One row per hundredth from one cent to two hundred: the amount as a Decimal, the same amount as a
+    float, and both as exact rationals. Which cents fall in which region below is read off this table by
+    asking fractions.Fraction rather than named here."""
+    return tuple((Decimal(cents).scaleb(-2), float(Decimal(cents).scaleb(-2)),
+                  Fraction(Decimal(cents).scaleb(-2)), Fraction(float(Decimal(cents).scaleb(-2))))
+                 for cents in range(1, 201))
+
+
+def _tolerances_where(relation):
+    """The rows of that table whose float stands in the given relation to its decimal, Fraction deciding."""
+    return [row for row in _tolerance_table() if relation(row[3], row[2])]
+
+
+def _sql_says_equal(exact, spelled):
+    """The same comparison inside DuckDB, the amount written as a decimal and the tolerance as a double.
+    Its typecasting page says combination casting "occurs for comparisons (`=` / `<` / `>`)"."""
+    with duckdb.connect() as connection:
+        return connection.execute('select cast(? as decimal(18,2)) = cast(? as double)',
+                                  [str(exact), spelled]).fetchone()[0]
+
+
+@given(st.integers(min_value=0, max_value=10 ** 4))
+@SLOW
+def test_a_decimal_tolerance_equals_its_float_spelling_only_where_the_float_is_that_exact_number(index):
+    """CPython's decimal documentation at tag v3.11.15 says "it is possible to use Python's comparison
+    operators to compare a Decimal instance x with another number y. This avoids confusing results when
+    doing equality comparisons between numbers of different types." Executed against Fraction, which holds
+    both as exact rationals, the comparison is exact: it says equal exactly where the two are the same
+    rational and not otherwise. Nine of the two hundred hundredths pass that test and the rest do not, so
+    whether a tolerance written as a float is the tolerance the chain declared is a property of the
+    particular amount. Replaces the typed Decimal('0.25') == 0.25 and Decimal('0.1') == 0.1 of case 152."""
+    exact, spelled, as_rational, spelled_as_rational = _tolerance_table()[index % len(_tolerance_table())]
+    npt.assert_equal(exact == spelled, as_rational == spelled_as_rational)
+
+
+@given(st.integers(min_value=0, max_value=10 ** 4))
+@SLOW
+def test_where_the_float_is_the_exact_amount_python_and_the_sql_engine_agree(index):
+    """On the hundredths whose float is the exact number, both readings call them equal."""
+    together = _tolerances_where(operator.eq)
+    exact, spelled, as_rational, spelled_as_rational = together[index % len(together)]
+    npt.assert_equal(as_rational, spelled_as_rational)
+    npt.assert_equal(_sql_says_equal(exact, spelled), exact == spelled)
+
+
+@given(st.integers(min_value=0, max_value=10 ** 4))
+@SLOW
+def test_the_sql_engine_calls_a_decimal_equal_to_a_float_that_python_calls_different(index):
+    """And on the rest they give opposite answers to the same question. DuckDB reports that a DECIMAL can be
+    cast implicitly to a DOUBLE and not the reverse, so the comparison is made after the exact amount has
+    been rounded to the nearest double, and the two are then equal; Python compares them exactly and they
+    are not. Offered a double that is not the nearest one, DuckDB says different, which is what shows the
+    rounding rather than a blanket answer. A tolerance the chain reads back from the workbook engine and one
+    it compares in Python are therefore not the same tolerance."""
+    apart = _tolerances_where(operator.ne)
+    exact, spelled, as_rational, spelled_as_rational = apart[index % len(apart)]
+    with pytest.raises(AssertionError):
+        npt.assert_equal(_sql_says_equal(exact, spelled), exact == spelled)
+    neighbour = float(np.nextafter(spelled, np.inf))
+    npt.assert_equal(_sql_says_equal(exact, neighbour), exact == neighbour)
+
+
+@given(st.integers(min_value=0, max_value=10 ** 4), CENTS)
+@SLOW
+def test_a_difference_exactly_at_the_tolerance_is_accepted_where_the_float_spelling_rounds_up(index, amount):
+    """P152's boundary check is abs(ordered - billed) <= tolerance and its evidence line claims four signed
+    price-boundary cases confirm a 0.25 USD tolerance. Twenty-five hundredths is one of the nine hundredths
+    whose float is exact, and on the hundredths whose nearest double is above the amount the boundary is
+    accepted either way: the decimal comparison accepts a difference exactly equal to the tolerance and so
+    does the float spelling, and Fraction agrees with both."""
+    larger = _tolerances_where(operator.gt)
+    exact, spelled, as_rational, spelled_as_rational = larger[index % len(larger)]
+    ordered = Decimal(amount).scaleb(-2)
+    difference = abs((ordered + exact) - ordered)
+    npt.assert_equal(difference <= spelled, Fraction(difference) <= spelled_as_rational)
+    npt.assert_equal(difference <= spelled, difference <= exact)
+
+
+@given(st.integers(min_value=0, max_value=10 ** 4), CENTS)
+@SLOW
+def test_a_difference_exactly_at_the_tolerance_is_refused_where_the_float_spelling_rounds_down(index, amount):
+    """On the hundredths whose nearest double is below the amount, the same boundary goes the other way: the
+    difference is exactly the declared tolerance and the float spelling of that tolerance refuses it, while
+    the decimal spelling accepts it. Ninety-two of the two hundred hundredths are in this region and a
+    hundred are in the region above, so which way a boundary case falls is decided by the cent and by how
+    the tolerance was written, and neither is visible at the comparison. Fraction says the same as the float
+    every time, so this is exact arithmetic on a number that is not the one the chain declared."""
+    smaller = _tolerances_where(operator.lt)
+    exact, spelled, as_rational, spelled_as_rational = smaller[index % len(smaller)]
+    ordered = Decimal(amount).scaleb(-2)
+    difference = abs((ordered + exact) - ordered)
+    npt.assert_equal(difference <= spelled, Fraction(difference) <= spelled_as_rational)
+    with pytest.raises(AssertionError):
+        npt.assert_equal(difference <= spelled, difference <= exact)
