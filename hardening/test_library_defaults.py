@@ -25,6 +25,7 @@ import sys
 import tempfile
 import subprocess
 import unicodedata
+import warnings
 import datetime
 import inspect
 import io
@@ -11944,3 +11945,211 @@ def test_filling_a_field_the_form_does_not_have_is_not_refused_by_the_library(na
     npt.assert_array_equal(sorted(_pdfium_form_values(answered)), sorted(_pdfium_form_values(pdf)))
     with pytest.raises(AssertionError):
         npt.assert_equal(answered, pdf)
+
+
+# --------------------------------------------------------------------------------------------------
+# handoff_guards_v3.py, case deadline_instants_and_censoring: what an instant comparison is
+# --------------------------------------------------------------------------------------------------
+INSTANT = st.datetimes(min_value=datetime.datetime(1990, 1, 1),
+                       max_value=datetime.datetime(2100, 1, 1)).map(
+    lambda naive: naive.replace(microsecond=0, tzinfo=datetime.timezone.utc))
+UTC_OFFSET = st.sampled_from([-720, -600, -480, -345, -300, -210, 0, 60, 120, 180, 210, 330, 345,
+                              540, 600, 720, 780, 840])
+SECONDS_EARLIER = st.integers(min_value=1, max_value=10 ** 6)
+INSTANTS = settings(max_examples=100, deadline=None)
+
+
+def _stamp_text(instant, offset_minutes):
+    """One instant written down at a chosen UTC offset. `astimezone` and `isoformat` do the writing, so
+    the two renderings of one instant differ only in the offset each carries."""
+    return instant.astimezone(
+        datetime.timezone(datetime.timedelta(minutes=offset_minutes))).isoformat(sep=' ')
+
+
+def _duckdb_value(text, sql_type):
+    """The stamp read by DuckDB 1.5.5 under one of its two timestamp types."""
+    return duckdb.execute('select ?::%s' % sql_type, [text]).fetchone()[0]
+
+
+def _duckdb_compare(left, right, sql_type, operator_text):
+    """One comparison evaluated by the engine, under a named type and a named operator."""
+    return duckdb.execute('select ?::{0} {1} ?::{0}'.format(sql_type, operator_text),
+                          [left, right]).fetchone()[0]
+
+
+def _polars_instant(text):
+    """The same stamp through polars 1.44.1, whose `Series.str.to_datetime` documents at tag py-1.44.1
+    that "If inputs are offset-aware and `time_zone` is None, inputs are converted to `'UTC'` and the
+    result time zone is `'UTC'`." Parsing is the Rust chrono crate, not CPython's."""
+    return pl.Series([text]).str.to_datetime()[0]
+
+
+@given(INSTANT, UTC_OFFSET)
+@INSTANTS
+def test_three_engines_agree_on_the_instant_a_stamp_denotes(instant, offset):
+    """handoff_guards_v3.py's case deadline_instants_and_censoring types nine expectations about two
+    fixed stamps, 00:30Z written at +02:00 and 01:00Z written at +01:00. Here the instant and the offset
+    are generated and three implementations read the text back to the instant it was written from:
+    CPython's `datetime.fromisoformat`, DuckDB 1.5.5's TIMESTAMPTZ cast, and polars 1.44.1's Rust
+    parser. The expected value is the generated input, not a value typed here."""
+    text = _stamp_text(instant, offset)
+    npt.assert_equal(datetime.datetime.fromisoformat(text), instant)
+    npt.assert_equal(_duckdb_value(text, 'TIMESTAMPTZ'), instant)
+    npt.assert_equal(_polars_instant(text), instant)
+
+
+@given(INSTANT, UTC_OFFSET, UTC_OFFSET)
+@INSTANTS
+def test_one_instant_written_at_two_offsets_is_one_instant_and_two_strings(instant, first, second):
+    """Why the case's first expectation, `g.equal(a <= b, False)`, is about text and not about time. One
+    generated instant written at two different offsets gives two strings that are not equal, while every
+    implementation that understands the offset reads them as the same instant. So an ordering taken from
+    the characters answers a different question from an ordering taken from the instants, and it does so
+    without raising anything."""
+    assume(first != second)
+    left, right = _stamp_text(instant, first), _stamp_text(instant, second)
+    npt.assert_equal(datetime.datetime.fromisoformat(left), datetime.datetime.fromisoformat(right))
+    npt.assert_equal(_duckdb_value(left, 'TIMESTAMPTZ'), _duckdb_value(right, 'TIMESTAMPTZ'))
+    npt.assert_equal(_polars_instant(left), _polars_instant(right))
+    with pytest.raises(AssertionError):
+        npt.assert_equal(left, right)
+
+
+@given(INSTANT, UTC_OFFSET)
+@INSTANTS
+def test_the_naive_cast_keeps_the_wall_clock_and_reads_the_offset_without_applying_it(instant, offset):
+    """What the case records as `g.equal(str(naive_a), '2011-10-30 02:30:00')`, executed over generated
+    input and traced to its cause. In DuckDB 1.5.5 the two casts differ by one boolean: `TryCast` for
+    `timestamp_t` calls `Timestamp::TryConvertTimestamp(..., result, false)` and the one for
+    `timestamp_tz_t` calls it with `true`, and that argument is `use_offset`, which gates the subtraction
+    inside `TryConvertTimestampTZ` in src/common/types/timestamp.cpp at tag v1.5.5. So the offset is
+    parsed either way and the TIMESTAMP cast simply does not apply it: what comes back is the wall clock
+    the text carries, which is exactly what CPython returns after `replace(tzinfo=None)`, and the cast
+    succeeds rather than warning that it dropped something."""
+    text = _stamp_text(instant, offset)
+    npt.assert_equal(_duckdb_value(text, 'TIMESTAMP'),
+                     datetime.datetime.fromisoformat(text).replace(tzinfo=None))
+    npt.assert_equal(_duckdb_value(text, 'TIMESTAMPTZ'), instant)
+
+
+@given(INSTANT, UTC_OFFSET, UTC_OFFSET)
+@INSTANTS
+def test_the_two_casts_order_one_instant_at_two_offsets_differently(instant, first, second):
+    """And the consequence for a deadline. Under TIMESTAMPTZ the two renderings of one instant compare
+    equal in both directions, so neither is before the other; under TIMESTAMP one of them is strictly
+    earlier, because the comparison is between two wall clocks in two different places. The engine
+    answers both questions without complaint, and only the type in the query says which was asked."""
+    assume(first != second)
+    left, right = _stamp_text(instant, first), _stamp_text(instant, second)
+    npt.assert_equal(_duckdb_compare(left, right, 'TIMESTAMPTZ', '<='),
+                     _duckdb_compare(right, left, 'TIMESTAMPTZ', '<='))
+    with pytest.raises(AssertionError):
+        npt.assert_equal(_duckdb_compare(left, right, 'TIMESTAMP', '<='),
+                         _duckdb_compare(right, left, 'TIMESTAMP', '<='))
+
+
+@given(INSTANT, UTC_OFFSET)
+@INSTANTS
+def test_an_absent_deadline_compares_to_unknown_in_both_engines_and_coalesce_decides_it(instant,
+                                                                                       offset):
+    """The case's `g.equal(unknown, None)` and `g.equal(coalesced, False)`, over generated stamps and in
+    two engines. A comparison against a missing deadline is unknown in DuckDB and null in polars, which
+    is not the same answer as false; `coalesce(..., false)` is where the unknown becomes a decision, and
+    the decision it becomes is that the deadline was met. Replaces both typed values."""
+    text = _stamp_text(instant, offset)
+    unknown, coalesced = duckdb.execute(
+        'select NULL::TIMESTAMPTZ <= ?::TIMESTAMPTZ, coalesce(NULL::TIMESTAMPTZ <= ?::TIMESTAMPTZ, false)',
+        [text, text]).fetchone()
+    absent = pl.Series([None], dtype=pl.String).str.to_datetime(time_zone='UTC')
+    present = pl.Series([text]).str.to_datetime(time_zone='UTC')
+    npt.assert_equal(unknown, (absent <= present)[0])
+    with pytest.raises(AssertionError):
+        npt.assert_equal(unknown, coalesced)
+
+
+@given(INSTANT, UTC_OFFSET, UTC_OFFSET)
+@INSTANTS
+def test_pandas_falls_back_to_object_where_polars_converts_the_column_to_utc(instant, first, second):
+    """Two dataframe engines given the same two stamps. pandas 2.2.3 warns -- its own `to_datetime`
+    docstring at tag v2.2.3 shows the text, "In a future version of pandas, parsing datetimes with mixed
+    time zones will raise an error unless `utc=True`" -- and returns a column of Python objects, so the
+    `.dt` accessor that the rest of a chain would use is gone. polars documents the opposite default for
+    the same input and applies it silently: the column comes back as UTC instants, equal to the instant
+    the stamps were written from. Replaces `g.equal(str(mixed.dtype), 'object')` and the FutureWarning
+    the case only requires to exist."""
+    assume(first != second)
+    left, right = _stamp_text(instant, first), _stamp_text(instant, second)
+    with pytest.warns(FutureWarning):
+        mixed = pd.to_datetime(pd.Series([left, right]), utc=False)
+    with pytest.raises(AttributeError):
+        mixed.dt.tz_convert('UTC')
+    plt.assert_series_equal(pl.Series([left, right]).str.to_datetime(),
+                            pl.Series([instant, instant], dtype=pl.Datetime('us', 'UTC')))
+
+
+@given(INSTANT, UTC_OFFSET, UTC_OFFSET)
+@INSTANTS
+def test_asking_pandas_for_utc_gives_the_instants_the_other_engines_read(instant, first, second):
+    """The other half of the case's dtype pair. With `utc=True` pandas returns a datetime64 column in
+    UTC whose values are the generated instant twice, which is what DuckDB's TIMESTAMPTZ cast and
+    polars' parser return for the same two strings. Replaces `g.equal(str(pd.to_datetime(...,
+    utc=True).dtype), 'datetime64[ns, UTC]')`, and says what the column holds rather than what it is
+    called."""
+    assume(first != second)
+    left, right = _stamp_text(instant, first), _stamp_text(instant, second)
+    pdt.assert_series_equal(pd.to_datetime(pd.Series([left, right]), utc=True),
+                            pd.Series([instant, instant], dtype='datetime64[ns, UTC]'))
+
+
+@given(INSTANT, INSTANT, UTC_OFFSET)
+@INSTANTS
+def test_two_stamps_at_one_offset_need_no_utc_flag_and_raise_no_warning(first, second, offset):
+    """Where the fallback does not happen, so that the previous test is about mixed offsets and not
+    about parsing. Two instants written at the same offset give pandas a tz-aware column with no
+    FutureWarning at all -- `simplefilter('error')` turns one into a failure -- and converting that
+    column to UTC gives exactly the column `utc=True` produces directly."""
+    left, right = _stamp_text(first, offset), _stamp_text(second, offset)
+    with warnings.catch_warnings():
+        warnings.simplefilter('error', FutureWarning)
+        parsed = pd.to_datetime(pd.Series([left, right]))
+    pdt.assert_series_equal(parsed.dt.tz_convert('UTC'),
+                            pd.to_datetime(pd.Series([left, right]), utc=True))
+
+
+@given(INSTANT, UTC_OFFSET)
+@INSTANTS
+def test_the_boundary_policy_decides_exactly_the_case_that_lands_on_the_deadline(instant, offset):
+    """The case's two boundary policies, executed. portion 2.6.2's README at tag 2.6.2 documents that
+    "when infinities are used as a lower or upper bound, the corresponding boundary is automatically
+    converted to an open one", so the two windows the guard builds differ only at the deadline itself,
+    and that is where they disagree: an end date equal to the deadline is inside the closed window and
+    outside the open one. Each membership is the DuckDB comparison with the matching operator, so the
+    interval library and the engine give the same answer to the same question. Replaces
+    `g.equal(deadline_outcomes(..., boundary='open')['c5'], 'after_deadline')`."""
+    text = _stamp_text(instant, offset)
+    deadline = datetime.datetime.fromisoformat(text)
+    closed = deadline in portion.closed(-portion.inf, deadline)
+    opened = deadline in portion.open(-portion.inf, deadline)
+    npt.assert_equal(closed, _duckdb_compare(text, text, 'TIMESTAMPTZ', '<='))
+    npt.assert_equal(opened, _duckdb_compare(text, text, 'TIMESTAMPTZ', '<'))
+    with pytest.raises(AssertionError):
+        npt.assert_equal(closed, opened)
+
+
+@given(INSTANT, UTC_OFFSET, UTC_OFFSET, SECONDS_EARLIER)
+@INSTANTS
+def test_away_from_the_deadline_the_two_policies_and_the_engine_agree(instant, offset, other, seconds):
+    """And away from that one point the policy makes no difference at all: an end date strictly before
+    the deadline is inside both windows and satisfies both engine operators, whichever offsets the two
+    stamps were written at. So the boundary policy the case requires to be declared changes the outcome
+    of exactly one case in a register, and the two stamps' offsets change none."""
+    text = _stamp_text(instant, offset)
+    deadline = datetime.datetime.fromisoformat(text)
+    earlier_text = _stamp_text(instant - datetime.timedelta(seconds=seconds), other)
+    earlier = datetime.datetime.fromisoformat(earlier_text)
+    npt.assert_equal(earlier in portion.closed(-portion.inf, deadline),
+                     earlier in portion.open(-portion.inf, deadline))
+    npt.assert_equal(earlier in portion.closed(-portion.inf, deadline),
+                     _duckdb_compare(earlier_text, text, 'TIMESTAMPTZ', '<='))
+    npt.assert_equal(_duckdb_compare(earlier_text, text, 'TIMESTAMPTZ', '<='),
+                     _duckdb_compare(earlier_text, text, 'TIMESTAMPTZ', '<'))
