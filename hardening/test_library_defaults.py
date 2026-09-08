@@ -19034,3 +19034,154 @@ def test_the_anchor_grid_loses_a_week_the_outside_engines_keep(spanned):
     npt.assert_array_equal(pd.Series(1, index=spanned).resample('W').sum().index.date, week_ends)
     with pytest.raises(AssertionError):
         npt.assert_array_equal(pd.date_range(spanned[0], spanned[-1], freq='W').date, week_ends)
+
+
+# ---------------------------------------------------------------------------------------------------
+# P142, case working_day_arithmetic_is_a_calendar_offset of handoff_guards_v18.py: the working-day
+# arithmetic of v15 rewritten as a pandas offset. The counting half of that case is already covered
+# above against numpy and workalendar; what is under test here is the offset's own methods --
+# is_on_offset, rollforward, rollback and the addition -- with workalendar 17.0.0 as the independent
+# calendar, since pandas builds an np.busdaycalendar and calls np.busday_offset itself.
+WORKING_OFFSET = settings(max_examples=60, deadline=None)
+_WEEKDAYS_2026 = [stamp.date() for stamp in pd.bdate_range('2026-01-01', '2026-12-31')]
+WEEKDAY_2026 = st.sampled_from(_WEEKDAYS_2026)
+WEEKDAY_HOLIDAYS = st.lists(WEEKDAY_2026, min_size=1, max_size=5, unique=True).map(sorted)
+HOLIDAY_ON_A_WEEKDAY = st.builds(lambda declared, pick: (declared, declared[pick % len(declared)]),
+                                 WEEKDAY_HOLIDAYS, st.integers(min_value=0, max_value=20))
+BUSINESS_STEPS = st.integers(min_value=1, max_value=10)
+
+
+def _working_days_between(first, last, holidays):
+    """Which days of a closed span workalendar calls working days, asked one day at a time so the answer
+    comes from the calendar's own predicate."""
+    calendar = DeclaredHolidays(holidays)
+    return [stamp.date() for stamp in pd.date_range(first, last)
+            if calendar.is_working_day(stamp.date())]
+
+
+@given(WORKING_SPAN, DECLARED_HOLIDAYS)
+@WORKING_OFFSET
+def test_the_offset_and_the_calendar_agree_which_days_are_working_days(span, holidays):
+    """`CustomBusinessDay.is_on_offset` is `np.is_busday(day64, busdaycal=self.calendar)` in pandas'
+    own source at v2.2.3, so the offset answers this question with the numpy engine it built. Over every
+    day of a generated span it gives the same answer as workalendar's `is_working_day`, which is an
+    implementation that shares nothing with either. Which days work is not in dispute; what the offset
+    then does with a day that does not is."""
+    offset = _custom_business_day(holidays)
+    days = pd.date_range(span[0], span[1])
+    calendar = DeclaredHolidays(holidays)
+    npt.assert_array_equal([offset.is_on_offset(stamp) for stamp in days],
+                           [calendar.is_working_day(stamp.date()) for stamp in days])
+
+
+@given(ANY_2026_DAY, DECLARED_HOLIDAYS, BUSINESS_STEPS)
+@WORKING_OFFSET
+def test_adding_and_subtracting_business_days_agree_with_the_independent_calendar(day, holidays, steps):
+    """pandas' `_apply` sets `roll = "backward"` for a positive count and `roll = "forward"` for a
+    non-positive one before calling `np.busday_offset`, so an addition that starts on a non-working day
+    is taken from the working day before it. workalendar's `add_working_days` instead walks one calendar
+    day at a time and counts the working ones. The two constructions are not the same procedure and they
+    return the same date for every generated start, holiday set and step count, in both directions."""
+    offset, calendar = _custom_business_day(holidays), DeclaredHolidays(holidays)
+    npt.assert_array_equal((pd.Timestamp(day) + steps * offset).date(),
+                           calendar.add_working_days(day, steps))
+    npt.assert_array_equal((pd.Timestamp(day) - steps * offset).date(),
+                           calendar.sub_working_days(day, steps))
+
+
+@given(HOLIDAY_ON_A_WEEKDAY)
+@WORKING_OFFSET
+def test_rolling_a_declared_holiday_lands_on_the_nearest_working_day_on_each_side(declared_and_day):
+    """What the two roll directions bracket. On a declared holiday the working days of the closed span
+    that runs from `rollback` to `rollforward` are exactly those two dates, asked of workalendar rather
+    than of pandas: everything the roll steps over is a day the independent calendar also refuses, and
+    it stops at the first day the independent calendar accepts on either side. The distance between the
+    two answers is therefore a property of the calendar and not the fixed four days of the case."""
+    holidays, day = declared_and_day
+    offset = _custom_business_day(holidays)
+    backward, forward = offset.rollback(pd.Timestamp(day)), offset.rollforward(pd.Timestamp(day))
+    npt.assert_array_equal(_working_days_between(backward, forward, holidays),
+                           [backward.date(), forward.date()])
+
+
+@given(HOLIDAY_ON_A_WEEKDAY)
+@WORKING_OFFSET
+def test_rolling_a_non_working_day_is_the_offsets_own_addition_of_one_business_day(declared_and_day):
+    """pandas defines both roll methods on the base offset as a conditional step of one: `rollback` is
+    `dt - type(self)(1)` and `rollforward` is `dt + type(self)(1)`, each taken only `if not
+    self.is_on_offset(dt)`. On a declared holiday that condition holds, so rolling forward is adding one
+    business day and rolling back is subtracting one -- which is why the forward answer is the next
+    working day rather than the one after it, and why a chain that rolls and then adds a day skips one."""
+    holidays, day = declared_and_day
+    offset, stamp = _custom_business_day(holidays), pd.Timestamp(day)
+    npt.assert_array_equal(offset.rollforward(stamp), stamp + offset)
+    npt.assert_array_equal(offset.rollback(stamp), stamp - offset)
+
+
+@given(HOLIDAY_ON_A_WEEKDAY)
+@WORKING_OFFSET
+def test_rolling_a_working_day_moves_it_nowhere_while_adding_a_day_still_moves_it(declared_and_day):
+    """The other region of the same condition. A day the offset accepts is returned unchanged by both
+    roll methods, and the addition the roll methods are written in terms of is not the identity there,
+    so `rollforward` and `+ offset` agree on exactly the days the offset refuses and disagree on every
+    day it accepts. A deadline computed by rolling is not a deadline computed by adding."""
+    holidays, day = declared_and_day
+    offset = _custom_business_day(holidays)
+    stamp = offset.rollforward(pd.Timestamp(day))
+    npt.assert_array_equal(offset.rollforward(stamp), stamp)
+    npt.assert_array_equal(offset.rollback(stamp), stamp)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(offset.rollforward(stamp), stamp + offset)
+
+
+@given(HOLIDAY_ON_A_WEEKDAY)
+@WORKING_OFFSET
+def test_the_calendars_following_working_day_does_not_consult_its_own_holidays(declared_and_day):
+    """The independent calendar has a method for this question and it is not the same question.
+    workalendar 17.0.0 documents `find_following_working_day` with "**WARNING**: this function doesn't
+    take into account the calendar holidays, only the days of the week and the weekend days parameters",
+    and its body is a loop over `day.weekday() in self.get_weekend_days()` alone. Executed on a declared
+    holiday that falls on a weekday it returns the same date as a calendar that declares no holidays at
+    all, and a different date from the one the pandas offset rolls to."""
+    holidays, day = declared_and_day
+    npt.assert_array_equal(DeclaredHolidays(holidays).find_following_working_day(day),
+                           DeclaredHolidays([]).find_following_working_day(day))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_custom_business_day(holidays).rollforward(pd.Timestamp(day)).date(),
+                               DeclaredHolidays(holidays).find_following_working_day(day))
+
+
+@given(HOLIDAY_ON_A_WEEKDAY)
+@WORKING_OFFSET
+def test_the_same_calendar_honours_the_holiday_its_other_method_ignores(declared_and_day):
+    """And the divergence is inside workalendar rather than between the two projects. Handed the same
+    declared holiday, `add_working_days(day, 1)` walks past it and returns what the pandas offset returns
+    for the same step, while `find_following_working_day` stops on it; the two methods of one calendar
+    disagree about whether a declared holiday is a working day. A chain that reaches for the
+    following-working-day method gets a due date on a day its own calendar calls a holiday."""
+    holidays, day = declared_and_day
+    calendar = DeclaredHolidays(holidays)
+    npt.assert_array_equal((pd.Timestamp(day) + _custom_business_day(holidays)).date(),
+                           calendar.add_working_days(day, 1))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(calendar.add_working_days(day, 1),
+                               calendar.find_following_working_day(day))
+
+
+@given(HOLIDAY_ON_A_WEEKDAY)
+@WORKING_OFFSET
+def test_the_declared_holiday_the_offset_rolls_off_is_a_day_neither_library_works(declared_and_day):
+    """What both agree about, stated where the methods above disagree. The generated day is a working
+    day for a calendar that declares nothing and is not one for the calendar that declares it, in both
+    libraries at once: pandas' `is_on_offset` and workalendar's `is_working_day` change together when the
+    holiday is added, so the roll and the addition are acting on a day both projects refuse and the
+    disagreement is only about where to go from there."""
+    holidays, day = declared_and_day
+    stamp = pd.Timestamp(day)
+    npt.assert_array_equal(_custom_business_day(holidays).is_on_offset(stamp),
+                           DeclaredHolidays(holidays).is_working_day(day))
+    npt.assert_array_equal(_custom_business_day([]).is_on_offset(stamp),
+                           DeclaredHolidays([]).is_working_day(day))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_custom_business_day(holidays).is_on_offset(stamp),
+                               _custom_business_day([]).is_on_offset(stamp))
