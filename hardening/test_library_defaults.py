@@ -67,6 +67,7 @@ import odf.table
 import odf.teletype
 import odf.text
 from odf.namespaces import OFFICENS, TABLENS
+import odfdo
 import orjson
 import pdfplumber
 import pymupdf
@@ -4228,3 +4229,150 @@ def test_the_cached_result_beside_the_formula_still_answers_the_old_question(sta
     npt.assert_array_equal(_ods_in_calamine(edited)[2], (start - finish).days)
     with pytest.raises(AssertionError):
         npt.assert_array_equal(_ods_in_calamine(edited)[2], (moved - finish).days)
+
+
+# ---------------------------------------------------------------- one document, two ODF libraries
+ODF_WORD = st.text(alphabet=st.characters(whitelist_categories=('Lu', 'Ll', 'Nd')),
+                   min_size=1, max_size=8)
+ODF_PART = st.one_of(
+    st.tuples(st.just('text'), ODF_WORD),
+    st.tuples(st.just('spaces'), st.one_of(st.integers(min_value=1, max_value=8), st.none())),
+    st.tuples(st.just('tab'), st.none()),
+    st.tuples(st.just('break'), st.none()))
+ODF_PARAGRAPH = st.lists(ODF_PART, min_size=1, max_size=8)
+
+
+def _odt_paragraph(parts):
+    """Build one text:p out of the generated parts with odfpy's own element classes."""
+    paragraph = odf.text.P()
+    for kind, value in parts:
+        if kind == 'text':
+            paragraph.addText(value)
+        elif kind == 'spaces':
+            paragraph.addElement(odf.text.S() if value is None else odf.text.S(c=value))
+        elif kind == 'tab':
+            paragraph.addElement(odf.text.Tab())
+        else:
+            paragraph.addElement(odf.text.LineBreak())
+    return paragraph
+
+
+def _odt_bytes(paragraphs, cells, typed=False):
+    document = odf.opendocument.OpenDocumentText()
+    for parts in paragraphs:
+        document.text.addElement(_odt_paragraph(parts))
+    table = odf.table.Table(name='T1')
+    row = odf.table.TableRow()
+    for value in cells:
+        cell = (odf.table.TableCell(valuetype='string', stringvalue=value) if typed
+                else odf.table.TableCell())
+        cell.addElement(odf.text.P(text=value))
+        row.addElement(cell)
+    table.addElement(row)
+    document.text.addElement(table)
+    written = io.BytesIO()
+    document.write(written)
+    return written.getvalue()
+
+
+def _odt_in_odfpy(data):
+    document = odf.opendocument.load(io.BytesIO(data))
+    return document, [odf.teletype.extractText(p) for p in document.getElementsByType(odf.text.P)]
+
+
+def _odt_in_odfdo(data):
+    document = odfdo.Document(io.BytesIO(data))
+    return document, [p.inner_text for p in document.body.get_paragraphs()]
+
+
+@given(st.lists(ODF_PARAGRAPH, min_size=1, max_size=5))
+@SLOW
+def test_two_odf_libraries_expand_the_same_paragraph_whitespace(paragraphs):
+    """odfpy's teletype.extractText and odfdo's Element.inner_text are two implementations of the same
+    operation with no shared ancestor: odfdo declares only lxml and typing-extensions and descends
+    from lpod-python. On text:s, text:tab and text:line-break written by odfpy they return the same
+    string, so the expansion of the whitespace elements is not a private odfpy convention. Replaces
+    the typed 'A   B', 'left\\tright' and 'first\\nsecond' of case 165."""
+    data = _odt_bytes(paragraphs, [])
+    _, by_odfpy = _odt_in_odfpy(data)
+    _, by_odfdo = _odt_in_odfdo(data)
+    npt.assert_array_equal(by_odfpy, by_odfdo)
+
+
+@given(st.lists(ODF_PARAGRAPH, min_size=1, max_size=4), st.lists(ODF_WORD, min_size=2, max_size=4))
+@SLOW
+def test_the_flat_paragraph_list_of_both_libraries_counts_the_table_cells(paragraphs, cells):
+    """odfpy's getElementsByType(P) and odfdo's body.get_paragraphs(), which is the XPath
+    descendant::text:p, both return the body paragraphs and the paragraph inside every table cell in
+    one flat list, and both lists are longer than the body itself. Nothing in either list says which
+    entries came out of the table, so a positional comparison against a source document shifts from
+    the table on. The table here holds at least two cells, which is the region where the two counts
+    have to differ; a one-cell table replaces itself in the count and the two agree. Replaces the
+    typed len(flat) == 6 and len(body) == 5 of case 165."""
+    data = _odt_bytes(paragraphs, cells)
+    _, by_odfpy = _odt_in_odfpy(data)
+    odfdo_document, by_odfdo = _odt_in_odfdo(data)
+    npt.assert_array_equal(len(by_odfpy), len(by_odfdo))
+    npt.assert_array_equal(len(by_odfpy), len(paragraphs) + len(cells))
+    npt.assert_array_equal(len(odfdo_document.body.children), len(paragraphs) + 1)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(len(by_odfpy), len(odfdo_document.body.children))
+
+
+@given(st.lists(ODF_WORD, min_size=1, max_size=5))
+@SLOW
+def test_odfpy_welds_the_table_cells_and_odfdo_keeps_them_apart(cells):
+    """Asked for the text of one table, odfpy concatenates the cells with nothing between them, which
+    is exactly the join of its own per-cell extractions. odfdo's inner_text of the same table ends
+    every paragraph with a newline, so the same bytes yield a string in which the cell boundaries are
+    still visible. The two libraries agree on each cell and disagree on the table. Replaces the typed
+    body[4] == 'cell Acell B' of case 165."""
+    data = _odt_bytes([], cells)
+    odfpy_document, _ = _odt_in_odfpy(data)
+    table = odfpy_document.getElementsByType(odf.table.Table)[0]
+    welded = odf.teletype.extractText(table)
+    per_cell = [odf.teletype.extractText(c)
+                for c in odfpy_document.getElementsByType(odf.table.TableCell)]
+    npt.assert_array_equal(welded, ''.join(per_cell))
+    npt.assert_array_equal(per_cell, cells)
+    odfdo_document, _ = _odt_in_odfdo(data)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(welded, odfdo_document.body.get_tables()[0].inner_text)
+
+
+@given(ODF_WORD, ODF_WORD, ODF_WORD)
+@SLOW
+def test_the_welded_table_text_does_not_say_where_the_cells_were(head, middle, tail):
+    """Two tables whose cells are cut at different points weld to one identical string under odfpy's
+    extractText while their cell lists differ, so the welded text cannot be split back into the cells
+    it came from. This is the loss the flat comparison of case 165 depends on and the reason a cell
+    walk and a table walk are not interchangeable."""
+    documents = [_odt_in_odfpy(_odt_bytes([], split))[0]
+                 for split in ([head + middle, tail], [head, middle + tail])]
+    welded = [odf.teletype.extractText(d.getElementsByType(odf.table.Table)[0]) for d in documents]
+    cells = [[odf.teletype.extractText(c) for c in d.getElementsByType(odf.table.TableCell)]
+             for d in documents]
+    npt.assert_array_equal(welded[0], welded[1])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(cells[0], cells[1])
+
+
+@given(st.lists(ODF_WORD, min_size=1, max_size=4))
+@SLOW
+def test_a_typed_cell_and_an_untyped_cell_read_alike_in_odfpy_and_differently_in_odfdo(cells):
+    """One table writes office:value-type and office:string-value beside the paragraph and the other
+    writes only the paragraph. odfpy's extractText returns the same text for both, because it reads
+    the paragraph and not the attribute. odfdo's str() of a table is a CSV of the typed values, so
+    the untyped table comes back as empty fields and the typed one carries the words. Two readers of
+    one visible table, and the attribute that decides the answer is invisible to the text walk."""
+    untyped = _odt_bytes([], cells, typed=False)
+    typed = _odt_bytes([], cells, typed=True)
+    by_odfpy = [odf.teletype.extractText(_odt_in_odfpy(data)[0].getElementsByType(odf.table.Table)[0])
+                for data in (untyped, typed)]
+    npt.assert_array_equal(by_odfpy[0], by_odfpy[1])
+    tables = [_odt_in_odfdo(data)[0].body.get_tables()[0] for data in (untyped, typed)]
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(str(tables[0]), str(tables[1]))
+    npt.assert_array_equal([c.value for c in tables[1].get_rows()[0].get_cells()], cells)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal([c.value for c in tables[0].get_rows()[0].get_cells()], cells)
