@@ -11241,3 +11241,165 @@ def test_the_counters_pytest_writes_on_the_suite_count_the_children_it_wrote(out
                             len(_junit_selected(data, './/testcase[error]')),
                             len(_junit_selected(data, './/testcase[skipped]'))])
     npt.assert_array_equal(suite.skipped, outcomes.count('skip') + outcomes.count('xfail'))
+
+
+# --------------------------------------------------------------------------------------------------
+# handoff_guards_v21.py, case canonical_key_order_is_not_canonical_row_order: which order is canonical
+# --------------------------------------------------------------------------------------------------
+MANIFEST_STATES = ['required', 'satisfied', 'missing', 'conflicting', 'unresolved']
+MANIFEST_SCHEMA = {'type': 'object',
+                   'properties': {'state': {'enum': MANIFEST_STATES}},
+                   'required': ['state']}
+ASCII_KEY = st.text(alphabet=st.characters(min_codepoint=97, max_codepoint=122), min_size=1, max_size=4)
+ESCAPED_KEY = st.characters(min_codepoint=0x00A0, max_codepoint=0xD7FF, blacklist_categories=('Cs',))
+PRIVATE_KEY = st.characters(min_codepoint=0xE000, max_codepoint=0xFFFD, blacklist_categories=('Cs',))
+SUPPLEMENTARY_KEY = st.characters(min_codepoint=0x10000, max_codepoint=0x10FFFF,
+                                  blacklist_categories=('Cs',))
+ROW_VALUE = st.integers(min_value=-1000, max_value=1000)
+
+
+def _canonical_rows(rows, *, sort_rows):
+    """The chain's canonicalisation, written with the two published callables it uses and nothing else:
+    rows optionally ordered by their own `json.dumps(sort_keys=True)` text, then serialised compactly."""
+    ordered = sorted(rows, key=lambda row: json.dumps(row, sort_keys=True)) if sort_rows else rows
+    return json.dumps(ordered, sort_keys=True, separators=(',', ':'), allow_nan=False)
+
+
+def _sorted_by_dump(rows):
+    """The row order the standard library's canonical text produces."""
+    return [json.dumps(row, sort_keys=True) for row in
+            sorted(rows, key=lambda row: json.dumps(row, sort_keys=True))]
+
+
+def _sorted_by_standard(rows):
+    """The row order RFC 8785's canonical text produces, from the rfc8785 package."""
+    return [json.dumps(row, sort_keys=True) for row in
+            sorted(rows, key=lambda row: rfc8785.dumps(row).decode())]
+
+
+@given(st.dictionaries(ASCII_KEY, ROW_VALUE, min_size=1, max_size=6))
+@SLOW
+def test_three_engines_put_the_canonical_row_texts_in_the_same_order(rows):
+    """handoff_guards_v21.py's case canonical_key_order_is_not_canonical_row_order makes twelve typed
+    comparisons, five of them about a canonicalisation that sorts rows by their own canonical text and
+    hashes the result, "row sort is required for a stable hash". The sort itself carries over: CPython's
+    `sorted`, DuckDB's ORDER BY on a VARCHAR column and polars' `Series.sort` return the same order for
+    the generated texts, so nothing about the ordering is specific to the interpreter that ran it."""
+    texts = [json.dumps({key: value}, sort_keys=True) for key, value in rows.items()]
+    connection = duckdb.connect()
+    connection.execute('create table rows (text varchar)')
+    connection.executemany('insert into rows values (?)', [(text,) for text in texts])
+    npt.assert_array_equal(sorted(texts),
+                           [row[0] for row in
+                            connection.execute('select text from rows order by text').fetchall()])
+    npt.assert_array_equal(sorted(texts), pl.Series(texts).sort().to_list())
+
+
+@given(ASCII_KEY, ESCAPED_KEY, ROW_VALUE, ROW_VALUE)
+@SLOW
+def test_the_row_order_is_an_order_on_escaped_text_and_not_on_the_keys(ascii_key, escaped_key,
+                                                                      first, second):
+    """What that order is an order of is the first finding. `json.dumps` escapes any non-ASCII character
+    by default, so the sort key for a row whose key is above U+007F begins with a backslash, which is
+    below every lowercase letter, and the row sorts before every ASCII-keyed row however its key
+    compares. Over a generated ASCII key and a generated key in the escaped range the order the chain
+    produces and the order of the keys themselves are opposite, so the canonical row order is a property
+    of the escaping rather than of the data."""
+    rows = [{ascii_key: first}, {escaped_key: second}]
+    by_key = [json.dumps(row, sort_keys=True) for row in
+              sorted(rows, key=lambda row: sorted(row)[0])]
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_sorted_by_dump(rows), by_key)
+
+
+@given(PRIVATE_KEY, SUPPLEMENTARY_KEY, ROW_VALUE, ROW_VALUE)
+@SLOW
+def test_the_row_order_changes_when_the_standard_canonicalisation_builds_the_sort_key(
+        private_key, supplementary_key, first, second):
+    """And the order changes again if the canonicalisation does. RFC 8785 orders keys by UTF-16 code
+    unit, where `json.dumps(sort_keys=True)` orders them by code point, and the register above records
+    that difference for the keys inside a row. It reaches the rows as well, because the row's sort key is
+    that same canonical text: for a row keyed in the supplementary planes and a row keyed in the private
+    use area the two canonicalisations return the rows in opposite orders. So the stable hash the case
+    records is stable within one spelling of canonical and not across the two."""
+    rows = [{private_key: first}, {supplementary_key: second}]
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_sorted_by_dump(rows), _sorted_by_standard(rows))
+
+
+@given(st.dictionaries(ASCII_KEY, ROW_VALUE, min_size=2, max_size=6))
+@SLOW
+def test_the_two_canonicalisations_agree_on_the_row_order_while_every_key_stays_ascii(rows):
+    """Inside the ASCII range they agree exactly. Neither the escaping nor the code unit question arises
+    there, and the two canonicalisations return the generated rows in the same order every time, so the
+    divergences above are about the ranges the chain's inputs are not guaranteed to stay inside rather
+    than about the sort."""
+    rows = [{key: value} for key, value in rows.items()]
+    npt.assert_array_equal(_sorted_by_dump(rows), _sorted_by_standard(rows))
+
+
+@given(st.dictionaries(ASCII_KEY, ROW_VALUE, min_size=2, max_size=6))
+@SLOW
+def test_the_digest_of_the_sorted_rows_does_not_depend_on_the_order_they_arrived_in(rows):
+    """The claim the row sort is there for, executed over generated rows rather than the two the case
+    types. Sorted, the canonical text and its SHA-256 are the same for a list and for its reverse;
+    unsorted, they are not, and the digests differ for every generated pair of distinct rows. The
+    comparison of the two digests is `hmac.compare_digest`, the standard library's own published
+    equality for a digest."""
+    rows = [{key: value} for key, value in rows.items()]
+    reversed_rows = list(reversed(rows))
+    sorted_digests = [hashlib.sha256(_canonical_rows(order, sort_rows=True).encode()).digest()
+                      for order in (rows, reversed_rows)]
+    npt.assert_array_equal(hmac.compare_digest(*sorted_digests), True)
+    unsorted_digests = [hashlib.sha256(_canonical_rows(order, sort_rows=False).encode()).digest()
+                        for order in (rows, reversed_rows)]
+    npt.assert_array_equal(hmac.compare_digest(*unsorted_digests), False)
+
+
+@given(st.lists(st.tuples(ASCII_KEY, st.sampled_from(MANIFEST_STATES)), min_size=1, max_size=8))
+@SLOW
+def test_every_item_lands_in_one_bucket_and_the_order_they_arrived_in_does_not_matter(items):
+    """The case's other half builds a manifest by looping over items and appending each to a bucket
+    keyed by its state, then checks that the bucket sizes total the number of items and that reversing
+    the input does not change the result. Both hold, and neither needs the loop: a pandas group-by over
+    the same items conserves them and returns the same counts for the items in either order."""
+    frame = pd.DataFrame({'id': [identifier for identifier, _ in items],
+                          'state': pd.Categorical([state for _, state in items],
+                                                  categories=MANIFEST_STATES)})
+    counts = frame.groupby('state', observed=False)['id'].count()
+    npt.assert_array_equal(counts.sum(), len(items))
+    pdt.assert_series_equal(counts, frame.iloc[::-1].groupby('state', observed=False)['id'].count())
+
+
+@given(st.sampled_from(MANIFEST_STATES), st.data())
+@SLOW
+def test_a_declared_bucket_with_nothing_in_it_appears_only_when_the_categories_are_declared(
+        unused, data):
+    """The empty bucket the case types as `g.equal(built['required'], [])` is the part a group-by cannot
+    reach from the data. pandas returns a group for a declared category with no rows only when it is told
+    the categories and asked for them with `observed=False`; with `observed=True` the unused state is not
+    in the result at all. So the five-bucket shape the case checks is a statement of the declared
+    contract rather than a reading of the items, and the library has an option that says so."""
+    states = data.draw(st.lists(st.sampled_from([state for state in MANIFEST_STATES if state != unused]),
+                                min_size=1, max_size=8))
+    frame = pd.DataFrame({'id': list(range(len(states))),
+                          'state': pd.Categorical(states, categories=MANIFEST_STATES)})
+    declared = frame.groupby('state', observed=False)['id'].count()
+    npt.assert_array_equal(sorted(declared.index), sorted(MANIFEST_STATES))
+    with pytest.raises(AssertionError):
+        pdt.assert_series_equal(declared, frame.groupby('state', observed=True)['id'].count())
+
+
+@given(ASCII_KEY, st.sampled_from(MANIFEST_STATES),
+       st.text(alphabet=st.characters(min_codepoint=97, max_codepoint=122), min_size=1, max_size=10)
+       .filter(lambda word: word not in MANIFEST_STATES))
+@SLOW
+def test_an_undeclared_state_is_refused_by_a_schema_rather_than_by_a_check_written_here(
+        identifier, declared, undeclared):
+    """And the refusal the case reaches with an `if item['state'] not in buckets` is a schema constraint.
+    jsonschema's `enum` over the declared states accepts every generated declared state and raises
+    ValidationError on every generated word that is not one of them, so the Blocked the case raises by
+    hand is what a validator returns from the contract itself."""
+    jsonschema.validate({'id': identifier, 'state': declared}, MANIFEST_SCHEMA)
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.validate({'id': identifier, 'state': undeclared}, MANIFEST_SCHEMA)
