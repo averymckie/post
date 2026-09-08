@@ -9970,3 +9970,299 @@ def test_the_zero_page_refusal_belongs_to_one_writer_and_not_to_the_format(title
             empty.tobytes()
     with pytest.raises(pypdfium2.PdfiumError):
         pypdfium2.PdfDocument(io.BytesIO(data))
+
+
+
+# --------------------------------------------------------------------------------------------------
+# handoff_guards_v10.py, case sparse_matrix_sums_duplicates_silently: accumulating duplicate pairs
+# --------------------------------------------------------------------------------------------------
+RESOURCE_SHAPE = (4, 4)
+RESOURCE_INDEX = st.integers(min_value=0, max_value=RESOURCE_SHAPE[0] - 1)
+RESOURCE_COORD = st.tuples(RESOURCE_INDEX, RESOURCE_INDEX)
+EXACT_WEIGHT = st.integers(min_value=-1000, max_value=1000).map(float)
+HANDOVER_WEIGHT = st.floats(min_value=-1e3, max_value=1e3, allow_nan=False, allow_infinity=False)
+EXACT_PAIRS = st.lists(st.tuples(RESOURCE_INDEX, RESOURCE_INDEX, EXACT_WEIGHT), min_size=1, max_size=12)
+HANDOVER_PAIRS = st.lists(st.tuples(RESOURCE_INDEX, RESOURCE_INDEX, HANDOVER_WEIGHT),
+                          min_size=1, max_size=12)
+HANDOVER_COORDS = st.lists(RESOURCE_COORD, min_size=1, max_size=12)
+REPEAT_COUNT = st.integers(min_value=2, max_value=8)
+ABSORBING_SCALE = st.integers(min_value=80, max_value=200).map(lambda power: 2.0 ** power)
+ABSORBED_WEIGHT = st.floats(min_value=1.0, max_value=1e3, allow_nan=False, allow_infinity=False)
+
+
+def _empty_resource_matrix(dtype):
+    """scipy's own empty constructor, `coo_matrix(shape, dtype)`, the first form its docstring shows."""
+    return scipy_sparse.coo_matrix(RESOURCE_SHAPE, dtype=dtype)
+
+
+def _scipy_canonical(rows, cols, weights):
+    """scipy's explicit accumulation. `sum_duplicates` is documented in scipy/sparse/_coo.py at tag
+    v1.17.1 as "Eliminate duplicate entries by adding them together", "an *in place* operation", and
+    the canonical format it produces has "Entries and coordinates sorted by row, then column". Its
+    implementation there sorts with `np.lexsort` and reduces each run with `np.add.reduceat`."""
+    matrix = scipy_sparse.coo_matrix((list(weights), (list(rows), list(cols))), shape=RESOURCE_SHAPE)
+    matrix.sum_duplicates()
+    return matrix.row, matrix.col, matrix.data
+
+
+def _duckdb_grouped(rows, cols, weights):
+    """The same accumulation as a relational one. DuckDB 1.5.5 documents `sum(arg)` as "Calculates the
+    sum of all non-null values in `arg`"."""
+    return duckdb.sql('select r, c, sum(w) as total from '
+                      '(select unnest(?::INTEGER[]) as r, unnest(?::INTEGER[]) as c, '
+                      'unnest(?::DOUBLE[]) as w) group by r, c order by r, c',
+                      params=[list(rows), list(cols), list(weights)]).fetchall()
+
+
+def _duckdb_distinct_cells(rows, cols):
+    return duckdb.sql('select count(*) from (select distinct r, c from '
+                      '(select unnest(?::INTEGER[]) as r, unnest(?::INTEGER[]) as c))',
+                      params=[list(rows), list(cols)]).fetchone()[0]
+
+
+def _numpy_accumulated(rows, cols, weights):
+    """And as numpy's own unbuffered scatter-add. `ufunc.at` is documented at tag v2.4.6 as an
+    "unbuffered in place operation on operand 'a' for elements specified by 'indices'", which for
+    addition "is equivalent to ``a[indices] += b``, except that results are accumulated for elements
+    that are indexed more than once"."""
+    dense = np.zeros(RESOURCE_SHAPE)
+    np.add.at(dense, (np.array(list(rows), dtype=int), np.array(list(cols), dtype=int)),
+              np.array(list(weights), dtype=float))
+    return dense
+
+
+def _scipy_dense_cell(weights):
+    """One cell reached the way the chain reaches it, through `toarray`. The C++ routine behind it,
+    coo_todense in scipy/sparse/sparsetools/coo.h at v1.17.1, is one pass over the stored entries in
+    the order they were listed: `for(npy_int64 n = 0; n < nnz; n++){ Bx[ (npy_intp)n_col * Ai[n] +
+    Aj[n] ] += Ax[n]; }`."""
+    zeros = [0] * len(weights)
+    return scipy_sparse.coo_matrix((list(weights), (zeros, zeros)), shape=(1, 1)).toarray()[0][0]
+
+
+def _scipy_canonical_cell(weights):
+    """The same cell reached through the operation scipy names, `sum_duplicates`."""
+    zeros = [0] * len(weights)
+    matrix = scipy_sparse.coo_matrix((list(weights), (zeros, zeros)), shape=(1, 1))
+    matrix.sum_duplicates()
+    return matrix.data[0]
+
+
+def _numpy_cell(weights):
+    cell = np.zeros((1, 1))
+    np.add.at(cell, (np.zeros(len(weights), dtype=int), np.zeros(len(weights), dtype=int)),
+              np.array(list(weights), dtype=float))
+    return cell[0][0]
+
+
+def _duckdb_cell(weights):
+    return duckdb.sql('select sum(w) from (select unnest(?::DOUBLE[]) as w)',
+                      params=[list(weights)]).fetchone()[0]
+
+
+def _duckdb_compensated_cell(weights):
+    """DuckDB's own more accurate summation: `fsum`, documented as calculating "the sum using a more
+    accurate floating point summation (Kahan Sum)", with aliases `sumkahan` and `kahan_sum`."""
+    return duckdb.sql('select fsum(w) from (select unnest(?::DOUBLE[]) as w)',
+                      params=[list(weights)]).fetchone()[0]
+
+
+def _duckdb_true_count(repeats):
+    return duckdb.sql('select sum(present) from (select unnest(?::BOOLEAN[]) as present)',
+                      params=[[True] * repeats]).fetchone()[0]
+
+
+def _scipy_mask(coords):
+    """The presence mask as one constructor call, at the dtype a mask wants."""
+    rows = [row for row, _ in coords]
+    cols = [col for _, col in coords]
+    return scipy_sparse.coo_matrix((np.ones(len(coords), dtype=bool), (rows, cols)),
+                                   shape=RESOURCE_SHAPE).toarray()
+
+
+def _numpy_mask(coords):
+    """The same mask through numpy's own logical-or scatter."""
+    mask = np.zeros(RESOURCE_SHAPE, dtype=bool)
+    np.logical_or.at(mask, (np.array([row for row, _ in coords], dtype=int),
+                            np.array([col for _, col in coords], dtype=int)), True)
+    return mask
+
+
+@given(EXACT_PAIRS)
+@SLOW
+def test_scipy_duckdb_and_numpy_accumulate_a_pair_list_identically_when_every_sum_is_exact(pairs):
+    """handoff_guards_v10.py's case sparse_matrix_sums_duplicates_silently types seven expectations
+    about a resource matrix, the first two of them about what coo_matrix does with duplicate
+    coordinates. scipy documents that in scipy/sparse/_coo.py at tag v1.17.1: "By default when
+    converting to CSR or CSC format, duplicate (i,j) entries will be summed together", and "Duplicate
+    coordinates are maintained until implicitly or explicitly summed". Where the weights are whole
+    numbers small enough that every partial sum is exact, the behaviour reproduces in three
+    implementations at once: scipy's canonical form, a DuckDB 1.5.5 GROUP BY and numpy's own `add.at`
+    scatter-add return the same cells with the same totals. The weights are generated as whole numbers
+    for a reason that the next two tests give."""
+    rows = [row for row, _, _ in pairs]
+    cols = [col for _, col, _ in pairs]
+    weights = [weight for _, _, weight in pairs]
+    scipy_rows, scipy_cols, scipy_data = _scipy_canonical(rows, cols, weights)
+    grouped = _duckdb_grouped(rows, cols, weights)
+    npt.assert_array_equal(scipy_rows, [row for row, _, _ in grouped])
+    npt.assert_array_equal(scipy_cols, [col for _, col, _ in grouped])
+    npt.assert_array_equal(scipy_data, [total for _, _, total in grouped])
+    npt.assert_array_equal(
+        scipy_sparse.coo_matrix((weights, (rows, cols)), shape=RESOURCE_SHAPE).toarray(),
+        _numpy_accumulated(rows, cols, weights))
+
+
+@given(ABSORBING_SCALE, ABSORBED_WEIGHT)
+@SLOW
+def test_the_dense_and_the_canonical_summation_of_one_cell_disagree(scale, weight):
+    """The reason, and the finding. scipy has two routes to the weight of a cell and they are two
+    different summations. `toarray` goes through coo_todense, one pass over the entries in the order
+    they were listed; `sum_duplicates` goes through `np.lexsort` -- an "indirect stable sort", so the
+    listed order is kept -- and then `np.add.reduceat`, which groups the run differently. Over a
+    generated scale and a generated weight far enough below it that a single addition absorbs the
+    weight exactly, the two routes return different numbers for the same three entries, in either
+    order. The divergence is generated directly rather than filtered for."""
+    cancel_first = [scale, -scale, weight]
+    cancel_last = [weight, scale, -scale]
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_scipy_dense_cell(cancel_first), _scipy_canonical_cell(cancel_first))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_scipy_dense_cell(cancel_last), _scipy_canonical_cell(cancel_last))
+
+
+@given(ABSORBING_SCALE, ABSORBED_WEIGHT)
+@SLOW
+def test_which_of_the_two_summations_keeps_the_weight_depends_on_the_order_it_was_listed(scale, weight):
+    """And neither route is the accurate one. With the cancelling pair listed first the dense route
+    keeps the generated weight and the canonical route loses it; with the same three entries listed the
+    other way round they swap, exactly. So the weight P93's resource matrix records for a cell is
+    decided by two things the chain never states: the order its pairs were listed in, and which of
+    scipy's two summations was asked for the answer."""
+    cancel_first = [scale, -scale, weight]
+    cancel_last = [weight, scale, -scale]
+    npt.assert_allclose(_scipy_dense_cell(cancel_first), weight)
+    npt.assert_allclose(_scipy_canonical_cell(cancel_last), weight)
+    with pytest.raises(AssertionError):
+        npt.assert_allclose(_scipy_canonical_cell(cancel_first), weight)
+    with pytest.raises(AssertionError):
+        npt.assert_allclose(_scipy_dense_cell(cancel_last), weight)
+
+
+@given(ABSORBING_SCALE, ABSORBED_WEIGHT)
+@SLOW
+def test_no_accumulator_recovers_the_weight_a_middle_listing_absorbs(scale, weight):
+    """With the weight listed between the two halves of the cancelling pair, every IEEE accumulator
+    loses it and they all lose it together: both of scipy's routes, numpy's scatter-add, DuckDB's SUM,
+    and DuckDB's own more accurate aggregate `fsum`, "the sum using a more accurate floating point
+    summation (Kahan Sum)", whose compensation term is itself below the scale it would have to correct.
+    Only exact arithmetic keeps it, and summing the same three entries as fractions.Fraction returns
+    the generated weight. DuckDB documents the general form itself, marking `sum(arg)` as one of the
+    functions whose "floating-point versions ... are affected by ordering"."""
+    absorbed = [scale, weight, -scale]
+    dropped = _scipy_dense_cell(absorbed)
+    npt.assert_allclose([_scipy_canonical_cell(absorbed), _numpy_cell(absorbed),
+                         _duckdb_cell(absorbed), _duckdb_compensated_cell(absorbed)],
+                        [dropped, dropped, dropped, dropped])
+    npt.assert_allclose(float(sum(map(Fraction, absorbed))), weight)
+    with pytest.raises(AssertionError):
+        npt.assert_allclose(dropped, weight)
+
+
+@given(HANDOVER_COORDS)
+@SLOW
+def test_the_presence_mask_the_case_builds_by_hand_is_one_constructor_call(coords):
+    """The case builds its presence mask with a Python loop, `for r, c in zip(rows, cols): present[r,
+    c] = True`, under the comment "a boolean mask cannot be built by summing". It can. At boolean dtype
+    the duplicate summation scipy documents is a logical or, so the constructor the case already calls
+    returns the mask it writes the loop for, and numpy's own `logical_or.at` scatter returns the same
+    array over generated coordinates. The loop is a hand-written implementation of a primitive that was
+    one dtype away."""
+    npt.assert_array_equal(_scipy_mask(coords), _numpy_mask(coords))
+
+
+@given(RESOURCE_COORD, REPEAT_COUNT)
+@SLOW
+def test_duckdb_counts_the_booleans_that_scipy_ors(coord, repeats):
+    """The two implementations part company at that dtype, and DuckDB says so in advance: its
+    `sum(arg)` "Calculates the sum of all non-null values in `arg` / counts `true` values when `arg` is
+    boolean". So over one generated coordinate repeated a generated number of times, scipy's boolean
+    matrix is the matrix of that coordinate listed once, while the relational sum of the same column of
+    true values is the number of repeats. "Summing the duplicates" names two different operations in
+    the two libraries, and the case's second typed expectation -- that a presence mask built the same
+    way becomes a count -- is true of the integer dtype it chose and of DuckDB at every dtype, and
+    false of scipy at the dtype a mask wants."""
+    npt.assert_array_equal(_scipy_mask([coord] * repeats), _scipy_mask([coord]))
+    npt.assert_array_equal(_duckdb_true_count(repeats), repeats)
+
+
+@given(HANDOVER_COORDS)
+@SLOW
+def test_the_same_pairs_at_integer_dtype_are_the_duckdb_count_of_each_cell(coords):
+    """At integer dtype the two agree again, and the count the case types is reproduced by a second
+    engine: a matrix of ones summed by scipy holds, in every cell, the number of generated pairs
+    DuckDB's GROUP BY counts there."""
+    rows = [row for row, _ in coords]
+    cols = [col for _, col in coords]
+    counted = scipy_sparse.coo_matrix((np.ones(len(coords), dtype=np.int64), (rows, cols)),
+                                      shape=RESOURCE_SHAPE).toarray()
+    grouped = duckdb.sql('select r, c, count(*) as n from '
+                         '(select unnest(?::INTEGER[]) as r, unnest(?::INTEGER[]) as c) '
+                         'group by r, c order by r, c', params=[rows, cols]).fetchall()
+    npt.assert_array_equal([counted[row][col] for row, col, _ in grouped],
+                           [n for _, _, n in grouped])
+
+
+@given(HANDOVER_PAIRS)
+@SLOW
+def test_nnz_counts_stored_entries_until_sum_duplicates_makes_it_count_cells(pairs):
+    """The count the case reaches by summing its hand-built mask is carried by the object itself, and
+    it means two different things before and after the operation scipy names. Freshly constructed, nnz
+    is the number of generated pairs, because "Duplicate coordinates are maintained until implicitly or
+    explicitly summed"; after `sum_duplicates` it is the number of distinct cells, which is what DuckDB
+    counts with COUNT over a DISTINCT projection."""
+    rows = [row for row, _, _ in pairs]
+    cols = [col for _, col, _ in pairs]
+    weights = [weight for _, _, weight in pairs]
+    matrix = scipy_sparse.coo_matrix((weights, (rows, cols)), shape=RESOURCE_SHAPE)
+    npt.assert_array_equal(matrix.nnz, len(pairs))
+    matrix.sum_duplicates()
+    npt.assert_array_equal(matrix.nnz, _duckdb_distinct_cells(rows, cols))
+
+
+@given(HANDOVER_COORDS)
+@SLOW
+def test_a_recorded_zero_weight_is_stored_and_still_invisible_in_the_dense_matrix(coords):
+    """The case's third claim, executed. Every generated pair is recorded with a zero weight, and the
+    dense matrix is then indistinguishable from the matrix of a binder with no pairs at all, built by
+    scipy's own empty constructor. The distinction the case wants survives in two places the case does
+    not look: the canonical format is documented to allow it, "Data arrays MAY have explicit zeros", so
+    nnz still counts the recorded pairs, and the boolean matrix built from the same coordinates still
+    marks them present where the empty one does not."""
+    rows = [row for row, _ in coords]
+    cols = [col for _, col in coords]
+    recorded = scipy_sparse.coo_matrix(([0.0] * len(coords), (rows, cols)), shape=RESOURCE_SHAPE)
+    npt.assert_array_equal(recorded.toarray(), _empty_resource_matrix(float).toarray())
+    npt.assert_array_equal(recorded.nnz, len(coords))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_scipy_mask(coords), _empty_resource_matrix(bool).toarray())
+
+
+@given(RESOURCE_INDEX, RESOURCE_INDEX, HANDOVER_WEIGHT)
+@SLOW
+def test_two_weights_that_cancel_leave_one_stored_zero_until_eliminate_zeros_runs(row, col, weight):
+    """And the same cell reached the other way. Two generated weights that cancel are two stored
+    entries; `sum_duplicates` makes them one, which DuckDB's DISTINCT count agrees is one cell, and its
+    dense matrix is again the empty one; `eliminate_zeros`, "Remove zero entries from the
+    array/matrix", then removes the entry altogether and nnz falls to what an empty matrix reports. So
+    whether a recorded pair is present in the sparse object depends on which of scipy's clean-up
+    primitives has been called, and the dense matrix the chain hands on has forgotten the difference
+    before any of them runs."""
+    cancelling = [weight, -weight]
+    matrix = scipy_sparse.coo_matrix((cancelling, ([row, row], [col, col])), shape=RESOURCE_SHAPE)
+    npt.assert_array_equal(matrix.nnz, len(cancelling))
+    matrix.sum_duplicates()
+    npt.assert_array_equal(matrix.nnz, _duckdb_distinct_cells([row, row], [col, col]))
+    npt.assert_array_equal(matrix.toarray(), _empty_resource_matrix(float).toarray())
+    matrix.eliminate_zeros()
+    npt.assert_array_equal(matrix.nnz, _empty_resource_matrix(float).nnz)
