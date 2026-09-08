@@ -71,6 +71,9 @@ import jsonschema
 from junitparser import JUnitXml
 import altair as alt
 import vl_convert
+import dictdiffer
+import jsonpatch
+from deepdiff import DeepDiff
 import markdown as python_markdown
 import markdownify
 import html2text
@@ -13463,3 +13466,289 @@ def test_a_column_named_for_a_vega_keyword_compiles_and_then_will_not_render(tab
     with pytest.raises(ValueError):
         vl_convert.vegalite_to_svg(json.dumps(specification))
     vl_convert.vegalite_to_svg(json.dumps(_chart_spec(frame, category, amount)))
+
+
+# ---------------------------------------------------------------- comparing two documents block by block
+JSON_PATCH_DIRECTORY = pathlib.Path(os.environ.get('JSON_PATCH_DIR',
+                                                   str(pathlib.Path.home() / 'jsonpatch-oracle')))
+JSON_PATCH_ORACLE_JS = pathlib.Path(__file__).with_name('json_patch_oracle.js')
+fast_json_patch_available = (shutil.which('node') is not None
+                             and (JSON_PATCH_DIRECTORY / 'node_modules' / 'fast-json-patch').is_dir())
+DOCUMENT_DIFF = settings(max_examples=25, deadline=None)
+DOCUMENT_LINE = st.text(alphabet=st.characters(whitelist_categories=('Lu', 'Ll', 'Nd')),
+                        min_size=1, max_size=10)
+
+
+@st.composite
+def _document_lines(draw):
+    """The paragraphs of one document and the two-column table that follows them, all generated."""
+    return (draw(st.lists(DOCUMENT_LINE, min_size=2, max_size=5)),
+            draw(st.lists(st.tuples(DOCUMENT_LINE, DOCUMENT_LINE), min_size=1, max_size=3)))
+
+
+def _document_bytes(lines, rows, blank_after=None, trailing=None):
+    """One .docx written with python-docx from generated text: the paragraphs, then a two-column
+    table, optionally with one empty paragraph inserted after the paragraph at the given position and
+    optionally with one more paragraph after the table."""
+    document = docx.Document()
+    for position, line in enumerate(lines):
+        document.add_paragraph(line)
+        if position == blank_after:
+            document.add_paragraph('')
+    table = document.add_table(rows=0, cols=2)
+    for row in rows:
+        cells = table.add_row().cells
+        for cell, value in zip(cells, row):
+            cell.text = value
+    if trailing is not None:
+        document.add_paragraph(trailing)
+    written = io.BytesIO()
+    document.save(written)
+    return written.getvalue()
+
+
+def _document_blocks(data):
+    """Every block python-docx's own iter_inner_content yields, named by the class the library
+    returns and carrying the text that class exposes."""
+    return [{'kind': type(block).__name__,
+             'value': ([[cell.text for cell in row.cells] for row in block.rows]
+                       if hasattr(block, 'rows') else block.text)}
+            for block in docx.Document(io.BytesIO(data)).iter_inner_content()]
+
+
+def _three_verdicts(left, right):
+    """Whether each of the three implementations reports a difference: DeepDiff 9.1.0 as the case
+    calls it, jsonpatch 1.33's RFC 6902 patch, and dictdiffer 0.10.0's change list."""
+    return (bool(DeepDiff(left, right, zip_ordered_iterables=True)),
+            bool(jsonpatch.make_patch(left, right).patch),
+            bool(list(dictdiffer.diff(left, right))))
+
+
+def _patch_in_node(left, right):
+    """The same RFC 6902 patch computed by fast-json-patch 3.1.1 under node. The shim reads the two
+    documents on stdin as one JSON array, calls the library and prints the operations it returns."""
+    completed = subprocess.run(['node', str(JSON_PATCH_ORACLE_JS)],
+                               input=json.dumps([left, right]), capture_output=True,
+                               encoding='utf-8', check=True,
+                               env={**os.environ,
+                                    'NODE_PATH': str(JSON_PATCH_DIRECTORY / 'node_modules')})
+    return json.loads(completed.stdout)
+
+
+@given(_document_lines(), st.data())
+@DOCUMENT_DIFF
+def test_three_implementations_agree_on_whether_two_documents_differ(content, source):
+    """P120 compares two documents by diffing their block lists and reads the answer off `not diff`.
+    Two documents written from the same generated text compare identical in DeepDiff 9.1.0, in
+    jsonpatch 1.33's RFC 6902 patch and in dictdiffer 0.10.0 -- neither of which shares a dependency
+    with DeepDiff, whose own are cachebox and orderly-set -- and changing one paragraph makes all
+    three report a difference. The patch is not only a verdict: applying it to the first block list
+    returns the second, which is what an RFC 6902 patch is for. Replaces `g.equal(same['identical'],
+    True)`, `g.equal(same['blocks'], 3)` and `g.equal(changed['identical'], False)` of
+    handoff_guards_v12.py case 120."""
+    lines, rows = content
+    position = source.draw(st.integers(min_value=0, max_value=len(lines) - 1))
+    replacement = source.draw(DOCUMENT_LINE.filter(lambda word: word != lines[position]))
+    first = _document_blocks(_document_bytes(lines, rows))
+    same = _document_blocks(_document_bytes(lines, rows))
+    npt.assert_array_equal(len(first), len(lines) + 1)
+    npt.assert_array_equal(_three_verdicts(first, same), [False, False, False])
+    changed = _document_blocks(
+        _document_bytes(lines[:position] + [replacement] + lines[position + 1:], rows))
+    npt.assert_array_equal(_three_verdicts(first, changed), [True, True, True])
+    npt.assert_array_equal(json.dumps(jsonpatch.make_patch(first, changed).apply(first)),
+                           json.dumps(changed))
+
+
+@given(_document_lines(), DOCUMENT_LINE)
+@DOCUMENT_DIFF
+def test_a_block_added_at_the_end_is_one_addition_and_not_a_values_changed_entry(content, extra):
+    """`g.equal('values_changed' in changed['diff'], True)` is right about the case's own fixture,
+    where one paragraph's text was edited, and it is not a test for whether two documents differ. A
+    document that has gained a paragraph after everything else is reported by DeepDiff under a
+    different key entirely, so the membership test finds nothing while all three implementations
+    report the difference and the RFC 6902 patch names it as the one addition it is."""
+    lines, rows = content
+    first = _document_blocks(_document_bytes(lines, rows))
+    longer = _document_blocks(_document_bytes(lines, rows, trailing=extra))
+    npt.assert_array_equal(len(longer), len(first) + 1)
+    npt.assert_array_equal(_three_verdicts(first, longer), [True, True, True])
+    npt.assert_array_equal(sorted(DeepDiff(first, longer, zip_ordered_iterables=True).keys()),
+                           ['iterable_item_added'])
+    npt.assert_array_equal([operation['op']
+                            for operation in jsonpatch.make_patch(first, longer).patch], ['add'])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(sorted(DeepDiff(first, longer, zip_ordered_iterables=True).keys()),
+                               ['values_changed'])
+
+
+@given(_document_lines(), DOCUMENT_LINE, st.data())
+@DOCUMENT_DIFF
+def test_the_same_added_block_costs_one_edit_at_the_end_and_more_in_the_middle(content, extra,
+                                                                              source):
+    """Where the block went decides how much of the document is reported as changed, and on a
+    list of blocks all three implementations are positional in the same way. One paragraph added
+    after everything else is one addition; the same paragraph added between two others is that
+    addition and a change to every block after it, because each of them is now compared with the
+    block that used to be one place later. The document gained exactly one block either way, so the
+    size of a diff is not a measure of how much of a document was edited. That this holds of
+    DeepDiff here is a consequence of what a block is, which the next test separates out."""
+    lines, rows = content
+    position = source.draw(st.integers(min_value=0, max_value=len(lines) - 1))
+    first = _document_blocks(_document_bytes(lines, rows))
+    appended = _document_blocks(_document_bytes(lines, rows, trailing=extra))
+    inserted = _document_blocks(
+        _document_bytes(lines[:position + 1] + [extra] + lines[position + 1:], rows))
+    npt.assert_array_equal(len(appended), len(inserted))
+    npt.assert_array_equal([operation['op']
+                            for operation in jsonpatch.make_patch(first, appended).patch], ['add'])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal([operation['op']
+                                for operation in jsonpatch.make_patch(first, inserted).patch],
+                               ['add'])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(sorted(DeepDiff(first, inserted, zip_ordered_iterables=True).keys()),
+                               ['iterable_item_added'])
+    npt.assert_array_equal(json.dumps(jsonpatch.make_patch(first, inserted).apply(first)),
+                           json.dumps(inserted))
+
+
+@given(_document_lines(), st.data())
+@DOCUMENT_DIFF
+def test_a_reordering_is_a_difference_by_default_and_not_when_the_option_is_named(content, source):
+    """"A reordering is a difference, not a match" is a default rather than a property of the
+    comparison: DeepDiff reports the two orderings as different, so do both other implementations,
+    and DeepDiff called with ignore_order reports nothing at all about the same pair. So what makes
+    the case's claim true is the option it did not pass, and a chain that ever passes it compares two
+    documents by their contents alone."""
+    lines, rows = content
+    assume(len(set(lines)) > 1)
+    order = source.draw(st.permutations(lines).filter(lambda drawn: list(drawn) != lines))
+    first = _document_blocks(_document_bytes(lines, rows))
+    reordered = _document_blocks(_document_bytes(list(order), rows))
+    npt.assert_array_equal(_three_verdicts(first, reordered), [True, True, True])
+    npt.assert_array_equal(bool(DeepDiff(first, reordered, ignore_order=True)), False)
+    npt.assert_array_equal(json.dumps(jsonpatch.make_patch(first, reordered).apply(first)),
+                           json.dumps(reordered))
+
+
+@given(_document_lines(), st.data())
+@DOCUMENT_DIFF
+def test_a_blank_paragraph_is_a_block_the_library_returns_and_all_three_diffs_report(content,
+                                                                                    source):
+    """A styling change that adds an empty paragraph. python-docx's own iter_inner_content returns
+    it, so the document really does have one block more, and all three implementations say the two
+    documents differ; the case sees nothing because its own reader keeps a paragraph only when
+    `block.text` is truthy, and an empty paragraph's text is the empty string. The rest of the
+    document is untouched: dropping the added block leaves the block list it started as."""
+    lines, rows = content
+    position = source.draw(st.integers(min_value=0, max_value=len(lines) - 1))
+    first = _document_blocks(_document_bytes(lines, rows))
+    spaced = _document_blocks(_document_bytes(lines, rows, blank_after=position))
+    npt.assert_array_equal(len(spaced), len(first) + 1)
+    npt.assert_array_equal(_three_verdicts(first, spaced), [True, True, True])
+    npt.assert_array_equal(json.dumps(spaced[:position + 1] + spaced[position + 2:]),
+                           json.dumps(first))
+
+
+@given(st.lists(st.integers(min_value=-10 ** 6, max_value=10 ** 6), min_size=1, max_size=6),
+       DOCUMENT_LINE)
+@DOCUMENT_DIFF
+def test_a_whole_number_written_as_a_float_splits_the_three_implementations(amounts, name):
+    """The comparison the chain also makes over data rather than text -- P96 checks its embedded
+    chart data with `DeepDiff(rows, data_values, zip_ordered_iterables=True)`. A record whose number
+    is the integer and the same record whose number is the float are one document to RFC 6902 and to
+    dictdiffer, whose patch and change list are each exactly as long as the ones they produce
+    comparing a document with itself, and two documents to DeepDiff, which reports them under
+    type_changes because the types differ even though `1 == 1.0` in Python. So the emptiness of a
+    DeepDiff is a stricter test than equality of the documents."""
+    left = [{name: amount} for amount in amounts]
+    right = [{name: float(amount)} for amount in amounts]
+    npt.assert_array_equal(sorted(DeepDiff(left, right, zip_ordered_iterables=True).keys()),
+                           ['type_changes'])
+    npt.assert_array_equal(len(jsonpatch.make_patch(left, right).patch),
+                           len(jsonpatch.make_patch(left, left).patch))
+    npt.assert_array_equal(list(dictdiffer.diff(left, right)), list(dictdiffer.diff(left, left)))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_three_verdicts(left, right), [True, True, True])
+
+
+@pytest.mark.skipif(not fast_json_patch_available,
+                    reason='node and a fast-json-patch checkout are required for this oracle')
+@given(st.lists(st.integers(min_value=-10 ** 6, max_value=10 ** 6), min_size=1, max_size=6),
+       DOCUMENT_LINE)
+@DOCUMENT_DIFF
+def test_a_fourth_implementation_cannot_see_the_type_change_at_all(amounts, name):
+    """Where the distinction goes when the documents are actually JSON. fast-json-patch 3.1.1 under
+    node, a second implementation of RFC 6902 whose package.json at 3.1.1 declares no dependencies,
+    is handed the two documents as JSON text and returns an empty patch -- not because it chose to
+    ignore the difference but because JSON has one number type and the runtime parsed both spellings
+    to the same value. It reports the same edits as the Python implementation for a change of text,
+    so the empty answer is not a failure to look."""
+    left = [{name: amount} for amount in amounts]
+    right = [{name: float(amount)} for amount in amounts]
+    npt.assert_array_equal(_patch_in_node(left, right), _patch_in_node(left, left))
+    changed = [{name: amount + 1} for amount in amounts]
+    npt.assert_array_equal(
+        sorted(json.dumps(operation, sort_keys=True) for operation in _patch_in_node(left, changed)),
+        sorted(json.dumps(operation, sort_keys=True)
+               for operation in jsonpatch.make_patch(left, changed).patch))
+
+
+@pytest.mark.skipif(not fast_json_patch_available,
+                    reason='node and a fast-json-patch checkout are required for this oracle')
+@given(st.lists(st.integers(min_value=-10 ** 6, max_value=10 ** 6), min_size=2, max_size=6),
+       DOCUMENT_LINE)
+@DOCUMENT_DIFF
+def test_the_two_rfc_6902_implementations_emit_the_same_edits_in_opposite_order(amounts, name):
+    """Two conforming implementations of the same standard do not return the same patch. Over two or
+    more changed records the operations are the same edits and the sequences are reversed: jsonpatch
+    1.33 walks the array forwards and fast-json-patch 3.1.1 walks it backwards, and both patches
+    applied to the first document return the second. So a patch compared as a document -- which is
+    what comparing two diffs amounts to -- reports a difference between two answers that are the
+    same answer."""
+    left = [{name: amount} for amount in amounts]
+    right = [{name: amount + 1} for amount in amounts]
+    in_python = jsonpatch.make_patch(left, right).patch
+    in_node = _patch_in_node(left, right)
+    npt.assert_array_equal(sorted(json.dumps(operation, sort_keys=True) for operation in in_node),
+                           sorted(json.dumps(operation, sort_keys=True) for operation in in_python))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal([json.dumps(operation, sort_keys=True) for operation in in_node],
+                               [json.dumps(operation, sort_keys=True) for operation in in_python])
+    npt.assert_array_equal(json.dumps(jsonpatch.JsonPatch(in_node).apply(left)), json.dumps(right))
+
+
+@given(st.lists(DOCUMENT_LINE, min_size=2, max_size=5, unique=True), DOCUMENT_LINE, st.data())
+@DOCUMENT_DIFF
+def test_whether_an_inserted_item_costs_one_edit_depends_on_what_the_items_are(words, extra,
+                                                                              source):
+    """The option case 120 passes is not the default, and DeepDiff's own documentation at 9.1.0 says
+    what the default does instead: "DeepDiff tries to find the smallest difference between the two
+    iterables to report. That means that items in the two lists are not paired individually in the
+    order of appearance in the iterables." Over a list of words that holds: an item inserted in the
+    middle costs the same one addition as an item appended at the end, which is what the RFC 6902
+    patch reports too, while `zip_ordered_iterables=True` makes the same insertion a change to every
+    item after it, and dictdiffer is positional whatever is asked of it. Over a list of blocks the
+    option makes no difference at all, because the smallest-difference pairing is reached only when
+    every value is basic hashable and a block is a dictionary -- so the flag the case passes changes
+    nothing about the answer it gets, and would change it for a document read as a list of strings."""
+    assume(extra not in words)
+    position = source.draw(st.integers(min_value=0, max_value=len(words) - 2))
+    inserted = words[:position + 1] + [extra] + words[position + 1:]
+    appended = words + [extra]
+    npt.assert_array_equal(sorted(DeepDiff(words, inserted).keys()),
+                           sorted(DeepDiff(words, appended).keys()))
+    npt.assert_array_equal(len(jsonpatch.make_patch(words, inserted).patch),
+                           len(jsonpatch.make_patch(words, appended).patch))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(
+            sorted(DeepDiff(words, inserted, zip_ordered_iterables=True).keys()),
+            sorted(DeepDiff(words, appended, zip_ordered_iterables=True).keys()))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(len(list(dictdiffer.diff(words, inserted))),
+                               len(list(dictdiffer.diff(words, appended))))
+    blocks = _document_blocks(_document_bytes(words, [(extra, extra)]))
+    shifted = _document_blocks(_document_bytes(inserted, [(extra, extra)]))
+    npt.assert_array_equal(sorted(DeepDiff(blocks, shifted, zip_ordered_iterables=True).keys()),
+                           sorted(DeepDiff(blocks, shifted).keys()))
