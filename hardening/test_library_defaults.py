@@ -5796,3 +5796,135 @@ def test_the_inventory_reconciliation_is_what_notices_the_unselected_control(nam
     npt.assert_array_equal(missing, sorted(set(names) - set(targeted)))
     npt.assert_array_equal(missing, sorted(names))
     npt.assert_array_equal(targeted, [])
+
+
+# ---------------------------------------------------------------- coverage, and the domain it is relative to
+COMPARISONS = {'<': operator.lt, '<=': operator.le, '>': operator.gt, '>=': operator.ge}
+DECISION_THRESHOLD = st.integers(min_value=-20, max_value=20)
+DOMAIN_DISTANCE = st.integers(min_value=0, max_value=20)
+
+
+def _rows_in(module, rows):
+    """P198's decision rows as expressions of one integer variable in the given solver's API. The
+    comparison comes from the standard library's operator module, so the row is built by applying a
+    named function to the solver's own variable and nothing is written twice."""
+    variable = module.Int('n')
+    return variable, [COMPARISONS[sense](variable, value) for sense, value in rows]
+
+
+def _uncovered_in(module, rows, floor):
+    """P198's gap query: a point of the declared domain that no row covers."""
+    variable, predicates = _rows_in(module, rows)
+    solver = module.Solver()
+    solver.add(variable >= floor)
+    solver.add(module.Not(module.Or(predicates)))
+    status = str(solver.check())
+    if status == 'sat':
+        return status, int(str(solver.model()[variable]))
+    return status, None
+
+
+def _overlapping_in(module, rows, floor):
+    """P198's overlap query: a point of the declared domain that more than one row answers."""
+    variable, predicates = _rows_in(module, rows)
+    solver = module.Solver()
+    solver.add(variable >= floor)
+    solver.add(module.And(predicates))
+    status = str(solver.check())
+    if status == 'sat':
+        model = solver.model()
+        return status, int(str(model[variable])), str(model.eval(module.And(predicates)))
+    return status, None, None
+
+
+@given(DECISION_THRESHOLD, DECISION_THRESHOLD)
+@SLOW
+def test_a_partition_of_the_declared_domain_has_no_gap_and_no_overlap_in_either_solver(threshold,
+                                                                                      floor):
+    """P198's theoretical positive test, run. Rows below and at-or-above one generated threshold
+    partition the declared domain: the gap query and the overlap query are both unsatisfiable, in z3
+    5.1.0 and in cvc5 1.3.4, whose decision procedures share no code. Replaces the typed
+    `uncovered([...]) is None` and `overlapping([...]) is None` of handoff_guards_v21.py case 198."""
+    rows = [('<', threshold), ('>=', threshold)]
+    npt.assert_array_equal(_uncovered_in(z3, rows, floor), _uncovered_in(cvc5_pythonic, rows, floor))
+    npt.assert_array_equal(_overlapping_in(z3, rows, floor),
+                           _overlapping_in(cvc5_pythonic, rows, floor))
+    npt.assert_array_equal(_uncovered_in(z3, rows, floor)[0], 'unsat')
+    npt.assert_array_equal(_overlapping_in(z3, rows, floor)[0], 'unsat')
+
+
+@given(DECISION_THRESHOLD, DOMAIN_DISTANCE)
+@SLOW
+def test_moving_one_row_off_the_boundary_leaves_exactly_the_boundary_uncovered(threshold, below):
+    """P198's first adverse test. Changing the second row from at-or-above to strictly above the
+    threshold leaves one point of the domain unanswered, and both solvers return that point: the
+    threshold itself, whatever it was generated as, from any floor at or below it."""
+    rows = [('<', threshold), ('>', threshold)]
+    floor = threshold - below
+    npt.assert_array_equal(_uncovered_in(z3, rows, floor), _uncovered_in(cvc5_pythonic, rows, floor))
+    npt.assert_array_equal(_uncovered_in(z3, rows, floor), ['sat', threshold])
+
+
+@given(DECISION_THRESHOLD, DOMAIN_DISTANCE)
+@SLOW
+def test_the_same_gap_is_gone_when_the_domain_starts_above_it(threshold, above):
+    """Totality is relative to the declared domain, which is P198's own contract sentence. The rows
+    that leave the threshold unanswered leave nothing unanswered once the domain begins above it, and
+    both solvers agree, so the same table is total or not according to a bound that is not in the
+    table at all."""
+    rows = [('<', threshold), ('>', threshold)]
+    floor = threshold + 1 + above
+    npt.assert_array_equal(_uncovered_in(z3, rows, floor), _uncovered_in(cvc5_pythonic, rows, floor))
+    npt.assert_array_equal(_uncovered_in(z3, rows, floor)[0], 'unsat')
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_uncovered_in(z3, rows, floor),
+                               _uncovered_in(z3, rows, threshold))
+
+
+@given(DECISION_THRESHOLD, st.integers(min_value=1, max_value=20), DOMAIN_DISTANCE)
+@SLOW
+def test_two_rows_that_both_answer_the_same_request_are_a_witness_both_solvers_find(threshold, gap,
+                                                                                   below):
+    """P198's second adverse test. A second row admitting everything from a lower threshold overlaps
+    the first everywhere above the higher one; both solvers find a witness, and each solver's own
+    model evaluates the conjunction of the rows to true, so the witness is checked by the solver that
+    produced it rather than by arithmetic written here."""
+    rows = [('>=', threshold), ('>=', threshold - gap)]
+    floor = threshold - below
+    by_z3 = _overlapping_in(z3, rows, floor)
+    by_cvc5 = _overlapping_in(cvc5_pythonic, rows, floor)
+    npt.assert_array_equal(by_z3[0], by_cvc5[0])
+    npt.assert_array_equal(by_z3[0], 'sat')
+    npt.assert_array_equal([by_z3[2], by_cvc5[2]], ['True', 'True'])
+
+
+@given(DECISION_THRESHOLD, st.sampled_from(('<', '<=', '>', '>=')))
+@SLOW
+def test_a_one_row_coverage_question_is_answered_by_one_solver_and_refused_by_the_other(threshold,
+                                                                                       sense):
+    """A decision table with one row is a coverage question in z3 and an error in cvc5. z3's Or, read
+    at raw.githubusercontent.com/Z3Prover/z3/z3-5.1.0/src/api/python/z3/z3.py, hands whatever it is
+    given to Z3_mk_or, which accepts one argument; cvc5's pythonic Or collapses a single expression
+    but not a single-element list -- "if len(args) == 1 and type(args[0]) is not list: return
+    args[0]" -- and its term manager refuses the kind below two children. Declaring the same row
+    twice is accepted by both and gives z3's answer, so the refusal is about the arity of the list
+    and not about the question. P198 builds its query from a list comprehension over the rows, so a
+    one-row table reaches this."""
+    rows = [(sense, threshold)]
+    doubled = rows + rows
+    with pytest.raises(RuntimeError):
+        _uncovered_in(cvc5_pythonic, rows, threshold)
+    npt.assert_array_equal(_uncovered_in(z3, rows, threshold),
+                           _uncovered_in(z3, doubled, threshold))
+    npt.assert_array_equal(_uncovered_in(z3, doubled, threshold),
+                           _uncovered_in(cvc5_pythonic, doubled, threshold))
+
+
+@given(st.integers(min_value=1, max_value=6))
+@SLOW
+def test_the_enumerated_domain_is_the_same_grid_in_two_libraries(size):
+    """The finite domain P198 enumerates beside the solver, itertools.product over a range, is the
+    grid numpy's indices produces for the same shape, in the same order and with the same number of
+    points. Replaces the typed `len(known) == 9` of case 198."""
+    npt.assert_array_equal(list(itertools.product(range(size), repeat=2)),
+                           np.indices((size, size)).reshape(2, -1).T)
