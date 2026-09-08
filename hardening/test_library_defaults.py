@@ -68,6 +68,11 @@ import rdflib
 from lxml import etree as lxml_etree
 from lxml import html as lxml_html
 from markdown_it import MarkdownIt
+import matplotlib
+
+matplotlib.use('Agg')  # the shim-free backend, so the chart tests draw without a display
+import matplotlib.dates as matplotlib_dates
+import matplotlib.pyplot as matplotlib_pyplot
 import networkx as nx
 import openpyxl
 import odf.opendocument
@@ -89,6 +94,7 @@ import pypdf
 import pypdfium2
 import repro_zipfile
 import xlsxwriter
+import xlsxwriter.exceptions
 from docx2python import docx2python
 from python_calamine import CalamineWorkbook
 
@@ -7604,3 +7610,195 @@ def test_a_period_range_covers_every_month_between_its_ends_with_no_gap_and_no_o
                             pd.period_range(start=periods[0], end=periods[-1], freq='M')])
     npt.assert_array_equal([period.end_time + pd.Timestamp.resolution for period in periods[:-1]],
                            [period.start_time for period in periods[1:]])
+
+
+# ------------------------------------------------------ a bar on a chart, and a table in a workbook
+BAR_DAY = st.dates(min_value=datetime.date(1971, 1, 1), max_value=datetime.date(2099, 12, 31))
+BAR_LENGTH = st.integers(min_value=0, max_value=400)
+TABLE_COLUMN = st.text(alphabet='abcdefghijklmnopqrstuvwxyz', min_size=1, max_size=8)
+TABLE_CELL = st.text(alphabet='abcdefghijklmnopqrstuvwxyz0123456789-', min_size=1, max_size=10)
+BEYOND_THE_SHEET = st.integers(min_value=1048576, max_value=2000000)
+
+
+@st.composite
+def _schedule_table(draw):
+    """One schedule as a header row of distinct column names and a body with a cell under each."""
+    columns = draw(st.lists(TABLE_COLUMN, min_size=1, max_size=5, unique=True))
+    rows = draw(st.lists(st.lists(TABLE_CELL, min_size=len(columns), max_size=len(columns)),
+                         min_size=1, max_size=4))
+    return columns, rows
+
+
+def _drawn_bar(start, width):
+    """The rectangle matplotlib actually draws for one bar: the extents of the path `broken_barh`
+    returns, as its two edges and its width."""
+    figure, axes = matplotlib_pyplot.subplots()
+    try:
+        extents = axes.broken_barh([(start, width)], (0, 1)).get_paths()[0].get_extents()
+        return [float(extents.x0), float(extents.x1), float(extents.width)]
+    finally:
+        matplotlib_pyplot.close(figure)
+
+
+def _schedule_workbook(columns, rows, *, declare):
+    """One workbook holding the header row and the body, with an Excel table over the same range.
+    `declare` passes the columns to `add_table` or leaves the options out, which is the whole
+    difference between the two readings below."""
+    buffer = io.BytesIO()
+    book = xlsxwriter.Workbook(buffer, {'in_memory': True})
+    sheet = book.add_worksheet('schedule')
+    sheet.write_row(0, 0, columns)
+    for index, row in enumerate(rows, start=1):
+        sheet.write_row(index, 0, row)
+    sheet.add_table(0, 0, len(rows), len(columns) - 1,
+                    {'columns': [{'header': column} for column in columns]} if declare else None)
+    book.close()
+    return buffer.getvalue()
+
+
+def _openpyxl_grid(data):
+    sheet = openpyxl.load_workbook(io.BytesIO(data))['schedule']
+    return [[cell.value for cell in row] for row in sheet.iter_rows()]
+
+
+def _calamine_grid(data):
+    return CalamineWorkbook.from_filelike(io.BytesIO(data)).get_sheet_by_name('schedule').to_python()
+
+
+@given(st.lists(BAR_DAY, min_size=2, max_size=30))
+@SLOW
+def test_a_chart_day_number_and_the_standard_library_ordinal_differ_by_one_constant(days):
+    """P141 draws a schedule with matplotlib, which turns a date into "Number of days since the epoch",
+    documented in lib/matplotlib/dates.py at tag v3.11.1 and defaulting to 1970-01-01. The standard
+    library's `date.toordinal` counts days from a different origin and is not matplotlib's code. Over
+    generated dates the two differ by one constant, and the gaps between consecutive dates are
+    identical, so the chart axis is a day count and nothing about it is matplotlib's own arithmetic.
+    Replaces the typed 20706.0 day number of handoff_guards_v15.py case
+    a_bar_takes_a_width_not_an_end_date."""
+    offsets = [day.toordinal() - matplotlib_dates.date2num(day) for day in days]
+    npt.assert_array_equal(offsets, [offsets[0]] * len(offsets))
+    npt.assert_array_equal(np.diff([matplotlib_dates.date2num(day) for day in sorted(days)]),
+                           np.diff([day.toordinal() for day in sorted(days)]))
+
+
+@pytest.mark.skipif(not ruby_available, reason='the ruby runtime is required for this oracle')
+@given(BAR_DAY, BAR_LENGTH)
+@ORACLE_PROCESS
+def test_another_runtime_counts_the_same_days_between_the_two_ends_of_a_bar(start, length):
+    """Ruby's `Date#jd`, documented in ext/date/date_core.c at tag v3_3_6 as returning "the Julian day
+    number", is a third origin again and a C implementation in another runtime. The number of days
+    between the two ends of a generated bar is the same in matplotlib's numbering and in Ruby's, which
+    is what the width of the bar is supposed to be."""
+    finish = start + datetime.timedelta(days=length)
+    npt.assert_equal(matplotlib_dates.date2num(finish) - matplotlib_dates.date2num(start),
+                     int(_ruby_calendar_day(finish.isoformat())[1])
+                     - int(_ruby_calendar_day(start.isoformat())[1]))
+
+
+@given(BAR_DAY, BAR_LENGTH)
+@SLOW
+def test_the_width_of_a_bar_is_the_length_of_the_interval_and_not_the_second_date(start, length):
+    """`broken_barh` takes, in its own signature, a sequence of `(xmin, xwidth)` pairs. Handed the
+    generated interval's length it draws a bar exactly that many days wide. Handed the finish date's
+    day number where the width belongs -- the same two values, passed the way a reader of the call
+    might expect -- it draws a bar as wide as the whole span from the epoch, tens of thousands of days,
+    and reports no error at all. Replaces the typed `right == [2.0, 0.0]`, the typed 20706.0 and the
+    typed `wrong[0] > right[0] * 10000` of case a_bar_takes_a_width_not_an_end_date."""
+    finish = start + datetime.timedelta(days=length)
+    first, last = matplotlib_dates.date2num(start), matplotlib_dates.date2num(finish)
+    npt.assert_equal(_drawn_bar(first, last - first)[2], float(length))
+    npt.assert_equal(_drawn_bar(first, last)[2], last)
+    with pytest.raises(AssertionError):
+        npt.assert_equal(_drawn_bar(first, last)[2], _drawn_bar(first, last - first)[2])
+
+
+@given(BAR_DAY, st.integers(min_value=1, max_value=400))
+@SLOW
+def test_a_finish_before_the_start_draws_exactly_the_bar_a_correct_interval_draws(start, length):
+    """The guard module refuses a finish that precedes its start, and that refusal is its own code:
+    matplotlib does not object. Handed the reversed pair, `broken_barh` draws a rectangle with the same
+    two edges and the same width as the correct one, so the two are the same bar on the page and a
+    chart cannot show the error. Replaces the typed
+    `g.rejects(g.Blocked, lambda: bar_spans(...))` of case a_bar_takes_a_width_not_an_end_date."""
+    finish = start + datetime.timedelta(days=length)
+    first, last = matplotlib_dates.date2num(start), matplotlib_dates.date2num(finish)
+    npt.assert_array_equal(_drawn_bar(first, last - first), _drawn_bar(last, first - last))
+
+
+@given(BAR_DAY)
+@SLOW
+def test_the_day_number_comes_back_as_an_instant_in_a_zone_and_not_as_a_date(day):
+    """`num2date` is documented at the same tag as returning `datetime.datetime` objects, "returned in
+    timezone *tz*", and the default zone is configured rather than absent. So the round trip through
+    the chart's numbering does not return what went into it: it returns midnight of that day in a zone,
+    which equals the date only after `.date()` is taken, and comparing it with the naive datetime of
+    the same day raises TypeError instead of answering. Replaces the typed
+    `isinstance(back, datetime.datetime)`, `str(back.tzinfo) == 'UTC'` and `back.date() == day` of case
+    a_bar_takes_a_width_not_an_end_date."""
+    back = matplotlib_dates.num2date(matplotlib_dates.date2num(day))
+    npt.assert_equal(back.date(), day)
+    npt.assert_equal(back, datetime.datetime.combine(day, datetime.time(), tzinfo=back.tzinfo))
+    with pytest.raises(TypeError):
+        back < datetime.datetime.combine(day, datetime.time())
+
+
+@given(_schedule_table(), st.data())
+@SLOW
+def test_a_table_added_without_declared_columns_overwrites_the_header_row_that_was_written(table,
+                                                                                          source):
+    """XlsxWriter 3.2.9 gives every column of a table a default name, `"Column" + str(col_id)` in
+    xlsxwriter/worksheet.py at tag RELEASE_3.2.9, and writes it into the sheet under the comment
+    "Write the column headers to the worksheet." unless the call declared a header for that column.
+    The header row the workbook already held is gone, and what replaces it does not depend on it: two
+    schedules whose column names differ come back with the same first row. Two independent readers
+    agree on the whole grid, openpyxl and the Rust calamine reader, so this is in the file rather than
+    in one reader. Replaces the typed `silent[0] == ['Column1', 'Column2', 'Column3']` of case
+    a_bar_takes_a_width_not_an_end_date."""
+    columns, rows = table
+    others = source.draw(st.lists(TABLE_COLUMN, min_size=len(columns), max_size=len(columns),
+                                  unique=True))
+    assume(others != columns)
+    written = _schedule_workbook(columns, rows, declare=False)
+    npt.assert_array_equal(_openpyxl_grid(written), _calamine_grid(written))
+    npt.assert_array_equal(_openpyxl_grid(written)[0],
+                           _openpyxl_grid(_schedule_workbook(others, rows, declare=False))[0])
+    npt.assert_array_equal(_openpyxl_grid(written)[1:], rows)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_openpyxl_grid(written)[0], columns)
+
+
+@given(_schedule_table())
+@SLOW
+def test_declaring_the_columns_keeps_the_headers_the_workbook_was_written_with(table):
+    """The same call with the headers declared keeps them: both readers return the generated column
+    names as the first row and the generated body under them. The difference between a schedule that
+    reads back and one that does not is one option on one call, and nothing in the file records which
+    was used. Replaces the typed `declared[0] == columns` and
+    `declared[1] == ['v20', '2026-09-08', '2026-09-10']` of case
+    a_bar_takes_a_width_not_an_end_date."""
+    columns, rows = table
+    written = _schedule_workbook(columns, rows, declare=True)
+    npt.assert_array_equal(_openpyxl_grid(written), _calamine_grid(written))
+    npt.assert_array_equal(_openpyxl_grid(written)[0], columns)
+    npt.assert_array_equal(_openpyxl_grid(written)[1:], rows)
+
+
+@given(_schedule_table(), BEYOND_THE_SHEET)
+@SLOW
+def test_a_table_reports_one_refusal_by_a_return_code_and_another_by_raising(table, beyond):
+    """`add_table` is documented at tag RELEASE_3.2.9 as returning 0 for success and -1, -2 or -3 for
+    the three ways it can fail, so a caller that does not read the return value is told nothing. That
+    is only half of it: a range that runs off the end of the sheet comes back as a code, and a range
+    that overlaps a table already added raises `OverlappingRange` instead. One call has two failure
+    channels, and the guard module's own `if code != 0` sees only one of them."""
+    columns, rows = table
+    buffer = io.BytesIO()
+    book = xlsxwriter.Workbook(buffer, {'in_memory': True})
+    sheet = book.add_worksheet('schedule')
+    accepted = sheet.add_table(0, 0, len(rows), len(columns) - 1, None)
+    refused = sheet.add_table(len(rows) + 2, 0, beyond, len(columns) - 1, None)
+    with pytest.raises(xlsxwriter.exceptions.OverlappingRange):
+        sheet.add_table(0, 0, len(rows), len(columns) - 1, None)
+    book.close()
+    with pytest.raises(AssertionError):
+        npt.assert_equal(refused, accepted)
