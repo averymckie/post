@@ -14523,7 +14523,7 @@ def test_the_undeprecated_successor_accepts_the_net_woflan_refuses(branches):
 
 # ---------------------------------------------------------------- a graph hash, an isomorphism and a canonical form
 GRAPH_FILTER = settings(max_examples=25, deadline=None)
-CYCLE_LENGTH = st.integers(min_value=3, max_value=6)
+CYCLE_SIZE = st.integers(min_value=3, max_value=6)
 WL_ITERATIONS = st.integers(min_value=1, max_value=8)
 PATH_LENGTH = st.integers(min_value=3, max_value=7)
 NODE_COUNT = st.integers(min_value=4, max_value=6)
@@ -14547,7 +14547,7 @@ def _networkx_graph(count, edges, directed=False):
     return graph
 
 
-def _igraph_of(graph, directed=False):
+def _igraph_from_networkx(graph, directed=False):
     """The same graph in igraph 1.0.0, whose C core shares nothing with NetworkX. `isomorphic` is
     documented in src/_igraph/graphobject.c at tag 1.0.0 as checking "whether the graph is isomorphic
     to another graph", choosing "the VF2 isomorphism algorithm" for directed graphs and otherwise
@@ -14567,7 +14567,7 @@ def _canonical_edges(graph):
     return sorted(tuple(sorted(edge)) for edge in canonical.get_edgelist())
 
 
-@given(CYCLE_LENGTH, CYCLE_LENGTH, WL_ITERATIONS)
+@given(CYCLE_SIZE, CYCLE_SIZE, WL_ITERATIONS)
 @GRAPH_FILTER
 def test_the_graph_hash_cannot_separate_a_cycle_from_a_pair_of_cycles_at_any_iteration_count(
         first, second, iterations):
@@ -14583,9 +14583,9 @@ def test_the_graph_hash_cannot_separate_a_cycle_from_a_pair_of_cycles_at_any_ite
     pair = nx.disjoint_union(nx.cycle_graph(first), nx.cycle_graph(second))
     npt.assert_array_equal(nx.weisfeiler_lehman_graph_hash(single, iterations=iterations),
                            nx.weisfeiler_lehman_graph_hash(pair, iterations=iterations))
-    npt.assert_array_equal(nx.is_isomorphic(single, pair), _igraph_of(single).isomorphic(_igraph_of(pair)))
+    npt.assert_array_equal(nx.is_isomorphic(single, pair), _igraph_from_networkx(single).isomorphic(_igraph_from_networkx(pair)))
     with pytest.raises(AssertionError):
-        npt.assert_array_equal(_canonical_edges(_igraph_of(single)), _canonical_edges(_igraph_of(pair)))
+        npt.assert_array_equal(_canonical_edges(_igraph_from_networkx(single)), _canonical_edges(_igraph_from_networkx(pair)))
 
 
 @given(NODE_COUNT.flatmap(lambda count: st.tuples(st.just(count), _edge_lists(count), _edge_lists(count))))
@@ -14598,9 +14598,9 @@ def test_two_isomorphism_deciders_that_share_no_code_agree_on_every_generated_pa
     count, left_edges, right_edges = drawn
     left, right = _networkx_graph(count, left_edges), _networkx_graph(count, right_edges)
     decided = nx.is_isomorphic(left, right)
-    npt.assert_array_equal(decided, _igraph_of(left).isomorphic(_igraph_of(right)))
+    npt.assert_array_equal(decided, _igraph_from_networkx(left).isomorphic(_igraph_from_networkx(right)))
     npt.assert_array_equal(decided,
-                           _canonical_edges(_igraph_of(left)) == _canonical_edges(_igraph_of(right)))
+                           _canonical_edges(_igraph_from_networkx(left)) == _canonical_edges(_igraph_from_networkx(right)))
 
 
 @given(NODE_COUNT.flatmap(lambda count: st.tuples(st.just(count), _edge_lists(count),
@@ -14615,12 +14615,12 @@ def test_the_hash_and_the_canonical_form_both_survive_a_relabelling(drawn):
     relabelled = nx.relabel_nodes(graph, dict(zip(range(count), permutation)))
     npt.assert_array_equal(nx.weisfeiler_lehman_graph_hash(graph),
                            nx.weisfeiler_lehman_graph_hash(relabelled))
-    npt.assert_array_equal(_canonical_edges(_igraph_of(graph)), _canonical_edges(_igraph_of(relabelled)))
+    npt.assert_array_equal(_canonical_edges(_igraph_from_networkx(graph)), _canonical_edges(_igraph_from_networkx(relabelled)))
     npt.assert_array_equal(nx.is_isomorphic(graph, relabelled),
-                           _igraph_of(graph).isomorphic(_igraph_of(relabelled)))
+                           _igraph_from_networkx(graph).isomorphic(_igraph_from_networkx(relabelled)))
 
 
-@given(CYCLE_LENGTH)
+@given(CYCLE_SIZE)
 @GRAPH_FILTER
 def test_the_graph_hash_warns_that_the_values_it_returns_have_changed(length):
     """The equality the case records survives; the values do not. Every call raises the warning
@@ -14652,7 +14652,7 @@ def test_the_directed_hash_separates_two_orientations_of_one_undirected_path(len
     npt.assert_array_equal(nx.weisfeiler_lehman_graph_hash(nx.Graph(forwards)),
                            nx.weisfeiler_lehman_graph_hash(nx.Graph(turned)))
     npt.assert_array_equal(nx.is_isomorphic(forwards, turned),
-                           _igraph_of(forwards, directed=True).isomorphic(_igraph_of(turned, directed=True)))
+                           _igraph_from_networkx(forwards, directed=True).isomorphic(_igraph_from_networkx(turned, directed=True)))
 
 
 @given(XML_NAME, XML_NAME, XML_NAME, XML_VALUE, XML_VALUE, INDENT)
@@ -14931,8 +14931,8 @@ def test_the_flow_graph_says_which_join_is_a_gateway_and_which_is_a_task(branche
 
 # ---------------------------------------------------------------- minting an IRI and asking a typed question
 RDF_TERMS = settings(max_examples=25, deadline=None)
-LOCAL_NAME = st.text(alphabet=st.characters(min_codepoint=97, max_codepoint=122), min_size=1, max_size=6)
-NAMESPACE_BASE = LOCAL_NAME.map(lambda word: f'http://example.org/{word}/')
+RDF_LOCAL_NAME = st.text(alphabet=st.characters(min_codepoint=97, max_codepoint=122), min_size=1, max_size=6)
+NAMESPACE_BASE = RDF_LOCAL_NAME.map(lambda word: f'http://example.org/{word}/')
 STRING_METHODS = st.sampled_from([name for name in dir(str) if not name.startswith('_')])
 COUNTED = st.integers(min_value=-1000, max_value=1000)
 XSD_INTEGER = 'http://www.w3.org/2001/XMLSchema#integer'
@@ -14964,7 +14964,7 @@ def test_a_namespace_attribute_is_the_string_method_wherever_str_has_one(name, b
     npt.assert_array_equal(str(namespace[name]), pyoxigraph.NamedNode(base + name).value)
 
 
-@given(LOCAL_NAME, LOCAL_NAME, NAMESPACE_BASE)
+@given(RDF_LOCAL_NAME, RDF_LOCAL_NAME, NAMESPACE_BASE)
 @RDF_TERMS
 def test_two_serialisers_refuse_an_iri_with_a_space_and_a_third_writes_it(left, right, base):
     """`g.rejects(Exception, lambda: raw.serialize(format='turtle'))` with the comment "an IRI with a
@@ -14984,7 +14984,7 @@ def test_two_serialisers_refuse_an_iri_with_a_space_and_a_third_writes_it(left, 
     npt.assert_array_equal(sorted(str(subject) for subject in reread.subjects()), [spaced])
 
 
-@given(LOCAL_NAME, LOCAL_NAME, NAMESPACE_BASE)
+@given(RDF_LOCAL_NAME, RDF_LOCAL_NAME, NAMESPACE_BASE)
 @RDF_TERMS
 def test_the_file_one_library_writes_and_reads_the_other_will_not_parse(left, right, base):
     """The second implementation is where that document stops. Oxigraph refuses the term at
@@ -15001,7 +15001,7 @@ def test_the_file_one_library_writes_and_reads_the_other_will_not_parse(left, ri
         pyoxigraph.Store().load(written.encode(), format=pyoxigraph.RdfFormat.RDF_XML)
 
 
-@given(LOCAL_NAME, LOCAL_NAME, NAMESPACE_BASE)
+@given(RDF_LOCAL_NAME, RDF_LOCAL_NAME, NAMESPACE_BASE)
 @RDF_TERMS
 def test_the_percent_encoded_iri_round_trips_through_both_implementations(left, right, base):
     """`g.equal('usc5-552-doj%3Au0001%3As00%23e7' in turtle, True)` types one encoded identifier.
@@ -15020,7 +15020,7 @@ def test_the_percent_encoded_iri_round_trips_through_both_implementations(left, 
     npt.assert_array_equal(sorted(quad.subject.value for quad in store), [encoded])
 
 
-@given(COUNTED, LOCAL_NAME, LOCAL_NAME, NAMESPACE_BASE)
+@given(COUNTED, RDF_LOCAL_NAME, RDF_LOCAL_NAME, NAMESPACE_BASE)
 @RDF_TERMS
 def test_two_sparql_engines_agree_that_a_plain_literal_is_not_the_number(number, plain, typed, base):
     """`g.equal([str(r.s) for r in plain.query(...FILTER(?v = 1))], ['http://example.org/facts/p2'])`
@@ -15043,7 +15043,7 @@ def test_two_sparql_engines_agree_that_a_plain_literal_is_not_the_number(number,
         str(number), datatype=pyoxigraph.NamedNode(XSD_INTEGER)), rdflib.Literal(str(number)) == rdflib.Literal(number))
 
 
-@given(COUNTED, LOCAL_NAME, LOCAL_NAME, NAMESPACE_BASE)
+@given(COUNTED, RDF_LOCAL_NAME, RDF_LOCAL_NAME, NAMESPACE_BASE)
 @RDF_TERMS
 def test_query_text_that_is_concatenated_is_parsed_and_a_bound_value_is_not(number, plain, typed, base):
     """`g.rejects(Exception, ...)` for the concatenated query and `g.equal(list(plain.query(
