@@ -173,6 +173,12 @@ import xlsxwriter.exceptions
 from docx2python import docx2python
 from python_calamine import CalamineWorkbook
 
+from gensim.corpora import Dictionary as GensimDictionary
+from gensim.models import TfidfModel as GensimTfidfModel
+from gensim.models.tfidfmodel import df2idf as gensim_df2idf
+from gensim.similarities import MatrixSimilarity as GensimMatrixSimilarity
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 import nltk
 import numpy.testing as npt
 import pandas as pd
@@ -18568,3 +18574,242 @@ def test_apache_poi_publishes_the_hidden_marker_from_the_same_package(records):
     marked = _checklist_document(records, marking='hidden')
     npt.assert_array_equal(_mammoth_block_texts(_mammoth_html(marked)),
                            [row[1] for row in _poi_section_lines(marked, 'PARA')])
+
+
+# --------------------------------------------------------------------------------------------------
+# handoff_guards_v3.py, case 26 (P26): which weighting scheme the candidate ranking is a fact about
+# --------------------------------------------------------------------------------------------------
+CASE_TOKEN_PATTERN = r'[a-z]+'  # the pattern case 26 hands both vectorizers, in place of the default
+TAG_WORD = st.text(alphabet='abcdefghijklmnopqrstuvwxyz', min_size=3, max_size=8)
+TAG_WORDS = st.lists(TAG_WORD, min_size=4, max_size=7, unique=True)
+TAG_DIGITS = st.text(alphabet='0123456789', min_size=2, max_size=4)
+TAGGING = settings(max_examples=40, deadline=None)
+
+
+def _action_documents(words):
+    """The corpus shape case 26 tags against: one action per generated word, each phrased over the
+    same three tokens every one of the case's own ACTIONS shares. The words are generated and unique,
+    so the only thing an action has in common with another is the shared phrase."""
+    return [word + ' the tsc meeting' for word in words]
+
+
+def _tagging_query(word):
+    """The sentence case 26 hands to `tag_candidates`, with the distinguishing word generated."""
+    return 'the tsc discussed the meeting; ' + word
+
+
+def _case_tokens(texts):
+    """sklearn's own published analyzer, built by `TfidfVectorizer.build_analyzer()` under the case's
+    token pattern, does the tokenising for both implementations. Handing gensim the same token lists
+    is what leaves the weighting as the only thing that can differ between them."""
+    analyzer = TfidfVectorizer(token_pattern=CASE_TOKEN_PATTERN).build_analyzer()
+    return [analyzer(text) for text in texts]
+
+
+def _sklearn_similarities(documents, query, fit_query=True, **options):
+    """What `tag_candidates` computes: a `TfidfVectorizer` fitted on the documents and the sentence
+    together, then `cosine_similarity` of each document against the sentence. `fit_query=False` fits
+    on the documents alone, which is the same operation with the sentence left out of the corpus."""
+    vectorizer = TfidfVectorizer(token_pattern=CASE_TOKEN_PATTERN, **options).fit(
+        documents + [query] if fit_query else documents)
+    return cosine_similarity(vectorizer.transform(documents), vectorizer.transform([query])).ravel()
+
+
+def _sklearn_idf(documents, query, **options):
+    """sklearn's fitted inverse document frequencies, term by term. The docstring of
+    `TfidfTransformer` at tag 1.9.0 states the formula: "idf(t) = log [ n / df(t) ] + 1 (if
+    ``smooth_idf=False``)" and, for the default, "idf(t) = log [ (1 + n) / (1 + df(t) ) ] + 1"."""
+    vectorizer = TfidfVectorizer(token_pattern=CASE_TOKEN_PATTERN, **options).fit(documents + [query])
+    return {term: vectorizer.idf_[index] for term, index in vectorizer.vocabulary_.items()}
+
+
+def _gensim_document_frequencies(documents, query):
+    """gensim's own document frequencies for the same corpus, counted by `corpora.Dictionary`, whose
+    `dfs` maps a token id to the number of documents containing it and whose `num_docs` is the size of
+    the corpus it was built from."""
+    dictionary = GensimDictionary(_case_tokens(documents + [query]))
+    return dictionary, {dictionary[index]: frequency for index, frequency in dictionary.dfs.items()}
+
+
+def _gensim_similarities(documents, query):
+    """The same ranking computed by gensim 4.4.0, an implementation whose published requirements at
+    that version are numpy, scipy and smart_open -- scikit-learn appears only under its `docs` extra,
+    so nothing of the library under test is in it. `TfidfModel`'s signature at tag 4.4.0 is
+    `wlocal=utils.identity, wglobal=df2idf, normalize=True`, and `MatrixSimilarity`'s own docstring at
+    that tag is "Compute cosine similarity against a corpus of documents by storing the index matrix
+    in memory"."""
+    tokenised = _case_tokens(documents + [query])
+    dictionary = GensimDictionary(tokenised)
+    corpus = [dictionary.doc2bow(tokens) for tokens in tokenised]
+    model = GensimTfidfModel(corpus)
+    index = GensimMatrixSimilarity(model[corpus[:-1]], num_features=len(dictionary))
+    return np.asarray(index[model[corpus[-1]]], dtype=float)
+
+
+def _sklearn_overlap(documents, query, **options):
+    """The other half of `tag_candidates`: a binary `CountVectorizer`, the elementwise product of each
+    document with the sentence, and the row sums -- a count of the distinct tokens they share."""
+    binary = CountVectorizer(token_pattern=CASE_TOKEN_PATTERN, binary=True, **options).fit(
+        documents + [query])
+    return np.asarray(binary.transform(documents).multiply(binary.transform([query])).sum(axis=1)).ravel()
+
+
+def _duckdb_overlap(documents, query):
+    """The same count in another engine: DuckDB 1.5.5 counting the distinct tokens of each document
+    that appear among the sentence's, over a left join so a document sharing nothing still answers."""
+    tokenised = _case_tokens(documents + [query])
+    connection = duckdb.connect()
+    connection.execute('create table document(number integer, token varchar)')
+    connection.executemany('insert into document values (?, ?)',
+                           [(number, token) for number, tokens in enumerate(tokenised[:-1])
+                            for token in tokens])
+    connection.execute('create table sentence(token varchar)')
+    connection.executemany('insert into sentence values (?)', [(token,) for token in tokenised[-1]])
+    rows = connection.execute(
+        'select every.number, count(distinct document.token) '
+        'from (select unnest(range(?)) as number) every '
+        'left join document on document.number = every.number '
+        'and document.token in (select token from sentence) '
+        'group by every.number order by every.number', [len(documents)]).fetchall()
+    return np.asarray([count for _, count in rows])
+
+
+@given(TAG_WORDS)
+@TAGGING
+def test_the_two_implementations_agree_on_the_idf_formula_the_library_documents(words):
+    """The agreeing region, and it is exact. sklearn 1.9.0 with `smooth_idf=False` computes the
+    formula its own docstring states, "idf(t) = log [ n / df(t) ] + 1", and gensim 4.4.0's published
+    `df2idf(docfreq, totaldocs, log_base, add)`, whose docstring gives it as "idf = add +
+    log_{log_base} totaldocs/docfreq", computes that same formula when its two offsets are set to the
+    ones sklearn's text names. Two libraries, two codebases, one number per term, to floating-point
+    tolerance. So the divergence below is not an accident of implementation."""
+    documents, query = _action_documents(words[:-2]), _tagging_query(words[0])
+    dictionary, frequencies = _gensim_document_frequencies(documents, query)
+    idf = _sklearn_idf(documents, query, smooth_idf=False)
+    terms = sorted(idf)
+    npt.assert_allclose([idf[term] for term in terms],
+                        [gensim_df2idf(frequencies[term], dictionary.num_docs,
+                                       log_base=math.e, add=1.0) for term in terms])
+
+
+@given(TAG_WORDS)
+@TAGGING
+def test_the_default_weighting_of_the_two_implementations_is_not_the_same_scheme(words):
+    """The disagreeing region is the defaults. Left to itself sklearn smooths -- "the constant "1" is
+    added to the numerator and denominator of the idf as if an extra document was seen containing every
+    term in the collection exactly once" -- and adds one to the result, so its default is
+    log[(1 + n)/(1 + df)] + 1. gensim's default is `df2idf` with `log_base=2.0` and `add=0.0`, which is
+    the textbook log2(n/df) and nothing else. The two disagree on every corpus generated here."""
+    documents, query = _action_documents(words[:-2]), _tagging_query(words[0])
+    dictionary, frequencies = _gensim_document_frequencies(documents, query)
+    idf = _sklearn_idf(documents, query)
+    terms = sorted(idf)
+    with pytest.raises(AssertionError):
+        npt.assert_allclose([idf[term] for term in terms],
+                            [gensim_df2idf(frequencies[term], dictionary.num_docs)
+                             for term in terms])
+
+
+@given(TAG_WORDS)
+@TAGGING
+def test_a_token_in_every_document_moves_the_sklearn_ranking_and_not_the_gensim_one(words):
+    """What the added constant does, executed. Give every document and the sentence one more token in
+    common and gensim's similarities do not move at all, because a term in every document has idf
+    log2(1) = 0 there and contributes nothing; sklearn's do move, because the same term has idf
+    log(1) + 1 = 1 there. sklearn's own docstring says so plainly: "The effect of adding "1" to the idf
+    in the equation above is that terms with zero idf, i.e., terms that occur in all documents in a
+    training set, will not be entirely ignored." So the numbers case 26 ranks on are partly a measure
+    of words that separate nothing."""
+    documents, query, filler = _action_documents(words[:-2]), _tagging_query(words[0]), words[-1]
+    shared = [document + ' ' + filler for document in documents]
+    npt.assert_allclose(_gensim_similarities(shared, query + ' ' + filler),
+                        _gensim_similarities(documents, query), atol=1e-6)
+    with pytest.raises(AssertionError):
+        npt.assert_allclose(_sklearn_similarities(shared, query + ' ' + filler),
+                            _sklearn_similarities(documents, query))
+
+
+@given(TAG_WORDS)
+@TAGGING
+def test_the_gap_the_tie_rule_measures_is_a_property_of_the_weighting_scheme(words):
+    """Case 26's verdict is `'tie' if ranked[0][1] - ranked[1][1] < margin`, with the margin fixed at
+    0.05. That difference is not a property of the sentence: sorted and differenced by numpy, the gap
+    between the best and the second-best score is a different number under the two weighting schemes
+    for every corpus generated here. A threshold on it is a threshold on scikit-learn's smoothing
+    choice, and `'tie'` and `'candidate'` are verdicts about that."""
+    documents, query = _action_documents(words[:-2]), _tagging_query(words[0])
+    with pytest.raises(AssertionError):
+        npt.assert_allclose(np.diff(np.sort(_sklearn_similarities(documents, query))[::-1][:2]),
+                            np.diff(np.sort(_gensim_similarities(documents, query))[::-1][:2]))
+
+
+@given(TAG_WORDS)
+@TAGGING
+def test_the_sentence_under_test_is_a_document_of_the_corpus_the_weights_are_fitted_on(words):
+    """`tag_candidates` fits on `docs + [sentence]`, so the sentence being scored is one of the
+    documents whose frequencies decide the weights. Fitting on the actions alone and transforming the
+    sentence afterwards -- the same two library calls, one argument different -- gives different
+    similarities for every corpus generated here. The score an action receives therefore depends on
+    what was asked, and two sentences cannot be compared by the numbers this returns."""
+    documents, query = _action_documents(words[:-2]), _tagging_query(words[0])
+    with pytest.raises(AssertionError):
+        npt.assert_allclose(_sklearn_similarities(documents, query),
+                            _sklearn_similarities(documents, query, fit_query=False))
+
+
+@given(TAG_WORDS)
+@TAGGING
+def test_a_sentence_word_no_action_carries_is_dropped_by_one_fit_and_reweights_the_other(words):
+    """The same choice seen from the other side. A word the actions do not contain is not in a
+    vocabulary fitted on the actions alone, so `transform` drops it silently and the similarities are
+    unchanged -- the sentence can say anything outside the vocabulary and score the same. Under the
+    fit the case actually performs the same word enters the vocabulary, and every similarity moves."""
+    documents, query, outside = _action_documents(words[:-2]), _tagging_query(words[0]), words[-2]
+    npt.assert_allclose(_sklearn_similarities(documents, query + ' ' + outside, fit_query=False),
+                        _sklearn_similarities(documents, query, fit_query=False))
+    with pytest.raises(AssertionError):
+        npt.assert_allclose(_sklearn_similarities(documents, query + ' ' + outside),
+                            _sklearn_similarities(documents, query))
+
+
+@given(TAG_WORDS, TAG_DIGITS)
+@TAGGING
+def test_the_token_pattern_the_case_sets_drops_every_digit_where_the_default_keeps_it(words, digits):
+    """The case replaces sklearn's default `token_pattern` of `(?u)\\b\\w\\w+\\b` with `[a-z]+`.
+    Measured with the library's own `build_analyzer()`, the replacement returns the same token list for
+    a sentence with a number appended as for the sentence without it, while the default returns a
+    longer one; the similarities are correspondingly unchanged. An action or a sentence identified by a
+    number contributes nothing to the ranking, and no message is produced."""
+    documents, query = _action_documents(words[:-2]), _tagging_query(words[0])
+    npt.assert_array_equal(_case_tokens([query + ' ' + digits]), _case_tokens([query]))
+    default = TfidfVectorizer().build_analyzer()
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(default(query + ' ' + digits), default(query))
+    npt.assert_allclose(_sklearn_similarities(documents, query + ' ' + digits),
+                        _sklearn_similarities(documents, query))
+
+
+@given(TAG_WORDS)
+@TAGGING
+def test_the_shared_token_count_the_overlap_ties_on_is_what_a_second_engine_counts(words):
+    """The overlap half of the case, checked against an engine that shares nothing with scikit-learn.
+    DuckDB 1.5.5 counting the distinct tokens of each action that appear among the sentence's returns
+    the same vector as the binary `CountVectorizer` product, so `overlap_winners` is exactly a
+    count of shared distinct tokens and the seven-way tie the case records is not an artefact of how
+    the count is taken."""
+    documents, query = _action_documents(words[:-2]), _tagging_query(words[0])
+    npt.assert_array_equal(_sklearn_overlap(documents, query), _duckdb_overlap(documents, query))
+
+
+@given(TAG_WORDS)
+@TAGGING
+def test_the_stop_word_default_is_what_the_overlap_winners_are_tied_on(words):
+    """And what the tie is made of. `CountVectorizer`'s `stop_words` default at 1.9.0 is None, so the
+    common words of the phrase are counted like any other; asking the library for its own English list
+    instead changes the overlap of every action. The seven-way tie case 26 records is therefore a
+    consequence of a default, not a property of the sentences, and the same actions tie on words
+    chosen to be uninformative."""
+    documents, query = _action_documents(words[:-2]), _tagging_query(words[0])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_sklearn_overlap(documents, query),
+                               _sklearn_overlap(documents, query, stop_words='english'))

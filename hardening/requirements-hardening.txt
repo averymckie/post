@@ -45,6 +45,7 @@ execnet==2.1.2
 fastexcel==0.21.0
 fonttools==4.64.0
 ftfy==6.3.1
+gensim==4.4.0
 ghp-import==2.1.0
 graphviz==0.21
 h11==0.16.0
