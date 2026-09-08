@@ -15343,3 +15343,218 @@ def test_the_filtered_graph_loses_edges_the_unfiltered_graph_carries(rows):
     pdt.assert_frame_equal(_pm4py_edges(completed), _duckdb_edges(completed), check_dtype=False)
     with pytest.raises(AssertionError):
         pdt.assert_frame_equal(_pm4py_edges(completed), _pm4py_edges(rows), check_dtype=False)
+
+
+ACCEPTANCE = settings(max_examples=50, deadline=None)
+CRITERION_OUTCOMES = st.lists(st.one_of(st.booleans(), st.none()), min_size=1, max_size=8)
+DECLARED_STATE_NAME = st.text(alphabet='abcdefg', min_size=1, max_size=5)
+UNDECLARED_STATE_NAME = st.text(alphabet='XYZ', min_size=1, max_size=5)
+
+
+@st.composite
+def _no_failure_and_one_unexecuted(draw):
+    """Criteria of which at least one was not executed and none failed."""
+    before = draw(st.lists(st.sampled_from([True, None]), max_size=4))
+    after = draw(st.lists(st.sampled_from([True, None]), max_size=4))
+    return before + [None] + after
+
+
+@st.composite
+def _one_executed_and_one_unexecuted(draw):
+    """Criteria of which at least one passed and at least one was not executed, and none failed."""
+    rest = draw(st.lists(st.sampled_from([True, None]), max_size=5))
+    return list(draw(st.permutations([True, None] + rest)))
+
+
+@st.composite
+def _a_failure_and_an_unexecuted(draw):
+    """Criteria of which at least one failed and at least one was not executed."""
+    rest = draw(st.lists(st.one_of(st.booleans(), st.none()), max_size=5))
+    return list(draw(st.permutations([False, None] + rest)))
+
+
+@st.composite
+def _declared_states_and_an_intruder(draw):
+    """A generated vocabulary of sign-off states and a state outside it."""
+    return (draw(st.lists(DECLARED_STATE_NAME, min_size=2, max_size=4, unique=True)),
+            draw(UNDECLARED_STATE_NAME))
+
+
+def _nullable_answer(value):
+    """One verdict as a one-element nullable boolean array, so that pandas' NA and polars' None are
+    one value to pandas.testing rather than two objects."""
+    return pd.array([value], dtype='boolean')
+
+
+def _pandas_verdict(outcomes, *, skipna):
+    return pd.Series(pd.array(outcomes, dtype='boolean')).all(skipna=skipna)
+
+
+def _polars_verdict(outcomes, *, ignore_nulls):
+    return pl.Series(outcomes, dtype=pl.Boolean).all(ignore_nulls=ignore_nulls)
+
+
+def _duckdb_verdict(outcomes):
+    with duckdb.connect() as connection:
+        connection.register('criteria', pd.DataFrame({'passed': pd.array(outcomes, dtype='boolean')}))
+        return connection.execute('SELECT bool_and(passed) FROM criteria').fetchone()[0]
+
+
+@given(CRITERION_OUTCOMES)
+@ACCEPTANCE
+def test_the_three_acceptance_states_are_one_nullable_all_in_two_engines(outcomes):
+    """Replaces `g.equal(acceptance_state(passing, signed, cutoff=...), 'accepted')` and the two
+    other state strings of handoff_guards_v20.py case 189. Passed, failed and not executed are True,
+    False and null, and the whole three-state rule the case writes by hand is one published
+    aggregation: pandas 2.2.3 all(skipna=False) over a `boolean` array and polars 1.44.1
+    all(ignore_nulls=False) return the same verdict for every generated list of outcomes. polars
+    documents the rule at 1.44.1 as Kleene logic -- "if the column contains any null values and no
+    `False` values, the output is `None`" -- and pandas' BooleanArray docstring says it "implements
+    Kleene logic (sometimes called three-value logic) for logical operations"."""
+    pdt.assert_extension_array_equal(
+        _nullable_answer(_pandas_verdict(outcomes, skipna=False)),
+        _nullable_answer(_polars_verdict(outcomes, ignore_nulls=False)))
+
+
+@given(_no_failure_and_one_unexecuted())
+@ACCEPTANCE
+def test_the_default_all_reads_an_unexecuted_criterion_as_a_passing_one(outcomes):
+    """The library default is not the case's rule. With a criterion not executed and none failed,
+    pandas' all() and polars' all() both answer what they would answer if the unexecuted rows were
+    simply absent -- pandas documents skipna at v2.2.3 as "Exclude NA/null values when computing the
+    result" and polars documents ignore_nulls=True as "null values are ignored" -- so the accepted
+    verdict is reached by dropping the gap. Only the non-default flag keeps it. Replaces `g.equal(
+    acceptance_state(not_run, signed, cutoff=...) != 'accepted', True)  # a signoff cannot fill the
+    gap`: nothing needs to fill it, because the default already has."""
+    executed = pd.Series(pd.array(outcomes, dtype='boolean')).dropna()
+    pdt.assert_extension_array_equal(_nullable_answer(_pandas_verdict(outcomes, skipna=True)),
+                                     _nullable_answer(executed.all()))
+    pdt.assert_extension_array_equal(_nullable_answer(_polars_verdict(outcomes, ignore_nulls=True)),
+                                     _nullable_answer(executed.all()))
+    with pytest.raises(AssertionError):
+        pdt.assert_extension_array_equal(_nullable_answer(_pandas_verdict(outcomes, skipna=False)),
+                                         _nullable_answer(_pandas_verdict(outcomes, skipna=True)))
+
+
+@given(_one_executed_and_one_unexecuted())
+@ACCEPTANCE
+def test_the_sql_aggregate_skips_the_unexecuted_row_and_offers_no_flag(outcomes):
+    """DuckDB 1.5.5 makes the same choice as the two dataframe defaults and gives no way to change
+    it: bool_and is declared in extension/core_functions/aggregate/distributive/bool.cpp at tag
+    v1.5.5 with `static bool IgnoreNull() { return true; }` and takes no argument for it. Where at
+    least one criterion was executed, its verdict is theirs and not the Kleene one, so a criterion
+    that was never executed leaves the SQL answer indistinguishable from a clean run."""
+    npt.assert_array_equal(_duckdb_verdict(outcomes), _pandas_verdict(outcomes, skipna=True))
+    npt.assert_array_equal(_duckdb_verdict(outcomes), _polars_verdict(outcomes, ignore_nulls=True))
+
+
+@given(st.lists(st.none(), min_size=1, max_size=6))
+@ACCEPTANCE
+def test_with_nothing_executed_the_sql_answer_is_unknown_and_the_dataframes_accept(outcomes):
+    """The disagreeing region, generated rather than filtered. When no criterion was executed at
+    all, the empty conjunction has two conventions and both are library defaults: polars documents
+    its own at 1.44.1 as "If there are no non-null values, the output is `True`" and pandas agrees,
+    while DuckDB's bool_and aggregates over no non-NULL rows and returns NULL. So a checklist on
+    which nothing was run reads as accepted in two engines and as unknown in the third, and the
+    divergence is asserted here rather than normalised away."""
+    pdt.assert_extension_array_equal(_nullable_answer(_pandas_verdict(outcomes, skipna=True)),
+                                     _nullable_answer(_polars_verdict(outcomes, ignore_nulls=True)))
+    pdt.assert_extension_array_equal(_nullable_answer(_pandas_verdict(outcomes, skipna=True)),
+                                     _nullable_answer(True))
+    with pytest.raises(AssertionError):
+        pdt.assert_extension_array_equal(_nullable_answer(_duckdb_verdict(outcomes)),
+                                         _nullable_answer(_pandas_verdict(outcomes, skipna=True)))
+
+
+@given(_a_failure_and_an_unexecuted())
+@ACCEPTANCE
+def test_a_failed_criterion_absorbs_an_unexecuted_one_in_all_three_engines(outcomes):
+    """Replaces `g.equal(acceptance_state(not_run, ...) != acceptance_state(failed, ...), True)
+    # not run is not the same as failed` of handoff_guards_v20.py case 189, and finds the case's
+    precedence reversed. Where a criterion failed and another was not executed, Kleene conjunction
+    absorbs the unknown and all three engines answer False -- the run failed. The case tests
+    `any(c['result'] == 'not_run' ...)` first and returns `'incomplete: a criterion was not
+    executed'` for that same input, so its hand-written order and the published one disagree
+    whenever both a failure and a gap are present."""
+    pdt.assert_extension_array_equal(_nullable_answer(_pandas_verdict(outcomes, skipna=False)),
+                                     _nullable_answer(False))
+    pdt.assert_extension_array_equal(_nullable_answer(_polars_verdict(outcomes, ignore_nulls=False)),
+                                     _nullable_answer(False))
+    npt.assert_array_equal(_duckdb_verdict(outcomes), False)
+
+
+@given(_no_failure_and_one_unexecuted())
+@ACCEPTANCE
+def test_the_builtin_all_reads_an_unexecuted_criterion_as_a_failing_one(outcomes):
+    """The standard library's own default is the opposite of the dataframe one. `all()` is truth
+    testing, and None is falsy, so a criterion that was never executed counts against the run
+    exactly as a failure does -- the same answer as filling the gap with False through pandas'
+    fillna -- while pandas' and polars' all() count it for the run. Two libraries, two silent and
+    opposite readings of one missing result, and the case's own `any(... == 'not_run')` is a third."""
+    npt.assert_array_equal(all(outcomes),
+                           pd.Series(pd.array(outcomes, dtype='boolean')).fillna(False).all())
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(all(outcomes), _pandas_verdict(outcomes, skipna=True))
+
+
+@given(_declared_states_and_an_intruder())
+@ACCEPTANCE
+def test_a_signoff_state_outside_the_declared_set_is_refused_by_two_validators(pair):
+    """Replaces `g.equal(acceptance_state(passing, {'state': 'draft', ...}, ...), 'not accepted: no
+    signed record')` and the withdrawn line of handoff_guards_v20.py case 189. The case decides with
+    `signoff['state'] != 'signed'`, which returns a verdict for every string ever written into that
+    field and refuses none of them, so a state nobody declared and a typo of a declared one are both
+    read as an ordinary unsigned record. A pydantic 2.13.5 model whose field is a Literal of the
+    generated vocabulary and a jsonschema 4.26.0 enum over the same vocabulary each refuse it, and
+    each accept a declared one."""
+    states, intruder = pair
+    declared = pydantic.create_model('Signoff', state=(Literal[tuple(states)], ...), on=(str, ...))
+    schema = {'type': 'object', 'required': ['state', 'on'],
+              'properties': {'state': {'enum': states}, 'on': {'type': 'string'}}}
+    npt.assert_array_equal(declared.model_validate({'state': states[0], 'on': 'x'}).state, states[0])
+    jsonschema.validate({'state': states[0], 'on': 'x'}, schema)
+    with pytest.raises(pydantic.ValidationError):
+        declared.model_validate({'state': intruder, 'on': 'x'})
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.validate({'state': intruder, 'on': 'x'}, schema)
+
+
+@given(_declared_states_and_an_intruder())
+@ACCEPTANCE
+def test_the_two_validators_agree_on_which_states_are_the_signed_one(pair):
+    """The case's `!= 'signed'` is the whole of its signed test. Stated instead as a type and as a
+    schema -- a pydantic Literal of one value and a jsonschema const of that value -- the two
+    libraries accept exactly the same states out of the generated vocabulary, which is what makes
+    the decision readable rather than a comparison buried in a branch."""
+    states, _ = pair
+    accepting = pydantic.create_model('Signed', state=(Literal[states[0]], ...))
+    schema = {'type': 'object', 'properties': {'state': {'const': states[0]}}}
+    npt.assert_array_equal(accepting.model_validate({'state': states[0]}).state, states[0])
+    jsonschema.validate({'state': states[0]}, schema)
+    for state in states[1:]:
+        with pytest.raises(pydantic.ValidationError):
+            accepting.model_validate({'state': state})
+        with pytest.raises(jsonschema.ValidationError):
+            jsonschema.validate({'state': state}, schema)
+
+
+@given(_declared_states_and_an_intruder())
+@ACCEPTANCE
+def test_an_absent_signoff_and_an_incomplete_one_are_refused_by_both_validators(pair):
+    """Replaces `g.equal(acceptance_state(passing, None, cutoff=...), 'not accepted: no signed
+    record')` of handoff_guards_v20.py case 189, which folds the absent record and the unsigned one
+    into one string. Both validators keep them apart from a valid record by refusing: no record at
+    all, and a record whose date field was never written, each raise, so the missing evidence is a
+    refusal rather than a verdict."""
+    states, _ = pair
+    declared = pydantic.create_model('Signoff', state=(Literal[tuple(states)], ...), on=(str, ...))
+    schema = {'type': 'object', 'required': ['state', 'on'],
+              'properties': {'state': {'enum': states}, 'on': {'type': 'string'}}}
+    with pytest.raises(pydantic.ValidationError):
+        declared.model_validate(None)
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.validate(None, schema)
+    with pytest.raises(pydantic.ValidationError):
+        declared.model_validate({'state': states[0]})
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.validate({'state': states[0]}, schema)
