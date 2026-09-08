@@ -23,6 +23,7 @@ import tempfile
 import subprocess
 import unicodedata
 import datetime
+import inspect
 import io
 import zipfile
 import zoneinfo
@@ -10266,3 +10267,205 @@ def test_two_weights_that_cancel_leave_one_stored_zero_until_eliminate_zeros_run
     npt.assert_array_equal(matrix.toarray(), _empty_resource_matrix(float).toarray())
     matrix.eliminate_zeros()
     npt.assert_array_equal(matrix.nnz, _empty_resource_matrix(float).nnz)
+
+
+# --------------------------------------------------------------------------------------------------
+# handoff_guards_v9.py, case formula_caches_must_be_computed_not_defaulted: caches and blank cells
+# --------------------------------------------------------------------------------------------------
+EXCEL_CELL_ORACLE_JAVA = pathlib.Path(__file__).with_name('excel_cell_oracle.java')
+MEASURE_NAME = st.text(alphabet=st.characters(min_codepoint=65, max_codepoint=90), min_size=2, max_size=6)
+MEASURE_VALUE = st.integers(min_value=0, max_value=100000)
+CACHED_TOTAL = st.integers(min_value=-100000, max_value=100000)
+MEASURE_ROWS = st.lists(st.tuples(MEASURE_NAME, MEASURE_VALUE), min_size=2, max_size=5,
+                        unique_by=lambda pair: pair[0])
+MEASURE_ROWS_AND_BLANK = MEASURE_ROWS.flatmap(
+    lambda rows: st.tuples(st.just(rows), st.integers(min_value=1, max_value=len(rows))))
+WRITE_FORMULA_DEFAULT_CACHE = inspect.signature(
+    xlsxwriter.worksheet.Worksheet.write_formula).parameters['value'].default
+
+
+def _measures_workbook(rows, *, cache=None, blank=None, blank_format=False, omit=False):
+    """The case's own writer, XlsxWriter 3.2.9. Its `write_formula` signature at tag RELEASE_3.2.9
+    carries `value=0` with the parameter line "value: An optional value for the formula. Default is
+    0.", and `write_blank` there is "Write a blank cell with formatting to a worksheet cell. The blank
+    token is ignored and the format only is written to the cell." With `omit` the blank row's second
+    cell is not written at all, which is the comparison the next test needs."""
+    buffer = io.BytesIO()
+    book = xlsxwriter.Workbook(buffer, {'in_memory': True})
+    sheet = book.add_worksheet('measures')
+    sheet.write_row(0, 0, ['activity', 'events'])
+    for number, (name, value) in enumerate(rows, start=1):
+        sheet.write(number, 0, name)
+        if number == blank:
+            if not omit:
+                sheet.write_blank(number, 1, None,
+                                  book.add_format({'bold': True}) if blank_format else None)
+        else:
+            sheet.write_number(number, 1, value)
+    formula = '=SUM(B2:B%d)' % (len(rows) + 1)
+    if cache is None:
+        sheet.write_formula(len(rows) + 1, 1, formula)
+    else:
+        sheet.write_formula(len(rows) + 1, 1, formula, None, cache)
+    book.close()
+    return buffer.getvalue()
+
+
+def _openpyxl_column(data, *, cached):
+    """openpyxl 3.1.5 reading the events column, with and without `data_only`."""
+    sheet = openpyxl.load_workbook(io.BytesIO(data), data_only=cached).active
+    return [cell.value for row in sheet.iter_rows(min_col=2, max_col=2) for cell in row]
+
+
+def _calamine_column(data):
+    """The Rust calamine reader on the same column."""
+    sheet = CalamineWorkbook.from_filelike(io.BytesIO(data)).get_sheet_by_index(0)
+    return [row[1] for row in sheet.to_python(skip_empty_area=False)]
+
+
+def _sheet_xml(data):
+    """The sheet part itself, out of the package, as a third witness."""
+    return zipfile.ZipFile(io.BytesIO(data)).read('xl/worksheets/sheet1.xml')
+
+
+def _stored_formula(data):
+    """And the formula as the file records it, read with expat through ElementTree."""
+    tree = ElementTree.fromstring(_sheet_xml(data))
+    return [node.text for node in tree.iter('{http://schemas.openxmlformats.org/spreadsheetml/2006/main}f')]
+
+
+def _poi_column(data, policy):
+    """The same column read by Apache POI 5.4.1 under Java. The shim parses argv, calls the library and
+    prints one line per cell for each of the three values of POI's `Row.MissingCellPolicy`; POI numbers
+    columns from zero where openpyxl numbers them from one, which is the only translation involved."""
+    with tempfile.TemporaryDirectory() as directory:
+        path = pathlib.Path(directory) / 'measures.xlsx'
+        path.write_bytes(data)
+        completed = subprocess.run(
+            ['java', '-Dlog4j2.statusLoggerLevel=OFF', '-cp', str(POI_DIRECTORY / 'jars' / '*'),
+             str(EXCEL_CELL_ORACLE_JAVA), str(path), '1'],
+            capture_output=True, encoding='utf-8', check=True)
+    return [line.split('\t')[1:] for line in completed.stdout.split('\n')[:-1]
+            if line.startswith(policy + '\t')]
+
+
+@pytest.mark.skipif(not poi_available, reason='java and the Apache POI jars are required for this oracle')
+@given(MEASURE_ROWS)
+@JAVA_ORACLE
+def test_the_default_formula_cache_is_the_zero_the_writer_signature_names(rows):
+    """handoff_guards_v9.py's case formula_caches_must_be_computed_not_defaulted types seven
+    expectations about a workbook of measures, the first being that a formula written without a value
+    reads back as 0, "the default cache is a zero nobody computed". The zero is not typed here: it is
+    read off XlsxWriter's own signature, whose `value` parameter defaults to 0 at tag RELEASE_3.2.9,
+    and three readers that share nothing hand it back -- openpyxl 3.1.5 with `data_only`, the Rust
+    calamine reader, and Apache POI 5.4.1 under Java, whose `getNumericCellValue` on a formula cell
+    returns the cached number. So the default is not a gap one reader papers over; every reader of the
+    file believes it, and nothing in the file says the total was never computed."""
+    data = _measures_workbook(rows)
+    npt.assert_array_equal(_openpyxl_column(data, cached=True)[-1], WRITE_FORMULA_DEFAULT_CACHE)
+    npt.assert_array_equal(_calamine_column(data)[-1], WRITE_FORMULA_DEFAULT_CACHE)
+    npt.assert_array_equal(float(_poi_column(data, 'RETURN_NULL_AND_BLANK')[-1][3]),
+                           WRITE_FORMULA_DEFAULT_CACHE)
+
+
+@pytest.mark.skipif(not poi_available, reason='java and the Apache POI jars are required for this oracle')
+@given(MEASURE_ROWS, CACHED_TOTAL)
+@JAVA_ORACLE
+def test_three_readers_return_the_cache_the_writer_chose_and_none_recomputes_it(rows, cache):
+    """And supplying a value does not make the cache a total. The cached number is generated
+    independently of the column the formula sums, and all three readers return that number rather than
+    the sum of the cells above it. So "computed" in the case's own vocabulary means only that the
+    writer passed a value: no reader of the file checks it against the formula, and a workbook whose
+    cache disagrees with its own cells is read back without complaint by every one of them."""
+    data = _measures_workbook(rows, cache=cache)
+    npt.assert_array_equal(_openpyxl_column(data, cached=True)[-1], cache)
+    npt.assert_array_equal(_calamine_column(data)[-1], cache)
+    npt.assert_array_equal(float(_poi_column(data, 'RETURN_NULL_AND_BLANK')[-1][3]), cache)
+
+
+@pytest.mark.skipif(not poi_available, reason='java and the Apache POI jars are required for this oracle')
+@given(MEASURE_ROWS, CACHED_TOTAL)
+@JAVA_ORACLE
+def test_the_equals_sign_the_case_types_is_not_in_the_file(rows, cache):
+    """The case types the formula as `'=SUM(B2:B4)'`. The file does not hold that string. The `f`
+    element read out of the sheet part with expat carries the expression without a leading equals sign,
+    and so does POI, whose `getCellFormula` is documented at tag REL_5_4_1 as returning "a formula for
+    the cell, for example, <code>SUM(C4:E4)</code>". openpyxl is the reader that puts the sign back,
+    and the typed expectation is a property of that reader rather than of the workbook."""
+    data = _measures_workbook(rows, cache=cache)
+    stored = _stored_formula(data)
+    npt.assert_array_equal(stored, [_poi_column(data, 'RETURN_NULL_AND_BLANK')[-1][2]])
+    npt.assert_array_equal(_openpyxl_column(data, cached=False)[-1], '=' + stored[0])
+
+
+@given(MEASURE_ROWS_AND_BLANK, CACHED_TOTAL)
+@SLOW
+def test_write_blank_without_a_format_leaves_the_sheet_exactly_as_if_it_were_never_called(rows_and_blank,
+                                                                                          cache):
+    """What the case's "a missing source cell stays blank, never zero" rests on. XlsxWriter's
+    `_write_blank` at tag RELEASE_3.2.9 opens `# Don't write a blank cell unless it has a format.` and
+    returns 0 when `cell_format is None`, and the sheet part it produces is byte for byte the part
+    produced when the call is left out altogether. So the workbook records no blank cell for that row;
+    it records no cell at all, and the call the chain makes to mark the gap is a call that writes
+    nothing."""
+    rows, blank = rows_and_blank
+    written = _measures_workbook(rows, cache=cache, blank=blank)
+    omitted = _measures_workbook(rows, cache=cache, blank=blank, omit=True)
+    npt.assert_array_equal(_sheet_xml(written), _sheet_xml(omitted))
+
+
+@given(MEASURE_ROWS_AND_BLANK, CACHED_TOTAL)
+@SLOW
+def test_the_two_python_readers_disagree_about_the_cell_that_was_never_written(rows_and_blank, cache):
+    """The case records that disagreement as a finding and types both halves of it, openpyxl's None
+    against calamine's empty string. Executed over generated rows and a generated gap, the two readers
+    return columns that differ, and they differ only there: with no gap in the workbook the same two
+    columns are equal."""
+    rows, blank = rows_and_blank
+    with_gap = _measures_workbook(rows, cache=cache, blank=blank)
+    without_gap = _measures_workbook(rows, cache=cache)
+    npt.assert_array_equal(np.array(_openpyxl_column(without_gap, cached=True), dtype=object),
+                           np.array(_calamine_column(without_gap), dtype=object))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(np.array(_openpyxl_column(with_gap, cached=True), dtype=object),
+                               np.array(_calamine_column(with_gap), dtype=object))
+
+
+@pytest.mark.skipif(not poi_available, reason='java and the Apache POI jars are required for this oracle')
+@given(MEASURE_ROWS_AND_BLANK, CACHED_TOTAL)
+@JAVA_ORACLE
+def test_only_the_third_reader_tells_an_absent_cell_from_a_blank_one(rows_and_blank, cache):
+    """And the question the two Python readers are disagreeing about has a third answer neither of them
+    can give. Writing the same gap with a format produces a workbook that does hold a cell there, and
+    openpyxl and calamine return exactly the same column for both files -- neither can tell the two
+    apart. POI can: its cell types differ between the two, because `Row.MissingCellPolicy` makes the
+    question explicit and its default, documented as "If you ask for a cell that is not defined....you
+    get a null.", is not the only answer it offers."""
+    rows, blank = rows_and_blank
+    absent = _measures_workbook(rows, cache=cache, blank=blank)
+    present = _measures_workbook(rows, cache=cache, blank=blank, blank_format=True)
+    npt.assert_array_equal(np.array(_openpyxl_column(absent, cached=True), dtype=object),
+                           np.array(_openpyxl_column(present, cached=True), dtype=object))
+    npt.assert_array_equal(np.array(_calamine_column(absent), dtype=object),
+                           np.array(_calamine_column(present), dtype=object))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal([cell[1] for cell in _poi_column(absent, 'RETURN_NULL_AND_BLANK')],
+                               [cell[1] for cell in _poi_column(present, 'RETURN_NULL_AND_BLANK')])
+
+
+@pytest.mark.skipif(not poi_available, reason='java and the Apache POI jars are required for this oracle')
+@given(MEASURE_ROWS_AND_BLANK, CACHED_TOTAL)
+@JAVA_ORACLE
+def test_the_third_readers_own_policies_disagree_with_each_other_about_the_same_file(rows_and_blank,
+                                                                                    cache):
+    """Which is the reading the case cannot reach at all, because it has only two readers and they
+    return one answer each. POI returns two different answers for one workbook depending on which of
+    its three documented policies is asked: under the default the missing cell is a null, and under
+    `CREATE_NULL_AS_BLANK` it is a cell of blank type. The question "is that cell blank" has no answer
+    in the file, and a chain that reconciles two readers has settled a disagreement that a third reader
+    keeps open on purpose."""
+    rows, blank = rows_and_blank
+    data = _measures_workbook(rows, cache=cache, blank=blank)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal([cell[1] for cell in _poi_column(data, 'RETURN_NULL_AND_BLANK')],
+                               [cell[1] for cell in _poi_column(data, 'CREATE_NULL_AS_BLANK')])
