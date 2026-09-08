@@ -10469,3 +10469,146 @@ def test_the_third_readers_own_policies_disagree_with_each_other_about_the_same_
     with pytest.raises(AssertionError):
         npt.assert_array_equal([cell[1] for cell in _poi_column(data, 'RETURN_NULL_AND_BLANK')],
                                [cell[1] for cell in _poi_column(data, 'CREATE_NULL_AS_BLANK')])
+
+
+# --------------------------------------------------------------------------------------------------
+# handoff_guards_v9.py, case python_docx_cannot_paginate: what a .docx says about its own pagination
+# --------------------------------------------------------------------------------------------------
+DOCX_PROPERTIES_ORACLE_JAVA = pathlib.Path(__file__).with_name('docx_properties_oracle.java')
+DOCX_TEMPLATE = pathlib.Path(docx.__file__).with_name('templates') / 'default.docx'
+WORDPROCESSING_NS = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'
+EXTENDED_PROPERTIES_NS = 'http://schemas.openxmlformats.org/officeDocument/2006/extended-properties'
+PAGE_BREAK_PATH = ".//{%s}br[@{%s}type='page']" % (WORDPROCESSING_NS, WORDPROCESSING_NS)
+DOCX_LINE = st.text(alphabet=st.characters(min_codepoint=65, max_codepoint=90), min_size=2, max_size=8)
+DOCX_LINES = st.lists(DOCX_LINE, min_size=1, max_size=6)
+DOCX_BREAKS = st.integers(min_value=0, max_value=4)
+
+
+def _paginated_document(lines, breaks):
+    """A document written the way the case writes one. python-docx 1.2.0's `Document()` is documented
+    at tag v1.2.0 as loading "the built-in default document "template"" when called with no argument,
+    and `add_page_break` as returning a "newly |Paragraph| object containing only a page break", which
+    its body confirms: `add_paragraph()` and then a run carrying `WD_BREAK.PAGE`."""
+    document = docx.Document()
+    for line in lines:
+        document.add_paragraph(line)
+    for _ in range(breaks):
+        document.add_page_break()
+    written = io.BytesIO()
+    document.save(written)
+    return written.getvalue()
+
+
+def _stated_property(data, name):
+    """One element of docProps/app.xml, read with expat through ElementTree."""
+    tree = ElementTree.fromstring(zipfile.ZipFile(io.BytesIO(data)).read('docProps/app.xml'))
+    return [node.text for node in tree.iter('{%s}%s' % (EXTENDED_PROPERTIES_NS, name))]
+
+
+def _page_breaks(data, parser):
+    """The explicit page breaks in word/document.xml, counted by whichever XML implementation is
+    handed in -- libxml2 through lxml, or expat through ElementTree."""
+    body = parser.fromstring(zipfile.ZipFile(io.BytesIO(data)).read('word/document.xml'))
+    return len(body.findall(PAGE_BREAK_PATH))
+
+
+def _poi_document_properties(data):
+    """The same document read by Apache POI 5.4.1 under Java. The shim parses argv, calls the library
+    and prints the extended properties POIXMLProperties.ExtendedProperties returns, then the size of
+    the list XWPFDocument.getParagraphs() returns."""
+    with tempfile.TemporaryDirectory() as directory:
+        path = pathlib.Path(directory) / 'document.docx'
+        path.write_bytes(data)
+        completed = subprocess.run(
+            ['java', '-Dlog4j2.statusLoggerLevel=OFF', '-cp', str(POI_DIRECTORY / 'jars' / '*'),
+             str(DOCX_PROPERTIES_ORACLE_JAVA), str(path)],
+            capture_output=True, encoding='utf-8', check=True)
+    return dict(line.split('\t') for line in completed.stdout.split('\n')[:-1])
+
+
+@given(DOCX_LINES, DOCX_BREAKS)
+@SLOW
+def test_the_page_count_the_package_states_is_the_templates_and_never_moves(lines, breaks):
+    """handoff_guards_v9.py's case python_docx_cannot_paginate types six expectations, the first two
+    being that `page_count_available` is False because "python-docx exposes no page count; pagination
+    belongs to a renderer" and that the explicit break is "only the explicit break ... knowable from the
+    file". The first is true of the library and false of the file. Every document python-docx writes is
+    written from the .docx its own api.py names, `os.path.join(_thisdir, "templates", "default.docx")`,
+    and that package states a page count in docProps/app.xml. Over generated paragraphs and a generated
+    number of page breaks the number written out is the template's own, unchanged."""
+    data = _paginated_document(lines, breaks)
+    npt.assert_array_equal(_stated_property(data, 'Pages'),
+                           _stated_property(DOCX_TEMPLATE.read_bytes(), 'Pages'))
+
+
+@pytest.mark.skipif(not poi_available, reason='java and the Apache POI jars are required for this oracle')
+@given(DOCX_LINES, DOCX_BREAKS)
+@JAVA_ORACLE
+def test_a_second_implementation_of_the_format_hands_that_number_back_as_the_page_count(lines, breaks):
+    """And a library that does expose a page count for a .docx returns it. Apache POI 5.4.1's
+    `POIXMLProperties.ExtendedProperties.getPages`, whose body at tag REL_5_4_1 returns the stored
+    value and `-1` only when the element is unset, hands back the template's number for every generated
+    document. So "pagination belongs to a renderer" describes python-docx's API rather than the format:
+    another implementation of the same format answers the question, and its answer came from whoever
+    made the template."""
+    data = _paginated_document(lines, breaks)
+    npt.assert_array_equal(int(_poi_document_properties(data)['PAGES']),
+                           int(_stated_property(DOCX_TEMPLATE.read_bytes(), 'Pages')[0]))
+
+
+@pytest.mark.skipif(not poi_available, reason='java and the Apache POI jars are required for this oracle')
+@given(DOCX_LINES, DOCX_BREAKS)
+@JAVA_ORACLE
+def test_the_word_and_character_counts_the_package_states_are_the_templates_too(lines, breaks):
+    """The page count is not alone. The word count and the character count the package states are the
+    template's as well, whatever text the document carries, and the second implementation returns those
+    too."""
+    data = _paginated_document(lines, breaks)
+    properties = _poi_document_properties(data)
+    template = DOCX_TEMPLATE.read_bytes()
+    npt.assert_array_equal([int(properties['WORDS']), int(properties['CHARACTERS'])],
+                           [int(_stated_property(template, 'Words')[0]),
+                            int(_stated_property(template, 'Characters')[0])])
+
+
+@pytest.mark.skipif(not poi_available, reason='java and the Apache POI jars are required for this oracle')
+@given(DOCX_LINES, DOCX_BREAKS)
+@JAVA_ORACLE
+def test_the_paragraphs_the_second_reader_counts_move_where_the_stated_ones_do_not(lines, breaks):
+    """Which separates the two kinds of number a package carries. Asked to count rather than to report,
+    the same library tracks the content exactly: the paragraphs POI walks are the generated lines plus
+    one for each generated page break, because `add_page_break` puts each break in a paragraph of its
+    own. The paragraph count the package states never moves at all, so the two disagree for every
+    document with anything in it."""
+    data = _paginated_document(lines, breaks)
+    counted = int(_poi_document_properties(data)['COUNTED_PARAGRAPHS'])
+    npt.assert_array_equal(counted, len(lines) + breaks)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(counted, int(_stated_property(data, 'Paragraphs')[0]))
+
+
+@given(DOCX_LINES, DOCX_BREAKS)
+@SLOW
+def test_the_explicit_break_count_is_the_number_that_does_track_the_content(lines, breaks):
+    """The case's other claim holds. The `w:br` elements carrying `w:type="page"` are exactly the breaks
+    the document was given, counted the same way by libxml2 through lxml and by expat through
+    ElementTree, so the one structural signal the case relies on is in the file and is read alike by two
+    XML implementations."""
+    data = _paginated_document(lines, breaks)
+    npt.assert_array_equal([_page_breaks(data, lxml_etree), _page_breaks(data, ElementTree)],
+                           [breaks, breaks])
+
+
+@given(DOCX_LINES, DOCX_BREAKS)
+@SLOW
+def test_every_document_carries_the_templates_part_list_and_its_thumbnail(lines, breaks):
+    """And what else travels with it. The package python-docx writes has the template's part list, part
+    for part, and carries the template's own docProps/thumbnail.jpeg unchanged -- a picture of a
+    document nobody in the chain wrote. A chain that fingerprints the package, as P83's does, is
+    fingerprinting that image along with its own text."""
+    data = _paginated_document(lines, breaks)
+    written = zipfile.ZipFile(io.BytesIO(data))
+    template = zipfile.ZipFile(io.BytesIO(DOCX_TEMPLATE.read_bytes()))
+    npt.assert_array_equal(sorted(written.namelist()), sorted(template.namelist()))
+    npt.assert_array_equal(written.read('docProps/thumbnail.jpeg'),
+                           template.read('docProps/thumbnail.jpeg'))
