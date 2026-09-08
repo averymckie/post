@@ -9230,17 +9230,17 @@ def test_icu_numbers_the_weekday_from_sunday_and_so_matches_the_column_only_then
 def test_icus_weekday_disagrees_with_the_column_for_every_other_declared_start(year, month,
                                                                               first_weekday):
     """And for the other six starts they never coincide, on any day of any generated month, because the
-    whole column is shifted by the distance between Sunday and the declared start. So a grid position
-    read out of one library and a weekday read out of the other are not the same quantity, and the row
-    they agree about is the only part of the position that travels."""
+    whole column is shifted by the distance between Sunday and the declared start: not one day of any
+    generated month is given the same number by both. So a grid position read out of one library and a
+    weekday read out of the other are not the same quantity, and the row they agree about is the only
+    part of the position that travels."""
     cells = _cpython_cells(year, month, first_weekday)
     (icu_length, icu_cells), = _oracle_cells(
         'php', WEEK_GRID_ORACLE_PHP,
         [(year, month, first_weekday, FIRST_WEEK_HOLDS_THE_WHOLE_MONTH)])
     npt.assert_array_equal(icu_length, len(cells))
-    with pytest.raises(AssertionError):
-        npt.assert_array_equal([weekday for row, weekday in icu_cells],
-                               [column for row, column in cells])
+    npt.assert_array_less(0, np.abs(np.array([weekday for row, weekday in icu_cells])
+                                    - np.array([column for row, column in cells])))
 
 
 @st.composite
@@ -9322,8 +9322,10 @@ def test_icu_reads_a_month_before_1582_from_the_julian_calendar_and_java_does_no
     calendar and java.time are both proleptic Gregorian and place every day of these months identically,
     row and column alike. ICU's Gregorian calendar reverts to the Julian calendar before its default
     cutover of 15 October 1582, so for every generated month of the eighty years before that date it
-    reports the same number of days in a different arrangement -- the weekday of the first of the month
-    differs by the ten days the two calendars had drifted apart, and every row moves with it."""
+    reports the same number of days in a different arrangement: the weekday of the first of the month
+    differs by however far the two calendars had drifted apart by then, and every row moves with it. Its
+    own header at release-74-2 states the cutover -- "Default is 00:00:00 local time, October 15, 1582.
+    Previous to this time and date will be Julian dates." """
     months = [(year, month, first_weekday, FIRST_WEEK_HOLDS_THE_WHOLE_MONTH)]
     cells = _cpython_cells(year, month, first_weekday)
     (java_length, java_cells), = _oracle_cells('java', WEEK_GRID_ORACLE_JAVA, months)
@@ -9494,7 +9496,7 @@ def test_the_escape_fts5_needs_for_an_embedded_quote_is_a_syntax_error_to_tantiv
     """The case's sixth expectation types the escape itself, that an embedded quote is doubled rather
     than dropped. Executed against a second engine it is worse than untypeable: the string the chain
     hands FTS5 for a phrase carrying a quote is parsed by FTS5, matches the block, and is a syntax error
-    to tantivy, which escapes an embedded quote with a backslash instead. So `literal_query` does not
+    to tantivy, whose parser does not read a doubled quote as an escape at all. So `literal_query` does not
     make a query literal, it makes it literal to one engine, and the same call that protects a reader
     from FTS5's grammar hands another engine something it will not parse at all."""
     quoted_text = '"'.join(phrase)
@@ -9626,9 +9628,10 @@ def _drawn_ratio(box):
 @RENDER
 def test_two_renderers_measure_the_same_drawing_on_the_handout(width, height, left, top,
                                                               box_width, box_height):
-    """handoff_guards_v12.py's case show_pdf_page_does_not_preserve_aspect makes six typed comparisons
-    about slides placed on a handout, and every one of them is a comparison of numbers the chain
-    computed rather than of anything on the page. Before reading the page, the reading is checked: the
+    """handoff_guards_v12.py's case show_pdf_page_does_not_preserve_aspect makes four typed comparisons
+    and one typed requirement about slides placed on a handout, and the ones about the placement compare
+    numbers the chain computed before the call rather than anything on the page. Before reading the page,
+    the reading is checked itself: the
     bounding box of the ink, measured by MuPDF's raster and by PDFium's through pypdfium2, agrees to
     within one pixel of the generated placement, so nothing that follows is one library's artefact."""
     slide = _inked_slide(width, height)
@@ -9681,11 +9684,11 @@ def test_the_drawn_proportions_do_not_depend_on_the_rectangle_they_were_given(wi
                                                                              box_width, box_height,
                                                                              other_width, other_height):
     """Which settles what the chain's own fitting is worth. Shown in two independently generated
-    rectangles with the argument left alone, one slide is drawn at one ratio, its own, in both; so
-    computing a rectangle that already carries the source ratio and handing that to the same call
-    cannot change the drawing, and the fitted and unfitted branches of the handout put the same picture
-    on the page. What differs between them is the pair of numbers the case rounds and compares, which is
-    read off the rectangle before the call and never off the result."""
+    rectangles with the argument left alone, one slide is drawn at one ratio, its own, in both, so no
+    rectangle handed to that call changes the proportions the slide appears at. A rectangle computed to
+    carry the source ratio therefore cannot change them either, and the fitted and unfitted branches of
+    the handout differ in the pair of numbers the case rounds and compares -- read off the rectangle
+    before the call and never off the result -- and not in the shape of the slide on the page."""
     slide = _inked_slide(width, height)
     box = pymupdf.Rect(left, top, left + box_width, top + box_height)
     other = pymupdf.Rect(left, top, left + other_width, top + other_height)
