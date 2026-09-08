@@ -7582,8 +7582,8 @@ def test_the_number_of_days_in_a_month_agrees_across_three_implementations(ancho
 def test_the_word_for_monthly_is_deprecated_in_one_pandas_api_and_refused_in_the_other(anchor, count):
     """The same letter means monthly in both halves of pandas 2.2.3 and only one of them will still
     take it. `to_offset` in pandas/_libs/tslibs/offsets.pyx at tag v2.2.3 warns for a date range --
-    "'M' is deprecated and will be removed in a future version, please use 'ME' instead." -- and eleven
-    lines further down raises for a period range, "for Period, please use 'M' instead of 'ME'". So a
+    "'M' is deprecated and will be removed in a future version, please use 'ME' instead." -- and in the same
+    branch of the same function, twenty-two lines further down, raises for a period range, "for Period, please use 'M' instead of 'ME'". So a
     schedule written with one spelling warns and a schedule written with the other raises, and no
     single spelling is accepted by both calls. The two calls do agree on the dates: the deprecated
     month-end offset walks exactly the ends of the periods the period range names."""
@@ -7974,10 +7974,11 @@ def test_an_exact_split_of_effort_adds_back_to_the_effort_that_was_declared(hour
 def test_the_same_split_in_floats_stays_close_and_does_not_always_add_back(losing, keeping):
     """The two regions are read off IEEE arithmetic itself at import rather than chosen: every
     (effort, days) pair below sixty days is sorted by whether the float shares add back to the effort.
-    Both are non-empty and the losing one is much the larger, and on both the float total is within
-    numpy's default tolerance of the exact one, so nothing here is visibly wrong. Which side a pair
-    falls on is not a property anyone could state in advance: the day counts that keep the total
-    include seventeen and a hundred and seven as well as the powers of two. Replaces the typed
+    Both are non-empty, the losing one is nearly three times the larger, and on both the float total is
+    within numpy's default tolerance of the exact one, so nothing here is visibly wrong. Which side a
+    pair falls on is not a property of the day count: forty-one of the day counts appear on both sides,
+    so the same schedule split over the same number of days conserves one effort and loses another.
+    Replaces the typed
     `sum([8 / 6] * 6) == 7.999999999999999` and `sum([10 / 3] * 3) == 10.0` of case
     an_empty_day_list_becomes_a_phantom_day."""
     for hours, days in (losing, keeping):
@@ -8003,3 +8004,206 @@ def test_effort_declared_against_no_days_is_a_refusal_in_one_arithmetic_and_an_i
         hours / 0
     with pytest.warns(RuntimeWarning):
         npt.assert_equal(np.float64(hours) / np.float64(0), np.inf)
+
+
+# --------------------------------------------------- a responsibility matrix, and the cells nobody filled
+TASK_NAME = st.text(alphabet='abcdefgh', min_size=1, max_size=6)
+ROLE_NAME = st.text(alphabet='ijklmnop', min_size=1, max_size=6)
+RESPONSIBILITY_CODE = st.text(alphabet='ACIR', min_size=1, max_size=1)
+UNDECLARED_ROLE_NAME = st.text(alphabet='qrstuv', min_size=1, max_size=6)
+
+
+@st.composite
+def _responsibility_cells(draw, minimum_roles=1):
+    """A declared inventory of tasks and roles, and one cell for a drawn subset of the pairs, so the
+    pairs nobody filled in come out of the strategy rather than being authored."""
+    tasks = draw(st.lists(TASK_NAME, min_size=1, max_size=4, unique=True))
+    roles = draw(st.lists(ROLE_NAME, min_size=minimum_roles, max_size=4, unique=True))
+    pairs = draw(st.lists(st.tuples(st.sampled_from(tasks), st.sampled_from(roles)),
+                          min_size=1, max_size=len(tasks) * len(roles), unique=True))
+    codes = draw(st.lists(RESPONSIBILITY_CODE, min_size=len(pairs), max_size=len(pairs)))
+    return tasks, roles, [{'task': task, 'role': role, 'code': code}
+                          for (task, role), code in zip(pairs, codes)]
+
+
+@st.composite
+def _responsibility_cells_with_an_unmentioned_role(draw):
+    """The same inventory with the cells drawn only from the roles other than one, so a declared role
+    the data never names is generated rather than filtered for."""
+    tasks = draw(st.lists(TASK_NAME, min_size=1, max_size=4, unique=True))
+    roles = draw(st.lists(ROLE_NAME, min_size=2, max_size=4, unique=True))
+    absent = draw(st.sampled_from(roles))
+    named = [role for role in roles if role != absent]
+    pairs = draw(st.lists(st.tuples(st.sampled_from(tasks), st.sampled_from(named)),
+                          min_size=1, max_size=len(tasks) * len(named), unique=True))
+    codes = draw(st.lists(RESPONSIBILITY_CODE, min_size=len(pairs), max_size=len(pairs)))
+    return tasks, roles, [{'task': task, 'role': role, 'code': code}
+                          for (task, role), code in zip(pairs, codes)], absent
+
+
+def _pandas_matrix(cells):
+    return pd.DataFrame(cells).pivot(index='task', columns='role', values='code')
+
+
+def _polars_matrix(cells):
+    return pl.DataFrame(cells).pivot(on='role', index='task', values='code')
+
+
+def _duckdb_matrix(cells):
+    frame = pl.DataFrame(cells)
+    with duckdb.connect() as connection:
+        return connection.sql('pivot frame on role using first(code) group by task').pl()
+
+
+def _reindexed(cells, tasks, roles):
+    return _pandas_matrix(cells).reindex(index=tasks, columns=roles)
+
+
+def _filled(wide):
+    """The cells a pandas wide table holds, as a mapping from the pair to the code. Row and column
+    order do not survive this, which is what lets the three engines be compared at all."""
+    return {(task, role): code for task, row in wide.iterrows() for role, code in row.items()
+            if pd.notna(code)}
+
+
+def _filled_frame(wide):
+    """The same reading of a polars wide table, whichever engine produced it."""
+    return {(row['task'], role): row[role] for row in wide.to_dicts()
+            for role in wide.columns if role != 'task' and row[role] is not None}
+
+
+@given(_responsibility_cells())
+@SLOW
+def test_three_engines_pivot_the_same_cells_into_the_same_matrix(inventory):
+    """P146 builds a responsibility matrix with pandas' pivot. Two independent implementations of the
+    same reshaping produce the same cells on generated inputs: polars 1.44.1's pivot and DuckDB 1.5.5's
+    PIVOT statement, which shares nothing with either dataframe library. All three hold exactly the
+    pairs the generated cells named, and each cell holds the code that cell carried. Replaces the typed
+    `matrix.loc['t1', 'ops'] == 'A'` and `matrix.loc['t2', 'ops'] == 'R'` of handoff_guards_v15.py case
+    a_blank_matrix_cell_needs_an_explicit_state."""
+    _, _, cells = inventory
+    declared = {(cell['task'], cell['role']): cell['code'] for cell in cells}
+    npt.assert_equal(_filled(_pandas_matrix(cells)), declared)
+    npt.assert_equal(_filled_frame(_polars_matrix(cells)), declared)
+    npt.assert_equal(_filled_frame(_duckdb_matrix(cells)), declared)
+
+
+@given(st.lists(TASK_NAME, min_size=1, max_size=3, unique=True),
+       st.lists(ROLE_NAME, min_size=2, max_size=4, unique=True),
+       st.lists(RESPONSIBILITY_CODE, min_size=4, max_size=4))
+@SLOW
+def test_the_engines_put_the_columns_of_the_matrix_in_two_different_orders(tasks, roles, codes):
+    """The cells are written with the roles in the reverse of their sorted order, so first appearance
+    and sorted order disagree by construction. pandas and DuckDB both sort the pivoted columns; polars
+    keeps the order the roles first appeared in. A matrix read by position rather than by name is
+    therefore a different matrix in the two libraries, and only naming the columns -- which is what the
+    reindex against the declared roles does -- makes them agree."""
+    ordered = sorted(roles, reverse=True)
+    cells = [{'task': tasks[0], 'role': role, 'code': code}
+             for role, code in zip(ordered, itertools.cycle(codes))]
+    npt.assert_array_equal(list(_pandas_matrix(cells).columns), sorted(roles))
+    npt.assert_array_equal([column for column in _duckdb_matrix(cells).columns if column != 'task'],
+                           sorted(roles))
+    npt.assert_array_equal([column for column in _polars_matrix(cells).columns if column != 'task'],
+                           ordered)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal([column for column in _polars_matrix(cells).columns
+                                if column != 'task'], sorted(roles))
+
+
+@given(_responsibility_cells_with_an_unmentioned_role())
+@SLOW
+def test_a_declared_role_no_cell_names_is_in_no_pivot_and_appears_only_after_the_reindex(inventory):
+    """A pivot carries the roles the data mentions and no others, in all three engines. The role that
+    no cell named is not an empty column anywhere: it is absent, and the matrix cannot be asked about
+    it. It appears only when the wide table is reindexed against the declared inventory, so the blank
+    cell the case records is produced by the declared list and not by the data. Replaces the typed
+    `pd.isna(matrix.loc['t2', 'legal'])` of case a_blank_matrix_cell_needs_an_explicit_state."""
+    tasks, roles, cells, _ = inventory
+    mentioned = sorted({cell['role'] for cell in cells})
+    npt.assert_array_equal(sorted(_pandas_matrix(cells).columns), mentioned)
+    npt.assert_array_equal(sorted(column for column in _polars_matrix(cells).columns
+                                  if column != 'task'), mentioned)
+    npt.assert_array_equal(sorted(column for column in _duckdb_matrix(cells).columns
+                                  if column != 'task'), mentioned)
+    npt.assert_array_equal(list(_reindexed(cells, tasks, roles).columns), roles)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(mentioned, sorted(roles))
+
+
+@given(_responsibility_cells(), st.data())
+@SLOW
+def test_a_task_and_role_named_twice_is_refused_by_two_engines_and_answered_by_the_third(inventory,
+                                                                                        source):
+    """The same pair given two codes. pandas raises ValueError, because reshaping needs the pair to be
+    unique; polars raises ComputeError, saying its aggregation expected one value and got two. DuckDB
+    is asked the same question through an aggregate and answers with one of the two codes, silently,
+    which is the shape of every PIVOT statement: the aggregate is mandatory and choosing it chooses
+    what a duplicate means. Replaces the typed
+    `g.rejects(ValueError, lambda: raci_matrix(duplicate, ...))` of case
+    a_blank_matrix_cell_needs_an_explicit_state."""
+    _, _, cells = inventory
+    repeated = source.draw(st.sampled_from(cells))
+    second = source.draw(RESPONSIBILITY_CODE)
+    duplicated = cells + [dict(repeated, code=second)]
+    with pytest.raises(ValueError):
+        _pandas_matrix(duplicated)
+    with pytest.raises(pl.exceptions.ComputeError):
+        _polars_matrix(duplicated)
+    answered = _filled_frame(_duckdb_matrix(duplicated))
+    npt.assert_array_equal(sorted(answered), sorted(_filled_frame(_duckdb_matrix(cells))))
+    npt.assert_array_equal(
+        sorted({answered[(repeated['task'], repeated['role'])]} | {repeated['code'], second}),
+        sorted({repeated['code'], second}))
+
+
+@given(_responsibility_cells())
+@SLOW
+def test_the_unassigned_cells_are_exactly_the_declared_pairs_no_cell_named(inventory):
+    """After the reindex the matrix has a cell for every declared pair, and the ones holding nothing
+    are exactly the pairs the generated cells did not name, which itertools computes as the difference
+    between the Cartesian product and the pairs. Replaces the typed
+    `sum(v == 'assigned' ...) == 3` and `sum(v == 'unassigned' ...) == 1` of case
+    a_blank_matrix_cell_needs_an_explicit_state."""
+    tasks, roles, cells = inventory
+    reindexed = _reindexed(cells, tasks, roles)
+    blank = sorted((task, role) for task, row in reindexed.iterrows()
+                   for role, code in row.items() if pd.isna(code))
+    npt.assert_array_equal(blank,
+                           sorted(set(itertools.product(tasks, roles))
+                                  - {(cell['task'], cell['role']) for cell in cells}))
+    npt.assert_equal(int(reindexed.notna().sum().sum()), len(cells))
+
+
+@given(_responsibility_cells(), UNDECLARED_ROLE_NAME)
+@SLOW
+def test_how_many_cells_are_unassigned_is_a_property_of_the_declared_inventory(inventory, extra):
+    """The count of blank cells is not in the data. Reindexing the same cells against a longer list of
+    declared roles produces more of them, by exactly the number of tasks, and nothing about the cells
+    changed. A chain that reports how much of a responsibility matrix is unassigned is reporting on the
+    list it was handed as much as on the assignments."""
+    tasks, roles, cells = inventory
+    npt.assert_equal(int(_reindexed(cells, tasks, roles).isna().sum().sum()),
+                     len(tasks) * len(roles) - len(cells))
+    npt.assert_equal(int(_reindexed(cells, tasks, roles + [extra]).isna().sum().sum()),
+                     len(tasks) * (len(roles) + 1) - len(cells))
+    with pytest.raises(AssertionError):
+        npt.assert_equal(int(_reindexed(cells, tasks, roles + [extra]).isna().sum().sum()),
+                         int(_reindexed(cells, tasks, roles).isna().sum().sum()))
+
+
+@given(_responsibility_cells(), st.data())
+@SLOW
+def test_the_matrix_names_the_tasks_that_carry_no_accountable_role(inventory, source):
+    """One of the codes the generated cells used is drawn as the accountable one, and the tasks whose
+    row does not carry it are exactly the tasks no cell gave it to. The matrix can answer that question
+    only because the reindex put every declared task in it: a task with no cell at all is a row of
+    blanks rather than a missing row. Replaces the typed `accountable['t1'] == ['ops']` and
+    `accountable['t2'] == []` of case a_blank_matrix_cell_needs_an_explicit_state."""
+    tasks, roles, cells = inventory
+    accountable = source.draw(st.sampled_from(sorted({cell['code'] for cell in cells})))
+    reindexed = _reindexed(cells, tasks, roles)
+    npt.assert_array_equal(
+        sorted(task for task in tasks if not (reindexed.loc[task] == accountable).any()),
+        sorted(set(tasks) - {cell['task'] for cell in cells if cell['code'] == accountable}))
+    npt.assert_array_equal(sorted(reindexed.index), sorted(tasks))
