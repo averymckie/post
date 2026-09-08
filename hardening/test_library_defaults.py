@@ -19620,3 +19620,229 @@ def test_a_document_with_no_head_is_refused_by_one_parser_and_given_one_by_the_o
     with pytest.raises(AssertionError):
         npt.assert_array_equal(len(lxml_html.fromstring(fragment).xpath('//head')),
                                len(lxml_html.fromstring(page).xpath('//head')))
+
+
+# --------------------------------------------------------------------------------------------------
+# handoff_guards_v14.py, case the_appendix_keeps_the_original_pages_and_bookmarks: what a merge carries
+# --------------------------------------------------------------------------------------------------
+BINDER_AND_APPENDIX = st.lists(BINDER_TITLE, min_size=5, max_size=8, unique=True).map(
+    lambda titles: (titles[:len(titles) // 2], titles[len(titles) // 2:-1], titles[-1]))
+APPENDIX_MERGE = settings(max_examples=25, deadline=None)
+
+
+def _bookmarked(titles):
+    """A document of one page a title, each page bookmarked by the title it carries: the binder the case
+    builds, and the appendix the case appends, built the same way."""
+    document = _sections(titles)
+    document.set_toc(_flat_outline(titles))
+    return document.tobytes()
+
+
+def _inserted(binder, appendix, **options):
+    """The merge under test. `Document.insert_pdf` is documented in docs/document.rst at tag 1.28.2 as
+    "Copy the page range **[from_page, to_page]** (including both) of PDF document *docsrc* into the
+    current one", with `start_at` the "First copied page, will become page number *start_at* in the
+    target. Default -1 appends the page range to the end. If zero, the page range will be inserted
+    before current first page"."""
+    document = pymupdf.open(stream=binder, filetype='pdf')
+    with pymupdf.open(stream=appendix, filetype='pdf') as extra:
+        document.insert_pdf(extra, **options)
+    return document.tobytes()
+
+
+def _pypdf_appended(binder, appendix, **options):
+    """The same merge by pypdf 6.17.0, whose `PdfWriter.append` documents at that tag that
+    "import_outline: You may prevent the source document's outline (collection of outline items,
+    previously referred to as 'bookmarks') from being imported by specifying this as ``False``" -- the
+    default being True, where `_writer.py` runs `_get_filtered_outline` and `_insert_filtered_outline`
+    over the appended document's `/Outlines`. Any option named here is passed to the appendix's append
+    alone, because the binder is the document the other two writers merge into and pypdf's writer starts
+    empty, so the binder reaches the output as an appended document too."""
+    writer = pypdf.PdfWriter()
+    writer.append(io.BytesIO(binder))
+    writer.append(io.BytesIO(appendix), **options)
+    written = io.BytesIO()
+    writer.write(written)
+    return written.getvalue()
+
+
+def _pypdf_appended_refusing_every_outline(binder, appendix):
+    """The same merge with `import_outline=False` given to both appends, which is what the option reads
+    like when a merge is written as a loop over the documents."""
+    writer = pypdf.PdfWriter()
+    writer.append(io.BytesIO(binder), import_outline=False)
+    writer.append(io.BytesIO(appendix), import_outline=False)
+    written = io.BytesIO()
+    writer.write(written)
+    return written.getvalue()
+
+
+def _pdfium_imported(binder, appendix):
+    """And by PDFium, whose `PdfDocument.import_pages` at pypdfium2 tag 5.13.0 documents only "Import
+    pages from a foreign document" and calls `pdfium_c.FPDF_ImportPagesByIndex` with `index` defaulting
+    to `len(self)`, saying nothing about the outline either way."""
+    destination = pypdfium2.PdfDocument(io.BytesIO(binder))
+    destination.import_pages(pypdfium2.PdfDocument(io.BytesIO(appendix)))
+    written = io.BytesIO()
+    destination.save(written)
+    return written.getvalue()
+
+
+def _mupdf_all_words(data):
+    """Every page of a document, read by MuPDF."""
+    document = pymupdf.open(stream=data, filetype='pdf')
+    return [page.get_text().strip() for page in document]
+
+
+def _pypdf_all_words(data):
+    reader = pypdf.PdfReader(io.BytesIO(data))
+    return [page.extract_text().strip() for page in reader.pages]
+
+
+def _pdfium_all_words(data):
+    document = pypdfium2.PdfDocument(io.BytesIO(data))
+    return [page.get_textpage().get_text_bounded().strip() for page in document]
+
+
+@given(BINDER_AND_APPENDIX)
+@APPENDIX_MERGE
+def test_insert_pdf_leaves_every_original_page_word_for_word_in_all_three_readers(parts):
+    """handoff_guards_v14.py's case the_appendix_keeps_the_original_pages_and_bookmarks types the page
+    count of a three-page result and two booleans. Nothing is typed here: the titles are generated, and
+    the half of the claim that holds is that the pages survive. The first pages of the merged document
+    read exactly as the binder's own pages did, in MuPDF through PyMuPDF 1.28.2, in pypdf 6.17.0 and in
+    PDFium through pypdfium2 5.13.0, and each reader is compared with its own reading of the binder
+    before the merge rather than with any typed text."""
+    binder_titles, appendix_titles, _ = parts
+    binder = _bookmarked(binder_titles)
+    merged = _inserted(binder, _bookmarked(appendix_titles))
+    npt.assert_array_equal(_mupdf_all_words(merged)[:len(binder_titles)], _mupdf_all_words(binder))
+    npt.assert_array_equal(_pypdf_all_words(merged)[:len(binder_titles)], _pypdf_all_words(binder))
+    npt.assert_array_equal(_pdfium_all_words(merged)[:len(binder_titles)], _pdfium_all_words(binder))
+
+
+@given(BINDER_AND_APPENDIX)
+@APPENDIX_MERGE
+def test_the_three_writers_append_the_appendix_pages_in_the_same_order(parts):
+    """Three implementations of the merge that share no code -- MuPDF's `insert_pdf`, pypdf's pure-Python
+    `PdfWriter.append`, and PDFium's `FPDF_ImportPagesByIndex` reached through pypdfium2's
+    `import_pages` -- produce the same page sequence from the same two documents, read by MuPDF. The
+    page count is a comparison between two writers' results and never a typed number."""
+    binder_titles, appendix_titles, _ = parts
+    binder, appendix = _bookmarked(binder_titles), _bookmarked(appendix_titles)
+    npt.assert_array_equal(_mupdf_all_words(_inserted(binder, appendix)),
+                           _mupdf_all_words(_pypdf_appended(binder, appendix)))
+    npt.assert_array_equal(_mupdf_all_words(_inserted(binder, appendix)),
+                           _mupdf_all_words(_pdfium_imported(binder, appendix)))
+
+
+@given(BINDER_AND_APPENDIX)
+@APPENDIX_MERGE
+def test_insert_pdf_returns_the_binders_own_outline_and_not_the_appendix_one(parts):
+    """The other half of the case's claim does not hold, and PyMuPDF says so: docs/document.rst at tag
+    1.28.2 notes of `insert_pdf` that "`docsrc` TOC entries **will not be copied**", under a note that
+    "This is a page-based method. Document-level information of source documents is therefore mostly
+    ignored. Examples include Optional Content, Embedded Files, `StructureElem`, table of contents, page
+    labels, metadata, named destinations (and other named entries) and some more." So the merged
+    document's outline is the binder's outline, whatever the appendix declared: each of the three
+    readers returns for the merged document exactly what it returns for the binder alone."""
+    binder_titles, appendix_titles, _ = parts
+    binder = _bookmarked(binder_titles)
+    merged = _inserted(binder, _bookmarked(appendix_titles))
+    npt.assert_array_equal(_mupdf_outline(merged), _mupdf_outline(binder))
+    npt.assert_array_equal(_pypdf_outline(merged), _pypdf_outline(binder))
+    npt.assert_array_equal(_pdfium_outline(merged), _pdfium_outline(binder))
+
+
+@given(BINDER_AND_APPENDIX)
+@APPENDIX_MERGE
+def test_pdfium_import_pages_drops_the_same_outline_that_pypdf_append_carries(parts):
+    """Which of the two things a merge does with the source outline is not settled by the format. PDFium
+    imports pages and leaves the outline as the destination's, exactly as MuPDF does, so the two
+    page-level importers agree. pypdf's document-level `append` imports the appended document's outline
+    by default and rebases its destinations, so the same two documents merge to a longer outline whose
+    first rows are still the binder's. The divergence is asserted, not normalised: the titles of the two
+    merges are not equal."""
+    binder_titles, appendix_titles, _ = parts
+    binder, appendix = _bookmarked(binder_titles), _bookmarked(appendix_titles)
+    by_pdfium, by_pypdf = _pdfium_imported(binder, appendix), _pypdf_appended(binder, appendix)
+    npt.assert_array_equal(_mupdf_outline(by_pdfium), _mupdf_outline(binder))
+    npt.assert_array_equal(_mupdf_outline(by_pypdf)[:len(_mupdf_outline(binder))], _mupdf_outline(binder))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal([row[1] for row in _mupdf_outline(by_pypdf)],
+                               [row[1] for row in _mupdf_outline(by_pdfium)])
+
+
+@given(BINDER_AND_APPENDIX)
+@APPENDIX_MERGE
+def test_pypdf_reproduces_the_other_two_merges_when_only_the_appendix_refuses_its_outline(parts):
+    """pypdf spells as an option what MuPDF and PDFium do unasked and offer no parameter for:
+    `insert_pdf`'s signature at 1.28.2 is `(docsrc, *, from_page, to_page, start_at, rotate, links,
+    annots, widgets, join_duplicates, show_progress, final)` and `import_pages`'s is `(pdf, pages,
+    index)`, neither of which names the outline. Told `import_outline=False` for the appendix alone,
+    pypdf's merged outline is the one both of the others produce."""
+    binder_titles, appendix_titles, _ = parts
+    binder, appendix = _bookmarked(binder_titles), _bookmarked(appendix_titles)
+    npt.assert_array_equal(_mupdf_outline(_pypdf_appended(binder, appendix, import_outline=False)),
+                           _mupdf_outline(_inserted(binder, appendix)))
+    npt.assert_array_equal(_mupdf_outline(_pypdf_appended(binder, appendix, import_outline=False)),
+                           _mupdf_outline(_pdfium_imported(binder, appendix)))
+
+
+@given(BINDER_AND_APPENDIX)
+@APPENDIX_MERGE
+def test_refusing_every_outline_in_pypdf_loses_the_bookmarks_insert_pdf_never_had_to_import(parts):
+    """And where the option is not the same operation. pypdf's writer starts empty and both documents
+    reach it through `append`, so `import_outline=False` given to the merge as a whole refuses the
+    binder's own outline as readily as the appendix's: the result carries the outline of a document that
+    was never bookmarked at all, where `insert_pdf` -- which opens the binder rather than appending it --
+    keeps it. The same three words in the same signature are a source-only option in one library and the
+    whole document's outline in the other."""
+    binder_titles, appendix_titles, _ = parts
+    binder, appendix = _bookmarked(binder_titles), _bookmarked(appendix_titles)
+    refused = _pypdf_appended_refusing_every_outline(binder, appendix)
+    npt.assert_array_equal(_mupdf_outline(refused), _mupdf_outline(_sections(binder_titles).tobytes()))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_mupdf_outline(refused), _mupdf_outline(_inserted(binder, appendix)))
+
+
+@given(BINDER_AND_APPENDIX)
+@APPENDIX_MERGE
+def test_the_rebuilt_outline_reaches_the_first_appendix_page_and_no_other(parts):
+    """What the case's own repair costs. It rebuilds the outline as `original_toc + [[1, title,
+    original_pages + 1]]`, one typed row for the whole appendix, and then reports
+    `original_bookmarks_retained` True -- which is true of the rows it retyped and says nothing about
+    the rows it dropped. Stated as the library's own two answers: the outline of the pypdf merge reaches
+    every page of it, and the outline of the rebuilt document does not reach every page of that one."""
+    binder_titles, appendix_titles, label = parts
+    binder, appendix = _bookmarked(binder_titles), _bookmarked(appendix_titles)
+    merged = pymupdf.open(stream=_inserted(binder, appendix), filetype='pdf')
+    merged.set_toc(_mupdf_outline(binder) + [[1, label, len(binder_titles) + 1]])
+    rebuilt = merged.tobytes()
+    by_pypdf = _pypdf_appended(binder, appendix)
+    npt.assert_array_equal(_mupdf_page_words(by_pypdf, [row[2] for row in _mupdf_outline(by_pypdf)]),
+                           _mupdf_all_words(by_pypdf))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_mupdf_page_words(rebuilt, [row[2] for row in _mupdf_outline(rebuilt)]),
+                               _mupdf_all_words(rebuilt))
+
+
+@given(BINDER_AND_APPENDIX)
+@APPENDIX_MERGE
+def test_inserting_before_the_first_page_moves_the_binder_bookmarks_with_their_pages(parts):
+    """The destination's own outline is maintained by the same call that ignores the source's. Inserted
+    with `start_at=0` -- "the page range will be inserted before current first page" -- every binder
+    bookmark points at a page carrying the words it pointed at before, in all three readers, while the
+    page numbers it carries are no longer the numbers it carried."""
+    binder_titles, appendix_titles, _ = parts
+    binder = _bookmarked(binder_titles)
+    front = _inserted(binder, _bookmarked(appendix_titles), start_at=0)
+    npt.assert_array_equal(_mupdf_page_words(front, [row[2] for row in _mupdf_outline(front)]),
+                           _mupdf_page_words(binder, [row[2] for row in _mupdf_outline(binder)]))
+    npt.assert_array_equal(_pypdf_page_words(front, [page for _, page in _pypdf_outline(front)]),
+                           _pypdf_page_words(binder, [page for _, page in _pypdf_outline(binder)]))
+    npt.assert_array_equal(_pdfium_page_words(front, [page for _, _, page in _pdfium_outline(front)]),
+                           _pdfium_page_words(binder, [page for _, _, page in _pdfium_outline(binder)]))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal([row[2] for row in _mupdf_outline(front)],
+                               [row[2] for row in _mupdf_outline(binder)])
