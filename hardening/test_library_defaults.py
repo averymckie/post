@@ -33,6 +33,9 @@ import inspect
 import io
 import zipfile
 import zoneinfo
+from email import policy as email_policy
+from email.message import EmailMessage
+from email.parser import BytesParser
 from xml.etree import ElementTree
 from typing import Literal
 from xml.sax.saxutils import escape as xml_escape
@@ -17673,3 +17676,241 @@ def test_a_repeated_key_is_collapsed_to_its_last_row_before_either_keyed_diff_be
     with pytest.raises(AssertionError):
         npt.assert_equal(_duckdb_rows_only_in_previous(duplicated, current),
                          _duckdb_rows_only_in_previous(deduplicated, current))
+
+
+# ---------------------------------------------------------------- a draft is a MIME message someone else must read
+MIME_ORACLE_DIRECTORY = pathlib.Path(os.environ.get('MIME_DIR', str(pathlib.Path.home() / 'mime-oracle')))
+MIME_ORACLE_JS = pathlib.Path(__file__).with_name('mime_oracle.js')
+mailparser_available = (shutil.which('node') is not None
+                        and (MIME_ORACLE_DIRECTORY / 'node_modules' / 'mailparser').is_dir())
+DRAFT = settings(max_examples=20, deadline=None)
+MIME_TOKEN = st.text(alphabet='abcdefghijklmnopqrstuvwxyz0123456789', min_size=1, max_size=10)
+MIME_ATTACHMENTS = st.dictionaries(MIME_TOKEN, st.binary(min_size=1, max_size=24), min_size=1, max_size=3)
+MIME_ACCENTED = st.text(alphabet=st.characters(whitelist_categories=('Lu', 'Ll'),
+                                               min_codepoint=0xc0, max_codepoint=0x17f),
+                        min_size=1, max_size=8)
+
+
+def _draft_message(subject, body, attachments, boundary=None, sender=None, recipient=None):
+    """One draft built with CPython's own email.message.EmailMessage: a text body set with
+    set_content, one part per attachment added with add_attachment, and optionally the multipart
+    boundary pinned with Message.set_boundary."""
+    message = EmailMessage()
+    message['Subject'] = subject
+    for header, value in (('From', sender), ('To', recipient)):
+        if value is not None:
+            message[header] = value
+    message.set_content(body)
+    for name, payload in attachments.items():
+        message.add_attachment(payload, maintype='application', subtype='octet-stream', filename=name)
+    if boundary is not None:
+        message.set_boundary(boundary)
+    return message
+
+
+def _draft_bytes(subject, body, attachments, boundary=None, sender=None, recipient=None):
+    return _draft_message(subject, body, attachments, boundary, sender, recipient).as_bytes()
+
+
+def _cpython_attachments(data):
+    """What CPython's parser reports under email.policy.default: every part iter_attachments yields,
+    as its filename and the SHA-256 of the bytes get_payload(decode=True) returns."""
+    message = BytesParser(policy=email_policy.default).parsebytes(data)
+    return sorted(((part.get_filename(), hashlib.sha256(part.get_payload(decode=True)).hexdigest())
+                   for part in message.iter_attachments()), key=str)
+
+
+def _mailparser_reading(data):
+    """The same bytes read by mailparser 3.9.23 under node, whose package.json at tag v3.9.23 calls it
+    "Parse e-mails" and declares he, tlds, libmime, iconv-lite, linkify-it, nodemailer, punycode.js,
+    html-to-text, encoding-japanese and @zone-eu/mailsplit -- all JavaScript, nothing from Python. The
+    shim writes the message out, calls simpleParser and prints one JSON object; every checksum in it is
+    computed by the library itself, asked for as SHA-256 through its documented checksumAlgo option."""
+    with tempfile.TemporaryDirectory() as directory:
+        written = pathlib.Path(directory) / 'draft.eml'
+        written.write_bytes(data)
+        completed = subprocess.run(['node', str(MIME_ORACLE_JS), str(written)],
+                                   capture_output=True, encoding='utf-8', check=True,
+                                   env={**os.environ,
+                                        'NODE_PATH': str(MIME_ORACLE_DIRECTORY / 'node_modules')})
+    return json.loads(completed.stdout)
+
+
+def _mailparser_attachments(data):
+    return sorted(((entry['filename'], entry['checksum'])
+                   for entry in _mailparser_reading(data)['attachments']), key=str)
+
+
+@given(MIME_TOKEN, MIME_TOKEN, MIME_ATTACHMENTS)
+@DRAFT
+def test_two_builds_of_one_draft_differ_because_the_boundary_is_drawn_at_random(subject, body, attachments):
+    """P109 writes a meeting draft and never sends it, and case 109 of handoff_guards_v11 types
+    `g.equal(unfixed_a == unfixed_b, False)` with the comment "the MIME boundary is generated at random
+    for every write". The mechanism is in CPython's own generator: Generator._handle_multipart calls
+    `boundary = msg.get_boundary()` and, `if not boundary`, `self._make_boundary(alltext)`, whose first
+    line is `token = random.randrange(sys.maxsize)`. So two drafts built from one set of values are two
+    different files, and the difference is only the boundary: the parser returns the same attachments,
+    with the same bytes, from both."""
+    first, second = (_draft_bytes(subject, body, attachments) for _ in range(2))
+    with pytest.raises(AssertionError):
+        npt.assert_equal(hashlib.sha256(first).hexdigest(), hashlib.sha256(second).hexdigest())
+    npt.assert_array_equal(_cpython_attachments(first), _cpython_attachments(second))
+
+
+@given(MIME_TOKEN, MIME_TOKEN, MIME_ATTACHMENTS)
+@DRAFT
+def test_flattening_one_draft_twice_is_byte_equal_because_the_boundary_is_written_back(subject, body, attachments):
+    """The irreproducibility is a property of building the message twice and not of writing it twice,
+    which the case's one fixture cannot show. The same generator that draws the boundary also stores it:
+    the line after `_make_boundary` is `msg.set_boundary(boundary)`, so the first flatten mutates the
+    message it is flattening. A second as_bytes() of that object is byte-identical, and the boundary the
+    message now carries is the boundary a parser reads out of the bytes it produced."""
+    message = _draft_message(subject, body, attachments)
+    first = message.as_bytes()
+    npt.assert_equal(hashlib.sha256(first).hexdigest(), hashlib.sha256(message.as_bytes()).hexdigest())
+    npt.assert_equal(message.get_boundary(),
+                     BytesParser(policy=email_policy.default).parsebytes(first).get_boundary())
+
+
+@given(MIME_TOKEN, MIME_TOKEN, MIME_ATTACHMENTS, MIME_TOKEN)
+@DRAFT
+def test_a_pinned_boundary_makes_two_builds_of_one_draft_byte_equal(subject, body, attachments, boundary):
+    """Case 109's repair, executed over generated values: with Message.set_boundary called before the
+    write, two builds of one draft are one file. Nothing else in the message is a clock or a counter,
+    so the boundary is the whole of the difference the previous test measures."""
+    first = _draft_bytes(subject, body, attachments, boundary=boundary)
+    second = _draft_bytes(subject, body, attachments, boundary=boundary)
+    npt.assert_equal(hashlib.sha256(first).hexdigest(), hashlib.sha256(second).hexdigest())
+
+
+@given(MIME_TOKEN, MIME_TOKEN, MIME_ATTACHMENTS, MIME_TOKEN)
+@DRAFT
+def test_the_drawn_boundary_is_kept_out_of_the_body_and_the_pinned_one_is_never_checked(subject, body, attachments, boundary):
+    """What the repair costs, and the case does not record it. `_make_boundary(alltext)` is handed the
+    text of every part precisely so the boundary it draws cannot occur in them; its loop appends a
+    counter `while True` until the candidate is absent from the text. set_boundary performs no such
+    check. A body that contains the pinned delimiter therefore splits the message where the writer did
+    not intend, and CPython's parser returns one more part than the draft has attachments -- a nameless
+    one carrying the rest of the body. The same body under the boundary the generator drew, and under
+    any pinned boundary that does not occur in it, gives the attachments the draft was built from."""
+    colliding = body + '\n--' + boundary + '\n' + body
+    pinned = _draft_bytes(subject, colliding, attachments, boundary=boundary)
+    apart = _draft_bytes(subject, colliding, attachments, boundary=boundary + boundary)
+    drawn = _draft_bytes(subject, colliding, attachments)
+    npt.assert_array_equal(_cpython_attachments(drawn), _cpython_attachments(apart))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_cpython_attachments(pinned), _cpython_attachments(apart))
+
+
+@pytest.mark.skipif(not mailparser_available,
+                    reason='node and the mailparser checkout are required for this oracle')
+@given(MIME_TOKEN, MIME_TOKEN, MIME_ATTACHMENTS, MIME_TOKEN)
+@DRAFT
+def test_the_two_mime_parsers_agree_on_every_attachment_name_and_digest(subject, body, attachments, boundary):
+    """Case 109 checks the attachment bytes against a dictionary of SHA-256 digests it computes from
+    the same values it wrote, which establishes that the round trip is a round trip and nothing about
+    whether the file is a MIME message anyone else can read. mailparser 3.9.23 under node is that other
+    reader, and it is independent of CPython's email package in the way rule 2a asks for. Over generated
+    filenames and generated attachment bytes the two agree on every name and on every digest, each
+    library hashing the bytes it decoded for itself."""
+    data = _draft_bytes(subject, body, attachments, boundary=boundary)
+    npt.assert_array_equal(_cpython_attachments(data), _mailparser_attachments(data))
+
+
+@pytest.mark.skipif(not mailparser_available,
+                    reason='node and the mailparser checkout are required for this oracle')
+@given(MIME_TOKEN, MIME_TOKEN, MIME_ATTACHMENTS, MIME_TOKEN)
+@DRAFT
+def test_the_two_mime_parsers_disagree_about_a_draft_whose_body_holds_its_own_boundary(subject, body, attachments, boundary):
+    """The collision is not merely a structure the writer did not intend: the two readers do not agree
+    on what that structure is. CPython returns the nameless remainder of the body as a further
+    attachment; mailparser returns only the parts that carry a filename, so it reports exactly the
+    attachments the draft was built with and nothing about the split. A chain that pins its boundary for
+    reproducibility and then checks its own attachment digests will see nothing wrong in either reader,
+    for two different reasons. On the same draft with a boundary that does not occur in the body the two
+    agree again."""
+    colliding = body + '\n--' + boundary + '\n' + body
+    pinned = _draft_bytes(subject, colliding, attachments, boundary=boundary)
+    apart = _draft_bytes(subject, colliding, attachments, boundary=boundary + boundary)
+    npt.assert_array_equal(_cpython_attachments(apart), _mailparser_attachments(apart))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_cpython_attachments(pinned), _mailparser_attachments(pinned))
+
+
+@pytest.mark.skipif(not mailparser_available,
+                    reason='node and the mailparser checkout are required for this oracle')
+@given(MIME_TOKEN, MIME_ATTACHMENTS, MIME_TOKEN, MIME_TOKEN)
+@DRAFT
+def test_neither_parser_finds_a_sender_or_a_recipient_in_a_draft(subject, attachments, local, domain):
+    """Case 109's `g.equal((back['sender'], back['recipient']), (None, None))`, generated and read by
+    two implementations. A draft built without the headers has neither, in CPython and in node alike;
+    the same draft built with a generated address has that address in both, spelled the same way, so the
+    absence is a reading of the message and not of the reader. The two do not spell a display name the
+    same way -- mailparser quotes it and CPython does not -- so the addresses compared here are bare."""
+    address = local + '@' + domain + '.example'
+    draft = _draft_bytes(subject, subject, attachments, boundary=subject)
+    addressed = _draft_bytes(subject, subject, attachments, boundary=subject,
+                             sender=address, recipient=address)
+    read_draft, read_addressed = _mailparser_reading(draft), _mailparser_reading(addressed)
+    npt.assert_array_equal([BytesParser(policy=email_policy.default).parsebytes(draft)[header]
+                            for header in ('From', 'To')],
+                           [read_draft['from'], read_draft['to']])
+    npt.assert_array_equal([str(BytesParser(policy=email_policy.default).parsebytes(addressed)[header])
+                            for header in ('From', 'To')],
+                           [read_addressed['from'], read_addressed['to']])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal([read_draft['from'], read_draft['to']],
+                               [read_addressed['from'], read_addressed['to']])
+
+
+@given(MIME_TOKEN, MIME_TOKEN, MIME_ATTACHMENTS, MIME_TOKEN)
+@DRAFT
+def test_the_parser_without_a_policy_returns_a_message_that_cannot_list_its_attachments(subject, body, attachments, boundary):
+    """Case 109's `g.equal(hasattr(legacy, 'iter_attachments'), False)`, executed as the refusal it is.
+    email.parser.BytesParser is declared `BytesParser(_class=None, *, policy=policy.compat32)`, and
+    CPython's own documentation of it carries the warning "**The policy keyword should always be
+    specified**; The default will change to :data:`email.policy.default` in a future version of Python."
+    Under compat32 the parse returns a Message, which has no iter_attachments at all; the same bytes
+    under email.policy.default return a MIMEPart, whose iter_attachments is documented to "Return an
+    iterator over all of the immediate sub-parts of the message that are not candidate "body" parts".
+    The information is in the legacy message too -- walking every part and keeping the ones that carry a
+    filename gives the same payloads -- but that selection is the caller's to write, and it is the same
+    selection only because every part here was added with a filename."""
+    data = _draft_bytes(subject, body, attachments, boundary=boundary)
+    legacy = BytesParser().parsebytes(data)
+    modern = BytesParser(policy=email_policy.default).parsebytes(data)
+    with pytest.raises(AttributeError):
+        legacy.iter_attachments()
+    npt.assert_array_equal(sorted(part.get_payload(decode=True) for part in modern.iter_attachments()),
+                           sorted(part.get_payload(decode=True) for part in legacy.walk()
+                                  if part.get_filename()))
+
+
+@pytest.mark.skipif(not mailparser_available,
+                    reason='node and the mailparser checkout are required for this oracle')
+@given(MIME_ACCENTED, MIME_ACCENTED, st.binary(min_size=1, max_size=16), MIME_TOKEN)
+@DRAFT
+def test_an_encoded_subject_and_an_encoded_filename_come_back_the_same_from_both_parsers(subject, name, payload, boundary):
+    """A draft whose subject and whose attachment name are outside ASCII does not carry them literally:
+    CPython writes the subject as an RFC 2047 encoded word and the filename as an RFC 2231
+    `filename*=utf-8''...` parameter. Both readings are the other library's to make, and over generated
+    accented text the two agree on the subject and on the name."""
+    data = _draft_bytes(subject, subject, {name: payload}, boundary=boundary)
+    reading = _mailparser_reading(data)
+    message = BytesParser(policy=email_policy.default).parsebytes(data)
+    npt.assert_array_equal([str(message['Subject'])] + [part.get_filename() for part in message.iter_attachments()],
+                           [reading['subject']] + [entry['filename'] for entry in reading['attachments']])
+
+
+@pytest.mark.skipif(not mailparser_available,
+                    reason='node and the mailparser checkout are required for this oracle')
+@given(MIME_TOKEN, MIME_ACCENTED, MIME_ATTACHMENTS, MIME_TOKEN)
+@DRAFT
+def test_the_body_text_survives_the_transfer_encoding_in_both_parsers(subject, body, attachments, boundary):
+    """The body of a draft is not stored as it was handed over either: set_content chooses a transfer
+    encoding for it, and accented text crosses as 8bit or as base64 depending on what the policy allows.
+    Both readers decode it to the same string, CPython through get_body().get_content() and mailparser
+    into its text field, including the trailing newline set_content adds."""
+    data = _draft_bytes(subject, body, attachments, boundary=boundary)
+    npt.assert_equal(BytesParser(policy=email_policy.default).parsebytes(data).get_body().get_content(),
+                     _mailparser_reading(data)['text'])
