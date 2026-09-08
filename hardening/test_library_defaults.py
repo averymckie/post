@@ -45,6 +45,7 @@ import duckdb
 import icalendar
 from dateutil import rrule, tz as dateutil_tz
 from dateutil.relativedelta import relativedelta
+from fontTools.ttLib import TTFont
 import numpy as np
 import numpy_financial as npf
 import pyxirr
@@ -72,6 +73,7 @@ import matplotlib
 
 matplotlib.use('Agg')  # the shim-free backend, so the chart tests draw without a display
 import matplotlib.dates as matplotlib_dates
+import matplotlib.font_manager as matplotlib_font_manager
 import matplotlib.pyplot as matplotlib_pyplot
 import networkx as nx
 import openpyxl
@@ -8207,3 +8209,299 @@ def test_the_matrix_names_the_tasks_that_carry_no_accountable_role(inventory, so
         sorted(task for task in tasks if not (reindexed.loc[task] == accountable).any()),
         sorted(set(tasks) - {cell['task'] for cell in cells if cell['code'] == accountable}))
     npt.assert_array_equal(sorted(reindexed.index), sorted(tasks))
+
+
+# ---------------------------------------------------------------- a chart saved twice
+GLYPH_INDEX_ORACLE_JS = pathlib.Path(__file__).with_name('glyph_index_oracle.js')
+OPENTYPE_DIRECTORY = pathlib.Path(os.environ.get('OPENTYPE_DIR', str(pathlib.Path.home() / 'opentype-oracle')))
+opentype_available = (shutil.which('node') is not None
+                      and (OPENTYPE_DIRECTORY / 'node_modules' / 'opentype.js').is_dir())
+SVG_NAMESPACE = '{http://www.w3.org/2000/svg}'
+XLINK_NAMESPACE = '{http://www.w3.org/1999/xlink}'
+DUBLIN_CORE_NAMESPACE = '{http://purl.org/dc/elements/1.1/}'
+CHART_CELL = st.text(alphabet='abcdefghijklmnopqrstuvwxyz0123456789 -', min_size=1, max_size=6)
+CHART_SALT = st.text(alphabet='0123456789abcdef', min_size=1, max_size=8)
+CHART_SERIES = st.lists(st.integers(min_value=-100, max_value=100), min_size=2, max_size=8)
+DEJAVU_SANS = matplotlib_font_manager.findfont(
+    matplotlib_font_manager.FontProperties(family='DejaVu Sans'))
+
+
+def _generated_chart_table():
+    """A table of generated cells: one row of column labels and one to three body rows of that width."""
+    return st.integers(min_value=1, max_value=3).flatmap(
+        lambda width: st.tuples(st.lists(CHART_CELL, min_size=width, max_size=width),
+                                st.lists(st.lists(CHART_CELL, min_size=width, max_size=width),
+                                         min_size=1, max_size=3)))
+
+
+def _table_graphic(columns, rows, image_format, *, salt=None, dated=False, fonttype=None):
+    """One table drawn by matplotlib and saved. Only rcParams and `savefig`'s own `metadata` argument
+    change between calls; nothing here computes a value."""
+    overrides = {}
+    if salt is not None:
+        overrides['svg.hashsalt'] = salt
+    if fonttype is not None:
+        overrides['svg.fonttype'] = fonttype
+    with matplotlib.rc_context(overrides):
+        figure, axes = matplotlib_pyplot.subplots(figsize=(6, 2))
+        axes.axis('off')
+        axes.table(cellText=rows, colLabels=columns, loc='center')
+        buffer = io.BytesIO()
+        figure.savefig(buffer, format=image_format,
+                       metadata=None if dated or image_format != 'svg' else {'Date': None})
+        matplotlib_pyplot.close(figure)
+        return buffer.getvalue()
+
+
+def _plot_graphic(values, *, salt=None):
+    """The same figure with a line drawn inside the axes, which is what puts a clip path in the file."""
+    overrides = {'svg.hashsalt': salt} if salt is not None else {}
+    with matplotlib.rc_context(overrides):
+        figure, axes = matplotlib_pyplot.subplots(figsize=(3, 2))
+        axes.plot(values)
+        buffer = io.BytesIO()
+        figure.savefig(buffer, format='svg', metadata={'Date': None})
+        matplotlib_pyplot.close(figure)
+        return buffer.getvalue()
+
+
+def _svg_text_nodes(data):
+    """The text of every <text> element, read twice: by libxml2 through lxml and by expat through
+    ElementTree. Every test below compares the two readings before it uses either."""
+    return ([node.text for node in lxml_etree.fromstring(data).iter(SVG_NAMESPACE + 'text')],
+            [node.text for node in ElementTree.fromstring(data).iter(SVG_NAMESPACE + 'text')])
+
+
+def _svg_dates(data):
+    """The Dublin Core date the SVG carries, read by the same two parsers."""
+    return ([node.text for node in lxml_etree.fromstring(data).iter(DUBLIN_CORE_NAMESPACE + 'date')],
+            [node.text for node in ElementTree.fromstring(data).iter(DUBLIN_CORE_NAMESPACE + 'date')])
+
+
+def _svg_clip_paths(data):
+    """How many <clipPath> elements the file holds, read by the same two parsers."""
+    return (len(list(lxml_etree.fromstring(data).iter(SVG_NAMESPACE + 'clipPath'))),
+            len(list(ElementTree.fromstring(data).iter(SVG_NAMESPACE + 'clipPath'))))
+
+
+def _glyph_index(reference):
+    """The number matplotlib put in one glyph reference. Splitting a string is all that happens here."""
+    return int(reference.rsplit('-', 1)[1], 16)
+
+
+def _svg_glyph_references(data):
+    """The glyph every <use> element points at, in document order, read by the same two parsers."""
+    return ([_glyph_index(node.get(XLINK_NAMESPACE + 'href'))
+             for node in lxml_etree.fromstring(data).iter(SVG_NAMESPACE + 'use')],
+            [_glyph_index(node.get(XLINK_NAMESPACE + 'href'))
+             for node in ElementTree.fromstring(data).iter(SVG_NAMESPACE + 'use')])
+
+
+@functools.lru_cache(maxsize=1)
+def _dejavu_glyph_indices():
+    """The font matplotlib drew with, read by fontTools instead of by FreeType: the glyph order and the
+    best cmap are that library's own accessors, and the glyph index of a character is its position in
+    the glyph order, which is what `enumerate` over that list says."""
+    font = TTFont(DEJAVU_SANS, lazy=True)
+    positions = {name: index for index, name in enumerate(font.getGlyphOrder())}
+    return {chr(codepoint): positions[name] for codepoint, name in font.getBestCmap().items()
+            if name in positions}
+
+
+def _fonttools_glyph_indices(text):
+    return [_dejavu_glyph_indices()[character] for character in text]
+
+
+def _node_glyph_indices(text):
+    """The same mapping in another runtime. The shim parses argv, calls opentype.js and prints one index
+    per line; the Python side runs subprocess and splits stdout."""
+    completed = subprocess.run(
+        ['node', str(GLYPH_INDEX_ORACLE_JS), DEJAVU_SANS, text.encode('utf-8').hex()],
+        capture_output=True, encoding='utf-8', check=True,
+        env={**os.environ, 'NODE_PATH': str(OPENTYPE_DIRECTORY / 'node_modules')})
+    return [int(line) for line in completed.stdout.split()]
+
+
+@given(_generated_chart_table())
+@SLOW
+def test_the_same_chart_saved_twice_is_two_different_files(table):
+    """P133 saves a table of records as SVG and finds that saving it again gives different bytes. That
+    reproduces on every generated table: matplotlib 3.11.1 writes a Dublin Core date into the file and,
+    with no `SOURCE_DATE_EPOCH` set, takes it from `datetime.datetime.today().isoformat()` in
+    `lib/matplotlib/backends/backend_svg.py` at tag v3.11.1, which carries microseconds. Replaces the
+    typed `g.equal(loose_a == loose_b, False)` of handoff_guards_v14.py case
+    matplotlib_svg_needs_a_fixed_hashsalt."""
+    columns, rows = table
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(
+            hashlib.sha256(_table_graphic(columns, rows, 'svg', dated=True)).hexdigest(),
+            hashlib.sha256(_table_graphic(columns, rows, 'svg', dated=True)).hexdigest())
+
+
+@given(_generated_chart_table())
+@SLOW
+def test_suppressing_the_timestamp_alone_makes_that_chart_reproducible(table):
+    """The proof's remedy is `svg.hashsalt` together with a suppressed date. Only the second half of it
+    does anything here: with `metadata={'Date': None}` and the shipped `svg.hashsalt: None` still in
+    force, the same generated table saves to the same bytes twice. Replaces the typed
+    `g.equal(fixed_a == fixed_b, True)` of case matplotlib_svg_needs_a_fixed_hashsalt, which set both
+    and could not say which one mattered."""
+    columns, rows = table
+    npt.assert_array_equal(hashlib.sha256(_table_graphic(columns, rows, 'svg')).hexdigest(),
+                           hashlib.sha256(_table_graphic(columns, rows, 'svg')).hexdigest())
+
+
+@given(_generated_chart_table(), st.lists(CHART_SALT, min_size=2, max_size=2, unique=True))
+@SLOW
+def test_the_hash_salt_the_proof_fixes_changes_nothing_in_that_chart(table, salts):
+    """Two different salts produce the same file, byte for byte, so the setting the proof relies on is
+    inert for the figure the proof draws. matplotlib's own `matplotlibrc` at tag v3.11.1 documents it as
+    "If not None, use this string as hash salt instead of uuid4", and `_make_id` in `backend_svg.py`
+    is the only reader of it; a table on an axes with `axis('off')` never reaches that call."""
+    columns, rows = table
+    first, second = salts
+    npt.assert_array_equal(hashlib.sha256(_table_graphic(columns, rows, 'svg', salt=first)).hexdigest(),
+                           hashlib.sha256(_table_graphic(columns, rows, 'svg', salt=second)).hexdigest())
+
+
+@given(_generated_chart_table(), CHART_SERIES)
+@SLOW
+def test_the_clip_path_the_salt_names_is_absent_from_a_table_and_present_in_a_plot(table, values):
+    """What the salt names is the identifier of a clip path: the docstring of `_get_clippath_id` in
+    `backend_svg.py` at tag v3.11.1 says it "allows plots that include custom clip paths to produce
+    identical SVG output on each render, provided that the :rc:`svg.hashsalt` config setting and the
+    ``SOURCE_DATE_EPOCH`` build-time environment variable are set to fixed values." The generated table
+    holds fewer clip paths than a figure with a line drawn in its axes, which is why the salt does
+    nothing to it and everything to the other. Both parsers count the same."""
+    columns, rows = table
+    table_counts = _svg_clip_paths(_table_graphic(columns, rows, 'svg'))
+    plot_counts = _svg_clip_paths(_plot_graphic(values))
+    npt.assert_array_equal(table_counts[0], table_counts[1])
+    npt.assert_array_equal(plot_counts[0], plot_counts[1])
+    npt.assert_array_equal(table_counts[0] < plot_counts[0], True)
+
+
+@given(CHART_SERIES, st.lists(CHART_SALT, min_size=2, max_size=2, unique=True))
+@SLOW
+def test_a_chart_with_data_needs_the_salt_and_then_depends_on_which_salt(values, salts):
+    """The same suppressed date that is enough for the table is not enough for a figure that draws
+    inside its axes: the clip path takes a fresh `uuid4` on every render and the two files differ. A
+    fixed salt makes that figure reproducible, and two different salts make it two different files, so
+    the byte identity is a property of the salt a reader happens to configure and not of the chart.
+    Replaces the typed `g.equal(b'<use ' in fixed_a, True)` reading of what the salt was doing."""
+    first, second = salts
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(hashlib.sha256(_plot_graphic(values)).hexdigest(),
+                               hashlib.sha256(_plot_graphic(values)).hexdigest())
+    npt.assert_array_equal(hashlib.sha256(_plot_graphic(values, salt=first)).hexdigest(),
+                           hashlib.sha256(_plot_graphic(values, salt=first)).hexdigest())
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(hashlib.sha256(_plot_graphic(values, salt=first)).hexdigest(),
+                               hashlib.sha256(_plot_graphic(values, salt=second)).hexdigest())
+
+
+@given(_generated_chart_table())
+@SLOW
+def test_the_raster_of_the_same_chart_is_reproducible_with_no_setting_at_all(table):
+    """The PNG of the same generated table saves to the same bytes twice with the date left alone and no
+    salt set, because the raster carries no timestamp and no identifier. Replaces the typed
+    `g.equal(png_a == png_b, True)` of case matplotlib_svg_needs_a_fixed_hashsalt."""
+    columns, rows = table
+    npt.assert_array_equal(
+        hashlib.sha256(_table_graphic(columns, rows, 'png', dated=True)).hexdigest(),
+        hashlib.sha256(_table_graphic(columns, rows, 'png', dated=True)).hexdigest())
+
+
+@given(_generated_chart_table(), st.integers(min_value=0, max_value=2_000_000_000))
+@SLOW
+def test_the_timestamp_comes_from_the_reproducible_builds_variable_when_it_is_set(table, epoch):
+    """`backend_svg.py` at tag v3.11.1 reads `SOURCE_DATE_EPOCH` before it reaches the clock, citing
+    https://reproducible-builds.org/specs/source-date-epoch/ -- the same variable the deterministic
+    package cluster above turns on. With it set the chart is reproducible without touching `savefig`'s
+    metadata, and the instant written into the file is the one pandas resolves that epoch to in UTC,
+    which is a second implementation of the conversion and not matplotlib's line. Both parsers read the
+    same date."""
+    columns, rows = table
+    with mock.patch.dict(os.environ, {'SOURCE_DATE_EPOCH': str(epoch)}):
+        first = _table_graphic(columns, rows, 'svg', dated=True)
+        second = _table_graphic(columns, rows, 'svg', dated=True)
+    npt.assert_array_equal(hashlib.sha256(first).hexdigest(), hashlib.sha256(second).hexdigest())
+    lxml_dates, expat_dates = _svg_dates(first)
+    npt.assert_array_equal(lxml_dates, expat_dates)
+    npt.assert_array_equal(lxml_dates, [pd.Timestamp(epoch, unit='s', tz='UTC').isoformat()])
+
+
+@given(_generated_chart_table())
+@SLOW
+def test_the_shipped_font_default_leaves_no_readable_text_in_the_chart(table):
+    """`matplotlibrc` at tag v3.11.1 ships `#svg.fonttype: path`, documented there as "path: Embed
+    characters as paths". Under it the file both parsers read holds no <text> element at all, so a
+    reader searching the chart for one of its own cells finds nothing, while the same table saved with
+    the font named holds one <text> element per generated cell. Replaces the typed
+    `g.equal(mpl.rcParams['svg.fonttype'], 'path')` and `g.equal(svg_text(fixed_a), [])` of case
+    matplotlib_svg_needs_a_fixed_hashsalt."""
+    columns, rows = table
+    outlined, expat_outlined = _svg_text_nodes(_table_graphic(columns, rows, 'svg'))
+    named, expat_named = _svg_text_nodes(_table_graphic(columns, rows, 'svg', fonttype='none'))
+    npt.assert_array_equal(outlined, expat_outlined)
+    npt.assert_array_equal(named, expat_named)
+    npt.assert_array_equal(len(outlined), 0)
+    npt.assert_array_equal(len(named), len(list(itertools.chain(columns, *rows))))
+
+
+@given(_generated_chart_table())
+@SLOW
+def test_naming_the_font_recovers_every_cell_in_the_order_the_table_draws_them(table):
+    """With `svg.fonttype` set to 'none' -- "Assume fonts are installed on the machine where the SVG
+    will be viewed", in the same `matplotlibrc` -- the text nodes are exactly the generated column
+    labels followed by the generated body cells. That order is matplotlib's own: `Table.draw` in
+    `lib/matplotlib/table.py` at tag v3.11.1 iterates `for key in sorted(self._cells)` and `table()`
+    adds the column labels at row 0 and the body at `row + offset`. Replaces the typed
+    `g.equal(text, ['meeting', 'present', 'tsc-2023-11-08', '6', 'tsc-2023-12-06', '10'])`."""
+    columns, rows = table
+    named, expat_named = _svg_text_nodes(_table_graphic(columns, rows, 'svg', fonttype='none'))
+    npt.assert_array_equal(named, expat_named)
+    npt.assert_array_equal(named, list(itertools.chain(columns, *rows)))
+
+
+@given(_generated_chart_table())
+@SLOW
+def test_naming_the_font_keeps_the_chart_reproducible(table):
+    """Recovering the text costs nothing in reproducibility: with the date suppressed the readable file
+    saves to the same bytes twice as well. Replaces the typed
+    `g.equal(readable == table_graphic(...), True)` of case matplotlib_svg_needs_a_fixed_hashsalt."""
+    columns, rows = table
+    npt.assert_array_equal(
+        hashlib.sha256(_table_graphic(columns, rows, 'svg', fonttype='none')).hexdigest(),
+        hashlib.sha256(_table_graphic(columns, rows, 'svg', fonttype='none')).hexdigest())
+
+
+@given(_generated_chart_table())
+@SLOW
+def test_the_default_file_holds_the_cells_only_as_glyph_indices_of_one_font(table):
+    """What the default file does hold is one <use> element per character of the table, in the drawing
+    order, each pointing at a glyph identifier that `TextToPath._get_glyph_repr` in
+    `lib/matplotlib/textpath.py` at tag v3.11.1 builds as
+    `urllib.parse.quote(f"{font.postscript_name}-{glyph:x}")` from a glyph index FreeType gave it
+    through `matplotlib.ft2font`. fontTools 4.64.0 reads the same DejaVuSans.ttf a second way, in pure
+    Python and without FreeType, and its glyph order and best cmap put every generated character at
+    exactly that index. So the cells are in the file as positions in one font's glyph table, not as
+    text. Replaces the typed `g.equal(b'<use ' in fixed_a, True)` of case
+    matplotlib_svg_needs_a_fixed_hashsalt."""
+    columns, rows = table
+    references, expat_references = _svg_glyph_references(_table_graphic(columns, rows, 'svg'))
+    npt.assert_array_equal(references, expat_references)
+    npt.assert_array_equal(references, _fonttools_glyph_indices(''.join(itertools.chain(columns, *rows))))
+
+
+@pytest.mark.skipif(not opentype_available, reason='node and an opentype.js checkout are required')
+@given(_generated_chart_table())
+@ORACLE_PROCESS
+def test_a_second_runtime_reads_the_same_glyph_indices_out_of_the_font_file(table):
+    """A third implementation of the same mapping, in another runtime: opentype.js 2.0.0 under node
+    v22.22.2 parses DejaVuSans.ttf itself and answers `charToGlyphIndex` for every generated character.
+    It agrees with the indices matplotlib wrote, which is what makes the previous test a property of the
+    font file rather than of fontTools."""
+    columns, rows = table
+    npt.assert_array_equal(_svg_glyph_references(_table_graphic(columns, rows, 'svg'))[0],
+                           _node_glyph_indices(''.join(itertools.chain(columns, *rows))))
