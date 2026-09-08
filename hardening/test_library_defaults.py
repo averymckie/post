@@ -12,6 +12,7 @@ import contextlib
 import csv
 import pathlib
 import shutil
+import tempfile
 import subprocess
 import unicodedata
 import datetime
@@ -27,6 +28,9 @@ from decimal import Decimal, ROUND_HALF_EVEN, ROUND_HALF_UP
 from fractions import Fraction
 
 import arrow
+import beancount_parser_lima as lima
+from beancount import loader as beancount_loader
+from beancount.core import data as beancount_data
 import docx
 import duckdb
 import icalendar
@@ -2019,3 +2023,159 @@ def test_the_two_dimensional_histogram_counts_fewer_pairs_than_it_was_given(edge
     npt.assert_array_equal(counted.sum(), len(kept_x))
     npt.assert_array_equal(counted.sum() < len(xs), True)
     npt.assert_array_equal(_polars_cell_counts(xs, ys, edges)['len'].sum(), len(xs))
+
+
+# ---------------------------------------------------------------- a balance assertion and how it is written
+JOURNAL = """2024-01-01 open Assets:Bank USD
+2024-01-01 open Equity:Opening-Balances USD
+
+2024-01-02 * "opening"
+  Assets:Bank   {posted} USD
+  Equity:Opening-Balances{completion}
+
+2024-01-03 balance Assets:Bank  {asserted} USD
+"""
+CENTS = st.integers(min_value=1, max_value=10_000_000)
+EXTRA_ZEROS = st.integers(min_value=1, max_value=4)
+WHOLE_UNITS = st.integers(min_value=1, max_value=100_000)
+IMBALANCE_UNITS = st.integers(min_value=1, max_value=1000)
+
+
+def _journal(posted, asserted, completion=''):
+    """The generated journal. Only the amounts vary; the surrounding directives are the syntax the format
+    requires, as the column names are in the CSV tests above."""
+    return JOURNAL.format(posted=posted, asserted=asserted, completion=completion)
+
+
+def _load_errors(text):
+    """beancount's own loader, which returns its errors rather than raising them."""
+    return beancount_loader.load_string(text)[1]
+
+
+def _lima_directive(text, attribute):
+    """The same file read by the other implementation. beancount-parser-lima 0.6.0 is Rust; its wheel
+    declares no Python dependencies and its Cargo.toml at tag 0.6.0 lists chumsky, logos, rust_decimal,
+    time and pyo3 and nothing from beancount. It reads a file, so the generated journal is written to a
+    temporary one and the directive is selected by the attribute its own model gives that directive."""
+    with tempfile.TemporaryDirectory() as directory:
+        path = pathlib.Path(directory) / 'generated.beancount'
+        path.write_text(text)
+        parsed = lima.BeancountSources(str(path)).parse()
+        for directive in parsed.directives:
+            if hasattr(directive, attribute):
+                return directive
+
+
+def _lima_balance(text):
+    """The asserted amount as the other parser reads it, and the tolerance it reports for that assertion."""
+    directive = _lima_directive(text, 'atol')
+    return Fraction(directive.atol.amount.number), directive.atol.tolerance
+
+
+def _lima_posting_amounts(text):
+    """The posting amounts the other parser reports, in file order."""
+    return [posting.amount for posting in _lima_directive(text, 'postings').postings]
+
+
+def _lima_parses_cleanly(text):
+    with tempfile.TemporaryDirectory() as directory:
+        path = pathlib.Path(directory) / 'generated.beancount'
+        path.write_text(text)
+        return isinstance(lima.BeancountSources(str(path)).parse(), lima.ParseSuccess)
+
+
+@given(CENTS, EXTRA_ZEROS)
+@SLOW
+def test_two_parsers_read_one_number_from_the_two_spellings_of_a_balance_assertion(cents, zeros):
+    """Trailing zeros change nothing about the value, and both readers say so. Fraction, the exact rational,
+    makes the two spellings one number, and beancount-parser-lima -- which its own README describes as "A
+    zero-copy parser for Beancount in Rust" that "is intended to be a complete implementation of the
+    Beancount file format" -- reads the same number from each and reports no tolerance for either, because
+    the file declares none."""
+    asserted = Decimal(cents).scaleb(-2)
+    short, long = format(asserted, '.2f'), format(asserted, '.%df' % (2 + zeros))
+    npt.assert_array_equal(Fraction(Decimal(short)) == Fraction(Decimal(long)), True)
+    short_value, short_tolerance = _lima_balance(_journal(short, short))
+    long_value, long_tolerance = _lima_balance(_journal(short, long))
+    npt.assert_array_equal(short_value == long_value, True)
+    npt.assert_array_equal([short_tolerance is None, long_tolerance is None], True)
+
+
+@given(CENTS, EXTRA_ZEROS)
+@SLOW
+def test_the_written_precision_and_not_the_value_decides_a_balance_assertion(cents, zeros):
+    """The two spellings are the same number and neither file declares a tolerance, yet the loader accepts
+    one and rejects the other against the same posted balance. beancount's own source at 3.2.3 shows why:
+    get_balance_tolerance in beancount/ops/balance.py takes expo = balance_entry.amount.number.as_tuple()
+    .exponent and, when it is negative, sets tolerance = ONE.scaleb(expo) * options_map
+    ["tolerance_multiplier"] * 2, under the comment "Be generous and always allow twice the multiplier on
+    Balance and Pad because the user creates these and the rounding of those balances may often be further
+    off than those used within a single transaction." So the tolerance is one unit of the last place the
+    author happened to type, and writing an extra zero tightens the check tenfold. Replaces the typed
+    '100.01 USD' and '100.010 USD' expectations of handoff_guards_v16.py case 155."""
+    posted = format(Decimal(cents).scaleb(-2), '.2f')
+    off_by_one_cent = Decimal(cents + 1).scaleb(-2)
+    short = format(off_by_one_cent, '.2f')
+    long = format(off_by_one_cent, '.%df' % (2 + zeros))
+    npt.assert_array_equal(Fraction(Decimal(short)) == Fraction(Decimal(long)), True)
+    npt.assert_array_equal(_lima_balance(_journal(posted, short))[0]
+                           == _lima_balance(_journal(posted, long))[0], True)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(bool(_load_errors(_journal(posted, short))),
+                               bool(_load_errors(_journal(posted, long))))
+    npt.assert_array_equal(bool(_load_errors(_journal(posted, short))), False)
+    npt.assert_array_equal(bool(_load_errors(_journal(posted, long))), True)
+
+
+@given(WHOLE_UNITS)
+@SLOW
+def test_a_balance_written_without_a_decimal_point_is_checked_with_no_tolerance_at_all(units):
+    """The same source has an else branch: when the exponent is not negative the tolerance is ZERO. So the
+    rule runs both ways. With the posted balance one cent above a whole number, asserting that whole number
+    is rejected outright and asserting the identical value written to two places is accepted, which is the
+    opposite verdict from the same number differently spelled. Fraction and the Rust parser both confirm the
+    two assertions are one value."""
+    posted = format(Decimal(units * 100 + 1).scaleb(-2), '.2f')
+    whole, two_places = str(units), format(Decimal(units), '.2f')
+    npt.assert_array_equal(Fraction(Decimal(whole)) == Fraction(Decimal(two_places)), True)
+    npt.assert_array_equal(_lima_balance(_journal(posted, whole))[0]
+                           == _lima_balance(_journal(posted, two_places))[0], True)
+    npt.assert_array_equal(bool(_load_errors(_journal(posted, whole))), True)
+    npt.assert_array_equal(bool(_load_errors(_journal(posted, two_places))), False)
+
+
+@given(CENTS)
+@SLOW
+def test_a_missing_posting_amount_is_supplied_by_the_loader_and_absent_from_the_file(cents):
+    """The completing amount case 155 reports is put there by beancount's booking, not by the file. The Rust
+    parser reads the same journal and reports the second posting with no amount at all, while beancount's
+    loader returns both postings with amounts that sum to zero. A tool that reads the file with any other
+    reader does not see the posting the chain relies on."""
+    posted = format(Decimal(cents).scaleb(-2), '.2f')
+    text = _journal(posted, posted)
+    amounts = _lima_posting_amounts(text)
+    npt.assert_array_equal(amounts[0] is None, False)
+    npt.assert_array_equal(amounts[1] is None, True)
+    postings = [posting
+                for entry in beancount_loader.load_string(text)[0]
+                if isinstance(entry, beancount_data.Transaction)
+                for posting in entry.postings]
+    npt.assert_array_equal(len(postings), len(amounts))
+    npt.assert_array_equal(sum(Fraction(posting.units.number) for posting in postings) == 0, True)
+
+
+@given(CENTS, IMBALANCE_UNITS)
+@SLOW
+def test_an_unbalanced_journal_is_a_returned_error_and_a_clean_parse_to_the_other_reader(cents, imbalance):
+    """Case 155 records that the loader reports rather than raises. Executed, that holds for every generated
+    imbalance: load_string returns errors in a list, nothing is raised, and the offending transaction is
+    still among the entries it hands on. The Rust parser accepts the same file outright, because the file is
+    well formed and only the arithmetic is wrong, so the two readers answer different questions and a chain
+    that swaps one for the other loses the check entirely rather than seeing it fail."""
+    posted = format(Decimal(cents).scaleb(-2), '.2f')
+    completion = '   %s USD' % format(-Decimal(cents + imbalance * 100).scaleb(-2), '.2f')
+    text = _journal(posted, posted, completion=completion)
+    entries, errors = beancount_loader.load_string(text)[:2]
+    npt.assert_array_equal(bool(errors), True)
+    npt.assert_array_equal(any(isinstance(entry, beancount_data.Transaction) for entry in entries), True)
+    npt.assert_array_equal(_lima_parses_cleanly(text), True)
