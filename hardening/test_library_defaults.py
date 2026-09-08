@@ -25,6 +25,7 @@ import sys
 import tempfile
 import subprocess
 import unicodedata
+import uuid
 import warnings
 import datetime
 import inspect
@@ -53,6 +54,7 @@ import duckdb
 from ebooklib import epub as ebooklib_epub
 import fastexcel
 import icalendar
+import icalendar.parser
 from dateutil import rrule, tz as dateutil_tz
 from dateutil.relativedelta import relativedelta
 from fontTools.ttLib import TTFont
@@ -12414,3 +12416,231 @@ def test_every_chapter_body_survives_as_text_in_the_file_the_spine_names(chapter
     for href, chapter in zip(_epub_spine(data)[1:], chapters):
         document = lxml_etree.fromstring(zipfile.ZipFile(io.BytesIO(data)).read(folder + '/' + href))
         npt.assert_array_equal(document.findtext('.//' + XHTML + 'p'), chapter['body'])
+
+
+# --------------------------------------------------------------------------------------------------
+# handoff_guards_v11.py, case calendar_events_are_stable_and_infer_nothing: the meeting in the file
+# --------------------------------------------------------------------------------------------------
+ICAL_DIRECTORY = pathlib.Path(os.environ.get('ICAL_DIR', str(pathlib.Path.home() / 'ical-oracle')))
+ICAL_EVENT_ORACLE_JS = pathlib.Path(__file__).with_name('ical_event_oracle.js')
+UUID_V5_ORACLE_JS = pathlib.Path(__file__).with_name('uuid_v5_oracle.js')
+ical_oracle_available = (shutil.which('node') is not None
+                         and (ICAL_DIRECTORY / 'node_modules' / 'ical.js').is_dir()
+                         and (ICAL_DIRECTORY / 'node_modules' / 'uuid').is_dir())
+MEETING_TITLE = st.text(alphabet=st.characters(min_codepoint=32, max_codepoint=0x24F,
+                                               blacklist_categories=('Cc', 'Cs'),
+                                               blacklist_characters='\\'),
+                        min_size=1, max_size=40)
+LONG_TITLE = st.text(alphabet=st.characters(min_codepoint=97, max_codepoint=122),
+                     min_size=90, max_size=200)
+MEETING_DAY = st.dates(min_value=datetime.date(1970, 1, 1), max_value=datetime.date(2100, 12, 31))
+MEETING_STAMP = st.datetimes(min_value=datetime.datetime(1970, 1, 1),
+                             max_value=datetime.datetime(2100, 1, 1)).map(
+    lambda naive: naive.replace(microsecond=0, tzinfo=datetime.timezone.utc))
+ICS_NAMESPACE = uuid.UUID('00000000-0000-0000-0000-000000000000')
+ICS_ORACLE = settings(max_examples=15, deadline=None)
+
+
+def _meeting_ics(titles, day, stamp):
+    """The calendar the case builds, with its fixture meeting replaced by generated ones: one all-day
+    VEVENT a title, a name-based UID and a caller-supplied DTSTAMP. Only icalendar 7.3.0 writes."""
+    calendar = icalendar.Calendar()
+    calendar.add('prodid', '-//proofs//hardening//EN')
+    calendar.add('version', '2.0')
+    for title in titles:
+        event = icalendar.Event()
+        event.add('summary', title)
+        event.add('dtstart', day)
+        event['uid'] = str(uuid.uuid5(ICS_NAMESPACE, title)) + '@proofs'
+        event.add('dtstamp', stamp)
+        calendar.add_component(event)
+    return calendar.to_ical()
+
+
+def _icalendar_events(data):
+    """What icalendar itself reads back out of the file it wrote."""
+    return [(str(event['uid']), str(event['summary']), event['dtstart'].dt,
+             'LOCATION' in event, 'ATTENDEE' in event, len(event.walk('VALARM')))
+            for event in icalendar.Calendar.from_ical(data).walk('VEVENT')]
+
+
+def _ical_js_events(data):
+    """The same file through ical.js 2.2.1 under node, whose package.json at tag v2.2.1 describes it as
+    a "Javascript parser for ics (rfc5545) and vcard (rfc6350) data" and declares no dependencies at
+    all. The shim parses argv, calls the library and prints; the Python side writes the bytes out and
+    splits stdout, decoding the two text fields from the hex they cross as."""
+    with tempfile.TemporaryDirectory() as directory:
+        written = pathlib.Path(directory) / 'meeting.ics'
+        written.write_bytes(data)
+        completed = subprocess.run(['node', str(ICAL_EVENT_ORACLE_JS), str(written)],
+                                   capture_output=True, encoding='utf-8', check=True,
+                                   env={**os.environ,
+                                        'NODE_PATH': str(ICAL_DIRECTORY / 'node_modules')})
+        return [(bytes.fromhex(row[0]).decode(), bytes.fromhex(row[1]).decode(), row[2] == 'true',
+                 row[3], row[4] == 'true', row[5] == 'true', int(row[6]))
+                for row in (line.split('\t') for line in completed.stdout.split('\n')[:-1])]
+
+
+def _node_uuid5(name):
+    """The same name-based UUID computed by the uuid package 14.0.2 under node, whose package.json at
+    tag v14.0.2 calls it "RFC9562 UUIDs" and declares no dependencies."""
+    completed = subprocess.run(['node', str(UUID_V5_ORACLE_JS), str(ICS_NAMESPACE),
+                                name.encode().hex()],
+                               capture_output=True, encoding='utf-8', check=True,
+                               env={**os.environ, 'NODE_PATH': str(ICAL_DIRECTORY / 'node_modules')})
+    return completed.stdout.strip()
+
+
+def _without_stamp(data):
+    """The same calendar with the one property that carries the writing time removed, through
+    icalendar's own component interface rather than by editing the text."""
+    calendar = icalendar.Calendar.from_ical(data)
+    for event in calendar.walk('VEVENT'):
+        del event['dtstamp']
+    return calendar.to_ical()
+
+
+@pytest.mark.skipif(not ical_oracle_available,
+                    reason='node and the ical.js checkout are required for this oracle')
+@given(st.lists(MEETING_TITLE, min_size=1, max_size=3, unique=True), MEETING_DAY, MEETING_STAMP)
+@ICS_ORACLE
+def test_two_implementations_read_the_same_meeting_out_of_one_calendar(titles, day, stamp):
+    """handoff_guards_v11.py's case calendar_events_are_stable_and_infer_nothing types the event count,
+    the start date, four booleans and the UID of one fixture meeting. Here the titles, the day and the
+    stamp are generated, and the file is read by two implementations that share nothing: icalendar
+    7.3.0 in Python and ical.js 2.2.1 under node. Both return the same UID and the same summary for
+    every event, and both report no location, no attendee and no alarm, so the four Nones the case
+    types are what a second reader of the format also finds. Replaces `g.equal(len(events), 1)` and the
+    tuple `(False, False, False, False)`."""
+    data = _meeting_ics(titles, day, stamp)
+    mine, theirs = _icalendar_events(data), _ical_js_events(data)
+    npt.assert_array_equal([event[0] for event in mine], [event[0] for event in theirs])
+    npt.assert_array_equal([event[1] for event in mine], [event[1] for event in theirs])
+    npt.assert_array_equal([event[3:] for event in mine],
+                           [(event[4], event[5], event[6]) for event in theirs])
+
+
+@pytest.mark.skipif(not ical_oracle_available,
+                    reason='node and the ical.js checkout are required for this oracle')
+@given(MEETING_TITLE, MEETING_DAY, MEETING_STAMP)
+@ICS_ORACLE
+def test_the_all_day_start_is_a_date_and_not_a_time_in_both_implementations(title, day, stamp):
+    """The case's `g.equal(events[0]['dtstart'], '2024-01-17')` and its has_time flag, over a generated
+    day. icalendar returns a `datetime.date` and not a `datetime.datetime`, and ical.js reports the
+    same start as a date rather than a date-time and renders it as the day the strategy produced.
+    Neither reader invents a time of day, and the expected value is the generated date."""
+    data = _meeting_ics([title], day, stamp)
+    start = _icalendar_events(data)[0][2]
+    npt.assert_array_equal(start, day)
+    npt.assert_array_equal(isinstance(start, datetime.datetime), False)
+    npt.assert_array_equal(_ical_js_events(data)[0][2], True)
+    npt.assert_array_equal(_ical_js_events(data)[0][3], day.isoformat())
+
+
+@pytest.mark.skipif(not ical_oracle_available,
+                    reason='node and the uuid checkout are required for this oracle')
+@given(MEETING_TITLE)
+@ICS_ORACLE
+def test_the_meeting_uid_is_the_name_based_uuid_a_second_runtime_computes(title):
+    """The case's typed UID. `uuid.uuid5` is RFC 4122's name-based version 5, and the uuid package
+    under node computes the same UUID from the same namespace and name for every generated title, so
+    the identifier the chain writes into the file is a function of the meeting name and of nothing
+    else. Replaces `g.equal(events[0]['uid'], str(uuid.uuid5(UID_NAMESPACE, 'tsc-2024-01-17')) +
+    '@proofs')`, which compares the value with the call that produced it."""
+    npt.assert_array_equal(str(uuid.uuid5(ICS_NAMESPACE, title)), _node_uuid5(title))
+
+
+@given(MEETING_TITLE, MEETING_TITLE, MEETING_DAY, MEETING_STAMP)
+@ICS_ORACLE
+def test_one_title_gives_one_uid_and_two_titles_give_two(first, second, day, stamp):
+    """What "a stable UID, not a random one" means as a property rather than as a value: the same title
+    written twice gives the same identifier, and two different titles give two, so the file identifies
+    the meeting and not the occasion of writing it."""
+    assume(first != second)
+    npt.assert_array_equal(_icalendar_events(_meeting_ics([first], day, stamp))[0][0],
+                           _icalendar_events(_meeting_ics([first], day, stamp))[0][0])
+    with pytest.raises(AssertionError):
+        npt.assert_equal(_icalendar_events(_meeting_ics([first], day, stamp))[0][0],
+                         _icalendar_events(_meeting_ics([second], day, stamp))[0][0])
+
+
+@given(MEETING_TITLE, MEETING_DAY, MEETING_STAMP, MEETING_STAMP)
+@ICS_ORACLE
+def test_the_stamp_is_the_only_part_of_the_calendar_that_moves(title, day, first, second):
+    """The case's two determinism claims, without waiting on a clock. Two calendars written from one
+    meeting at two different stamps are not the same bytes, and deleting that one property from each --
+    through icalendar's own component interface -- leaves two calendars equal byte for byte. So a
+    pinned stamp is reproducible because the stamp is the whole of the difference, and the clock
+    version differs for the same reason and no other."""
+    assume(first != second)
+    with pytest.raises(AssertionError):
+        npt.assert_equal(_meeting_ics([title], day, first), _meeting_ics([title], day, second))
+    npt.assert_array_equal(_without_stamp(_meeting_ics([title], day, first)),
+                           _without_stamp(_meeting_ics([title], day, second)))
+
+
+@pytest.mark.skipif(not ical_oracle_available,
+                    reason='node and the ical.js checkout are required for this oracle')
+@given(MEETING_TITLE, MEETING_TITLE, MEETING_DAY, MEETING_STAMP)
+@ICS_ORACLE
+def test_a_lone_carriage_return_in_a_title_is_written_as_a_line_break(left, right, day, stamp):
+    """A title is not carried through unchanged. icalendar's `_escape_char` in
+    src/icalendar/parser/string.py at tag v7.3.0 ends with three replacements whose own note says
+    "Steps 5 to 7 normalize `\\r\\n`, `\\n`, or a lone `\\r` to `\\n`. The line-ending normalization is
+    an implementation convenience, not part of :rfc:`5545`, which only defines `\\n` or `\\N` for an
+    intentional line break, and doesn't give an escape form for a lone `\\r`." Executed: three titles
+    that differ only in their line ending produce one identical calendar, both readers return the
+    newline form for all three, and the three summaries in one calendar are one string. The identifier
+    does not follow: the UID is computed from the title before it is escaped, so the file carries three
+    events that no reader can tell apart by their text under three different UIDs."""
+    carriage, pair, newline = left + '\r' + right, left + '\r\n' + right, left + '\n' + right
+    data = _meeting_ics([carriage, pair, newline], day, stamp)
+    npt.assert_array_equal([event[1] for event in _icalendar_events(data)], [newline] * 3)
+    npt.assert_array_equal([event[1] for event in _ical_js_events(data)], [newline] * 3)
+    npt.assert_array_equal(len(set(event[0] for event in _icalendar_events(data))),
+                           len(_icalendar_events(data)))
+    with pytest.raises(AssertionError):
+        npt.assert_equal(_icalendar_events(data)[0][1], carriage)
+
+
+@pytest.mark.skipif(not ical_oracle_available,
+                    reason='node and the ical.js checkout are required for this oracle')
+@given(MEETING_TITLE, MEETING_TITLE, MEETING_DAY, MEETING_STAMP)
+@ICS_ORACLE
+def test_two_visible_characters_in_a_title_become_a_line_break_in_the_file(left, right, day, stamp):
+    """And the first of the same seven replacements does it the other way round. `_escape_char` begins
+    with ``\\N`` -> ``\\n`` (normalize newlines to lowercase), which is applied to the title's own
+    characters before anything is escaped, so a title carrying a backslash and a capital N -- two
+    printable characters a person can type -- is turned into a line break, and both readers return a
+    title with a newline in it where the chain recorded none. Written into one calendar beside the same
+    title with a real newline, the two summaries are one string and the two UIDs are still two."""
+    typed, broken = left + '\\N' + right, left + '\n' + right
+    data = _meeting_ics([typed, broken], day, stamp)
+    npt.assert_array_equal([event[1] for event in _icalendar_events(data)], [broken] * 2)
+    npt.assert_array_equal([event[1] for event in _ical_js_events(data)], [broken] * 2)
+    npt.assert_array_equal(len(set(event[0] for event in _icalendar_events(data))),
+                           len(_icalendar_events(data)))
+    with pytest.raises(AssertionError):
+        npt.assert_equal(_ical_js_events(data)[0][1], typed)
+
+
+@pytest.mark.skipif(not ical_oracle_available,
+                    reason='node and the ical.js checkout are required for this oracle')
+@given(LONG_TITLE, MEETING_TITLE, MEETING_DAY, MEETING_STAMP)
+@ICS_ORACLE
+def test_a_long_title_is_folded_within_the_libraries_own_limit_and_unfolds_in_both(long_title, short,
+                                                                                  day, stamp):
+    """The property a title longer than one line has to satisfy. `_foldline` in the same file quotes
+    RFC 5545 -- "Lines of text SHOULD NOT be longer than 75 octets, excluding the line break" -- and
+    carries that number as its own `limit` default, which is read here from the signature rather than
+    typed. Every physical line of the generated calendar is inside it, a long title takes more physical
+    lines than a short one, and both implementations unfold the title back to the characters it was
+    written from."""
+    limit = inspect.signature(icalendar.parser.foldline).parameters['limit'].default
+    data = _meeting_ics([long_title], day, stamp)
+    npt.assert_array_less([len(line.encode()) for line in data.decode().split('\r\n')], limit + 1)
+    with pytest.raises(AssertionError):
+        npt.assert_equal(len(data.decode().split('\r\n')),
+                         len(_meeting_ics([short], day, stamp).decode().split('\r\n')))
+    npt.assert_array_equal(_icalendar_events(data)[0][1], long_title)
+    npt.assert_array_equal(_ical_js_events(data)[0][1], long_title)
