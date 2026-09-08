@@ -39,7 +39,7 @@ import itertools
 import json
 import math
 import sqlite3
-from urllib.parse import urljoin
+from urllib.parse import urljoin, quote as urllib_quote
 from decimal import Decimal, DivisionByZero, ROUND_CEILING, ROUND_HALF_EVEN, ROUND_HALF_UP, ROUND_UP
 from fractions import Fraction
 
@@ -89,6 +89,8 @@ import z3
 import clingo
 from cvc5 import pythonic as cvc5_pythonic
 import pydantic
+import pyoxigraph
+import pyparsing
 import pyshacl
 import rdflib
 from lxml import etree as lxml_etree
@@ -14925,3 +14927,148 @@ def test_the_flow_graph_says_which_join_is_a_gateway_and_which_is_a_task(branche
                               if flow.degree(name, mode='in') > 1}))
     npt.assert_array_equal(joined[0], ['manualTask'])
     npt.assert_array_equal(joined[1], ['parallelGateway'])
+
+
+# ---------------------------------------------------------------- minting an IRI and asking a typed question
+RDF_TERMS = settings(max_examples=25, deadline=None)
+LOCAL_NAME = st.text(alphabet=st.characters(min_codepoint=97, max_codepoint=122), min_size=1, max_size=6)
+NAMESPACE_BASE = LOCAL_NAME.map(lambda word: f'http://example.org/{word}/')
+STRING_METHODS = st.sampled_from([name for name in dir(str) if not name.startswith('_')])
+COUNTED = st.integers(min_value=-1000, max_value=1000)
+XSD_INTEGER = 'http://www.w3.org/2001/XMLSchema#integer'
+
+
+def _oxigraph_store(graph):
+    """The same triples in Oxigraph 0.5.11, a SPARQL database and RDF toolkit written in Rust whose
+    published metadata for that version declares no Python dependencies at all, handed over as
+    N-Triples so that nothing but the text passes between the two libraries."""
+    store = pyoxigraph.Store()
+    store.load(graph.serialize(format='nt').encode(), format=pyoxigraph.RdfFormat.N_TRIPLES)
+    return store
+
+
+@given(STRING_METHODS, NAMESPACE_BASE)
+@RDF_TERMS
+def test_a_namespace_attribute_is_the_string_method_wherever_str_has_one(name, base):
+    """`g.equal(isinstance(FACTS.count, Node), False)` beside `g.equal(isinstance(FACTS['count'],
+    Node), True)` records one name. It is every name: rdflib 7.6.0 declares `class Namespace(str)`
+    and reaches its `__getattr__`, which is what mints a term, only when ordinary attribute lookup
+    has already failed, so every public method str carries shadows the term of that name. The
+    library says so by patching exactly one of them -- `@property def title` with the comment
+    "Override for DCTERMS.title to return a URIRef instead of str.title method" -- and the test asks
+    the class itself which names those are rather than naming any. The subscript always mints, and
+    the term it mints is the term Oxigraph builds from the same text."""
+    namespace = rdflib.Namespace(base)
+    patched = [attribute for attribute, value in vars(rdflib.Namespace).items() if isinstance(value, property)]
+    npt.assert_array_equal(isinstance(getattr(namespace, name), rdflib.term.Node), name in patched)
+    npt.assert_array_equal(str(namespace[name]), pyoxigraph.NamedNode(base + name).value)
+
+
+@given(LOCAL_NAME, LOCAL_NAME, NAMESPACE_BASE)
+@RDF_TERMS
+def test_two_serialisers_refuse_an_iri_with_a_space_and_a_third_writes_it(left, right, base):
+    """`g.rejects(Exception, lambda: raw.serialize(format='turtle'))` with the comment "an IRI with a
+    space cannot be serialized". It can. The graph accepts the term, Turtle and N-Triples refuse it
+    with rdflib's own message, and RDF/XML writes it out -- and rdflib reads its own file back with
+    the space still in the subject, so the round trip the chain would check succeeds on a document
+    that is not readable RDF."""
+    spaced = base + left + ' ' + right
+    graph = rdflib.Graph()
+    graph.add((rdflib.URIRef(spaced), rdflib.URIRef(base + 'lemma'), rdflib.Literal(left)))
+    for form in ('turtle', 'nt'):
+        with pytest.raises(Exception, match='does not look like a valid URI'):
+            graph.serialize(format=form)
+    written = graph.serialize(format='xml')
+    reread = rdflib.Graph()
+    reread.parse(data=written, format='xml')
+    npt.assert_array_equal(sorted(str(subject) for subject in reread.subjects()), [spaced])
+
+
+@given(LOCAL_NAME, LOCAL_NAME, NAMESPACE_BASE)
+@RDF_TERMS
+def test_the_file_one_library_writes_and_reads_the_other_will_not_parse(left, right, base):
+    """The second implementation is where that document stops. Oxigraph refuses the term at
+    construction, before any serialisation is in question, and refuses the RDF/XML file rdflib wrote
+    and read, so the two libraries reject the same IRI at different moments and only one of them
+    ever produces a file."""
+    spaced = base + left + ' ' + right
+    graph = rdflib.Graph()
+    graph.add((rdflib.URIRef(spaced), rdflib.URIRef(base + 'lemma'), rdflib.Literal(left)))
+    written = graph.serialize(format='xml')
+    with pytest.raises(ValueError):
+        pyoxigraph.NamedNode(spaced)
+    with pytest.raises(SyntaxError):
+        pyoxigraph.Store().load(written.encode(), format=pyoxigraph.RdfFormat.RDF_XML)
+
+
+@given(LOCAL_NAME, LOCAL_NAME, NAMESPACE_BASE)
+@RDF_TERMS
+def test_the_percent_encoded_iri_round_trips_through_both_implementations(left, right, base):
+    """`g.equal('usc5-552-doj%3Au0001%3As00%23e7' in turtle, True)` types one encoded identifier.
+    Over generated names, percent-encoding the offending characters with the standard library's own
+    quote makes a term Turtle writes, rdflib reads back, and Oxigraph reads to the same subject, so
+    the encoding and not the serialiser is what carries the identifier across."""
+    encoded = base + urllib_quote(left + ' ' + right, safe='')
+    graph = rdflib.Graph()
+    graph.add((rdflib.URIRef(encoded), rdflib.URIRef(base + 'lemma'), rdflib.Literal(left)))
+    turtle = graph.serialize(format='turtle')
+    reread = rdflib.Graph()
+    reread.parse(data=turtle, format='turtle')
+    store = pyoxigraph.Store()
+    store.load(turtle.encode(), format=pyoxigraph.RdfFormat.TURTLE)
+    npt.assert_array_equal(sorted(str(subject) for subject in reread.subjects()), [encoded])
+    npt.assert_array_equal(sorted(quad.subject.value for quad in store), [encoded])
+
+
+@given(COUNTED, LOCAL_NAME, LOCAL_NAME, NAMESPACE_BASE)
+@RDF_TERMS
+def test_two_sparql_engines_agree_that_a_plain_literal_is_not_the_number(number, plain, typed, base):
+    """`g.equal([str(r.s) for r in plain.query(...FILTER(?v = 1))], ['http://example.org/facts/p2'])`
+    types the answer for one graph. Over a generated number and generated subject names, two SPARQL
+    engines that share no code return the same answer: the subject whose object was written as a
+    Python integer, and not the one whose object was written as the same digits in a string. The
+    term inequality underneath it is stated by both libraries."""
+    assume(plain != typed)
+    graph = rdflib.Graph()
+    graph.add((rdflib.URIRef(base + plain), rdflib.URIRef(base + 'count'), rdflib.Literal(str(number))))
+    graph.add((rdflib.URIRef(base + typed), rdflib.URIRef(base + 'count'), rdflib.Literal(number)))
+    query = f'SELECT ?s WHERE {{ ?s <{base}count> ?v FILTER(?v = {number}) }}'
+    answered = sorted(str(row.s) for row in graph.query(query))
+    npt.assert_array_equal(answered,
+                           sorted(solution['s'].value for solution in _oxigraph_store(graph).query(query)))
+    npt.assert_array_equal(answered, [base + typed])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(str(rdflib.Literal(str(number)).n3()), str(rdflib.Literal(number).n3()))
+    npt.assert_array_equal(pyoxigraph.Literal(str(number)) == pyoxigraph.Literal(
+        str(number), datatype=pyoxigraph.NamedNode(XSD_INTEGER)), rdflib.Literal(str(number)) == rdflib.Literal(number))
+
+
+@given(COUNTED, LOCAL_NAME, LOCAL_NAME, NAMESPACE_BASE)
+@RDF_TERMS
+def test_query_text_that_is_concatenated_is_parsed_and_a_bound_value_is_not(number, plain, typed, base):
+    """`g.rejects(Exception, ...)` for the concatenated query and `g.equal(list(plain.query(
+    COUNT_QUERY, initBindings={'x': RdfLiteral(hostile)})), [])` for the bound one, over a generated
+    number and generated names, through both engines. Text that closes the filter and opens a union
+    is parsed as query syntax by rdflib's pyparsing grammar and by Oxigraph's Rust parser alike, and
+    both refuse it; passed as a value through rdflib's initBindings and through Oxigraph's
+    substitutions it is a literal that matches nothing, while the same route with the number itself
+    returns the row the query is for."""
+    assume(plain != typed)
+    graph = rdflib.Graph()
+    graph.add((rdflib.URIRef(base + plain), rdflib.URIRef(base + 'count'), rdflib.Literal(str(number))))
+    graph.add((rdflib.URIRef(base + typed), rdflib.URIRef(base + 'count'), rdflib.Literal(number)))
+    store = _oxigraph_store(graph)
+    hostile = f'{number}) }} UNION {{ ?s ?p ?o }} FILTER(true'
+    concatenated = f'SELECT ?s WHERE {{ ?s <{base}count> ?v FILTER(?v = {hostile}) }}'
+    with pytest.raises(pyparsing.ParseException):
+        graph.query(concatenated)
+    with pytest.raises(SyntaxError):
+        store.query(concatenated)
+    bound = f'SELECT ?s ?x WHERE {{ ?s <{base}count> ?v FILTER(?v = ?x) }}'
+    npt.assert_array_equal(
+        sorted(str(row.s) for row in graph.query(bound, initBindings={'x': rdflib.Literal(hostile)})),
+        sorted(solution['s'].value for solution in
+               store.query(bound, substitutions={pyoxigraph.Variable('x'): pyoxigraph.Literal(hostile)})))
+    npt.assert_array_equal(
+        sorted(str(row.s) for row in graph.query(bound, initBindings={'x': rdflib.Literal(number)})),
+        [base + typed])
