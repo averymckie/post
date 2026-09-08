@@ -19185,3 +19185,155 @@ def test_the_declared_holiday_the_offset_rolls_off_is_a_day_neither_library_work
     with pytest.raises(AssertionError):
         npt.assert_array_equal(_custom_business_day(holidays).is_on_offset(stamp),
                                _custom_business_day([]).is_on_offset(stamp))
+
+
+# ---------------------------------------------------------------------------------------------------
+# P62, case handover_keeps_self_loops_and_coverage of handoff_guards_v7.py: the handover-of-work
+# network pm4py builds from an event log's resource attribute. pm4py 2.7.23.8 is the library under
+# test; the independent readings are the same two the directly-follows cluster above uses, polars
+# 1.44.1 shift over a case partition and DuckDB 1.5.5 lead() over a window.
+HANDOVER = settings(max_examples=20, deadline=None)
+RESOURCE_NAME = st.text(alphabet='PQRST', min_size=1, max_size=1)
+HANDOVER_CASES = st.lists(st.lists(RESOURCE_NAME, min_size=2, max_size=5), min_size=1, max_size=4)
+REPEATED_RESOURCE_CASES = st.lists(RESOURCE_NAME, min_size=1, max_size=3).map(
+    lambda names: [[name, name] for name in names])
+RETURNING_RESOURCE_CASES = st.lists(
+    st.lists(RESOURCE_NAME, min_size=2, max_size=2, unique=True), min_size=1, max_size=3).map(
+    lambda pairs: [[first, second, first] for first, second in pairs])
+THREE_RESOURCE_CASE = st.lists(RESOURCE_NAME, min_size=3, max_size=3, unique=True).map(lambda names: [names])
+
+
+def _handover_log(cases):
+    """One event per resource in each generated case, an hour apart so no case has a timestamp tie, with
+    the resource carried in the attribute pm4py's own formatter leaves alone."""
+    rows = []
+    for number, resources in enumerate(cases):
+        for step, resource in enumerate(resources):
+            rows.append({'case_id': 'case%d' % number, 'activity': resource, 'org:resource': resource,
+                         'timestamp': LOG_EPOCH + datetime.timedelta(hours=step)})
+    return _formatted_event_log(rows)
+
+
+def _handover_connections(cases, **options):
+    """The network itself, as the mapping of resource pairs to weights pm4py returns."""
+    return pm4py.discover_handover_of_work_network(_handover_log(cases), **options).connections
+
+
+def _polars_resource_pairs(cases):
+    """The same relation taken over the resource instead of the activity, by polars' shift over the case
+    partition -- the implementation already recorded as independent for the directly-follows cluster."""
+    frame = pl.DataFrame({'case': [('case%d' % number) for number, resources in enumerate(cases)
+                                   for _ in resources],
+                          'step': [step for resources in cases for step in range(len(resources))],
+                          'resource': [resource for resources in cases for resource in resources]})
+    followed = (frame.sort('case', 'step')
+                .with_columns(pl.col('resource').shift(-1).over('case').alias('next'))
+                .drop_nulls('next'))
+    counted = followed.group_by('resource', 'next').len().sort('resource', 'next')
+    return {(source, target): count for source, target, count in counted.iter_rows()}
+
+
+def _duckdb_resource_pairs(cases):
+    """And by a SQL window function in DuckDB."""
+    rows = [('case%d' % number, step, resource)
+            for number, resources in enumerate(cases) for step, resource in enumerate(resources)]
+    with duckdb.connect() as connection:
+        connection.execute('create table events(case_name varchar, step integer, resource varchar)')
+        connection.executemany('insert into events values (?, ?, ?)', rows)
+        counted = connection.execute(
+            'select resource, next_resource, count(*) from (select resource, lead(resource) over '
+            '(partition by case_name order by step) as next_resource from events) '
+            'where next_resource is not null group by 1, 2').fetchall()
+    return {(source, target): count for source, target, count in counted}
+
+
+@given(HANDOVER_CASES)
+@HANDOVER
+def test_the_handover_pairs_are_the_directly_follows_pairs_taken_over_the_resource(cases):
+    """pm4py documents the network as "essentially the Directly-Follows Graph (DFG) of the event log, but
+    using the resource as the nodes of the graph instead of activities". Executed on generated logs its
+    pair set is exactly the pair set polars' shift over the case partition returns and exactly the one
+    DuckDB's lead() over a window returns, so the relation is the documented one and the two engines
+    outside Python's process-mining stack agree with it."""
+    pairs = sorted(_handover_connections(cases))
+    npt.assert_array_equal(pairs, sorted(_polars_resource_pairs(cases)))
+    npt.assert_array_equal(pairs, sorted(_duckdb_resource_pairs(cases)))
+
+
+@given(HANDOVER_CASES)
+@HANDOVER
+def test_the_handover_weights_are_shares_of_the_whole_network_and_not_counts(cases):
+    """What the network carries against each pair is not how often the handover happened. pm4py's own
+    source at tag 2.7.23.8 divides every entry by a running `dividend` that accumulates the same terms,
+    so the weights are shares of the whole network. Checked against the counts the two engines take, the
+    weights are those counts divided by their total -- a chain that reads a weight as a number of
+    handovers reads a fraction."""
+    connections = _handover_connections(cases)
+    counted = _polars_resource_pairs(cases)
+    counts = np.array([counted[pair] for pair in sorted(connections)], dtype='float64')
+    npt.assert_allclose([connections[pair] for pair in sorted(connections)], counts / counts.sum())
+
+
+@given(HANDOVER_CASES)
+@HANDOVER
+def test_two_copies_of_a_log_are_the_same_handover_network_as_one(cases):
+    """And a share is blind to how much work there was. Doubling every case of the log under new case
+    identifiers doubles every count both engines take and leaves every weight pm4py returns exactly
+    where it was, so the network cannot tell a log from two copies of itself. The strongest pair the
+    chain reads off it is unchanged, and so is everything else the network says."""
+    doubled = list(cases) + list(cases)
+    pdt.assert_series_equal(pd.Series(_handover_connections(cases)).sort_index(),
+                            pd.Series(_handover_connections(doubled)).sort_index())
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal([_polars_resource_pairs(cases)[pair] for pair in sorted(_polars_resource_pairs(cases))],
+                               [_polars_resource_pairs(doubled)[pair] for pair in sorted(_polars_resource_pairs(cases))])
+
+
+@given(REPEATED_RESOURCE_CASES)
+@HANDOVER
+def test_a_resource_handing_work_to_itself_is_a_pair_the_network_keeps(cases):
+    """The claim case 62 types, on generated logs rather than on its fixture. Where a case has two
+    consecutive events by one resource, the pair from that resource to itself is in the network pm4py
+    returns and in the relation both engines compute; nothing filters a self-handover out anywhere."""
+    npt.assert_array_equal(sorted(_handover_connections(cases)), sorted(_polars_resource_pairs(cases)))
+    npt.assert_array_equal(sorted(_handover_connections(cases)),
+                           sorted(pair for pair in _duckdb_resource_pairs(cases) if pair[0] == pair[1]))
+
+
+@given(RETURNING_RESOURCE_CASES)
+@HANDOVER
+def test_the_default_beta_leaves_out_every_pair_that_does_not_directly_follow(cases):
+    """pm4py's loop over the later positions of a variant carries `if beta == 0: ... break`, so at the
+    default the only pair taken from each position is the next one. On logs whose every case hands work
+    out and takes it back, the network is still exactly the directly-follows relation both engines
+    compute, and the resource that returns is not recorded as handing work to itself."""
+    npt.assert_array_equal(sorted(_handover_connections(cases)), sorted(_polars_resource_pairs(cases)))
+
+
+@given(RETURNING_RESOURCE_CASES)
+@HANDOVER
+def test_a_non_zero_beta_adds_pairs_that_never_directly_follow(cases):
+    """The `else` branch of the same loop takes every later position, weighted `beta ** (j - i - 1)`.
+    Handed the same logs with `beta=1` the network gains the pair from the returning resource to itself,
+    which no case ever performs and neither engine reports: the parameter changes which pairs exist and
+    not only how they are weighted. Every pair of the default network is still present, and the two
+    networks are not the same network."""
+    default, widened = _handover_connections(cases), _handover_connections(cases, beta=1)
+    npt.assert_array_equal(sorted(set(default) & set(widened)), sorted(default))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(sorted(widened), sorted(default))
+
+
+@given(THREE_RESOURCE_CASE)
+@HANDOVER
+def test_a_beta_above_one_weights_the_remote_handover_above_the_adjacent_one(cases):
+    """`beta ** (j - i - 1)` is a growth factor for any beta above one, and pm4py validates nothing. On a
+    case of three distinct resources, `beta=1` gives the handover across the middle resource the same
+    weight as the two adjacent ones, and `beta=2` gives it twice their weight: the strongest connection
+    in the network is then a handover that never happened, between two resources that never worked one
+    after the other. The published metric this parameter names is a decay."""
+    first, second, third = cases[0]
+    flat = _handover_connections(cases, beta=1)
+    npt.assert_allclose(flat[(first, second)], flat[(first, third)])
+    steep = _handover_connections(cases, beta=2)
+    npt.assert_array_less(steep[(first, second)], steep[(first, third)])
