@@ -25,6 +25,7 @@ from xml.etree import ElementTree
 from xml.sax.saxutils import escape as xml_escape
 import itertools
 import json
+import math
 import sqlite3
 from urllib.parse import urljoin
 from decimal import Decimal, ROUND_HALF_EVEN, ROUND_HALF_UP
@@ -2826,7 +2827,7 @@ def test_a_decimal_tolerance_equals_its_float_spelling_only_where_the_float_is_t
     operators to compare a Decimal instance x with another number y. This avoids confusing results when
     doing equality comparisons between numbers of different types." Executed against Fraction, which holds
     both as exact rationals, the comparison is exact: it says equal exactly where the two are the same
-    rational and not otherwise. Nine of the two hundred hundredths pass that test and the rest do not, so
+    rational and not otherwise. Eight of the two hundred hundredths pass that test and the rest do not, so
     whether a tolerance written as a float is the tolerance the chain declared is a property of the
     particular amount. Replaces the typed Decimal('0.25') == 0.25 and Decimal('0.1') == 0.1 of case 152."""
     exact, spelled, as_rational, spelled_as_rational = _tolerance_table()[index % len(_tolerance_table())]
@@ -2864,7 +2865,7 @@ def test_the_sql_engine_calls_a_decimal_equal_to_a_float_that_python_calls_diffe
 @SLOW
 def test_a_difference_exactly_at_the_tolerance_is_accepted_where_the_float_spelling_rounds_up(index, amount):
     """P152's boundary check is abs(ordered - billed) <= tolerance and its evidence line claims four signed
-    price-boundary cases confirm a 0.25 USD tolerance. Twenty-five hundredths is one of the nine hundredths
+    price-boundary cases confirm a 0.25 USD tolerance. Twenty-five hundredths is one of the eight hundredths
     whose float is exact, and on the hundredths whose nearest double is above the amount the boundary is
     accepted either way: the decimal comparison accepts a difference exactly equal to the tolerance and so
     does the float spelling, and Fraction agrees with both."""
@@ -3261,3 +3262,161 @@ def test_the_two_column_types_agree_on_the_rest_of_the_ties(index):
     tie, to_even, away, in_decimal, in_double = together[index % len(together)]
     npt.assert_equal(in_double, in_decimal)
 
+
+# ---------------------------------------------------------------- a bill of materials and its edges
+BOM_TRIPLES = st.lists(st.tuples(st.integers(min_value=0, max_value=4),
+                                 st.integers(min_value=1, max_value=4),
+                                 st.integers(min_value=1, max_value=9)),
+                       min_size=1, max_size=8, unique_by=lambda triple: triple[:2])
+RING_SIZE = st.integers(min_value=2, max_value=8)
+ABSENT_ITEM = st.integers(min_value=100, max_value=120)
+
+
+def _bom_edges(triples):
+    """One edge per generated triple, from an item to the item a generated positive gap further on, so the
+    graph is acyclic by construction and every parent, child and quantity is generated."""
+    return [('item-%d' % parent, 'item-%d' % (parent + gap), qty) for parent, gap, qty in triples]
+
+
+def _networkx_bom(edges):
+    """The chain's own graph: DiGraph.add_edge with the quantity as an edge attribute."""
+    graph = nx.DiGraph()
+    for parent, child, qty in edges:
+        graph.add_edge(parent, child, qty=qty)
+    return graph
+
+
+def _igraph_bom(edges):
+    """The same declarations in igraph, a C library with its own graph implementation."""
+    names = sorted({name for parent, child, _ in edges for name in (parent, child)})
+    graph = igraph.Graph(directed=True)
+    graph.add_vertices(names)
+    graph.add_edges([(parent, child) for parent, child, _ in edges],
+                    attributes={'qty': [qty for _, _, qty in edges]})
+    return graph
+
+
+def _duckdb_gross_requirement(edges, source, target):
+    """The same expansion as a recursive query, which enumerates the paths in SQL and multiplies along each
+    one. DuckDB shares no code with either graph library."""
+    with duckdb.connect() as connection:
+        connection.execute('create table bom(parent VARCHAR, child VARCHAR, qty BIGINT)')
+        connection.executemany('insert into bom values (?, ?, ?)', edges)
+        return connection.execute(
+            'with recursive expand(node, qty) as ('
+            '  select child, qty from bom where parent = ? '
+            '  union all '
+            '  select bom.child, expand.qty * bom.qty from expand join bom on bom.parent = expand.node) '
+            'select coalesce(sum(qty), 0) from expand where node = ?', [source, target]).fetchone()[0]
+
+
+@given(st.integers(min_value=0, max_value=4), st.integers(min_value=1, max_value=4),
+       st.integers(min_value=1, max_value=9), st.integers(min_value=1, max_value=9))
+@SLOW
+def test_a_repeated_bill_of_materials_edge_is_one_edge_in_one_library_and_two_in_the_other(parent, gap,
+                                                                                          first, extra):
+    """P160 builds the bill of materials with DiGraph.add_edge and case 160 records that declaring the same
+    parent and child twice stores one edge carrying the second quantity. That is not the operation, it is
+    this library: igraph 1.0.0, a C implementation, stores both declarations as parallel edges and keeps
+    both quantities, one edge for every declaration in the file. The quantity NetworkX keeps is the last one
+    igraph kept, so nothing is corrupted; what differs is how many
+    edges the same file describes, and therefore how much material it calls for. Replaces the typed
+    loose.number_of_edges() == 1 and loose['kit']['cable']['qty'] == 3 of handoff_guards_v16.py case 160."""
+    edges = _bom_edges([(parent, gap, first), (parent, gap, first + extra)])
+    graph, in_igraph = _networkx_bom(edges), _igraph_bom(edges)
+    with pytest.raises(AssertionError):
+        npt.assert_equal(graph.number_of_edges(), in_igraph.ecount())
+    npt.assert_equal(graph.edges[edges[0][0], edges[0][1]]['qty'], in_igraph.es['qty'][-1])
+    npt.assert_equal(in_igraph.ecount(), len(edges))
+    with pytest.raises(AssertionError):
+        npt.assert_equal(graph.edges[edges[0][0], edges[0][1]]['qty'], np.sum(in_igraph.es['qty']))
+
+
+@given(BOM_TRIPLES, st.integers(min_value=0, max_value=100), st.integers(min_value=0, max_value=100))
+@SLOW
+def test_the_requirement_along_the_declared_paths_agrees_with_two_other_expansions(triples, source_index,
+                                                                                  target_index):
+    """The gross requirement P160 computes is a sum over simple paths of the product of the quantities along
+    each one. Where the declarations are unique, three implementations give the same number: NetworkX's
+    all_simple_paths with math.prod, igraph's get_all_simple_paths in C, and a recursive SQL query in DuckDB
+    that never enumerates a path at all. So the arithmetic of the nested assembly is the operation and not
+    the library, which is what makes the disagreements in the other tests specific. Replaces the typed
+    gross_requirement(graph, 'kit', 'cable', 1, checked=True) == 6 of case 160."""
+    edges = _bom_edges(triples)
+    graph, in_igraph = _networkx_bom(edges), _igraph_bom(edges)
+    names = sorted({name for parent, child, _ in edges for name in (parent, child)})
+    source = names[source_index % len(names)]
+    reachable = [name for name in names if name != source]
+    target = reachable[target_index % len(reachable)]
+    by_networkx = sum(math.prod(graph.edges[path[step], path[step + 1]]['qty']
+                                for step in range(len(path) - 1))
+                      for path in nx.all_simple_paths(graph, source, target))
+    by_igraph = sum(math.prod(in_igraph.es[in_igraph.get_eid(path[step], path[step + 1])]['qty']
+                              for step in range(len(path) - 1))
+                    for path in in_igraph.get_all_simple_paths(source, to=target))
+    npt.assert_equal(by_networkx, by_igraph)
+    npt.assert_equal(by_networkx, _duckdb_gross_requirement(edges, source, target))
+
+
+@given(RING_SIZE)
+@SLOW
+def test_a_cycle_stops_the_topological_order_when_it_is_consumed_and_not_when_it_is_built(size):
+    """Case 160 records that building the topological_sort iterator validates nothing. The two libraries
+    disagree about when the check happens: NetworkX returns a generator that raises NetworkXUnfeasible only
+    when it is exhausted, so a chain that calls topological_sort and does not consume it has checked
+    nothing, while igraph's topological_sorting raises at the call. Their predicates agree that the ring is
+    not acyclic, so the difference is entirely in when the refusal arrives. Replaces the typed
+    acyclic(cyclic, method='generator') == True of case 160."""
+    ring = [('item-%d' % position, 'item-%d' % ((position + 1) % size)) for position in range(size)]
+    graph = nx.DiGraph()
+    graph.add_edges_from(ring)
+    in_igraph = igraph.Graph(directed=True)
+    in_igraph.add_vertices(sorted({name for edge in ring for name in edge}))
+    in_igraph.add_edges(ring)
+    nx.topological_sort(graph)
+    with pytest.raises(nx.NetworkXUnfeasible):
+        list(nx.topological_sort(graph))
+    with pytest.raises(igraph.InternalError):
+        in_igraph.topological_sorting()
+    npt.assert_equal(nx.is_directed_acyclic_graph(graph), in_igraph.is_dag())
+
+
+@given(BOM_TRIPLES, st.integers(min_value=0, max_value=100))
+@SLOW
+def test_an_item_is_its_own_requirement_in_one_library_and_not_in_the_other(triples, index):
+    """Asked for the paths from an item to itself, NetworkX returns one path -- the item alone -- and igraph
+    returns none. The product of no quantities is one, which numpy and math agree on, so NetworkX's answer
+    turns a demand for an assembly into a requirement for that same assembly, at exactly the demanded
+    quantity, out of a graph that declares no such edge. Replaces the typed path_quantity(graph, 'kit',
+    'kit') == [(['kit'], 1)] and math.prod([]) == 1 of case 160."""
+    edges = _bom_edges(triples)
+    graph, in_igraph = _networkx_bom(edges), _igraph_bom(edges)
+    names = sorted({name for parent, child, _ in edges for name in (parent, child)})
+    item = names[index % len(names)]
+    in_networkx = list(nx.all_simple_paths(graph, item, item))
+    with pytest.raises(AssertionError):
+        npt.assert_equal(len(in_networkx), len(in_igraph.get_all_simple_paths(item, to=item)))
+    npt.assert_equal(math.prod([]), np.prod([]))
+
+
+@given(BOM_TRIPLES, ABSENT_ITEM)
+@SLOW
+def test_an_item_that_is_not_in_the_graph_raises_as_a_source_and_is_silent_as_a_target(triples, missing):
+    """The two ends of the same query are not treated alike. An item the graph has never heard of raises
+    NodeNotFound when it is the source and returns quietly when it is the target, and what it returns is
+    indistinguishable from the answer for an item that is in the graph and simply cannot be reached. igraph
+    refuses both ends with a ValueError, so the asymmetry is this library's and a missing part number
+    disappears from the requirements without a word. Replaces the typed path_quantity(graph, 'kit',
+    'absent') == [] of case 160."""
+    edges = _bom_edges(triples)
+    graph, in_igraph = _networkx_bom(edges), _igraph_bom(edges)
+    names = sorted({name for parent, child, _ in edges for name in (parent, child)})
+    absent = 'item-%d' % missing
+    with pytest.raises(nx.NodeNotFound):
+        list(nx.all_simple_paths(graph, absent, names[0]))
+    npt.assert_array_equal(list(nx.all_simple_paths(graph, names[0], absent)),
+                           list(nx.all_simple_paths(graph, names[-1], names[0])))
+    with pytest.raises(ValueError):
+        in_igraph.get_all_simple_paths(absent, to=names[0])
+    with pytest.raises(ValueError):
+        in_igraph.get_all_simple_paths(names[0], to=absent)
