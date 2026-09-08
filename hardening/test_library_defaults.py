@@ -7802,3 +7802,204 @@ def test_a_table_reports_one_refusal_by_a_return_code_and_another_by_raising(tab
     book.close()
     with pytest.raises(AssertionError):
         npt.assert_equal(refused, accepted)
+
+
+# ------------------------------------------------- a day that no one worked, and an effort split over days
+EFFORT_HOURS = st.integers(min_value=1, max_value=400)
+SPLIT_DAYS = st.integers(min_value=1, max_value=200)
+SPLIT_LOSES_THE_TOTAL = tuple((hours, days) for hours in range(1, 20) for days in range(2, 60)
+                              if sum([hours / days] * days) != float(hours))
+SPLIT_KEEPS_THE_TOTAL = tuple((hours, days) for hours in range(1, 20) for days in range(2, 60)
+                              if sum([hours / days] * days) == float(hours))
+
+
+@st.composite
+def _assignments(draw, minimum=1):
+    """One assignment per generated identifier, each carrying the days it was booked against. The list
+    may be empty and it may be missing altogether, so both cases come out of the strategy."""
+    size = draw(st.integers(min_value=minimum, max_value=6))
+    booked = draw(st.lists(st.one_of(st.none(),
+                                     st.lists(st.text(alphabet='abcdefghij', min_size=1, max_size=4),
+                                              max_size=3)),
+                           min_size=size, max_size=size))
+    return [str(index) for index in range(size)], booked
+
+
+@st.composite
+def _assignments_with_an_empty_booking(draw):
+    """The same assignments with one drawn position booked against no days, so the case the engines
+    disagree about is generated rather than filtered for."""
+    identifiers, booked = draw(_assignments())
+    booked = list(booked)
+    booked[draw(st.integers(min_value=0, max_value=len(booked) - 1))] = []
+    return identifiers, booked
+
+
+@st.composite
+def _assignments_with_an_empty_and_a_missing_booking(draw):
+    """The same again with one drawn position booked against no days and another with no booking at
+    all, which are the two records the libraries hold apart differently."""
+    identifiers, booked = draw(_assignments(minimum=2))
+    booked = list(booked)
+    first, second = draw(st.lists(st.integers(min_value=0, max_value=len(booked) - 1),
+                                  min_size=2, max_size=2, unique=True))
+    booked[first], booked[second] = [], None
+    return identifiers, booked
+
+
+def _polars_assignments(identifiers, booked):
+    return pl.DataFrame({'id': identifiers, 'days': booked},
+                        schema={'id': pl.String, 'days': pl.List(pl.String)})
+
+
+def _duckdb_unnested(identifiers, booked):
+    """The same assignments through DuckDB's UNNEST, which is a third implementation of the same
+    reshaping and shares nothing with either dataframe library."""
+    frame = _polars_assignments(identifiers, booked)
+    with duckdb.connect() as connection:
+        return connection.sql('select id, unnest(days) as day from frame').pl().to_dicts()
+
+
+@given(_assignments())
+@SLOW
+def test_an_empty_day_list_becomes_a_row_in_one_engine_and_no_row_in_another(assignments):
+    """P145 explodes the booked days and counts the rows. pandas 2.2.3 documents explode as
+    "Transform each element of a list-like to a row, replicating index values" and its own example in
+    pandas/core/frame.py at tag v2.2.3 shows a row whose value is `[]` coming back as NaN, so an
+    assignment booked against no days still produces a row. DuckDB 1.5.5's UNNEST produces none. The
+    two row counts differ by exactly the number of assignments that named no day, which is a count of
+    the generated input rather than a number anyone typed. Replaces the typed `len(exploded) == 3` and
+    `int(exploded['days'].isna().sum()) == 1` of handoff_guards_v15.py case
+    an_empty_day_list_becomes_a_phantom_day."""
+    identifiers, booked = assignments
+    exploded = pd.DataFrame({'id': identifiers, 'days': booked}).explode('days')
+    unnested = _duckdb_unnested(identifiers, booked)
+    empty_or_missing = sum(1 for days in booked if not days)
+    npt.assert_equal(len(exploded) - len(unnested), empty_or_missing)
+    npt.assert_equal(int(exploded['days'].isna().sum()), empty_or_missing)
+
+
+@given(_assignments())
+@SLOW
+def test_the_option_that_decides_whether_that_row_appears_is_named_in_the_second_implementation(
+        assignments):
+    """polars 1.44.1 makes the same decision an argument and documents both halves of it in
+    py-polars/src/polars/dataframe/frame.py at tag py-1.44.1: `empty_as_null` is "Explode an empty
+    list/array into a `null`" and `keep_nulls` is "Explode a `null` list/array into a `null`". Asked
+    with both on it returns the rows pandas returns; asked with both off it returns the rows DuckDB
+    returns. The disagreement between the two engines is therefore one documented option, and the
+    chain that counts rows after an explode has not said which side of it the count was taken on."""
+    identifiers, booked = assignments
+    exploded = pd.DataFrame({'id': identifiers, 'days': booked}).explode('days')
+    frame = _polars_assignments(identifiers, booked)
+    as_pandas = frame.explode('days', empty_as_null=True, keep_nulls=True)
+    as_duckdb = frame.explode('days', empty_as_null=False, keep_nulls=False)
+    npt.assert_array_equal(as_pandas['id'].to_list(), list(exploded['id']))
+    npt.assert_array_equal([row['id'] for row in as_duckdb.to_dicts()],
+                           [row['id'] for row in _duckdb_unnested(identifiers, booked)])
+    npt.assert_array_equal([row['day'] for row in _duckdb_unnested(identifiers, booked)],
+                           as_duckdb['days'].to_list())
+
+
+@given(_assignments_with_an_empty_booking())
+@SLOW
+def test_the_second_implementation_warns_that_the_default_deciding_this_is_changing(assignments):
+    """Called without the option, polars 1.44.1 raises a DeprecationWarning saying the default is
+    about to move, and the two answers it is moving between are the two engines' answers. So the row
+    count after an explode is not only a question of which library ran but of which version of one of
+    them, and the library says so at the call site."""
+    identifiers, booked = assignments
+    frame = _polars_assignments(identifiers, booked)
+    with pytest.warns(DeprecationWarning):
+        undecided = frame.explode('days')
+    npt.assert_array_equal(undecided['id'].to_list(),
+                           frame.explode('days', empty_as_null=True)['id'].to_list())
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(undecided['id'].to_list(),
+                               frame.explode('days', empty_as_null=False)['id'].to_list())
+
+
+@given(_assignments_with_an_empty_and_a_missing_booking())
+@SLOW
+def test_a_missing_day_list_and_an_empty_one_are_one_row_after_the_explode(assignments):
+    """An assignment booked against no days and an assignment whose booking is missing altogether are
+    two different records, and pandas' explode returns a missing value for both, so `isna` cannot tell
+    them apart afterwards and a chain that drops the nulls drops both. polars keeps the two questions
+    separate: with `empty_as_null` off and `keep_nulls` on, the empty booking loses its row and the
+    missing booking keeps one, which is a distinction pandas' explode has no argument for."""
+    identifiers, booked = assignments
+    exploded = pd.DataFrame({'id': identifiers, 'days': booked}).explode('days')
+    frame = _polars_assignments(identifiers, booked)
+    missing = [identifier for identifier, days in zip(identifiers, booked) if days is None]
+    npt.assert_array_equal(sorted(set(exploded.loc[exploded['days'].isna(), 'id'])),
+                           sorted(identifier for identifier, days in zip(identifiers, booked)
+                                  if not days))
+    npt.assert_array_equal(
+        sorted(set(frame.explode('days', empty_as_null=False, keep_nulls=True)
+                   .filter(pl.col('days').is_null())['id'].to_list())),
+        sorted(missing))
+
+
+@given(_assignments())
+@SLOW
+def test_dropping_the_rows_an_empty_list_produced_leaves_the_days_that_were_declared(assignments):
+    """What survives the drop is exactly the days the assignments named, in order, in all three
+    engines. The phantom rows are therefore removable and the question is only whether anyone
+    removed them; nothing else about the reshaping differs. Replaces the typed `len(real) == 2` of
+    case an_empty_day_list_becomes_a_phantom_day."""
+    identifiers, booked = assignments
+    declared = [day for days in booked if days for day in days]
+    exploded = pd.DataFrame({'id': identifiers, 'days': booked}).explode('days')
+    npt.assert_array_equal(list(exploded.dropna(subset=['days'])['days']), declared)
+    npt.assert_array_equal([row['day'] for row in _duckdb_unnested(identifiers, booked)], declared)
+    npt.assert_array_equal(
+        _polars_assignments(identifiers, booked)
+        .explode('days', empty_as_null=False, keep_nulls=False)['days'].to_list(), declared)
+
+
+@given(EFFORT_HOURS, SPLIT_DAYS)
+@SLOW
+def test_an_exact_split_of_effort_adds_back_to_the_effort_that_was_declared(hours, days):
+    """The daily share as an exact rational: the shares always add back to the declared effort, for
+    every generated pair, because Fraction divides exactly. Replaces the typed `exact_share('16', 2)
+    == Fraction(8)` and `sum([exact_share('8', 6)] * 6) == Fraction(8)` of case
+    an_empty_day_list_becomes_a_phantom_day."""
+    share = Fraction(hours) / days
+    npt.assert_array_equal(sum([share] * days), Fraction(hours))
+    npt.assert_array_equal(share * days, Fraction(hours))
+
+
+@given(st.sampled_from(SPLIT_LOSES_THE_TOTAL), st.sampled_from(SPLIT_KEEPS_THE_TOTAL))
+@SLOW
+def test_the_same_split_in_floats_stays_close_and_does_not_always_add_back(losing, keeping):
+    """The two regions are read off IEEE arithmetic itself at import rather than chosen: every
+    (effort, days) pair below sixty days is sorted by whether the float shares add back to the effort.
+    Both are non-empty and the losing one is much the larger, and on both the float total is within
+    numpy's default tolerance of the exact one, so nothing here is visibly wrong. Which side a pair
+    falls on is not a property anyone could state in advance: the day counts that keep the total
+    include seventeen and a hundred and seven as well as the powers of two. Replaces the typed
+    `sum([8 / 6] * 6) == 7.999999999999999` and `sum([10 / 3] * 3) == 10.0` of case
+    an_empty_day_list_becomes_a_phantom_day."""
+    for hours, days in (losing, keeping):
+        npt.assert_allclose(sum([hours / days] * days), float(Fraction(hours)))
+    npt.assert_array_equal(sum([keeping[0] / keeping[1]] * keeping[1]), float(keeping[0]))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(sum([losing[0] / losing[1]] * losing[1]), float(losing[0]))
+
+
+@given(EFFORT_HOURS)
+@SLOW
+def test_effort_declared_against_no_days_is_a_refusal_in_one_arithmetic_and_an_infinity_in_another(
+        hours):
+    """The guard module blocks a split over zero days with its own check. The primitives do not agree
+    on what that is. Fraction and the built-in float division both raise ZeroDivisionError, so the
+    refusal is the library's; numpy's float division returns inf and only warns, so the same
+    quantity divided the same way becomes a number that will pass every later comparison. Replaces the
+    typed `g.rejects(g.Blocked, lambda: exact_share('4', 0))` of case
+    an_empty_day_list_becomes_a_phantom_day."""
+    with pytest.raises(ZeroDivisionError):
+        Fraction(hours) / 0
+    with pytest.raises(ZeroDivisionError):
+        hours / 0
+    with pytest.warns(RuntimeWarning):
+        npt.assert_equal(np.float64(hours) / np.float64(0), np.inf)
