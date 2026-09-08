@@ -38,6 +38,7 @@ from fractions import Fraction
 
 import arrow
 import beancount_parser_lima as lima
+import cv2
 from beancount import loader as beancount_loader
 from beancount.core import data as beancount_data
 import docx
@@ -108,7 +109,9 @@ import pandas.testing as pdt
 import polars as pl
 import pyarrow.csv as pyarrow_csv
 import rfc8785
+import segno
 import scipy.sparse as scipy_sparse
+import zxingcpp
 import scipy.sparse.linalg as scipy_linsolve
 from scipy.sparse.linalg import spsolve as scipy_spsolve
 import polars.testing as plt
@@ -8219,7 +8222,8 @@ opentype_available = (shutil.which('node') is not None
 SVG_NAMESPACE = '{http://www.w3.org/2000/svg}'
 XLINK_NAMESPACE = '{http://www.w3.org/1999/xlink}'
 DUBLIN_CORE_NAMESPACE = '{http://purl.org/dc/elements/1.1/}'
-CHART_CELL = st.text(alphabet='abcdefghijklmnopqrstuvwxyz0123456789 -', min_size=1, max_size=6)
+CHART_CELL_ALPHABET = 'abcdefghijklmnopqrstuvwxyz0123456789 -'
+CHART_CELL = st.text(alphabet=CHART_CELL_ALPHABET, min_size=1, max_size=6)
 CHART_SALT = st.text(alphabet='0123456789abcdef', min_size=1, max_size=8)
 CHART_SERIES = st.lists(st.integers(min_value=-100, max_value=100), min_size=2, max_size=8)
 DEJAVU_SANS = matplotlib_font_manager.findfont(
@@ -8312,6 +8316,32 @@ def _fonttools_glyph_indices(text):
     return [_dejavu_glyph_indices()[character] for character in text]
 
 
+@functools.lru_cache(maxsize=1)
+def _dejavu_ligature_candidates():
+    """Every character this font has a glyph for that the Unicode database decomposes into two
+    characters of the cell alphabet. `unicodedata.decomposition` is CPython's own reading of the
+    database's compatibility decompositions and the font's own cmap says which of those characters
+    DejaVu Sans carries, so neither the pairs nor the ligature characters are typed here."""
+    indices = _dejavu_glyph_indices()
+    candidates = {}
+    for character in indices:
+        parts = unicodedata.decomposition(character).split()
+        if parts[:1] == ['<compat>'] and len(parts) == 3:
+            components = ''.join(chr(int(part, 16)) for part in parts[1:])
+            if all(component in CHART_CELL_ALPHABET for component in components):
+                candidates[components] = character
+    return candidates
+
+
+def _ligated(text):
+    """The same text with every pair this font ligates replaced by the single Unicode character that
+    names that ligature. `str.replace` is the only operation; which pairs to replace is read off
+    matplotlib at import and which character replaces them off the Unicode database."""
+    for pair in CHART_LIGATED:
+        text = text.replace(pair, _dejavu_ligature_candidates()[pair])
+    return text
+
+
 def _node_glyph_indices(text):
     """The same mapping in another runtime. The shim parses argv, calls opentype.js and prints one index
     per line; the Python side runs subprocess and splits stdout."""
@@ -8320,6 +8350,26 @@ def _node_glyph_indices(text):
         capture_output=True, encoding='utf-8', check=True,
         env={**os.environ, 'NODE_PATH': str(OPENTYPE_DIRECTORY / 'node_modules')})
     return [int(line) for line in completed.stdout.split()]
+
+
+CHART_LIGATED = tuple(pair for pair in _dejavu_ligature_candidates()
+                      if _svg_glyph_references(_table_graphic([pair], [[pair]], 'svg'))[0]
+                      != _fonttools_glyph_indices(pair + pair))
+CHART_SAFE_ALPHABET = ''.join(character for character in CHART_CELL_ALPHABET
+                              if all(character not in pair for pair in CHART_LIGATED))
+CHART_SAFE_CELL = st.text(alphabet=CHART_SAFE_ALPHABET, min_size=1, max_size=6)
+CHART_LIGATURE_CELL = st.tuples(st.text(alphabet=CHART_SAFE_ALPHABET, max_size=3),
+                                st.sampled_from(CHART_LIGATED),
+                                st.text(alphabet=CHART_SAFE_ALPHABET, max_size=3)).map(''.join)
+
+
+def _generated_table_of(cell):
+    """The same table shape as above over a given cell strategy: one row of column labels and one to
+    three body rows of that width."""
+    return st.integers(min_value=1, max_value=3).flatmap(
+        lambda width: st.tuples(st.lists(cell, min_size=width, max_size=width),
+                                st.lists(st.lists(cell, min_size=width, max_size=width),
+                                         min_size=1, max_size=3)))
 
 
 @given(_generated_chart_table())
@@ -8476,7 +8526,7 @@ def test_naming_the_font_keeps_the_chart_reproducible(table):
         hashlib.sha256(_table_graphic(columns, rows, 'svg', fonttype='none')).hexdigest())
 
 
-@given(_generated_chart_table())
+@given(_generated_table_of(CHART_SAFE_CELL))
 @SLOW
 def test_the_default_file_holds_the_cells_only_as_glyph_indices_of_one_font(table):
     """What the default file does hold is one <use> element per character of the table, in the drawing
@@ -8486,7 +8536,9 @@ def test_the_default_file_holds_the_cells_only_as_glyph_indices_of_one_font(tabl
     through `matplotlib.ft2font`. fontTools 4.64.0 reads the same DejaVuSans.ttf a second way, in pure
     Python and without FreeType, and its glyph order and best cmap put every generated character at
     exactly that index. So the cells are in the file as positions in one font's glyph table, not as
-    text. Replaces the typed `g.equal(b'<use ' in fixed_a, True)` of case
+    text. One character per glyph holds only away from the pairs this font ligates, which are taken out
+    of this alphabet by execution rather than by hand and are the subject of the test below.
+    Replaces the typed `g.equal(b'<use ' in fixed_a, True)` of case
     matplotlib_svg_needs_a_fixed_hashsalt."""
     columns, rows = table
     references, expat_references = _svg_glyph_references(_table_graphic(columns, rows, 'svg'))
@@ -8495,13 +8547,255 @@ def test_the_default_file_holds_the_cells_only_as_glyph_indices_of_one_font(tabl
 
 
 @pytest.mark.skipif(not opentype_available, reason='node and an opentype.js checkout are required')
-@given(_generated_chart_table())
+@given(_generated_table_of(CHART_SAFE_CELL))
 @ORACLE_PROCESS
 def test_a_second_runtime_reads_the_same_glyph_indices_out_of_the_font_file(table):
     """A third implementation of the same mapping, in another runtime: opentype.js 2.0.0 under node
     v22.22.2 parses DejaVuSans.ttf itself and answers `charToGlyphIndex` for every generated character.
     It agrees with the indices matplotlib wrote, which is what makes the previous test a property of the
-    font file rather than of fontTools."""
+    font file rather than of fontTools. Only the mapping is a third implementation: asked to shape a
+    string instead of to map a character, the same library refuses this font outright, and
+    `stringToGlyphs` raises `Error: substitutionType : 62 lookupType: 6 - substFormat: 2 is not yet
+    supported` on any text at all, so the ligature below has no witness in that runtime."""
     columns, rows = table
     npt.assert_array_equal(_svg_glyph_references(_table_graphic(columns, rows, 'svg'))[0],
                            _node_glyph_indices(''.join(itertools.chain(columns, *rows))))
+
+
+
+@given(_generated_table_of(CHART_LIGATURE_CELL))
+@SLOW
+def test_a_pair_the_font_ligates_leaves_one_glyph_where_two_characters_were(table):
+    """The one-glyph-per-character reading holds only where the font has no ligature for the pair. Which
+    pairs those are is read off matplotlib at import over the candidates the Unicode database names: of
+    the thirteen characters DejaVu Sans carries that decompose into two characters of this alphabet,
+    three are substituted when the table is drawn and ten -- including the st ligature the font also
+    carries -- are not. On a cell holding one of the three, the file has one <use> element where the
+    text has two characters, so a reader resolving the file against the font character by character is
+    wrong about the length of the cell before it is wrong about its text. What is written is not a
+    glyph no character maps to: it is exactly the index the font's own cmap gives the single Unicode
+    character that names that ligature, which is where the expected value here comes from."""
+    columns, rows = table
+    text = ''.join(itertools.chain(columns, *rows))
+    references, expat_references = _svg_glyph_references(_table_graphic(columns, rows, 'svg'))
+    npt.assert_array_equal(references, expat_references)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(references, _fonttools_glyph_indices(text))
+    npt.assert_array_equal(references, _fonttools_glyph_indices(_ligated(text)))
+
+# ---------------------------------------------------------------- a code that decodes to its url
+QR_PAYLOAD = st.text(alphabet='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~:/?#@!$&*+,;=',
+                     min_size=1, max_size=60)
+QR_FAMILY = tuple('https://example.org/packs/minutes/tsc-2024-%02d-%02d.md' % (month, day)
+                  for month in range(1, 4) for day in range(1, 29))
+QR_SCALE = 8
+QR_SMALLER_SCALE = 4
+
+
+def _qr_image(payload, scale=QR_SCALE):
+    """One code written by segno at the error correction level the proof uses, decoded into the
+    grayscale array both readers take. segno chooses the symbol: `make` is documented at tag 1.6.6 as
+    producing "an optimal (minimal) (Micro) QR code with a maximal error correction level"."""
+    buffer = io.BytesIO()
+    segno.make(payload, error='h').save(buffer, kind='png', scale=scale, border=4)
+    return cv2.imdecode(np.frombuffer(buffer.getvalue(), np.uint8), cv2.IMREAD_GRAYSCALE)
+
+
+def _legacy_reading(image):
+    """OpenCV's `QRCodeDetector`, whose whole documentation at tag 5.0.0 is "QR code detector."."""
+    return cv2.QRCodeDetector().detectAndDecode(image)[0]
+
+
+def _aruco_reading(image):
+    """OpenCV's other detector, "QR code detector based on Aruco markers detection code." at the same
+    tag. It is the one the chain calls."""
+    return cv2.QRCodeDetectorAruco().detectAndDecode(image)[0]
+
+
+def _zxing_readings(image):
+    """Every barcode zxing-cpp reports in one image, as text. An image it finds nothing in gives an
+    empty list rather than an empty string, which is a distinction OpenCV's return type cannot make."""
+    return [barcode.text for barcode in zxingcpp.read_barcodes(image)]
+
+
+def _zxing_symbol(payload, **options):
+    """The same payload written by the other implementation, as the array of modules it draws."""
+    barcode = zxingcpp.create_barcode(payload, zxingcpp.BarcodeFormat.QRCode, ec_level='H')
+    return np.array(zxingcpp.write_barcode_to_image(barcode, **options))
+
+
+def _zxing_modules(payload):
+    """The side of the symbol the other implementation draws, in modules, with no quiet zone."""
+    return _zxing_symbol(payload, scale=1, add_quiet_zones=False).shape
+
+
+def _segno_modules(payload):
+    """The same measurement from segno, whose `symbol_size` "Returns the symbol size (width x height)
+    with the provided border and scaling factor"."""
+    return segno.make(payload, error='h').symbol_size(border=0)
+
+
+QR_MODE_ALPHABETS = ('0123456789', '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:',
+                     'abcdefghijklmnopqrstuvwxyz')
+QR_SINGLE_MODE_PAYLOAD = st.sampled_from(QR_MODE_ALPHABETS).flatmap(
+    lambda alphabet: st.text(alphabet=alphabet, min_size=1, max_size=25))
+QR_MIXED_PAYLOAD = st.tuples(st.text(alphabet='0123456789', min_size=7, max_size=11),
+                             st.sampled_from('abcdefghijklmnopqrstuvwxyz_~?#@!&,;=')).map(''.join)
+
+
+LEGACY_READING = {url: _legacy_reading(_qr_image(url)) for url in QR_FAMILY}
+LEGACY_MISSES = tuple(url for url in QR_FAMILY if LEGACY_READING[url] != url)
+LEGACY_HITS = tuple(url for url in QR_FAMILY if LEGACY_READING[url] == url)
+LEGACY_RECOVERED_BY_SHRINKING = tuple(
+    url for url in LEGACY_MISSES if _legacy_reading(_qr_image(url, QR_SMALLER_SCALE)) == url)
+
+
+@given(QR_PAYLOAD)
+@SLOW
+def test_every_generated_payload_survives_the_code_round_trip(payload):
+    """P138 records that every code decodes to its recorded URL and checks it with OpenCV, which is the
+    only reader in the chain and wrote none of the codes. zxing-cpp 3.1.1 is a second implementation of
+    the format: its own README at tag v3.1.1 calls ZXing-C++ "an open-source, multi-format
+    linear/matrix barcode image processing library implemented in C++" with "no third-party
+    dependencies (for the library itself)", and its `pyproject.toml` at that tag declares no runtime
+    dependencies at all, so none of segno or OpenCV is under it. It reads back exactly the payload
+    segno 1.6.6 encoded, for every generated payload. Replaces the typed `g.equal(decode_qr(png), url)`
+    of handoff_guards_v14.py case every_code_decodes_to_its_recorded_url."""
+    npt.assert_array_equal(_zxing_readings(_qr_image(payload)), [payload])
+
+
+@given(QR_PAYLOAD)
+@SLOW
+def test_the_other_implementation_writes_a_code_the_chains_reader_reads(payload):
+    """The round trip the other way round, which the case never runs: zxing-cpp writes the symbol and
+    the Aruco detector the chain calls reads the same payload out of it. Since version 3.0 that writer
+    is the zint library, named as the "default writing backend" in the same README, so this direction
+    shares neither the encoder nor the decoder with the chain."""
+    npt.assert_array_equal(_aruco_reading(_zxing_symbol(payload, scale=QR_SCALE)), payload)
+
+
+@given(st.sampled_from(QR_FAMILY))
+@SLOW
+def test_both_encoders_draw_the_same_symbol_for_every_url_the_chain_records(url):
+    """The case types that both of its URLs are version 6. Nothing here types a version: segno's `make`
+    chooses "the minimal version which fits for the input data" and `symbol_size` "Returns the symbol
+    size (width x height) with the provided border and scaling factor", both documented in
+    raw.githubusercontent.com/heuer/segno/1.6.6/segno/__init__.py. Asked for any URL of the family at the
+    same error correction level, the other implementation draws a symbol of exactly the same number of
+    modules, so the version those two URLs share is a fact about the format rather than a choice segno
+    made. Replaces `g.equal(segno.make(a).version, segno.make(b).version)`."""
+    npt.assert_array_equal(_zxing_modules(url), _segno_modules(url))
+
+
+@given(QR_SINGLE_MODE_PAYLOAD)
+@SLOW
+def test_two_encoders_choose_the_same_symbol_for_a_single_mode_payload(payload):
+    """Where the whole payload belongs to one QR encoding mode the two encoders agree exactly. The three
+    alphabets are the three modes themselves: the digits of numeric mode; the alphanumeric set, which is
+    character for character segno's own `ALPHANUMERIC_CHARS` in segno/consts.py at 1.6.6, sitting beside
+    the mode indicators the same file cites to "ISO/IEC 18004:2015(E) -- Table 2"; and lower-case
+    letters, which fall outside that set and so are byte mode."""
+    npt.assert_array_equal(_zxing_modules(payload), _segno_modules(payload))
+
+
+@given(QR_PAYLOAD)
+@SLOW
+def test_the_encoder_that_segments_never_draws_the_larger_symbol(payload):
+    """Over the whole generated payload region the two encoders are not interchangeable, but they are
+    ordered: zint's symbol is never larger than segno's. `numpy.minimum` picks the smaller of the two
+    side lengths and it is always zint's, which is the invariant that makes the divergence below
+    one-sided."""
+    npt.assert_array_equal(np.minimum(_zxing_modules(payload), _segno_modules(payload)),
+                           _zxing_modules(payload))
+
+
+@given(QR_MIXED_PAYLOAD)
+@SLOW
+def test_a_numeric_run_with_one_byte_character_gets_a_larger_symbol_from_segno(payload):
+    """segno's own claim for `make` is that "an optimal (minimal) (Micro) QR code with a maximal error
+    correction level is generated", and for a payload of one mode it is. For a run of seven to eleven
+    digits followed by one character outside the alphanumeric set it is not: zint splits the payload
+    into a numeric segment and a byte segment and fits a smaller symbol, while segno encodes the whole
+    message in one mode and needs the next version up. Its own encoder says why -- `prepare_data` in
+    raw.githubusercontent.com/heuer/segno/1.6.6/segno/encoder.py is documented as "If `content` is a
+    string, an integer, or bytes, the returned tuple will have a single item", so a string is one
+    segment and the segmentation is left to the caller. The region is a strategy bound, not a filter:
+    every payload of that shape diverges."""
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_zxing_modules(payload), _segno_modules(payload))
+    npt.assert_array_less(_zxing_modules(payload), _segno_modules(payload))
+
+
+@given(QR_PAYLOAD)
+@SLOW
+def test_the_independent_reader_reports_the_error_level_the_writer_declared(payload):
+    """The error correction level is written into the symbol and read back out of it: segno's `error`
+    property is "Error correction level; either a string ("L", "M", "Q", "H")" and zxing-cpp's decoded
+    barcode reports the same letter for every generated payload, which is what makes the level the
+    chain asks for a fact about the file rather than an argument nobody checked."""
+    npt.assert_array_equal([barcode.ec_level for barcode in zxingcpp.read_barcodes(_qr_image(payload))],
+                           [segno.make(payload, error='h').error])
+
+
+@given(st.sampled_from(LEGACY_MISSES))
+@SLOW
+def test_the_detector_most_examples_reach_for_reads_nothing_from_a_valid_code(url):
+    """The case found one URL that `cv2.QRCodeDetector` silently fails on. Over a family of eighty-four URLs
+    that differ only in a month and a day, the failures are read off the detector itself at import
+    rather than chosen: sixteen of them come back as nothing. Every one of those codes is read
+    correctly by the Aruco detector in the same library and by zxing-cpp, so the code is sound and the
+    reading is not.
+    Replaces the typed `g.equal(legacy[entries[1]['url']], '')`."""
+    image = _qr_image(url)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_legacy_reading(image), url)
+    npt.assert_array_equal(_aruco_reading(image), url)
+    npt.assert_array_equal(_zxing_readings(image), [url])
+
+
+@given(st.sampled_from(LEGACY_MISSES), st.sampled_from(LEGACY_HITS))
+@SLOW
+def test_the_codes_it_misses_are_the_same_symbol_as_the_codes_it_reads(missed, read):
+    """What separates the two regions is not the size of the code. A URL the detector misses and a URL
+    it reads produce the same version and the same symbol size, so nothing about the symbol predicts
+    which side a record falls on, and a chain cannot check the size to know whether its code will be
+    read. Replaces the typed `g.equal(segno.make(a).version, segno.make(b).version)` read as a claim
+    about the two URLs of the case."""
+    npt.assert_array_equal(segno.make(missed, error='h').version, segno.make(read, error='h').version)
+    npt.assert_array_equal(segno.make(missed, error='h').symbol_size(),
+                           segno.make(read, error='h').symbol_size())
+
+
+@given(st.sampled_from(LEGACY_RECOVERED_BY_SHRINKING))
+@SLOW
+def test_a_smaller_image_of_the_same_code_is_the_one_the_legacy_detector_reads(url):
+    """The case rescales its one failing code up through scales 4, 8 and 12, finds the legacy detector
+    still blind at every one, and concludes that "the payload is what decides". It is not only the
+    payload: of the sixteen URLs the detector misses at the scale the chain writes, fifteen are read
+    correctly from the smaller image of the same code, and the sixteenth is the URL the case happened
+    to pick. This region is read off the detector at import rather than chosen, and in it making a code
+    bigger is what makes it unreadable. The other two readers read both sizes. Replaces the typed `g.equal(decode_qr_legacy(buf.getvalue()), '')` over the scale loop."""
+    npt.assert_array_equal(_legacy_reading(_qr_image(url, QR_SMALLER_SCALE)), url)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_legacy_reading(_qr_image(url, QR_SCALE)), url)
+    npt.assert_array_equal(_aruco_reading(_qr_image(url, QR_SCALE)), url)
+    npt.assert_array_equal(_zxing_readings(_qr_image(url, QR_SMALLER_SCALE)), [url])
+
+
+@given(st.integers(min_value=100, max_value=400))
+@SLOW
+def test_an_empty_payload_is_written_as_a_code_no_reader_reports(size):
+    """segno accepts the empty string and writes a symbol for it, and the image it writes is not a blank
+    page: the two do not even hold the same set of pixel values. No reader here reports a code in it.
+    Both OpenCV detectors return the empty string, which is the same value they return for a blank page
+    of any generated size, so nothing in that return type separates a code that was read from a code
+    that was missed from no code at all; zxing-cpp returns no barcode for either, which at least does
+    not name a payload. Replaces the typed `g.equal(decode_qr_legacy(blank_png()), '')` and the guard
+    module's own Blocked wrapper around a blank page."""
+    empty = _qr_image('')
+    blank = np.full((size, size), 255, dtype=np.uint8)
+    npt.assert_array_equal(_legacy_reading(empty), _legacy_reading(blank))
+    npt.assert_array_equal(_aruco_reading(empty), _aruco_reading(blank))
+    npt.assert_array_equal(_zxing_readings(empty), _zxing_readings(blank))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(np.unique(empty), np.unique(blank))
