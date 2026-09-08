@@ -58,6 +58,8 @@ import z3
 import clingo
 from cvc5 import pythonic as cvc5_pythonic
 import pydantic
+import pyshacl
+import rdflib
 from lxml import etree as lxml_etree
 from markdown_it import MarkdownIt
 import networkx as nx
@@ -5617,3 +5619,180 @@ def test_an_index_of_bookings_counts_the_probe_against_itself(entries, closed, s
     npt.assert_equal(index.overlaps(probe)[position], probe.overlaps(probe))
     npt.assert_equal(int(np.sum(index.overlaps(probe))),
                      int(np.sum(without.overlaps(probe))) + int(probe.overlaps(probe)))
+
+
+# ---------------------------------------------------------------- shapes, and the nodes they never look at
+SHACL_DIRECTORY = pathlib.Path(os.environ.get('SHACL_DIR', str(pathlib.Path.home() / 'shacl-oracle')))
+SHACL_VALIDATE_ORACLE_JS = pathlib.Path(__file__).with_name('shacl_validate_oracle.js')
+shacl_oracle_available = (shutil.which('node') is not None
+                          and (SHACL_DIRECTORY / 'node_modules' / 'rdf-validate-shacl').is_dir())
+SHACL_ORACLE = settings(max_examples=10, deadline=None)
+EXAMPLE = rdflib.Namespace('http://example.org/')
+LOCAL_NAME = st.from_regex(r'\A[a-z][a-z0-9]{0,7}\Z')
+EVIDENCE_DATE = st.dates(min_value=datetime.date(2000, 1, 1), max_value=datetime.date(2099, 12, 31))
+NOT_A_DATE = st.from_regex(r'\A[a-zA-Z]{1,10}\Z')
+
+
+def _control_shapes():
+    """P194's shapes graph, built with rdflib's own vocabulary rather than written out as text: one
+    node shape targeting the control class and requiring an owner and a typed evidence date."""
+    shapes = rdflib.Graph()
+    shapes.add((EXAMPLE.ControlShape, rdflib.RDF.type, rdflib.SH.NodeShape))
+    shapes.add((EXAMPLE.ControlShape, rdflib.SH.targetClass, EXAMPLE.Control))
+    owner, evidence = rdflib.BNode(), rdflib.BNode()
+    shapes.add((EXAMPLE.ControlShape, rdflib.SH.property, owner))
+    shapes.add((owner, rdflib.SH.path, EXAMPLE.owner))
+    shapes.add((owner, rdflib.SH.minCount, rdflib.Literal(1)))
+    shapes.add((EXAMPLE.ControlShape, rdflib.SH.property, evidence))
+    shapes.add((evidence, rdflib.SH.path, EXAMPLE.evidenceDate))
+    shapes.add((evidence, rdflib.SH.minCount, rdflib.Literal(1)))
+    shapes.add((evidence, rdflib.SH.datatype, rdflib.XSD.date))
+    return shapes
+
+
+def _control_graph(name, class_name, owner, evidence):
+    """One control node of the named class, with the owner and evidence date supplied by the caller.
+    Every term comes from rdflib; nothing here is written as turtle."""
+    graph = rdflib.Graph()
+    node = EXAMPLE[name]
+    graph.add((node, rdflib.RDF.type, EXAMPLE[class_name]))
+    for predicate, value in owner + evidence:
+        graph.add((node, predicate, value))
+    return graph
+
+
+def _in_pyshacl(data, shapes):
+    """pySHACL 0.40.1 over rdflib 7.6.0, the pair P194 names, reporting conformance and the number of
+    sh:ValidationResult nodes in the report graph it returns."""
+    conforms, report, _ = pyshacl.validate(data, shacl_graph=shapes, advanced=True)
+    return bool(conforms), len(list(report.subjects(rdflib.RDF.type, rdflib.SH.ValidationResult)))
+
+
+def _in_rdf_validate_shacl(data, shapes):
+    """The same two graphs validated by rdf-validate-shacl 0.6.5 under node, a JavaScript
+    implementation of the same W3C recommendation. Both graphs cross as turtle written by rdflib's own
+    serializer; the shim parses argv, calls the library and prints two lines."""
+    with tempfile.TemporaryDirectory() as directory:
+        paths = []
+        for graph, name in ((shapes, 'shapes.ttl'), (data, 'data.ttl')):
+            path = pathlib.Path(directory) / name
+            path.write_text(graph.serialize(format='turtle'), encoding='utf-8')
+            paths.append(str(path))
+        completed = subprocess.run(['node', str(SHACL_VALIDATE_ORACLE_JS)] + paths,
+                                   capture_output=True, encoding='utf-8', check=True,
+                                   env={**os.environ,
+                                        'NODE_PATH': str(SHACL_DIRECTORY / 'node_modules')})
+    conforms, results = completed.stdout.split('\n')[:2]
+    return conforms == 'true', int(results)
+
+
+@pytest.mark.skipif(not shacl_oracle_available,
+                    reason='node and the rdf-validate-shacl checkout are required for this oracle')
+@given(LOCAL_NAME, LOCAL_NAME, EVIDENCE_DATE)
+@SHACL_ORACLE
+def test_a_control_with_an_owner_and_a_typed_evidence_date_conforms_in_two_implementations(name,
+                                                                                          owner,
+                                                                                          when):
+    """P194 is recorded as a theoretical requirement, so its positive test had never been run. Run
+    now, pySHACL 0.40.1 and rdf-validate-shacl 0.6.5 under node return the same verdict and the same
+    number of results for every generated control."""
+    shapes = _control_shapes()
+    data = _control_graph(name, 'Control', [(EXAMPLE.owner, EXAMPLE[owner])],
+                          [(EXAMPLE.evidenceDate, rdflib.Literal(when))])
+    npt.assert_array_equal(_in_pyshacl(data, shapes), _in_rdf_validate_shacl(data, shapes))
+
+
+@pytest.mark.skipif(not shacl_oracle_available,
+                    reason='node and the rdf-validate-shacl checkout are required for this oracle')
+@given(LOCAL_NAME, LOCAL_NAME, EVIDENCE_DATE)
+@SHACL_ORACLE
+def test_a_control_without_an_owner_is_the_same_single_violation_in_both(name, owner, when):
+    """The first of P194's adverse tests. Removing the owner link produces one violation in both
+    implementations, and the graph that keeps it produces none in either, so the count the chain
+    reports is not a property of the validator it happened to use."""
+    shapes = _control_shapes()
+    evidence = [(EXAMPLE.evidenceDate, rdflib.Literal(when))]
+    without = _control_graph(name, 'Control', [], evidence)
+    with_owner = _control_graph(name, 'Control', [(EXAMPLE.owner, EXAMPLE[owner])], evidence)
+    npt.assert_array_equal(_in_pyshacl(without, shapes), _in_rdf_validate_shacl(without, shapes))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_in_pyshacl(without, shapes), _in_pyshacl(with_owner, shapes))
+
+
+@pytest.mark.skipif(not shacl_oracle_available,
+                    reason='node and the rdf-validate-shacl checkout are required for this oracle')
+@given(LOCAL_NAME, LOCAL_NAME, NOT_A_DATE)
+@SHACL_ORACLE
+def test_an_ill_typed_evidence_date_is_the_same_single_violation_in_both(name, owner, text):
+    """The second adverse test. A literal that carries the date datatype but no date in it fails
+    sh:datatype in both implementations, with the same count, even though one reaches that verdict
+    through rdflib's lexical parser and the other through rdf-validate-datatype."""
+    shapes = _control_shapes()
+    data = _control_graph(name, 'Control', [(EXAMPLE.owner, EXAMPLE[owner])],
+                          [(EXAMPLE.evidenceDate, rdflib.Literal(text, datatype=rdflib.XSD.date))])
+    npt.assert_array_equal(_in_pyshacl(data, shapes), _in_rdf_validate_shacl(data, shapes))
+
+
+@pytest.mark.skipif(not shacl_oracle_available,
+                    reason='node and the rdf-validate-shacl checkout are required for this oracle')
+@given(LOCAL_NAME, LOCAL_NAME, EVIDENCE_DATE, st.from_regex(r'\A[A-Z][a-z]{2,7}\Z').filter(
+           lambda word: word != 'Control'))
+@SHACL_ORACLE
+def test_a_node_of_another_class_conforms_vacuously_in_both(name, owner, when, other_class):
+    """P194's third adverse test, and the one its contract is written around: "Zero targeted nodes
+    cannot count as success when controls were expected." A node whose class is not the targeted one
+    is not selected by any shape, so the missing owner is never looked for and the report is
+    identical to the report for a graph that satisfies everything. Both implementations answer this
+    way, so the vacuous pass is what SHACL specifies and not one library's default. Replaces the
+    typed `shacl(wrong_class) == (True, 0)` of handoff_guards_v21.py case 194."""
+    shapes = _control_shapes()
+    evidence = [(EXAMPLE.evidenceDate, rdflib.Literal(when))]
+    unselected = _control_graph(name, other_class, [], evidence)
+    conforming = _control_graph(name, 'Control', [(EXAMPLE.owner, EXAMPLE[owner])], evidence)
+    npt.assert_array_equal(_in_pyshacl(unselected, shapes),
+                           _in_rdf_validate_shacl(unselected, shapes))
+    npt.assert_array_equal(_in_pyshacl(unselected, shapes), _in_pyshacl(conforming, shapes))
+    npt.assert_array_equal(_in_rdf_validate_shacl(unselected, shapes),
+                           _in_rdf_validate_shacl(conforming, shapes))
+
+
+@pytest.mark.skipif(not shacl_oracle_available,
+                    reason='node and the rdf-validate-shacl checkout are required for this oracle')
+@given(LOCAL_NAME, EVIDENCE_DATE)
+@SHACL_ORACLE
+def test_a_graph_with_no_controls_at_all_conforms_in_both(name, when):
+    """The empty case of the same rule. A graph holding no node of the targeted class conforms in
+    both implementations, and so does a graph holding nothing at all, so a validation report cannot
+    distinguish a complete inventory from an empty file."""
+    shapes = _control_shapes()
+    empty = rdflib.Graph()
+    unrelated = _control_graph(name, 'Widget', [], [(EXAMPLE.evidenceDate, rdflib.Literal(when))])
+    npt.assert_array_equal(_in_pyshacl(empty, shapes), _in_rdf_validate_shacl(empty, shapes))
+    npt.assert_array_equal(_in_pyshacl(empty, shapes), _in_pyshacl(unrelated, shapes))
+
+
+@given(st.lists(LOCAL_NAME, min_size=1, max_size=4, unique=True), EVIDENCE_DATE)
+@SLOW
+def test_the_inventory_reconciliation_is_what_notices_the_unselected_control(names, when):
+    """The independent target inventory P194 requires beside the shape validation. rdflib's own
+    subjects() reports which nodes carry the targeted class, and the expected identifiers that are
+    not among them are the coverage defect; a DuckDB EXCEPT over the same two lists finds the same
+    ones. For a graph whose controls all carry another class the whole inventory is missing, and that
+    is the only signal, because the validation report is the report of a conforming graph. Replaces
+    the typed `target_coverage(wrong_class, ['c1']) == ['c1']` of case 194."""
+    graph = rdflib.Graph()
+    for name in names:
+        graph.add((EXAMPLE[name], rdflib.RDF.type, EXAMPLE.Widget))
+        graph.add((EXAMPLE[name], EXAMPLE.evidenceDate, rdflib.Literal(when)))
+    targeted = sorted(str(subject).rsplit('/', 1)[-1]
+                      for subject in graph.subjects(rdflib.RDF.type, EXAMPLE.Control))
+    expected = pd.DataFrame({'name': pd.Series(names, dtype='object')})
+    present = pd.DataFrame({'name': pd.Series(targeted, dtype='object')})
+    with duckdb.connect() as connection:
+        connection.register('expected', expected)
+        connection.register('present', present)
+        missing = [row[0] for row in connection.execute(
+            'select name from expected except select name from present order by name').fetchall()]
+    npt.assert_array_equal(missing, sorted(set(names) - set(targeted)))
+    npt.assert_array_equal(missing, sorted(names))
+    npt.assert_array_equal(targeted, [])
