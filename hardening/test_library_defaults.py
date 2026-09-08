@@ -73,6 +73,7 @@ from python_calamine import CalamineWorkbook
 import nltk
 import numpy.testing as npt
 import pandas as pd
+import pandera.pandas as pandera
 import pandas.testing as pdt
 import polars as pl
 import pyarrow.csv as pyarrow_csv
@@ -3856,3 +3857,132 @@ def test_a_repeated_rate_name_is_accepted_by_three_parsers_and_only_the_last_val
     npt.assert_array_equal(float(_node_json_member(document, key)), json.loads(document)[key])
     with pytest.raises(AssertionError):
         npt.assert_array_equal(json.loads(document)[key], json.loads('{"%s": %s}' % (key, first))[key])
+
+
+# ---------------------------------------------------------------- one declared list, three validators
+DECLARED_JOURNALS = ['J01', 'J02', 'J03', 'J04']
+JOURNAL_POOL = st.sampled_from(DECLARED_JOURNALS + ['J05', 'J06'])
+POSTED_JOURNALS = st.lists(JOURNAL_POOL, min_size=1, max_size=6)
+DISTINCT_JOURNALS = st.lists(st.sampled_from(DECLARED_JOURNALS), min_size=2, max_size=4, unique=True)
+UNDECLARED_JOURNAL = st.sampled_from(['J05', 'J06'])
+POSITION = st.integers(min_value=0, max_value=5)
+JOURNAL_COLUMN_SCHEMA = pandera.DataFrameSchema(
+    {'journal': pandera.Column(str, pandera.Check.isin(DECLARED_JOURNALS), unique=True)})
+JOURNAL_LIST_SCHEMA = {'type': 'array', 'items': {'enum': DECLARED_JOURNALS}, 'uniqueItems': True}
+JOURNAL_TABLE_SQL = ("CREATE TABLE posted (journal VARCHAR PRIMARY KEY "
+                     "CHECK (journal IN ('J01', 'J02', 'J03', 'J04')))")
+
+
+def _pandera_accepts(identifiers):
+    try:
+        JOURNAL_COLUMN_SCHEMA.validate(pd.DataFrame({'journal': identifiers}), lazy=True)
+        return True
+    except pandera.errors.SchemaErrors:
+        return False
+
+
+def _jsonschema_accepts(identifiers):
+    try:
+        jsonschema.validate(identifiers, JOURNAL_LIST_SCHEMA)
+        return True
+    except jsonschema.ValidationError:
+        return False
+
+
+def _duckdb_accepts(identifiers):
+    connection = duckdb.connect()
+    connection.execute(JOURNAL_TABLE_SQL)
+    try:
+        connection.executemany('INSERT INTO posted VALUES (?)', [(one,) for one in identifiers])
+        return True
+    except duckdb.ConstraintException:
+        return False
+
+
+def _pandera_failures(identifiers):
+    try:
+        JOURNAL_COLUMN_SCHEMA.validate(pd.DataFrame({'journal': identifiers}), lazy=True)
+        raise AssertionError('the schema accepted the frame')
+    except pandera.errors.SchemaErrors as refusal:
+        return refusal.failure_cases
+
+
+@given(POSTED_JOURNALS)
+@SLOW
+def test_three_validators_agree_on_which_postings_one_declared_list_admits(identifiers):
+    """One declared list of journal identifiers, three engines that share no code: pandera's
+    DataFrameSchema with Check.isin and unique=True, the jsonschema package's implementation of the
+    JSON Schema keywords enum and uniqueItems, and DuckDB's own PRIMARY KEY and CHECK constraints.
+    They accept and refuse exactly the same generated lists, so the coverage rule P161 declares is not
+    a property of the validator it happens to use."""
+    npt.assert_array_equal(_pandera_accepts(identifiers), _jsonschema_accepts(identifiers))
+    npt.assert_array_equal(_pandera_accepts(identifiers), _duckdb_accepts(identifiers))
+
+
+@given(DISTINCT_JOURNALS, POSITION)
+@SLOW
+def test_only_one_of_the_three_refusals_names_the_row_a_repeat_is_on(identifiers, position):
+    """All three refuse a repeated identifier and each says something different about it. pandera
+    reports the value and every row it sits on, which polars finds independently with is_duplicated;
+    the jsonschema keyword uniqueItems fails against the whole array and its absolute_path is empty,
+    so nothing in the structured error says which element repeated. The identifier P161 needs named is
+    therefore named by the validator and not by the rule. Replaces the typed 'J02' in str(blocked) of
+    case 161."""
+    repeated = identifiers[position % len(identifiers)]
+    posted = identifiers + [repeated]
+    failures = _pandera_failures(posted)
+    column = pl.Series(posted)
+    npt.assert_array_equal(sorted(set(failures['failure_case'])),
+                           sorted(column.filter(column.is_duplicated()).unique().to_list()))
+    npt.assert_array_equal(sorted(failures['index']),
+                           sorted(column.is_duplicated().arg_true().to_list()))
+    npt.assert_array_equal(sorted(set(failures['check'])),
+                           sorted({'field_uniqueness'} & set(failures['check'])))
+    with pytest.raises(jsonschema.ValidationError) as refused:
+        jsonschema.validate(posted, JOURNAL_LIST_SCHEMA)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(list(refused.value.absolute_path), sorted(failures['index']))
+
+
+@given(DISTINCT_JOURNALS, UNDECLARED_JOURNAL, POSITION)
+@SLOW
+def test_two_validators_point_at_the_same_row_for_an_undeclared_identifier(identifiers, unknown,
+                                                                          position):
+    """Membership is the case where the two structured reports agree: pandera's failing index and the
+    absolute_path of the jsonschema enum error are the same row, and DuckDB refuses the same list
+    through its CHECK constraint. What differs from the repeat case is only which keyword failed."""
+    posted = list(identifiers)
+    posted.insert(position % (len(posted) + 1), unknown)
+    failures = _pandera_failures(posted)
+    with pytest.raises(jsonschema.ValidationError) as refused:
+        jsonschema.validate(posted, JOURNAL_LIST_SCHEMA)
+    npt.assert_array_equal(list(refused.value.absolute_path), list(failures['index']))
+    npt.assert_array_equal(sorted(set(failures['failure_case'])), [unknown])
+    npt.assert_array_equal(_duckdb_accepts(posted), _jsonschema_accepts(posted))
+
+
+@given(POSITION)
+@SLOW
+def test_the_index_set_comparison_the_chain_uses_cannot_see_a_repeated_posting(position):
+    """The coverage step is pd.Index(declared).symmetric_difference(pd.Index(posted)), and a set
+    operation deduplicates before it compares: a frame that posts one journal twice and covers every
+    declared journal produces the same empty difference as the exact frame, which is what the schema
+    catches and the comparison does not. The blindness is the set operation rather than the library,
+    because DuckDB's EXCEPT answers the same way in both directions on the same lists. Replaces the
+    typed len(pd.Index(...).symmetric_difference(...)) == 0 of case 161."""
+    repeated = DECLARED_JOURNALS[position % len(DECLARED_JOURNALS)]
+    posted = DECLARED_JOURNALS + [repeated]
+    npt.assert_array_equal(list(pd.Index(DECLARED_JOURNALS).symmetric_difference(pd.Index(posted))),
+                           list(pd.Index(DECLARED_JOURNALS).symmetric_difference(
+                               pd.Index(DECLARED_JOURNALS))))
+    connection = duckdb.connect()
+    connection.register('declared', pd.DataFrame({'journal': DECLARED_JOURNALS}))
+    connection.register('posted', pd.DataFrame({'journal': posted}))
+    npt.assert_array_equal(
+        connection.execute('SELECT journal FROM declared EXCEPT SELECT journal FROM posted '
+                           'UNION SELECT journal FROM posted EXCEPT SELECT journal FROM declared')
+        .fetchall(),
+        connection.execute('SELECT journal FROM declared EXCEPT SELECT journal FROM declared')
+        .fetchall())
+    with pytest.raises(pandera.errors.SchemaErrors):
+        JOURNAL_COLUMN_SCHEMA.validate(pd.DataFrame({'journal': posted}), lazy=True)
