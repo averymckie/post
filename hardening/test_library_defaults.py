@@ -79,7 +79,10 @@ import pyarrow.csv as pyarrow_csv
 import rfc8785
 import polars.testing as plt
 import pytest
+import rapidfuzz.distance.DamerauLevenshtein as rf_damerau
 import rapidfuzz.distance.Levenshtein as rf_levenshtein
+import rapidfuzz.distance.OSA as rf_osa
+import rapidfuzz.process as rf_process
 from hypothesis import assume, given, settings, strategies as st
 from largest_remainder import LargestRemainder
 
@@ -3609,3 +3612,126 @@ def test_a_highlight_comment_and_its_author_survive_without_the_appearance_updat
                 for entry in pypdf.PdfReader(io.BytesIO(saved)).pages[0]['/Annots']]
     npt.assert_array_equal(in_mupdf, in_pypdf)
     npt.assert_array_equal([note[:2] for note in in_mupdf], [(comment, title)])
+
+
+# ---------------------------------------------------------------- a lookup, its cutoff and its limit
+LOOKUP_WORD = st.text(alphabet='ab', min_size=2, max_size=4)
+LOOKUP_CHOICES = st.lists(LOOKUP_WORD, min_size=18, max_size=26, unique=True)
+DISTINCT_LETTERS = st.lists(st.characters(min_codepoint=97, max_codepoint=122), min_size=3, max_size=3,
+                            unique=True)
+
+
+@given(WORDS, WORDS)
+@SLOW
+def test_the_two_libraries_compute_the_same_damerau_levenshtein_distance(left, right):
+    """The distance P164 names is rapidfuzz's C++ DamerauLevenshtein; nltk's edit_distance with
+    transpositions enabled is pure-Python dynamic programming whose own dependencies are defusedxml,
+    click, joblib, regex and tqdm, none of them rapidfuzz. The two agree on generated text. The
+    Levenshtein distribution installed here is not a second implementation and is not used as one:
+    its published metadata requires rapidfuzz itself."""
+    npt.assert_array_equal(rf_damerau.distance(left, right),
+                           nltk.edit_distance(left, right, transpositions=True))
+
+
+@given(DISTINCT_LETTERS)
+@SLOW
+def test_two_transposition_metrics_answer_one_misspelling_differently(letters):
+    """rapidfuzz's own docstrings carry this pair as examples: DamerauLevenshtein.distance("CA", "ABC")
+    is 2 and OSA.distance("CA", "ABC") is 3, because the restricted metric may not edit a substring it
+    has already transposed. nltk's transposition mode is the unrestricted one, so it answers with
+    DamerauLevenshtein. A one-edit bound therefore keeps a misspelling under the scorer P164 names and
+    drops it under the neighbouring scorer in the same module, and plain Levenshtein charges two edits
+    for the adjacent swap that motivates the chain. Replaces the typed distances of case 164."""
+    first, second, third = letters
+    swapped, spread = third + first, first + second + third
+    npt.assert_array_equal(rf_damerau.distance(swapped, spread),
+                           nltk.edit_distance(swapped, spread, transpositions=True))
+    npt.assert_array_less(rf_damerau.distance(swapped, spread), rf_osa.distance(swapped, spread))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(rf_osa.distance(swapped, spread),
+                               nltk.edit_distance(swapped, spread, transpositions=True))
+    adjacent = second + first
+    npt.assert_array_less(rf_damerau.distance(first + second, adjacent),
+                          rf_levenshtein.distance(first + second, adjacent))
+
+
+@given(LOOKUP_CHOICES, st.integers(min_value=0, max_value=25))
+@SLOW
+def test_the_default_result_limit_drops_words_tied_with_the_last_one_it_keeps(choices, index):
+    """process.extract is documented as taking "limit : int, optional / maximum amount of results to
+    return. None can be passed to disable this behavior. Default is 5." and as sorting equal scores
+    "by their index". At the one-edit bound P164 declares, only the query itself can score zero, so
+    every word after the first is tied; executed, the truncated list is a prefix of the full one and
+    the first word dropped carries the same distance as the last word kept, which means the cut is
+    settled by the position of the word in the source index and not by the lookup. P164 passes
+    limit=None and therefore keeps them; nothing in the operation does. Replaces the typed
+    len(capped) == 5, len(every) == 11 and the typed list of six dropped words of case 164."""
+    query = choices[index % len(choices)]
+    every = rf_process.extract(query, choices, scorer=rf_damerau.distance, score_cutoff=1, limit=None)
+    capped = rf_process.extract(query, choices, scorer=rf_damerau.distance, score_cutoff=1)
+    npt.assert_array_equal([hit[0] for hit in capped], [hit[0] for hit in every[:len(capped)]])
+    npt.assert_array_equal([hit[1] for hit in every],
+                           [nltk.edit_distance(query, hit[0], transpositions=True) for hit in every])
+    assume(len(capped) < len(every))
+    npt.assert_array_equal(every[len(capped) - 1][1], every[len(capped)][1])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal([hit[0] for hit in capped], [hit[0] for hit in every])
+
+
+@given(LOOKUP_CHOICES, st.integers(min_value=0, max_value=25))
+@SLOW
+def test_one_cutoff_is_three_different_filters_across_three_scorers_of_one_metric(choices, index):
+    """The same number passed as score_cutoff means opposite things depending on the scorer, which
+    process.extract documents: "When an edit distance is used this represents the maximum edit
+    distance and matches with a `distance > score_cutoff` are ignored. When a normalized edit distance
+    is used this represents the minimal similarity and matches with a `similarity < score_cutoff` are
+    ignored." With one as the cutoff, DamerauLevenshtein.distance keeps the words within one edit,
+    DamerauLevenshtein.similarity keeps every word sharing one character, and
+    normalized_similarity keeps only the words nltk also puts at the query's distance from itself.
+    Swapping the scorer for a neighbour in the same module silently turns the bound into a
+    pass-through or into an equality test. Replaces the typed len(similar) == len(WORDS) and the typed
+    empty normalized_similarity result of case 164."""
+    query = choices[index % len(choices)]
+    tight = [hit[0] for hit in rf_process.extract(query, choices, scorer=rf_damerau.distance,
+                                                  score_cutoff=1, limit=None)]
+    loose = [hit[0] for hit in rf_process.extract(query, choices, scorer=rf_damerau.similarity,
+                                                  score_cutoff=1, limit=None)]
+    exact = [hit[0] for hit in rf_process.extract(query, choices,
+                                                  scorer=rf_damerau.normalized_similarity,
+                                                  score_cutoff=1, limit=None)]
+    npt.assert_array_equal(sorted(set(tight) & set(loose)), sorted(tight))
+    npt.assert_array_equal(sorted(set(exact) & set(tight)), sorted(exact))
+    npt.assert_array_equal(sorted(exact),
+                           sorted(word for word in choices
+                                  if nltk.edit_distance(query, word, transpositions=True)
+                                  == nltk.edit_distance(query, query, transpositions=True)))
+    assume(len(tight) < len(loose))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(sorted(tight), sorted(loose))
+
+
+@given(LOOKUP_CHOICES, st.integers(min_value=0, max_value=25))
+@SLOW
+def test_the_lookup_folds_no_case_until_a_processor_is_passed(choices, index):
+    """process.extract documents its preprocessing as "Optional callable that is used to preprocess
+    the strings before comparing them. Default is None, which deactivates this behaviour." A query
+    typed in capitals therefore matches nothing at a one-edit bound, because every cased letter counts
+    as an edit, which nltk confirms independently; passing str.lower recovers exactly the words the
+    lowercase query returns. The P164 chain case-folds while indexing, so the folding is upstream of
+    the lookup and not in it. Replaces the typed lookup('MEMBERS', ...) == [] and the typed distance
+    of 7 in case 164."""
+    query = choices[index % len(choices)]
+    plain = [hit[0] for hit in rf_process.extract(query, choices, scorer=rf_damerau.distance,
+                                                  score_cutoff=1, limit=None)]
+    shouted = [hit[0] for hit in rf_process.extract(query.upper(), choices,
+                                                    scorer=rf_damerau.distance, score_cutoff=1,
+                                                    limit=None)]
+    folded = [hit[0] for hit in rf_process.extract(query.upper(), choices,
+                                                   scorer=rf_damerau.distance, score_cutoff=1,
+                                                   limit=None, processor=str.lower)]
+    npt.assert_array_equal(sorted(folded), sorted(plain))
+    npt.assert_array_equal([rf_damerau.distance(query.upper(), word) for word in choices],
+                           [nltk.edit_distance(query.upper(), word, transpositions=True)
+                            for word in choices])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(sorted(shouted), sorted(plain))
