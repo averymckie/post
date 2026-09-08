@@ -9564,3 +9564,131 @@ def test_the_snippet_marks_the_whole_phrase_where_tantivy_marks_each_word_of_it(
     score, address = searcher.search(parsed, 5).hits[0]
     marked = generator.snippet_from_doc(searcher.doc(address)).to_html()
     npt.assert_array_equal([run.split('</b>')[0] for run in marked.split('<b>')[1:]], list(phrase))
+
+
+# ---------------------------------------------------------------- a slide placed in a box on a handout
+RENDER = settings(max_examples=25, deadline=None)
+RENDER_SCALE = 2
+HANDOUT_PAGE = (595, 842)
+SLIDE_WIDE = st.integers(min_value=400, max_value=800)
+SLIDE_TALL = st.integers(min_value=200, max_value=350)
+BOX_EDGE = st.integers(min_value=10, max_value=50)
+BOX_WIDE = st.integers(min_value=200, max_value=350)
+BOX_TALL = st.integers(min_value=400, max_value=700)
+
+
+def _inked_slide(width, height):
+    """A source page of the generated size with every point of it inked, so that what a reader measures
+    on the handout is the placed page itself and not the text that happens to be on it."""
+    written = io.BytesIO()
+    page = rl_canvas.Canvas(written, pagesize=(width, height))
+    page.setFillGray(0)
+    page.rect(0, 0, width, height, stroke=0, fill=1)
+    page.showPage()
+    page.save()
+    return written.getvalue()
+
+
+def _shown_on_a_handout(slide, box, **options):
+    """The chain's own placement: one handout page, one call to show_pdf_page with the generated
+    rectangle. Any option named here is passed straight to that call."""
+    handout = pymupdf.open()
+    page = handout.new_page(width=HANDOUT_PAGE[0], height=HANDOUT_PAGE[1])
+    with pymupdf.open(stream=slide, filetype='pdf') as source:
+        page.show_pdf_page(box, source, 0, **options)
+    return handout.tobytes()
+
+
+def _mupdf_ink(pdf):
+    """The bounding box of everything drawn on the page, from MuPDF's own raster: the extreme rows and
+    columns numpy finds below the mid grey."""
+    pixmap = pymupdf.open(stream=pdf, filetype='pdf')[0].get_pixmap(dpi=72 * RENDER_SCALE)
+    raster = np.frombuffer(pixmap.samples, dtype=np.uint8).reshape(pixmap.height, pixmap.width, pixmap.n)
+    rows, columns = np.nonzero(raster[:, :, 0] < 128)
+    return np.array([columns.min(), rows.min(), columns.max(), rows.max()])
+
+
+def _pdfium_ink(pdf):
+    """The same bounding box from PDFium's raster, through pypdfium2, which declares no dependencies at
+    all and shares no code with MuPDF."""
+    raster = np.asarray(pypdfium2.PdfDocument(io.BytesIO(pdf))[0].render(scale=RENDER_SCALE)
+                        .to_pil().convert('L'))
+    rows, columns = np.nonzero(raster < 128)
+    return np.array([columns.min(), rows.min(), columns.max(), rows.max()])
+
+
+def _drawn_ratio(box):
+    """The width-to-height ratio of a measured ink box."""
+    return (box[2] - box[0]) / (box[3] - box[1])
+
+
+@given(SLIDE_WIDE, SLIDE_TALL, BOX_EDGE, BOX_EDGE, BOX_WIDE, BOX_TALL)
+@RENDER
+def test_two_renderers_measure_the_same_drawing_on_the_handout(width, height, left, top,
+                                                              box_width, box_height):
+    """handoff_guards_v12.py's case show_pdf_page_does_not_preserve_aspect makes six typed comparisons
+    about slides placed on a handout, and every one of them is a comparison of numbers the chain
+    computed rather than of anything on the page. Before reading the page, the reading is checked: the
+    bounding box of the ink, measured by MuPDF's raster and by PDFium's through pypdfium2, agrees to
+    within one pixel of the generated placement, so nothing that follows is one library's artefact."""
+    slide = _inked_slide(width, height)
+    box = pymupdf.Rect(left, top, left + box_width, top + box_height)
+    placed = _shown_on_a_handout(slide, box)
+    npt.assert_allclose(_mupdf_ink(placed), _pdfium_ink(placed), atol=1)
+
+
+@given(SLIDE_WIDE, SLIDE_TALL, BOX_EDGE, BOX_EDGE, BOX_WIDE, BOX_TALL)
+@RENDER
+def test_the_drawing_keeps_the_source_proportions_and_not_the_rectangles(width, height, left, top,
+                                                                        box_width, box_height):
+    """The case's first claim is that an unfitted placement stretches the slide, and it is not true of
+    the page. `show_pdf_page` is documented at tag 1.28.2 with the signature `show_pdf_page(rect,
+    docsrc, pno=0, keep_proportion=True, overlay=True, oc=0, rotate=0, clip=None)` and the parameter
+    line "whether to maintain the width-height-ratio (default)", and the chain never passes that
+    argument in either branch. Measured on the page, the drawing has the generated slide's ratio and
+    not the generated rectangle's -- the source is always landscape here and the rectangle always
+    portrait, so the two can never coincide -- and the case's own threshold of a tenth would have
+    caught it had it measured the drawing instead of the rectangle it asked for."""
+    slide = _inked_slide(width, height)
+    box = pymupdf.Rect(left, top, left + box_width, top + box_height)
+    drawn = _drawn_ratio(_mupdf_ink(_shown_on_a_handout(slide, box)))
+    npt.assert_allclose(drawn, width / height, rtol=0.03)
+    with pytest.raises(AssertionError):
+        npt.assert_allclose(drawn, box_width / box_height, rtol=0.03)
+
+
+@given(SLIDE_WIDE, SLIDE_TALL, BOX_EDGE, BOX_EDGE, BOX_WIDE, BOX_TALL)
+@RENDER
+def test_only_keep_proportion_false_stretches_the_drawing_to_the_rectangle(width, height, left, top,
+                                                                          box_width, box_height):
+    """The stretch the case describes is a real behaviour of the library, reached by the argument the
+    chain does not pass: with `keep_proportion=False`, documented at that tag as "If false, all 4
+    corners are always positioned on the border of the target rectangle -- whatever the rotation value.
+    In general, this will deliver distorted and /or non-rectangular images", the ink fills the generated
+    rectangle and takes its ratio instead of the slide's. So the two branches the case calls fitted and
+    unfitted differ in the number it records and not in the option that decides this."""
+    slide = _inked_slide(width, height)
+    box = pymupdf.Rect(left, top, left + box_width, top + box_height)
+    drawn = _drawn_ratio(_mupdf_ink(_shown_on_a_handout(slide, box, keep_proportion=False)))
+    npt.assert_allclose(drawn, box_width / box_height, rtol=0.03)
+    with pytest.raises(AssertionError):
+        npt.assert_allclose(drawn, width / height, rtol=0.03)
+
+
+@given(SLIDE_WIDE, SLIDE_TALL, BOX_EDGE, BOX_EDGE, BOX_WIDE, BOX_TALL, BOX_WIDE, BOX_TALL)
+@RENDER
+def test_the_drawn_proportions_do_not_depend_on_the_rectangle_they_were_given(width, height, left, top,
+                                                                             box_width, box_height,
+                                                                             other_width, other_height):
+    """Which settles what the chain's own fitting is worth. Shown in two independently generated
+    rectangles with the argument left alone, one slide is drawn at one ratio, its own, in both; so
+    computing a rectangle that already carries the source ratio and handing that to the same call
+    cannot change the drawing, and the fitted and unfitted branches of the handout put the same picture
+    on the page. What differs between them is the pair of numbers the case rounds and compares, which is
+    read off the rectangle before the call and never off the result."""
+    slide = _inked_slide(width, height)
+    box = pymupdf.Rect(left, top, left + box_width, top + box_height)
+    other = pymupdf.Rect(left, top, left + other_width, top + other_height)
+    here = _drawn_ratio(_mupdf_ink(_shown_on_a_handout(slide, box)))
+    there = _drawn_ratio(_mupdf_ink(_shown_on_a_handout(slide, other)))
+    npt.assert_allclose([here, there], [width / height, width / height], rtol=0.03)
