@@ -2332,3 +2332,131 @@ def test_another_runtime_folds_letters_this_python_leaves_alone(index):
     npt.assert_array_equal(character.casefold(), character)
     with pytest.raises(AssertionError):
         npt.assert_array_equal(_runtime_case_forms('php', CASE_ORACLE_PHP, character)[0], character)
+
+
+# ---------------------------------------------------------------- mapping a label and grouping the result
+STAGE_CODES = tuple(range(4))
+UNKNOWN_CODES = tuple(range(4, 8))
+STAGE_OF = {'code-%d' % code: 'stage-%d' % code for code in STAGE_CODES}
+KNOWN_ROWS = st.lists(st.tuples(st.sampled_from(STAGE_CODES), st.integers(min_value=1, max_value=10 ** 6)),
+                      min_size=1, max_size=8)
+UNKNOWN_ROWS = st.lists(st.tuples(st.sampled_from(UNKNOWN_CODES), st.integers(min_value=1, max_value=10 ** 6)),
+                        min_size=1, max_size=4)
+
+
+def _labelled(rows):
+    """The generated rows as (label, amount) pairs. The label is built from the generated code and the
+    mapping is built from the same range the strategy draws from, so neither is typed."""
+    return [('code-%d' % code, amount) for code, amount in rows]
+
+
+def _pandas_stage_totals(rows, *, observed):
+    """The chain's own rollup: map the label to a declared stage, make it a categorical over every declared
+    stage, and sum by it."""
+    labels = [label for label, _ in rows]
+    frame = pd.DataFrame({'stage': pd.Categorical(pd.Series(labels).map(STAGE_OF),
+                                                  categories=sorted(STAGE_OF.values())),
+                          'amount': [amount for _, amount in rows]})
+    return frame.groupby('stage', observed=observed)['amount'].sum().sort_index()
+
+
+def _polars_stage_totals(rows):
+    """The same rollup in polars, which has no declared-category dimension to roll up over."""
+    labels = [label for label, _ in rows]
+    frame = pl.DataFrame({'stage': pl.Series(labels).replace_strict(STAGE_OF, default=None),
+                          'amount': [amount for _, amount in rows]})
+    return (frame.drop_nulls('stage').group_by('stage').agg(pl.col('amount').sum()).sort('stage'))
+
+
+def _duckdb_stage_totals(rows):
+    """And in SQL, where the mapping is a table and the drop is a join that finds no partner."""
+    with duckdb.connect() as connection:
+        connection.execute('create table entries(label VARCHAR, amount BIGINT)')
+        connection.execute('create table stages(label VARCHAR, stage VARCHAR)')
+        connection.executemany('insert into entries values (?, ?)', rows)
+        connection.executemany('insert into stages values (?, ?)', list(STAGE_OF.items()))
+        return connection.execute('select stages.stage, sum(entries.amount) from entries '
+                                  'join stages on entries.label = stages.label '
+                                  'group by stages.stage order by stages.stage').fetchall()
+
+
+@given(KNOWN_ROWS, UNKNOWN_ROWS)
+@SLOW
+def test_an_unmapped_label_is_a_null_in_one_engine_and_a_refusal_in_the_other(known, unknown):
+    """pandas.Series.map has no setting for a label the mapping does not cover: it returns a missing value
+    and says nothing. polars refuses the same call outright, with the message "incomplete mapping specified
+    for `replace_strict`", and will produce the missing value only when asked for it with default=None --
+    at which point the two engines agree exactly about which rows are missing. Its other spelling, replace,
+    leaves an uncovered label as it found it and loses nothing at all. One operation, three answers, and the
+    silent one is the default. Replaces the typed isna().sum() of handoff_guards_v16.py case 158."""
+    labels = [label for label, _ in _labelled(known + unknown)]
+    with pytest.raises(pl.exceptions.InvalidOperationError):
+        pl.Series(labels).replace_strict(STAGE_OF)
+    npt.assert_array_equal(pd.Series(labels).map(STAGE_OF).isna().to_numpy(),
+                           pl.Series(labels).replace_strict(STAGE_OF, default=None).is_null().to_numpy())
+    npt.assert_array_equal(pl.Series(labels).replace(STAGE_OF).is_null().to_numpy(), False)
+
+
+@given(KNOWN_ROWS)
+@SLOW
+def test_the_two_engines_agree_on_every_label_the_mapping_covers(known):
+    """Where the mapping is complete all three spellings return the same column, so the divergence above is
+    entirely about the uncovered label and not about the mapping itself."""
+    labels = [label for label, _ in _labelled(known)]
+    npt.assert_array_equal(pd.Series(labels).map(STAGE_OF).to_numpy(),
+                           pl.Series(labels).replace_strict(STAGE_OF).to_numpy())
+    npt.assert_array_equal(pl.Series(labels).replace(STAGE_OF).to_numpy(),
+                           pl.Series(labels).replace_strict(STAGE_OF).to_numpy())
+
+
+@given(KNOWN_ROWS, UNKNOWN_ROWS)
+@SLOW
+def test_the_missing_value_pandas_puts_in_a_column_of_labels_is_not_a_label(known, unknown):
+    """What pandas puts in the gap is a float, in a column of text, and the column's dtype becomes object.
+    polars will not accept that list as a string column at all, which is how the type damage becomes
+    visible: the same rollup handed to another engine fails to load rather than producing a different
+    number. Asked for the missing value in its own terms polars returns a string column with a null."""
+    labels = [label for label, _ in _labelled(known + unknown)]
+    with pytest.raises(TypeError):
+        pl.Series(pd.Series(labels).map(STAGE_OF).tolist(), dtype=pl.String)
+    npt.assert_array_equal(pl.Series(labels).replace_strict(STAGE_OF, default=None).dtype == pl.String, True)
+
+
+@given(KNOWN_ROWS, UNKNOWN_ROWS)
+@SLOW
+def test_grouping_a_declared_category_invents_rows_no_other_engine_reports(known, unknown):
+    """The default pandas groups a categorical under, observed=False, reports every declared stage whether
+    or not any row reached it, and the ones no row reached are reported as a sum of zero -- a measured
+    figure and an absent one written the same way. Neither of the other engines has any way to produce those
+    rows: polars groups what is there, and the SQL join finds no partner for the uncovered label. With
+    observed=True pandas agrees with both of them, on every generated set of rows. Replaces the typed
+    five-bar and three-bar stage rollups of case 158."""
+    rows = _labelled(known + unknown)
+    observed = _pandas_stage_totals(rows, observed=True)
+    declared = _pandas_stage_totals(rows, observed=False)
+    by_polars = _polars_stage_totals(rows)
+    npt.assert_array_equal(list(observed.index), by_polars['stage'].to_list())
+    npt.assert_array_equal(observed.to_numpy(), by_polars['amount'].to_numpy())
+    npt.assert_array_equal([list(observed.index), list(observed.to_numpy())],
+                           [[stage for stage, _ in _duckdb_stage_totals(rows)],
+                            [total for _, total in _duckdb_stage_totals(rows)]])
+    npt.assert_array_equal(len(declared), len(STAGE_OF))
+    npt.assert_array_equal(len(declared) >= len(observed), True)
+    npt.assert_array_equal(declared.sum(), observed.sum())
+
+
+@given(KNOWN_ROWS, UNKNOWN_ROWS)
+@SLOW
+def test_every_engine_leaves_the_unmapped_amount_out_of_the_stage_totals(known, unknown):
+    """The amount on an uncovered label reaches no stage in any of the three engines, so the rollup is
+    smaller than the ledger it was built from and nothing in the rollup says so. The three agree on the
+    figure they report, which is what makes the shortfall hard to see: two independent engines confirm the
+    total that is wrong."""
+    rows = _labelled(known + unknown)
+    source_total = sum(amount for _, amount in rows)
+    reported = [float(_pandas_stage_totals(rows, observed=True).sum()),
+                float(_polars_stage_totals(rows)['amount'].sum()),
+                float(sum(total for _, total in _duckdb_stage_totals(rows)))]
+    npt.assert_array_equal(reported, [reported[0]] * 3)
+    npt.assert_array_equal(reported[0] < source_total, True)
+    npt.assert_array_equal(source_total - reported[0], sum(amount for _, amount in _labelled(unknown)))
