@@ -70,6 +70,8 @@ from odf.namespaces import OFFICENS, TABLENS
 import odfdo
 import orjson
 import pdfplumber
+import pptx
+from pptx.util import Inches
 import pymupdf
 import pypdf
 import pypdfium2
@@ -4376,3 +4378,205 @@ def test_a_typed_cell_and_an_untyped_cell_read_alike_in_odfpy_and_differently_in
     npt.assert_array_equal([c.value for c in tables[1].get_rows()[0].get_cells()], cells)
     with pytest.raises(AssertionError):
         npt.assert_array_equal([c.value for c in tables[0].get_rows()[0].get_cells()], cells)
+
+
+# ---------------------------------------------------------------- reading a deck, and what that writes
+OFFICEPARSER_DIRECTORY = pathlib.Path(os.environ.get('OFFICEPARSER_DIR',
+                                                     str(pathlib.Path.home() / 'officeparser-oracle')))
+PPTX_NOTES_ORACLE_JS = pathlib.Path(__file__).with_name('pptx_notes_oracle.js')
+PPTX_PARTS_ORACLE_PHP = pathlib.Path(__file__).with_name('pptx_parts_oracle.php')
+officeparser_available = (shutil.which('node') is not None
+                          and (OFFICEPARSER_DIRECTORY / 'node_modules' / 'officeparser').is_dir())
+PPTX_LINE = st.text(alphabet=st.characters(whitelist_categories=('Lu', 'Ll', 'Nd'),
+                                           whitelist_characters='&<>"\''),
+                    min_size=1, max_size=12)
+PPTX_DECK = st.tuples(PPTX_LINE, st.lists(PPTX_LINE, min_size=1, max_size=3))
+
+
+def _pptx_bytes(title, lines, notes=None, picture=None):
+    """Build one deck with python-pptx from generated text. The picture, when asked for, is a PNG
+    written by PyMuPDF, so no image bytes are assembled here."""
+    deck = pptx.Presentation()
+    slide = deck.slides.add_slide(deck.slide_layouts[5])
+    slide.shapes.title.text = title
+    box = slide.shapes.add_textbox(Inches(1), Inches(2), Inches(4), Inches(1))
+    box.text_frame.text = lines[0]
+    for extra in lines[1:]:
+        box.text_frame.add_paragraph().text = extra
+    if picture is not None:
+        pixmap = pymupdf.Pixmap(pymupdf.csRGB, pymupdf.IRect(0, 0, picture[0], picture[1]))
+        pixmap.set_rect(pixmap.irect, (picture[2], picture[2], picture[2]))
+        slide.shapes.add_picture(io.BytesIO(pixmap.tobytes('png')),
+                                 Inches(5), Inches(2), Inches(1), Inches(1))
+    if notes is not None:
+        frame = slide.notes_slide.notes_text_frame
+        frame.text = notes[0]
+        for extra in notes[1:]:
+            frame.add_paragraph().text = extra
+    written = io.BytesIO()
+    deck.save(written)
+    return written.getvalue()
+
+
+def _pptx_parts(data):
+    with zipfile.ZipFile(io.BytesIO(data)) as archive:
+        return sorted(archive.namelist())
+
+
+def _pptx_parts_in_php(data):
+    """The same package listed by libzip through PHP's ZipArchive. The shim parses argv, calls the
+    library and prints one entry name per line."""
+    with tempfile.TemporaryDirectory() as directory:
+        path = pathlib.Path(directory) / 'deck.pptx'
+        path.write_bytes(data)
+        completed = subprocess.run(['php', str(PPTX_PARTS_ORACLE_PHP), str(path)],
+                                   capture_output=True, encoding='utf-8', check=True)
+    return sorted(completed.stdout.split('\n')[:-1])
+
+
+def _pptx_touched(data, how):
+    """Read one property of the first slide, save the deck again and return the new bytes."""
+    deck = pptx.Presentation(io.BytesIO(data))
+    getattr(deck.slides[0], how)
+    written = io.BytesIO()
+    deck.save(written)
+    return written.getvalue()
+
+
+def _pptx_notes_in_officeparser(data):
+    """The same package read by officeparser 7.8.0 under node: one list of paragraph texts per note.
+    The shim parses argv, calls the library and prints the tree it returns as JSON."""
+    with tempfile.TemporaryDirectory() as directory:
+        path = pathlib.Path(directory) / 'deck.pptx'
+        path.write_bytes(data)
+        completed = subprocess.run(['node', str(PPTX_NOTES_ORACLE_JS), str(path)],
+                                   capture_output=True, encoding='utf-8', check=True,
+                                   env={**os.environ,
+                                        'NODE_PATH': str(OFFICEPARSER_DIRECTORY / 'node_modules')})
+    tree = json.loads(completed.stdout)
+    return [[child['text'] for child in note['children']]
+            for note in tree['content'][0]['notes']]
+
+
+def _pptx_notes_in_python_pptx(data):
+    frame = pptx.Presentation(io.BytesIO(data)).slides[0].notes_slide.notes_text_frame
+    return frame.text, [paragraph.text for paragraph in frame.paragraphs]
+
+
+@pytest.mark.skipif(not php_binary_available, reason='php is required for this oracle')
+@given(PPTX_DECK, PPTX_DECK)
+@ORACLE_PROCESS
+def test_reading_the_notes_property_writes_the_same_five_parts_into_any_deck(first, second):
+    """python-pptx documents the side effect: has_notes_slide tests for a notes slide "without the
+    possible side effect of creating one", which notes_slide has. Executed, that read followed by a
+    save adds parts to the package, and the parts it adds are the same list for two decks with
+    different titles and different numbers of paragraphs, so the cost is a property of the read and
+    not of the deck. libzip through PHP's ZipArchive lists the same entries as zipfile for every
+    package here. Replaces the typed len(added) == 5 of case 162."""
+    packages = [_pptx_bytes(*specification) for specification in (first, second)]
+    for data in packages:
+        npt.assert_array_equal(_pptx_parts(data), _pptx_parts_in_php(data))
+    added = [sorted(set(_pptx_parts(_pptx_touched(data, 'notes_slide'))) - set(_pptx_parts(data)))
+             for data in packages]
+    npt.assert_array_equal(added[0], added[1])
+    npt.assert_array_equal(added[0], sorted(set(_pptx_parts_in_php(_pptx_touched(packages[0], 'notes_slide')))
+                                            - set(_pptx_parts_in_php(packages[0]))))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_pptx_parts(packages[0]),
+                               _pptx_parts(_pptx_touched(packages[0], 'notes_slide')))
+
+
+@given(PPTX_DECK)
+@ORACLE_PROCESS
+def test_the_guarded_test_for_notes_leaves_every_part_where_it_was(specification):
+    """Reading has_notes_slide and saving returns a package with exactly the entries it had; reading
+    notes_slide and saving does not. Both reads are spelled the same way at the call site and only
+    one of them is a question. Replaces the typed empty added list of case 162."""
+    data = _pptx_bytes(*specification)
+    npt.assert_array_equal(_pptx_parts(_pptx_touched(data, 'has_notes_slide')), _pptx_parts(data))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_pptx_parts(_pptx_touched(data, 'notes_slide')), _pptx_parts(data))
+
+
+@pytest.mark.skipif(not officeparser_available,
+                    reason='node and an officeparser checkout are required for this oracle')
+@given(PPTX_DECK, st.lists(PPTX_LINE, min_size=1, max_size=4))
+@ORACLE_PROCESS
+def test_two_readers_return_the_same_note_paragraphs_and_the_same_literal(specification, notes):
+    """officeparser 7.8.0 reads the same .pptx with its own zip inflater and its own XML parser and
+    returns one node per notes paragraph. On notes whose text carries ampersands, angle brackets and
+    quotes -- the characters the package stores as XML entities -- the two implementations return the
+    same strings, and python-pptx's own text of the whole frame is those strings joined with the
+    line feed both projects document as their separator. Replaces the typed 'A & B < 5 > 2' and the
+    typed paragraph count of case 162."""
+    data = _pptx_bytes(*specification, notes=notes)
+    text, paragraphs = _pptx_notes_in_python_pptx(data)
+    npt.assert_array_equal(paragraphs, _pptx_notes_in_officeparser(data)[0])
+    npt.assert_array_equal(text, '\n'.join(_pptx_notes_in_officeparser(data)[0]))
+    npt.assert_array_equal(len(text.split('\n')), len(paragraphs))
+
+
+@pytest.mark.skipif(not officeparser_available,
+                    reason='node and an officeparser checkout are required for this oracle')
+@given(PPTX_DECK, PPTX_LINE, PPTX_LINE, PPTX_LINE)
+@ORACLE_PROCESS
+def test_the_same_string_becomes_two_paragraphs_or_one_depending_on_which_setter_took_it(
+        specification, first, head, tail):
+    """python-pptx's own source says a line feed assigned to TextFrame.text adds "A new paragraph
+    ... for each line-feed character", while the same character assigned to _Paragraph.text is
+    "translated to a line-break", and names the contrast itself. Executed, one string written as the
+    first note paragraph produces one more paragraph than the same string written as the second, and
+    officeparser counts the paragraphs the same way in both arrangements. The list of note strings a
+    caller passes is therefore not read back as that list."""
+    joined = head + '\n' + tail
+    as_first = _pptx_bytes(*specification, notes=[joined, first])
+    as_second = _pptx_bytes(*specification, notes=[first, joined])
+    npt.assert_array_equal(len(_pptx_notes_in_python_pptx(as_first)[1]),
+                           len(_pptx_notes_in_python_pptx(as_second)[1]) + 1)
+    for data in (as_first, as_second):
+        npt.assert_array_equal(len(_pptx_notes_in_python_pptx(data)[1]),
+                               len(_pptx_notes_in_officeparser(data)[0]))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_pptx_notes_in_python_pptx(as_first)[1],
+                               _pptx_notes_in_python_pptx(as_second)[1])
+
+
+@pytest.mark.skipif(not officeparser_available,
+                    reason='node and an officeparser checkout are required for this oracle')
+@given(PPTX_DECK, PPTX_LINE, PPTX_LINE, PPTX_LINE)
+@ORACLE_PROCESS
+def test_a_line_break_reads_as_a_vertical_tab_here_and_as_a_newline_in_the_other_reader(
+        specification, first, head, tail):
+    """The line break python-pptx writes for that assigned line feed comes back as a vertical tab,
+    which its source documents as PowerPoint's clipboard encoding of a soft carriage return, and
+    comes back from officeparser as the line feed that was written. So the frame text always splits
+    on line feeds into exactly its paragraph count, whatever breaks the paragraphs contain, while
+    the other reader's text of the same notes splits into more lines than there are paragraphs.
+    Replaces the typed text.count('\\n') == 1 of case 162 and corrects its caveat: no paragraph
+    written through this library can contain a line feed of its own."""
+    data = _pptx_bytes(*specification, notes=[first, head + '\n' + tail])
+    text, paragraphs = _pptx_notes_in_python_pptx(data)
+    by_officeparser = _pptx_notes_in_officeparser(data)[0]
+    npt.assert_array_equal(len(text.split('\n')), len(paragraphs))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(paragraphs, by_officeparser)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(len(text.split('\n')), len('\n'.join(by_officeparser).split('\n')))
+
+
+@given(PPTX_DECK, st.tuples(st.integers(min_value=2, max_value=8),
+                            st.integers(min_value=2, max_value=8),
+                            st.integers(min_value=0, max_value=255)))
+@ORACLE_PROCESS
+def test_a_picture_has_no_text_attribute_at_all(specification, picture):
+    """A walk over shapes that reads .text raises AttributeError on the picture rather than returning
+    an empty string, so the guarded walk is the one that finishes. What it returns is the text of the
+    shapes that have a text frame, in the order the deck holds them. Replaces the typed shape text
+    list of case 162."""
+    data = _pptx_bytes(*specification, picture=picture)
+    shapes = pptx.Presentation(io.BytesIO(data)).slides[0].shapes
+    pictures = [shape for shape in shapes if not shape.has_text_frame]
+    with pytest.raises(AttributeError):
+        pictures[0].text
+    npt.assert_array_equal([shape.text for shape in shapes if shape.has_text_frame],
+                           [specification[0], '\n'.join(specification[1])])
