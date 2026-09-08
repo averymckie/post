@@ -71,6 +71,9 @@ import odfdo
 import orjson
 import pdfplumber
 import pptx
+import pptx.chart.data
+from pptx.enum.chart import XL_CHART_TYPE
+import pptx.oxml.ns as pptx_ns
 from pptx.util import Inches
 import pymupdf
 import pypdf
@@ -4580,3 +4583,153 @@ def test_a_picture_has_no_text_attribute_at_all(specification, picture):
         pictures[0].text
     npt.assert_array_equal([shape.text for shape in shapes if shape.has_text_frame],
                            [specification[0], '\n'.join(specification[1])])
+
+
+# ---------------------------------------------------------------- one amount, a chart and its workbook
+CHART_CENTS = st.integers(min_value=1, max_value=5000000).map(lambda n: Decimal(n * 10).scaleb(-2))
+CHART_WHOLE = st.integers(min_value=1, max_value=50000).map(lambda n: Decimal(n * 100).scaleb(-2))
+CHART_VALUE_TAG = pptx_ns.qn('c:v')
+
+
+def _chart_bytes(categories, amounts, name='Actual'):
+    deck = pptx.Presentation()
+    slide = deck.slides.add_slide(deck.slide_layouts[6])
+    data = pptx.chart.data.CategoryChartData()
+    data.categories = list(categories)
+    data.add_series(name, tuple(amounts))
+    slide.shapes.add_chart(XL_CHART_TYPE.COLUMN_CLUSTERED, Inches(1), Inches(1), Inches(6),
+                           Inches(4), data)
+    written = io.BytesIO()
+    deck.save(written)
+    return written.getvalue()
+
+
+def _chart_cached_texts(data):
+    """Every c:v in the package, read with the standard library's expat parser rather than the lxml
+    tree python-pptx writes with. The qualified name comes from python-pptx's own ns.qn."""
+    texts = []
+    with zipfile.ZipFile(io.BytesIO(data)) as archive:
+        for name in archive.namelist():
+            if name.endswith('.xml'):
+                texts.extend(element.text for element
+                             in ElementTree.fromstring(archive.read(name)).iter(CHART_VALUE_TAG))
+    return texts
+
+
+def _chart_workbook(data):
+    with zipfile.ZipFile(io.BytesIO(data)) as archive:
+        blob = archive.read([name for name in archive.namelist() if name.endswith('.xlsx')][0])
+    sheet = openpyxl.load_workbook(io.BytesIO(blob)).active
+    by_openpyxl = [row[1].value for row in sheet.iter_rows()][1:]
+    by_calamine = [row[1] for row in
+                   CalamineWorkbook.from_filelike(io.BytesIO(blob)).get_sheet_by_index(0).to_python()][1:]
+    return by_openpyxl, by_calamine
+
+
+def _chart_values(data):
+    chart = pptx.Presentation(io.BytesIO(data)).slides[0].shapes[0].chart
+    return list(chart.plots[0].categories), list(chart.series[0].values)
+
+
+@given(st.lists(PPTX_LINE, min_size=2, max_size=5, unique=True), st.data())
+@ORACLE_PROCESS
+def test_the_cached_chart_number_is_the_text_of_the_object_it_was_handed(categories, source):
+    """python-pptx writes the number a caller hands it into c:v as that object's own text, so a
+    Decimal carrying trailing cents and the float of the same amount produce two different packages.
+    The library cannot tell them apart afterwards: chart.series[0].values returns the same floats for
+    both. Read here with expat rather than the lxml tree the library writes with. Replaces the typed
+    cached value list of case 167."""
+    amounts = source.draw(st.lists(CHART_CENTS, min_size=len(categories), max_size=len(categories)))
+    as_decimal = _chart_bytes(categories, amounts)
+    as_float = _chart_bytes(categories, [float(amount) for amount in amounts])
+    npt.assert_array_equal(_chart_cached_texts(as_decimal),
+                           ['Actual'] + list(categories) + [str(amount) for amount in amounts])
+    npt.assert_array_equal(_chart_cached_texts(as_float),
+                           ['Actual'] + list(categories) + [str(float(amount)) for amount in amounts])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_chart_cached_texts(as_decimal), _chart_cached_texts(as_float))
+    npt.assert_allclose(_chart_values(as_decimal)[1], _chart_values(as_float)[1])
+
+
+@given(st.lists(PPTX_LINE, min_size=2, max_size=5, unique=True), st.data())
+@ORACLE_PROCESS
+def test_the_charts_own_workbook_does_not_carry_the_cents_the_chart_xml_carries(categories, source):
+    """The same deck holds the amount twice: once as the text of c:v and once as a cell in the
+    embedded xlsx the chart is bound to. Two readers of that workbook, openpyxl and the Rust
+    calamine, return the amount as a number equal to the one that was handed in, and neither returns
+    the trailing cents that are sitting in the chart XML beside it. Replaces the typed
+    workbook[2] == ['Software', 2130] of case 167."""
+    amounts = source.draw(st.lists(CHART_CENTS, min_size=len(categories), max_size=len(categories)))
+    data = _chart_bytes(categories, amounts)
+    by_openpyxl, by_calamine = _chart_workbook(data)
+    npt.assert_allclose(by_openpyxl, [float(amount) for amount in amounts])
+    npt.assert_allclose(by_calamine, [float(amount) for amount in amounts])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal([str(value) for value in by_openpyxl],
+                               [str(amount) for amount in amounts])
+
+
+@given(st.lists(PPTX_LINE, min_size=2, max_size=5, unique=True), st.data())
+@ORACLE_PROCESS
+def test_two_readers_of_the_charts_workbook_disagree_about_a_whole_amount(categories, source):
+    """A whole-dollar amount reaches the embedded sheet with no decimal point in its stored text, and
+    openpyxl returns it as an int where calamine returns it as a float. The numbers are equal and the
+    types are not, so a comparison that checks the type of a chart's own backing cell answers
+    differently depending on which reader opened it."""
+    amounts = source.draw(st.lists(CHART_WHOLE, min_size=len(categories), max_size=len(categories)))
+    by_openpyxl, by_calamine = _chart_workbook(_chart_bytes(categories,
+                                                            [float(amount) for amount in amounts]))
+    npt.assert_allclose(by_openpyxl, by_calamine)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal([type(value).__name__ for value in by_openpyxl],
+                               [type(value).__name__ for value in by_calamine])
+
+
+@given(st.lists(PPTX_LINE, min_size=2, max_size=5, unique=True), st.data())
+@ORACLE_PROCESS
+def test_replace_data_writes_back_a_chart_that_is_not_the_chart_it_read(categories, source):
+    """replace_data is handed the values python-pptx itself just read, which are floats, and it
+    rewrites both the cached XML and the embedded workbook from them. The amounts stay equal and the
+    forms do not: the cents in c:v are gone, and a whole amount that openpyxl read as a float out of
+    the original sheet is an int in the rewritten one. Replaces the typed after['workbook'] ==
+    state['workbook'] of case 167."""
+    amounts = source.draw(st.lists(CHART_WHOLE, min_size=len(categories), max_size=len(categories)))
+    data = _chart_bytes(categories, amounts)
+    deck = pptx.Presentation(io.BytesIO(data))
+    chart = deck.slides[0].shapes[0].chart
+    replacement = pptx.chart.data.CategoryChartData()
+    replacement.categories = list(chart.plots[0].categories)
+    replacement.add_series('Actual', tuple(chart.series[0].values))
+    chart.replace_data(replacement)
+    written = io.BytesIO()
+    deck.save(written)
+    rebuilt = written.getvalue()
+    npt.assert_allclose(_chart_values(rebuilt)[1], _chart_values(data)[1])
+    npt.assert_allclose(_chart_workbook(rebuilt)[0], _chart_workbook(data)[0])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_chart_cached_texts(rebuilt), _chart_cached_texts(data))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal([type(value).__name__ for value in _chart_workbook(rebuilt)[0]],
+                               [type(value).__name__ for value in _chart_workbook(data)[0]])
+
+
+@given(st.lists(PPTX_LINE, min_size=2, max_size=5, unique=True), st.data())
+@ORACLE_PROCESS
+def test_a_missing_amount_is_none_to_one_reader_and_an_empty_string_to_the_other(categories, source):
+    """One category with no figure survives the chart: python-pptx returns None in the series and
+    openpyxl finds an empty cell. calamine returns the empty string for that same cell, so which
+    categories are unfigured is a question the two readers of one workbook answer differently, and
+    only one of the two answers can be tested with `is None`. Replaces the typed [1500.0, None] of
+    case 167."""
+    amounts = source.draw(st.lists(CHART_CENTS, min_size=len(categories), max_size=len(categories)))
+    missing = source.draw(st.integers(min_value=0, max_value=len(categories) - 1))
+    handed = [None if index == missing else amount for index, amount in enumerate(amounts)]
+    data = _chart_bytes(categories, handed)
+    by_openpyxl, by_calamine = _chart_workbook(data)
+    npt.assert_array_equal([value is None for value in _chart_values(data)[1]],
+                           [value is None for value in handed])
+    npt.assert_array_equal([value is None for value in by_openpyxl],
+                           [value is None for value in handed])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal([value is None for value in by_calamine],
+                               [value is None for value in by_openpyxl])
