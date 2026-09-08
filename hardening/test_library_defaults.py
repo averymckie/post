@@ -44,7 +44,7 @@ import json
 import logging
 import math
 import sqlite3
-from urllib.parse import urljoin, quote as urllib_quote
+from urllib.parse import urljoin, urlsplit, quote as urllib_quote
 from decimal import Decimal, DivisionByZero, ROUND_CEILING, ROUND_HALF_EVEN, ROUND_HALF_UP, ROUND_UP
 from fractions import Fraction
 
@@ -77,6 +77,10 @@ from workalendar import exceptions as workalendar_exceptions
 from workalendar.registry import registry as workalendar_registry
 import holidays
 import html5lib
+import mkdocs
+import mkdocs.commands.build as mkdocs_build
+import mkdocs.config as mkdocs_config
+import tinycss2
 import igraph
 import jinja2
 from lark import Lark
@@ -17914,3 +17918,192 @@ def test_the_body_text_survives_the_transfer_encoding_in_both_parsers(subject, b
     data = _draft_bytes(subject, body, attachments, boundary=boundary)
     npt.assert_equal(BytesParser(policy=email_policy.default).parsebytes(data).get_body().get_content(),
                      _mailparser_reading(data)['text'])
+
+
+# ---------------------------------------------------------------- a built site and what it still fetches
+SITE = settings(max_examples=25, deadline=None)
+SITE_SLUG = st.text(alphabet='abcdefghijklmnopqrstuvwxyz0123456789', min_size=1, max_size=8)
+MKDOCS_THEME_TEMPLATE = (pathlib.Path(mkdocs.__file__).parent / 'themes' / 'mkdocs' / 'base.html')
+CASE_39_RULE = ("//script/@src[starts-with(., 'http:') or starts-with(., 'https:') or starts-with(., '//')]"
+                " | //link/@href[starts-with(., 'http:') or starts-with(., 'https:') or starts-with(., '//')]")
+
+
+def _mkdocs_page(body, theme_options=''):
+    """One site built by mkdocs 1.6.1 with its own shipped theme, returned as the text of index.html."""
+    with tempfile.TemporaryDirectory() as directory:
+        root = pathlib.Path(directory)
+        (root / 'docs').mkdir()
+        (root / 'docs' / 'index.md').write_text(body, encoding='utf-8')
+        (root / 'mkdocs.yml').write_text('site_name: proofs\nmarkdown_extensions: [tables]\n'
+                                         'theme:\n  name: mkdocs\n' + theme_options, encoding='utf-8')
+        mkdocs_build.build(mkdocs_config.load_config(config_file=str(root / 'mkdocs.yml'),
+                                                     site_dir=str(root / 'site')))
+        return (root / 'site' / 'index.html').read_text(encoding='utf-8')
+
+
+def _case_39_assets(page):
+    """Case 39's own external_assets rule, written as one XPath and evaluated by libxml2: the src of
+    every script and the href of every link whose value already names a scheme."""
+    return sorted(lxml_html.fromstring(page).xpath(CASE_39_RULE))
+
+
+def _every_external_reference(page):
+    """Every link lxml.html's own iterlinks() reports whose target names a host. Its docstring reads
+    "Yield (element, attribute, link, pos), where attribute may be None (indicating the link is in the
+    text). ``pos`` is the position where the link occurs; often 0, but sometimes something else in the
+    case of links in stylesheets or style tags"."""
+    return sorted(link for _, _, link, _ in lxml_html.fromstring(page).iterlinks() if urlsplit(link).netloc)
+
+
+def _external_hosts(page):
+    return sorted({urlsplit(link).netloc for link in _every_external_reference(page)})
+
+
+def _html5lib_selection(page, expression):
+    """The same document parsed by html5lib 1.1's WHATWG algorithm instead of by libxml2's HTML parser,
+    and selected with one XPath over the tree it builds."""
+    return sorted(html5lib.parse(page, treebuilder='lxml', namespaceHTMLElements=False).getroot().xpath(expression))
+
+
+def _tinycss2_style_attribute_urls(page):
+    """Every url() token tinycss2 1.5.1 finds in the style attributes of the page, each attribute parsed
+    as the declaration list it is."""
+    return sorted(token.value
+                  for value in _html5lib_selection(page, '//*/@style')
+                  for declaration in tinycss2.parse_blocks_contents(value)
+                  for token in getattr(declaration, 'value', []) or [] if token.type == 'url')
+
+
+def _tinycss2_style_element_urls(page):
+    """Every at-rule target tinycss2 finds in the style elements of the page, each parsed as a stylesheet."""
+    return sorted(token.value
+                  for text in _html5lib_selection(page, '//style/text()')
+                  for rule in tinycss2.parse_stylesheet(text)
+                  for token in getattr(rule, 'prelude', None) or [] if token.type == 'url')
+
+
+@given(SITE_SLUG, SITE_SLUG)
+@SITE
+def test_every_host_the_built_page_reaches_is_a_host_the_shipped_theme_declares(column, value):
+    """P39 renders the site a reader is given, and case 39 of handoff_guards_v4,
+    site_tables_need_escaping_and_local_assets, types
+    `g.equal([u.startswith('https://cdnjs.cloudflare.com/') for u in g3.external_assets(default_page)],
+    [True, True, True])`. Executed rather than typed: the hosts the built page reaches are a subset of
+    the hosts the theme's own base.html declares, both enumerated by lxml.html's published iterlinks over
+    the same library, and the references the case's rule finds all name one and the same host. The
+    template is the one mkdocs 1.6.1 ships, read from the installed package, and it is the whole source
+    of these URLs -- nothing in the content contributes one."""
+    body = '| id | ' + column + ' |\n| --- | --- |\n| s2 | ' + value + ' |\n'
+    page = _mkdocs_page(body, '  highlightjs: true\n')
+    template = MKDOCS_THEME_TEMPLATE.read_text(encoding='utf-8')
+    npt.assert_array_equal(_external_hosts(page),
+                           sorted(set(_external_hosts(page)) & set(_external_hosts(template))))
+    hosts = [urlsplit(url).netloc for url in _case_39_assets(page)]
+    npt.assert_array_equal(hosts, hosts[:1] * len(hosts))
+
+
+@given(SITE_SLUG, SITE_SLUG)
+@SITE
+def test_the_documented_analytics_option_changes_the_hosts_the_case_rule_reports(column, tag):
+    """The three assets are a property of one configuration and not of the theme. mkdocs' own theme
+    documentation at 1.6.1 says of the same theme "**`analytics`**: Defines configuration options for an
+    analytics service. Currently, only Google Analytics v4 is supported via the `gtag` option", and
+    base.html turns that option into `<script async
+    src="https://www.googletagmanager.com/gtag/js?id={{ config.theme.analytics.gtag }}">`. Setting it
+    gives the same page a script from a second host, with highlight.js switched off -- which is exactly
+    the configuration case 39's checked_site builds and asserts has no external asset at all. The host is
+    still one the theme declares, so the subset claim above survives; the case's typed list of three does
+    not."""
+    body = '| id | ' + column + ' |\n| --- | --- |\n| s2 | x |\n'
+    with_tag = _mkdocs_page(body, '  highlightjs: false\n  analytics:\n    gtag: G-' + tag + '\n')
+    without = _mkdocs_page(body, '  highlightjs: false\n')
+    template = MKDOCS_THEME_TEMPLATE.read_text(encoding='utf-8')
+    npt.assert_array_equal(_external_hosts(with_tag),
+                           sorted(set(_external_hosts(with_tag)) & set(_external_hosts(template))))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_case_39_assets(with_tag), _case_39_assets(without))
+
+
+@given(SITE_SLUG, SITE_SLUG)
+@SITE
+def test_an_image_the_content_names_is_a_fetch_the_case_rule_cannot_see(host, name):
+    """Case 39's checked_site raises Blocked on `if external:` and otherwise returns
+    `{'rows': 3, 'external_assets': 0}`, and that zero is read as a page with no external dependency.
+    The rule behind it looks at script/@src and link/@href and at nothing else, so an image written in
+    the content -- ordinary Markdown, and the content is what the chain itself supplies -- is a fetch at
+    render time that the rule returns nothing about. Its answer for the page with the image is its answer
+    for the page without it, while lxml's iterlinks separates them, and what iterlinks adds is exactly
+    what html5lib's WHATWG parse finds at //img/@src."""
+    url = 'https://' + host + '.example/' + name + '.png'
+    body = '| id | text |\n| --- | --- |\n| s2 | x |\n'
+    with_image = _mkdocs_page(body + '\n![' + name + '](' + url + ')\n')
+    without = _mkdocs_page(body)
+    npt.assert_array_equal(_case_39_assets(with_image), _case_39_assets(without))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_every_external_reference(with_image), _every_external_reference(without))
+    npt.assert_array_equal(sorted(set(_every_external_reference(with_image)) - set(_every_external_reference(without))),
+                           _html5lib_selection(with_image, '//img/@src'))
+
+
+@given(SITE_SLUG, SITE_SLUG)
+@SITE
+def test_a_url_in_a_style_attribute_is_a_fetch_the_case_rule_cannot_see(host, name):
+    """The same gap reached through the other thing case 39 records about its own content, that inline
+    HTML is rendered rather than escaped. A style attribute carrying a CSS url() is a fetch, the case's
+    rule reports nothing about it, and iterlinks reports it because its scan covers style attributes as
+    well as link attributes. The independent reading is tinycss2 1.5.1, whose published requirement at
+    that version is webencodings alone: it parses each style attribute as the declaration list it is and
+    returns the url token, and it returns the same URL iterlinks added."""
+    url = 'https://' + host + '.example/' + name + '.png'
+    body = '| id | text |\n| --- | --- |\n| s2 | x |\n'
+    styled = _mkdocs_page(body + '\n<div style="background:url(' + url + ')">z</div>\n')
+    without = _mkdocs_page(body)
+    npt.assert_array_equal(_case_39_assets(styled), _case_39_assets(without))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_every_external_reference(styled), _every_external_reference(without))
+    npt.assert_array_equal(sorted(set(_every_external_reference(styled)) - set(_every_external_reference(without))),
+                           _tinycss2_style_attribute_urls(styled))
+
+
+@given(SITE_SLUG, SITE_SLUG)
+@SITE
+def test_an_import_in_a_style_element_is_a_fetch_the_case_rule_cannot_see(host, name):
+    """The third shape, and the one that pulls in a whole stylesheet rather than one file: an @import
+    inside a style element the content supplies. The case's rule looks at link elements, and this is not
+    one. iterlinks reports it from the element's text, which is the case its docstring means by "links in
+    stylesheets or style tags", and tinycss2 reports it as the prelude of an at-rule."""
+    url = 'https://' + host + '.example/' + name + '.css'
+    body = '| id | text |\n| --- | --- |\n| s2 | x |\n'
+    imported = _mkdocs_page(body + '\n<style>@import url(' + url + ');</style>\n')
+    without = _mkdocs_page(body)
+    npt.assert_array_equal(_case_39_assets(imported), _case_39_assets(without))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_every_external_reference(imported), _every_external_reference(without))
+    npt.assert_array_equal(sorted(set(_every_external_reference(imported)) - set(_every_external_reference(without))),
+                           _tinycss2_style_element_urls(imported))
+
+
+@given(SITE_SLUG)
+@SITE
+def test_the_two_html_parsers_find_the_same_scripts_and_stylesheets_in_the_built_page(column):
+    """The reading does not depend on the parser. libxml2's HTML parser through lxml 6.1.3 and
+    html5lib 1.1's own WHATWG implementation are handed the same built page and the same XPath, and they
+    return the same script sources and stylesheet hrefs, with highlight.js switched on so there are some
+    to find."""
+    body = '| id | ' + column + ' |\n| --- | --- |\n| s2 | x |\n'
+    page = _mkdocs_page(body, '  highlightjs: true\n')
+    npt.assert_array_equal(_case_39_assets(page), _html5lib_selection(page, CASE_39_RULE))
+
+
+@given(SITE_SLUG)
+@SITE
+def test_the_built_page_links_out_to_its_generator_and_the_case_rule_never_reports_it(column):
+    """Even with nothing in the content and highlight.js switched off, the page the reader is given is
+    not free of external references: the shipped theme's footer carries an anchor to the project's own
+    site. It is a navigation link and not a subresource, which is why the case's rule is silent about it,
+    but it is the whole of the difference between the two enumerations on that page, and both parsers
+    agree that it is there."""
+    body = '| id | ' + column + ' |\n| --- | --- |\n| s2 | x |\n'
+    page = _mkdocs_page(body, '  highlightjs: false\n')
+    npt.assert_array_equal(sorted(set(_every_external_reference(page)) - set(_case_39_assets(page))),
+                           _html5lib_selection(page, "//a/@href[starts-with(., 'http:') or starts-with(., 'https:')]"))
