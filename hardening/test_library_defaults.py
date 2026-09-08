@@ -61,6 +61,7 @@ import pint
 import portion
 import unyt
 import regex
+import tantivy
 import rfc3986
 import z3
 import clingo
@@ -9378,3 +9379,188 @@ def test_the_module_grid_reads_process_state_that_the_object_grid_declares(year,
                                    .monthdayscalendar(year, month))
     finally:
         calendar.setfirstweekday(was)
+
+
+# ---------------------------------------------------------------- an index, a query language and a rank
+FTS_SCHEMA = "CREATE VIRTUAL TABLE docs USING fts5(document, block_id, body, tokenize='unicode61')"
+FTS_WORD = st.text(alphabet='abcdefgh', min_size=3, max_size=6)
+FTS_BODY = st.lists(FTS_WORD, min_size=1, max_size=8)
+FTS_BODIES = st.lists(FTS_BODY, min_size=2, max_size=6)
+FTS_OPERATOR = st.sampled_from(('AND', 'OR', 'NOT'))
+FTS_PHRASE = st.lists(FTS_WORD, min_size=2, max_size=3)
+FILLER_LENGTHS = st.lists(st.integers(min_value=1, max_value=30), min_size=4, max_size=8, unique=True)
+
+
+def _fts5_index(bodies):
+    """The chain's own index: one FTS5 virtual table in memory, one row per block, declaring the same
+    unicode61 tokenizer the case records."""
+    connection = sqlite3.connect(':memory:')
+    connection.execute(FTS_SCHEMA)
+    connection.executemany('INSERT INTO docs(document, block_id, body) VALUES (?,?,?)',
+                           [('d', 'b%d' % number, ' '.join(body)) for number, body in enumerate(bodies)])
+    return connection
+
+
+def _fts5_hits(connection, query):
+    """The chain's own query, block by block: the identifier, the rank and the snippet, ordered as the
+    case orders them."""
+    return connection.execute(
+        "SELECT block_id, bm25(docs), snippet(docs, 2, '[', ']', '...', 6) "
+        'FROM docs WHERE docs MATCH ? ORDER BY bm25(docs)', (query,)).fetchall()
+
+
+def _fts5_literal(text):
+    """The escape the chain applies, which FTS5's own documented phrase syntax asks for: the phrase in
+    double quotes with any embedded quote doubled."""
+    return '"' + text.replace('"', '""') + '"'
+
+
+def _tantivy_index(bodies):
+    """The same blocks in tantivy 0.26.0, a Rust search engine whose Python wrapper declares no runtime
+    dependencies at all and whose Cargo.toml at tag 0.26.0 names the tantivy crate and no SQLite, so
+    nothing of FTS5 is beneath it."""
+    builder = tantivy.SchemaBuilder()
+    for field in ('document', 'block_id', 'body'):
+        builder.add_text_field(field, stored=True)
+    index = tantivy.Index(builder.build())
+    writer = index.writer()
+    for number, body in enumerate(bodies):
+        writer.add_document(tantivy.Document(document=['d'], block_id=['b%d' % number],
+                                             body=[' '.join(body)]))
+    writer.commit()
+    index.reload()
+    return index
+
+
+def _tantivy_hits(index, query):
+    """The same query through tantivy's own parser and searcher, best first as that library orders it."""
+    searcher = index.searcher()
+    parsed = index.parse_query(query, ['body'])
+    return [(searcher.doc(address)['block_id'][0], score)
+            for score, address in searcher.search(parsed, 50).hits]
+
+
+@given(FTS_BODIES, FTS_OPERATOR)
+@SLOW
+def test_both_engines_refuse_a_bare_boolean_operator(bodies, operator):
+    """handoff_guards_v13.py's case a_literal_query_must_be_quoted types seven expectations about a
+    search over three typed blocks. The first reproduces in a second engine that shares nothing with the
+    first: for every generated corpus, a bare AND, OR or NOT is a syntax error to SQLite's FTS5 parser
+    and to tantivy's, so a phrase a reader typed is refused by both rather than searched for. The
+    operator names are the query language's own, not values anybody expects back."""
+    with pytest.raises(sqlite3.OperationalError):
+        _fts5_hits(_fts5_index(bodies), operator)
+    with pytest.raises(ValueError):
+        _tantivy_index(bodies).parse_query(operator, ['body'])
+
+
+@given(FTS_BODIES, FTS_WORD, FTS_WORD)
+@SLOW
+def test_the_hyphen_fts5_reads_as_a_column_filter_is_an_ordinary_term_to_tantivy(bodies, left, right):
+    """The second expectation does not travel. FTS5's grammar in ext/fts5/fts5parse.y at tag
+    version-3.45.1 has the rule `colset(A) ::= MINUS STRING(X).`, so a minus sign followed by a bareword
+    is a column set, and `sqlite3Fts5ParseError(pParse, "no such column: %s", z)` in fts5_expr.c is what
+    a reader gets for a hyphenated term. tantivy parses the same string without complaint and returns
+    the block that holds it. So the escaping the chain performs is not a general precaution against
+    hyphens; it is one engine's grammar, and the same unescaped query is a search in the other."""
+    hyphenated = left + '-' + right
+    bodies = [body for body in bodies if not {left, right} & set(body)] + [[hyphenated]]
+    with pytest.raises(sqlite3.OperationalError):
+        _fts5_hits(_fts5_index(bodies), hyphenated)
+    npt.assert_array_equal([block for block, score in
+                            _tantivy_hits(_tantivy_index(bodies), hyphenated)],
+                           ['b%d' % (len(bodies) - 1)])
+
+
+@given(FTS_BODIES, FTS_WORD, FTS_WORD)
+@SLOW
+def test_quoting_makes_both_engines_read_a_hyphenated_term_literally(bodies, left, right):
+    """Quoted, the two engines agree again. The generated hyphenated term is placed in a block of its
+    own and quoted for each engine, and both return that block and no other, so the case's third and
+    fourth expectations hold in a second implementation."""
+    hyphenated = left + '-' + right
+    bodies = [body for body in bodies if not {left, right} & set(body)] + [[hyphenated]]
+    wanted = 'b%d' % (len(bodies) - 1)
+    quoted = _fts5_literal(hyphenated)
+    npt.assert_array_equal([block for block, rank, snippet in _fts5_hits(_fts5_index(bodies), quoted)],
+                           [wanted])
+    npt.assert_array_equal([block for block, score in _tantivy_hits(_tantivy_index(bodies), quoted)],
+                           [wanted])
+
+
+@given(FTS_BODIES, FTS_PHRASE)
+@SLOW
+def test_the_escape_fts5_needs_for_an_embedded_quote_is_a_syntax_error_to_tantivy(bodies, phrase):
+    """The case's sixth expectation types the escape itself, that an embedded quote is doubled rather
+    than dropped. Executed against a second engine it is worse than untypeable: the string the chain
+    hands FTS5 for a phrase carrying a quote is parsed by FTS5, matches the block, and is a syntax error
+    to tantivy, which escapes an embedded quote with a backslash instead. So `literal_query` does not
+    make a query literal, it makes it literal to one engine, and the same call that protects a reader
+    from FTS5's grammar hands another engine something it will not parse at all."""
+    quoted_text = '"'.join(phrase)
+    bodies = [body for body in bodies if not set(phrase) & set(body)] + [[quoted_text]]
+    query = _fts5_literal(quoted_text)
+    npt.assert_array_equal([block for block, rank, snippet in _fts5_hits(_fts5_index(bodies), query)],
+                           ['b%d' % (len(bodies) - 1)])
+    with pytest.raises(ValueError):
+        _tantivy_index(bodies).parse_query(query, ['body'])
+
+
+@given(FILLER_LENGTHS, FTS_WORD)
+@SLOW
+def test_the_two_engines_order_the_hits_alike_and_sign_the_ranks_oppositely(lengths, term):
+    """The case records only that every rank is a float. What a rank is differs between the engines by
+    exactly a sign: `sqlite3_result_double(pCtx, -1.0 * score)` is the last line of fts5Bm25Function in
+    ext/fts5/fts5_aux.c at version-3.45.1, so every FTS5 rank is negative and `ORDER BY bm25(docs)`
+    ascending is best-first, while every tantivy score is positive and its searcher returns best first.
+    Over generated corpora holding the term in documents of distinct lengths the two orders are the same
+    order, so the ranking agrees and only the convention differs -- which is what makes the chain's
+    `ORDER BY` correct here and backwards against any engine that scores upward."""
+    bodies = [[term] + ['f%d' % position for position in range(length)] for length in lengths]
+    ranked = _fts5_hits(_fts5_index(bodies), _fts5_literal(term))
+    scored = _tantivy_hits(_tantivy_index(bodies), _fts5_literal(term))
+    npt.assert_array_equal([block for block, rank, snippet in ranked],
+                           [block for block, score in scored])
+    npt.assert_array_less([rank for block, rank, snippet in ranked], 0.0)
+    npt.assert_array_less(0.0, [score for block, score in scored])
+
+
+@given(FILLER_LENGTHS, FTS_WORD)
+@SLOW
+def test_rounding_the_rank_to_six_places_merges_hits_that_both_engines_separate(lengths, term):
+    """And the rank the chain records is not the rank the engine computed. FTS5's bm25 in that same file
+    carries the comment that "The problem with this is that if (N < 2*nHit), the IDF is negative. Which
+    is undesirable. So the mimimum allowable IDF is (1e-6) - roughly the same as a term that appears in
+    just over half of set of 5,000,000 documents", and the line beneath it is `if( idf<=0.0 ) idf =
+    1e-6;`. For a term in every document of a small corpus that floor is what is used, so the ranks come
+    back around a millionth apart and `round(r[3], 6)`, which is how the case records them, merges hits
+    the engine had separated. tantivy's idf in src/query/bm25.rs at tag 0.26.0 is `(1.0 + x).ln()` with
+    no floor, so its scores stay apart through the same rounding: the collapse is the recording, not the
+    ranking."""
+    bodies = [[term] + ['f%d' % position for position in range(length)] for length in lengths]
+    ranks = [rank for block, rank, snippet in _fts5_hits(_fts5_index(bodies), _fts5_literal(term))]
+    scores = [score for block, score in _tantivy_hits(_tantivy_index(bodies), _fts5_literal(term))]
+    npt.assert_array_less(len(set(round(rank, 6) for rank in ranks)), len(set(ranks)))
+    npt.assert_array_equal(len(set(round(score, 6) for score in scores)), len(set(scores)))
+
+
+@given(FTS_BODIES, FTS_PHRASE)
+@SLOW
+def test_the_snippet_marks_the_whole_phrase_where_tantivy_marks_each_word_of_it(bodies, phrase):
+    """The case's remaining expectation is that the snippet marks the matched span in the source text.
+    It does, and the span it marks is the phrase: the text between the two markers FTS5 was handed is
+    exactly the generated phrase, so nothing about it needs typing. tantivy highlights the same match
+    word by word instead -- its snippet returns one bold run per term -- so "the matched span" is not one
+    thing across engines, and a reader shown a highlighted result learns which words matched from one
+    and which phrase matched from the other."""
+    bodies = [body for body in bodies if not set(phrase) & set(body)] + [list(phrase)]
+    query = _fts5_literal(' '.join(phrase))
+    (block, rank, snippet), = _fts5_hits(_fts5_index(bodies), query)
+    npt.assert_array_equal(snippet.split('[')[1].split(']')[0], ' '.join(phrase))
+    index = _tantivy_index(bodies)
+    searcher = index.searcher()
+    parsed = index.parse_query(query, ['body'])
+    generator = tantivy.SnippetGenerator.create(searcher, parsed, index.schema, 'body')
+    score, address = searcher.search(parsed, 5).hits[0]
+    marked = generator.snippet_from_doc(searcher.doc(address)).to_html()
+    npt.assert_array_equal([run.split('</b>')[0] for run in marked.split('<b>')[1:]], list(phrase))
