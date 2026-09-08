@@ -19470,3 +19470,153 @@ def test_a_proof_heading_written_underlined_is_a_heading_to_both_parsers(entries
     npt.assert_array_equal(_markdown_it_catalogue(underlined), _python_markdown_catalogue(underlined))
     npt.assert_array_equal(_markdown_it_catalogue(underlined),
                            _markdown_it_catalogue(_catalogue_source(entries)))
+
+
+# ---------------------------------------------------------------------------------------------------
+# P129, case large_type_changes_only_the_stylesheet of handoff_guards_v13.py: a large-type reading copy
+# of a page, made by attaching a stylesheet and changing nothing else. libxml2's HTML parser through
+# lxml 6.1.3 is the library under test; html5lib 1.1's WHATWG parser and tinycss2 1.5.1 are the two
+# independent readings, both already recorded above.
+LARGE_TYPE = settings(max_examples=40, deadline=None)
+READING_WORDS = st.lists(st.text(alphabet='abcdefghij', min_size=1, max_size=6),
+                         min_size=1, max_size=6).map(' '.join)
+TYPE_SIZE = st.integers(min_value=12, max_value=48)
+STYLE_ATTRIBUTE_VALUE = st.text(alphabet='abcdefg', min_size=1, max_size=6)
+
+
+def _reading_page(heading, paragraph):
+    """A complete page with a head to attach a stylesheet to, in the shape case 129 starts from."""
+    return ('<html lang="en-US"><head><meta charset="utf-8"><title>Checklist</title></head>'
+            '<body><h1>' + heading + '</h1><p>' + paragraph + '</p></body></html>')
+
+
+def _large_type_copy(page, size, attributes=''):
+    """The same operation the case performs: parse the page, append one style element to the head, and
+    serialise the tree again, all of it done by lxml."""
+    document = lxml_html.fromstring(page)
+    document.find('head').append(lxml_html.fragment_fromstring(
+        '<style' + attributes + '>body { font-size: ' + str(size) + 'pt }</style>'))
+    return lxml_html.tostring(document, encoding='unicode')
+
+
+def _reading_text(page):
+    """The words a reader sees, taken as the case takes them: the style and script elements removed from
+    the tree first, then lxml's own text_content."""
+    document = lxml_html.fromstring(page)
+    for element in document.xpath('//style | //script'):
+        element.getparent().remove(element)
+    return ' '.join(document.text_content().split())
+
+
+def _html5lib_reading_text(page):
+    """The same words from html5lib's WHATWG tree instead of libxml2's, serialised by lxml's own text
+    method because the tree html5lib builds carries plain elements rather than lxml.html ones."""
+    document = html5lib.parse(page, treebuilder='lxml', namespaceHTMLElements=False).getroot()
+    for element in document.xpath('//style | //script'):
+        element.getparent().remove(element)
+    return ' '.join(lxml_etree.tostring(document, method='text', encoding='unicode').split())
+
+
+def _html5lib_count(page, expression):
+    """How many elements html5lib's WHATWG tree has for one XPath, where libxml2's tree is the other
+    reading of the same markup."""
+    return len(html5lib.parse(page, treebuilder='lxml', namespaceHTMLElements=False).getroot().xpath(expression))
+
+
+def _declared_type_sizes(page):
+    """Every font-size declaration tinycss2 finds in the page's style elements, parsed as stylesheets and
+    serialised by tinycss2 itself."""
+    return sorted(tinycss2.serialize(declaration.value).strip()
+                  for text in lxml_html.fromstring(page).xpath('//style/text()')
+                  for rule in tinycss2.parse_stylesheet(text, skip_whitespace=True)
+                  for declaration in tinycss2.parse_declaration_list(
+                      getattr(rule, 'content', None) or [], skip_whitespace=True, skip_comments=True)
+                  if declaration.type == 'declaration' and declaration.lower_name == 'font-size')
+
+
+@given(READING_WORDS, READING_WORDS, TYPE_SIZE)
+@LARGE_TYPE
+def test_the_large_type_copy_leaves_every_word_of_the_reading_text_where_it_was(heading, paragraph, size):
+    """The claim case 129 types, taken on generated pages and read by two parsers rather than one. With
+    the style and script elements removed from the tree first, the words libxml2 reports for the large
+    type copy are the words it reports for the source, and html5lib's WHATWG tree reports the same words
+    for both -- so nothing of the reading text moves, and that is not an artefact of the parser."""
+    page = _reading_page(heading, paragraph)
+    copy = _large_type_copy(page, size)
+    npt.assert_array_equal(_reading_text(copy), _reading_text(page))
+    npt.assert_array_equal(_html5lib_reading_text(copy), _html5lib_reading_text(page))
+    npt.assert_array_equal(_reading_text(copy), _html5lib_reading_text(copy))
+
+
+@given(READING_WORDS, READING_WORDS, TYPE_SIZE)
+@LARGE_TYPE
+def test_the_reading_text_is_unchanged_only_because_the_stylesheet_is_taken_out_first(heading,
+                                                                                     paragraph, size):
+    """And what that reading depends on. `text_content` is a serialisation of every text node in the
+    subtree, so the stylesheet's own characters are part of it: asked for the text of the copy without
+    removing the style element, both parsers return more than they return for the source. The comparison
+    the case makes is true of a tree the case pruned, not of the document it produced."""
+    page = _reading_page(heading, paragraph)
+    copy = _large_type_copy(page, size)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(lxml_html.fromstring(copy).text_content(),
+                               lxml_html.fromstring(page).text_content())
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(
+            lxml_etree.tostring(html5lib.parse(copy, treebuilder='lxml', namespaceHTMLElements=False)
+                                .getroot(), method='text', encoding='unicode'),
+            lxml_etree.tostring(html5lib.parse(page, treebuilder='lxml', namespaceHTMLElements=False)
+                                .getroot(), method='text', encoding='unicode'))
+
+
+@given(READING_WORDS, TYPE_SIZE)
+@LARGE_TYPE
+def test_the_declared_size_is_a_css_declaration_where_the_substring_check_is_not(heading, size):
+    """The case checks that the copy carries the new size by looking for the text of it in the markup.
+    tinycss2 parses the style elements as stylesheets and returns the value of every font-size
+    declaration, and on the copy that value is the size the stylesheet declares. On a page whose reading
+    text merely contains the same characters and which has no stylesheet at all, tinycss2 returns what it
+    returns for the untouched source and the substring check passes anyway, so the check is satisfied by
+    a document that was never restyled."""
+    declared = str(size) + 'pt'
+    npt.assert_array_equal(_declared_type_sizes(_large_type_copy(_reading_page(heading, heading), size)),
+                           [declared])
+    page = _reading_page(heading, declared + ' of nothing')
+    npt.assert_array_equal(declared in page, declared in _large_type_copy(page, size))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_declared_type_sizes(page), _declared_type_sizes(_large_type_copy(page, size)))
+
+
+@given(READING_WORDS, TYPE_SIZE, STYLE_ATTRIBUTE_VALUE)
+@LARGE_TYPE
+def test_how_many_stylesheets_a_page_carries_is_a_tree_question_and_not_a_substring_one(heading, size,
+                                                                                       media):
+    """The case counts the stylesheets by counting one literal opening tag in the serialised markup. A
+    style element written with an attribute is the same element to both parsers and to the XPath that
+    selects it, and it is not that literal: the tree count of the copy made with an attribute is the tree
+    count of the copy made without one, and the substring count is not."""
+    page = _reading_page(heading, heading)
+    plain = _large_type_copy(page, size)
+    attributed = _large_type_copy(page, size, attributes=' media="' + media + '"')
+    npt.assert_array_equal(len(lxml_html.fromstring(attributed).xpath('//style')),
+                           len(lxml_html.fromstring(plain).xpath('//style')))
+    npt.assert_array_equal(_html5lib_count(attributed, '//style'), _html5lib_count(plain, '//style'))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(attributed.count('<style>'), plain.count('<style>'))
+
+
+@given(READING_WORDS)
+@LARGE_TYPE
+def test_a_document_with_no_head_is_refused_by_one_parser_and_given_one_by_the_other(paragraph):
+    """The refusal the case records is a property of the parser. Handed a bare fragment, libxml2 returns
+    the fragment's own element as the root and there is no head to attach a stylesheet to, so the
+    operation is blocked; html5lib's WHATWG algorithm builds the same document structure it builds for a
+    complete page, head included, and carries the same reading text. Whether the source can take a
+    stylesheet is decided by which parser read it."""
+    fragment = '<div>' + paragraph + '</div>'
+    page = _reading_page(paragraph, paragraph)
+    npt.assert_array_equal(_html5lib_count(fragment, '//head'), _html5lib_count(page, '//head'))
+    npt.assert_array_equal(_html5lib_reading_text(fragment), _reading_text(fragment))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(len(lxml_html.fromstring(fragment).xpath('//head')),
+                               len(lxml_html.fromstring(page).xpath('//head')))
