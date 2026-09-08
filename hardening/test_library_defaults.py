@@ -95,6 +95,8 @@ from pptx.util import Inches
 import pymupdf
 import pypdf
 import pypdfium2
+from reportlab.pdfgen import canvas as rl_canvas
+from reportlab.lib.utils import ImageReader
 import repro_zipfile
 import xlsxwriter
 import xlsxwriter.exceptions
@@ -123,6 +125,7 @@ import rapidfuzz.process as rf_process
 from unittest import mock
 
 from hypothesis import assume, given, settings, strategies as st
+from hypothesis.extra import numpy as hyp_np
 from largest_remainder import LargestRemainder
 import apportionment.methods as apportionment_methods
 
@@ -8799,3 +8802,188 @@ def test_an_empty_payload_is_written_as_a_code_no_reader_reports(size):
     npt.assert_array_equal(_zxing_readings(empty), _zxing_readings(blank))
     with pytest.raises(AssertionError):
         npt.assert_array_equal(np.unique(empty), np.unique(blank))
+
+
+# ---------------------------------------------------------------- charts embedded in a brief
+BRIEF_PAGE = (400, 400)
+BRIEF_IMAGE = hyp_np.arrays(np.uint8, (8, 12), elements=st.integers(min_value=0, max_value=255))
+BRIEF_IMAGES = st.lists(BRIEF_IMAGE, min_size=2, max_size=4)
+
+
+def _brief_pdf(arrays, *, upward=False):
+    """The chain's own writer: reportlab draws each generated image below the last on one page, at one
+    point per pixel. Only library calls happen here -- OpenCV encodes the PNG, reportlab places it.
+    With `upward` the same charts are drawn from the foot of the page up, so that the order they are
+    drawn in is the reverse of the order a reader meets them going down the page."""
+    written = io.BytesIO()
+    page = rl_canvas.Canvas(written, pagesize=BRIEF_PAGE)
+    for index, array in enumerate(arrays):
+        step = (index + 1) * (array.shape[0] + 10)
+        page.drawImage(ImageReader(io.BytesIO(cv2.imencode('.png', array)[1].tobytes())),
+                       20, step if upward else BRIEF_PAGE[1] - 20 - step,
+                       width=array.shape[1], height=array.shape[0])
+    page.showPage()
+    page.save()
+    return written.getvalue()
+
+
+def _mupdf_displayed_by_box(pdf):
+    """The same displayed images put in the case's own order: sorted by the top of the bounding box,
+    with CPython's `sorted` doing the sorting."""
+    document = pymupdf.open(stream=pdf, filetype='pdf')
+    placed = sorted(document[0].get_image_info(xrefs=True), key=lambda item: item['bbox'][1])
+    return [_pdf_image(document.extract_image(item['xref'])['image']) for item in placed]
+
+
+def _pdf_image(payload):
+    return cv2.imdecode(np.frombuffer(payload, np.uint8), cv2.IMREAD_UNCHANGED)
+
+
+def _mupdf_referenced(pdf):
+    """The images `Page.get_images` reports, in the order it reports them, extracted by xref."""
+    document = pymupdf.open(stream=pdf, filetype='pdf')
+    return [_pdf_image(document.extract_image(item[0])['image'])
+            for item in document[0].get_images(full=True)]
+
+
+def _mupdf_referenced_names(pdf):
+    """The symbolic name of each of those, which is item[7] of the same tuple."""
+    document = pymupdf.open(stream=pdf, filetype='pdf')
+    return [item[7] for item in document[0].get_images(full=True)]
+
+
+def _mupdf_displayed(pdf):
+    """The images `Page.get_image_info(xrefs=True)` reports, in the order it reports them."""
+    document = pymupdf.open(stream=pdf, filetype='pdf')
+    return [_pdf_image(document.extract_image(item['xref'])['image'])
+            for item in document[0].get_image_info(xrefs=True)]
+
+
+def _mupdf_displayed_digests(pdf):
+    """The MD5 hashcode the same call computes for each displayed image when asked for hashes."""
+    document = pymupdf.open(stream=pdf, filetype='pdf')
+    return [item['digest'] for item in document[0].get_image_info(hashes=True)]
+
+
+def _pdfium_drawn(pdf):
+    """The bitmap of every image object PDFium finds on the page, in the page's own object order."""
+    page = pypdfium2.PdfDocument(io.BytesIO(pdf))[0]
+    return [obj.get_bitmap().to_numpy() for obj in page.get_objects()
+            if isinstance(obj, pypdfium2.PdfImage)]
+
+
+def _pypdf_images(pdf):
+    """The same page read by a pure-Python implementation of the PDF object model."""
+    return [np.asarray(image.image) for image in pypdf.PdfReader(io.BytesIO(pdf)).pages[0].images]
+
+
+@given(BRIEF_IMAGES)
+@SLOW
+def test_a_second_engine_reads_back_every_embedded_pixel_in_the_order_drawn(arrays):
+    """handoff_guards_v14.py's case embedded_chart_images_keep_every_pixel types six comparisons about
+    two charts placed in a brief. Nothing is typed here and the expected pixels are the generated input
+    itself. PDFium, through pypdfium2 5.13.0 -- whose pyproject.toml at that tag declares no runtime
+    dependencies at all, only build and optional groups -- walks the page's own object list, which
+    `get_objects` documents at that tag as "Iterate through the pageobjects on this page", and each
+    image object's bitmap read as an array (`to_numpy`, "Get a numpy array view of the bitmap") is
+    exactly the array the strategy generated, in the order reportlab drew them. So the embedding loses
+    no pixel and the page's object order is the drawing order. Replaces the typed `g.equal(placed,
+    expected)`."""
+    npt.assert_array_equal(_pdfium_drawn(_brief_pdf(arrays)), arrays)
+
+
+@given(BRIEF_IMAGES)
+@SLOW
+def test_the_displayed_image_list_pairs_each_chart_with_its_source(arrays):
+    """The case's own remedy, executed on generated input. PyMuPDF 1.28.2's `get_image_info` is
+    documented in docs/page.rst at tag 1.28.2 as returning "a list of meta information dictionaries for
+    all images displayed by the page", "for **exactly those** images, that are shown on the page", and
+    with `xrefs=True` it will "Try to find the xref for each image". Extracted through those xrefs the
+    images come back in the drawn order and pixel for pixel identical to what the strategy generated,
+    which is the same answer PDFium gives. The case reached that pairing by sorting the bounding boxes
+    of the same list; on a brief laid out down the page the list is already in that order, and the test
+    below is what happens when it is not. Replaces the second half of `g.equal(placed, expected)`."""
+    npt.assert_array_equal(_mupdf_displayed(_brief_pdf(arrays)), arrays)
+
+
+@given(BRIEF_IMAGES)
+@SLOW
+def test_reversing_the_page_leaves_the_referenced_image_list_unchanged(arrays):
+    """The finding, put where no ordering has to be assumed. Drawing the same generated charts in the
+    reverse order changes the page: PDFium's object list comes back reversed. It does not change
+    `get_images` at all -- the same images in the same order for both pages -- so that list carries no
+    information about which chart is where, and for one of any two orderings a chain that pairs charts
+    with captions by it is wrong. PyMuPDF's own documentation says so before the fact: `get_page_images`
+    at tag 1.28.2 warns "In general, this is not the list of images that are **actually displayed**.
+    This method only parses several PDF objects to collect references to embedded images. It does not
+    analyse the page's contents, where all the actual image display commands are defined." Replaces
+    `g.equal(resource == expected, False)` and the sorted-multiset comparison beside it."""
+    assume(len({array.tobytes() for array in arrays}) == len(arrays))
+    forward, backward = _brief_pdf(arrays), _brief_pdf(arrays[::-1])
+    npt.assert_array_equal(_mupdf_referenced(forward), _mupdf_referenced(backward))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_pdfium_drawn(forward), _pdfium_drawn(backward))
+
+
+@given(BRIEF_IMAGES)
+@SLOW
+def test_a_second_reader_of_the_object_model_returns_the_same_referenced_order(arrays):
+    """The mispairing is in the file rather than in one library. pypdf 6.17.0 is pure Python -- its
+    pyproject.toml at that tag declares typing_extensions below 3.11 and nothing else at run time, with
+    Pillow only in the optional `image` extra -- and its `images` property, "Read-only property
+    emulating a list of images on a page", is built by `_get_ids_image`, which walks the page's
+    resources under the comment "# Iterate through all XObject resources". It returns the same images in
+    the same order as MuPDF's list, so both libraries report the resource dictionary and neither reports
+    the page."""
+    pdf = _brief_pdf(arrays)
+    npt.assert_array_equal(_pypdf_images(pdf), _mupdf_referenced(pdf))
+
+
+@given(BRIEF_IMAGES)
+@SLOW
+def test_the_referenced_order_is_the_sorted_order_of_the_digests_of_the_pixels(arrays):
+    """What the order is instead. reportlab 5.0.1's `drawImage`, in src/reportlab/pdfgen/canvas.py of
+    the sdist published for that version, begins "# first, generate a unique name/signature for the
+    image. If ANYTHING is different, even the mask, this should be different." and sets
+    `name = _digester(rawdata+mdata)`, which src/reportlab/lib/utils.py defines as an md5 hexdigest.
+    The names MuPDF reports come back in exactly the order CPython's `sorted` puts them in, so which
+    chart is first in the referenced list is decided by an md5 digest of its own pixels: change one
+    pixel of one chart and the pairing a chain makes from that list can swap."""
+    names = _mupdf_referenced_names(_brief_pdf(arrays))
+    npt.assert_array_equal(names, sorted(names))
+
+
+@given(BRIEF_IMAGES)
+@SLOW
+def test_the_same_chart_twice_is_one_referenced_image_and_two_displayed(arrays):
+    """A count taken from the referenced list is not a count of the charts on the page. Drawing every
+    generated chart twice leaves as many entries in `get_images` as there are distinct charts and twice
+    as many in `get_image_info`, and PDFium draws all of them; the two halves have equal MD5 hashcodes,
+    which is the duplicate detection `get_image_info` documents as "Multiple occurrences of the same
+    image are always reported. You can detect duplicates by comparing their `digest` values." reportlab
+    documents its half too: drawImage "creates 'external images' which are only stored once in the PDF
+    file but can be drawn many times", and with an ImageReader "it tests whether the image content has
+    changed before deciding whether to reuse it". Replaces the typed `g.equal(len(resource), 2)`."""
+    assume(len({array.tobytes() for array in arrays}) == len(arrays))
+    pdf = _brief_pdf(list(arrays) + list(arrays))
+    npt.assert_array_equal(len(_mupdf_referenced(pdf)), len(arrays))
+    npt.assert_array_equal(len(_mupdf_displayed(pdf)), 2 * len(arrays))
+    npt.assert_array_equal(_pdfium_drawn(pdf), list(arrays) + list(arrays))
+    digests = _mupdf_displayed_digests(pdf)
+    npt.assert_array_equal(digests[:len(arrays)], digests[len(arrays):])
+
+
+@given(BRIEF_IMAGES)
+@SLOW
+def test_the_displayed_list_follows_the_content_stream_and_not_the_page(arrays):
+    """The case's remedy is not the same operation as the library call it is built on, and the brief it
+    was tested on hides the difference. Drawn from the foot of the page up, the displayed list still
+    comes back in the order the charts were drawn -- the same order PDFium reports and pixel for pixel
+    the generated input -- while sorting that list by the top of the bounding box, which is what the
+    case does to pair charts with sources, returns them reversed. So `get_image_info` reports the
+    content stream and the case reports the geometry, and the two agree only for a page whose drawing
+    order runs down it. Nothing about a PDF requires that."""
+    pdf = _brief_pdf(arrays, upward=True)
+    npt.assert_array_equal(_mupdf_displayed(pdf), arrays)
+    npt.assert_array_equal(_pdfium_drawn(pdf), arrays)
+    npt.assert_array_equal(_mupdf_displayed_by_box(pdf), arrays[::-1])
