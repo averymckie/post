@@ -72,6 +72,8 @@ from junitparser import JUnitXml
 import altair as alt
 import vl_convert
 import dictdiffer
+import ftfy
+import ftfy.badness
 import jsonpatch
 from deepdiff import DeepDiff
 import markdown as python_markdown
@@ -13752,3 +13754,96 @@ def test_whether_an_inserted_item_costs_one_edit_depends_on_what_the_items_are(w
     shifted = _document_blocks(_document_bytes(inserted, [(extra, extra)]))
     npt.assert_array_equal(sorted(DeepDiff(blocks, shifted, zip_ordered_iterables=True).keys()),
                            sorted(DeepDiff(blocks, shifted).keys()))
+
+
+# ---------------------------------------------------------------- text that was decoded twice
+MOJIBAKE = settings(max_examples=50, deadline=None)
+MOJIBAKE_ALPHABET = st.sampled_from(list('abcdefghij ') + [chr(0x2019), chr(0x2014),
+                                                           chr(0xe9), chr(0xfc), chr(0xf1)])
+MOJIBAKE_TEXT = st.text(alphabet=MOJIBAKE_ALPHABET, min_size=4, max_size=24)
+MOJIBAKE_ROUNDS = st.integers(min_value=1, max_value=3)
+
+
+def _mis_decoded(text, rounds):
+    """The same text read as Latin-1 after being written as UTF-8, that many times over. Nothing
+    here is a repair or a heuristic: it is CPython's own codecs making the damage the case records."""
+    for _ in range(rounds):
+        text = text.encode('utf-8').decode('latin-1')
+    return text
+
+
+def _re_decoded(text, rounds):
+    """The exact inverse, again through CPython's codecs and nothing else."""
+    for _ in range(rounds):
+        text = text.encode('latin-1').decode('utf-8')
+    return text
+
+
+@given(MOJIBAKE_TEXT, MOJIBAKE_ROUNDS)
+@MOJIBAKE
+def test_the_repair_ftfy_names_is_the_one_cpythons_codecs_perform(text, rounds):
+    """P26 records a token whose nine code points are typed out in hexadecimal and checks that
+    ftfy's explanation for it contains two ('decode', 'utf-8') steps. The explanation is a
+    description of an operation the standard library performs: over generated text mis-decoded a
+    generated number of times, ftfy 6.3.1 reports exactly that many encode-and-decode pairs, and
+    applying the same pair that many times with CPython's codecs returns the text that was damaged.
+    Asked not to touch the quotes, ftfy returns the original text itself. Replaces the typed
+    explanation list and the typed hexadecimal token of handoff_guards_v3.py case 26."""
+    assume(any(ord(character) > 127 for character in text))
+    broken = _mis_decoded(text, rounds)
+    explanation = ftfy.fix_and_explain(broken, uncurl_quotes=False).explanation
+    npt.assert_array_equal(len([step for step in explanation if step[0] == 'decode']), rounds)
+    npt.assert_array_equal(len([step for step in explanation if step[0] == 'encode']), rounds)
+    npt.assert_array_equal(_re_decoded(broken, rounds), text)
+    npt.assert_array_equal(ftfy.fix_text(broken, uncurl_quotes=False), text)
+
+
+@given(MOJIBAKE_TEXT, MOJIBAKE_ROUNDS)
+@MOJIBAKE
+def test_the_code_points_of_the_damaged_text_are_the_bytes_the_text_was_written_as(text, rounds):
+    """What the typed hexadecimal list records, stated as the property it is an instance of: each
+    round of the damage turns the UTF-8 bytes of the text into that many code points, so the code
+    points of the damaged text are exactly the bytes of the round before it, every one of them below
+    256. That is why the recorded token has nine code points where its four characters had four."""
+    assume(any(ord(character) > 127 for character in text))
+    broken = _mis_decoded(text, rounds)
+    npt.assert_array_equal([ord(character) for character in broken],
+                           list(_mis_decoded(text, rounds - 1).encode('utf-8')))
+    npt.assert_array_equal(broken.encode('latin-1').decode('latin-1'), broken)
+
+
+@given(MOJIBAKE_TEXT, MOJIBAKE_ROUNDS)
+@MOJIBAKE
+def test_the_detector_separates_the_damaged_text_from_the_text_it_came_from(text, rounds):
+    """`g.equal(ftfy.badness.is_bad(RECORDED_P26_TOKEN), True)` over generated text: whatever the
+    number of rounds, the detector calls the damaged text bad and does not call the text it came
+    from bad, and it calls the repaired text exactly what it called the original, because they are
+    the same string. Rule 2a's search found no implementation of this heuristic independent of ftfy;
+    what the standard library can corroborate is the repair rather than the detection, and it does,
+    in the test above."""
+    assume(any(ord(character) > 127 for character in text))
+    broken = _mis_decoded(text, rounds)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(ftfy.badness.is_bad(text), ftfy.badness.is_bad(broken))
+    npt.assert_array_equal(ftfy.badness.is_bad(_re_decoded(broken, rounds)),
+                           ftfy.badness.is_bad(text))
+
+
+@given(st.text(alphabet=st.sampled_from(list('abcdefghij ')), min_size=2, max_size=12),
+       st.text(alphabet=st.sampled_from(list('abcdefghij ')), min_size=2, max_size=12))
+@MOJIBAKE
+def test_ftfys_default_rewrites_an_apostrophe_that_was_never_broken(before, after):
+    """`g.equal(checked_text('It’s not causing any maintenance burdens'), 'It’s not causing any
+    maintenance burdens')` says the chain leaves an unbroken sentence alone, and the case's other
+    expectation types the repaired token as "It's" with the ASCII apostrophe. Both are true, and
+    together they say what ftfy's default does to text that was never damaged: the detector reports
+    nothing wrong with a sentence carrying a typographic apostrophe, and fix_text returns a different
+    sentence anyway, because uncurl_quotes is on by default and is the only step the explanation
+    lists. Naming that option returns the sentence that was given."""
+    text = before + chr(0x2019) + after
+    npt.assert_array_equal(ftfy.badness.is_bad(text), ftfy.badness.is_bad(before + after))
+    npt.assert_array_equal(ftfy.fix_text(text, uncurl_quotes=False), text)
+    npt.assert_array_equal([step[1] for step in ftfy.fix_and_explain(text).explanation],
+                           ['uncurl_quotes'])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(ftfy.fix_text(text), text)
