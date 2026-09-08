@@ -48,6 +48,7 @@ import numpy as np
 import numpy_financial as npf
 import pyxirr
 from workalendar import core as workalendar_core
+import html5lib
 import igraph
 import jinja2
 import jsonschema
@@ -64,6 +65,7 @@ import pydantic
 import pyshacl
 import rdflib
 from lxml import etree as lxml_etree
+from lxml import html as lxml_html
 from markdown_it import MarkdownIt
 import networkx as nx
 import openpyxl
@@ -6803,3 +6805,147 @@ def test_the_same_edit_gets_a_different_report_once_the_clause_is_long_enough(le
     npt.assert_array_equal(_edit_kinds(base, after), _rapidfuzz_kinds(base, after))
     with pytest.raises(AssertionError):
         npt.assert_array_equal(_edit_kinds(base, after), _edit_kinds(base, after, autojunk=False))
+
+
+# ---------------------------------------------------------------- what the two parser families read back
+PASSAGE_TEMPLATE = '<ul>{% for p in passages %}<li id="{{ p.id }}">{{ p.text }}</li>{% endfor %}</ul>'
+SAFE_LETTERS = st.text(alphabet=st.characters(min_codepoint=ord('a'), max_codepoint=ord('z')),
+                       min_size=1, max_size=8)
+
+
+def _rendered_page(texts, *, autoescape):
+    """The chain's own page, rendered by jinja2 with escaping on or off, one list item per passage."""
+    environment = jinja2.Environment(undefined=jinja2.StrictUndefined, autoescape=autoescape)
+    return environment.from_string(PASSAGE_TEMPLATE).render(
+        passages=[{'id': 'p%d' % index, 'text': text} for index, text in enumerate(texts)])
+
+
+def _lxml_rows(markup):
+    """The passage text libxml2's HTML parser reads back, one entry per list item."""
+    return [node.text_content() for node in lxml_html.fromstring(markup).xpath('//li')]
+
+
+def _html5lib_rows(markup):
+    """The same list from html5lib 1.1, which its README at tag 1.1 calls "a pure-python library for
+    parsing HTML" that "is designed to conform to the WHATWG HTML specification", and whose setup.py at
+    that tag declares six and webencodings; lxml appears there only as an optional extra and the etree
+    treebuilder asked for here does not reach it."""
+    tree = html5lib.parse(markup, treebuilder='etree', namespaceHTMLElements=False)
+    return [''.join(node.itertext()) for node in tree.iter('li')]
+
+
+def _lxml_identifiers(markup):
+    """The id attribute of every list item, as libxml2 reads them."""
+    return [node.get('id') for node in lxml_html.fromstring(markup).xpath('//li')]
+
+
+def _html5lib_identifiers(markup):
+    """The same attributes from the second parser."""
+    tree = html5lib.parse(markup, treebuilder='etree', namespaceHTMLElements=False)
+    return [node.get('id') for node in tree.iter('li')]
+
+
+def _both_xml_parsers_refuse(markup):
+    """Whether both XML parsers refuse these bytes. Called once, at import, to read the region the tests
+    generate in off the parsers rather than name it here."""
+    for parse in (lxml_etree.fromstring, ElementTree.fromstring):
+        try:
+            parse(markup)
+        except Exception:
+            continue
+        return False
+    return True
+
+
+XML_UNSAFE_CHARACTERS = [character for character in ESCAPABLE_CHARACTERS
+                         if _both_xml_parsers_refuse(_rendered_page([character], autoescape=False))]
+XML_UNSAFE_TEXT = st.text(alphabet=st.sampled_from(XML_UNSAFE_CHARACTERS), min_size=1, max_size=6)
+
+
+@given(st.lists(ESCAPABLE_TEXT, min_size=1, max_size=4))
+@SLOW
+def test_two_html_parsers_read_the_same_passages_out_of_an_escaped_page(texts):
+    """P181 renders authored passages into a page and reads them back with lxml's HTML parser. Two
+    implementations of HTML parsing that share no code agree on what the escaped page says: libxml2's C
+    parser through lxml 6.1.3, and html5lib 1.1, a pure-Python implementation of the WHATWG algorithm.
+    Both return every generated passage exactly as it was written, which is the round trip the chain
+    claims. Replaces the typed parsed_texts(escaped_page(...)) == [passages[0]['text']] of
+    handoff_guards_v20.py case 181."""
+    page = _rendered_page(texts, autoescape=True)
+    npt.assert_array_equal(_lxml_rows(page), _html5lib_rows(page))
+    npt.assert_array_equal(_lxml_rows(page), texts)
+
+
+@given(st.lists(XML_UNSAFE_TEXT, min_size=1, max_size=4))
+@SLOW
+def test_the_unescaped_page_reads_back_correctly_in_html_and_is_refused_as_xml(texts):
+    """The same passages rendered with escaping off produce bytes that are not XML, and the round trip
+    still looks correct. Both HTML parsers return every passage exactly as written, so a check that reads
+    the page back and compares finds nothing wrong; both XML parsers refuse the same bytes outright, lxml
+    with XMLSyntaxError and the standard library's expat binding with ParseError. The characters this is
+    generated from were read off the two XML parsers at import rather than named here. Replaces the typed
+    g.rejects(etree.XMLSyntaxError, ...) of case 181."""
+    page = _rendered_page(texts, autoescape=False)
+    npt.assert_array_equal(_lxml_rows(page), _html5lib_rows(page))
+    npt.assert_array_equal(_lxml_rows(page), texts)
+    with pytest.raises(lxml_etree.XMLSyntaxError):
+        lxml_etree.fromstring(page)
+    with pytest.raises(ElementTree.ParseError):
+        ElementTree.fromstring(page)
+    escaped = _rendered_page(texts, autoescape=True)
+    npt.assert_array_equal([node.text for node in lxml_etree.fromstring(escaped)],
+                           [node.text for node in ElementTree.fromstring(escaped)])
+
+
+@given(SAFE_LETTERS, SAFE_LETTERS)
+@SLOW
+def test_literal_markup_in_a_passage_is_consumed_with_the_row_count_unchanged(before, inside):
+    """A passage that contains markup is not refused and does not change the shape of the page: both HTML
+    parsers drop the tags, keep the text between them, and return as many rows as the escaped page does.
+    So the one thing a chain counting rows would notice is exactly the thing that does not change, while
+    the passage text it reads back is not the passage text it rendered. Replaces the typed
+    parsed_texts(...) == ['see bold here'] and the unchanged element count of case 181."""
+    marked = '%s<b>%s</b>' % (before, inside)
+    page = _rendered_page([marked], autoescape=False)
+    npt.assert_array_equal(_lxml_rows(page), _html5lib_rows(page))
+    npt.assert_array_equal(_lxml_rows(page), [before + inside])
+    npt.assert_array_equal(len(_lxml_rows(page)),
+                           len(_lxml_rows(_rendered_page([marked], autoescape=True))))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_lxml_rows(page), [marked])
+
+
+@given(SAFE_LETTERS, SAFE_LETTERS)
+@SLOW
+def test_an_unescaped_closing_tag_manufactures_a_second_row_in_both_html_parsers(first, second):
+    """One passage carrying a closing tag becomes two rows, in libxml2 and in html5lib alike, and the two
+    parsers split it in the same place. Escaping the same passage returns one row holding the text as
+    written, so the count a reader sees is decided by a flag on the renderer and not by the number of
+    passages. Replaces the typed len(parsed_texts(escaped_page(closing, autoescape=False))) == 2 and
+    ['end', 'injected'] of case 181."""
+    injected = '%s</li><li>%s' % (first, second)
+    page = _rendered_page([injected], autoescape=False)
+    npt.assert_array_equal(_lxml_rows(page), _html5lib_rows(page))
+    npt.assert_array_equal(_lxml_rows(page), [first, second])
+    npt.assert_array_equal(_lxml_rows(_rendered_page([injected], autoescape=True)), [injected])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(len(_lxml_rows(page)),
+                               len(_lxml_rows(_rendered_page([injected], autoescape=True))))
+
+
+@given(SAFE_LETTERS, SAFE_LETTERS)
+@SLOW
+def test_the_manufactured_row_carries_no_identifier_in_either_parser(first, second):
+    """The identifier is what binds a row back to the passage it came from, and the manufactured row has
+    none: both parsers report an id for the first row and nothing for the second. Dropping the rows
+    without an id leaves exactly the identifiers the escaped page has, so the page carries one identifier
+    and two rows, and a reader keyed on the identifier cannot see the second one at all."""
+    injected = '%s</li><li>%s' % (first, second)
+    page = _rendered_page([injected], autoescape=False)
+    npt.assert_array_equal(_lxml_identifiers(page), _html5lib_identifiers(page))
+    npt.assert_array_equal([identifier for identifier in _lxml_identifiers(page)
+                            if identifier is not None],
+                           _lxml_identifiers(_rendered_page([injected], autoescape=True)))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(len([identifier for identifier in _lxml_identifiers(page)
+                                    if identifier is not None]), len(_lxml_rows(page)))
