@@ -13847,3 +13847,317 @@ def test_ftfys_default_rewrites_an_apostrophe_that_was_never_broken(before, afte
                            ['uncurl_quotes'])
     with pytest.raises(AssertionError):
         npt.assert_array_equal(ftfy.fix_text(text), text)
+
+
+# ---------------------------------------------------------------- files attached to a report
+ATTACHMENTS = settings(max_examples=20, deadline=None)
+ATTACHED_NAME = st.text(alphabet=st.characters(min_codepoint=97, max_codepoint=122), min_size=1, max_size=6)
+ATTACHED_PAYLOAD = st.binary(min_size=1, max_size=48)
+ATTACHED_FILES = st.lists(st.tuples(ATTACHED_NAME, ATTACHED_PAYLOAD),
+                          min_size=1, max_size=3, unique_by=lambda pair: pair[0])
+ATTACHED_PAIR = st.lists(st.tuples(ATTACHED_NAME, ATTACHED_PAYLOAD),
+                         min_size=2, max_size=3, unique_by=lambda pair: pair[0])
+# PDFDocEncoding and Latin-1 agree over this range, so what a reader returns is its own decoding.
+PDFDOC_NAME = st.text(alphabet=st.characters(min_codepoint=0xa1, max_codepoint=0xff,
+                                             exclude_characters='\xad'), min_size=1, max_size=4)
+# Nothing in this range is in PDFDocEncoding at all, so pypdf writes a UTF-16BE string with a BOM.
+OUTSIDE_PDFDOC_NAME = st.text(alphabet=st.characters(min_codepoint=0x4e00, max_codepoint=0x9fff),
+                              min_size=1, max_size=3)
+ATTACHMENT_STAMP = st.datetimes(min_value=datetime.datetime(1990, 1, 1),
+                                max_value=datetime.datetime(2050, 12, 31),
+                                timezones=st.just(datetime.timezone.utc)
+                                ).map(lambda moment: moment.replace(microsecond=0))
+
+
+def _attached(pdf, files, stamp=None):
+    """pypdf 6.17.0 attaching files to a report. `PdfWriter.add_attachment` is documented at tag
+    6.17.0 (raw.githubusercontent.com/py-pdf/pypdf/6.17.0/pypdf/_writer.py) as "Embed a file inside
+    the PDF", referred to "Section 7.11.3" of the PDF specification, and returns "EmbeddedFile
+    instance for the newly created embedded file"; the dates, when a chain writes any, come from
+    that instance's own `creation_date` and `modification_date` setters, which are the only callers
+    of `_ensure_params` here and so the only writers of a /Params dictionary."""
+    writer = pypdf.PdfWriter(clone_from=io.BytesIO(pdf))
+    for name, payload in files:
+        writer.add_attachment(name, payload)
+    if stamp is not None:
+        for embedded in writer.attachment_list:
+            embedded.creation_date = stamp
+            embedded.modification_date = stamp
+    written = io.BytesIO()
+    writer.write(written)
+    return written.getvalue()
+
+
+def _pypdf_attachments(data):
+    """pypdf's own reading. `PdfReader.attachments` is annotated at tag 6.17.0 as
+    `Mapping[str, list[bytes]]` and documented as the "Mapping of attachment filenames to their
+    content", and `attachment_list` yields the `EmbeddedFile` objects themselves, whose `name` is
+    "The (primary) name of the embedded file as provided in the name tree"."""
+    reader = pypdf.PdfReader(io.BytesIO(data))
+    return {name: [hashlib.sha256(payload).hexdigest() for payload in payloads]
+            for name, payloads in reader.attachments.items()}
+
+
+def _pypdf_embedded(data):
+    """The same reader's account of what each attachment declares about itself. `size` is "the size
+    of the uncompressed file in bytes" and `creation_date` "the file creation datetime", and both
+    read the /Params dictionary through a `_params` property that returns an empty dictionary when
+    the key is absent, so None here is the absence of the key."""
+    reader = pypdf.PdfReader(io.BytesIO(data))
+    return [(embedded.name, embedded.creation_date, embedded.size) for embedded in reader.attachment_list]
+
+
+def _mupdf_attachments(data):
+    """MuPDF's reading through PyMuPDF 1.28.2. docs/document.rst at tag 1.28.2
+    (raw.githubusercontent.com/pymupdf/PyMuPDF/1.28.2/docs/document.rst) documents `embfile_count`
+    as returning "the number of embedded files", `embfile_get(item)` as retrieving "the content of
+    embedded file by its entry number or name", and `embfile_info(item)` as returning a dictionary
+    whose keys are listed as including `filename`, `size` -- "original file size" -- `length` --
+    "compressed file length" -- and `creationDate`, "date-time of item creation in PDF format"."""
+    document = pymupdf.open(stream=data, filetype='pdf')
+    return [(document.embfile_info(index), hashlib.sha256(document.embfile_get(index)).hexdigest())
+            for index in range(document.embfile_count())]
+
+
+def _pdfium_attachments(data, key):
+    """PDFium 153.0.7999.0 through pypdfium2 5.13.0's raw API and the two-call buffer idiom that
+    project's README publishes. public/fpdf_attachment.h documents `FPDFDoc_GetAttachmentCount` as
+    getting "the number of embedded files in |document|", `FPDFAttachment_GetName`'s buffer as the
+    one "for holding the file name, encoded in UTF-16LE", `FPDFAttachment_GetFile` as filling a
+    "buffer for holding the file data from |attachment|", and -- the call that answers a presence
+    question without the object model -- `FPDFAttachment_HasKey`, which "Check[s] if the params
+    dictionary of |attachment| has |key| as a key" and "Returns true if |key| exists"."""
+    document = pypdfium2.PdfDocument(io.BytesIO(data))
+    found = []
+    for index in range(pdfium_c.FPDFDoc_GetAttachmentCount(document.raw)):
+        attachment = pdfium_c.FPDFDoc_GetAttachment(document.raw, index)
+        length = pdfium_c.FPDFAttachment_GetName(attachment, None, 0)
+        buffer = ctypes.create_string_buffer(length)
+        pdfium_c.FPDFAttachment_GetName(attachment, ctypes.cast(buffer, ctypes.POINTER(ctypes.c_ushort)),
+                                        length)
+        size = ctypes.c_ulong(0)
+        pdfium_c.FPDFAttachment_GetFile(attachment, None, 0, ctypes.byref(size))
+        held = ctypes.create_string_buffer(size.value)
+        pdfium_c.FPDFAttachment_GetFile(attachment, held, size.value, ctypes.byref(size))
+        found.append((codecs.decode(memoryview(buffer)[:length - 2], 'utf-16-le'),
+                      hashlib.sha256(bytes(memoryview(held)[:size.value])).hexdigest(),
+                      bool(pdfium_c.FPDFAttachment_HasKey(attachment, key))))
+    return found
+
+
+def _pdfminer_embedded(data, key):
+    """pdfminer.six 20260107 walking the same name tree in pure Python -- the catalog's
+    /Names /EmbeddedFiles /Names array with every indirect reference resolved. It hands back the
+    dictionaries themselves, so a /Params that is not there is a key that is not there, which is the
+    reading none of the other three can offer."""
+    document = PdfminerDocument(PdfminerParser(io.BytesIO(data)))
+    names = pdfminer_resolve(document.catalog['Names'])
+    tree = pdfminer_resolve(pdfminer_resolve(names['EmbeddedFiles'])['Names'])
+    found = []
+    for index in range(0, len(tree), 2):
+        specification = pdfminer_resolve(tree[index + 1])
+        stream = pdfminer_resolve(pdfminer_resolve(specification['EF'])['F'])
+        parameters = pdfminer_resolve(stream.attrs.get('Params', {}))
+        found.append({'key': tree[index], 'digest': hashlib.sha256(stream.get_data()).hexdigest(),
+                      'carries': key in parameters, 'parameters': 'Params' in stream.attrs,
+                      'unicode_name': 'UF' in specification})
+    return found
+
+
+@given(SAFE_LINE, ATTACHED_FILES, ATTACHMENT_STAMP)
+@ATTACHMENTS
+def test_four_readers_agree_on_which_attachments_carry_a_creation_date(line, files, stamp):
+    """handoff_guards_v13.py case 124 writes `g.equal(bare_a == bare_b, True)` with the comment that
+    "pypdf sets no attachment dates of its own", inferring the absence of a date from two runs
+    producing the same bytes. The absence is a question about the file, and four independent readers
+    answer it the same way over generated attachments: pypdf's own EmbeddedFile.creation_date,
+    MuPDF's documented `creationDate` key, PDFium's FPDFAttachment_HasKey and pdfminer's raw
+    dictionary all say no attachment written by the default carries one, and all four say every
+    attachment does once the chain sets it. pypdf's `_create_new` at tag 6.17.0 is where that comes
+    from: it writes /Type, /F and /EF into the filespec and nothing else, so there is no /Params
+    dictionary at all to hold a date."""
+    pdf = _pdf_bytes([line])
+    bare, pinned = _attached(pdf, files), _attached(pdf, files, stamp)
+    for data in (bare, pinned):
+        by_pypdf = [created is not None for _, created, _ in _pypdf_embedded(data)]
+        npt.assert_array_equal(by_pypdf, [carried for _, _, carried in _pdfium_attachments(data, b'CreationDate')])
+        npt.assert_array_equal(by_pypdf, [read['carries'] for read in _pdfminer_embedded(data, 'CreationDate')])
+        npt.assert_array_equal(by_pypdf, ['creationDate' in info for info, _ in _mupdf_attachments(data)])
+    npt.assert_array_equal([read['parameters'] for read in _pdfminer_embedded(bare, 'CreationDate')],
+                           [created is not None for _, created, _ in _pypdf_embedded(bare)])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal([created is not None for _, created, _ in _pypdf_embedded(bare)],
+                               [created is not None for _, created, _ in _pypdf_embedded(pinned)])
+
+
+@given(SAFE_LINE, ATTACHED_FILES, ATTACHMENT_STAMP)
+@ATTACHMENTS
+def test_the_default_repeats_and_a_pinned_stamp_repeats_with_it(line, files, stamp):
+    """`g.equal(bare_a == bare_b, True)` and `g.equal(pinned_a == pinned_b, True)`, taken over
+    generated attachments and a generated stamp rather than over one pair of files and a sleep of
+    1.1 seconds. Both hold: nothing pypdf writes for an attachment moves with the clock, and a
+    stamp the chain supplies is written verbatim, so the second run of either is the first run's
+    bytes."""
+    pdf = _pdf_bytes([line])
+    npt.assert_array_equal(hashlib.sha256(_attached(pdf, files)).hexdigest(),
+                           hashlib.sha256(_attached(pdf, files)).hexdigest())
+    npt.assert_array_equal(hashlib.sha256(_attached(pdf, files, stamp)).hexdigest(),
+                           hashlib.sha256(_attached(pdf, files, stamp)).hexdigest())
+
+
+@given(SAFE_LINE, ATTACHED_FILES, ATTACHMENT_STAMP, ATTACHMENT_STAMP)
+@ATTACHMENTS
+def test_a_stamp_that_moves_moves_the_file_and_a_pinned_stamp_is_not_a_no_op(line, files, first, second):
+    """`g.equal(clock_a == clock_b, False)` and `g.equal(pinned_a == bare_a, False)`. The case
+    establishes the first by reading the clock twice a second apart; what it is an instance of is
+    that two different stamps are two different files, which is what a clock produces and what
+    hypothesis generates directly. The date pypdf reads back is the date it was given, to the second
+    its own `format_iso8824_date` writes."""
+    assume(first != second)
+    pdf = _pdf_bytes([line])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(hashlib.sha256(_attached(pdf, files, first)).hexdigest(),
+                               hashlib.sha256(_attached(pdf, files, second)).hexdigest())
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(hashlib.sha256(_attached(pdf, files, first)).hexdigest(),
+                               hashlib.sha256(_attached(pdf, files)).hexdigest())
+    npt.assert_array_equal([created for _, created, _ in _pypdf_embedded(_attached(pdf, files, first))],
+                           [first] * len(files))
+
+
+@given(SAFE_LINE, ATTACHED_PAIR)
+@ATTACHMENTS
+def test_the_same_files_attached_in_the_other_order_are_a_different_file(line, files):
+    """What the case's repeatability claim does not cover. `_get_insertion_index` at tag 6.17.0
+    bisects the name tree, so the tree pypdf writes is sorted by the UTF-8 bytes of the name whatever
+    order the files arrived in, and every reader returns the same attachments with the same contents
+    either way -- while the streams themselves are numbered in arrival order, so the two files are
+    not the same file. A chain that attaches the files of a set, or of a mapping built in a different
+    order, repeats its readings and not its bytes."""
+    pdf = _pdf_bytes([line])
+    forwards, backwards = _attached(pdf, files), _attached(pdf, list(reversed(files)))
+    npt.assert_array_equal(sorted((name, digest) for name, digests in _pypdf_attachments(forwards).items()
+                                  for digest in digests),
+                           sorted((name, digest) for name, digests in _pypdf_attachments(backwards).items()
+                                  for digest in digests))
+    npt.assert_array_equal([(info['filename'], digest) for info, digest in _mupdf_attachments(forwards)],
+                           [(info['filename'], digest) for info, digest in _mupdf_attachments(backwards)])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(hashlib.sha256(forwards).hexdigest(), hashlib.sha256(backwards).hexdigest())
+
+
+@given(SAFE_LINE, ATTACHED_FILES)
+@ATTACHMENTS
+def test_four_readers_return_the_same_attachment_bytes(line, files):
+    """`g.equal(both['pypdf'], expected)` and `g.equal(both['pymupdf'], expected)` type the sha256 of
+    two hand-written files and check them against two readers. Here the payloads are generated, the
+    expected digest is the digest of the generated payload, and two further implementations read the
+    same file: PDFium's FPDFAttachment_GetFile and pdfminer's own stream decoding. All four return
+    the bytes that were attached."""
+    pdf = _pdf_bytes([line])
+    data = _attached(pdf, files)
+    digests = sorted(hashlib.sha256(payload).hexdigest() for _, payload in files)
+    npt.assert_array_equal(sorted(digest for digests_for_name in _pypdf_attachments(data).values()
+                                  for digest in digests_for_name), digests)
+    npt.assert_array_equal(sorted(digest for _, digest in _mupdf_attachments(data)), digests)
+    npt.assert_array_equal(sorted(digest for _, digest, _ in _pdfium_attachments(data, b'CreationDate')), digests)
+    npt.assert_array_equal(sorted(read['digest'] for read in _pdfminer_embedded(data, 'CreationDate')), digests)
+
+
+@given(SAFE_LINE, PDFDOC_NAME, ATTACHED_PAYLOAD)
+@ATTACHMENTS
+def test_the_readers_that_agree_on_the_bytes_do_not_agree_on_the_name(line, name, payload):
+    """The other half of "a second library reads the same attachment bytes". They do; they do not
+    read the same name. pypdf writes the filename into /F alone -- `_create_new` writes no /UF at
+    all -- and over names whose characters PDFDocEncoding and Latin-1 spell with the same byte,
+    pypdf and PDFium return the name that was attached while MuPDF returns its UTF-8 bytes decoded
+    as Latin-1, which is exactly the mis-decoding CPython's own codecs perform. MuPDF's `ufilename`,
+    documented as one of the keys `embfile_info` returns, is the empty string, because the key it
+    would come from was never written."""
+    pdf = _pdf_bytes([line])
+    data = _attached(pdf, [(name, payload)])
+    npt.assert_array_equal(list(_pypdf_attachments(data)), [name])
+    npt.assert_array_equal([found for found, _, _ in _pdfium_attachments(data, b'CreationDate')], [name])
+    [(info, _)] = _mupdf_attachments(data)
+    npt.assert_array_equal(info['filename'], name.encode('utf-8').decode('latin-1'))
+    npt.assert_array_equal([bool(info['ufilename'])],
+                           [read['unicode_name'] for read in _pdfminer_embedded(data, 'CreationDate')])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(info['filename'], name)
+
+
+@given(SAFE_LINE, OUTSIDE_PDFDOC_NAME, ATTACHED_PAYLOAD)
+@ATTACHMENTS
+def test_a_name_outside_pdfdocencoding_is_returned_by_only_one_of_the_three_readers(line, name, payload):
+    """A name PDFDocEncoding cannot spell is written as a UTF-16BE string behind the byte order mark,
+    which is the format's own answer and which pypdf reads back unchanged. PDFium does not: its
+    FPDFAttachment_GetName returns the string's bytes widened one for one, byte order mark included,
+    so the name a reader without the object model reports is the encoded form rather than the name.
+    MuPDF's answer is the same mis-decoding it makes for every other name."""
+    pdf = _pdf_bytes([line])
+    data = _attached(pdf, [(name, payload)])
+    npt.assert_array_equal(list(_pypdf_attachments(data)), [name])
+    npt.assert_array_equal([found for found, _, _ in _pdfium_attachments(data, b'CreationDate')],
+                           [(codecs.BOM_UTF16_BE + name.encode('utf-16-be')).decode('latin-1')])
+    npt.assert_array_equal([info['filename'] for info, _ in _mupdf_attachments(data)],
+                           [name.encode('utf-8').decode('latin-1')])
+
+
+@given(SAFE_LINE, ATTACHED_NAME, ATTACHED_PAYLOAD, ATTACHED_PAYLOAD)
+@ATTACHMENTS
+def test_a_second_file_under_one_name_is_written_and_a_name_keyed_reading_loses_one(line, name, first, second):
+    """The case reads its attachments back into two dictionaries keyed by filename and compares them,
+    normalising pypdf's list with `v[0] if isinstance(v, list) else v` and building MuPDF's with a
+    plain assignment per entry. Both normalisations are lossy in opposite directions, and the file
+    the writer produces shows it: pypdf attaches both payloads under one name, all three readers
+    return two attachments in the order they were written, pypdf's mapping holds both in a list, and
+    the two dictionaries the case builds from them disagree -- the list keeps the first and the
+    assignment keeps the last. MuPDF's own name lookup keeps the first, and its documentation says
+    so of the neighbouring call: `embfile_del` "will only **delete the first item** with that name.
+    Be aware that PDFs not created with PyMuPDF may contain duplicate names"."""
+    assume(first != second)
+    pdf = _pdf_bytes([line])
+    data = _attached(pdf, [(name, first), (name, second)])
+    written = [hashlib.sha256(first).hexdigest(), hashlib.sha256(second).hexdigest()]
+    npt.assert_array_equal(_pypdf_attachments(data)[name], written)
+    npt.assert_array_equal([digest for _, digest in _mupdf_attachments(data)], written)
+    npt.assert_array_equal([digest for _, digest, _ in _pdfium_attachments(data, b'CreationDate')], written)
+    npt.assert_array_equal(hashlib.sha256(pymupdf.open(stream=data, filetype='pdf').embfile_get(name)).hexdigest(),
+                           _pypdf_attachments(data)[name][0])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_pypdf_attachments(data)[name][0],
+                               dict((info['filename'], digest) for info, digest in _mupdf_attachments(data))[name])
+
+
+@given(SAFE_LINE, ATTACHED_NAME, ATTACHED_PAYLOAD)
+@ATTACHMENTS
+def test_the_size_one_reader_declares_is_a_size_no_writer_wrote(line, name, payload):
+    """Three readers agree that the /Size the PDF specification's file parameter dictionary carries
+    was never written, because pypdf writes no /Params at all: pypdf's `size` is None, PDFium's
+    HasKey says no, pdfminer finds no such key. MuPDF returns a number for it anyway, and that
+    number is not the size of the file that was attached, while the `length` it reports beside it
+    is exactly the length of the payload -- so of the two sizes one reader offers, only the one the
+    documentation calls the compressed length is a fact about the file."""
+    pdf = _pdf_bytes([line])
+    data = _attached(pdf, [(name, payload)])
+    npt.assert_array_equal([declared is not None for _, _, declared in _pypdf_embedded(data)],
+                           [carried for _, _, carried in _pdfium_attachments(data, b'Size')])
+    npt.assert_array_equal([declared is not None for _, _, declared in _pypdf_embedded(data)],
+                           [read['carries'] for read in _pdfminer_embedded(data, 'Size')])
+    [(info, _)] = _mupdf_attachments(data)
+    npt.assert_array_equal(info['length'], len(payload))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(info['size'], len(payload))
+
+
+@given(SAFE_LINE, ATTACHED_FILES)
+@ATTACHMENTS
+def test_attaching_files_leaves_the_page_text_alone(line, files):
+    """`g.equal('Report' in text, True)`, which is a substring of one hand-written page. Over a
+    generated line and generated attachments, both extractors return exactly what they returned
+    before the files were attached: MuPDF's `get_text` and pdfminer's through pdfplumber."""
+    pdf = _pdf_bytes([line])
+    before = _both_extractions(pdf)
+    after = _both_extractions(_attached(pdf, files))
+    npt.assert_array_equal(after[0], before[0])
+    npt.assert_array_equal(after[1], before[1])
