@@ -12882,3 +12882,280 @@ def test_declaring_the_column_as_text_restores_the_code_in_every_reader(pair):
     npt.assert_array_equal(pd.read_csv(io.BytesIO(data), dtype=str)['a'].tolist(), codes)
     npt.assert_array_equal(_duckdb_csv_column(data), codes)
     npt.assert_array_equal(_ruby_csv_column(data), codes)
+
+
+# ---------------------------------------------------------------- a deck outline: tables, charts and their caches
+PPTX_DECK_ORACLE_JAVA = pathlib.Path(__file__).with_name('pptx_deck_oracle.java')
+DECK_ORACLE = settings(max_examples=6, deadline=None)
+DECK_WORD = st.text(alphabet=st.characters(whitelist_categories=('Lu', 'Ll', 'Nd')),
+                    min_size=1, max_size=8)
+DECK_NUMBER = st.floats(min_value=-1e6, max_value=1e6, allow_nan=False, allow_infinity=False)
+
+
+@st.composite
+def _deck_cells(draw):
+    """One table's worth of generated text: a row count, a column count and a word per cell. The
+    first row is the header the case writes; nothing here says so, because the readers decide."""
+    rows = draw(st.integers(min_value=1, max_value=4))
+    columns = draw(st.integers(min_value=1, max_value=4))
+    return [[draw(DECK_WORD) for _ in range(columns)] for _ in range(rows)]
+
+
+@st.composite
+def _deck_chart(draw, minimum=2):
+    """Categories and one series of the same length, every number distinct so a shift shows."""
+    size = draw(st.integers(min_value=minimum, max_value=5))
+    return (draw(st.lists(DECK_WORD, min_size=size, max_size=size, unique=True)),
+            draw(st.lists(DECK_NUMBER, min_size=size, max_size=size, unique=True)))
+
+
+@st.composite
+def _deck_chart_with_a_gap(draw):
+    """The same, plus the index of one category whose number was never recorded. The gap is never the
+    first or the last point, so the point after it exists and carries a different number."""
+    categories, values = draw(_deck_chart(minimum=3))
+    return categories, values, draw(st.integers(min_value=1, max_value=len(values) - 2))
+
+
+def _deck_bytes(order, title, cells, chart):
+    """Build one deck with python-pptx, adding a text box, a table and a column chart in the given
+    order onto a blank layout, so no placeholder shape joins them."""
+    categories, values = chart
+    deck = pptx.Presentation()
+    slide = deck.slides.add_slide(deck.slide_layouts[6])
+    for kind in order:
+        if kind == 'text':
+            box = slide.shapes.add_textbox(Inches(1), Inches(1), Inches(4), Inches(1))
+            box.text_frame.text = title
+        elif kind == 'table':
+            table = slide.shapes.add_table(len(cells), len(cells[0]),
+                                           Inches(1), Inches(2), Inches(4), Inches(1)).table
+            for row_index, row in enumerate(cells):
+                for column_index, word in enumerate(row):
+                    table.cell(row_index, column_index).text = word
+        else:
+            source = pptx.chart.data.CategoryChartData()
+            source.categories = categories
+            source.add_series('cases', values)
+            slide.shapes.add_chart(XL_CHART_TYPE.COLUMN_CLUSTERED,
+                                   Inches(1), Inches(4), Inches(5), Inches(2), source)
+    written = io.BytesIO()
+    deck.save(written)
+    return written.getvalue()
+
+
+def _deck_shapes(data):
+    return list(pptx.Presentation(io.BytesIO(data)).slides[0].shapes)
+
+
+def _deck_in_poi(data):
+    """The same package read by Apache POI 5.4.1 under Java. The shim parses argv, calls the library
+    and prints one tab-separated line per shape, per table cell, per chart series and per cached
+    point."""
+    with tempfile.TemporaryDirectory() as directory:
+        path = pathlib.Path(directory) / 'deck.pptx'
+        path.write_bytes(data)
+        completed = subprocess.run(
+            ['java', '-Dlog4j2.statusLoggerLevel=OFF', '-cp', str(POI_DIRECTORY / 'jars' / '*'),
+             str(PPTX_DECK_ORACLE_JAVA), str(path)],
+            capture_output=True, encoding='utf-8', check=True)
+    return [line.split('\t') for line in completed.stdout.split('\n')[:-1]]
+
+
+def _deck_in_officeparser(data):
+    """The same package read by officeparser 7.8.0 under node: the slide's children in the order the
+    parser returns them. The shim parses argv, calls the library and prints the tree as JSON."""
+    with tempfile.TemporaryDirectory() as directory:
+        path = pathlib.Path(directory) / 'deck.pptx'
+        path.write_bytes(data)
+        completed = subprocess.run(['node', str(PPTX_NOTES_ORACLE_JS), str(path)],
+                                   capture_output=True, encoding='utf-8', check=True,
+                                   env={**os.environ,
+                                        'NODE_PATH': str(OFFICEPARSER_DIRECTORY / 'node_modules')})
+    return json.loads(completed.stdout)['content'][0]['children']
+
+
+@pytest.mark.skipif(not poi_available, reason='java and the Apache POI jars are required for this oracle')
+@given(DECK_WORD, _deck_cells(), _deck_chart())
+@DECK_ORACLE
+def test_the_table_the_outline_reads_back_is_the_table_three_readers_find(title, cells, chart):
+    """P114's outline reads a table with `[[c.text for c in r.cells] for r in shape.table.rows]`, and
+    python-pptx documents `_Cell.text` at v1.0.2 as the "Textual content of cell as a single string".
+    Apache POI's `XSLFTable.getCell(row, column).getText()` and officeparser's own cell nodes return
+    the same words in the same order out of the same package, so the read-back is the table that was
+    written and not an artefact of one binding. Replaces the typed cell text of handoff_guards_v12.py
+    case 114."""
+    written = _deck_bytes(['text', 'table', 'chart'], title, cells, chart)
+    table = [shape for shape in _deck_shapes(written) if shape.has_table][0].table
+    npt.assert_array_equal([[cell.text for cell in row.cells] for row in table.rows], cells)
+    npt.assert_array_equal([fields[4] for fields in _deck_in_poi(written) if fields[0] == 'CELL'],
+                           [word for row in cells for word in row])
+    node = [child for child in _deck_in_officeparser(written) if child['type'] == 'table'][0]
+    npt.assert_array_equal([[cell['text'] for cell in row['children']] for row in node['children']],
+                           cells)
+
+
+@pytest.mark.skipif(not poi_available, reason='java and the Apache POI jars are required for this oracle')
+@given(DECK_WORD, _deck_cells(), _deck_chart())
+@DECK_ORACLE
+def test_the_cell_count_the_outline_reports_counts_the_header_row_as_data(title, cells, chart):
+    """`g.equal(outline['table_cells'], 4)` for a two-by-two table is right, and what it counts is
+    every cell the table has, header row included: the outline's sum is `len(r)` over every row of
+    the read-back, so it is the row count times the column count and never the number of body rows.
+    POI's own `getNumberOfRows`/`getNumberOfColumns` report the same dimensions, and the first row
+    both readers return is the header the deck was given. Replaces `g.equal(outline['table_cells'],
+    4)` of case 114."""
+    written = _deck_bytes(['text', 'table', 'chart'], title, cells, chart)
+    reported = _deck_in_poi(written)
+    npt.assert_array_equal([fields[2:4] for fields in reported if fields[0] == 'TABLESIZE'],
+                           [[str(len(cells)), str(len(cells[0]))]])
+    counted = [fields for fields in reported if fields[0] == 'CELL']
+    npt.assert_array_equal(len(counted), len(cells) * len(cells[0]))
+    npt.assert_array_equal([fields[4] for fields in counted[:len(cells[0])]], cells[0])
+
+
+@pytest.mark.skipif(not officeparser_available,
+                    reason='node and an officeparser checkout are required for this oracle')
+@given(DECK_WORD, _deck_cells(), _deck_chart())
+@DECK_ORACLE
+def test_the_words_inside_the_table_are_not_text_blocks_of_the_outline(title, cells, chart):
+    """The outline counts a text block only where `shape.has_text_frame` is true, and python-pptx
+    documents that property on the base shape as "|True| if this shape can contain text" -- a table
+    arrives as a graphic frame, for which it is false. So `outline['text_blocks'] >= 1` holds because
+    of the one text box, and every word inside the table is missing from the outline's text however
+    many cells the table has. officeparser, reading the same package, returns each of those words as
+    the text of a cell. Replaces `g.equal(outline['text_blocks'] >= 1, True)` of case 114."""
+    written = _deck_bytes(['text', 'table', 'chart'], title, cells, chart)
+    framed = [shape.text_frame.text for shape in _deck_shapes(written)
+              if shape.has_text_frame and shape.text_frame.text]
+    npt.assert_array_equal(framed, [title])
+    node = [child for child in _deck_in_officeparser(written) if child['type'] == 'table'][0]
+    npt.assert_array_equal(sorted(cell['text'] for row in node['children'] for cell in row['children']),
+                           sorted(word for row in cells for word in row))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(sorted(framed),
+                               sorted([title] + [word for row in cells for word in row]))
+
+
+@pytest.mark.skipif(not poi_available, reason='java and the Apache POI jars are required for this oracle')
+@given(st.permutations(['text', 'table', 'chart']), DECK_WORD, _deck_cells(), _deck_chart())
+@DECK_ORACLE
+def test_the_shape_order_the_outline_keeps_is_the_order_three_readers_return(order, title, cells,
+                                                                            chart):
+    """`kinds.index('text') < kinds.index('table')` is one arrangement of three shapes. Over every
+    arrangement the strategy draws, the position of the table and the position of the chart are the
+    same in python-pptx's shape sequence, in the order Apache POI walks the shape tree in and in the
+    children officeparser returns, so the outline's order is the order the shapes were added and not
+    a convention of one reader. Replaces the typed ordering assertion of case 114."""
+    written = _deck_bytes(order, title, cells, chart)
+    shapes = _deck_shapes(written)
+    reported = [fields for fields in _deck_in_poi(written) if fields[0] == 'SHAPE']
+    children = _deck_in_officeparser(written)
+    for kind, predicate, java, node in (('table', 'has_table', 'XSLFTable', 'table'),
+                                        ('chart', 'has_chart', 'XSLFGraphicFrame', 'chart')):
+        npt.assert_array_equal([index for index, shape in enumerate(shapes)
+                                if getattr(shape, predicate)],
+                               [index for index, name in enumerate(order) if name == kind])
+        npt.assert_array_equal([int(fields[1]) for fields in reported if fields[2] == java],
+                               [index for index, name in enumerate(order) if name == kind])
+        npt.assert_array_equal([index for index, child in enumerate(children)
+                                if child['type'] == node],
+                               [index for index, name in enumerate(order) if name == kind])
+
+
+@pytest.mark.skipif(not poi_available, reason='java and the Apache POI jars are required for this oracle')
+@given(DECK_WORD, _deck_cells(), _deck_chart())
+@DECK_ORACLE
+def test_two_readers_agree_on_every_number_the_chart_cache_holds(title, cells, chart):
+    """`g.equal(chart['value']['series']['cases'], [1390.0, 15.0])` and `g.equal(outline
+    ['chart_values'], 2)` are both readings of the numCache python-pptx writes beside the chart.
+    Its `_BaseCategorySeries.values` at v1.0.2 yields `val.pt_v(idx)` for `range(val.ptCount_val)`,
+    and Apache POI's `XDDFDataSourcesFactory` reads the same cache through `getPointCount()` and
+    `getPointAt(index)`. On a series with a number for every category the two agree point for point,
+    the categories agree, and the count is the length of the series the deck was given."""
+    written = _deck_bytes(['text', 'table', 'chart'], title, cells, chart)
+    categories, values = chart
+    series = [shape for shape in _deck_shapes(written) if shape.has_chart][0].chart
+    npt.assert_allclose(series.series[0].values, values)
+    npt.assert_array_equal(list(series.plots[0].categories), categories)
+    reported = _deck_in_poi(written)
+    npt.assert_allclose([float(fields[4]) for fields in reported if fields[0] == 'VALUE'], values)
+    npt.assert_array_equal([fields[4] for fields in reported if fields[0] == 'CATEGORY'], categories)
+    npt.assert_array_equal([int(fields[3]) for fields in reported if fields[0] == 'SERIES'],
+                           [len(values)])
+
+
+@pytest.mark.skipif(not poi_available, reason='java and the Apache POI jars are required for this oracle')
+@given(DECK_WORD, _deck_cells(), _deck_chart_with_a_gap())
+@DECK_ORACLE
+def test_a_category_with_no_number_is_a_hole_only_the_writers_own_reader_can_read(title, cells,
+                                                                                 chart):
+    """A category whose number is absent. python-pptx writes `<c:ptCount val="n"/>` and one `<c:pt>`
+    for each number it does have, each carrying its own `idx`, and reads a point back with the xpath
+    `.//c:pt[@idx=%d]`, returning `None` where there is no such element -- so the series it returns is
+    as long as the count the cache declares, with a hole in the place the number is missing. Apache
+    POI declares the same count, `return (int) values.getPtCount().getVal()`, and then indexes the
+    elements that are present, `values.getPtArray(index).getV()`, so it raises
+    IndexOutOfBoundsException before it reaches the end of the count it reported. The gap is
+    readable by the library that wrote it and by nothing else here."""
+    categories, values, gap = chart
+    holed = list(values)
+    holed[gap] = None
+    written = _deck_bytes(['text', 'table', 'chart'], title, cells, (categories, holed))
+    series = [shape for shape in _deck_shapes(written) if shape.has_chart][0].chart.series[0]
+    npt.assert_array_equal(len(series.values), len(holed))
+    npt.assert_array_equal([number is None for number in series.values],
+                           [number is None for number in holed])
+    with pytest.raises(subprocess.CalledProcessError) as failure:
+        _deck_in_poi(written)
+    printed = [line.split('\t') for line in failure.value.stdout.split('\n')[:-1]]
+    npt.assert_array_equal([int(fields[3]) for fields in printed if fields[0] == 'SERIES'],
+                           [len(series.values)])
+
+
+@pytest.mark.skipif(not poi_available, reason='java and the Apache POI jars are required for this oracle')
+@given(DECK_WORD, _deck_cells(), _deck_chart_with_a_gap())
+@DECK_ORACLE
+def test_the_second_reader_reads_the_next_categorys_number_at_the_gap_before_it_fails(title, cells,
+                                                                                      chart):
+    """What POI prints before the exception is not a prefix of the series: because `getPointAt(index)`
+    is a position in the elements that are present and not the `idx` they carry, every number after
+    the gap moves one category earlier. So the numbers it reports are exactly the series with the
+    hole removed, the number it reports for the missing category is the number belonging to the next
+    one, and the misreading is silent -- the failure that follows is about running off the end of the
+    declared count, not about the values already handed back."""
+    categories, values, gap = chart
+    holed = list(values)
+    holed[gap] = None
+    written = _deck_bytes(['text', 'table', 'chart'], title, cells, (categories, holed))
+    with pytest.raises(subprocess.CalledProcessError) as failure:
+        _deck_in_poi(written)
+    printed = [float(line.split('\t')[4]) for line in failure.value.stdout.split('\n')[:-1]
+               if line.split('\t')[0] == 'VALUE']
+    npt.assert_allclose(printed, [number for number in holed if number is not None])
+    npt.assert_allclose(printed[gap], values[gap + 1])
+    with pytest.raises(AssertionError):
+        npt.assert_allclose(printed[gap], values[gap])
+
+
+@pytest.mark.skipif(not officeparser_available,
+                    reason='node and an officeparser checkout are required for this oracle')
+@given(DECK_WORD, _deck_cells(), _deck_chart(), _deck_chart())
+@DECK_ORACLE
+def test_the_third_reader_returns_the_chart_as_a_shape_carrying_none_of_its_numbers(title, cells,
+                                                                                   first, second):
+    """officeparser walks the same package and returns the chart as a child of the slide in its
+    place, with the part it came from in its metadata and no numbers at all. Two decks whose charts
+    hold different categories and different numbers -- which python-pptx tells apart point by point --
+    come back from officeparser as the same children. A reader that lists the shapes is not thereby a
+    reader of what the shapes hold."""
+    assume(first != second)
+    written = [_deck_bytes(['text', 'table', 'chart'], title, cells, chart)
+               for chart in (first, second)]
+    read = [[shape for shape in _deck_shapes(data) if shape.has_chart][0].chart for data in written]
+    seen = [json.dumps({'categories': list(chart.plots[0].categories),
+                        'values': list(chart.series[0].values)}, sort_keys=True) for chart in read]
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(seen[0], seen[1])
+    npt.assert_array_equal(json.dumps(_deck_in_officeparser(written[0]), sort_keys=True),
+                           json.dumps(_deck_in_officeparser(written[1]), sort_keys=True))
