@@ -1844,3 +1844,178 @@ def test_both_libraries_refuse_a_conversion_across_dimensions(reading):
         UNIT_REGISTRY.Quantity(reading, 'degC').to('psi')
     with pytest.raises(unyt.exceptions.UnitConversionError):
         unyt.unyt_quantity(reading, 'degC').to('psi')
+
+
+# ---------------------------------------------------------------- banding a score and counting the bands
+BAND_EDGES = st.lists(st.integers(min_value=-50, max_value=50), min_size=3, max_size=6,
+                      unique=True).map(sorted)
+FRACTION = st.floats(min_value=0.01, max_value=0.99, allow_nan=False, allow_infinity=False)
+BEYOND = st.floats(min_value=1.0, max_value=100.0, allow_nan=False, allow_infinity=False)
+INSIDE_FRACTIONS = st.lists(FRACTION, min_size=1, max_size=20)
+PAST_THE_EDGE = st.lists(st.floats(min_value=0.0, max_value=100.0, allow_nan=False, allow_infinity=False),
+                         min_size=1, max_size=20)
+CLEAR_OF_THE_EDGE = st.lists(BEYOND, min_size=1, max_size=20)
+INSIDE_PAIRS = st.lists(st.tuples(FRACTION, FRACTION), min_size=1, max_size=20)
+BEYOND_PAIRS = st.lists(st.tuples(BEYOND, FRACTION), min_size=1, max_size=20)
+
+
+def _scores_inside(edges, fractions):
+    """Scores placed inside the declared scale by the generated fractions. Both the edges and the fractions
+    come from strategies, so nothing about the scale is typed; the arithmetic places an input, it does not
+    compute an expected value."""
+    return [edges[0] + fraction * (edges[-1] - edges[0]) for fraction in fractions]
+
+
+def _pairs_inside(edges, pairs):
+    """The same placement for two axes at once, so the two coordinate lists are always the same length."""
+    across, down = zip(*pairs)
+    return _scores_inside(edges, across), _scores_inside(edges, down)
+
+
+def _pandas_band_ends(scores, edges, **options):
+    """The right endpoint pandas assigns to each score, read off the IntervalIndex pandas itself returns."""
+    return pd.IntervalIndex(pd.cut(pd.Series(scores, dtype='float64'), bins=edges, **options)).right.to_numpy()
+
+
+def _polars_band_ends(scores, edges, **options):
+    """The same quantity from polars, read off the breakpoint field its own include_breaks option adds."""
+    return (pl.Series(scores, dtype=pl.Float64).cut(edges, include_breaks=True, **options)
+            .struct.field('breakpoint').to_numpy())
+
+
+def _polars_cell_counts(xs, ys, edges):
+    """Counting the same pairs into cells in the other engine: polars bins each axis with its own cut and
+    counts the rows of each group with its own len aggregation."""
+    frame = pl.DataFrame({'x': pl.Series(xs, dtype=pl.Float64), 'y': pl.Series(ys, dtype=pl.Float64)})
+    return (frame.with_columns(pl.col('x').cut(edges).alias('band_x'),
+                               pl.col('y').cut(edges).alias('band_y'))
+            .group_by('band_x', 'band_y').len())
+
+
+@given(BAND_EDGES, INSIDE_FRACTIONS)
+@SLOW
+def test_two_binning_engines_agree_on_every_score_inside_the_declared_scale(edges, fractions):
+    """polars 1.44.1 is Rust and its py-polars/pyproject.toml at tag py-1.44.1 declares one dependency,
+    polars-runtime-32, so it shares no code with pandas 2.2.3. Inside the declared scale the two agree on
+    the band of every generated score, under both closures, which is the part of case 159 that does carry
+    across engines."""
+    scores = _scores_inside(edges, fractions)
+    npt.assert_array_equal(_pandas_band_ends(scores, edges), _polars_band_ends(scores, edges))
+    npt.assert_array_equal(_pandas_band_ends(scores, edges, right=False),
+                           _polars_band_ends(scores, edges, left_closed=True))
+
+
+@given(BAND_EDGES)
+@SLOW
+def test_the_closure_decides_which_end_of_the_scale_keeps_the_score_it_declares(edges):
+    """The mirror of the case above, and the one case 159 records as the loss moving. A score sitting
+    exactly on the highest declared edge is banded by the default right-closed cut and dropped to null by
+    the left-closed one, while numpy's histogram counts it under both readings because its last bin is
+    closed at both ends. Neither flag makes pandas agree with numpy about both endpoints at once: whichever
+    way the closure is set, one declared score is counted by one primitive of this chain and discarded by
+    the other. Replaces the typed left_closed[5] == 'nan' of case 159."""
+    scores = [float(edges[-1])]
+    npt.assert_array_equal(pd.cut(pd.Series(scores, dtype='float64'), bins=edges).isna().to_numpy(), False)
+    npt.assert_array_equal(pd.cut(pd.Series(scores, dtype='float64'), bins=edges,
+                                  right=False).isna().to_numpy(), True)
+    npt.assert_array_equal(np.histogram(scores, bins=edges)[0].sum(), len(scores))
+
+
+@given(BAND_EDGES, PAST_THE_EDGE)
+@SLOW
+def test_a_score_at_or_below_the_lowest_edge_is_null_in_pandas_and_banded_in_polars(edges, offsets):
+    """The two projects mean different things by the list of numbers they are given. pandas documents its
+    bins as "sequence of scalars : Defines the bin edges allowing for non-uniform width. No extension of the
+    range of `x` is done", so a score outside them has no band and comes back null. polars documents its
+    breaks as a "List of unique cut points" and its own example shows a break list of two producing three
+    categories, the first of them (-inf, -1]: the cut points are interior, the scale is the whole line, and
+    no observation is ever outside it. Executed on scores at or below the lowest declared edge, pandas
+    returns null for every one and polars returns the unbounded band whose endpoint is that edge. The rows
+    case 159 records as silently dropped are, in the other engine, silently kept in a band with no floor."""
+    scores = [edges[0] - offset for offset in offsets]
+    npt.assert_array_equal(pd.cut(pd.Series(scores, dtype='float64'), bins=edges).isna().to_numpy(), True)
+    npt.assert_array_equal(_polars_band_ends(scores, edges), float(edges[0]))
+
+
+@given(BAND_EDGES, CLEAR_OF_THE_EDGE)
+@SLOW
+def test_the_left_closed_convention_loses_the_other_end_of_the_scale(edges, offsets):
+    """Turning the closure round moves the loss rather than removing it: under right=False the scores above
+    the highest declared edge are the ones pandas cannot place, and polars puts them in the band that runs
+    to positive infinity. So neither closure covers the whole line, and which score disappears depends on a
+    flag the chain of case 159 never sets."""
+    scores = [edges[-1] + offset for offset in offsets]
+    npt.assert_array_equal(pd.cut(pd.Series(scores, dtype='float64'), bins=edges,
+                                  right=False).isna().to_numpy(), True)
+    npt.assert_array_equal(np.isposinf(_polars_band_ends(scores, edges, left_closed=True)), True)
+
+
+@given(BAND_EDGES)
+@SLOW
+def test_the_two_primitives_this_chain_uses_disagree_about_the_lowest_declared_score(edges):
+    """Case 159 bands scores with pandas.cut and counts pairs with numpy.histogram2d, and the two primitives
+    do not agree about a score sitting exactly on the lowest declared edge: numpy's histogram counts it,
+    because its first bin is closed on the left, while pandas' default right-closed cut has no band for it
+    and returns null. Both are called on the same generated edges here, so the disagreement is between two
+    libraries and not between two sets of numbers. Replaces the typed 'nan' at right_closed[0] of
+    handoff_guards_v16.py case 159."""
+    scores = [float(edges[0])]
+    npt.assert_array_equal(pd.cut(pd.Series(scores, dtype='float64'), bins=edges).isna().to_numpy(), True)
+    npt.assert_array_equal(np.histogram(scores, bins=edges)[0].sum(), len(scores))
+    npt.assert_array_equal(np.isnan(_polars_band_ends(scores, edges)), False)
+
+
+@given(BAND_EDGES)
+@SLOW
+def test_admitting_the_lowest_score_moves_the_boundary_pandas_reports(edges):
+    """pandas has an option for the score above, and it works by moving the boundary rather than closing the
+    interval. Its source at v2.2.3 defines adjust = lambda x: x - 10 ** (-precision) and applies it under
+    the comment "adjust lhs of first interval by precision to account for being right closed", so the first
+    band pandas reports starts strictly below the edge the chain declared. polars admits the same score
+    without moving any cut point, by running its first band down to negative infinity. Both engines keep the
+    score and they put it in different bands: pandas widens the first declared band and reports the score
+    inside it, polars leaves the declared bands alone and reports the score below all of them. Replaces the
+    typed '(0.999, 5.0]' of case 159."""
+    scores = [float(edges[0])]
+    banded = pd.cut(pd.Series(scores, dtype='float64'), bins=edges, include_lowest=True)
+    npt.assert_array_equal(banded.isna().to_numpy(), False)
+    npt.assert_array_equal(banded.cat.categories.left[0] < edges[0], True)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_pandas_band_ends(scores, edges, include_lowest=True),
+                               _polars_band_ends(scores, edges))
+    npt.assert_array_equal(_pandas_band_ends(scores, edges, include_lowest=True), float(edges[1]))
+    npt.assert_array_equal(_polars_band_ends(scores, edges), float(edges[0]))
+
+
+@given(BAND_EDGES, INSIDE_PAIRS)
+@SLOW
+def test_both_engines_count_every_pair_that_lies_inside_the_scale(edges, pairs):
+    """With every pair inside the declared scale the two engines account for the same rows. The types do not
+    match even so: numpy returns the cell counts as floating point and the polars aggregation returns them
+    as an unsigned integer, so a chain comparing one engine's count with the other's is comparing a float
+    with an integer. Replaces the typed 'float64' and the typed diagonal of case 159."""
+    xs, ys = _pairs_inside(edges, pairs)
+    counted = np.histogram2d(xs, ys, bins=[edges, edges])[0]
+    npt.assert_array_equal(counted.sum(), len(xs))
+    npt.assert_array_equal(_polars_cell_counts(xs, ys, edges)['len'].sum(), len(xs))
+    npt.assert_array_equal(np.issubdtype(counted.dtype, np.floating), True)
+    npt.assert_array_equal(np.issubdtype(_polars_cell_counts(xs, ys, edges)['len'].to_numpy().dtype,
+                                         np.integer), True)
+
+
+@given(BAND_EDGES, INSIDE_PAIRS, BEYOND_PAIRS)
+@SLOW
+def test_the_two_dimensional_histogram_counts_fewer_pairs_than_it_was_given(edges, inside, beyond):
+    """Every pair whose first coordinate lies above the declared scale is left out of the histogram, with no
+    error and no warning, so the total of the matrix is the number of in-scale rows rather than the number
+    of rows supplied: the "seven rows in, five counted" of case 159, on generated input. The polars
+    aggregation over the same rows counts all of them, because its outermost bands are unbounded, so the two
+    engines disagree about how many assessments there were and not only about where they sit."""
+    kept_x, kept_y = _pairs_inside(edges, inside)
+    over, down = zip(*beyond)
+    xs = list(kept_x) + [edges[-1] + offset for offset in over]
+    ys = list(kept_y) + list(_scores_inside(edges, down))
+    counted = np.histogram2d(xs, ys, bins=[edges, edges])[0]
+    npt.assert_array_equal(counted.sum(), len(kept_x))
+    npt.assert_array_equal(counted.sum() < len(xs), True)
+    npt.assert_array_equal(_polars_cell_counts(xs, ys, edges)['len'].sum(), len(xs))
