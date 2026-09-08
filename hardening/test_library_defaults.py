@@ -112,9 +112,13 @@ import orjson
 import pdfplumber
 import pm4py
 import pm4py.analysis as pm4py_analysis
+from pm4py.objects.bpmn.importer.variants import lxml as pm4py_bpmn
 from pm4py.objects.petri_net import obj as pm4py_petri
 from pm4py.objects.petri_net.utils import petri_utils as pm4py_utils
 import snakes.nets as snakes_nets
+from SpiffWorkflow.bpmn.parser.BpmnParser import BpmnParser as SpiffBpmnParser
+from SpiffWorkflow.bpmn.workflow import BpmnWorkflow as SpiffBpmnWorkflow
+from SpiffWorkflow.util.task import TaskState as SpiffTaskState
 import pptx
 import pptx.chart.data
 from pptx.enum.chart import XL_CHART_TYPE
@@ -14726,3 +14730,198 @@ def test_canonicalisation_does_not_reorder_siblings(root, first, second):
         npt.assert_array_equal(lxml_etree.canonicalize(forwards), lxml_etree.canonicalize(backwards))
     with pytest.raises(AssertionError):
         npt.assert_array_equal(ElementTree.canonicalize(forwards), ElementTree.canonicalize(backwards))
+
+
+# ---------------------------------------------------------------- one BPMN document, two engines
+ENGINES = settings(max_examples=10, deadline=None)
+TASK_NAMES = st.lists(st.text(alphabet=st.characters(min_codepoint=97, max_codepoint=122), min_size=2, max_size=5),
+                      min_size=2, max_size=3, unique=True)
+BPMN_HEAD = ('<?xml version="1.0" encoding="UTF-8"?>\n<bpmn:definitions '
+             'xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" id="defs" '
+             'targetNamespace="http://example.org/p35">\n<bpmn:process id="proc" isExecutable="true">\n')
+BPMN_TAIL = '</bpmn:process>\n</bpmn:definitions>\n'
+BPMN_NAMESPACE = {'bpmn': 'http://www.omg.org/spec/BPMN/20100524/MODEL'}
+
+
+def _bpmn_document(branches, merge, declared):
+    """One process in two shapes over the same generated task names: branches that leave the start
+    event and arrive at one task with no gateway anywhere, and the same branches between a declared
+    parallel split and a declared parallel join. Nothing about either document is a fixture but its
+    grammar; the names and the number of branches are the strategy's."""
+    parts = []
+    if declared:
+        parts.append('<bpmn:startEvent id="start"><bpmn:outgoing>fs</bpmn:outgoing></bpmn:startEvent>')
+        parts.append('<bpmn:parallelGateway id="split"><bpmn:incoming>fs</bpmn:incoming>'
+                     + ''.join(f'<bpmn:outgoing>fi{index}</bpmn:outgoing>' for index in range(len(branches)))
+                     + '</bpmn:parallelGateway>')
+    else:
+        parts.append('<bpmn:startEvent id="start">'
+                     + ''.join(f'<bpmn:outgoing>fi{index}</bpmn:outgoing>' for index in range(len(branches)))
+                     + '</bpmn:startEvent>')
+    for index, name in enumerate(branches):
+        parts.append(f'<bpmn:manualTask id="{name}" name="{name}"><bpmn:incoming>fi{index}</bpmn:incoming>'
+                     f'<bpmn:outgoing>fo{index}</bpmn:outgoing></bpmn:manualTask>')
+    if declared:
+        parts.append('<bpmn:parallelGateway id="join">'
+                     + ''.join(f'<bpmn:incoming>fo{index}</bpmn:incoming>' for index in range(len(branches)))
+                     + '<bpmn:outgoing>fj</bpmn:outgoing></bpmn:parallelGateway>')
+        parts.append(f'<bpmn:manualTask id="{merge}" name="{merge}"><bpmn:incoming>fj</bpmn:incoming>'
+                     '<bpmn:outgoing>fe</bpmn:outgoing></bpmn:manualTask>')
+    else:
+        parts.append(f'<bpmn:manualTask id="{merge}" name="{merge}">'
+                     + ''.join(f'<bpmn:incoming>fo{index}</bpmn:incoming>' for index in range(len(branches)))
+                     + '<bpmn:outgoing>fe</bpmn:outgoing></bpmn:manualTask>')
+    parts.append('<bpmn:endEvent id="end"><bpmn:incoming>fe</bpmn:incoming></bpmn:endEvent>')
+    if declared:
+        parts.append('<bpmn:sequenceFlow id="fs" sourceRef="start" targetRef="split"/>')
+        parts += [f'<bpmn:sequenceFlow id="fi{index}" sourceRef="split" targetRef="{name}"/>'
+                  for index, name in enumerate(branches)]
+        parts += [f'<bpmn:sequenceFlow id="fo{index}" sourceRef="{name}" targetRef="join"/>'
+                  for index, name in enumerate(branches)]
+        parts.append(f'<bpmn:sequenceFlow id="fj" sourceRef="join" targetRef="{merge}"/>')
+    else:
+        parts += [f'<bpmn:sequenceFlow id="fi{index}" sourceRef="start" targetRef="{name}"/>'
+                  for index, name in enumerate(branches)]
+        parts += [f'<bpmn:sequenceFlow id="fo{index}" sourceRef="{name}" targetRef="{merge}"/>'
+                  for index, name in enumerate(branches)]
+    parts.append(f'<bpmn:sequenceFlow id="fe" sourceRef="{merge}" targetRef="end"/>')
+    return BPMN_HEAD + '\n'.join(parts) + '\n' + BPMN_TAIL
+
+
+def _spiff_trace(document):
+    """SpiffWorkflow 3.2.0 running the document: its own parser, its own workflow object and its own
+    ready-task queue, with the tasks taken in the order the engine offers them. The engine shares
+    nothing with pm4py."""
+    parser = SpiffBpmnParser()
+    parser.add_bpmn_xml(lxml_etree.fromstring(document.encode()), filename='generated.bpmn')
+    workflow = SpiffBpmnWorkflow(parser.get_spec('proc'))
+    workflow.do_engine_steps()
+    trace = []
+    while not workflow.is_completed():
+        ready = sorted(workflow.get_tasks(state=SpiffTaskState.READY), key=lambda task: task.task_spec.name)
+        if not ready or len(trace) > 60:
+            break
+        ready[0].run()
+        trace.append(ready[0].task_spec.name)
+        workflow.do_engine_steps()
+    return trace
+
+
+def _converted_net(document):
+    """pm4py 2.7.23.8 reading the same document and converting it: bpmn importer, then
+    convert_to_petri_net."""
+    return pm4py.convert_to_petri_net(pm4py_bpmn.import_from_string(document))
+
+
+def _run_labels(net, initial):
+    """Which task labels can fire at all in the converted net, and the largest number of tokens any
+    reachable marking holds, both read off the marking graph SNAKES builds."""
+    graph, markings = _reachable(net, initial)
+    labels = {transition.name: transition.label for transition in net.transitions}
+    fired = {labels[data['transition']] for _, _, data in graph.edges(data=True) if labels[data['transition']]}
+    return sorted(fired), max(sum(count for _, count in marking) for marking in markings.values()), len(graph)
+
+
+@given(TASK_NAMES, st.text(alphabet=st.characters(min_codepoint=97, max_codepoint=122), min_size=2, max_size=5))
+@ENGINES
+def test_an_undeclared_merge_runs_once_in_one_engine_and_once_per_branch_in_the_other(branches, merge):
+    """`g.equal(g3.run_witness(g3.BPMN_MERGE, 'proc'), ['a', 'b', 'c', 'c'])` beside
+    `g.equal(merge['transitions']['c'], (1, 1))` and the comment that "one branch runs and c fires
+    once in the Petri view". Over generated task names and a generated number of branches, the two
+    engines read one document two ways: SpiffWorkflow 3.2.0 runs every branch and runs the merging
+    task once for each of them, while pm4py's conversion gives that task one input place, so the
+    number of times the trace runs it is the number of branches times the number of times it runs
+    any one of them. Declaring the gateways makes the two agree, which the next test shows."""
+    assume(merge not in branches)
+    trace = _spiff_trace(_bpmn_document(branches, merge, declared=False))
+    npt.assert_array_equal(sorted(set(trace)), sorted(set(branches) | {merge}))
+    npt.assert_array_equal(trace.count(merge), len(branches) * trace.count(branches[0]))
+    declared = _spiff_trace(_bpmn_document(branches, merge, declared=True))
+    npt.assert_array_equal(declared.count(merge), declared.count(branches[0]))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(trace.count(merge), declared.count(merge))
+
+
+@given(TASK_NAMES, st.text(alphabet=st.characters(min_codepoint=97, max_codepoint=122), min_size=2, max_size=5))
+@ENGINES
+def test_the_converted_net_holds_one_token_where_the_engine_runs_every_branch(branches, merge):
+    """What the conversion did, read off the marking graph a third library builds rather than off an
+    arc count. With no gateway declared, every reachable marking of the converted net holds exactly
+    one token and its marking graph is the same size whatever the number of branches: the start
+    event became a place with one token and several consuming transitions, which is a choice.
+    Declaring the split makes the same document into a net whose markings hold as many tokens as
+    there are branches. Every branch task can still fire in both, so a check that each task is
+    reachable does not separate them."""
+    assume(merge not in branches)
+    undeclared_net, undeclared_initial, _ = _converted_net(_bpmn_document(branches, merge, declared=False))
+    declared_net, declared_initial, _ = _converted_net(_bpmn_document(branches, merge, declared=True))
+    undeclared_labels, undeclared_tokens, undeclared_states = _run_labels(undeclared_net, undeclared_initial)
+    declared_labels, declared_tokens, _ = _run_labels(declared_net, declared_initial)
+    npt.assert_array_equal(undeclared_labels, declared_labels)
+    npt.assert_array_equal(declared_tokens, len(branches))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(undeclared_tokens, declared_tokens)
+    npt.assert_array_equal(undeclared_states,
+                           _run_labels(*_converted_net(_bpmn_document(branches[:2], merge, declared=False))[:2])[2])
+
+
+@given(TASK_NAMES, st.text(alphabet=st.characters(min_codepoint=97, max_codepoint=122), min_size=2, max_size=5))
+@ENGINES
+def test_both_engines_report_success_on_the_document_they_read_differently(branches, merge):
+    """The case's own summary field, executed: engines_disagree_yet_both_report_success. The
+    workflow engine completes the undeclared document and the declared one alike, and Woflan calls
+    both converted nets sound, so neither engine's own report distinguishes the document whose
+    meaning they disagree about. What separates them is running both and comparing, which is what
+    this test does."""
+    assume(merge not in branches)
+    undeclared, declared = (_bpmn_document(branches, merge, declared=False),
+                            _bpmn_document(branches, merge, declared=True))
+    for document in (undeclared, declared):
+        net, initial, final = _converted_net(document)
+        npt.assert_array_equal(pm4py.check_soundness(net, initial, final)[0],
+                               pm4py.check_soundness(*_converted_net(declared))[0])
+        npt.assert_array_equal(sorted(set(_spiff_trace(document))), sorted(set(branches) | {merge}))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(len(_spiff_trace(undeclared)), len(_spiff_trace(declared)))
+
+
+@given(TASK_NAMES, st.text(alphabet=st.characters(min_codepoint=97, max_codepoint=122), min_size=2, max_size=5))
+@ENGINES
+def test_the_two_readings_agree_once_the_split_and_the_join_are_declared(branches, merge):
+    """The other half of the case, and the remedy it records. With a parallel gateway on each side,
+    SpiffWorkflow runs each branch once and the merging task once, and the converted net holds one
+    token per branch until the join takes them all, so the trace and the marking graph tell the same
+    story about the same document."""
+    assume(merge not in branches)
+    document = _bpmn_document(branches, merge, declared=True)
+    trace = _spiff_trace(document)
+    net, initial, final = _converted_net(document)
+    labels, tokens, _ = _run_labels(net, initial)
+    npt.assert_array_equal(sorted(trace), sorted(list(branches) + [merge]))
+    npt.assert_array_equal(labels, sorted(list(branches) + [merge]))
+    npt.assert_array_equal(tokens, len(branches))
+
+
+@given(TASK_NAMES, st.text(alphabet=st.characters(min_codepoint=97, max_codepoint=122), min_size=2, max_size=5))
+@ENGINES
+def test_the_flow_graph_says_which_join_is_a_gateway_and_which_is_a_task(branches, merge):
+    """`g.rejects(g.Blocked, lambda: gateway_contract(g3.BPMN_MERGE))` is the guard module's own rule.
+    The fact underneath it is a document fact two libraries state: libxml2 through lxml 6.1.3 reads
+    the element kind of every node in the process, igraph 1.0.0 counts the incoming sequence flows,
+    and the node that more than one flow arrives at is a manualTask in the undeclared document and a
+    parallelGateway in the declared one. That is the whole difference between the two documents, and
+    it is what the two engines read differently."""
+    assume(merge not in branches)
+    joined = []
+    for declared in (False, True):
+        tree = lxml_etree.fromstring(_bpmn_document(branches, merge, declared).encode())
+        kinds = {element.get('id'): lxml_etree.QName(element).localname
+                 for element in tree.xpath('//bpmn:process/*[@id]', namespaces=BPMN_NAMESPACE)}
+        flow = igraph.Graph(directed=True)
+        flow.add_vertices(sorted(kinds))
+        flow.add_edges([(element.get('sourceRef'), element.get('targetRef'))
+                        for element in tree.xpath('//bpmn:sequenceFlow', namespaces=BPMN_NAMESPACE)])
+        joined.append(sorted({kinds[name] for name in kinds
+                              if flow.degree(name, mode='in') > 1}))
+    npt.assert_array_equal(joined[0], ['manualTask'])
+    npt.assert_array_equal(joined[1], ['parallelGateway'])
