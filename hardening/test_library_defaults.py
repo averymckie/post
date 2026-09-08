@@ -9695,3 +9695,278 @@ def test_the_drawn_proportions_do_not_depend_on_the_rectangle_they_were_given(wi
     here = _drawn_ratio(_mupdf_ink(_shown_on_a_handout(slide, box)))
     there = _drawn_ratio(_mupdf_ink(_shown_on_a_handout(slide, other)))
     npt.assert_allclose([here, there], [width / height, width / height], rtol=0.03)
+
+
+# --------------------------------------------------------------------------------------------------
+# handoff_guards_v11.py, case binder_bookmarks_point_at_real_pages: the outline of an assembled binder
+# --------------------------------------------------------------------------------------------------
+BINDER_TITLE = st.text(alphabet=st.characters(min_codepoint=65, max_codepoint=90), min_size=3, max_size=7)
+BINDER_TITLES = st.lists(BINDER_TITLE, min_size=1, max_size=5, unique=True)
+BINDER_SECTIONS = st.lists(st.tuples(BINDER_TITLE, st.sampled_from([1, 2])), min_size=2, max_size=5,
+                           unique_by=lambda pair: pair[0])
+BINDER_AND_ANY_ROW = st.lists(BINDER_TITLE, min_size=2, max_size=5, unique=True).flatmap(
+    lambda titles: st.tuples(st.just(titles), st.integers(min_value=0, max_value=len(titles) - 1)))
+BINDER_AND_EARLIER_ROW = st.lists(BINDER_TITLE, min_size=2, max_size=5, unique=True).flatmap(
+    lambda titles: st.tuples(st.just(titles), st.integers(min_value=0, max_value=len(titles) - 2)))
+OVERSHOOT = st.integers(min_value=1, max_value=60)
+BINDER_OUTLINE = settings(max_examples=50, deadline=None)
+
+
+def _one_page(word):
+    """One page carrying one generated word, written by PyMuPDF itself."""
+    document = pymupdf.open()
+    document.new_page().insert_text((72, 72), word)
+    return document.tobytes()
+
+
+def _sections(titles):
+    """A binder assembled the way the case assembles one, with the case's own glue removed: one page a
+    section, each section inserted by `Document.insert_pdf`."""
+    binder = pymupdf.open()
+    for title in titles:
+        with pymupdf.open(stream=_one_page(title), filetype='pdf') as part:
+            binder.insert_pdf(part)
+    return binder
+
+
+def _flat_outline(titles):
+    """The outline the case writes: one level-1 entry a section, pointing at the page it went on.
+    `set_toc` documents its item format at tag 1.28.2 as "[lvl, title, page [, dest]]" where "**page**
+    (int) is the target page number **(attention: 1-based)**", so `enumerate` numbering from one is the
+    page each single-page section occupies."""
+    return [[1, title, number] for number, title in enumerate(titles, start=1)]
+
+
+def _mupdf_outline(data):
+    """PyMuPDF's own reading. docs/document.rst at tag 1.28.2 documents each `get_toc` entry as
+    "*[lvl, title, page, dest]*" whose page is the "1-based source page number (*int*). `-1` if no
+    destination or outside document"."""
+    return pymupdf.open(stream=data, filetype='pdf').get_toc()
+
+
+def _pypdf_outline(data):
+    """The same outline through pypdf 6.17.0, a pure-Python reader of the PDF object model whose
+    `outline` property is documented at tag 6.17.0 as "the outline present in the document (i.e., a
+    collection of 'outline items' which are also known as 'bookmarks')" and whose
+    `get_destination_page_number` returns "The page number or None if page is not found" -- an index
+    counted from zero. Called only on flat outlines, where pypdf returns no nested lists."""
+    reader = pypdf.PdfReader(io.BytesIO(data))
+    return [(item.title, reader.get_destination_page_number(item)) for item in reader.outline]
+
+
+def _pdfium_outline(data):
+    """And through PDFium, whose `PdfDocument.get_toc` at tag 5.13.0 iterates "through the bookmarks in
+    the document's table of contents (TOC)", each carrying a `level` that is "The bookmark's nesting
+    level in the TOC tree (zero-based)" and a destination whose `get_index` is the "Zero-based index of
+    the page the dest points to, or None on failure" -- PDFium's own negative sentinel, which the
+    binding turns into None with `return val if val >= 0 else None`."""
+    document = pypdfium2.PdfDocument(io.BytesIO(data))
+    out = []
+    for bookmark in document.get_toc():
+        destination = bookmark.get_dest()
+        out.append((bookmark.get_title(), bookmark.level,
+                    None if destination is None else destination.get_index()))
+    return out
+
+
+def _mupdf_page_words(data, numbers):
+    """The text of each page an outline entry points at, read by MuPDF. `get_toc` numbers pages from
+    one and `Document.__getitem__` indexes them from zero, so the entry's number is the index one
+    further on; `insert_text` wrote one line, and each extractor terminates that line its own way."""
+    document = pymupdf.open(stream=data, filetype='pdf')
+    return [document[number - 1].get_text().strip() for number in numbers]
+
+
+def _pypdf_page_words(data, indices):
+    reader = pypdf.PdfReader(io.BytesIO(data))
+    return [reader.pages[index].extract_text().strip() for index in indices]
+
+
+def _pdfium_page_words(data, indices):
+    document = pypdfium2.PdfDocument(io.BytesIO(data))
+    return [document[index].get_textpage().get_text_bounded().strip() for index in indices]
+
+
+@given(BINDER_TITLES)
+@BINDER_OUTLINE
+def test_three_outline_readers_return_the_same_bookmark_titles_in_the_same_order(titles):
+    """handoff_guards_v11.py's case binder_bookmarks_point_at_real_pages types the page count, the
+    section count and the whole table of contents as a nested list. Nothing is typed here: the titles
+    are generated and three implementations that share no code read them back. MuPDF through PyMuPDF
+    1.28.2, pypdf 6.17.0 -- whose only declared dependency at that tag is typing_extensions below
+    Python 3.11 -- and PDFium through pypdfium2 5.13.0, whose pyproject.toml at that tag declares no
+    runtime dependency at all, agree on the titles and on their order."""
+    data = _sections(titles).tobytes()
+    with pymupdf.open(stream=data, filetype='pdf') as binder:
+        binder.set_toc(_flat_outline(titles))
+        data = binder.tobytes()
+    npt.assert_array_equal([entry[1] for entry in _mupdf_outline(data)], titles)
+    npt.assert_array_equal([title for title, _ in _pypdf_outline(data)], titles)
+    npt.assert_array_equal([title for title, _, _ in _pdfium_outline(data)], titles)
+
+
+@given(BINDER_TITLES)
+@BINDER_OUTLINE
+def test_every_bookmark_resolves_to_the_page_that_carries_its_own_section(titles):
+    """The claim the case's name makes, executed rather than typed. Each generated title is written on
+    its own page and is also the bookmark's title, so the text of the page each reader's destination
+    resolves to is the title itself -- an invariant of the generated input, not an expected value. All
+    three readers land on that page, so the destinations survive the write and are the same
+    destinations under three independent resolutions of the PDF's own name tree."""
+    data = _sections(titles).tobytes()
+    with pymupdf.open(stream=data, filetype='pdf') as binder:
+        binder.set_toc(_flat_outline(titles))
+        data = binder.tobytes()
+    npt.assert_array_equal(_mupdf_page_words(data, [entry[2] for entry in _mupdf_outline(data)]), titles)
+    npt.assert_array_equal(_pypdf_page_words(data, [page for _, page in _pypdf_outline(data)]), titles)
+    npt.assert_array_equal(_pdfium_page_words(data, [page for _, _, page in _pdfium_outline(data)]), titles)
+
+
+@given(BINDER_SECTIONS)
+@BINDER_OUTLINE
+def test_a_nesting_level_survives_the_write_and_both_engines_report_the_same_one(sections):
+    """The case's outline is flat and it types the flatness into the expected list. Generated here is a
+    two-level outline: `set_toc` documents that the level "**must be 1** for the first item and at most
+    1 larger than the previous one", so a first entry at level 1 followed by any sequence of ones and
+    twos is a valid tree by construction and needs no filtering. MuPDF's levels count from one and
+    PDFium's `level` is documented as the nesting level "(zero-based)" -- the same tree in two
+    vocabularies."""
+    titles = [title for title, _ in sections]
+    levels = [1, *[level for _, level in sections[1:]]]
+    with _sections(titles) as binder:
+        binder.set_toc([[level, title, number]
+                        for level, (number, title) in zip(levels, enumerate(titles, start=1))])
+        data = binder.tobytes()
+    npt.assert_array_equal([entry[0] for entry in _mupdf_outline(data)], levels)
+    npt.assert_array_equal([level + 1 for _, level, _ in _pdfium_outline(data)], levels)
+
+
+@given(BINDER_AND_ANY_ROW)
+@BINDER_OUTLINE
+def test_the_two_index_readers_agree_exactly_about_a_bookmark_whose_page_was_deleted(binder_and_row):
+    """A binder is not finished when its outline is written. Delete any one of the generated pages
+    afterwards with `Document.delete_page` and its bookmark stays in the outline with nothing behind
+    it. pypdf, which returns "The page number or None if page is not found", and PDFium, whose index is
+    "Zero-based index of the page the dest points to, or None on failure", report the same list for the
+    edited binder, entry for entry, including which single entry has no destination left."""
+    titles, dropped = binder_and_row
+    with _sections(titles) as binder:
+        binder.set_toc(_flat_outline(titles))
+        binder.delete_page(dropped)
+        data = binder.tobytes()
+    npt.assert_array_equal(np.array([page for _, page in _pypdf_outline(data)], dtype=object),
+                           np.array([page for _, _, page in _pdfium_outline(data)], dtype=object))
+
+
+@given(BINDER_AND_ANY_ROW)
+@BINDER_OUTLINE
+def test_the_orphaned_bookmark_sits_below_the_first_page_rather_than_above_the_last(binder_and_row):
+    """And this is what the case's own requirement is worth. It requires that `entry[2] <= out['pages']`
+    for every entry, calling that "every bookmark points inside the binder". MuPDF reports the orphan's
+    page as the value docs/document.rst at tag 1.28.2 documents for it -- "`-1` if no destination or
+    outside document" -- which is below one, below the first page of any binder, and therefore below
+    the page count as well. The one outline entry that points at nothing satisfies the requirement more
+    comfortably than the entries that point at real pages."""
+    titles, dropped = binder_and_row
+    with _sections(titles) as binder:
+        binder.set_toc(_flat_outline(titles))
+        binder.delete_page(dropped)
+        data = binder.tobytes()
+    with pymupdf.open(stream=data, filetype='pdf') as edited:
+        npt.assert_array_less(_mupdf_outline(data)[dropped][2], 1)
+        npt.assert_array_less(_mupdf_outline(data)[dropped][2], edited.page_count)
+
+
+@given(BINDER_AND_EARLIER_ROW, OVERSHOOT)
+@BINDER_OUTLINE
+def test_set_toc_refuses_a_page_number_past_the_end_in_any_row_but_the_last(binder_and_row, overshoot):
+    """`set_toc` documents that the page "Must be in valid range if positive", and for every row it
+    checks, it enforces exactly that: a generated overshoot in any row before the last is refused."""
+    titles, row = binder_and_row
+    outline = _flat_outline(titles)
+    outline[row][2] = len(titles) + overshoot
+    with _sections(titles) as binder, pytest.raises(ValueError):
+        binder.set_toc(outline)
+
+
+@given(BINDER_TITLES, OVERSHOOT)
+@BINDER_OUTLINE
+def test_the_last_row_escapes_that_check_and_its_destination_is_moved_onto_the_last_page(titles, overshoot):
+    """The last row is never reached by it. The check in `set_toc` at 1.28.2 reads `for i in
+    list(range(toclen - 1)):` and then tests `toc[i]`, so the final entry's page number is the one entry
+    never validated, and a single-entry outline is never validated at all. The value is not rejected and
+    not preserved either: written out, the destination has been moved onto a real page, and all three
+    readers resolve it to the page carrying the last generated section. So the case's requirement that
+    every bookmark point inside the binder cannot fail on a freshly written outline -- every row it
+    could have caught was refused before it ran, and the one row that escapes was repaired before it
+    ran."""
+    outline = _flat_outline(titles)
+    outline[-1][2] = len(titles) + overshoot
+    with _sections(titles) as binder:
+        binder.set_toc(outline)
+        data = binder.tobytes()
+    npt.assert_array_equal(_mupdf_page_words(data, [_mupdf_outline(data)[-1][2]]), titles[-1:])
+    npt.assert_array_equal(_pypdf_page_words(data, [_pypdf_outline(data)[-1][1]]), titles[-1:])
+    npt.assert_array_equal(_pdfium_page_words(data, [_pdfium_outline(data)[-1][2]]), titles[-1:])
+
+
+@given(BINDER_TITLES, st.integers(max_value=-2))
+@BINDER_OUTLINE
+def test_a_last_destination_below_minus_one_is_written_out_as_no_destination_at_all(titles, page):
+    """The other side of the same unchecked row. `set_toc` documents "-1 if there is no target, or the
+    target is external"; a generated value below that is neither refused nor kept, and what reaches the
+    file is the no-destination sentinel. MuPDF reports a number below one and the two index readers
+    agree with each other, entry for entry, that the last bookmark resolves to nothing."""
+    outline = _flat_outline(titles)
+    outline[-1][2] = page
+    with _sections(titles) as binder:
+        binder.set_toc(outline)
+        data = binder.tobytes()
+    npt.assert_array_less(_mupdf_outline(data)[-1][2], 1)
+    npt.assert_array_equal(np.array([page for _, page in _pypdf_outline(data)], dtype=object),
+                           np.array([page for _, _, page in _pdfium_outline(data)], dtype=object))
+
+
+@given(BINDER_TITLES, st.integers(min_value=2, max_value=8))
+@BINDER_OUTLINE
+def test_set_toc_does_enforce_the_hierarchy_rule_it_documents_for_the_first_entry(titles, level):
+    """One of the two documented constraints is enforced everywhere. The level "**must be 1** for the
+    first item", and any generated level above one in that position is refused."""
+    outline = _flat_outline(titles)
+    outline[0][0] = level
+    with _sections(titles) as binder, pytest.raises(ValueError):
+        binder.set_toc(outline)
+
+
+@given(BINDER_AND_EARLIER_ROW, st.integers(min_value=3, max_value=9))
+@BINDER_OUTLINE
+def test_set_toc_refuses_a_level_that_jumps_by_more_than_one(binder_and_row, level):
+    """And "at most 1 larger than the previous one" is enforced in every row after the first, including
+    the last -- the row whose page number nothing checks."""
+    titles, row = binder_and_row
+    outline = _flat_outline(titles)
+    outline[row + 1][0] = level
+    with _sections(titles) as binder, pytest.raises(ValueError):
+        binder.set_toc(outline)
+
+
+@given(BINDER_TITLE)
+@BINDER_OUTLINE
+def test_the_zero_page_refusal_belongs_to_one_writer_and_not_to_the_format(title):
+    """The case ends by asserting that `pymupdf.open().tobytes()` raises, with the comment that "a
+    zero-page document cannot even be serialized". The refusal is real and it is MuPDF's. pypdf writes a
+    zero-page PDF without complaint, carrying the generated title; MuPDF opens that file and hands the
+    title back, and refuses only when asked to write it out again; PDFium will not open it at all. Three
+    libraries, three policies, and the guarantee the case reads off the exception is a property of the
+    writer it happened to use."""
+    writer = pypdf.PdfWriter()
+    writer.add_metadata({'/Title': title})
+    written = io.BytesIO()
+    writer.write(written)
+    data = written.getvalue()
+    with pymupdf.open(stream=data, filetype='pdf') as empty:
+        npt.assert_equal(empty.metadata['title'], title)
+        with pytest.raises(ValueError):
+            empty.tobytes()
+    with pytest.raises(pypdfium2.PdfiumError):
+        pypdfium2.PdfDocument(io.BytesIO(data))
