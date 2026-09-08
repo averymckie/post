@@ -4831,3 +4831,124 @@ def test_a_party_with_no_weight_changes_nothing_in_either_library(weights, total
     carried = [weight for weight in weights if weight]
     for whole, without in zip(_hamilton_pair(weights, total), _hamilton_pair(carried, total)):
         npt.assert_array_equal([paid for paid, weight in zip(whole, weights) if weight], without)
+
+
+# ---------------------------------------------------------------- counting the working days between two dates
+DECLARED_HOLIDAYS = st.lists(ANY_2026_DAY, min_size=0, max_size=6, unique=True)
+WORKING_SPAN = st.tuples(ANY_2026_DAY, ANY_2026_DAY).map(lambda pair: tuple(sorted(pair)))
+
+
+class DeclaredHolidays(workalendar_core.Calendar):
+    """A five-day week whose holidays are the generated ones. The same list is handed to numpy and
+    to pandas, so the three implementations are compared on the convention and not on the calendar."""
+    WEEKEND_DAYS = (5, 6)
+
+    def __init__(self, holidays):
+        super().__init__()
+        self._declared = list(holidays)
+
+    def get_calendar_holidays(self, year):
+        return [(day, 'declared') for day in self._declared if day.year == year]
+
+
+def _numpy_calendar(holidays):
+    return np.busdaycalendar(weekmask='Mon Tue Wed Thu Fri',
+                             holidays=[day.isoformat() for day in holidays])
+
+
+def _custom_business_day(holidays):
+    return pd.offsets.CustomBusinessDay(holidays=[pd.Timestamp(day) for day in holidays])
+
+
+def _working_counts(span, holidays):
+    """The same two dates counted three ways: numpy's busday_count, the length of pandas'
+    bdate_range and workalendar's get_working_days_delta. workalendar is the independent
+    implementation here; pandas' CustomBusinessDay builds an np.busdaycalendar of its own and calls
+    np.is_busday, so it is a third endpoint convention over the same engine and not a third reader."""
+    start, end = span
+    half_open = int(np.busday_count(np.datetime64(start.isoformat()), np.datetime64(end.isoformat()),
+                                    busdaycal=_numpy_calendar(holidays)))
+    closed = len(pd.bdate_range(start, end, freq=_custom_business_day(holidays)))
+    open_on_the_left = DeclaredHolidays(holidays).get_working_days_delta(start, end)
+    return half_open, closed, open_on_the_left
+
+
+def _works(day, holidays):
+    return int(np.is_busday(np.datetime64(day.isoformat()), busdaycal=_numpy_calendar(holidays)))
+
+
+@given(WORKING_SPAN, DECLARED_HOLIDAYS)
+@SLOW
+def test_three_working_day_counters_count_three_different_intervals(span, holidays):
+    """numpy counts the working days in [start, end), pandas' bdate_range lists those in [start, end]
+    and workalendar's delta counts those in (start, end]. Handed one calendar and one pair of dates
+    the three differ by exactly the working-day status of the endpoint each of them leaves out, which
+    is the relation asserted here. numpy and workalendar therefore return the same number only when
+    the two endpoints have the same status, and the pair of dates a chain hands them decides it.
+    Replaces the typed 20 and 21 of case 171."""
+    half_open, closed, open_on_the_left = _working_counts(span, holidays)
+    npt.assert_array_equal(closed, half_open + _works(span[1], holidays))
+    npt.assert_array_equal(closed, open_on_the_left + _works(span[0], holidays))
+
+
+@given(WORKING_SPAN.filter(lambda span: span[0] != span[1]), DECLARED_HOLIDAYS)
+@SLOW
+def test_the_inclusive_span_is_one_longer_than_the_half_open_one_only_when_the_last_day_works(
+        span, holidays):
+    """The chain's inclusive count adds a day to the end before counting. That returns one more than
+    the half-open count when the last day is a working day and returns the same number when it is
+    not, so the identity the case types as a difference of one is a fact about the end date rather
+    than about the two calls."""
+    start, end = span
+    calendar = _numpy_calendar(holidays)
+    half_open = int(np.busday_count(np.datetime64(start.isoformat()),
+                                    np.datetime64(end.isoformat()), busdaycal=calendar))
+    inclusive = int(np.busday_count(np.datetime64(start.isoformat()),
+                                    np.datetime64(end.isoformat()) + np.timedelta64(1, 'D'),
+                                    busdaycal=calendar))
+    npt.assert_array_equal(inclusive, half_open + _works(end, holidays))
+
+
+@given(WORKING_SPAN, DECLARED_HOLIDAYS)
+@SLOW
+def test_numpy_and_workalendar_list_the_same_working_days_between_the_same_dates(span, holidays):
+    """The disagreement is about the endpoints and not about the days. Over the closed span the
+    dates numpy keeps with is_busday are exactly the dates workalendar calls working days, on the
+    same generated holidays, and pandas' bdate_range emits that same list. The two implementations
+    agree about the calendar and return different counts of it."""
+    start, end = span
+    days = np.arange(np.datetime64(start.isoformat()),
+                     np.datetime64(end.isoformat()) + np.timedelta64(1, 'D'), dtype='datetime64[D]')
+    calendar = DeclaredHolidays(holidays)
+    by_numpy = [str(day) for day in days[np.is_busday(days, busdaycal=_numpy_calendar(holidays))]]
+    by_workalendar = [str(day) for day in days
+                      if calendar.is_working_day(datetime.date.fromisoformat(str(day)))]
+    by_pandas = [stamp.date().isoformat()
+                 for stamp in pd.bdate_range(start, end, freq=_custom_business_day(holidays))]
+    npt.assert_array_equal(by_numpy, by_workalendar)
+    npt.assert_array_equal(by_numpy, by_pandas)
+
+
+@given(st.lists(st.tuples(st.one_of(st.none(), st.sampled_from(['A', 'B', 'C'])),
+                          st.integers(min_value=1, max_value=800)), min_size=1, max_size=12)
+       .filter(lambda rows: any(row[0] is None for row in rows)))
+@SLOW
+def test_the_unattributed_days_leave_one_engine_and_stay_in_the_other_two(rows):
+    """A timesheet row with no employee is a row nobody has claimed. pandas' groupby drops it by
+    default, so the totals it returns are short of the days that were booked; polars' group_by and a
+    DuckDB GROUP BY both return it as its own group, and pandas returns it too once dropna=False is
+    passed. Nothing raises in any of the four, and only three of them conserve the days. Replaces the
+    typed 4.00 and 5.00 totals of case 171."""
+    frame = pd.DataFrame(rows, columns=['employee', 'days'])
+    booked = int(frame['days'].sum())
+    dropped = int(frame.groupby('employee')['days'].sum().sum())
+    kept = int(frame.groupby('employee', dropna=False)['days'].sum().sum())
+    by_polars = int(pl.DataFrame(rows, schema=['employee', 'days'], orient='row')
+                    .group_by('employee').agg(pl.col('days').sum())['days'].sum())
+    by_duckdb = duckdb.connect().execute(
+        'select sum(total) from (select employee, sum(days) as total from frame group by employee)'
+    ).fetchone()[0]
+    npt.assert_array_equal([kept, by_polars, int(by_duckdb)], [booked, booked, booked])
+    npt.assert_array_less(dropped, booked)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(dropped, booked)
