@@ -19337,3 +19337,136 @@ def test_a_beta_above_one_weights_the_remote_handover_above_the_adjacent_one(cas
     npt.assert_allclose(flat[(first, second)], flat[(first, third)])
     steep = _handover_connections(cases, beta=2)
     npt.assert_array_less(steep[(first, second)], steep[(first, third)])
+
+
+# ---------------------------------------------------------------------------------------------------
+# P89, case a_heading_inside_a_fence_is_not_a_proof of handoff_guards_v9.py: reading a catalogue of
+# proof headings out of a Markdown document. markdown-it-py 4.2.0 is the parser the case uses;
+# Python-Markdown 3.10.3 is the second implementation, already recorded above as an independent
+# parser with its own block processors.
+CATALOGUE = settings(max_examples=40, deadline=None)
+CATALOGUE_TITLE = st.lists(st.text(alphabet='abcdefgh', min_size=1, max_size=4),
+                           min_size=1, max_size=3).map(' '.join)
+CATALOGUE_ENTRIES = st.lists(st.tuples(st.integers(min_value=1, max_value=400), CATALOGUE_TITLE),
+                             min_size=2, max_size=4, unique_by=lambda entry: entry[0])
+BURIED_ENTRY = st.tuples(st.integers(min_value=500, max_value=999), CATALOGUE_TITLE)
+
+
+def _catalogue_heading(entry):
+    """One proof heading in the shape the case's own regular expression matches."""
+    return '## P%d  %s' % entry
+
+
+def _catalogue_source(entries, buried=None, style=None):
+    """A catalogue document, with one further heading buried by the named construct if one is asked for."""
+    blocks = ['# Proofs']
+    for entry in entries[:1]:
+        blocks.append(_catalogue_heading(entry))
+    if style == 'fence':
+        blocks.append('```\n' + _catalogue_heading(buried) + '\n```')
+    elif style == 'indent':
+        blocks.append('    ' + _catalogue_heading(buried))
+    elif style == 'plain':
+        blocks.append(_catalogue_heading(buried))
+    elif style == 'unclosed':
+        blocks.append('```')
+    for entry in entries[1:]:
+        blocks.append(_catalogue_heading(entry))
+    return '\n\n'.join(blocks) + '\n'
+
+
+def _markdown_it_catalogue(source):
+    """The headings the case's parser reports, read off its own token stream."""
+    tokens = MarkdownIt().parse(source)
+    return [tokens[index + 1].content.strip() for index, token in enumerate(tokens)
+            if token.type == 'heading_open' and token.tag == 'h2']
+
+
+def _markdown_it_fences(source):
+    """And how many fence tokens it reports, which is what the case counts."""
+    return len([token for token in MarkdownIt().parse(source) if token.type == 'fence'])
+
+
+def _python_markdown_catalogue(source, **options):
+    """The same headings from Python-Markdown, selected out of its rendered HTML by one libxml2 XPath."""
+    markup = python_markdown.Markdown(**options).convert(source)
+    return [node.text_content().strip()
+            for node in lxml_html.fromstring('<div>' + markup + '</div>').xpath('.//h2')]
+
+
+@given(CATALOGUE_ENTRIES)
+@CATALOGUE
+def test_two_markdown_parsers_read_the_same_catalogue_out_of_a_document_with_no_fences(entries):
+    """The agreeing region, and the part of case 89 that carries across implementations. On a catalogue
+    of generated proof headings the token stream markdown-it-py produces and the `h2` elements
+    Python-Markdown renders name the same proofs in the same order, so reading a catalogue is not an
+    artefact of the parser the chain happens to import."""
+    source = _catalogue_source(entries)
+    npt.assert_array_equal(_markdown_it_catalogue(source), _python_markdown_catalogue(source))
+
+
+@given(CATALOGUE_ENTRIES, BURIED_ENTRY)
+@CATALOGUE
+def test_a_heading_inside_a_fence_is_a_heading_to_the_other_parser_by_default(entries, buried):
+    """The typed expectation of case 89 is that the fenced heading never becomes a proof. That is a
+    property of markdown-it-py, whose default preset is CommonMark and which returns a `fence` token for
+    the block. Python-Markdown's fenced code is an extension rather than core syntax, so with no
+    extensions its default reading of the same document has the buried heading as a real `h2`, and the
+    catalogue gains a proof. Handed `extensions=['fenced_code']` it agrees with the other parser
+    exactly. Which headings a fence hides is a decision each implementation makes separately."""
+    source = _catalogue_source(entries, buried, style='fence')
+    npt.assert_array_equal(_markdown_it_catalogue(source), _markdown_it_catalogue(_catalogue_source(entries)))
+    npt.assert_array_equal(_python_markdown_catalogue(source, extensions=['fenced_code']),
+                           _markdown_it_catalogue(source))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_python_markdown_catalogue(source), _markdown_it_catalogue(source))
+
+
+@given(CATALOGUE_ENTRIES, BURIED_ENTRY)
+@CATALOGUE
+def test_a_heading_buried_by_indentation_is_hidden_from_both_parsers_and_counted_by_neither(entries,
+                                                                                           buried):
+    """Indented code is core syntax in both implementations, so a heading indented by four spaces is
+    hidden from both -- and it is not a fence. The count of fence tokens for the document that hides a
+    heading this way is the count for a document that hides nothing, so the number case 89 reports as
+    heading-like lines inside fences is not the number of headings its parser dropped. The same document
+    with the indentation removed has the buried heading in both catalogues."""
+    hidden = _catalogue_source(entries, buried, style='indent')
+    shown = _catalogue_source(entries, buried, style='plain')
+    npt.assert_array_equal(_markdown_it_catalogue(hidden), _python_markdown_catalogue(hidden))
+    npt.assert_array_equal(_markdown_it_fences(hidden), _markdown_it_fences(_catalogue_source(entries)))
+    npt.assert_array_equal(_markdown_it_catalogue(shown), _python_markdown_catalogue(shown))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_markdown_it_catalogue(hidden), _markdown_it_catalogue(shown))
+
+
+@given(CATALOGUE_ENTRIES)
+@CATALOGUE
+def test_a_fence_that_is_never_closed_takes_every_later_heading_out_of_the_catalogue(entries):
+    """A fence opened and not closed runs to the end of the document in CommonMark, so markdown-it-py
+    returns one fence token and a catalogue that stops at the opening line: every proof written after it
+    is gone, with nothing raised and one fence counted exactly as a closed one would be. The same
+    document read by Python-Markdown, whose default has no fenced code at all, still has every heading.
+    A catalogue that silently loses its tail and a catalogue that loses nothing are the same file."""
+    truncated = _catalogue_source(entries, style='unclosed')
+    npt.assert_array_equal(_markdown_it_catalogue(truncated),
+                           _markdown_it_catalogue(_catalogue_source(entries[:1])))
+    npt.assert_array_equal(_markdown_it_fences(truncated),
+                           _markdown_it_fences(_catalogue_source(entries, entries[0], style='fence')))
+    npt.assert_array_equal(_python_markdown_catalogue(truncated), _markdown_it_catalogue(_catalogue_source(entries)))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_markdown_it_catalogue(truncated), _python_markdown_catalogue(truncated))
+
+
+@given(CATALOGUE_ENTRIES)
+@CATALOGUE
+def test_a_proof_heading_written_underlined_is_a_heading_to_both_parsers(entries):
+    """The other direction. A setext heading -- the title on one line and a rule of hyphens under it --
+    is a second-level heading in both implementations, and the catalogues they read from a document
+    written that way are the ones they read from the same document written with two hashes. A rule that
+    looks for lines beginning with two hashes would find none of them; both parsers find them all."""
+    underlined = '\n\n'.join(['# Proofs'] + ['P%d  %s\n%s' % (number, title, '-' * 10)
+                                             for number, title in entries]) + '\n'
+    npt.assert_array_equal(_markdown_it_catalogue(underlined), _python_markdown_catalogue(underlined))
+    npt.assert_array_equal(_markdown_it_catalogue(underlined),
+                           _markdown_it_catalogue(_catalogue_source(entries)))
