@@ -6376,3 +6376,231 @@ def test_the_validator_takes_an_offset_midnight_as_the_local_date_its_own_rule_e
     npt.assert_array_equal(adapter.validate_python(local.isoformat()).isoformat(), day.isoformat())
     with pytest.raises(pydantic.ValidationError):
         adapter.validate_python(in_utc.isoformat())
+
+
+# ---------------------------------------------------------------- declared membership and unknown quantity
+MEMBERSHIP_START = st.dates(min_value=datetime.date(2000, 1, 1), max_value=datetime.date(2099, 1, 1))
+SPAN_DAYS = st.integers(min_value=1, max_value=60)
+KNOWN_NETS = st.lists(st.integers(min_value=0, max_value=99), min_size=1, max_size=10)
+UNKNOWN_POSITION = st.integers(min_value=0, max_value=20)
+CLOSURE_NAMES = (('both', 'both'), ('left', 'left'), ('right', 'right'), ('neither', 'none'))
+
+
+def _duckdb_dates(start, end, function):
+    """The same date span from one of DuckDB's two range functions, which its documentation says differ
+    only in whether the stop argument is included."""
+    with duckdb.connect() as connection:
+        rows = connection.execute("select unnest(%s(DATE '%s', DATE '%s', INTERVAL 1 DAY))"
+                                  % (function, start.isoformat(), end.isoformat())).fetchall()
+    return np.array([row[0].date() for row in rows], dtype='datetime64[D]')
+
+
+def _shortfall_quantities(known, position):
+    """One quantity per generated value plus one that is unknown, inserted at a generated position, so the
+    unknown line is always present and is never authored as a fixture."""
+    quantities = list(known)
+    quantities.insert(position % (len(quantities) + 1), None)
+    return quantities
+
+
+def _duckdb_lines(quantities, query):
+    """The same line list in SQL, with the unknown quantity carried across as a NULL."""
+    with duckdb.connect() as connection:
+        connection.register('lines', pd.DataFrame({'line': range(len(quantities)),
+                                                   'net': pd.Series(quantities, dtype='Int64')}))
+        return np.array([row[0] for row in connection.execute(query).fetchall()])
+
+
+@given(MEMBERSHIP_START, SPAN_DAYS)
+@SLOW
+def test_the_date_range_default_includes_the_declared_end_date_in_three_engines(start, days):
+    """P172 reads a membership window as start-inclusive and end-exclusive and builds it with
+    pandas.date_range, whose parameter is documented at
+    raw.githubusercontent.com/pandas-dev/pandas/v2.2.3/pandas/core/indexes/datetimes.py as
+    'inclusive : {"both", "neither", "left", "right"}, default "both"'. polars' date_range carries the
+    same default, 'closed: ClosedInterval = "both"' at tag py-1.44.1, and DuckDB's generate_series is
+    documented as "Both the `start` and the `stop` parameters are inclusive." All three return the end
+    date the chain declares excluded. Replaces the typed len(both) == 20 and both[-1] == '2026-09-20' of
+    handoff_guards_v19.py case 172."""
+    end = start + datetime.timedelta(days=days)
+    in_pandas = pd.date_range(start, end).to_numpy().astype('datetime64[D]')
+    npt.assert_array_equal(in_pandas, pl.date_range(start, end, eager=True).to_numpy())
+    npt.assert_array_equal(in_pandas, _duckdb_dates(start, end, 'generate_series'))
+    npt.assert_array_equal(in_pandas[-1], np.datetime64(end))
+
+
+@given(MEMBERSHIP_START, SPAN_DAYS)
+@SLOW
+def test_the_end_exclusive_window_the_chain_declares_is_a_named_option_in_all_three(start, days):
+    """The declared reading exists in every engine under a name. pandas takes inclusive='left', polars
+    closed='left', and DuckDB's range is documented as "The `start` parameter is inclusive, while the
+    `stop` parameter is exclusive." The three agree over generated spans, and the window the default
+    returns is that window with the end date appended, which is the whole of the difference. Replaces the
+    typed len(left) == 19, left[-1] == '2026-09-19' and len(both) - len(left) == 1 of case 172."""
+    end = start + datetime.timedelta(days=days)
+    in_pandas = pd.date_range(start, end, inclusive='left').to_numpy().astype('datetime64[D]')
+    npt.assert_array_equal(in_pandas, pl.date_range(start, end, closed='left', eager=True).to_numpy())
+    npt.assert_array_equal(in_pandas, _duckdb_dates(start, end, 'range'))
+    npt.assert_array_equal(np.append(in_pandas, np.datetime64(end)),
+                           pd.date_range(start, end).to_numpy().astype('datetime64[D]'))
+
+
+@given(MEMBERSHIP_START, SPAN_DAYS)
+@SLOW
+def test_the_two_duckdb_range_functions_answer_the_same_question_differently(start, days):
+    """One engine ships both readings under two names, which is what makes the closure a declaration
+    rather than a default. DuckDB's own documentation says of the pair "The two functions' behavior is
+    different regarding their `stop` argument."; executed over generated spans the two lists are never
+    equal, and the inclusive one is the exclusive one with the end date appended."""
+    end = start + datetime.timedelta(days=days)
+    exclusive = _duckdb_dates(start, end, 'range')
+    inclusive = _duckdb_dates(start, end, 'generate_series')
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(exclusive, inclusive)
+    npt.assert_array_equal(np.append(exclusive, np.datetime64(end)), inclusive)
+
+
+@given(MEMBERSHIP_START, SPAN_DAYS)
+@SLOW
+def test_the_two_membership_primitives_of_one_chain_close_opposite_ends(start, days):
+    """P172 lists the days with date_range and holds the assignment window in a pandas.Interval, and the
+    two defaults are opposites: date_range is documented default "both" and Interval is documented
+    "closed : {'right', 'left', 'both', 'neither'}, default 'right'" in pandas/_libs/interval.pyx at tag
+    v2.2.3. Over the same two bounds the default day list contains the start date and the default interval
+    does not. portion 2.6.2 answers the two questions the same way for the closure pandas defaults to, so
+    the exclusion is the closure and not pandas. Replaces the typed pd.Interval(0, 1).closed == 'right'
+    of case 172."""
+    end = start + datetime.timedelta(days=days)
+    default_interval = pd.Interval(pd.Timestamp(start), pd.Timestamp(end))
+    npt.assert_array_equal([pd.Timestamp(start) in default_interval, pd.Timestamp(end) in default_interval],
+                           [start in portion.openclosed(start, end), end in portion.openclosed(start, end)])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(pd.Timestamp(start) in default_interval,
+                               pd.Timestamp(start) in pd.date_range(start, end))
+
+
+@given(MEMBERSHIP_START, SPAN_DAYS)
+@SLOW
+def test_a_left_closed_and_a_right_closed_window_never_agree_on_either_bound(start, days):
+    """The declared window is start-inclusive and end-exclusive, which is Interval(closed='left'); the
+    default is its mirror. Over generated bounds the two disagree about both endpoints and agree about
+    every day strictly between them, and portion returns the same pair of answers for the same closure.
+    Replaces the typed membership expectations of case 172, which asked the two closures about the two
+    endpoints one date at a time."""
+    end = start + datetime.timedelta(days=days)
+    left = pd.Interval(pd.Timestamp(start), pd.Timestamp(end), closed='left')
+    right = pd.Interval(pd.Timestamp(start), pd.Timestamp(end), closed='right')
+    npt.assert_array_equal([pd.Timestamp(start) in left, pd.Timestamp(end) in left],
+                           [start in portion.closedopen(start, end), end in portion.closedopen(start, end)])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal([pd.Timestamp(start) in left, pd.Timestamp(end) in left],
+                               [pd.Timestamp(start) in right, pd.Timestamp(end) in right])
+    inside = pd.date_range(start, end, inclusive='neither')
+    npt.assert_array_equal([day in left for day in inside], [day in right for day in inside])
+
+
+@given(MEMBERSHIP_START, SPAN_DAYS)
+@SLOW
+def test_each_of_the_four_closures_is_a_different_window_in_two_engines(start, days):
+    """pandas and polars each offer four closures and agree closure by closure over generated spans, and
+    the four windows are six pairwise different day lists. So the window a chain gets is entirely the
+    argument it passes; there is no reading of the bounds that the libraries settle on, and the one the
+    chain declares is not the one it gets by saying nothing."""
+    end = start + datetime.timedelta(days=days)
+    windows = []
+    for in_pandas, in_polars in CLOSURE_NAMES:
+        listed = pd.date_range(start, end, inclusive=in_pandas).to_numpy().astype('datetime64[D]')
+        npt.assert_array_equal(listed, pl.date_range(start, end, closed=in_polars, eager=True).to_numpy())
+        windows.append(listed)
+    for first, second in itertools.combinations(windows, 2):
+        with pytest.raises(AssertionError):
+            npt.assert_array_equal(first, second)
+
+
+@given(KNOWN_NETS, UNKNOWN_POSITION)
+@SLOW
+def test_an_unknown_quantity_compares_as_false_in_one_dtype_and_as_unknown_in_three_engines(known,
+                                                                                           position):
+    """P174 requires an unknown shortfall to stay unknown rather than become a zero request. Whether the
+    comparison that sorts the lines keeps it unknown depends on the dtype the frame happens to carry.
+    pandas' own missing-data guide at tag v2.2.3 says "In equality and comparison operations,
+    :class:`NA` also propagates. This deviates from the behaviour of ``np.nan``, where comparisons with
+    ``np.nan`` always return ``False``." Executed, that is the split: the float64 column answers False for
+    the unknown line and names nothing, while the nullable Int64 column, polars and DuckDB all answer
+    unknown and name the same line. DuckDB documents the rule as "Any comparison with a `NULL` value
+    returns `NULL`, including `NULL = NULL`." Replaces the typed unknown[0]['requested'] is None of
+    handoff_guards_v19.py case 174."""
+    quantities = _shortfall_quantities(known, position)
+    as_float = pd.Series(quantities, dtype='float64') > 0
+    as_nullable = pd.Series(quantities, dtype='Int64') > 0
+    npt.assert_array_equal(pd.isna(as_nullable).to_numpy(),
+                           pl.Series(quantities).gt(0).is_null().to_numpy())
+    npt.assert_array_equal(np.flatnonzero(pd.isna(as_nullable).to_numpy()),
+                           _duckdb_lines(quantities,
+                                         'select line from lines where (net > 0) is null order by line'))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(pd.isna(as_float).to_numpy(), pd.isna(as_nullable).to_numpy())
+
+
+@given(KNOWN_NETS, UNKNOWN_POSITION)
+@SLOW
+def test_every_engine_totals_the_unknown_quantity_as_a_zero(known, position):
+    """Whatever the comparison does, the total does the same thing in all four readings. pandas' sum skips
+    the missing value by default in both dtypes, polars' sum ignores nulls and DuckDB's SUM ignores them,
+    so the column total of a line list carrying one unknown shortfall is the total of the known lines
+    alone. The unknown becomes a zero the moment anything is added up, which is the state P174's contract
+    says must not happen."""
+    quantities = _shortfall_quantities(known, position)
+    npt.assert_array_equal(pd.Series(quantities, dtype='float64').sum(), sum(known))
+    npt.assert_array_equal(pd.Series(quantities, dtype='Int64').sum(), sum(known))
+    npt.assert_array_equal(pl.Series(quantities).sum(), sum(known))
+    npt.assert_array_equal(_duckdb_lines(quantities, 'select sum(net) from lines'), sum(known))
+
+
+@given(KNOWN_NETS, UNKNOWN_POSITION)
+@SLOW
+def test_the_requested_lines_are_the_same_rows_in_four_readings_and_the_unknown_is_in_none(known,
+                                                                                          position):
+    """The half that does agree. Selecting the lines whose net quantity is above zero returns the same
+    rows in the float64 frame, the nullable frame, polars and DuckDB, and the unknown line is in none of
+    them, because a filter keeps only what the comparison called true and neither False nor unknown is
+    true. Replaces the typed [r['item'] for r in requested] == ['cable', 'desk'] of case 174."""
+    quantities = _shortfall_quantities(known, position)
+    lines = pd.DataFrame({'line': range(len(quantities))})
+    as_float = pd.Series(quantities, dtype='float64')
+    as_nullable = pd.Series(quantities, dtype='Int64')
+    requested = lines['line'][(as_float > 0)].to_numpy()
+    npt.assert_array_equal(requested, lines['line'][(as_nullable > 0)].to_numpy())
+    npt.assert_array_equal(requested, pl.DataFrame({'line': np.arange(len(quantities)),
+                                                    'net': pl.Series(quantities)})
+                           .filter(pl.col('net') > 0)['line'].to_numpy())
+    npt.assert_array_equal(requested, _duckdb_lines(
+        quantities, 'select line from lines where net > 0 order by line'))
+
+
+@given(KNOWN_NETS, UNKNOWN_POSITION)
+@SLOW
+def test_the_lines_that_are_not_requested_hold_the_unknown_in_one_reading_and_lose_it_in_three(known,
+                                                                                              position):
+    """The other half does not agree, and this is the finding. Negating the same comparison keeps the
+    unknown line in the float64 frame, where it is indistinguishable from a line whose shortfall is a
+    real zero, and drops it in the nullable frame, in polars and in DuckDB, where not unknown is unknown
+    and unknown is not true. So in three of the four readings the unknown line is in neither the requested
+    set nor its complement: the two queries a reader would write to cover every line cover every line but
+    that one, and nothing reports it. Replaces the typed
+    unknown[0]['requested'] == absent[0]['requested'] being False of case 174."""
+    quantities = _shortfall_quantities(known, position)
+    lines = pd.DataFrame({'line': range(len(quantities))})
+    as_float = pd.Series(quantities, dtype='float64')
+    as_nullable = pd.Series(quantities, dtype='Int64')
+    float_rest = lines['line'][~(as_float > 0)].to_numpy()
+    nullable_rest = lines['line'][~(as_nullable > 0)].to_numpy()
+    npt.assert_array_equal(nullable_rest, pl.DataFrame({'line': np.arange(len(quantities)),
+                                                        'net': pl.Series(quantities)})
+                           .filter(~(pl.col('net') > 0))['line'].to_numpy())
+    npt.assert_array_equal(nullable_rest, _duckdb_lines(
+        quantities, 'select line from lines where not (net > 0) order by line'))
+    npt.assert_array_equal(np.sort(np.append(nullable_rest, quantities.index(None))),
+                           np.sort(float_rest))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(float_rest, nullable_rest)
