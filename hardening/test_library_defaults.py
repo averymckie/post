@@ -60,6 +60,7 @@ from docx.enum.section import WD_SECTION
 from docx.oxml.ns import qn
 from docx.shared import Twips
 from docxcompose.composer import Composer
+import docxtpl
 import duckdb
 from ebooklib import epub as ebooklib_epub
 import fastexcel
@@ -18107,3 +18108,206 @@ def test_the_built_page_links_out_to_its_generator_and_the_case_rule_never_repor
     page = _mkdocs_page(body, '  highlightjs: false\n')
     npt.assert_array_equal(sorted(set(_every_external_reference(page)) - set(_case_39_assets(page))),
                            _html5lib_selection(page, "//a/@href[starts-with(., 'http:') or starts-with(., 'https:')]"))
+
+
+# ---------------------------------------------------------------- a value bound into a Word template
+DOCXTEMPLATER_DIRECTORY = pathlib.Path(os.environ.get('DOCXTEMPLATER_DIR',
+                                                      str(pathlib.Path.home() / 'docxtemplater-oracle')))
+DOCX_TEMPLATE_ORACLE_JS = pathlib.Path(__file__).with_name('docx_template_oracle.js')
+docxtemplater_available = (shutil.which('node') is not None
+                           and (DOCXTEMPLATER_DIRECTORY / 'node_modules' / 'docxtemplater').is_dir())
+TEMPLATE_BINDING = settings(max_examples=20, deadline=None)
+BINDING_WORD = st.text(alphabet='abcdefghijklmnopqrstuvwxyz', min_size=1, max_size=6)
+BINDING_VALUE = st.builds(lambda first, second, third: first + ' & ' + second + ' < ' + third,
+                          BINDING_WORD, BINDING_WORD, BINDING_WORD)
+WORD_NAMESPACE = {'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'}
+
+
+def _word_template(placeholder, with_table=False):
+    """One .docx written with python-docx whose single paragraph carries one placeholder, and
+    optionally a one-row table whose first cell carries a second."""
+    document = docx.Document()
+    document.add_paragraph('Topic: ' + placeholder)
+    if with_table:
+        table = document.add_table(rows=1, cols=2)
+        table.cell(0, 0).text = '{{ flag }}'
+        table.cell(0, 1).text = 'x'
+    buffer = io.BytesIO()
+    document.save(buffer)
+    return buffer.getvalue()
+
+
+def _bound_document(template, context, **keywords):
+    """docxtpl 0.20.2 binding a context into that template and saving the package it produces."""
+    bound = docxtpl.DocxTemplate(io.BytesIO(template))
+    bound.render(context, **keywords)
+    buffer = io.BytesIO()
+    bound.save(buffer)
+    return buffer.getvalue()
+
+
+def _bound_paragraphs(data):
+    return [paragraph.text for paragraph in docx.Document(io.BytesIO(data)).paragraphs]
+
+
+def _docxtemplater_paragraphs(placeholder_template, context):
+    """The same substitution performed by docxtemplater 3.69.3 under node, whose package.json at
+    3.69.3 declares @xmldom/xmldom alone, over pizzip 3.2.0, which declares pako alone: an
+    implementation of the same operation that shares nothing with docxtpl, with jinja2 or with Python.
+    The shim parses argv, calls the library and writes the package out."""
+    with tempfile.TemporaryDirectory() as directory:
+        root = pathlib.Path(directory)
+        (root / 'template.docx').write_bytes(placeholder_template)
+        (root / 'values.json').write_text(json.dumps(context), encoding='utf-8')
+        subprocess.run(['node', str(DOCX_TEMPLATE_ORACLE_JS), str(root / 'template.docx'),
+                        str(root / 'values.json'), str(root / 'rendered.docx')],
+                       capture_output=True, encoding='utf-8', check=True,
+                       env={**os.environ,
+                            'NODE_PATH': str(DOCXTEMPLATER_DIRECTORY / 'node_modules')})
+        return _bound_paragraphs((root / 'rendered.docx').read_bytes())
+
+
+@given(BINDING_VALUE)
+@TEMPLATE_BINDING
+def test_the_body_xml_a_template_binding_builds_is_not_well_formed(value):
+    """P151 binds meeting values into a Word template, and case 151 of handoff_guards_v16,
+    template_binding_escapes_nothing_by_default, types `g.equal(plain['paragraphs'][1],
+    'Topic: A  B  5 > 2')` under the comment "the & and < fragments are gone". Where they go is settled
+    by docxtpl 0.20.2's own source, read at tag v0.20.2: render() builds the body as text with
+    build_xml and hands the result to fix_tables, which is `parser = etree.XMLParser(recover=True)`
+    followed by `etree.fromstring(xml, parser=parser)`, and map_xml calls it on every render whether the
+    template has a table or not. This test executes the step before that: with no autoescape the text
+    build_xml produces is not well-formed XML at all, and both published parsers refuse it -- libxml2
+    through lxml with XMLSyntaxError, and expat through the standard library with ParseError."""
+    template = docxtpl.DocxTemplate(io.BytesIO(_word_template('{{ topic }}')))
+    template.init_docx()
+    built = template.build_xml({'topic': value})
+    with pytest.raises(lxml_etree.XMLSyntaxError):
+        lxml_etree.fromstring(built.encode())
+    with pytest.raises(ElementTree.ParseError):
+        ElementTree.fromstring(built)
+
+
+@given(BINDING_VALUE)
+@TEMPLATE_BINDING
+def test_what_the_saved_document_says_is_what_the_recovering_parser_salvaged(value):
+    """And this is where the value goes. The same text parsed with the recovering parser docxtpl always
+    runs does parse, with the markup characters and nothing else dropped, and the paragraph the saved
+    package carries is exactly the paragraph that recovered tree holds -- libxml2's string() of the
+    first w:p on one side, python-docx's Paragraph.text on the other. The document that reaches the
+    reader is well-formed, opens cleanly and is missing part of the value, and the loss happened before
+    anything was written, which is why no reader of the package can report it."""
+    template = _word_template('{{ topic }}')
+    prepared = docxtpl.DocxTemplate(io.BytesIO(template))
+    prepared.init_docx()
+    recovered = lxml_etree.fromstring(prepared.build_xml({'topic': value}).encode(),
+                                      lxml_etree.XMLParser(recover=True))
+    npt.assert_array_equal(_bound_paragraphs(_bound_document(template, {'topic': value})),
+                           [recovered.xpath('string((//w:p)[1])', namespaces=WORD_NAMESPACE)])
+
+
+@given(BINDING_VALUE)
+@TEMPLATE_BINDING
+def test_two_readers_agree_on_the_truncated_paragraph_and_neither_can_recover_the_value(value):
+    """python-docx 1.2.0 reading through lxml and docx2python 3.7.1 reading the XML itself return the
+    same paragraph from the saved package, and it is not the paragraph the same binding produces with
+    escaping switched on. Agreement between readers is no protection here: they agree because there is
+    only one thing left to read."""
+    template = _word_template('{{ topic }}')
+    plain = _bound_document(template, {'topic': value})
+    with docx2python(io.BytesIO(plain)) as parsed:
+        npt.assert_array_equal(_bound_paragraphs(plain), parsed.body[0][0][0])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_bound_paragraphs(plain),
+                               _bound_paragraphs(_bound_document(template, {'topic': value},
+                                                                 autoescape=True)))
+    npt.assert_array_equal(_bound_paragraphs(_bound_document(template, {'topic': value},
+                                                             autoescape=True)),
+                           ['Topic: ' + value])
+
+
+@pytest.mark.skipif(not poi_available, reason='java and the Apache POI jars are required for this oracle')
+@given(BINDING_VALUE)
+@TEMPLATE_BINDING
+def test_apache_poi_reads_the_same_truncated_paragraph_from_the_saved_package(value):
+    """The third reader, in another runtime and over another object model: Apache POI 5.4.1's
+    XWPFParagraph.getText() returns the same truncated paragraph python-docx and docx2python return, so
+    the package is not merely readable by the library that wrote it."""
+    plain = _bound_document(_word_template('{{ topic }}'), {'topic': value})
+    npt.assert_array_equal(_bound_paragraphs(plain),
+                           [row[1] for row in _poi_section_lines(plain, 'PARA')])
+
+
+@pytest.mark.skipif(not docxtemplater_available,
+                    reason='node and the docxtemplater checkout are required for this oracle')
+@given(BINDING_VALUE)
+@TEMPLATE_BINDING
+def test_the_independent_binding_engine_keeps_the_value_this_one_deletes(value):
+    """The rule 2a search for a second implementation of substituting a value into a Word template
+    ("independent implementation render Word docx template placeholders library not
+    python-docx-template docx-templates PHPWord TemplateProcessor") found three -- docxtemplater under
+    node, DocxTemplater in C# and go-docx in Go -- and the first was installed. Handed the same value in
+    its own single-brace placeholder, it writes a package whose paragraph carries the value intact, with
+    no option asked for, and that paragraph is the paragraph docxtpl produces only when autoescape is
+    switched on. So escaping the substituted value is not something the operation cannot do; it is
+    something one of the two implementations does not do by default."""
+    plain = _bound_document(_word_template('{{ topic }}'), {'topic': value})
+    escaped = _bound_document(_word_template('{{ topic }}'), {'topic': value}, autoescape=True)
+    npt.assert_array_equal(_docxtemplater_paragraphs(_word_template('{topic}'), {'topic': value}),
+                           _bound_paragraphs(escaped))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_docxtemplater_paragraphs(_word_template('{topic}'), {'topic': value}),
+                               _bound_paragraphs(plain))
+
+
+@given(BINDING_VALUE)
+@TEMPLATE_BINDING
+def test_the_autoescape_argument_of_the_binding_only_ever_turns_escaping_on(value):
+    """docxtpl's render at v0.20.2 acts on the argument only when it is true: `if autoescape:` guards
+    both `jinja_env = Environment(autoescape=autoescape)` and `jinja_env.autoescape = autoescape`. The
+    argument is therefore an enable and not a switch -- passing autoescape=False alongside an
+    environment that escapes leaves the escaping on -- and a caller reading the signature as a setting
+    gets the opposite of what the name suggests in one of the two directions."""
+    template = _word_template('{{ topic }}')
+    npt.assert_array_equal(
+        _bound_paragraphs(_bound_document(template, {'topic': value},
+                                          jinja_env=jinja2.Environment(autoescape=True),
+                                          autoescape=False)),
+        _bound_paragraphs(_bound_document(template, {'topic': value}, autoescape=True)))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(
+            _bound_paragraphs(_bound_document(template, {'topic': value},
+                                              jinja_env=jinja2.Environment(autoescape=True),
+                                              autoescape=False)),
+            _bound_paragraphs(_bound_document(template, {'topic': value})))
+
+
+@given(BINDING_VALUE)
+@TEMPLATE_BINDING
+def test_a_strict_undefined_environment_does_not_turn_escaping_on(value):
+    """Case 151's `g.equal(strict['paragraphs'][1], 'Topic: A  B  5 > 2')`, executed: an environment
+    passed for its undefined policy carries jinja2's own autoescape default, which is False, so a
+    template binding hardened against a missing variable is exactly as unescaped as one with no
+    environment at all. The two renders are the same document."""
+    template = _word_template('{{ topic }}')
+    npt.assert_array_equal(
+        _bound_paragraphs(_bound_document(template, {'topic': value},
+                                          jinja_env=jinja2.Environment(undefined=jinja2.StrictUndefined))),
+        _bound_paragraphs(_bound_document(template, {'topic': value})))
+
+
+@given(BINDING_WORD)
+@TEMPLATE_BINDING
+def test_a_variable_the_context_does_not_carry_is_an_empty_cell_by_default_and_a_refusal_under_strict(topic):
+    """The other half of the same default. With no environment the binding uses jinja2's plain
+    Undefined, so a name the context does not carry renders as nothing and the table cell that was to
+    hold it is the cell an empty string produces -- a document that is complete, well-formed and silent
+    about what is missing. The same binding under a StrictUndefined environment refuses instead."""
+    template = _word_template('{{ topic }}', with_table=True)
+    missing = _bound_document(template, {'topic': topic})
+    blank = _bound_document(template, {'topic': topic, 'flag': ''})
+    npt.assert_array_equal([cell.text for cell in docx.Document(io.BytesIO(missing)).tables[0].rows[0].cells],
+                           [cell.text for cell in docx.Document(io.BytesIO(blank)).tables[0].rows[0].cells])
+    with pytest.raises(jinja2.UndefinedError):
+        _bound_document(template, {'topic': topic},
+                        jinja_env=jinja2.Environment(undefined=jinja2.StrictUndefined))
