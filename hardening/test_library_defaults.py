@@ -2892,3 +2892,162 @@ def test_a_difference_exactly_at_the_tolerance_is_refused_where_the_float_spelli
     npt.assert_equal(difference <= spelled, Fraction(difference) <= spelled_as_rational)
     with pytest.raises(AssertionError):
         npt.assert_equal(difference <= spelled, difference <= exact)
+
+
+# ---------------------------------------------------------------- a running balance and the order it is in
+RECEIPTS = st.lists(st.integers(min_value=1, max_value=500), min_size=1, max_size=8)
+ISSUES = st.lists(st.integers(min_value=1, max_value=500), min_size=1, max_size=8)
+MOVEMENTS = st.lists(st.integers(min_value=-500, max_value=500), min_size=1, max_size=6)
+DAY_CODES = st.lists(st.integers(min_value=0, max_value=3), min_size=2, max_size=40)
+SMALL_LEDGER = st.lists(st.integers(min_value=0, max_value=3), min_size=2, max_size=16)
+LARGE_LEDGER = st.lists(st.integers(min_value=0, max_value=3), min_size=17, max_size=40)
+RECEIPT_IDS = st.lists(st.integers(min_value=0, max_value=4), min_size=2, max_size=8)
+
+
+def _running_totals(values):
+    """The same running total from three implementations: pandas' cumsum, polars' cum_sum in Rust, and
+    itertools.accumulate, which is a C loop in CPython itself and shares no code with either."""
+    return (pd.Series(values).cumsum().to_numpy(),
+            pl.Series(values).cum_sum().to_numpy(),
+            np.array(list(itertools.accumulate(values))))
+
+
+def _ledger_frame(day_codes):
+    """One ledger entry per generated day code, in the order generated. The codes are drawn from a range
+    narrower than the shortest list, so tied days are forced rather than hoped for."""
+    days = [pd.Timestamp('2026-01-01') + pd.Timedelta(days=code) for code in day_codes]
+    return pd.DataFrame({'day': days, 'entry': range(len(day_codes))})
+
+
+@given(RECEIPTS, ISSUES)
+@SLOW
+def test_the_closing_balance_does_not_depend_on_the_order_and_the_running_minimum_does(receipts, issues):
+    """P153 accumulates stock with groupby/cumsum after ordering by a declared posting contract, and one of
+    its rejected inputs is negative running stock. Three independent implementations produce the same
+    running total for a given order, and the closing balance is the same whichever order the same movements
+    arrive in, so the balance the workbook shows does not depend on the sort. The lowest point of the run
+    does: with the receipts first the run never goes below the first receipt, and with the issues first it
+    reaches the whole issued quantity, so whether a negative-stock rejection fires is decided by an ordering
+    the primitive does not impose. Replaces the typed [5, 3, -1] and [-2, -6, -1] of handoff_guards_v16.py
+    case 153."""
+    arriving = list(receipts) + [-issue for issue in issues]
+    leaving = [-issue for issue in issues] + list(receipts)
+    for order in (arriving, leaving):
+        by_pandas, by_polars, by_itertools = _running_totals(order)
+        npt.assert_array_equal(by_pandas, by_polars)
+        npt.assert_array_equal(by_pandas, by_itertools)
+    first_run, second_run = _running_totals(arriving)[0], _running_totals(leaving)[0]
+    npt.assert_equal(first_run[-1], second_run[-1])
+    with pytest.raises(AssertionError):
+        npt.assert_equal(np.min(first_run), np.min(second_run))
+
+
+@given(MOVEMENTS, MOVEMENTS)
+@SLOW
+def test_a_missing_quantity_voids_the_rest_of_the_run_in_three_implementations_and_is_skipped_in_two(before,
+                                                                                                    after):
+    """Case 153 records that a gap in the quantities leaves the balance resuming as if the gap were zero.
+    That is one of two answers, and which one a chain gets depends on the library and on how the gap is
+    written. pandas' cumsum takes skipna=True, documented at v2.2.3 as "Exclude NA/null values. If an entire
+    row/column is NA, the result will be NA", so the row is missing and every row after it is a number
+    again; polars' cum_sum, whose docstring at py-1.44.1 documents only an overflow cast and says nothing
+    about missing values, does the same for a null and the opposite for a NaN; numpy's cumsum, whose Notes
+    mention only modular integer arithmetic, and itertools.accumulate carry the NaN to the end of the
+    ledger. So the same missing quantity either silently counts as zero or voids every balance after it, and
+    pandas' own skipna=False reproduces the voided run exactly."""
+    values = [float(value) for value in before] + [float('nan')] + [float(value) for value in after]
+    with_a_null = [float(value) for value in before] + [None] + [float(value) for value in after]
+    resumed = pd.Series(values).cumsum().to_numpy()
+    npt.assert_array_equal(resumed, pl.Series(with_a_null).cum_sum().to_numpy())
+    voided = (np.cumsum(np.array(values)), np.array(list(itertools.accumulate(values))),
+              pl.Series(values).cum_sum().to_numpy(), pd.Series(values).cumsum(skipna=False).to_numpy())
+    for run in voided:
+        npt.assert_array_equal(voided[0], run)
+        with pytest.raises(AssertionError):
+            npt.assert_array_equal(resumed, run)
+
+
+@given(DAY_CODES)
+@SLOW
+def test_three_stable_sorts_leave_the_tied_entries_in_the_order_they_arrived(day_codes):
+    """The posting order P153 sorts by is a date, and several entries share one. Asked for a stable sort,
+    pandas, CPython's sorted -- whose sorting howto at tag v3.11.15 says "Sorts are guaranteed to be stable.
+    That means that when multiple records have the same key, their original order is preserved" -- and
+    polars with maintain_order=True, documented at py-1.44.1 as "Whether the order should be maintained if
+    elements are equal", all put the tied entries in the order they arrived. That agreement is what makes
+    the next test a property of the default rather than of pandas."""
+    frame = _ledger_frame(day_codes)
+    by_pandas = frame.sort_values('day', kind='stable')['entry'].to_numpy()
+    by_python = np.array([entry for _, entry in sorted(zip(frame['day'], frame['entry']),
+                                                       key=operator.itemgetter(0))])
+    by_polars = pl.from_pandas(frame).sort('day', maintain_order=True)['entry'].to_numpy()
+    npt.assert_array_equal(by_pandas, by_python)
+    npt.assert_array_equal(by_pandas, by_polars)
+
+
+@given(LARGE_LEDGER)
+@SLOW
+def test_the_default_sort_moves_tied_entries_once_the_ledger_passes_sixteen_of_them(day_codes):
+    """pandas' sort_values docstring at v2.2.3 says of kind, "{'quicksort', 'mergesort', 'heapsort',
+    'stable'}, default 'quicksort'" and that "`mergesort` and `stable` are the only stable algorithms", and
+    P153 sorts without naming one. Executed on generated ledgers of seventeen entries and more, whose day
+    codes are drawn from a range of four so that ties are forced, the default reorders the tied entries and
+    the three stable sorts above do not. The threshold is the finding: below it the default agrees with them
+    on every input, so a fixture of sixteen rows cannot see this, and P153's own evidence line describes
+    eighteen declared ledger entries. Replaces the typed tie_order(shuffled, kind='quicksort') ==
+    tie_order(shuffled, kind='stable') of case 153."""
+    frame = _ledger_frame(day_codes)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(frame.sort_values('day')['entry'].to_numpy(),
+                               frame.sort_values('day', kind='stable')['entry'].to_numpy())
+    npt.assert_array_equal(np.sort(frame.sort_values('day')['entry'].to_numpy()),
+                           np.sort(frame.sort_values('day', kind='stable')['entry'].to_numpy()))
+
+
+@given(SMALL_LEDGER)
+@SLOW
+def test_the_same_default_leaves_them_where_they_are_while_the_ledger_is_smaller(day_codes):
+    """And below the threshold the default and the stable option agree on every generated ledger, which is
+    what makes the reordering above invisible to a small fixture: the same call, the same data shape and the
+    same library give a stable answer at sixteen entries and an unstable one at seventeen."""
+    frame = _ledger_frame(day_codes)
+    npt.assert_array_equal(frame.sort_values('day')['entry'].to_numpy(),
+                           frame.sort_values('day', kind='stable')['entry'].to_numpy())
+
+
+def _duckdb_first_receipt_rows(frame):
+    """The same deduplication in SQL, keeping the first row per receipt reference in arrival order."""
+    with duckdb.connect() as connection:
+        connection.execute('create table receipts(arrived BIGINT, receipt_id BIGINT, qty BIGINT)')
+        connection.executemany('insert into receipts values (?, ?, ?)',
+                               frame.astype(object).to_numpy().tolist())
+        return connection.execute('select distinct on (receipt_id) receipt_id, qty from receipts '
+                                  'order by receipt_id, arrived').fetchall()
+
+
+@given(RECEIPT_IDS, st.lists(st.integers(min_value=1, max_value=50), min_size=2, max_size=8),
+       st.integers(min_value=1, max_value=20))
+@SLOW
+def test_deduplicating_on_the_reference_discards_a_disagreeing_quantity_in_three_engines(ids, quantities,
+                                                                                        difference):
+    """P153 deduplicates exact receipt IDs before building the ledger. Every receipt reference here appears
+    twice with quantities that differ by a generated amount, so every kept row silently stands for a row
+    that disagreed with it. pandas' drop_duplicates(subset=...), polars' unique(subset=..., keep='first')
+    in Rust and DuckDB's DISTINCT ON keep the same rows, so the behaviour is the operation and not the
+    library, and none of the three says anything. That the rows discarded were not duplicates at all is
+    visible only by deduplicating on the whole row instead, which keeps more rows than deduplicating on the
+    reference. Replaces the typed len(loose) == 2 and [r['qty'] for r in loose] == [2, 1] of case 153."""
+    references = list(ids) + list(ids)
+    payloads = [quantities[position % len(quantities)] for position in range(len(ids))]
+    frame = pd.DataFrame({'arrived': range(2 * len(ids)), 'receipt_id': references,
+                          'qty': payloads + [payload + difference for payload in payloads]})
+    kept = frame.drop_duplicates(subset=['receipt_id'])
+    in_polars = pl.from_pandas(frame).unique(subset=['receipt_id'], keep='first', maintain_order=True)
+    npt.assert_array_equal(kept[['receipt_id', 'qty']].sort_values('receipt_id').to_numpy(),
+                           in_polars.sort('receipt_id')[['receipt_id', 'qty']].to_numpy())
+    npt.assert_array_equal(kept[['receipt_id', 'qty']].sort_values('receipt_id').to_numpy(),
+                           np.array(_duckdb_first_receipt_rows(frame)))
+    npt.assert_equal(len(kept), frame['receipt_id'].nunique())
+    with pytest.raises(AssertionError):
+        npt.assert_equal(len(kept), len(frame.drop_duplicates(subset=['receipt_id', 'qty'])))
+
