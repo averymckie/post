@@ -77,6 +77,8 @@ import jinja2
 from lark import Lark
 from lark.exceptions import UnexpectedInput
 import jsonschema
+import kuzu
+from grandcypher import GrandCypher
 from junitparser import JUnitXml
 import altair as alt
 import vl_convert
@@ -17234,3 +17236,175 @@ def test_the_ukrainian_public_calendar_under_martial_law_leaves_every_weekday_a_
     npt.assert_equal(from_holidays, _working_days_in(year, np.busdaycalendar(weekmask='1111100')))
     with pytest.raises(AssertionError):
         npt.assert_equal(from_holidays, _working_days_in(year, _busday_calendar(_workalendar_dates('UA', year))))
+
+# ---------------------------------------------------------------- Cypher literals and missing endpoints
+# Replaces handoff_guards_v4.py case 38 parameterized_graph_load, whose four typed comparisons carry the
+# comments "interpolation stored a different value without an error" and "an edge to an unknown event
+# vanishes without an error".
+CYPHER_WORDS = st.from_regex(r'\A[A-Za-z0-9]{1,10}\Z')
+CYPHER_TEXT = st.text(alphabet=st.characters(blacklist_categories=('Cs', 'Cc')), max_size=20)
+CRAFTED_LITERALS = CYPHER_WORDS.map(lambda word: word + '"}) RETURN 1; //')
+UNPAIRED_QUOTES = st.tuples(CYPHER_WORDS, CYPHER_WORDS).map(lambda pair: pair[0] + '"' + pair[1])
+CYPHER_NODES = st.lists(st.tuples(CYPHER_WORDS, CYPHER_WORDS), min_size=1, max_size=5,
+                        unique_by=lambda pair: pair[0])
+CYPHER_QUERY = settings(max_examples=25, deadline=None)
+
+
+def _kuzu_events():
+    connection = kuzu.Connection(kuzu.Database(':memory:'))
+    connection.execute('CREATE NODE TABLE Event(id STRING, lemma STRING, PRIMARY KEY(id))')
+    connection.execute('CREATE REL TABLE precedes(FROM Event TO Event)')
+    return connection
+
+
+def _kuzu_loaded(pairs):
+    connection = _kuzu_events()
+    for identifier, lemma in pairs:
+        connection.execute('CREATE (:Event {id: $id, lemma: $lemma})',
+                           parameters={'id': identifier, 'lemma': lemma})
+    return connection
+
+
+def _networkx_loaded(pairs):
+    graph = nx.DiGraph()
+    for identifier, lemma in pairs:
+        graph.add_node(identifier, lemma=lemma)
+    return graph
+
+
+def _kuzu_lemmas(connection):
+    return sorted(row[0] for row in connection.execute('MATCH (e:Event) RETURN e.lemma').get_all())
+
+
+def _kuzu_relationships(connection):
+    return connection.execute('MATCH (:Event)-[r:precedes]->(:Event) RETURN count(r)').get_all()[0][0]
+
+
+@given(CYPHER_TEXT)
+@CYPHER_QUERY
+def test_a_parameterised_cypher_value_round_trips_whatever_text_it_is_given(lemma):
+    """kuzu 0.11.3's Connection.execute documents its parameters argument and says "If a query string is
+    given, a prepared statement will be created automatically." Over arbitrary generated text the value
+    that comes back is the value that went in."""
+    npt.assert_array_equal(_kuzu_lemmas(_kuzu_loaded([('n', lemma)])), [lemma])
+
+
+@given(CYPHER_WORDS)
+@CYPHER_QUERY
+def test_an_interpolated_cypher_literal_round_trips_a_text_with_no_quote_in_it(lemma):
+    """The agreeing region: for a value that cannot close the literal, building the statement by
+    concatenation gives what the prepared statement gives."""
+    interpolated = _kuzu_events()
+    interpolated.execute('CREATE (:Event {id: "n", lemma: "' + lemma + '"})')
+    npt.assert_array_equal(_kuzu_lemmas(interpolated), _kuzu_lemmas(_kuzu_loaded([('n', lemma)])))
+
+
+@given(UNPAIRED_QUOTES)
+@CYPHER_QUERY
+def test_an_interpolated_cypher_literal_is_refused_when_the_text_carries_an_unpaired_quote(lemma):
+    """A quote on its own is caught: kuzu raises RuntimeError('Parser exception: Invalid input ...'). The
+    hazard is not the quote."""
+    with pytest.raises(RuntimeError):
+        _kuzu_events().execute('CREATE (:Event {id: "n", lemma: "' + lemma + '"})')
+
+
+@given(CYPHER_WORDS)
+@CYPHER_QUERY
+def test_an_interpolated_literal_that_closes_and_comments_stores_the_prefix_and_not_the_value(word):
+    """The hazard is a value that closes the literal, adds valid Cypher and comments out the tail. The
+    statement parses, no exception is raised, and the stored value is the generated prefix rather than the
+    generated value. This is case 38's `g.equal(conn.execute(...).get_all(), [['x']])`, generated: the
+    expected value is the prefix the strategy built the payload from, never a typed constant."""
+    lemma = word + '"}) RETURN 1; //'
+    interpolated = _kuzu_events()
+    interpolated.execute('CREATE (:Event {id: "n", lemma: "' + lemma + '"})')
+    npt.assert_array_equal(_kuzu_lemmas(interpolated), [word])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_kuzu_lemmas(interpolated), _kuzu_lemmas(_kuzu_loaded([('n', lemma)])))
+
+
+@given(CYPHER_NODES)
+@CYPHER_QUERY
+def test_the_two_cypher_parsers_agree_on_a_double_quoted_literal_with_no_quote_in_it(pairs):
+    """grand-cypher 1.2.0 is an independent Cypher implementation: its pyproject.toml at tag v1.2.0
+    declares grandiso, lark, networkx and cachetools, and names neither kuzu nor anything of kuzu's. Over
+    the same generated nodes the two return the same lemmas for the same query."""
+    target = pairs[0][1]
+    from_kuzu = sorted(row[0] for row in _kuzu_loaded(pairs).execute(
+        'MATCH (e:Event {lemma: "' + target + '"}) RETURN e.lemma').get_all())
+    from_grand = GrandCypher(_networkx_loaded(pairs)).run(
+        'MATCH (e {lemma: "' + target + '"}) RETURN e.lemma')
+    npt.assert_array_equal(from_kuzu, sorted(from_grand['e.lemma']))
+
+
+@given(CYPHER_NODES, CRAFTED_LITERALS)
+@CYPHER_QUERY
+def test_the_second_cypher_parser_refuses_the_crafted_literal_the_first_one_runs(pairs, lemma):
+    """The disagreeing region, and the reason the first library's silence matters. kuzu parses the crafted
+    text as a complete statement and answers; grand-cypher's lark grammar refuses it, because its string
+    terminal is `%import common.ESCAPED_STRING -> ESTRING` and the crafted text is not one escaped string."""
+    query = 'MATCH (e {lemma: "' + lemma + '"}) RETURN e.lemma'
+    _kuzu_loaded(pairs).execute('MATCH (e:Event {lemma: "' + lemma + '"}) RETURN e.lemma').get_all()
+    with pytest.raises(UnexpectedInput):
+        GrandCypher(_networkx_loaded(pairs)).run(query)
+
+
+@given(CYPHER_NODES, UNPAIRED_QUOTES)
+@CYPHER_QUERY
+def test_the_two_cypher_parsers_agree_that_an_unpaired_quote_is_not_a_literal(pairs, lemma):
+    """Where the text cannot be read as a literal at all the two agree, each refusing in its own class."""
+    with pytest.raises(RuntimeError):
+        _kuzu_loaded(pairs).execute('MATCH (e:Event {lemma: "' + lemma + '"}) RETURN e.lemma')
+    with pytest.raises(UnexpectedInput):
+        GrandCypher(_networkx_loaded(pairs)).run('MATCH (e {lemma: "' + lemma + '"}) RETURN e.lemma')
+
+
+@given(CYPHER_NODES)
+@CYPHER_QUERY
+def test_only_one_of_the_two_cypher_parsers_accepts_a_single_quoted_literal(pairs):
+    """The two do not agree on what a string literal is. kuzu accepts both quote characters; grand-cypher
+    accepts only the double quote, because lark's common.ESCAPED_STRING has no single-quoted form. A query
+    written for one engine is a syntax error in the other."""
+    target = pairs[0][1]
+    npt.assert_array_equal(sorted(row[0] for row in _kuzu_loaded(pairs).execute(
+        "MATCH (e:Event {lemma: '" + target + "'}) RETURN e.lemma").get_all()), [target])
+    with pytest.raises(UnexpectedInput):
+        GrandCypher(_networkx_loaded(pairs)).run("MATCH (e {lemma: '" + target + "'}) RETURN e.lemma")
+
+
+@given(CYPHER_NODES, CYPHER_WORDS)
+@CYPHER_QUERY
+def test_an_edge_to_an_unknown_node_is_created_as_many_times_as_the_pattern_matched(pairs, absent):
+    """Case 38's `g.equal(silent, [[0]])`, generated and stated as the invariant it is: CREATE after MATCH
+    makes exactly as many relationships as the MATCH found, and finding nothing is a successful query
+    returning zero, not an error. The endpoint that does not exist is generated separately from the nodes,
+    so the pattern matches nothing whenever the name is absent."""
+    connection = _kuzu_loaded(pairs)
+    before = _kuzu_relationships(connection)
+    found = connection.execute('MATCH (x:Event {id: $a}), (y:Event {id: $b}) RETURN count(*)',
+                               parameters={'a': pairs[0][0], 'b': absent}).get_all()
+    made = connection.execute(
+        'MATCH (x:Event {id: $a}), (y:Event {id: $b}) CREATE (x)-[:precedes]->(y) RETURN count(*)',
+        parameters={'a': pairs[0][0], 'b': absent}).get_all()
+    npt.assert_array_equal(made, found)
+    npt.assert_equal(_kuzu_relationships(connection) - before, made[0][0])
+
+
+@given(CYPHER_NODES, CYPHER_WORDS)
+@CYPHER_QUERY
+def test_the_same_missing_reference_is_a_silent_zero_in_sql_and_a_refusal_under_a_declared_key(pairs, absent):
+    """DuckDB 1.5.5 is the second query language on the same shape. An INSERT whose rows come from a join
+    inserts nothing and raises nothing, exactly as the Cypher CREATE does; the same reference written as a
+    literal row is refused with ConstraintException by a declared FOREIGN KEY. What separates the two is a
+    declared constraint, and a Cypher CREATE after a MATCH has no place to declare one."""
+    assume(absent not in {identifier for identifier, _ in pairs})
+    connection = duckdb.connect()
+    connection.execute('CREATE TABLE ev(id VARCHAR PRIMARY KEY, lemma VARCHAR)')
+    connection.execute('CREATE TABLE pre(src VARCHAR, dst VARCHAR, '
+                       'FOREIGN KEY(src) REFERENCES ev(id), FOREIGN KEY(dst) REFERENCES ev(id))')
+    connection.executemany('INSERT INTO ev VALUES (?, ?)', list(pairs))
+    connection.execute('INSERT INTO pre SELECT a.id, b.id FROM ev a, ev b WHERE a.id = ? AND b.id = ?',
+                       [pairs[0][0], absent])
+    npt.assert_array_equal(connection.execute('SELECT count(*) FROM pre').fetchall(), [(0,)])
+    with pytest.raises(duckdb.ConstraintException):
+        connection.execute('INSERT INTO pre VALUES (?, ?)', [pairs[0][0], absent])
