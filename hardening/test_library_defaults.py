@@ -15558,3 +15558,175 @@ def test_an_absent_signoff_and_an_incomplete_one_are_refused_by_both_validators(
         declared.model_validate({'state': states[0]})
     with pytest.raises(jsonschema.ValidationError):
         jsonschema.validate({'state': states[0]}, schema)
+
+
+MEETING_FAMILY = settings(max_examples=20, deadline=None)
+MEETING_NAME = st.text(alphabet='abcdefghij-', min_size=1, max_size=10)
+FAMILY_DAY = st.dates(min_value=datetime.date(2024, 1, 1), max_value=datetime.date(2024, 12, 31))
+
+
+@st.composite
+def _a_meeting_and_a_digit_of_its_date(draw):
+    """A meeting record, and a different action count whose decimal text is already in the date."""
+    day = draw(FAMILY_DAY)
+    wrong = draw(st.sampled_from(sorted({int(character) for character in day.isoformat()
+                                         if character.isdigit()})))
+    count = draw(st.sampled_from([number for number in range(10) if number != wrong]))
+    return draw(MEETING_NAME), day, count, wrong
+
+
+@st.composite
+def _a_meeting_and_a_leading_digit_of_its_count(draw):
+    """A meeting record whose action count is at least two digits, and its first digit."""
+    written = draw(st.integers(min_value=10, max_value=999))
+    return draw(MEETING_NAME), draw(FAMILY_DAY), written, int(str(written)[:1])
+
+
+def _meeting_json(name, day, count):
+    return json.dumps({'meeting': name, 'date': day.isoformat(), 'actions': count}, sort_keys=True)
+
+
+def _meeting_docx(name, day, count):
+    document = docx.Document()
+    document.add_heading(name, 1)
+    document.add_paragraph('date: ' + day.isoformat())
+    document.add_paragraph('actions: ' + str(count))
+    written = io.BytesIO()
+    document.save(written)
+    return written.getvalue()
+
+
+def _meeting_deck(name, day, count):
+    deck = pptx.Presentation()
+    slide = deck.slides.add_slide(deck.slide_layouts[6])
+    box = slide.shapes.add_textbox(Inches(1), Inches(1), Inches(6), Inches(2))
+    box.text_frame.text = ' | '.join([name, day.isoformat(), str(count)])
+    written = io.BytesIO()
+    deck.save(written)
+    return written.getvalue()
+
+
+def _docx_paragraph_texts(data):
+    """What python-docx returns paragraph by paragraph, rather than joined into one string."""
+    return [paragraph.text for paragraph in docx.Document(io.BytesIO(data)).paragraphs]
+
+
+def _docx2python_paragraphs(data):
+    """The same paragraphs read by docx2python 3.7.1, which parses the XML directly."""
+    with docx2python(io.BytesIO(data)) as extracted:
+        return [''.join(runs) for table in extracted.body_runs for row in table
+                for cell in row for runs in cell]
+
+
+def _deck_paragraph_texts(data):
+    """What python-pptx returns for each text frame of the first slide."""
+    return [paragraph.text
+            for shape in pptx.Presentation(io.BytesIO(data)).slides[0].shapes
+            if shape.has_text_frame
+            for paragraph in shape.text_frame.paragraphs]
+
+
+def _deck_paragraphs_in_officeparser(data):
+    """The same slide read by officeparser 7.8.0 under node, through the shim that prints the tree
+    the library returns."""
+    with tempfile.TemporaryDirectory() as directory:
+        path = pathlib.Path(directory) / 'deck.pptx'
+        path.write_bytes(data)
+        completed = subprocess.run(['node', str(PPTX_NOTES_ORACLE_JS), str(path)],
+                                   capture_output=True, encoding='utf-8', check=True,
+                                   env={**os.environ,
+                                        'NODE_PATH': str(OFFICEPARSER_DIRECTORY / 'node_modules')})
+    return [child['text'] for child in json.loads(completed.stdout)['content'][0]['children']]
+
+
+@given(_a_meeting_and_a_digit_of_its_date())
+@MEETING_FAMILY
+def test_a_containment_check_finds_a_count_the_record_does_not_state(record):
+    """Replaces `g.equal(checks['json'], True)` and `g.equal(family_agrees(family, changed)['json'],
+    False)  # a different count no longer agrees` of handoff_guards_v14.py case 140. The case
+    establishes that six formats agree with one record by asking whether `str(meeting['actions'])`
+    is a substring of each rendering. A digit of the date is such a substring, so the containment
+    test cannot tell the stated count from a count the record does not state, while parsing the
+    document with json.loads and reading the field can. The disagreeing region is generated
+    directly: the wrong count is drawn from the digits of the generated date."""
+    name, day, count, wrong = record
+    document = _meeting_json(name, day, count)
+    npt.assert_array_equal(operator.contains(document, str(count)),
+                           operator.contains(document, str(wrong)))
+    npt.assert_array_equal(json.loads(document)['actions'], count)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(json.loads(document)['actions'], wrong)
+
+
+@given(_a_meeting_and_a_leading_digit_of_its_count())
+@MEETING_FAMILY
+def test_a_containment_check_finds_the_leading_digit_of_the_count_it_states(record):
+    """The same hazard with no date involved. The case compares the decimal text of a count, so a
+    record stating ninety-two actions contains the text of nine, and the check the case reads as
+    agreement passes for a count an order of magnitude smaller. Parsing returns the number."""
+    name, day, written, leading = record
+    document = _meeting_json(name, day, written)
+    npt.assert_array_equal(operator.contains(document, str(written)),
+                           operator.contains(document, str(leading)))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(json.loads(document)['actions'], leading)
+
+
+@given(_a_meeting_and_a_digit_of_its_date())
+@MEETING_FAMILY
+def test_the_document_and_the_deck_hide_the_same_count_from_the_same_check(record):
+    """Replaces `g.equal(checks['docx'], True)` and `g.equal(checks['pptx'], True)` of
+    handoff_guards_v14.py case 140, which join every paragraph of the document and every text frame
+    of the deck into one string before searching it. Two documents that state different counts have
+    the same answer to that search, and the paragraph list python-docx returns and the paragraph
+    list python-pptx returns each keep them apart."""
+    name, day, count, wrong = record
+    document, other = _meeting_docx(name, day, count), _meeting_docx(name, day, wrong)
+    npt.assert_array_equal(operator.contains(' '.join(_docx_paragraph_texts(document)), str(wrong)),
+                           operator.contains(' '.join(_docx_paragraph_texts(other)), str(wrong)))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_docx_paragraph_texts(document), _docx_paragraph_texts(other))
+    deck, other_deck = _meeting_deck(name, day, count), _meeting_deck(name, day, wrong)
+    npt.assert_array_equal(operator.contains(' '.join(_deck_paragraph_texts(deck)), str(wrong)),
+                           operator.contains(' '.join(_deck_paragraph_texts(other_deck)), str(wrong)))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_deck_paragraph_texts(deck), _deck_paragraph_texts(other_deck))
+
+
+@given(_a_meeting_and_a_digit_of_its_date())
+@MEETING_FAMILY
+def test_two_readers_of_the_document_return_the_same_paragraphs(record):
+    """python-docx builds an object model of the document part and docx2python 3.7.1 parses the XML
+    directly, and over generated records the two return the same paragraph list, so the finding
+    above is a property of the check and not of one reader. Replaces the joined-text read behind
+    `checks['docx']`."""
+    name, day, count, _ = record
+    document = _meeting_docx(name, day, count)
+    npt.assert_array_equal(_docx_paragraph_texts(document), _docx2python_paragraphs(document))
+
+
+@pytest.mark.skipif(not officeparser_available, reason='node and officeparser are required')
+@given(_a_meeting_and_a_digit_of_its_date())
+@MEETING_FAMILY
+def test_two_readers_of_the_deck_return_the_same_paragraphs(record):
+    """officeparser 7.8.0 under node reads the same slide out of the package with @xmldom/xmldom and
+    fflate and nothing from Python, and returns the paragraph python-pptx returns. Replaces the
+    joined-text read behind `checks['pptx']`."""
+    name, day, count, _ = record
+    deck = _meeting_deck(name, day, count)
+    npt.assert_array_equal(_deck_paragraph_texts(deck), _deck_paragraphs_in_officeparser(deck))
+
+
+@given(_a_meeting_and_a_digit_of_its_date())
+@MEETING_FAMILY
+def test_the_count_paragraph_is_unchanged_when_only_the_date_moves(record):
+    """What a whole-document containment cannot do is say which paragraph the digit came from. Two
+    documents written for the same count on different dates carry the identical actions paragraph
+    and differ elsewhere, so the paragraph that states the count is stable and locatable while the
+    joined text the case searches is not."""
+    name, day, count, wrong = record
+    other_day = day + datetime.timedelta(days=1)
+    document, moved = _meeting_docx(name, day, count), _meeting_docx(name, other_day, count)
+    npt.assert_array_equal(_docx_paragraph_texts(document)[-1], _docx_paragraph_texts(moved)[-1])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_docx_paragraph_texts(document), _docx_paragraph_texts(moved))
