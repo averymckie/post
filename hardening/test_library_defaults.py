@@ -5419,3 +5419,201 @@ def test_the_two_ends_of_a_connector_place_it_at_one_point_for_one_connection(at
                            [from_end.end_x, from_end.end_y])
     npt.assert_array_equal([from_begin.begin_x, from_begin.begin_y],
                            [elsewhere.begin_x, elsewhere.begin_y])
+
+
+# ---------------------------------------------------------------- bookings, and what overlapping means
+GUAVA_DIRECTORY = pathlib.Path(os.environ.get('GUAVA_DIR', str(pathlib.Path.home() / 'guava-oracle')))
+INTERVAL_OVERLAP_ORACLE_JAVA = pathlib.Path(__file__).with_name('interval_overlap_oracle.java')
+guava_available = shutil.which('java') is not None and (GUAVA_DIRECTORY / 'jars').is_dir()
+CLOSURE = st.sampled_from(('both', 'left', 'right', 'neither'))
+BOOKING_ANCHOR = pd.Timestamp('2026-09-23', tz='UTC')
+BOOKING_HOUR = st.integers(min_value=0, max_value=20)
+BOOKING_LENGTH = st.integers(min_value=1, max_value=3)
+PORTION_CLOSURES = {'both': portion.closed, 'left': portion.closedopen,
+                    'right': portion.openclosed, 'neither': portion.open}
+
+
+def _booking(hour, length, closed):
+    """One booking as P180 builds them: a pandas Interval between two UTC timestamps with a declared
+    closure."""
+    start = BOOKING_ANCHOR + pd.Timedelta(hours=hour)
+    return pd.Interval(start, start + pd.Timedelta(hours=length), closed=closed)
+
+
+def _in_portion(booking):
+    """The same two endpoints and the same closure in portion 2.6.2, whose only declared dependency
+    is sortedcontainers, so none of pandas is under it."""
+    return PORTION_CLOSURES[booking.closed](booking.left, booking.right)
+
+
+def _in_guava(pairs):
+    """The same pairs of endpoints as Guava ranges under Java: for each pair, whether Guava calls the
+    two ranges connected and whether their intersection is non-empty. The shim parses argv, calls the
+    library and prints; the endpoints crossing to it are Timestamp.value, the nanoseconds pandas
+    itself stores."""
+    arguments = []
+    for first, second in pairs:
+        for booking in (first, second):
+            arguments += [str(booking.left.value), str(booking.right.value), booking.closed]
+    completed = subprocess.run(['java', '-cp', str(GUAVA_DIRECTORY / 'jars' / '*'),
+                                str(INTERVAL_OVERLAP_ORACLE_JAVA)] + arguments,
+                               capture_output=True, encoding='utf-8', check=True)
+    printed = completed.stdout.split('\n')[:-1]
+    return [(printed[at] == 'true', printed[at + 1] == 'true')
+            for at in range(0, len(printed), 2)]
+
+
+@pytest.mark.skipif(not guava_available, reason='java and the Guava jars are required for this oracle')
+@given(BOOKING_HOUR, BOOKING_LENGTH, CLOSURE, BOOKING_HOUR, BOOKING_LENGTH, CLOSURE)
+@JAVA_ORACLE
+def test_three_implementations_agree_on_whether_two_bookings_overlap(hour, length, closed,
+                                                                    other_hour, other_length,
+                                                                    other_closed):
+    """P180 detects conflicting bookings with pandas.Interval.overlaps, documented at v2.2.3 as "Two
+    intervals overlap if they share a common point, including closed endpoints. Intervals that only
+    have an open endpoint in common do not overlap." Two independent implementations of the same
+    relation say the same thing on generated bookings under every combination of the four closures:
+    portion 2.6.2, which defines overlaps as "if their intersection is non-empty", and Guava
+    33.7.1-jre under Java, whose Range answers it as a connected pair with a non-empty
+    intersection."""
+    first = _booking(hour, length, closed)
+    second = _booking(other_hour, other_length, other_closed)
+    npt.assert_equal(first.overlaps(second), _in_portion(first).overlaps(_in_portion(second)))
+    npt.assert_equal(first.overlaps(second), _in_guava([(first, second)])[0][1])
+
+
+@pytest.mark.skipif(not guava_available, reason='java and the Guava jars are required for this oracle')
+@given(BOOKING_HOUR, BOOKING_LENGTH, BOOKING_LENGTH, st.integers(min_value=1, max_value=3))
+@JAVA_ORACLE
+def test_a_handover_and_a_gap_are_one_answer_from_the_interval_and_two_from_the_others(hour, length,
+                                                                                      next_length,
+                                                                                      gap):
+    """A booking that starts exactly when another ends, and a booking that starts hours later, are
+    the same answer from pandas: neither overlaps. Both other libraries have a word for the first and
+    not for the second. portion calls them adjacent, "if they do not overlap and their union form a
+    single atomic interval"; Guava calls them connected, and its own documentation gives this very
+    case: "[2, 4) and [4, 6) are connected, because both enclose the empty range [4, 4)". A roster
+    built on overlaps alone cannot tell a handover from an empty hour, and P180's coverage gaps are
+    exactly that distinction."""
+    first = _booking(hour, length, 'left')
+    handover = _booking(hour + length, next_length, 'left')
+    apart = _booking(hour + length + gap, next_length, 'left')
+    npt.assert_equal(first.overlaps(handover), first.overlaps(apart))
+    (handover_connected, handover_intersects), (apart_connected, apart_intersects) = _in_guava(
+        [(first, handover), (first, apart)])
+    npt.assert_equal(_in_portion(first).adjacent(_in_portion(handover)),
+                     handover_connected and not handover_intersects)
+    npt.assert_equal(_in_portion(first).adjacent(_in_portion(apart)),
+                     apart_connected and not apart_intersects)
+    with pytest.raises(AssertionError):
+        npt.assert_equal(_in_portion(first).adjacent(_in_portion(handover)),
+                         _in_portion(first).adjacent(_in_portion(apart)))
+    with pytest.raises(AssertionError):
+        npt.assert_equal(handover_connected, apart_connected)
+
+
+@pytest.mark.skipif(not guava_available, reason='java and the Guava jars are required for this oracle')
+@given(BOOKING_HOUR, BOOKING_LENGTH, BOOKING_LENGTH)
+@JAVA_ORACLE
+def test_the_same_two_clock_times_conflict_or_not_according_to_the_declared_closure(hour, length,
+                                                                                   next_length):
+    """The four timestamps are the same in both pairs and only the declared closure differs: under
+    the start-inclusive, end-exclusive reading P180 declares, a booking ending when another starts is
+    not a conflict, and under closed-on-both-ends it is. All three libraries agree on each reading
+    separately and therefore reproduce the contradiction rather than resolve it. Replaces the typed
+    `desk.overlaps(later) == False` and `both_desk.overlaps(both_later) == True` of
+    handoff_guards_v19.py case 180."""
+    left_first, left_second = _booking(hour, length, 'left'), _booking(hour + length, next_length,
+                                                                      'left')
+    both_first, both_second = _booking(hour, length, 'both'), _booking(hour + length, next_length,
+                                                                      'both')
+    npt.assert_array_equal([left_first.left, left_first.right, left_second.left, left_second.right],
+                           [both_first.left, both_first.right, both_second.left, both_second.right])
+    pairs = _in_guava([(left_first, left_second), (both_first, both_second)])
+    npt.assert_equal(left_first.overlaps(left_second), pairs[0][1])
+    npt.assert_equal(both_first.overlaps(both_second), pairs[1][1])
+    npt.assert_equal(left_first.overlaps(left_second),
+                     _in_portion(left_first).overlaps(_in_portion(left_second)))
+    npt.assert_equal(both_first.overlaps(both_second),
+                     _in_portion(both_first).overlaps(_in_portion(both_second)))
+    with pytest.raises(AssertionError):
+        npt.assert_equal(left_first.overlaps(left_second), both_first.overlaps(both_second))
+
+
+@pytest.mark.skipif(not guava_available, reason='java and the Guava jars are required for this oracle')
+@given(BOOKING_HOUR, BOOKING_LENGTH, BOOKING_LENGTH)
+@JAVA_ORACLE
+def test_two_bookings_with_different_closures_are_compared_without_an_error(hour, length,
+                                                                           next_length):
+    """Nothing in any of the three libraries objects to comparing a booking closed on the right with
+    one closed on the left, and the shared endpoint belongs to both, so the pair conflicts where the
+    same clock times under the declared closure do not. A roster assembled from records whose
+    closures were set in different places therefore answers, and answers differently, without
+    anything to show that the two were built by different rules. Replaces the typed
+    `right_desk.overlaps(later) == True` of case 180."""
+    right_first = _booking(hour, length, 'right')
+    left_first = _booking(hour, length, 'left')
+    second = _booking(hour + length, next_length, 'left')
+    pairs = _in_guava([(right_first, second), (left_first, second)])
+    npt.assert_equal(right_first.overlaps(second), pairs[0][1])
+    npt.assert_equal(right_first.overlaps(second),
+                     _in_portion(right_first).overlaps(_in_portion(second)))
+    npt.assert_equal(left_first.overlaps(second), pairs[1][1])
+    with pytest.raises(AssertionError):
+        npt.assert_equal(right_first.overlaps(second), left_first.overlaps(second))
+
+
+@pytest.mark.skipif(not guava_available, reason='java and the Guava jars are required for this oracle')
+@given(BOOKING_HOUR, st.sampled_from(('both', 'left', 'right')))
+@JAVA_ORACLE
+def test_a_booking_of_no_length_conflicts_with_itself_only_when_both_ends_are_closed(hour, closed):
+    """A booking whose start and end are the same instant is a well-formed Interval in pandas for
+    every closure, and it conflicts with itself under exactly one of them: closed on both ends it is
+    the single point, and under either half-open reading it holds nothing at all. portion says the
+    same by collapsing three of the four to the empty interval, and Guava says it by intersecting an
+    empty range with itself."""
+    booking = _booking(hour, 0, closed)
+    npt.assert_equal(booking.closed, closed)
+    npt.assert_equal(booking.length, booking.right - booking.left)
+    npt.assert_equal(booking.overlaps(booking), not _in_portion(booking).empty)
+    npt.assert_equal(booking.overlaps(booking), _in_guava([(booking, booking)])[0][1])
+
+
+@pytest.mark.skipif(not guava_available, reason='java and the Guava jars are required for this oracle')
+@given(BOOKING_HOUR)
+@JAVA_ORACLE
+def test_a_booking_of_no_length_closed_at_neither_end_is_a_refusal_in_the_third_library(hour):
+    """The fourth closure of the same zero-length booking is where the three libraries stop agreeing
+    on what exists. pandas builds the object and reports its closure back; portion returns the empty
+    interval, which is the same value it returns for the two half-open ones, so the closure is gone;
+    Guava refuses to construct it at all, its `open` factory documented to throw
+    IllegalArgumentException "if lower is greater than or equal to upper", which reaches this test as
+    a non-zero exit. A booking of no length is therefore a record in one library, a nothing in the
+    second and an error in the third, and only the first of those can be written to a roster."""
+    booking = _booking(hour, 0, 'neither')
+    npt.assert_equal(booking.closed, 'neither')
+    npt.assert_equal(_in_portion(booking).empty, _in_portion(_booking(hour, 0, 'left')).empty)
+    with pytest.raises(AssertionError):
+        npt.assert_equal(_in_portion(booking).empty, _in_portion(_booking(hour, 0, 'both')).empty)
+    with pytest.raises(subprocess.CalledProcessError):
+        _in_guava([(booking, booking)])
+
+
+@given(st.lists(st.tuples(BOOKING_HOUR, BOOKING_LENGTH), min_size=2, max_size=5), CLOSURE, st.data())
+@SLOW
+def test_an_index_of_bookings_counts_the_probe_against_itself(entries, closed, source):
+    """IntervalIndex.overlaps compares the probe with every interval in the index, the probe included
+    when it is one of them, so the conflict count P180 reports is one larger than the number of other
+    bookings that clash. The whole vector agrees with portion booking by booking, and the extra hit
+    is exactly the probe's verdict on itself. Replaces the typed
+    `conflicts([desk, training, later], desk, drop_self=False) == 2` of case 180."""
+    bookings = [_booking(hour, length, closed) for hour, length in entries]
+    position = source.draw(st.integers(min_value=0, max_value=len(bookings) - 1))
+    probe = bookings[position]
+    index = pd.IntervalIndex(bookings)
+    without = pd.IntervalIndex([booking for at, booking in enumerate(bookings) if at != position])
+    npt.assert_array_equal(list(index.overlaps(probe)),
+                           [_in_portion(booking).overlaps(_in_portion(probe)) for booking in bookings])
+    npt.assert_equal(index.overlaps(probe)[position], probe.overlaps(probe))
+    npt.assert_equal(int(np.sum(index.overlaps(probe))),
+                     int(np.sum(without.overlaps(probe))) + int(probe.overlaps(probe)))
