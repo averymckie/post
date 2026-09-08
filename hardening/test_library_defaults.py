@@ -98,6 +98,9 @@ import pandas.testing as pdt
 import polars as pl
 import pyarrow.csv as pyarrow_csv
 import rfc8785
+import scipy.sparse as scipy_sparse
+import scipy.sparse.linalg as scipy_linsolve
+from scipy.sparse.linalg import spsolve as scipy_spsolve
 import polars.testing as plt
 import pytest
 import rapidfuzz.distance.DamerauLevenshtein as rf_damerau
@@ -6949,3 +6952,181 @@ def test_the_manufactured_row_carries_no_identifier_in_either_parser(first, seco
     with pytest.raises(AssertionError):
         npt.assert_array_equal(len([identifier for identifier in _lxml_identifiers(page)
                                     if identifier is not None]), len(_lxml_rows(page)))
+
+
+# ---------------------------------------------------------------- the bill of materials as a linear solve
+ASSEMBLY_SIZE = st.integers(min_value=2, max_value=7)
+QUANTITY = st.integers(min_value=1, max_value=5)
+DEMAND_UNITS = st.integers(min_value=1, max_value=9)
+ACYCLIC_BILL = ASSEMBLY_SIZE.flatmap(
+    lambda size: st.lists(st.tuples(st.integers(min_value=0, max_value=size - 2),
+                                    st.integers(min_value=1, max_value=size - 1), QUANTITY),
+                          min_size=1, max_size=12, unique_by=lambda edge: edge[:2])
+    .map(lambda edges: [(parent, child, qty) for parent, child, qty in edges if parent < child])
+    .filter(bool))
+CYCLE_LENGTH = st.integers(min_value=2, max_value=6)
+LOOP_QUANTITY = st.integers(min_value=2, max_value=5)
+
+
+def _requirement_matrix(edges):
+    """The bill of materials as NetworkX builds it and as the chain hands it to a solver: the transpose of
+    the weighted adjacency matrix, which is the Leontief input coefficient matrix."""
+    graph = nx.DiGraph()
+    for parent, child, quantity in edges:
+        graph.add_edge(parent, child, qty=quantity)
+    nodes = sorted(graph.nodes())
+    matrix = nx.to_scipy_sparse_array(graph, nodelist=nodes, weight='qty', format='csc').T
+    return graph, nodes, matrix
+
+
+def _demand_vector(nodes, root, units):
+    """The right-hand side, one entry per part, built by numpy."""
+    wanted = np.zeros(len(nodes))
+    wanted[nodes.index(root)] = units
+    return wanted
+
+
+def _sparse_totals(edges, root, units):
+    """The primitive v18 named: SuperLU through scipy.sparse.linalg.spsolve on (I - A) x = d."""
+    _, nodes, matrix = _requirement_matrix(edges)
+    system = (scipy_sparse.identity(len(nodes), format='csc') - matrix).tocsc()
+    return nodes, scipy_spsolve(system, _demand_vector(nodes, root, units))
+
+
+def _dense_totals(edges, root, units):
+    """The same system solved by LAPACK through numpy.linalg.solve, which is a different factorisation in
+    a different library."""
+    _, nodes, matrix = _requirement_matrix(edges)
+    return nodes, np.linalg.solve(np.eye(len(nodes)) - matrix.toarray(),
+                                  _demand_vector(nodes, root, units))
+
+
+def _duckdb_totals(edges, root, units):
+    """The same totals as a recursive expansion in SQL, which multiplies quantities along every path and
+    adds them up. It is only ever asked about acyclic bills, because it does not terminate on the others."""
+    frame = pd.DataFrame(edges, columns=['parent', 'child', 'qty'])
+    with duckdb.connect() as connection:
+        connection.register('edges', frame)
+        rows = connection.execute(
+            'with recursive expanded(item, units) as ('
+            '  select ? as item, ?::DOUBLE as units'
+            '  union all'
+            '  select edges.child, expanded.units * edges.qty from expanded'
+            '  join edges on edges.parent = expanded.item)'
+            ' select item, sum(units) from expanded group by item order by item',
+            [root, float(units)]).fetchall()
+    return dict(rows)
+
+
+def _solver_tolerance(edges, solution):
+    """The forward-error bound numpy itself computes for this system: machine epsilon times the condition
+    number times the size of the answer. A direct solver does not return exact zeros for the parts a
+    demand does not reach, so the engines are compared inside this bound rather than exactly."""
+    _, nodes, matrix = _requirement_matrix(edges)
+    return (np.finfo(float).eps * np.linalg.cond(np.eye(len(nodes)) - matrix.toarray())
+            * np.linalg.norm(solution, ord=np.inf))
+
+
+@given(ACYCLIC_BILL, DEMAND_UNITS)
+@SLOW
+def test_three_engines_agree_on_the_total_requirement_of_a_generated_bill(edges, units):
+    """v18 replaced two hand-written traversals with scipy.sparse.linalg.spsolve on the Leontief
+    total-requirements system, and its v16.path_quantity case types the six cables a kit needs. Two more
+    engines now answer the same question over generated acyclic bills: numpy.linalg.solve, which is LAPACK
+    rather than SuperLU, and a DuckDB recursive expansion, which multiplies quantities along every path
+    and adds them instead of solving anything. All three agree, so the recorded number is the bill\'s and
+    not the solver\'s. Replaces the typed per_kit[\'cable\'] == 6.0, per_kit[\'display\'] == 2.0 and
+    per_kit[\'kit\'] == 1.0 of handoff_guards_v18.py."""
+    _, nodes, _ = _requirement_matrix(edges)
+    root = nodes[0]
+    solved_nodes, sparse_solution = _sparse_totals(edges, root, units)
+    _, dense_solution = _dense_totals(edges, root, units)
+    tolerance = _solver_tolerance(edges, sparse_solution)
+    npt.assert_allclose(sparse_solution, dense_solution, atol=tolerance)
+    expanded = _duckdb_totals(edges, root, units)
+    npt.assert_allclose(sparse_solution, [expanded.get(node, 0.0) for node in solved_nodes],
+                        atol=tolerance)
+
+
+@given(ACYCLIC_BILL, DEMAND_UNITS)
+@SLOW
+def test_the_total_requirement_is_linear_in_the_demand_in_three_engines(edges, units):
+    """Scaling the demand scales every total by the same factor, in all three engines, which is the
+    property that lets a per-unit explosion be reused for an order. Replaces the typed
+    total_requirements(edges, {\'kit\': 2})[\'cable\'] == 12.0 of handoff_guards_v18.py."""
+    _, nodes, _ = _requirement_matrix(edges)
+    root = nodes[0]
+    _, one = _sparse_totals(edges, root, 1)
+    _, many = _sparse_totals(edges, root, units)
+    tolerance = _solver_tolerance(edges, many)
+    npt.assert_allclose(many, one * units, atol=tolerance)
+    _, dense_many = _dense_totals(edges, root, units)
+    npt.assert_allclose(dense_many, one * units, atol=tolerance)
+    expanded_one = _duckdb_totals(edges, root, 1)
+    expanded_many = _duckdb_totals(edges, root, units)
+    npt.assert_allclose([expanded_many[node] for node in sorted(expanded_many)],
+                        [expanded_one[node] * units for node in sorted(expanded_one)], atol=tolerance)
+
+
+@given(ACYCLIC_BILL, DEMAND_UNITS)
+@SLOW
+def test_a_part_with_nothing_under_it_demands_only_itself(edges, units):
+    """A part that is the parent of nothing explodes to itself and to no other part. The recursive
+    expansion says so exactly, reaching that part and no other; the solver says so only inside the error
+    bound, because the entries it returns for the parts the demand does not reach are small rather than
+    zero. Replaces the typed total_requirements(edges, {\'cable\': 1})[\'cable\'] == 1.0 of
+    handoff_guards_v18.py."""
+    graph, nodes, _ = _requirement_matrix(edges)
+    leaf = max(nodes, key=lambda node: (graph.out_degree(node) == 0, node))
+    assume(graph.out_degree(leaf) == 0)
+    solved_nodes, solution = _sparse_totals(edges, leaf, units)
+    tolerance = _solver_tolerance(edges, solution)
+    npt.assert_allclose(solution[solved_nodes.index(leaf)], units, atol=tolerance)
+    npt.assert_allclose(np.delete(solution, solved_nodes.index(leaf)),
+                        np.zeros(len(solved_nodes) - 1), atol=tolerance)
+    npt.assert_array_equal(sorted(_duckdb_totals(edges, leaf, units)), [leaf])
+
+
+@given(CYCLE_LENGTH, LOOP_QUANTITY, DEMAND_UNITS)
+@SLOW
+def test_a_bill_that_loops_gets_a_negative_answer_from_both_solvers_and_no_refusal(length, quantity,
+                                                                                  units):
+    """The chain tests acyclicity before it solves, and the test is doing all the refusing. Handed a
+    generated bill whose parts require each other around a loop, neither solver raises and neither warns:
+    both return the same finite vector, and its smallest entry is negative, which is not a quantity of
+    anything. NetworkX's is_directed_acyclic_graph is what says no. The recursive expansion in SQL is not
+    asked, because on these bills it does not terminate. Replaces the typed
+    g.rejects(g.Blocked, lambda: total_requirements(cyclic, ...)) of handoff_guards_v18.py."""
+    edges = [(index, (index + 1) % length, quantity) for index in range(length)]
+    graph, nodes, _ = _requirement_matrix(edges)
+    npt.assert_array_equal(nx.is_directed_acyclic_graph(graph),
+                           nx.is_directed_acyclic_graph(nx.DiGraph(graph.edges).reverse()))
+    _, sparse_solution = _sparse_totals(edges, nodes[0], units)
+    _, dense_solution = _dense_totals(edges, nodes[0], units)
+    npt.assert_allclose(sparse_solution, dense_solution)
+    npt.assert_array_equal(np.isfinite(sparse_solution), np.isfinite(dense_solution))
+    with pytest.raises(AssertionError):
+        npt.assert_allclose(np.min(sparse_solution), np.abs(np.min(sparse_solution)))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(nx.is_directed_acyclic_graph(graph),
+                               nx.is_directed_acyclic_graph(nx.DiGraph()))
+
+
+@given(CYCLE_LENGTH, DEMAND_UNITS)
+@SLOW
+def test_the_two_solvers_part_company_on_a_loop_that_returns_exactly_one_unit(length, units):
+    """When each part in the loop takes exactly one of the next, the matrix is exactly singular, and the
+    two solvers answer differently. numpy documents "LinAlgError: If `a` is singular or not square."
+    (numpy/linalg/_linalg.py at tag v2.4.6) and raises. scipy warns and returns: its
+    MatrixRankWarning is exported in scipy/sparse/linalg/_dsolve/linsolve.py at tag v1.17.1 and
+    documented there as "Warning for exactly singular matrices.", and the same file's spsolve warns
+    "Matrix is exactly singular" and then calls x.fill(np.nan). So a chain that catches solver exceptions
+    sees nothing here, and the answer it carries forward is a vector with no finite entry in it."""
+    edges = [(index, (index + 1) % length, 1) for index in range(length)]
+    _, nodes, _ = _requirement_matrix(edges)
+    with pytest.raises(np.linalg.LinAlgError):
+        _dense_totals(edges, nodes[0], units)
+    with pytest.warns(scipy_linsolve.MatrixRankWarning):
+        _, solution = _sparse_totals(edges, nodes[0], units)
+    npt.assert_array_equal(np.flatnonzero(np.isfinite(solution)),
+                           np.flatnonzero(np.isfinite(np.full(len(nodes), np.nan))))
