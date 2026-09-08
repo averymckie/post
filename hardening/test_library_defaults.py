@@ -8,7 +8,9 @@ this repository, which is the point of rule 5 of the hardening assurance.
 Each test names the hand-typed expectation in the frozen guard modules that it replaces.
 """
 import calendar
+import codecs
 import contextlib
+import ctypes
 import csv
 import difflib
 import functools
@@ -104,6 +106,11 @@ from pptx.util import Inches
 import pymupdf
 import pypdf
 import pypdfium2
+import pypdfium2.raw as pdfium_c
+from pdfminer.pdfdocument import PDFDocument as PdfminerDocument
+from pdfminer.pdfparser import PDFParser as PdfminerParser
+from pdfminer.pdftypes import resolve1 as pdfminer_resolve
+from pypdf.generic import NameObject
 from reportlab.pdfgen import canvas as rl_canvas
 from reportlab.lib.utils import ImageReader
 import repro_zipfile
@@ -11579,3 +11586,361 @@ def test_the_model_refuses_a_modality_the_grammar_never_produces_and_a_rule_with
         ControlledRule.model_validate(dict(payload, source=clause))
     with pytest.raises(pydantic.ValidationError):
         ControlledRule.model_validate({key: value for key, value in payload.items() if key != 'clause'})
+
+
+# --------------------------------------------------------------------------------------------------
+# handoff_guards_v12.py, cases form_fields_start_blank_in_both_readers and
+# entered_values_round_trip_without_touching_content: the reviewer form and what four readers see in it
+# --------------------------------------------------------------------------------------------------
+REVIEW_NAME = st.text(alphabet='abcdefghijklmnopqrstuvwxyz', min_size=1, max_size=6)
+REVIEW_NAMES = st.lists(REVIEW_NAME, min_size=1, max_size=3, unique=True)
+REVIEW_PAIR = st.lists(REVIEW_NAME, min_size=2, max_size=3, unique=True)
+REVIEW_NOTE = st.text(alphabet='abcdefghijklmnopqrstuvwxyz', min_size=1, max_size=10)
+LATIN_NOTE = st.text(alphabet=st.characters(min_codepoint=0xC0, max_codepoint=0xFF), min_size=1, max_size=6)
+BEYOND_LATIN_NOTE = st.text(alphabet=st.characters(min_codepoint=0x2190, max_codepoint=0x21FF),
+                            min_size=1, max_size=4)
+REVIEW_FORM = settings(max_examples=40, deadline=None)
+
+
+def _review_form(names):
+    """The form the case builds, with its fixture list replaced by generated names: for each name one
+    multiline text widget and one check box, written by PyMuPDF itself. `field_name` is documented in
+    docs/widget.rst at tag 1.28.2 as "A mandatory string defining the field's name", and `field_value`
+    on the same page as "The value of the field"; both are set here and nothing else touches the file."""
+    document = pymupdf.open()
+    page = document.new_page()
+    for index, name in enumerate(names):
+        notes = pymupdf.Widget()
+        notes.rect = pymupdf.Rect(50, 50 + index * 250, 400, 150 + index * 250)
+        notes.field_name = 'notes_' + name
+        notes.field_type = pymupdf.PDF_WIDGET_TYPE_TEXT
+        notes.field_flags = pymupdf.PDF_TX_FIELD_IS_MULTILINE
+        notes.field_value = ''
+        page.add_widget(notes)
+        box = pymupdf.Widget()
+        box.rect = pymupdf.Rect(50, 170 + index * 250, 70, 190 + index * 250)
+        box.field_name = 'reviewed_' + name
+        box.field_type = pymupdf.PDF_WIDGET_TYPE_CHECKBOX
+        box.field_value = False
+        page.add_widget(box)
+    return document.tobytes()
+
+
+def _review_form_with_passage(names, passage):
+    """The same form with one generated line drawn on the page itself, so that the page has content of
+    its own to be preserved. `insert_text` is the writer's own text primitive."""
+    document = pymupdf.open(stream=_review_form(names), filetype='pdf')
+    document[0].insert_text((72, 800), passage)
+    return document.tobytes()
+
+
+def _answered(pdf, values):
+    """Values put into the widgets that carry those names, through `Widget.field_value` and
+    `Widget.update`, which docs/widget.rst at tag 1.28.2 says "**must be used** to reflect changes in
+    the PDF". Names the form does not carry are simply never matched."""
+    document = pymupdf.open(stream=pdf, filetype='pdf')
+    for page in document:
+        for widget in page.widgets():
+            if widget.field_name in values:
+                widget.field_value = values[widget.field_name]
+                widget.update()
+    return document.tobytes()
+
+
+def _mupdf_form_values(pdf):
+    """MuPDF's reading: every widget's `field_value`, keyed by `field_name`."""
+    document = pymupdf.open(stream=pdf, filetype='pdf')
+    return {widget.field_name: widget.field_value for page in document for widget in page.widgets()}
+
+
+def _pypdf_form_fields(pdf):
+    """pypdf 6.17.0's reading. `get_fields` is documented at tag 6.17.0 as returning "A dictionary where
+    each key is a field name, and each value is a :class:`Field<pypdf.generic.Field>` object", and each
+    Field is the PDF dictionary itself, so `'/V' in field` is the presence of the value key in the
+    file."""
+    return pypdf.PdfReader(io.BytesIO(pdf)).get_fields() or {}
+
+
+def _pdfminer_form_fields(pdf):
+    """pdfminer.six 20260107's reading of the same object model: the AcroForm's `/Fields` array with
+    every indirect reference resolved. pdfminer is independent of the other three readers -- its
+    published requirements at that version are charset-normalizer and cryptography and nothing else --
+    and it returns the raw objects, so a `/V` that is not there is a key that is not there."""
+    document = PdfminerDocument(PdfminerParser(io.BytesIO(pdf)))
+    form = pdfminer_resolve(document.catalog['AcroForm'])
+    return {pdfminer_resolve(field)['T']: pdfminer_resolve(field)
+            for field in pdfminer_resolve(form['Fields'])}
+
+
+def _pdfium_form_values(pdf):
+    """PDFium's reading through pypdfium2 5.13.0's raw API, which the project's README at tag 5.13.0
+    documents as "available in the namespace `pypdfium2.raw`", with the two-call buffer idiom that same
+    README publishes for string output parameters. public/fpdf_annot.h says of
+    `FPDFAnnot_GetFormFieldValue` that it "Gets the value of |annot|, which is an interactive form
+    annotation", that the buffer holds "the value string, encoded in UTF-16LE", and -- the sentence that
+    matters here -- "Note that return value of empty string is 2 for "\\0\\0"."."""
+    document = pypdfium2.PdfDocument(io.BytesIO(pdf))
+    document.init_forms()
+    values = {}
+    for index in range(len(document)):
+        page = document[index]
+        for position in range(pdfium_c.FPDFPage_GetAnnotCount(page.raw)):
+            annotation = pdfium_c.FPDFPage_GetAnnot(page.raw, position)
+            length = pdfium_c.FPDFAnnot_GetFormFieldName(document.formenv.raw, annotation, None, 0)
+            buffer = ctypes.create_string_buffer(length)
+            pdfium_c.FPDFAnnot_GetFormFieldName(document.formenv.raw, annotation,
+                                                ctypes.cast(buffer, ctypes.POINTER(ctypes.c_ushort)),
+                                                length)
+            name = codecs.decode(memoryview(buffer)[:length - 2], 'utf-16-le')
+            size = pdfium_c.FPDFAnnot_GetFormFieldValue(document.formenv.raw, annotation, None, 0)
+            held = ctypes.create_string_buffer(size)
+            pdfium_c.FPDFAnnot_GetFormFieldValue(document.formenv.raw, annotation,
+                                                 ctypes.cast(held, ctypes.POINTER(ctypes.c_ushort)),
+                                                 size)
+            values[name] = codecs.decode(memoryview(held)[:size - 2], 'utf-16-le')
+    return values
+
+
+def _mupdf_on_state(pdf, name):
+    """The check box's own name for being checked, from the library rather than from this file.
+    docs/widget.rst at tag 1.28.2 documents `button_states` as returning "a dictionary with the names of
+    'On' and 'Off' for the *normal* and the *pressed-down* appearance of button widgets", and
+    `on_state` as the method whose result `field_value` is then set to."""
+    document = pymupdf.open(stream=pdf, filetype='pdf')
+    page = document[0]
+    return [widget for widget in page.widgets() if widget.field_name == name][0].on_state()
+
+
+@given(REVIEW_NAMES)
+@REVIEW_FORM
+def test_four_implementations_report_the_same_form_field_names(names):
+    """handoff_guards_v12.py's case form_fields_start_blank_in_both_readers types the four field names of
+    its two-slide fixture and then asserts that its two readers agree on them. Here the names are
+    generated and four implementations that share no code read them back: MuPDF through PyMuPDF 1.28.2,
+    pypdf 6.17.0 in pure Python, pdfminer.six 20260107 in pure Python, and PDFium 153.0.7999.0 through
+    pypdfium2 5.13.0. All four return exactly the names the form was written with. Replaces
+    `g.equal(sorted(fields['pymupdf']), ['notes_0', 'notes_1', 'reviewed_0', 'reviewed_1'])` and
+    `g.equal(sorted(fields['pypdf']), sorted(fields['pymupdf']))`."""
+    pdf = _review_form(names)
+    written = sorted(['notes_' + name for name in names] + ['reviewed_' + name for name in names])
+    npt.assert_array_equal(sorted(_mupdf_form_values(pdf)), written)
+    npt.assert_array_equal(sorted(_pypdf_form_fields(pdf)), written)
+    npt.assert_array_equal(sorted(_pdfium_form_values(pdf)), written)
+    npt.assert_array_equal(sorted(_pdfminer_form_fields(pdf)),
+                           sorted(name.encode() for name in written))
+
+
+@given(REVIEW_NAMES)
+@REVIEW_FORM
+def test_the_blank_text_field_carries_no_value_key_in_the_file_at_all(names):
+    """What "blank" is. The two readers that report the object model rather than a rendered field agree,
+    field by field, about which fields carry a `/V` key: the check boxes do and the text fields do not.
+    pypdf's Field is the dictionary, so `'/V' in field` is the key's presence; pdfminer resolves the
+    same array and its dictionaries have no `V` either. So the text widget PyMuPDF wrote with
+    `field_value = ''` has no value in the file, and the empty string the case compares against is
+    something a reader supplies."""
+    pdf = _review_form(names)
+    by_pypdf = sorted(name for name, field in _pypdf_form_fields(pdf).items() if '/V' in field)
+    by_pdfminer = sorted(name.decode() for name, field in _pdfminer_form_fields(pdf).items()
+                         if 'V' in field)
+    npt.assert_array_equal(by_pypdf, by_pdfminer)
+    npt.assert_array_equal(by_pypdf, sorted('reviewed_' + name for name in names))
+
+
+@given(REVIEW_NAMES)
+@REVIEW_FORM
+def test_the_two_readers_of_the_case_disagree_about_the_blank_text_field(names):
+    """The disagreement the case records as a fact about the file is a disagreement about what to return
+    for a key that is absent. pypdf reports the absence; MuPDF returns an empty string, and so does
+    PDFium, whose public/fpdf_annot.h documents an empty return as a length of 2 for the two NUL bytes.
+    The case's `g.equal(fields['pymupdf']['notes_0'], '')` and `g.equal(fields['pypdf']['notes_0'],
+    None)` are therefore two readers' defaults, and the third and fourth readers split two to two."""
+    pdf = _review_form(names)
+    for name in names:
+        npt.assert_array_equal(_mupdf_form_values(pdf)['notes_' + name],
+                               _pdfium_form_values(pdf)['notes_' + name])
+        with pytest.raises(AssertionError):
+            npt.assert_equal(_mupdf_form_values(pdf)['notes_' + name],
+                             _pypdf_form_fields(pdf)['notes_' + name].get('/V'))
+
+
+@given(REVIEW_NAMES)
+@REVIEW_FORM
+def test_the_off_state_is_one_name_that_only_one_reader_spells_with_a_solidus(names):
+    """And the second disagreement is a spelling. `Off` is a PDF name object; pypdf's `NameObject`
+    subclasses `str` with `prefix = b"/"` and `read_from_stream` requires that byte, so the Python value
+    keeps the delimiter that introduces the name in the file. pdfminer's `PSLiteral` docstring says
+    literals "are case sensitive and denoted by a preceding slash sign (e.g. "/Name")" and keeps the
+    name itself in `.name`, which is what MuPDF and PDFium also return. So the case's blank_state list
+    containing both 'Off' and '/Off' spans one name and one reader's rendering of the token, and pypdf's
+    own published prefix is exactly the difference. Replaces `g.equal(fields['pymupdf']['reviewed_0'],
+    'Off')` and `g.equal(fields['pypdf']['reviewed_0'], '/Off')`."""
+    pdf = _review_form(names)
+    for name in names:
+        by_mupdf = _mupdf_form_values(pdf)['reviewed_' + name]
+        npt.assert_array_equal(by_mupdf, _pdfium_form_values(pdf)['reviewed_' + name])
+        npt.assert_array_equal(by_mupdf,
+                               _pdfminer_form_fields(pdf)[('reviewed_' + name).encode()]['V'].name)
+        by_pypdf = _pypdf_form_fields(pdf)['reviewed_' + name]['/V']
+        with pytest.raises(AssertionError):
+            npt.assert_equal(by_mupdf, by_pypdf)
+        npt.assert_array_equal(by_pypdf.removeprefix(NameObject.prefix.decode()), by_mupdf)
+
+
+@given(REVIEW_NAMES, REVIEW_NOTE)
+@REVIEW_FORM
+def test_a_note_written_into_the_field_is_read_back_by_every_implementation(names, note):
+    """Once a value is present the four readers agree exactly, and the object model carries it as a
+    string: pdfminer returns the bytes of the literal, which for a note inside PDFDocEncoding are the
+    note's own bytes. Replaces `g.equal(fields['pymupdf']['notes_0'], 'checked the quote')` and its
+    pypdf twin, with the value generated rather than typed."""
+    answered = _answered(_review_form(names), {'notes_' + names[0]: note})
+    npt.assert_array_equal(_mupdf_form_values(answered)['notes_' + names[0]], note)
+    npt.assert_array_equal(_pypdf_form_fields(answered)['notes_' + names[0]]['/V'], note)
+    npt.assert_array_equal(_pdfium_form_values(answered)['notes_' + names[0]], note)
+    npt.assert_array_equal(_pdfminer_form_fields(answered)[('notes_' + names[0]).encode()]['V'],
+                           note.encode())
+
+
+@given(REVIEW_NAMES, LATIN_NOTE)
+@REVIEW_FORM
+def test_the_stored_string_becomes_utf_16_as_soon_as_the_note_leaves_ascii(names, note):
+    """The same value one encoding further out. A note of Latin-1 letters is still returned unchanged by
+    the three readers that decode PDF strings, while the bytes pdfminer hands back begin with the
+    big-endian byte order mark, so the file now holds UTF-16 where the previous test's file held the
+    note's own bytes. `codecs.BOM_UTF16_BE` is CPython's own name for those two bytes; nothing about the
+    encoding is typed here."""
+    answered = _answered(_review_form(names), {'notes_' + names[0]: note})
+    npt.assert_array_equal(_mupdf_form_values(answered)['notes_' + names[0]], note)
+    npt.assert_array_equal(_pypdf_form_fields(answered)['notes_' + names[0]]['/V'], note)
+    npt.assert_array_equal(_pdfium_form_values(answered)['notes_' + names[0]], note)
+    stored = _pdfminer_form_fields(answered)[('notes_' + names[0]).encode()]['V']
+    npt.assert_array_equal(stored[:len(codecs.BOM_UTF16_BE)], codecs.BOM_UTF16_BE)
+
+
+@given(REVIEW_PAIR, REVIEW_NOTE)
+@REVIEW_FORM
+def test_filling_one_field_leaves_the_others_without_a_value_key(names, note):
+    """The untouched field the case checks with its own blank_state predicate, checked instead as the
+    key set both object-model readers report: after one note is entered, the fields carrying a value are
+    the check boxes and that one text field, and no other. Replaces
+    `g.equal(blank_state(fields['pymupdf']['notes_1']), True)`."""
+    answered = _answered(_review_form(names), {'notes_' + names[0]: note})
+    expected = sorted(['reviewed_' + name for name in names] + ['notes_' + names[0]])
+    npt.assert_array_equal(sorted(name for name, field in _pypdf_form_fields(answered).items()
+                                  if '/V' in field), expected)
+    npt.assert_array_equal(sorted(name.decode() for name, field
+                                  in _pdfminer_form_fields(answered).items() if 'V' in field),
+                           expected)
+
+
+@given(REVIEW_NAMES)
+@REVIEW_FORM
+def test_checking_the_box_moves_the_value_and_the_appearance_state_together(names):
+    """The check box set to the on state the library itself names. Both the value and the appearance
+    state become that name in the file, which pdfminer reports as two entries of one literal, and the
+    other three readers return it as the name. Replaces `g.equal(fields['pymupdf']['reviewed_0'] not in
+    ('Off', '/Off'), True)`, whose claim was only that the value had left a two-spelling list."""
+    pdf = _review_form(names)
+    on_state = _mupdf_on_state(pdf, 'reviewed_' + names[0])
+    answered = _answered(pdf, {'reviewed_' + names[0]: on_state})
+    field = _pdfminer_form_fields(answered)[('reviewed_' + names[0]).encode()]
+    npt.assert_array_equal(field['V'].name, on_state)
+    npt.assert_array_equal(field['AS'].name, on_state)
+    npt.assert_array_equal(_mupdf_form_values(answered)['reviewed_' + names[0]], on_state)
+    npt.assert_array_equal(_pdfium_form_values(answered)['reviewed_' + names[0]], on_state)
+
+
+@given(REVIEW_NAMES)
+@REVIEW_FORM
+def test_the_page_the_widgets_sit_on_carries_the_content_of_a_blank_page(names):
+    """What the case's text_outside_widgets helper is protecting. The form's page has no content of its
+    own: MuPDF's `read_contents` returns for it exactly what it returns for a page a blank document has
+    just been given, and pypdf extracts the same text from both. So `g.equal(before_text.strip(), '')`
+    and the comparison of the page text outside the widget rectangles are made over a page with nothing
+    on it, and establish nothing about a page that carries content."""
+    pdf = _review_form(names)
+    blank = pymupdf.open()
+    blank_page = blank.new_page()
+    npt.assert_array_equal(pymupdf.open(stream=pdf, filetype='pdf')[0].read_contents(),
+                           blank_page.read_contents())
+    npt.assert_array_equal(pypdf.PdfReader(io.BytesIO(pdf)).pages[0].extract_text(),
+                           pypdf.PdfReader(io.BytesIO(blank.tobytes())).pages[0].extract_text())
+
+
+@given(REVIEW_NAMES, REVIEW_NOTE, REVIEW_NOTE)
+@REVIEW_FORM
+def test_a_drawn_passage_survives_the_fill_with_the_content_stream_untouched(names, passage, note):
+    """The claim the case wanted, made over a page that does carry content. A generated line is drawn on
+    the form, a generated note is entered, and both readers return the page's content stream byte for
+    byte as it was: MuPDF through `Page.read_contents` and pypdf through `PageObject.get_contents`. What
+    a filled field adds is the widget's own appearance stream, which is not page content."""
+    pdf = _review_form_with_passage(names, passage)
+    answered = _answered(pdf, {'notes_' + names[0]: note})
+    npt.assert_array_equal(pymupdf.open(stream=pdf, filetype='pdf')[0].read_contents(),
+                           pymupdf.open(stream=answered, filetype='pdf')[0].read_contents())
+    npt.assert_array_equal(pypdf.PdfReader(io.BytesIO(pdf)).pages[0].get_contents().get_data(),
+                           pypdf.PdfReader(io.BytesIO(answered)).pages[0].get_contents().get_data())
+
+
+@given(REVIEW_NAMES, REVIEW_NOTE, REVIEW_NOTE)
+@REVIEW_FORM
+def test_the_extracted_text_cannot_separate_the_drawn_passage_from_the_entered_value(names, passage,
+                                                                                    note):
+    """And why the case needed the helper at all. Extracted text is the union: the page whose only
+    content is the drawn line returns that line, and after the note is entered `get_text` returns both,
+    with nothing to say which came from the document and which from the reviewer. Replaces
+    `g.equal('checked the quote' in after_text, True)`."""
+    pdf = _review_form_with_passage(names, passage)
+    npt.assert_array_equal(pymupdf.open(stream=pdf, filetype='pdf')[0].get_text().split(), [passage])
+    answered = _answered(pdf, {'notes_' + names[0]: note})
+    npt.assert_array_equal(sorted(pymupdf.open(stream=answered, filetype='pdf')[0].get_text().split()),
+                           sorted([passage, note]))
+
+
+@given(REVIEW_NAMES)
+@REVIEW_FORM
+def test_checking_the_box_alone_puts_a_character_into_the_page_text(names):
+    """A check box contributes to the text layer too. The unfilled form extracts as a blank page does;
+    once the box is set to its on state the same extraction is no longer that of a blank page, because
+    the appearance stream MuPDF builds for a checked box draws a glyph. So text extracted from a filled
+    review form carries marks that were never typed by anyone."""
+    pdf = _review_form(names)
+    blank = pymupdf.open().new_page().get_text()
+    npt.assert_array_equal(pymupdf.open(stream=pdf, filetype='pdf')[0].get_text(), blank)
+    checked = _answered(pdf, {'reviewed_' + names[0]: _mupdf_on_state(pdf, 'reviewed_' + names[0])})
+    with pytest.raises(AssertionError):
+        npt.assert_equal(pymupdf.open(stream=checked, filetype='pdf')[0].get_text(), blank)
+
+
+@given(REVIEW_NAMES, BEYOND_LATIN_NOTE)
+@REVIEW_FORM
+def test_a_value_every_reader_returns_need_not_appear_in_the_extracted_text(names, note):
+    """The stored value and the displayed value part company outside the appearance font. A note of
+    arrows round-trips through all four readers unchanged, and the page it was entered on extracts as a
+    blank page does, so a chain that checks the entered value by searching the page text would find
+    nothing while every form reader returns it."""
+    answered = _answered(_review_form(names), {'notes_' + names[0]: note})
+    npt.assert_array_equal(_mupdf_form_values(answered)['notes_' + names[0]], note)
+    npt.assert_array_equal(_pypdf_form_fields(answered)['notes_' + names[0]]['/V'], note)
+    npt.assert_array_equal(_pdfium_form_values(answered)['notes_' + names[0]], note)
+    npt.assert_array_equal(pymupdf.open(stream=answered, filetype='pdf')[0].get_text(),
+                           pymupdf.open().new_page().get_text())
+
+
+@given(REVIEW_NAMES, REVIEW_NAME, REVIEW_NOTE)
+@REVIEW_FORM
+def test_filling_a_field_the_form_does_not_have_is_not_refused_by_the_library(names, absent, note):
+    """The case's last expectation is a refusal its own code raises: `fill_fields` collects the names it
+    did not find and raises Blocked. The library does no such thing. Writing a value under a name the
+    form does not carry matches no widget, raises nothing, and returns a file whose field names are
+    unchanged in every reader -- and whose bytes are not the bytes that went in, because the document
+    was saved again. Replaces `g.rejects(g.Blocked, lambda: fill_fields(data, {'notes_9': 'x'}))`."""
+    assume(absent not in names)
+    pdf = _review_form(names)
+    answered = _answered(pdf, {'notes_' + absent: note})
+    npt.assert_array_equal(sorted(_mupdf_form_values(answered)), sorted(_mupdf_form_values(pdf)))
+    npt.assert_array_equal(sorted(_pypdf_form_fields(answered)), sorted(_pypdf_form_fields(pdf)))
+    npt.assert_array_equal(sorted(_pdfium_form_values(answered)), sorted(_pdfium_form_values(pdf)))
+    with pytest.raises(AssertionError):
+        npt.assert_equal(answered, pdf)

@@ -94,6 +94,7 @@ packaging==26.3
 pandas==2.2.3
 pandera==0.33.1
 pathspec==1.1.1
+pdfminer-six==20260107
 pdfplumber==0.11.10
 pillow==12.3.0
 pint==0.25.3
