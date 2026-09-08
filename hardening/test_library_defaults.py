@@ -28,7 +28,7 @@ import json
 import math
 import sqlite3
 from urllib.parse import urljoin
-from decimal import Decimal, ROUND_HALF_EVEN, ROUND_HALF_UP
+from decimal import Decimal, DivisionByZero, ROUND_CEILING, ROUND_HALF_EVEN, ROUND_HALF_UP, ROUND_UP
 from fractions import Fraction
 
 import arrow
@@ -3986,3 +3986,131 @@ def test_the_index_set_comparison_the_chain_uses_cannot_see_a_repeated_posting(p
         .fetchall())
     with pytest.raises(pandera.errors.SchemaErrors):
         JOURNAL_COLUMN_SCHEMA.validate(pd.DataFrame({'journal': posted}), lazy=True)
+
+
+# ---------------------------------------------------------------- a whole-unit break-even volume
+BREAK_EVEN_CENTS = st.integers(min_value=1, max_value=2000)
+BUNDLE_COUNTS = st.lists(st.integers(min_value=1, max_value=50_000), min_size=20, max_size=30,
+                         unique=True)
+PART_CENT = st.integers(min_value=1, max_value=1999)
+
+
+def _exact_break_even(fixed, contribution):
+    return [math.ceil(Fraction(one) / Fraction(contribution)) for one in fixed]
+
+
+def _decimal_break_even(fixed, contribution):
+    return [int((one / contribution).to_integral_value(rounding=ROUND_CEILING)) for one in fixed]
+
+
+def _float_break_even(fixed, contribution):
+    return [math.ceil(float(one) / float(contribution)) for one in fixed]
+
+
+def _duckdb_break_even(fixed, contribution):
+    rows = pd.DataFrame({'position': range(len(fixed)),
+                         'fixed': [str(one) for one in fixed],
+                         'contribution': [str(contribution)] * len(fixed)})
+    connection = duckdb.connect()
+    connection.register('inputs', rows)
+    return connection.execute(
+        'SELECT ceil(CAST(fixed AS DECIMAL(18,2)) / CAST(contribution AS DECIMAL(18,2))), '
+        '       ceil(CAST(fixed AS DOUBLE) / CAST(contribution AS DOUBLE)) '
+        'FROM inputs ORDER BY position').fetchall()
+
+
+@given(BREAK_EVEN_CENTS, BUNDLE_COUNTS)
+@SLOW
+def test_two_exact_implementations_agree_on_every_break_even_volume(cents, counts):
+    """P170 takes the break-even volume as Decimal.to_integral_value with ROUND_CEILING. Over fixed
+    costs generated as an exact whole number of bundles, decimal's rounding of its own 28-digit
+    quotient and fractions.Fraction's exact ceiling return the same volume, and it is the number of
+    bundles the cost was built from. This is the agreeing region and the reference the rest of the
+    cluster is measured against."""
+    contribution = Decimal(cents) / Decimal(100)
+    fixed = [Decimal(cents * count) / Decimal(100) for count in counts]
+    npt.assert_array_equal(_decimal_break_even(fixed, contribution),
+                           _exact_break_even(fixed, contribution))
+    npt.assert_array_equal(_exact_break_even(fixed, contribution), counts)
+
+
+@given(BREAK_EVEN_CENTS, BUNDLE_COUNTS)
+@SLOW
+def test_the_same_break_even_in_floating_point_orders_bundles_nobody_needs(cents, counts):
+    """The same quotient in binary floating point never returns fewer bundles than the exact
+    calculation and does not always return the same number: over a generated range of exact bundle
+    counts it lands one bundle high on about an eighth of them, because the fixed cost and the
+    contribution are each inexact as doubles and their quotient falls just above the whole number it
+    should equal. Nothing raises, and the surplus bundle is indistinguishable in the answer from a
+    genuine part-bundle remainder."""
+    contribution = Decimal(cents) / Decimal(100)
+    fixed = [Decimal(cents * count) / Decimal(100) for count in counts]
+    exact = _exact_break_even(fixed, contribution)
+    in_binary = _float_break_even(fixed, contribution)
+    npt.assert_array_equal(np.minimum(exact, in_binary), exact)
+    assume(in_binary != exact)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(in_binary, exact)
+
+
+@given(BREAK_EVEN_CENTS, BUNDLE_COUNTS)
+@SLOW
+def test_the_sql_engine_answers_the_exact_question_in_floating_point(cents, counts):
+    """DuckDB 1.5.5 has a DECIMAL type and its operator table calls `/` "Float division"; executed on
+    two DECIMAL operands it returns a DOUBLE, so the ceiling of a DECIMAL quotient and the ceiling of
+    a DOUBLE quotient are the same number in that engine, and both are the number Python's float path
+    gives rather than the exact one. A break-even recomputed in SQL from the same declared figures
+    therefore carries the surplus bundle that Decimal does not."""
+    contribution = Decimal(cents) / Decimal(100)
+    fixed = [Decimal(cents * count) / Decimal(100) for count in counts]
+    in_engine = _duckdb_break_even(fixed, contribution)
+    npt.assert_array_equal([row[0] for row in in_engine], [row[1] for row in in_engine])
+    npt.assert_array_equal([row[0] for row in in_engine], _float_break_even(fixed, contribution))
+    exact = _exact_break_even(fixed, contribution)
+    assume([int(row[0]) for row in in_engine] != exact)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal([int(row[0]) for row in in_engine], exact)
+
+
+@given(BREAK_EVEN_CENTS)
+@SLOW
+def test_a_zero_contribution_is_a_refusal_in_two_libraries_and_infinity_in_two_engines(cents):
+    """Asked for the break-even volume of a product that contributes nothing, decimal raises
+    DivisionByZero and Fraction raises ZeroDivisionError, while numpy and DuckDB both answer with an
+    infinity and no exception. Whether the unanswerable case arrives as a refusal or as a number
+    depends on which of the four the figure passed through."""
+    fixed = Decimal(cents) / Decimal(100)
+    with pytest.raises(DivisionByZero):
+        fixed / Decimal(0)
+    with pytest.raises(ZeroDivisionError):
+        Fraction(fixed) / Fraction(0)
+    connection = duckdb.connect()
+    in_engine = connection.execute(
+        "SELECT CAST('%s' AS DECIMAL(18,2)) / CAST('0.00' AS DECIMAL(18,2))" % fixed).fetchone()[0]
+    with np.errstate(divide='ignore'):
+        npt.assert_array_equal(in_engine, np.divide(np.float64(float(fixed)), np.float64(0.0)))
+
+
+@given(BREAK_EVEN_CENTS, st.integers(min_value=1, max_value=50_000), PART_CENT)
+@SLOW
+def test_a_negative_contribution_returns_a_volume_the_chain_s_rounding_gets_wrong_way_round(
+        cents, count, remainder):
+    """A contribution of less than zero still divides, and the quotient is negative, where the two
+    roundings part company: ROUND_CEILING moves toward positive infinity and ROUND_UP moves away from
+    zero. Fraction's exact ceiling confirms which one ROUND_CEILING is, and the volume P170's
+    ROUND_CEILING returns is the one at which the product is still losing money, while the volume
+    ROUND_UP returns is not. On a negative contribution the rounding the chain declares is the
+    rounding that answers the opposite question. Replaces the typed Decimal('-725') and Decimal('-726')
+    of case 170."""
+    assume(remainder < cents)
+    contribution = -(Decimal(cents) / Decimal(100))
+    fixed = Decimal(cents * count + remainder) / Decimal(100)
+    quotient = fixed / contribution
+    toward_infinity = quotient.to_integral_value(rounding=ROUND_CEILING)
+    away_from_zero = quotient.to_integral_value(rounding=ROUND_UP)
+    npt.assert_array_equal(int(toward_infinity),
+                           math.ceil(Fraction(fixed) / Fraction(contribution)))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(toward_infinity, away_from_zero)
+    npt.assert_array_less(Fraction(int(toward_infinity)) * Fraction(contribution), Fraction(fixed))
+    npt.assert_array_less(Fraction(fixed), Fraction(int(away_from_zero)) * Fraction(contribution))
