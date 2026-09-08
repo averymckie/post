@@ -68,6 +68,9 @@ import numpy as np
 import numpy_financial as npf
 import pyxirr
 from workalendar import core as workalendar_core
+from workalendar import exceptions as workalendar_exceptions
+from workalendar.registry import registry as workalendar_registry
+import holidays
 import html5lib
 import igraph
 import jinja2
@@ -17049,3 +17052,185 @@ def test_dompdf_also_prints_the_page_whose_external_image_cannot_be_fetched(toke
     npt.assert_array_equal(_mupdf_page_text(dropped), _mupdf_page_text(never_named))
     npt.assert_array_equal([token in _mupdf_page_text(dropped) for token in tokens],
                            [token in with_images for token in tokens])
+
+
+# ---------------------------------------------------------------- national holiday calendars, two libraries
+# Replaces handoff_guards_v6.py case 58 working_days_are_half_open_and_calendar_defined, whose typed
+# comparison `g.equal(datetime.date(2011, 5, 5) in nl, False)` carries the comment "Liberation Day is a
+# formal day off only every five years; the library encodes that rule". Both libraries encode a rule, and
+# they are not the same rule. The half-open and reversed-range halves of that case are already covered by
+# the numpy busday_count tests above.
+HOLIDAY_YEARS = st.integers(min_value=2015, max_value=2030)
+# The countries both libraries support, taken from each library's own published inventory.
+COMMON_HOLIDAY_COUNTRIES = sorted(set(workalendar_registry.get_calendars())
+                                  & set(holidays.list_supported_countries()))
+HOLIDAY_COUNTRIES = st.sampled_from(COMMON_HOLIDAY_COUNTRIES)
+# The two regions, generated directly rather than filtered: every code below was executed against both
+# libraries for every year of 2015-2030, and agrees in all sixteen or disagrees in all sixteen.
+AGREEING_COUNTRIES = st.sampled_from(('AT', 'CZ', 'DE', 'EE', 'FI', 'FR', 'HR', 'LT', 'LU', 'MT', 'NO', 'PT'))
+DISAGREEING_COUNTRIES = st.sampled_from((
+    'AO', 'AR', 'BB', 'BE', 'BJ', 'BR', 'BY', 'CA', 'CH', 'CI', 'CL', 'CO', 'CY', 'DK', 'DZ', 'GB', 'GR',
+    'HK', 'IE', 'IL', 'IS', 'IT', 'KE', 'KR', 'KZ', 'LV', 'MG', 'MH', 'MX', 'MZ', 'NG', 'PA', 'PH', 'PY',
+    'QA', 'RS', 'SE', 'ST', 'TN', 'TW', 'UA'))
+# Dutch years in which the optional day is neither a fifth year nor already public for another reason.
+DUTCH_DIVERGING_YEARS = st.sampled_from((2017, 2018, 2019, 2021, 2022, 2023, 2024, 2026, 2027, 2028, 2029))
+# The country and year pairs whose workalendar answer reaches outside the year asked for.
+SHIFTED_OBSERVANCES = st.sampled_from((('KE', 2017), ('KE', 2023), ('KE', 2028),
+                                       ('MX', 2022), ('MX', 2028), ('US', 2022), ('US', 2028)))
+UNCONFIGURED_CHINESE_YEARS = st.sampled_from((2015, 2016, 2017, 2024, 2025, 2026, 2027, 2028, 2029, 2030))
+UNDATED_MALAYSIAN_YEARS = st.sampled_from((2025, 2026, 2027, 2028, 2029, 2030))
+HOLIDAY_CALENDAR = settings(max_examples=60, deadline=None)
+
+
+def _workalendar_dates(code, year):
+    return sorted({day for day, _ in workalendar_registry.get_calendars()[code]().holidays(year)})
+
+
+def _holidays_dates(code, year, categories=None):
+    if categories is None:
+        return sorted(holidays.country_holidays(code, years=[year]))
+    return sorted(holidays.country_holidays(code, years=[year], categories=categories))
+
+
+def _busday_calendar(dates):
+    return np.busdaycalendar(weekmask='1111100',
+                             holidays=[np.datetime64(day.isoformat()) for day in dates])
+
+
+def _working_days_in(year, calendar):
+    return int(np.busday_count(np.datetime64(datetime.date(year, 1, 1).isoformat()),
+                               np.datetime64(datetime.date(year + 1, 1, 1).isoformat()),
+                               busdaycal=calendar))
+
+
+@given(AGREEING_COUNTRIES, HOLIDAY_YEARS)
+@HOLIDAY_CALENDAR
+def test_the_two_holiday_libraries_agree_for_the_countries_whose_rules_they_share(code, year):
+    """holidays 0.103 and workalendar 17.0.0 are independent implementations of the same operation:
+    workalendar's setup.cfg at 17.0.0 declares python-dateutil, lunardate, convertdate and pyluach, and
+    names neither holidays nor any part of it. For twelve of the seventy-six countries both support they
+    return the same set of dates in every year of 2015-2030."""
+    npt.assert_array_equal(_workalendar_dates(code, year), _holidays_dates(code, year))
+
+
+@given(DISAGREEING_COUNTRIES, HOLIDAY_YEARS)
+@HOLIDAY_CALENDAR
+def test_the_two_holiday_libraries_disagree_for_the_countries_whose_rules_they_do_not(code, year):
+    """The other forty-one common countries disagree in every one of those sixteen years. The set a
+    working-day calendar is built from is not a fact about the country; it is a fact about the package."""
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_workalendar_dates(code, year), _holidays_dates(code, year))
+
+
+@given(HOLIDAY_YEARS)
+@HOLIDAY_CALENDAR
+def test_the_dutch_calendars_agree_once_the_optional_category_is_included(year):
+    """The whole Dutch disagreement is one library's category system. holidays 0.103
+    countries/netherlands.py populates Liberation Day twice: under `if self._year % 5 == 0:` in
+    _populate_public_holidays, with the comment "a day off only once every five years (e.g., 2030, 2035,
+    etc.)", and under `if self._year >= 1982:` in _populate_optional_holidays. workalendar has no
+    categories and carries it as a fixed holiday, `(5, 5, "Liberation Day")`. Asking holidays for both
+    categories at once gives workalendar's set exactly, in every year."""
+    npt.assert_array_equal(_workalendar_dates('NL', year),
+                           _holidays_dates('NL', year, (holidays.PUBLIC, holidays.OPTIONAL)))
+
+
+@given(DUTCH_DIVERGING_YEARS)
+@HOLIDAY_CALENDAR
+def test_the_default_dutch_calendar_omits_the_optional_day_the_other_library_keeps(year):
+    """Case 58's typed `g.equal(datetime.date(2011, 5, 5) in nl, False)` reads the default category, which
+    is public only. The years this strategy leaves out are the four fifth years the public rule names and
+    2016, where the day is Ascension Day and public for another reason, so the default is narrower than the
+    other library in eleven of the sixteen years and equal in five."""
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_workalendar_dates('NL', year), _holidays_dates('NL', year))
+
+
+@given(HOLIDAY_COUNTRIES, HOLIDAY_YEARS)
+@HOLIDAY_CALENDAR
+def test_no_date_the_holidays_package_reports_falls_outside_the_year_it_was_asked_for(code, year):
+    """The invariant a caller assumes when it pins a set of years and then blocks any case outside them,
+    as case 58's working_days does. It holds for every one of the seventy-six common countries -- including
+    the years where the answer is that there are no public holidays at all."""
+    npt.assert_array_equal(sorted({day.year for day in _holidays_dates(code, year)} - {year}), [])
+
+
+@given(SHIFTED_OBSERVANCES)
+@HOLIDAY_CALENDAR
+def test_a_workalendar_year_can_report_an_observance_from_the_year_beside_it(pair):
+    """It does not hold for the other library. workalendar shifts an observance off a weekend and keeps the
+    shifted date, so asking for one year can return a date in the next or the previous one: 'New Years Eve
+    Shift' for Kenya, 'New year substitute' for Mexico and 'New year (Observed)' for the United States. A
+    calendar assembled year by year therefore carries dates the year filter never sees."""
+    code, year = pair
+    npt.assert_array_equal(sorted({day.year for day in _holidays_dates(code, year)} - {year}), [])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(sorted({day.year for day in _workalendar_dates(code, year)} - {year}), [])
+
+
+@given(UNCONFIGURED_CHINESE_YEARS)
+@HOLIDAY_CALENDAR
+def test_workalendar_refuses_a_chinese_year_it_was_not_configured_for(year):
+    """One library says it does not know and the other always answers. workalendar's asia/china.py warns
+    "Support years 2018-2023 currently, need update every year." and raises CalendarError outside that
+    window; holidays 0.103 returns a full set of dates for the same year, and nothing in the chain can tell
+    a computed calendar from a configured one."""
+    with pytest.raises(workalendar_exceptions.CalendarError):
+        _workalendar_dates('CN', year)
+    npt.assert_array_equal(sorted({day.year for day in _holidays_dates('CN', year)}), [year])
+
+
+@given(UNDATED_MALAYSIAN_YEARS)
+@HOLIDAY_CALENDAR
+def test_workalendar_raises_a_bare_key_error_for_a_malaysian_year_it_has_no_date_for(year):
+    """The same refusal arrives as a different exception class for a different country: asia/malaysia.py
+    raises KeyError('Missing date for Malaysia Deepavali for year: ...'), not the library's own
+    CalendarError, so a caller that catches the documented exception catches only some of the refusals."""
+    with pytest.raises(KeyError):
+        _workalendar_dates('MY', year)
+    npt.assert_array_equal(sorted({day.year for day in _holidays_dates('MY', year)}), [year])
+
+
+@given(HOLIDAY_YEARS)
+@HOLIDAY_CALENDAR
+def test_the_dutch_working_day_count_moves_by_the_disagreeing_dates_that_are_weekdays(year):
+    """The chain of P58 fills np.busdaycalendar from one of these libraries and counts working days with
+    np.busday_count. The count over a whole year differs between the two calendars by exactly the number of
+    disagreeing dates numpy itself calls business days -- one in most years and none in the years where the
+    date is a Sunday or already a holiday. Both sides of the comparison are computed by numpy from library
+    data; nothing here is typed."""
+    from_workalendar = _workalendar_dates('NL', year)
+    from_holidays = _holidays_dates('NL', year)
+    only_in_workalendar = sorted(set(from_workalendar) - set(from_holidays))
+    public_calendar = _busday_calendar(from_holidays)
+    npt.assert_equal(_working_days_in(year, public_calendar)
+                     - _working_days_in(year, _busday_calendar(from_workalendar)),
+                     int(np.count_nonzero(np.is_busday(
+                         [np.datetime64(day.isoformat()) for day in only_in_workalendar],
+                         busdaycal=public_calendar))))
+
+
+@given(AGREEING_COUNTRIES, HOLIDAY_YEARS)
+@HOLIDAY_CALENDAR
+def test_the_working_day_count_agrees_where_the_two_libraries_agree_on_the_dates(code, year):
+    """The agreeing region of the same measurement: where the two libraries return one set, the working-day
+    count over the year is one number, so the divergence above is entirely the holiday set and not the
+    counting."""
+    npt.assert_equal(_working_days_in(year, _busday_calendar(_workalendar_dates(code, year))),
+                     _working_days_in(year, _busday_calendar(_holidays_dates(code, year))))
+
+
+
+@given(st.integers(min_value=2023, max_value=2030))
+@HOLIDAY_CALENDAR
+def test_the_ukrainian_public_calendar_under_martial_law_leaves_every_weekday_a_working_day(year):
+    """A national holiday calendar can legitimately be empty, and nothing downstream can tell that from a
+    calendar that was never filled. holidays 0.103 countries/ukraine.py carries the rule as a comment on
+    _populate_common -- "There is no public holidays in Ukraine during the period of martial law" -- with
+    the law and the date it came into force, and from 2023 the public category returns nothing. Filling
+    np.busdaycalendar from it gives the same year length as a calendar with no holidays at all, while
+    workalendar, which encodes no such rule, gives a shorter year."""
+    from_holidays = _working_days_in(year, _busday_calendar(_holidays_dates('UA', year)))
+    npt.assert_equal(from_holidays, _working_days_in(year, np.busdaycalendar(weekmask='1111100')))
+    with pytest.raises(AssertionError):
+        npt.assert_equal(from_holidays, _working_days_in(year, _busday_calendar(_workalendar_dates('UA', year))))
