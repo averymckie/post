@@ -7456,3 +7456,151 @@ def test_the_second_writer_is_reproducible_across_zones_at_every_later_stamp(par
     _, from_utc = _java_package(package, zone='UTC')
     _, from_zone = _java_package(package, zone=zone)
     npt.assert_equal(hashlib.sha256(from_zone).hexdigest(), hashlib.sha256(from_utc).hexdigest())
+
+
+# --------------------------------------------------- the month end a schedule is supposed to land on
+MONTH_ANCHOR = st.dates(min_value=datetime.date(1901, 1, 1), max_value=datetime.date(2099, 12, 31))
+PERIOD_COUNT = st.integers(min_value=2, max_value=18)
+SHORTENING_MONTHS = tuple(month for month in range(1, 13)
+                          if calendar.monthrange(2027, month)[1]
+                          > calendar.monthrange(2027, month % 12 + 1)[1])
+
+
+@given(st.lists(MONTH_ANCHOR, min_size=1, max_size=20))
+@SLOW
+def test_the_last_day_of_a_month_is_the_same_day_in_three_implementations(anchors):
+    """P159's month walk and case v16.month_walk turn on where a month ends. pandas 2.2.3 answers it
+    with `Period.end_time`, documented in pandas/_libs/tslibs/period.pyx at tag v2.2.3 as "Get the
+    Timestamp for the end of the period." Two implementations that share none of that code answer the
+    same question on generated dates: polars 1.44.1's `dt.month_end`, "Roll forward to the last day of
+    the month", read in py-polars/src/polars/expr/datetime.py at tag py-1.44.1, and DuckDB 1.5.5's
+    `last_day`, "The last day of the corresponding month in the date." All three agree on every
+    generated date, leap Februaries included. Replaces the typed
+    `[date(2026, 1, 31), date(2026, 2, 28), date(2026, 3, 31)]` of handoff_guards_v18.py case
+    month_ends_come_from_periods_not_from_repeated_addition."""
+    frame = pl.DataFrame({'anchor': anchors})
+    by_pandas = pl.Series('end', [pd.Period(anchor, freq='M').end_time.date() for anchor in anchors])
+    plt.assert_series_equal(by_pandas, frame['anchor'].dt.month_end().rename('end'))
+    with duckdb.connect() as connection:
+        plt.assert_series_equal(by_pandas, connection.sql(
+            'select last_day(anchor) as end from frame').pl()['end'])
+
+
+@pytest.mark.skipif(not php_binary_available, reason='the php runtime is required for this oracle')
+@given(MONTH_ANCHOR)
+@ORACLE_PROCESS
+def test_a_fourth_implementation_in_another_runtime_lands_on_the_same_last_day(anchor):
+    """PHP 8.4.19's relative formats include "last day of", handled by timelib in C, and asking
+    `DateTime::modify` for the last day of the anchor's own month gives the same date pandas gives as
+    the end of the monthly period containing it, on every generated date. The month end is therefore a
+    property of the calendar and not of the library, which is what makes the drift below a defect
+    rather than a convention."""
+    period = pd.Period(anchor, freq='M')
+    npt.assert_equal(period.end_time.date(),
+                     datetime.date.fromisoformat(_php_modify(anchor, 'last day of this month')))
+
+
+@given(MONTH_ANCHOR, st.data())
+@SLOW
+def test_a_monthly_period_forgets_the_day_of_the_month_it_was_anchored_with(anchor, source):
+    """A monthly period is the month, not the date it was built from: any other day of the same month
+    gives the same period, the same text and the same end. This is why a period range cannot drift and
+    a repeated offset can -- the day of the month is not carried from one step to the next, because it
+    was never kept. Replaces the typed `str(periods[1]) == '2026-02'` and the typed
+    `['2026-01', '2026-02', '2026-03']` of case
+    month_ends_come_from_periods_not_from_repeated_addition."""
+    other = anchor.replace(day=source.draw(st.integers(
+        min_value=1, max_value=calendar.monthrange(anchor.year, anchor.month)[1])))
+    npt.assert_equal(str(pd.Period(anchor, freq='M')), str(pd.Period(other, freq='M')))
+    npt.assert_equal(pd.Period(anchor, freq='M').end_time, pd.Period(other, freq='M').end_time)
+    npt.assert_equal(str(pd.Period(anchor, freq='M')), anchor.strftime('%Y-%m'))
+
+
+@given(st.integers(min_value=1901, max_value=2098), st.sampled_from(SHORTENING_MONTHS),
+       st.integers(min_value=3, max_value=18))
+@SLOW
+def test_repeated_month_addition_drifts_off_the_month_ends_a_period_range_keeps(year, month, count):
+    """The defect v16 hit and v18 recorded: its hand-written step "reached 2026-03-28 instead". The
+    months this runs from are the ones the calendar module reports as longer than the month after
+    them, so the first step has somewhere to fall to. One step of `relativedelta(months=+1)` from the
+    month end lands on the next month end, because clamping and the month end are the same date there;
+    the second step carries that shortened day forward and never recovers it. One hop of two months
+    from the same anchor does land on the right month end, so the drift is a property of stepping
+    repeatedly rather than of the offset. Replaces the typed `ends[-1] == date(2026, 3, 31)` of case
+    month_ends_come_from_periods_not_from_repeated_addition."""
+    periods = pd.period_range(pd.Period(year=year, month=month, freq='M'), periods=count)
+    ends = [period.end_time.date() for period in periods]
+    npt.assert_equal(ends[0] + relativedelta(months=+1), ends[1])
+    npt.assert_equal(ends[0] + relativedelta(months=+2), ends[2])
+    with pytest.raises(AssertionError):
+        npt.assert_equal(ends[0] + relativedelta(months=+1) + relativedelta(months=+1), ends[2])
+
+
+@given(MONTH_ANCHOR)
+@SLOW
+def test_the_end_of_a_monthly_period_is_its_last_nanosecond_and_not_a_date(anchor):
+    """`end_time` is not the last day: it is the last instant of the period, and the gap between it and
+    the start of the next period is exactly `Timestamp.resolution`, the smallest step pandas can
+    represent. Taking `.date()` off it, as the chain does, discards a time of 23:59:59.999999999, so a
+    deadline compared as a date admits nothing after midnight while the same deadline compared as the
+    period's own end admits the whole last day. Replaces the typed
+    `g.equal(periods[1].end_time.date() != periods[1].end_time, True)` of case
+    month_ends_come_from_periods_not_from_repeated_addition."""
+    period = pd.Period(anchor, freq='M')
+    npt.assert_equal((period + 1).start_time - period.end_time, pd.Timestamp.resolution)
+    npt.assert_array_less(pd.Timestamp(period.end_time.date()).value, period.end_time.value)
+    with pytest.raises(AssertionError):
+        npt.assert_equal(pd.Timestamp(period.end_time.date()), period.end_time)
+
+
+@given(st.lists(MONTH_ANCHOR, min_size=1, max_size=20))
+@SLOW
+def test_the_number_of_days_in_a_month_agrees_across_three_implementations(anchors):
+    """`Period.days_in_month` against the standard library's own `calendar.monthrange`, which is pure
+    Python and unrelated to pandas' C extension, and against the day component of polars' month end.
+    All three agree on every generated month, and each equals the day of the month the period ends on.
+    Replaces the typed `pd.Period('2026-02', freq='M').days_in_month == 28` of case
+    month_ends_come_from_periods_not_from_repeated_addition."""
+    periods = [pd.Period(anchor, freq='M') for anchor in anchors]
+    npt.assert_array_equal([period.days_in_month for period in periods],
+                           [calendar.monthrange(anchor.year, anchor.month)[1] for anchor in anchors])
+    npt.assert_array_equal([period.days_in_month for period in periods],
+                           [period.end_time.day for period in periods])
+    plt.assert_series_equal(pl.Series('day', [period.days_in_month for period in periods],
+                                      dtype=pl.Int8),
+                            pl.Series('anchor', anchors).dt.month_end().dt.day().rename('day'))
+
+
+@given(MONTH_ANCHOR, PERIOD_COUNT)
+@SLOW
+def test_the_word_for_monthly_is_deprecated_in_one_pandas_api_and_refused_in_the_other(anchor, count):
+    """The same letter means monthly in both halves of pandas 2.2.3 and only one of them will still
+    take it. `to_offset` in pandas/_libs/tslibs/offsets.pyx at tag v2.2.3 warns for a date range --
+    "'M' is deprecated and will be removed in a future version, please use 'ME' instead." -- and eleven
+    lines further down raises for a period range, "for Period, please use 'M' instead of 'ME'". So a
+    schedule written with one spelling warns and a schedule written with the other raises, and no
+    single spelling is accepted by both calls. The two calls do agree on the dates: the deprecated
+    month-end offset walks exactly the ends of the periods the period range names."""
+    with pytest.warns(FutureWarning):
+        deprecated = pd.date_range(anchor, periods=count, freq='M')
+    npt.assert_array_equal(deprecated.date, pd.date_range(anchor, periods=count, freq='ME').date)
+    npt.assert_array_equal(deprecated.date,
+                           [period.end_time.date()
+                            for period in pd.period_range(anchor, periods=count, freq='M')])
+    with pytest.raises(ValueError):
+        pd.period_range(anchor, periods=count, freq='ME')
+
+
+@given(MONTH_ANCHOR, PERIOD_COUNT)
+@SLOW
+def test_a_period_range_covers_every_month_between_its_ends_with_no_gap_and_no_overlap(anchor, count):
+    """A period range named by a count and the same range named by its first and last period are the
+    same months, and each period's last instant is one resolution step before the next period's first,
+    so the months tile the interval exactly. Replaces the typed `len(periods) == 3` of case
+    month_ends_come_from_periods_not_from_repeated_addition."""
+    periods = pd.period_range(anchor, periods=count, freq='M')
+    npt.assert_array_equal([str(period) for period in periods],
+                           [str(period) for period in
+                            pd.period_range(start=periods[0], end=periods[-1], freq='M')])
+    npt.assert_array_equal([period.end_time + pd.Timestamp.resolution for period in periods[:-1]],
+                           [period.start_time for period in periods[1:]])
