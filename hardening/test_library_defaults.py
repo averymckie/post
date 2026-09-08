@@ -11,6 +11,7 @@ import calendar
 import contextlib
 import csv
 import functools
+import os
 import pathlib
 import shutil
 import tempfile
@@ -42,6 +43,7 @@ import numpy_financial as npf
 import pyxirr
 from workalendar import core as workalendar_core
 import igraph
+import jinja2
 import jsonschema
 import markdown as python_markdown
 import pint
@@ -2460,3 +2462,118 @@ def test_every_engine_leaves_the_unmapped_amount_out_of_the_stage_totals(known, 
     npt.assert_array_equal(reported, [reported[0]] * 3)
     npt.assert_array_equal(reported[0] < source_total, True)
     npt.assert_array_equal(source_total - reported[0], sum(amount for _, amount in _labelled(unknown)))
+
+
+# ---------------------------------------------------------------- rendering a template and escaping a value
+NUNJUCKS_DIRECTORY = pathlib.Path(os.environ.get('NUNJUCKS_DIR', str(pathlib.Path.home() / 'nunjucks-oracle')))
+TEMPLATE_ORACLE_JS = pathlib.Path(__file__).with_name('template_render_oracle.js')
+TEMPLATE_STRICT_JS = pathlib.Path(__file__).with_name('template_strict_oracle.js')
+nunjucks_available = (shutil.which('node') is not None
+                      and (NUNJUCKS_DIRECTORY / 'node_modules' / 'nunjucks').is_dir())
+ESCAPING_TEMPLATE = '{{ value }}'
+PLAIN_ENVIRONMENT = jinja2.Environment()
+ESCAPING_ENVIRONMENT = jinja2.Environment(autoescape=True)
+STRICT_ENVIRONMENT = jinja2.Environment(undefined=jinja2.StrictUndefined)
+ESCAPABLE_CHARACTERS = [character for character in map(chr, range(0x20, 0x7f))
+                        if ESCAPING_ENVIRONMENT.from_string(ESCAPING_TEMPLATE).render(value=character)
+                        != character]
+ESCAPABLE_TEXT = st.text(alphabet=st.sampled_from(ESCAPABLE_CHARACTERS), min_size=1, max_size=8)
+
+
+def _nunjucks_renders(script, context):
+    """One template rendered by the other implementation of this template language. The shim parses argv,
+    calls the library and prints; nothing here computes anything."""
+    completed = subprocess.run(['node', str(script), ESCAPING_TEMPLATE, json.dumps(context)],
+                               capture_output=True, encoding='utf-8', check=True,
+                               env={**os.environ, 'NODE_PATH': str(NUNJUCKS_DIRECTORY / 'node_modules')})
+    return completed.stdout.split('\n')[:2]
+
+
+@functools.lru_cache(maxsize=1)
+def _escaping_comparison():
+    """One row per printable character: the character, the text jinja2 escapes it to and the text nunjucks
+    escapes it to. Ninety-five subprocess runs, once per session, and the two regions below are read off it
+    rather than named here."""
+    return [(character,
+             ESCAPING_ENVIRONMENT.from_string(ESCAPING_TEMPLATE).render(value=character),
+             _nunjucks_renders(TEMPLATE_ORACLE_JS, {'value': character})[0])
+            for character in map(chr, range(0x20, 0x7f))]
+
+
+@pytest.mark.skipif(not nunjucks_available, reason='node and a nunjucks checkout are required')
+@given(ESCAPABLE_TEXT)
+@ORACLE_PROCESS
+def test_the_same_template_language_escapes_by_default_in_one_runtime_and_not_the_other(value):
+    """nunjucks 3.2.4 is a JavaScript implementation of this template language whose package.json lists
+    a-sync-waterfall, asap and commander and nothing from Python. Given the same template and the same
+    value, its default environment escapes and jinja2 3.1.6's default environment does not, so the safety of
+    a rendered document depends on which runtime rendered it. Turning nunjucks' flag off reproduces jinja2's
+    default exactly. The characters this is generated from are the ones jinja2's own escaping changes, read
+    off jinja2 rather than listed here. Replaces the typed 'Topic: A  B  5 > 2' of case 151."""
+    escaped, unescaped = _nunjucks_renders(TEMPLATE_ORACLE_JS, {'value': value})
+    npt.assert_array_equal(PLAIN_ENVIRONMENT.from_string(ESCAPING_TEMPLATE).render(value=value), value)
+    npt.assert_array_equal(unescaped, value)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(escaped, value)
+
+
+@pytest.mark.skipif(not nunjucks_available, reason='node and a nunjucks checkout are required')
+@given(st.integers(min_value=0, max_value=1000), st.integers(min_value=1, max_value=8))
+@ORACLE_PROCESS
+def test_the_two_engines_escape_the_characters_they_share_to_the_same_text(index, length):
+    """Over the printable characters the two engines agree about, asking both to escape produces the same
+    text, so the divergence below is confined to particular characters rather than being a difference of
+    algorithm."""
+    agreed = [character for character, by_jinja, by_nunjucks in _escaping_comparison()
+              if by_jinja == by_nunjucks]
+    value = ''.join(agreed[(index + offset) % len(agreed)] for offset in range(length))
+    npt.assert_array_equal(_nunjucks_renders(TEMPLATE_ORACLE_JS, {'value': value})[0],
+                           ESCAPING_ENVIRONMENT.from_string(ESCAPING_TEMPLATE).render(value=value))
+
+
+@pytest.mark.skipif(not nunjucks_available, reason='node and a nunjucks checkout are required')
+@given(st.integers(min_value=0, max_value=1000))
+@ORACLE_PROCESS
+def test_the_two_engines_escape_some_characters_to_different_text(index):
+    """And on the rest they do not agree. Both engines are escaping, both are safe, and the bytes they
+    produce differ, so a rendered document checked against one produced by the other differs even though
+    neither is wrong. Which characters those are is established by asking both engines about every printable
+    character, not by naming them here."""
+    apart = [character for character, by_jinja, by_nunjucks in _escaping_comparison()
+             if by_jinja != by_nunjucks]
+    character = apart[index % len(apart)]
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_nunjucks_renders(TEMPLATE_ORACLE_JS, {'value': character})[0],
+                               ESCAPING_ENVIRONMENT.from_string(ESCAPING_TEMPLATE).render(value=character))
+
+
+@pytest.mark.skipif(not nunjucks_available, reason='node and a nunjucks checkout are required')
+@given(st.text(alphabet=st.characters(codec='ascii', exclude_categories=('C',)), min_size=1, max_size=8))
+@ORACLE_PROCESS
+def test_both_engines_render_a_missing_variable_as_nothing_at_all(name):
+    """Where the value is absent rather than dangerous the two agree: the default of each engine renders a
+    variable it was not given as an empty string, with no error and no marker in the output, so the empty
+    cell of case 151 is a property of the language and not of either implementation. The variable name is
+    generated, and neither engine is given a context containing it."""
+    template = ESCAPING_TEMPLATE
+    rendered = _nunjucks_renders(TEMPLATE_ORACLE_JS, {})
+    npt.assert_array_equal(rendered, ['', ''])
+    npt.assert_array_equal(PLAIN_ENVIRONMENT.from_string(template).render(), '')
+
+
+@pytest.mark.skipif(not nunjucks_available, reason='node and a nunjucks checkout are required')
+@given(ESCAPABLE_TEXT)
+@ORACLE_PROCESS
+def test_asking_either_engine_to_refuse_a_missing_variable_leaves_its_escaping_where_it_was(value):
+    """Both engines can be told to refuse an absent variable, and in both the setting is independent of the
+    escaping: jinja2 with StrictUndefined still does not escape and nunjucks with throwOnUndefined still
+    does. So the environment a chain reaches for when it wants strictness is not the environment that makes
+    the output safe, in either runtime. Replaces the typed
+    Environment(undefined=StrictUndefined).autoescape == False of case 151."""
+    with pytest.raises(jinja2.UndefinedError):
+        STRICT_ENVIRONMENT.from_string(ESCAPING_TEMPLATE).render()
+    with pytest.raises(subprocess.CalledProcessError):
+        _nunjucks_renders(TEMPLATE_STRICT_JS, {})
+    npt.assert_array_equal(STRICT_ENVIRONMENT.from_string(ESCAPING_TEMPLATE).render(value=value), value)
+    npt.assert_array_equal(_nunjucks_renders(TEMPLATE_STRICT_JS, {'value': value})[0],
+                           _nunjucks_renders(TEMPLATE_ORACLE_JS, {'value': value})[0])
