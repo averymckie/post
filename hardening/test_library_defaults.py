@@ -197,6 +197,7 @@ import polars.testing as plt
 import pytest
 import rapidfuzz.distance.DamerauLevenshtein as rf_damerau
 import rapidfuzz.distance.Levenshtein as rf_levenshtein
+import rapidfuzz.distance.JaroWinkler as rf_jaro_winkler
 import rapidfuzz.distance.OSA as rf_osa
 import rapidfuzz.process as rf_process
 from unittest import mock
@@ -205,6 +206,10 @@ from hypothesis import assume, given, settings, strategies as st
 from hypothesis.extra import numpy as hyp_np
 from largest_remainder import LargestRemainder
 import apportionment.methods as apportionment_methods
+import jellyfish
+import recordlinkage
+from splink import DuckDBAPI, Linker, SettingsCreator, block_on
+import splink.comparison_library as splink_comparisons
 
 SLOW = settings(max_examples=200, deadline=None)
 AMOUNTS = st.lists(st.integers(min_value=-1000, max_value=1000), min_size=1, max_size=40)
@@ -20576,3 +20581,222 @@ def test_the_zero_padded_code_is_text_to_the_parsers_and_a_number_to_the_reader(
         npt.assert_array_equal(pd.read_html(io.StringIO(page),
                                             keep_default_na=False)[0].to_numpy().tolist(),
                                _dom_lxml_rows(page))
+
+
+# --------------------------------------------------------------------------------------------------
+# P201: probabilistic record linkage, its clusters, its blocked pairs and the pair it cannot abstain on
+# --------------------------------------------------------------------------------------------------
+LINK_TOKEN = st.text(alphabet=st.characters(min_codepoint=97, max_codepoint=122), min_size=1, max_size=6)
+LINK_CHAIN = st.lists(LINK_TOKEN, min_size=5, max_size=5, unique=True)
+LINK_BLOCKS = st.lists(LINK_TOKEN, min_size=6, max_size=6, unique=True)
+LINK_STRINGS = st.lists(st.text(alphabet=st.characters(min_codepoint=97, max_codepoint=101),
+                                min_size=1, max_size=8), min_size=2, max_size=2)
+LINKAGE = settings(max_examples=8, deadline=None)
+
+
+def _linkage_settings():
+    """The settings the proof calls "settings as versioned data": two exact-match comparisons and one
+    blocking rule, built by splink's own creators. Nothing about the model is typed -- the prior is
+    whatever `SettingsCreator` declares, which its source at tag 4.0.17
+    (raw.githubusercontent.com/moj-analytical-services/splink/v4.0.17/splink/internals/
+    settings_creator.py) gives as `probability_two_random_records_match: float = 0.0001`."""
+    return SettingsCreator(
+        link_type='dedupe_only',
+        comparisons=[splink_comparisons.ExactMatch('first'), splink_comparisons.ExactMatch('second')],
+        blocking_rules_to_generate_predictions=[block_on('town')])
+
+
+def _linkage_predictions(records):
+    """The scored candidate pairs, from `Linker.inference.predict` over a DuckDB backend."""
+    declared = _linkage_settings()
+    linker = Linker(records, declared, db_api=DuckDBAPI())
+    scored = linker.inference.predict()
+    return linker, scored, declared
+
+
+def _chain_records(tokens):
+    """Three records in one block: the first and second agree on one field, the second and third agree
+    on the other, and the first and third agree on neither. Every value is generated and all five are
+    distinct, so the agreements are exactly the ones the strategy placed."""
+    town, first, second, third, fourth = tokens
+    return pd.DataFrame([{'unique_id': 0, 'first': first, 'second': second, 'town': town},
+                         {'unique_id': 1, 'first': first, 'second': third, 'town': town},
+                         {'unique_id': 2, 'first': fourth, 'second': third, 'town': town}])
+
+
+def _pair_probabilities(scored):
+    """The pairwise scores as the engine returned them, keyed by the pair."""
+    frame = scored.as_pandas_dataframe()
+    return {(int(left), int(right)): float(probability) for left, right, probability
+            in zip(frame['unique_id_l'], frame['unique_id_r'], frame['match_probability'])}
+
+
+def _threshold_between(probabilities):
+    """A threshold taken from the engine's own answers rather than typed: halfway between the lowest
+    score it returned and the lowest of the others."""
+    lowest = min(probabilities.values())
+    return (lowest + min(value for value in probabilities.values() if value > lowest)) / 2
+
+
+def _splink_partition(linker, scored, threshold):
+    """The clusters splink builds at that threshold, as a sorted partition of the record ids.
+    `cluster_pairwise_predictions_at_threshold` documents itself at 4.0.17 as clustering the pairwise
+    predictions "into groups of connected record using the connected components graph clustering
+    algorithm", where records "at or above `threshold_match_probability` ... are considered to be a
+    match (i.e. they represent the same entity)"."""
+    frame = (linker.clustering.cluster_pairwise_predictions_at_threshold(
+        scored, threshold_match_probability=threshold).as_pandas_dataframe())
+    groups = {}
+    for cluster, record in zip(frame['cluster_id'], frame['unique_id']):
+        groups.setdefault(str(cluster), []).append(int(record))
+    return sorted(sorted(members) for members in groups.values())
+
+
+def _graph_partitions(records, edges):
+    """The same partition from the two graph libraries already used against each other for P196:
+    networkx 3.6.1's connected_components and igraph 1.0.0's connected_components over the C core."""
+    graph = nx.Graph()
+    graph.add_nodes_from(int(record) for record in records['unique_id'])
+    graph.add_edges_from(edges)
+    by_networkx = sorted(sorted(int(node) for node in group) for group in nx.connected_components(graph))
+    core = igraph.Graph(n=len(records), edges=list(edges))
+    by_igraph = sorted(sorted(int(node) for node in group) for group in core.connected_components())
+    return by_networkx, by_igraph
+
+
+def _duckdb_pairs_within(partition):
+    """Every pair a cluster asserts, enumerated by the engine: a self-join of the membership table on
+    the cluster, keeping the ordered pairs."""
+    with duckdb.connect() as connection:
+        connection.execute('create table membership(cluster BIGINT, record BIGINT)')
+        connection.executemany('insert into membership values (?, ?)',
+                               [[index, record] for index, members in enumerate(partition)
+                                for record in members])
+        return [(int(left), int(right)) for left, right in connection.execute(
+            'select a.record, b.record from membership a join membership b '
+            'on a.cluster = b.cluster and a.record < b.record '
+            'order by a.record, b.record').fetchall()]
+
+
+@given(LINK_CHAIN)
+@LINKAGE
+def test_a_chain_of_two_scored_pairs_becomes_one_identity_of_three_records(tokens):
+    """P201's contract says "A connected cluster does not prove all pairwise identities" and its adverse
+    test says "A-B and B-C similarity cannot bypass an A-C contradiction". Executed, nothing in the chain
+    enforces either. splink 4.0.17 clusters by connected components, so with the first and second records
+    scored above a threshold and the second and third scored above it while the first and third are
+    scored below, the three become one cluster, and the pairs that cluster asserts -- enumerated by a
+    DuckDB self-join of the membership it returned -- are not the pairs the engine scored above the
+    threshold."""
+    records = _chain_records(tokens)
+    linker, scored, _ = _linkage_predictions(records)
+    probabilities = _pair_probabilities(scored)
+    threshold = _threshold_between(probabilities)
+    partition = _splink_partition(linker, scored, threshold)
+    matched = sorted(pair for pair, value in probabilities.items() if value >= threshold)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_duckdb_pairs_within(partition), matched)
+
+
+@given(LINK_CHAIN)
+@LINKAGE
+def test_the_cluster_splink_builds_is_the_partition_two_graph_libraries_build(tokens):
+    """The clustering itself is not in doubt, and that is the point: over the same edge set -- the pairs
+    the engine scored at or above the threshold -- splink's connected components, networkx's and
+    igraph's are the same partition, so the merge of a chain into one identity is what connected
+    components means and not a defect in this implementation of it. The two graph libraries are the pair
+    already recorded against each other for P196."""
+    records = _chain_records(tokens)
+    linker, scored, _ = _linkage_predictions(records)
+    probabilities = _pair_probabilities(scored)
+    threshold = _threshold_between(probabilities)
+    edges = [pair for pair, value in probabilities.items() if value >= threshold]
+    by_networkx, by_igraph = _graph_partitions(records, edges)
+    npt.assert_array_equal(_splink_partition(linker, scored, threshold), by_networkx)
+    npt.assert_array_equal(by_networkx, by_igraph)
+
+
+@given(LINK_CHAIN)
+@LINKAGE
+def test_a_pair_with_nothing_to_compare_is_scored_at_the_declared_prior(tokens):
+    """The proof's new capability is "Splink record linkage with an explicit abstention", and there is no
+    abstention to be had. A pair whose every comparison column is null is scored, and the score it gets
+    is exactly the settings object's own `probability_two_random_records_match` -- read off that object
+    here, never typed -- because a null comparison level contributes no evidence either way. A pair that
+    disagrees on every column is scored below that same prior, so the run distinguishes evidence against
+    from no evidence at all only by the number, and returns a number in both cases."""
+    town = tokens[0]
+    nulls = pd.DataFrame([{'unique_id': 0, 'first': None, 'second': None, 'town': town},
+                          {'unique_id': 1, 'first': None, 'second': None, 'town': town}])
+    disagreeing = pd.DataFrame([{'unique_id': 0, 'first': tokens[1], 'second': tokens[2], 'town': town},
+                                {'unique_id': 1, 'first': tokens[3], 'second': tokens[4], 'town': town}])
+    _, scored, declared = _linkage_predictions(nulls)
+    npt.assert_allclose(list(_pair_probabilities(scored).values()),
+                        [declared.probability_two_random_records_match])
+    _, other, _ = _linkage_predictions(disagreeing)
+    with pytest.raises(AssertionError):
+        npt.assert_allclose(list(_pair_probabilities(other).values()),
+                            [declared.probability_two_random_records_match])
+
+
+def test_a_null_comparison_level_has_no_m_or_u_probability_to_read():
+    """And the library says so in its own words. The null level of a comparison carries no trained
+    weight at all: `ComparisonLevel.m_probability` at tag 4.0.17
+    (raw.githubusercontent.com/moj-analytical-services/splink/v4.0.17/splink/internals/
+    comparison_level.py) begins `if self.is_null_level: raise ValueError("Null levels have no
+    m-probability")`, and `u_probability` does the same, while every other level of the same comparison
+    answers. There is nowhere for an abstention to be recorded."""
+    comparison = splink_comparisons.ExactMatch('first').get_comparison('duckdb')
+    null_levels = [level for level in comparison.comparison_levels if level.is_null_level]
+    other_levels = [level for level in comparison.comparison_levels if not level.is_null_level]
+    for level in null_levels:
+        with pytest.raises(ValueError):
+            level.m_probability
+        with pytest.raises(ValueError):
+            level.u_probability
+    npt.assert_array_equal([level.m_probability is None for level in other_levels],
+                           [level.u_probability is None for level in other_levels])
+
+
+@given(LINK_BLOCKS)
+@LINKAGE
+def test_the_pairs_the_engine_scores_are_the_blocked_pairs_and_not_every_pair(tokens):
+    """Blocking recall is a separate measure, as the contract says, and the run gives no sign of it. The
+    pairs `predict()` returns are exactly the pairs a second implementation of blocking returns --
+    recordlinkage 0.16's `Index().block`, whose published metadata at that version declares jellyfish,
+    numpy, pandas, scipy, scikit-learn and joblib and nothing of splink -- and they are not the pairs
+    that library's own `Index().full()` enumerates, because the record in the other block is never
+    compared with anything and never appears in the output at all."""
+    town, other_town, first, second, third, fourth = tokens
+    records = pd.DataFrame([{'unique_id': 0, 'first': first, 'second': second, 'town': town},
+                            {'unique_id': 1, 'first': first, 'second': third, 'town': town},
+                            {'unique_id': 2, 'first': first, 'second': fourth, 'town': other_town}])
+    _, scored, _ = _linkage_predictions(records)
+    indexed = recordlinkage.Index()
+    indexed.block('town')
+    blocked = sorted(tuple(sorted(pair)) for pair in indexed.index(records.set_index('unique_id')))
+    every = recordlinkage.Index()
+    every.full()
+    complete = sorted(tuple(sorted(pair)) for pair in every.index(records.set_index('unique_id')))
+    npt.assert_array_equal(sorted(_pair_probabilities(scored)), blocked)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(blocked, complete)
+
+
+@given(LINK_STRINGS)
+@SLOW
+def test_three_jaro_winkler_implementations_agree_on_every_generated_pair(pair):
+    """The similarity splink's DuckDB dialect emits -- `jaro_winkler_function_name` returns
+    "jaro_winkler_similarity" at tag 4.0.17 in splink/internals/dialects.py -- agrees with rapidfuzz and
+    with jellyfish on every generated pair of short strings. Two of those three are one implementation:
+    DuckDB's third_party/jaro_winkler/jaro_winkler.hpp at tag v1.5.5
+    (raw.githubusercontent.com/duckdb/duckdb/v1.5.5/third_party/jaro_winkler/jaro_winkler.hpp) carries
+    the header "Copyright (c) 2022 Max Bachmann" and the namespace `duckdb_jaro_winkler`, which is
+    rapidfuzz's author and rapidfuzz's code vendored into the engine, so rapidfuzz corroborates and
+    jellyfish 1.2.1, a Rust implementation whose published metadata declares no dependencies at all, is
+    the independent reading."""
+    left, right = pair
+    with duckdb.connect() as connection:
+        in_duckdb = connection.execute('select jaro_winkler_similarity(?, ?)', [left, right]).fetchone()[0]
+    npt.assert_allclose(in_duckdb, rf_jaro_winkler.similarity(left, right))
+    npt.assert_allclose(in_duckdb, jellyfish.jaro_winkler_similarity(left, right))
