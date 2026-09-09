@@ -1,0 +1,27 @@
+master sha256 2ef09333cdb41f82302ce0a12565afd2d653190b444705fb19684e60e25251de lines 12328
+families                     38
+operations                   18
+compositions                 14
+axes                         18
+boundary_fields              14
+variation_rules              18
+familyspec_records           9
+execution_contract_entries   8
+grammar_productions          15
+required_claims              32
+prerequisite_layers          8
+chains                       12
+libraries                    65
+proofs                       349
+roles                        115
+expected counts: all match
+proof classes: {'historical': 190, 'theoretical': 110, 'specified': 49}
+family cards with a missing label: none
+prerequisite layers cover 49 proofs; expected P301-P349: True
+reference errors: 0
+theoretical records without a hardening block in the master (informational): 98 (P203..P300)
+input roles supplied from outside every family (operating-model inputs): 58
+families with no existing anchors: none
+families with no primary proof record: ['F12', 'F22', 'F27', 'F28', 'F35', 'F36', 'F38']
+input roles no family produces (58): ['AgreementModel', 'AlternativeSet', 'ArtifactModel', 'AssessmentModel', 'AssetModel', 'AuthorityModel', 'CalendarModel', 'CapabilityCatalogue', 'Checkpoint', 'ClockModel', 'CompetencyModel', 'ComponentCatalogue', 'CompositionModel', 'Configuration', 'ConstraintModel', 'ControlModel', 'DemandModel', 'DependencyModel', 'DeploymentModel', 'DetectionModel', 'DiagnosticModel', 'EngineeringRequirements', 'EvaluationPolicy', 'EventHistory', 'EventStream', 'ExecutionEvidence', 'ExperimentQuestion', 'FactorModel', 'FamilySpec', 'GoalModel', 'HardwareContract', 'IdentityAdjudication', 'InteractionModel', 'LearningResourceSet', 'MappingModel', 'MaterialModel', 'MeasureModel', 'MeasurementModel', 'ObjectiveModel', 'ObservationStream', 'ProofRequirementCatalogue', 'QualificationPolicy', 'QuantitativePolicy', 'QueryModel', 'RequirementSet', 'ResourceModel', 'ResponsePolicy', 'RetentionPolicy', 'ReviewModel', 'ScenarioSet', 'SimulationModel', 'SoftwareModel', 'SourceBundle', 'SpatialModel', 'TargetProfile', 'TaskModel', 'TrainingModel', 'WorkflowModel']
+output roles no family consumes (37): ['AllocationPlan', 'Archive', 'AssessmentResult', 'AssetState', 'CompositeSystem', 'CompositionManifest', 'Configurator', 'ControlIntent', 'DecisionResult', 'DeliveryIntent', 'DeploymentPlan', 'DetectionResult', 'DiagnosticResult', 'EntitlementState', 'EvidenceRequest', 'ExperimentPlan', 'GeometryModel', 'LearningPlan', 'ManufacturingPlan', 'MaterialPlan', 'MeasureSet', 'ObservedState', 'PredictionSet', 'QualificationResult', 'QueryResult', 'ReconciliationResult', 'ReleaseView', 'RepairPlan', 'RestoredState', 'ReviewResult', 'RoutePlan', 'RuntimeBinding', 'ScenarioResult', 'Schedule', 'SelectionPlan', 'SpatialDecision', 'WorkPlan']
