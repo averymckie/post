@@ -20311,3 +20311,268 @@ def test_the_two_workbook_readers_do_not_spell_the_unwritten_cell_the_same_way(s
     with pytest.raises(AssertionError):
         npt.assert_array_equal([repr(value) for value in by_openpyxl],
                                [repr(value) for value in by_calamine])
+
+
+# --------------------------------------------------------------------------------------------------
+# handoff_guards_v8.py case dom_assertions_prove_wiring_not_layout and handoff_guards_v10.py case
+# searchable_tables_render_the_contract: what a DOM implementation reports about a rendered table
+# --------------------------------------------------------------------------------------------------
+JSDOM_DIRECTORY = pathlib.Path(os.environ.get('JSDOM_DIR', str(pathlib.Path.home() / 'jsdom-oracle')))
+DOM_PAGE_ORACLE_JS = pathlib.Path(__file__).with_name('dom_page_oracle.js')
+jsdom_available = (shutil.which('node') is not None
+                   and (JSDOM_DIRECTORY / 'node_modules' / 'jsdom').is_dir())
+DOM_CELL = st.text(alphabet=st.characters(whitelist_categories=('Lu', 'Ll'),
+                                          whitelist_characters='&<>"\''), min_size=1, max_size=10)
+DOM_TABLE = st.integers(min_value=2, max_value=3).flatmap(
+    lambda columns: st.lists(st.lists(DOM_CELL, min_size=columns, max_size=columns),
+                             min_size=1, max_size=4))
+DOM_TWO_TABLES = st.integers(min_value=2, max_value=3).flatmap(
+    lambda columns: st.lists(st.lists(DOM_CELL, min_size=columns, max_size=columns),
+                             min_size=1, max_size=4).flatmap(
+        lambda first: st.tuples(st.just(first),
+                                st.lists(st.lists(DOM_CELL, min_size=columns, max_size=columns),
+                                         min_size=len(first), max_size=len(first)))))
+DOM_CODE = st.integers(min_value=1, max_value=99999).map(lambda number: '0%d' % number)
+DOM_LANGUAGE = st.sampled_from(('en-US', 'fr-CA', 'de-DE', 'ja-JP', 'pt-BR'))
+DOM_WIDTH = st.integers(min_value=1, max_value=4000)
+DOM_WIDTHS = st.lists(DOM_WIDTH, min_size=2, max_size=2, unique=True)
+DOM_CLICKS = st.lists(st.integers(min_value=1, max_value=6), min_size=2, max_size=2)
+DOM_ORACLE = settings(max_examples=10, deadline=None)
+
+
+def _dom_frame(rows):
+    """The generated cells as a frame, under column names taken from their own positions."""
+    return pd.DataFrame(rows, columns=['c%d' % index for index in range(len(rows[0]))])
+
+
+def _dom_page(frame, language, width, extras=''):
+    """One page whose table is written by pandas' own to_html -- `table_id` names it -- inside a document
+    skeleton carrying the generated language, a style element declaring the generated column width, and
+    whatever further elements the test names."""
+    return ('<!doctype html><html lang="' + language + '"><head><meta charset="utf-8">'
+            '<style>#data td{width:' + str(width) + 'px}</style></head><body>'
+            + frame.to_html(index=False, table_id='data')
+            + '<button id="act">go</button>' + extras + '</body></html>')
+
+
+def _jsdom_reading(page, clicks=0):
+    """What jsdom 30.0.1 reports about the page. The shim reads the document on stdin and the click
+    count from argv, calls the library and prints one JSON object."""
+    completed = subprocess.run(['node', str(DOM_PAGE_ORACLE_JS), str(clicks)], input=page,
+                               capture_output=True, encoding='utf-8', check=True,
+                               env=dict(os.environ, NODE_PATH=str(JSDOM_DIRECTORY / 'node_modules')))
+    return json.loads(completed.stdout)
+
+
+def _dom_lxml_rows(page):
+    """The same rows through libxml2's HTML parser."""
+    return [[cell.text_content() for cell in row.xpath('./td')]
+            for row in lxml_html.fromstring(page).xpath('//*[@id="data"]/tbody/tr')]
+
+
+def _dom_html5lib_rows(page):
+    """And through html5lib's pure-Python WHATWG parser, whose root is a plain lxml element, so its text
+    is taken with tostring(method='text') rather than with text_content -- with_tail=False, because that
+    serialiser otherwise carries the whitespace that follows the cell as well as the text inside it."""
+    root = html5lib.parse(page, treebuilder='lxml', namespaceHTMLElements=False).getroot()
+    return [[lxml_etree.tostring(cell, method='text', encoding='unicode', with_tail=False)
+             for cell in row.xpath('./td')]
+            for row in root.xpath('//*[@id="data"]/tbody/tr')]
+
+
+@pytest.mark.skipif(not jsdom_available, reason='node and a jsdom checkout are required for this oracle')
+@given(DOM_TABLE, DOM_LANGUAGE, DOM_WIDTH)
+@DOM_ORACLE
+def test_three_html_parsers_return_the_same_table_cells(rows, language, width):
+    """handoff_guards_v10.py's case searchable_tables_render_the_contract types the identifier column of
+    a two-row table and makes the DOM check optional; handoff_guards_v8.py's case
+    dom_assertions_prove_wiring_not_layout types the whole row list, the language, the hidden count and
+    two zeros. Nothing is typed here. The table is written by pandas' own to_html from generated cells
+    and read back by three parsers that share no code: jsdom 30.0.1, whose package.json at that version
+    names parse5 as its HTML parser and nothing of Python's; libxml2 through lxml 6.1.3; and html5lib
+    1.1's pure-Python WHATWG implementation. All three return the same cells in the same order."""
+    page = _dom_page(_dom_frame(rows), language, width)
+    npt.assert_array_equal(_jsdom_reading(page)['rows'], _dom_lxml_rows(page))
+    npt.assert_array_equal(_dom_lxml_rows(page), _dom_html5lib_rows(page))
+
+
+@pytest.mark.skipif(not jsdom_available, reason='node and a jsdom checkout are required for this oracle')
+@given(DOM_TABLE, DOM_LANGUAGE, DOM_WIDTH)
+@DOM_ORACLE
+def test_the_table_the_dom_reads_is_the_table_pandas_wrote(rows, language, width):
+    """The round trip closes on the frame itself. pandas.read_html reads back what to_html wrote, and the
+    DOM reports those same strings as the text of its cells, so the rendered table is the data rather
+    than a rendering of it -- and the characters that have to be escaped in markup make the round trip
+    too, escaped on the way out by one library and unescaped on the way back by the other."""
+    frame = _dom_frame(rows)
+    page = _dom_page(frame, language, width)
+    read_back = pd.read_html(io.StringIO(page), keep_default_na=False,
+                             converters={name: str for name in frame.columns})[0]
+    npt.assert_array_equal(_jsdom_reading(page)['rows'], read_back.to_numpy().tolist())
+    npt.assert_array_equal(read_back.to_numpy().tolist(), frame.to_numpy().tolist())
+
+
+@pytest.mark.skipif(not jsdom_available, reason='node and a jsdom checkout are required for this oracle')
+@given(DOM_TABLE, DOM_LANGUAGE, DOM_WIDTH)
+@DOM_ORACLE
+def test_the_declared_language_is_the_same_attribute_to_every_reader(rows, language, width):
+    """The language the case types as 'en-US' is an attribute of the root element, and the DOM reads back
+    the generated one that both Python parsers read."""
+    page = _dom_page(_dom_frame(rows), language, width)
+    npt.assert_array_equal([_jsdom_reading(page)['lang']], lxml_html.fromstring(page).xpath('/html/@lang'))
+    npt.assert_array_equal(lxml_html.fromstring(page).xpath('/html/@lang'),
+                           html5lib.parse(page, treebuilder='lxml',
+                                          namespaceHTMLElements=False).getroot().xpath('/html/@lang'))
+
+
+@pytest.mark.skipif(not jsdom_available, reason='node and a jsdom checkout are required for this oracle')
+@given(DOM_TABLE, DOM_LANGUAGE, DOM_WIDTH, DOM_CELL)
+@DOM_ORACLE
+def test_the_hidden_element_is_the_same_element_to_the_dom_and_to_the_xpath(rows, language, width, note):
+    """So is the hidden element the case counts: the elements the DOM's `[hidden]` selector matches are
+    the elements libxml2's `//*[@hidden]` matches, and the same page without one matches nothing in
+    either."""
+    frame = _dom_frame(rows)
+    with_note = _dom_page(frame, language, width, extras='<div hidden>' + note + '</div>')
+    without = _dom_page(frame, language, width)
+    npt.assert_array_equal(_jsdom_reading(with_note)['hidden'],
+                           [element.tag for element in lxml_html.fromstring(with_note).xpath('//*[@hidden]')])
+    npt.assert_array_equal(_jsdom_reading(without)['hidden'],
+                           [element.tag for element in lxml_html.fromstring(without).xpath('//*[@hidden]')])
+
+
+@pytest.mark.skipif(not jsdom_available, reason='node and a jsdom checkout are required for this oracle')
+@given(DOM_TABLE, DOM_LANGUAGE, DOM_WIDTHS)
+@DOM_ORACLE
+def test_a_wide_column_and_a_narrow_one_measure_the_same_in_the_dom(rows, language, widths):
+    """What the case types as `(out['offsetWidth'], out['boundingWidth']) == (0, 0)` is the whole of the
+    layout this oracle does. jsdom's README at tag v30.0.1
+    (raw.githubusercontent.com/jsdom/jsdom/v30.0.1/README.md) lists among the unimplemented parts of the
+    web platform "**Layout**: the ability to calculate where elements will be visually laid out as a
+    result of CSS, which impacts methods like `getBoundingClientRects()` or properties like
+    `offsetTop`", and adds that jsdom has "dummy behaviors for some aspects of these features, such as
+    ... returning zeros for many layout-related properties". Stated without typing that zero: the boxes
+    reported for a page declaring the wider of two generated column widths are the boxes reported for the
+    same page declaring the narrower, so no width a stylesheet declares is measurable here."""
+    frame = _dom_frame(rows)
+    npt.assert_array_equal(_jsdom_reading(_dom_page(frame, language, max(widths)))['boxes'],
+                           _jsdom_reading(_dom_page(frame, language, min(widths)))['boxes'])
+
+
+@pytest.mark.skipif(not jsdom_available, reason='node and a jsdom checkout are required for this oracle')
+@given(DOM_TWO_TABLES, DOM_LANGUAGE, DOM_WIDTH)
+@DOM_ORACLE
+def test_the_boxes_do_not_change_with_the_text_the_cells_carry_either(tables, language, width):
+    """Nor is the reported box a function of the content. Two tables of the same shape carrying different
+    generated cells report the same boxes, so a DOM assertion about a width is an assertion about the
+    library's placeholder and never about what a reader would see."""
+    first, second = tables
+    npt.assert_array_equal(_jsdom_reading(_dom_page(_dom_frame(first), language, width))['boxes'],
+                           _jsdom_reading(_dom_page(_dom_frame(second), language, width))['boxes'])
+
+
+@pytest.mark.skipif(not jsdom_available, reason='node and a jsdom checkout are required for this oracle')
+@given(DOM_TABLE, DOM_LANGUAGE, DOM_WIDTH, DOM_CLICKS)
+@DOM_ORACLE
+def test_a_click_dispatched_from_outside_reaches_the_handler_once_a_click(rows, language, width, counts):
+    """The wiring the case does check is real and is the DOM's own. A handler added from outside the
+    document receives one event a `click()` call, for two generated numbers of calls, and the kinds of
+    event the two runs deliver are the same kinds."""
+    page = _dom_page(_dom_frame(rows), language, width)
+    received = [_jsdom_reading(page, clicks=count)['events'] for count in counts]
+    npt.assert_array_equal([len(events) for events in received], counts)
+    npt.assert_array_equal(sorted(set(received[0])), sorted(set(received[1])))
+
+
+@pytest.mark.skipif(not jsdom_available, reason='node and a jsdom checkout are required for this oracle')
+@given(DOM_TABLE, DOM_LANGUAGE, DOM_WIDTH, DOM_CELL)
+@DOM_ORACLE
+def test_the_script_written_in_capitals_is_a_script_to_every_parser(rows, language, width, body):
+    """The case's other check is a substring: `g.equal('<script' in page, False)`. A script element
+    written in capitals is a script element to all three parsers and is not that substring, so a page
+    carrying one passes the check with the substring count it would have carrying none."""
+    frame = _dom_frame(rows)
+    shouted = _dom_page(frame, language, width, extras='<SCRIPT>' + body + '</SCRIPT>')
+    quiet = _dom_page(frame, language, width)
+    npt.assert_array_equal(_jsdom_reading(shouted)['scripts'],
+                           [element.tag for element in lxml_html.fromstring(shouted).xpath('//script')])
+    npt.assert_array_equal(_html5lib_count(shouted, '//script'), len(_jsdom_reading(shouted)['scripts']))
+    npt.assert_array_equal(shouted.count('<script'), quiet.count('<script'))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(shouted.count('<script'), len(_jsdom_reading(shouted)['scripts']))
+
+
+@pytest.mark.skipif(not jsdom_available, reason='node and a jsdom checkout are required for this oracle')
+@given(DOM_TABLE, DOM_LANGUAGE, DOM_WIDTH, DOM_CELL)
+@DOM_ORACLE
+def test_the_external_reference_is_in_the_dom_that_never_fetches_it(rows, language, width, name):
+    """And what the case reads as `out['externalRequests'] == 0` is a property of the library's default
+    rather than of the page: jsdom's README at v30.0.1 says "By default, jsdom will not load any
+    subresources such as scripts, stylesheets, images, or iframes", and the frozen guard's own DOM script
+    prints `externalRequests: 0` as a literal it never measures. The reference is nonetheless in the
+    document the DOM built, at the URL lxml.html's iterlinks enumerates -- the enumeration recorded for
+    P39 -- while the same page without it has neither."""
+    stylesheet = 'https://example.invalid/' + name + '.css'
+    page = _dom_page(_dom_frame(rows), language, width,
+                     extras='<link rel="stylesheet" href="' + stylesheet + '">')
+    without = _dom_page(_dom_frame(rows), language, width)
+    npt.assert_array_equal([reference[2] for reference in _jsdom_reading(page)['references']],
+                           [url for _, _, url, _ in lxml_html.fromstring(page).iterlinks()])
+    npt.assert_array_equal([reference[2] for reference in _jsdom_reading(without)['references']],
+                           [url for _, _, url, _ in lxml_html.fromstring(without).iterlinks()])
+
+
+@pytest.mark.skipif(not jsdom_available, reason='node and a jsdom checkout are required for this oracle')
+@given(DOM_TABLE, DOM_LANGUAGE, DOM_WIDTH)
+@DOM_ORACLE
+def test_the_head_the_parsers_build_holds_the_stylesheet_and_the_body_holds_the_table(rows, language,
+                                                                                     width):
+    """Where the declared width lives is a parser question and not a substring one. The style element is
+    in the head of the tree libxml2 builds and in the head of the tree html5lib builds, and the table is
+    inside the body of both, so the width the measurement above cannot see is attached to the document in
+    the same place by each of them."""
+    page = _dom_page(_dom_frame(rows), language, width)
+    npt.assert_array_equal(len(lxml_html.fromstring(page).xpath('/html/head/style')),
+                           _html5lib_count(page, '/html/head/style'))
+    npt.assert_array_equal(len(lxml_html.fromstring(page).xpath('//*[@id="data"]/ancestor::body')),
+                           _html5lib_count(page, '//*[@id="data"]/ancestor::body'))
+
+
+@pytest.mark.skipif(not jsdom_available, reason='node and a jsdom checkout are required for this oracle')
+@given(DOM_TABLE, DOM_LANGUAGE, DOM_WIDTH, DOM_CELL)
+@DOM_ORACLE
+def test_a_hidden_block_leaves_every_row_the_readers_return_where_it_was(rows, language, width, note):
+    """The last of the case's typed numbers is the hidden count, and hiding is not removal: a table
+    followed by a hidden block reads back exactly the cells the same table without one reads back, in the
+    DOM and in both Python parsers, so what the page holds and what a reader would see are two
+    questions and only the first of them is being asked."""
+    frame = _dom_frame(rows)
+    with_note = _dom_page(frame, language, width, extras='<div hidden>' + note + '</div>')
+    without = _dom_page(frame, language, width)
+    npt.assert_array_equal(_jsdom_reading(with_note)['rows'], _jsdom_reading(without)['rows'])
+    npt.assert_array_equal(_dom_lxml_rows(with_note), _dom_lxml_rows(without))
+    npt.assert_array_equal(_dom_html5lib_rows(with_note), _dom_html5lib_rows(without))
+
+
+@pytest.mark.skipif(not jsdom_available, reason='node and a jsdom checkout are required for this oracle')
+@given(st.lists(st.lists(DOM_CODE, min_size=2, max_size=2), min_size=1, max_size=4),
+       DOM_LANGUAGE, DOM_WIDTH)
+@DOM_ORACLE
+def test_the_zero_padded_code_is_text_to_the_parsers_and_a_number_to_the_reader(rows, language, width):
+    """The reader the case's chain would use to get its rows back is not one of the parsers. Every cell
+    here is a code with a leading zero; jsdom, libxml2 and html5lib all return it as the text it is,
+    pandas.read_html on its defaults infers the column and returns numbers, and asked for a `str` converter a column at a time it
+    returns the text the three parsers return. Which is not the escaping question of the round trip
+    above: the markup is unambiguous and the loss is in the reading."""
+    frame = _dom_frame(rows)
+    page = _dom_page(frame, language, width)
+    npt.assert_array_equal(_jsdom_reading(page)['rows'], _dom_lxml_rows(page))
+    npt.assert_array_equal(_dom_lxml_rows(page), _dom_html5lib_rows(page))
+    npt.assert_array_equal(
+        pd.read_html(io.StringIO(page), keep_default_na=False,
+                     converters={name: str for name in frame.columns})[0].to_numpy().tolist(),
+        _dom_lxml_rows(page))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(pd.read_html(io.StringIO(page),
+                                            keep_default_na=False)[0].to_numpy().tolist(),
+                               _dom_lxml_rows(page))
