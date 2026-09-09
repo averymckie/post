@@ -20050,3 +20050,264 @@ def test_a_declared_band_with_no_invoice_totals_zero_in_pandas_and_nothing_in_sq
     edges, rows = ledger
     with pytest.raises(AssertionError):
         npt.assert_array_equal(_pandas_band_totals(edges, rows), _duckdb_band_totals(edges, rows))
+
+
+# --------------------------------------------------------------------------------------------------
+# handoff_guards_v20.py, case an_in_memory_edit_leaves_the_source_presentation_alone: what a save moves
+# --------------------------------------------------------------------------------------------------
+EDIT_AMOUNT = CHART_CENTS.map(float)
+EDIT_SERIES_WITH_A_GAP = st.lists(PPTX_LINE, min_size=3, max_size=5, unique=True).flatmap(
+    lambda names: st.tuples(st.just(names),
+                            st.lists(EDIT_AMOUNT, min_size=len(names), max_size=len(names)),
+                            st.tuples(st.just(True), *[st.booleans() for _ in names[1:-1]],
+                                      st.just(False)).map(list)))
+EDIT_SERIES = st.lists(PPTX_LINE, min_size=2, max_size=5, unique=True).flatmap(
+    lambda names: st.tuples(st.just(names),
+                            st.lists(EDIT_AMOUNT, min_size=len(names), max_size=len(names))))
+EDIT_SERIES_AND_ANOTHER = st.lists(PPTX_LINE, min_size=2, max_size=5, unique=True).flatmap(
+    lambda names: st.tuples(st.just(names),
+                            st.lists(EDIT_AMOUNT, min_size=len(names) + 1, max_size=len(names) + 1,
+                                     unique=True)))
+CHART_EDIT = settings(max_examples=25, deadline=None)
+
+
+def _chart_replaced(data, categories, amounts, name='Actual'):
+    """The edit the case makes: open the package, hand the chart a new CategoryChartData and save.
+    `Chart.replace_data` is documented at tag v1.0.2 in src/pptx/chart/chart.py as "Use the categories
+    and series values in the |ChartData| object *chart_data* to replace those in the XML and Excel
+    worksheet for this chart"."""
+    deck = pptx.Presentation(io.BytesIO(data))
+    replacement = pptx.chart.data.CategoryChartData()
+    replacement.categories = list(categories)
+    replacement.add_series(name, tuple(amounts))
+    deck.slides[0].shapes[0].chart.replace_data(replacement)
+    written = io.BytesIO()
+    deck.save(written)
+    return written.getvalue()
+
+
+def _pptx_resaved(data):
+    """The same package opened and saved again with nothing asked of it at all."""
+    deck = pptx.Presentation(io.BytesIO(data))
+    written = io.BytesIO()
+    deck.save(written)
+    return written.getvalue()
+
+
+def _pptx_entry_order(data):
+    """The entry names in the order the package stores them, which is what `namelist` returns."""
+    with zipfile.ZipFile(io.BytesIO(data)) as archive:
+        return archive.namelist()
+
+
+def _pptx_entry_order_in_php(data):
+    """The same order through libzip: the shim walks `numFiles` by index and prints `getNameIndex`."""
+    with tempfile.TemporaryDirectory() as directory:
+        path = pathlib.Path(directory) / 'deck.pptx'
+        path.write_bytes(data)
+        completed = subprocess.run(['php', str(PPTX_PARTS_ORACLE_PHP), str(path)],
+                                   capture_output=True, encoding='utf-8', check=True)
+    return completed.stdout.split('\n')[:-1]
+
+
+def _pptx_entry_order_in_java(data):
+    """And through java.util.zip, whose ZipFile.entries the existing shim walks in order."""
+    return [row[0] for row in _java_package(data)[0]]
+
+
+def _pptx_parts_that_differ(first, second):
+    """The entries whose bytes are not the same in two packages, compared under their own names."""
+    with zipfile.ZipFile(io.BytesIO(first)) as left, zipfile.ZipFile(io.BytesIO(second)) as right:
+        shared = sorted(set(left.namelist()) & set(right.namelist()))
+        return [name for name in shared if left.read(name) != right.read(name)]
+
+
+def _pptx_digest(data):
+    """The digest the case takes of the package bytes."""
+    return hashlib.sha256(data).hexdigest()
+
+
+@given(EDIT_SERIES)
+@CHART_EDIT
+def test_a_replaced_chart_reads_back_the_numbers_it_was_given_in_three_readings(series):
+    """handoff_guards_v20.py's case an_in_memory_edit_leaves_the_source_presentation_alone types three
+    expectations about one fixed deck of three amounts. Nothing is typed here. The edit itself does what
+    it says: over generated categories and generated amounts the replaced chart reads back as the numbers
+    it was handed, in python-pptx's own accessor, in the cached `c:v` texts read with expat rather than
+    the lxml tree the library writes with, and in the embedded workbook read by openpyxl and by the Rust
+    calamine reader, which agree with each other."""
+    categories, amounts = series
+    edited = _chart_replaced(_chart_bytes(categories, amounts), categories, amounts)
+    npt.assert_allclose(_chart_values(edited)[1], amounts)
+    npt.assert_array_equal(_chart_cached_texts(edited),
+                           ['Actual'] + list(categories) + [str(amount) for amount in amounts])
+    by_openpyxl, by_calamine = _chart_workbook(edited)
+    npt.assert_allclose(by_openpyxl, by_calamine)
+
+
+@given(EDIT_SERIES)
+@CHART_EDIT
+def test_replacing_a_chart_with_the_numbers_it_already_holds_changes_the_package_digest(series):
+    """What the case reads as evidence of an edit is not evidence of one. Handed back exactly the values
+    it just read, `replace_data` produces a package whose digest is not the source's, while the chart
+    reads back the same numbers in the same order. `hashlib.sha256(edited).hexdigest() == before` being
+    False therefore says nothing about whether any value changed."""
+    categories, amounts = series
+    source = _chart_bytes(categories, amounts)
+    unchanged = _chart_replaced(source, categories, amounts)
+    npt.assert_allclose(_chart_values(unchanged)[1], _chart_values(source)[1])
+    npt.assert_array_equal(_chart_cached_texts(unchanged), _chart_cached_texts(source))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_pptx_digest(unchanged), _pptx_digest(source))
+
+
+@given(EDIT_SERIES)
+@CHART_EDIT
+def test_no_part_of_the_package_changes_when_the_chart_is_replaced_by_itself(series):
+    """And the difference is in no part of the document. The two packages hold the same entry names and
+    every entry under a shared name holds the same bytes: the parts that differ between the source and
+    the re-edited copy are the parts that differ between the source and itself."""
+    categories, amounts = series
+    source = _chart_bytes(categories, amounts)
+    unchanged = _chart_replaced(source, categories, amounts)
+    npt.assert_array_equal(sorted(_pptx_entry_order(unchanged)), sorted(_pptx_entry_order(source)))
+    npt.assert_array_equal(_pptx_parts_that_differ(source, unchanged),
+                           _pptx_parts_that_differ(source, source))
+
+
+@given(EDIT_SERIES_AND_ANOTHER)
+@CHART_EDIT
+def test_a_real_edit_does_change_a_part_where_the_no_op_edit_changes_none(series):
+    """The same measurement separates the two edits. The strategy draws one more distinct amount than
+    there are categories, so the value put in the first place is one the chart does not hold and the
+    ledger is changed rather than merely rewritten; the list of parts whose bytes differ is then not the
+    list a replacement by the same values produces."""
+    categories, drawn = series
+    amounts, other = drawn[:len(categories)], drawn[-1]
+    source = _chart_bytes(categories, amounts)
+    moved = _chart_replaced(source, categories, [other] + list(amounts[1:]))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_pptx_parts_that_differ(source, moved),
+                               _pptx_parts_that_differ(source, source))
+
+
+@pytest.mark.skipif(not php_binary_available, reason='php is required for this oracle')
+@pytest.mark.skipif(not java_runtime_available, reason='the java runtime is required for this oracle')
+@given(EDIT_SERIES)
+@CHART_EDIT
+def test_the_entry_order_is_what_moved_and_two_outside_zip_readers_report_the_same_one(series):
+    """What did change is the order the entries are stored in, and three implementations of the ZIP
+    format agree about it. CPython's zipfile, libzip through PHP's ZipArchive walking `numFiles` by
+    index, and java.util.zip's ZipFile.entries return the same sequence for the source and the same
+    sequence for the re-saved copy, and those two sequences are not each other. A package digest is a
+    digest of an order as much as of a document."""
+    categories, amounts = series
+    source = _chart_bytes(categories, amounts)
+    unchanged = _chart_replaced(source, categories, amounts)
+    for package in (source, unchanged):
+        npt.assert_array_equal(_pptx_entry_order(package), _pptx_entry_order_in_php(package))
+        npt.assert_array_equal(_pptx_entry_order(package), _pptx_entry_order_in_java(package))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_pptx_entry_order(unchanged), _pptx_entry_order(source))
+
+
+@given(EDIT_SERIES)
+@CHART_EDIT
+def test_a_load_and_save_that_edits_nothing_moves_the_entries_the_same_way(series):
+    """It is not the edit that moves them. A package opened and saved again with nothing asked of it at
+    all is stored in the same order as the one whose chart was replaced by itself, and its digest is not
+    the source's either, so the digest separates a deck that was written once from a deck that was
+    written twice and never a deck that was changed from one that was not."""
+    categories, amounts = series
+    source = _chart_bytes(categories, amounts)
+    npt.assert_array_equal(_pptx_entry_order(_pptx_resaved(source)),
+                           _pptx_entry_order(_chart_replaced(source, categories, amounts)))
+    npt.assert_array_equal(_pptx_parts_that_differ(source, _pptx_resaved(source)),
+                           _pptx_parts_that_differ(source, source))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_pptx_digest(_pptx_resaved(source)), _pptx_digest(source))
+
+
+@given(EDIT_SERIES_WITH_A_GAP)
+@CHART_EDIT
+def test_an_unknown_amount_is_written_as_no_cached_point_at_all(series):
+    """The case's second claim, that "unknown current values stay unknown", is a property of two pieces
+    of the library that meet in the middle. The writer drops the point: `_val_pt_xml` in
+    src/pptx/chart/xmlwriter.py at tag v1.0.2 loops `for idx, value in enumerate(self._series.values)`
+    and runs `if value is None: continue`, so the cached texts of a series with gaps are the texts of its
+    known amounts alone, however many categories it declares."""
+    categories, amounts, known = series
+    gapped = [amount if flag else None for amount, flag in zip(amounts, known)]
+    edited = _chart_replaced(_chart_bytes(categories, amounts), categories, gapped)
+    npt.assert_array_equal(_chart_cached_texts(edited),
+                           ['Actual'] + list(categories)
+                           + [str(amount) for amount, flag in zip(amounts, known) if flag])
+
+
+@given(EDIT_SERIES_WITH_A_GAP)
+@CHART_EDIT
+def test_the_chart_still_reports_one_value_a_category_when_the_points_are_absent(series):
+    """The reader puts them back as None. `CategorySeries.values` at that tag iterates
+    `for idx in range(val.ptCount_val)` and yields `val.pt_v(idx)`, whose own docstring is "Return the Y
+    value for data point *idx* in this cache, or None if no value is present for that data point", so a
+    series with points missing from the file reports as many values as one with every point present, and
+    the missing ones come back as None -- which is why the case's `chart_values(unknown)[1] is None`
+    passes for a number that was never written rather than for one recorded as unknown."""
+    categories, amounts, known = series
+    gapped = [amount if flag else None for amount, flag in zip(amounts, known)]
+    source = _chart_bytes(categories, amounts)
+    edited = _chart_replaced(source, categories, gapped)
+    filled = _chart_replaced(source, categories, amounts)
+    npt.assert_array_equal(len(_chart_values(edited)[1]), len(_chart_values(filled)[1]))
+    npt.assert_array_equal([value is None for value in _chart_values(edited)[1]],
+                           [not flag for flag in known])
+
+
+def _chart_workbook_readings(data):
+    """The embedded workbook read twice, each reading carrying its own spelling of an empty cell: the
+    value the same reader returns for the sheet's top-left cell, which `replace_data` leaves empty in
+    every workbook it writes. Nothing about emptiness is typed here -- each reader supplies its own."""
+    with zipfile.ZipFile(io.BytesIO(data)) as archive:
+        blob = archive.read([name for name in archive.namelist() if name.endswith('.xlsx')][0])
+    sheet = openpyxl.load_workbook(io.BytesIO(blob)).active
+    by_openpyxl = [[cell.value for cell in row] for row in sheet.iter_rows()]
+    by_calamine = CalamineWorkbook.from_filelike(io.BytesIO(blob)).get_sheet_by_index(0).to_python()
+    return ((by_openpyxl[0][0], [row[1] for row in by_openpyxl[1:]]),
+            (by_calamine[0][0], [row[1] for row in by_calamine[1:]]))
+
+
+@given(EDIT_SERIES_WITH_A_GAP)
+@CHART_EDIT
+def test_the_embedded_workbook_leaves_the_unknown_cell_where_the_cache_leaves_the_point(series):
+    """And the workbook `replace_data` rewrites alongside the cache says the same thing twice. Each
+    reader marks as empty exactly the cells of the amounts that were not given -- measured against that
+    reader's own value for the sheet's empty top-left cell -- and both return the same numbers in the
+    cells that were, so the gap is in the package rather than in one reader's reading of it."""
+    categories, amounts, known = series
+    gapped = [amount if flag else None for amount, flag in zip(amounts, known)]
+    edited = _chart_replaced(_chart_bytes(categories, amounts), categories, gapped)
+    (openpyxl_blank, by_openpyxl), (calamine_blank, by_calamine) = _chart_workbook_readings(edited)
+    npt.assert_array_equal([value == openpyxl_blank for value in by_openpyxl],
+                           [not flag for flag in known])
+    npt.assert_array_equal([value == calamine_blank for value in by_calamine],
+                           [not flag for flag in known])
+    npt.assert_allclose([value for value, flag in zip(by_openpyxl, known) if flag],
+                        [value for value, flag in zip(by_calamine, known) if flag])
+
+
+@given(EDIT_SERIES_WITH_A_GAP)
+@CHART_EDIT
+def test_the_two_workbook_readers_do_not_spell_the_unwritten_cell_the_same_way(series):
+    """They do not agree on what to call it. openpyxl returns nothing at all for a cell that was never
+    written and the Rust calamine reader returns an empty string, so the two readings of one workbook are
+    not equal columns, and their two empty cells are not equal values either. A chain that decides
+    "unknown" by testing the cell against None gets one answer from each reader."""
+    categories, amounts, known = series
+    gapped = [amount if flag else None for amount, flag in zip(amounts, known)]
+    edited = _chart_replaced(_chart_bytes(categories, amounts), categories, gapped)
+    (openpyxl_blank, by_openpyxl), (calamine_blank, by_calamine) = _chart_workbook_readings(edited)
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(repr(openpyxl_blank), repr(calamine_blank))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal([repr(value) for value in by_openpyxl],
+                               [repr(value) for value in by_calamine])
