@@ -20800,3 +20800,404 @@ def test_three_jaro_winkler_implementations_agree_on_every_generated_pair(pair):
         in_duckdb = connection.execute('select jaro_winkler_similarity(?, ?)', [left, right]).fetchone()[0]
     npt.assert_allclose(in_duckdb, rf_jaro_winkler.similarity(left, right))
     npt.assert_allclose(in_duckdb, jellyfish.jaro_winkler_similarity(left, right))
+
+
+# ---------------------------------------------------------------- P202: a parent graph, its duplicates, its cycles and the gaps nothing reports
+# The relationship kinds and exception reasons below are the declared vocabulary P202 names; they are
+# anchors the strategies are built from, never expected outputs.
+CONSOLIDATION_KINDS = ('IS_DIRECTLY_CONSOLIDATED_BY', 'IS_ULTIMATELY_CONSOLIDATED_BY',
+                       'IS_INTERNATIONAL_BRANCH_OF')
+REPORTING_EXCEPTIONS = ('NO_LEI', 'NATURAL_PERSONS', 'NON_PUBLIC')
+ENTITY_ID = st.from_regex(r'\A[A-Z0-9]{4}\Z')
+RELATIONSHIP_KIND = st.sampled_from(CONSOLIDATION_KINDS)
+EXCEPTION_REASON = st.sampled_from(REPORTING_EXCEPTIONS)
+OWNERSHIP_SHARE = st.floats(min_value=0, max_value=100, allow_nan=False, allow_infinity=False)
+ENTITY_CLASS = st.from_regex(r'\A[A-Z][a-z]{2,7}\Z')
+PARENT_GRAPH = settings(max_examples=100, deadline=None)
+
+
+class _RelationshipRecord(pydantic.BaseModel):
+    """The declared shape of one relationship record: two identifiers, a kind, and a percentage that
+    may be absent. This is the "schema adapter" step of P202 written as the primitive alone."""
+
+    parent: str
+    child: str
+    kind: str
+    percentage: float | None = None
+
+
+def _relationship_schema():
+    """The same declared shape as a JSON Schema, so the two validators P202 names in one step are
+    asked the same question. jsonschema.validate is the published assertion callable."""
+    return {'type': 'object',
+            'properties': {'parent': {'type': 'string'}, 'child': {'type': 'string'},
+                           'kind': {'type': 'string', 'enum': list(CONSOLIDATION_KINDS)},
+                           'percentage': {'type': ['number', 'null']}},
+            'required': ['parent', 'child', 'kind']}
+
+
+def _ownership_chain(entities, kind):
+    """One relationship record per consecutive pair: the first entity consolidates the second and so
+    on down the chain. Each record is (parent, child, kind), the order GLEIF's own relationship
+    records carry."""
+    return [(parent, child, kind) for parent, child in zip(entities, entities[1:])]
+
+
+def _ownership_ring(entities, kind):
+    """The same chain with the record that closes it, so the last entity consolidates the first."""
+    return _ownership_chain(entities, kind) + [(entities[-1], entities[0], kind)]
+
+
+def _parent_multigraph(records):
+    """The typed multigraph of P202's third step, built by the primitive that step names. The edge
+    runs from the parent to the entity it consolidates, so a look-through is a walk along the
+    edges."""
+    graph = nx.MultiDiGraph()
+    for parent, child, kind in records:
+        graph.add_edge(parent, child, kind=kind)
+    return graph
+
+
+def _parent_triples(records):
+    """The same records in the other store the same step names: one triple per record, written the
+    way the relationship reads, child-kind-parent."""
+    graph = rdflib.Graph()
+    for parent, child, kind in records:
+        graph.add((EXAMPLE[child], EXAMPLE[kind], EXAMPLE[parent]))
+    return graph
+
+
+def _relationship_store_sizes(records):
+    """What each of the three stores holds after the same records are loaded into it: the number of
+    edges networkx keeps, the number of triples rdflib keeps, and the number Oxigraph's Rust store
+    keeps after parsing rdflib's own N-Triples serialisation."""
+    triples = _parent_triples(records)
+    store = pyoxigraph.Store()
+    store.load(triples.serialize(format='nt').encode(), format=pyoxigraph.RdfFormat.N_TRIPLES)
+    return {'networkx': _parent_multigraph(records).number_of_edges(),
+            'rdflib': len(triples), 'oxigraph': len(store)}
+
+
+def _as_igraph(graph):
+    """The same multigraph in igraph's C core, vertices named by the entity identifiers."""
+    converted = igraph.Graph(directed=True)
+    converted.add_vertices(sorted(graph.nodes()))
+    converted.add_edges([(parent, child) for parent, child, _ in graph.edges(keys=True)])
+    return converted
+
+
+def _igraph_reachable(graph, root, order, mindist):
+    """igraph's own bounded reachability. Its neighborhood() takes the depth limit as `order` and
+    takes whether the seed itself belongs in the answer as `mindist`, documented at tag 1.0.0 as
+    "If this is one, the seed vertex is not included"; python-igraph 1.0.0 raises ValueError for the
+    negative order the same docstring says means no limit, so an unbounded walk is asked for with an
+    order the input's own size bounds."""
+    converted = _as_igraph(graph)
+    return sorted(converted.vs[vertex]['name']
+                  for vertex in converted.neighborhood(root, order=order, mode='out',
+                                                       mindist=mindist))
+
+
+def _networkx_components(graph):
+    """networkx's strongly connected components as one sorted member list per component."""
+    return sorted(' '.join(sorted(component))
+                  for component in nx.strongly_connected_components(graph))
+
+
+def _igraph_components(graph):
+    """The same partition from igraph's C core."""
+    converted = _as_igraph(graph)
+    return sorted(' '.join(sorted(converted.vs[vertex]['name'] for vertex in component))
+                  for component in converted.connected_components(mode='strong'))
+
+
+def _lei_pyshacl(data, shapes, **options):
+    """pySHACL 0.40.1 on the options the caller asks for, so the defaults its own signature declares
+    (advanced=False, inference=None) are what runs unless a test names otherwise."""
+    conforms, report, _ = pyshacl.validate(data, shacl_graph=shapes, **options)
+    return bool(conforms), len(list(report.subjects(rdflib.RDF.type, rdflib.SH.ValidationResult)))
+
+
+def _parent_shapes(class_name):
+    """One node shape targeting the named entity class and requiring at least one parent link."""
+    shapes = rdflib.Graph()
+    shapes.add((EXAMPLE.ParentShape, rdflib.RDF.type, rdflib.SH.NodeShape))
+    shapes.add((EXAMPLE.ParentShape, rdflib.SH.targetClass, EXAMPLE[class_name]))
+    constraint = rdflib.BNode()
+    shapes.add((EXAMPLE.ParentShape, rdflib.SH.property, constraint))
+    shapes.add((constraint, rdflib.SH.path, EXAMPLE.consolidatedBy))
+    shapes.add((constraint, rdflib.SH.minCount, rdflib.Literal(1)))
+    return shapes
+
+
+def _typed_entity(name, class_name):
+    """One entity node carrying the named class and no parent link at all."""
+    graph = rdflib.Graph()
+    graph.add((EXAMPLE[name], rdflib.RDF.type, EXAMPLE[class_name]))
+    return graph
+
+
+def _subclass_triple(subclass, superclass):
+    """The taxonomy statement on its own, so a test can place it in the data, beside the shapes, or
+    in the ontology document pySHACL's ont_graph parameter takes."""
+    graph = rdflib.Graph()
+    graph.add((EXAMPLE[subclass], rdflib.RDFS.subClassOf, EXAMPLE[superclass]))
+    return graph
+
+
+def _exception_shapes():
+    """A shape over the reporting exceptions whose sh:in list is the declared vocabulary, built with
+    rdflib's own Collection rather than written out as turtle."""
+    shapes = rdflib.Graph()
+    shapes.add((EXAMPLE.ExceptionShape, rdflib.RDF.type, rdflib.SH.NodeShape))
+    shapes.add((EXAMPLE.ExceptionShape, rdflib.SH.targetClass, EXAMPLE.ReportingException))
+    constraint = rdflib.BNode()
+    shapes.add((EXAMPLE.ExceptionShape, rdflib.SH.property, constraint))
+    shapes.add((constraint, rdflib.SH.path, EXAMPLE.exceptionReason))
+    members = rdflib.BNode()
+    rdflib.collection.Collection(shapes, members,
+                                 [rdflib.Literal(reason) for reason in REPORTING_EXCEPTIONS])
+    shapes.add((constraint, rdflib.SH['in'], members))
+    return shapes
+
+
+def _exception_record(name, code):
+    """One reporting exception carrying the reason code the caller supplies."""
+    graph = rdflib.Graph()
+    graph.add((EXAMPLE[name], rdflib.RDF.type, EXAMPLE.ReportingException))
+    graph.add((EXAMPLE[name], EXAMPLE.exceptionReason, rdflib.Literal(code)))
+    return graph
+
+
+def _ownership_program(entities, records, exceptions):
+    """P202's "explicit stop conditions" as the ASP program clingo grounds: an atom per entity, an
+    atom per relationship record, an atom per recorded exception, and coverage as the closed-world
+    negation. Identifiers are quoted because an unquoted capital is an ASP variable."""
+    lines = ['entity("%s").' % entity for entity in entities]
+    lines += ['parent("%s","%s").' % (child, parent) for parent, child, _ in records]
+    lines += ['exception("%s","%s").' % (entity, reason) for entity, reason in exceptions]
+    lines += ['covered(E) :- parent(E,_).',
+              'uncovered(E) :- entity(E), not covered(E).',
+              'unresolved(E,R) :- entity(E), exception(E,R), not covered(E).']
+    return '\n'.join(lines)
+
+
+def _clingo_answer(program, shown):
+    """clingo 5.8.2 grounds and solves; every atom in the answer comes from the solver."""
+    control = clingo.Control(['--models=0'])
+    control.add('base', [], program + '\n' + shown)
+    control.ground([('base', [])])
+    answers = []
+    with control.solve(yield_=True) as handle:
+        for model in handle:
+            answers.append(sorted(str(symbol) for symbol in model.symbols(shown=True)))
+    return answers
+
+
+@given(st.lists(ENTITY_ID, min_size=2, max_size=2, unique=True), RELATIONSHIP_KIND)
+@PARENT_GRAPH
+def test_the_same_relationship_record_twice_is_two_edges_in_one_store_and_one_triple_in_the_other(
+        pair, kind):
+    """P202's third step is "build a typed multigraph without inventing edges" and names two stores
+    for it in one line, networkx.MultiDiGraph.add_edge and rdflib.Graph.add. They do not agree about
+    what a repeated relationship record is. rdflib's module docstring at tag 7.6.0 opens "An RDF
+    graph is a set of RDF triples", and Graph.add hands the triple to the store with no multiplicity,
+    so filing the same record twice changes nothing; Oxigraph's Rust store, parsing rdflib's own
+    serialisation, holds the same number. MultiDiGraph.add_edge documents `key` as "Used to
+    distinguish multiedges between a pair of nodes" with "the lowest unused integer" as its default,
+    so the second copy is a second edge. Nothing in the chain reconciles the two counts, and a
+    duplicate filing is therefore either invisible or a doubled ownership link depending on which of
+    the two named primitives the step actually calls."""
+    parent, child = pair
+    once = _relationship_store_sizes([(parent, child, kind)])
+    twice = _relationship_store_sizes([(parent, child, kind), (parent, child, kind)])
+    npt.assert_array_equal(twice['rdflib'], once['rdflib'])
+    npt.assert_array_equal(twice['oxigraph'], once['oxigraph'])
+    npt.assert_array_equal(twice['rdflib'], twice['oxigraph'])
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(twice['networkx'], once['networkx'])
+
+
+@given(st.lists(ENTITY_ID, min_size=3, max_size=5, unique=True), RELATIONSHIP_KIND)
+@PARENT_GRAPH
+def test_an_entity_in_an_ownership_cycle_is_absent_from_its_own_look_through_set(entities, kind):
+    """P202's adverse test says "A cycle cannot generate an infinite ownership chain", and the
+    traversal step names networkx.descendants. It cannot generate one, but not because anything
+    detects the cycle: descendants is `{child for parent, child in nx.bfs_edges(G, source)}` at tag
+    networkx-3.6.1 and its docstring says "The `source` node is not a descendant of itself", so the
+    record that closes the ring is walked and then discarded, and the look-through set of a ring is
+    the look-through set of the open chain over the same entities, member for member. The same step
+    also names single_source_shortest_path_length, whose own example prints the source at distance
+    zero, so the two primitives of one chain step disagree by exactly the entity being looked
+    through. igraph's neighborhood takes that choice as a parameter and reproduces each of the two
+    answers exactly."""
+    root = entities[0]
+    ring = _parent_multigraph(_ownership_ring(entities, kind))
+    chain = _parent_multigraph(_ownership_chain(entities, kind))
+    npt.assert_array_equal(sorted(nx.descendants(ring, root)), sorted(nx.descendants(chain, root)))
+    npt.assert_array_equal(sorted(nx.descendants(ring, root)),
+                           _igraph_reachable(ring, root, order=len(entities), mindist=1))
+    npt.assert_array_equal(sorted(nx.single_source_shortest_path_length(ring, root)),
+                           _igraph_reachable(ring, root, order=len(entities), mindist=0))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(sorted(nx.descendants(ring, root)),
+                               sorted(nx.single_source_shortest_path_length(ring, root)))
+
+
+@given(st.lists(ENTITY_ID, min_size=3, max_size=5, unique=True), RELATIONSHIP_KIND)
+@PARENT_GRAPH
+def test_the_cycle_the_look_through_cannot_see_is_the_one_the_component_primitives_report(entities,
+                                                                                         kind):
+    """The repair for the previous test, and the reason P202's traversal step names a second
+    primitive beside descendants. strongly_connected_components does separate the ring from the open
+    chain over the same entities, and igraph's C core returns the same partition for both graphs, so
+    the cycle is a fact about the ownership structure and not an artefact of one library. It is
+    reported only if the chain asks for it: the reachable set alone cannot."""
+    ring = _parent_multigraph(_ownership_ring(entities, kind))
+    chain = _parent_multigraph(_ownership_chain(entities, kind))
+    npt.assert_array_equal(_networkx_components(ring), _igraph_components(ring))
+    npt.assert_array_equal(_networkx_components(chain), _igraph_components(chain))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_networkx_components(ring), _networkx_components(chain))
+
+
+@given(st.lists(ENTITY_ID, min_size=4, max_size=6, unique=True), RELATIONSHIP_KIND,
+       st.integers(min_value=1, max_value=2))
+@PARENT_GRAPH
+def test_a_depth_limited_look_through_cannot_be_told_from_a_chain_that_ends(entities, kind, depth):
+    """P202's contract says "Graph depth limits are computational limits, not regulatory
+    thresholds", which requires the two to be distinguishable in the output. They are not. The
+    cutoff parameter of single_source_shortest_path_length is documented as "Depth to stop the
+    search", and the set it returns for a chain that continues past the limit is the same set,
+    member for member, as the one it returns for a chain that genuinely ends at the limit; igraph's
+    neighborhood at the same order returns that set too. The parent-path register therefore carries
+    no mark separating "this entity has no further parent" from "we stopped looking here", and the
+    only place the difference survives is the unlimited walk, which is the one a depth limit exists
+    to avoid."""
+    root = entities[0]
+    full = _parent_multigraph(_ownership_chain(entities, kind))
+    ends_at_the_limit = _parent_multigraph(_ownership_chain(entities[:depth + 1], kind))
+    npt.assert_array_equal(sorted(nx.single_source_shortest_path_length(full, root, cutoff=depth)),
+                           sorted(nx.single_source_shortest_path_length(ends_at_the_limit, root,
+                                                                        cutoff=depth)))
+    npt.assert_array_equal(sorted(nx.single_source_shortest_path_length(full, root, cutoff=depth)),
+                           _igraph_reachable(full, root, order=depth, mindist=0))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(sorted(nx.single_source_shortest_path_length(full, root)),
+                               sorted(nx.single_source_shortest_path_length(ends_at_the_limit,
+                                                                            root)))
+
+
+@pytest.mark.skipif(not shacl_oracle_available,
+                    reason='node and the rdf-validate-shacl checkout are required for this oracle')
+@given(LOCAL_NAME, st.lists(ENTITY_CLASS, min_size=2, max_size=2, unique=True))
+@SHACL_ORACLE
+def test_a_taxonomy_declared_beside_the_shapes_leaves_every_subclass_entity_unvalidated(name,
+                                                                                       classes):
+    """P202's fourth step validates the typed parent graph with pyshacl.validate, and its typing is
+    the whole point of the step. sh:targetClass does follow rdfs:subClassOf, so an entity typed with
+    a declared subclass of the targeted class is selected and its missing parent is reported -- but
+    only when the taxonomy is a statement of the data graph. Written into the shapes document
+    instead, where an ontology naturally lives, the same declaration selects nothing: the subclass
+    entity conforms exactly as it does when no taxonomy exists anywhere, which is the vacuous pass
+    P194 records for an unselected node. rdf-validate-shacl 0.6.5 under node returns the same
+    verdict, so this is what SHACL specifies and not pySHACL's default; and pySHACL's own ont_graph
+    parameter, documented as "an extra ontology document to mix into the data graph", is the repair,
+    reaching the same verdict as putting the taxonomy in the data."""
+    subclass, superclass = classes
+    shapes = _parent_shapes(superclass)
+    entity = _typed_entity(name, subclass)
+    taxonomy = _subclass_triple(subclass, superclass)
+    beside_the_shapes = shapes + taxonomy
+    npt.assert_array_equal(_lei_pyshacl(entity, beside_the_shapes),
+                           _in_rdf_validate_shacl(entity, beside_the_shapes))
+    npt.assert_array_equal(_lei_pyshacl(entity, beside_the_shapes), _lei_pyshacl(entity, shapes))
+    npt.assert_array_equal(_lei_pyshacl(entity + taxonomy, shapes),
+                           _in_rdf_validate_shacl(entity + taxonomy, shapes))
+    npt.assert_array_equal(_lei_pyshacl(entity + taxonomy, shapes),
+                           _lei_pyshacl(entity, shapes, ont_graph=taxonomy))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_lei_pyshacl(entity, beside_the_shapes),
+                               _lei_pyshacl(entity + taxonomy, shapes))
+
+
+@pytest.mark.skipif(not shacl_oracle_available,
+                    reason='node and the rdf-validate-shacl checkout are required for this oracle')
+@given(LOCAL_NAME, EXCEPTION_REASON, st.from_regex(r'\A[A-Z]{3,8}\Z'))
+@SHACL_ORACLE
+def test_an_undeclared_exception_code_is_the_same_refusal_in_both_shacl_implementations(name,
+                                                                                       declared,
+                                                                                       invented):
+    """P202's adverse test names the reporting exceptions by their codes, and the codes are strings
+    rather than graph structure, so the only thing that can hold them to the declared vocabulary is
+    a constraint over the values. An sh:in list built from that vocabulary does: a record carrying
+    one of the declared reasons conforms and a record carrying an invented code does not, with the
+    same verdict and the same number of results from pySHACL 0.40.1 and from rdf-validate-shacl
+    0.6.5 under node. The invented codes are generated without an underscore, which every declared
+    reason carries, so the disagreeing region is generated directly rather than filtered into."""
+    shapes = _exception_shapes()
+    recorded = _exception_record(name, declared)
+    undeclared = _exception_record(name, invented)
+    npt.assert_array_equal(_lei_pyshacl(recorded, shapes), _in_rdf_validate_shacl(recorded, shapes))
+    npt.assert_array_equal(_lei_pyshacl(undeclared, shapes),
+                           _in_rdf_validate_shacl(undeclared, shapes))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_lei_pyshacl(recorded, shapes), _lei_pyshacl(undeclared, shapes))
+
+
+@given(st.lists(ENTITY_ID, min_size=3, max_size=3, unique=True), RELATIONSHIP_KIND,
+       EXCEPTION_REASON)
+@PARENT_GRAPH
+def test_an_unidentified_parent_and_no_relationship_at_all_are_one_answer_set(entities, kind,
+                                                                             reason):
+    """P202's adverse test says that "treating NATURAL_PERSONS as a named natural-person owner or
+    treating NON_PUBLIC as no parent produces an invalid inference", and its coverage step derives
+    the unresolved endpoints from clingo under the closed-world assumption already recorded for
+    P197. That assumption makes the second inference by default: an entity whose exception record
+    says its parent exists but is not published has no parent atom, so the coverage rule cannot
+    reach it, and the answer set for the graph carrying the exception is the answer set for a graph
+    where the entity simply has no relationship record at all -- atom for atom. The reason survives
+    only when the exception is itself an atom the program derives from, which is the repair and is
+    what the second comparison shows."""
+    known_parent, known_child, unidentified = entities
+    records = [(known_parent, known_child, kind)]
+    npt.assert_array_equal(
+        _clingo_answer(_ownership_program(entities, records, [(unidentified, reason)]),
+                       '#show uncovered/1.'),
+        _clingo_answer(_ownership_program(entities, records, []), '#show uncovered/1.'))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(
+            _clingo_answer(_ownership_program(entities, records, [(unidentified, reason)]),
+                           '#show unresolved/2.'),
+            _clingo_answer(_ownership_program(entities, records, []), '#show unresolved/2.'))
+
+
+@given(st.lists(ENTITY_ID, min_size=2, max_size=2, unique=True), RELATIONSHIP_KIND,
+       OWNERSHIP_SHARE)
+@PARENT_GRAPH
+def test_a_percentage_written_as_text_is_a_number_to_one_validator_and_a_refusal_to_the_other(
+        pair, kind, share):
+    """P202's first step names pydantic and a "schema adapter" together, and its contract says
+    "Missing percentages never become zero or 100 percent". The two validators that could be that
+    adapter do not agree about what a percentage is. pydantic 2.13.5 on its lax default returns the
+    same number for the percentage written as text as it returns for the percentage written as a
+    number, so a share that arrived as a string is silently a float; jsonschema 4.26.0 refuses the
+    same record against the same declared shape. The contract's own case holds in both: an absent
+    percentage and one reported explicitly as null validate identically in pydantic, model field for
+    model field, and both pass jsonschema, so neither validator turns a missing share into a
+    number -- it is the typed share that the two of them disagree about."""
+    parent, child = pair
+    schema = _relationship_schema()
+    absent = {'parent': parent, 'child': child, 'kind': kind}
+    as_number = {**absent, 'percentage': share}
+    as_text = {**absent, 'percentage': str(share)}
+    explicit_null = {**absent, 'percentage': None}
+    npt.assert_allclose(_RelationshipRecord.model_validate(as_text).percentage,
+                        _RelationshipRecord.model_validate(as_number).percentage)
+    jsonschema.validate(as_number, schema)
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.validate(as_text, schema)
+    npt.assert_equal(_RelationshipRecord.model_validate(absent).model_dump(),
+                     _RelationshipRecord.model_validate(explicit_null).model_dump())
+    jsonschema.validate(absent, schema)
+    jsonschema.validate(explicit_null, schema)
