@@ -1207,3 +1207,7 @@ Origin clusters rediscovered in more than one iteration:
 
 
 
+## Halt of the blind-agent phase after iteration 3 (partial)
+
+The user stopped the blind-agent research loop after iteration 3's response arrived and before its mapping was complete. Iteration 3's verbatim response is retained at `coverage/iterations/03.raw.md` (54 briefs, 112-entry inventory, 70 of 112 snippet-only, seed 1158297115365469046, prompt hash identical to iterations 1 and 2). The 22 cases mapped before the halt are retained at `coverage/iterations/03.partial.jsonl`; they are not counted in the cumulative tally, which stands at iterations 1 and 2 (108 of 108 COVERED, 107 of 108 stresses expressed). All 22 partial mappings were COVERED with expressed stresses; the strongest observations from the partially mapped set are recorded here so they are not lost: beneficial-ownership disclosure (EITI) is anchored unusually well by P202, P253, P254 and P291; Basel's non-binding waste classification with binding consequences is a second data point for the modality-gradient watch item; the digital emblem's undetectable validation (not yet mapped) is the strongest strain candidate seen so far, because the boundary contract presumes a handoff both parties know about. Iteration 4's agent was launched and then stopped without a response. The next phase is procedural generation at volume, recorded in a new section when it starts.
+
