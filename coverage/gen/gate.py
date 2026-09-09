@@ -33,7 +33,7 @@ Exit status 0 when every gate that ran passed.
 import argparse, hashlib, json, math, os, random, re, shutil, subprocess, sys, time
 from collections import Counter, defaultdict
 
-FLOORS = {'regime': 60, 'isic': 20, 'ford': 40, 'relation': 30, 'cross': 100}  # per 1,000 cases
+FLOORS = {'regime': 60, 'isic': 20, 'ford': 40, 'relation': 30, 'cross': 100, 'cell': 3}  # per 1,000 cases
 PROVENANCE_FLOOR = 0.80          # share of ingredients grounded in inventories or taxonomies
 RUNTIME_BUDGET_S = 60.0          # generate + check, per 1,000 cases
 ISIC = ['ISIC-' + chr(c) for c in range(ord('A'), ord('U') + 1)]
@@ -582,9 +582,18 @@ def main():
     if cross < floors['cross']:
         short['cross_regime'] = cross
     unparsed = {k: v for k, v in domains.items() if k.startswith('OTHER')}
+    cells = Counter((regime_of(c), domain_of(c)) for c in cases)
+    short_cells = {}
+    for rg in sorted(regime_vocab):
+        for d in ISIC + FORD:
+            if cells.get((rg, d), 0) < floors['cell']:
+                short_cells['%s|%s' % (rg, d)] = cells.get((rg, d), 0)
+    if short_cells:
+        short['cells_below_floor'] = len(short_cells)
     g5 = {'regimes': dict(regimes), 'domains': dict(domains), 'relationship_kinds': dict(rel_cases),
           'cross_regime_by_mention': cross_mention, 'cross_regime_by_ingredient': cross_ingredient,
-          'unparsed_domains': unparsed, 'shortfalls': short}
+          'unparsed_domains': unparsed, 'shortfalls': short, 'cells_below_floor': short_cells,
+          'cells_total': 7 * 27, 'cell_floor': floors['cell']}
     g5['pass'] = not short and not unparsed and n_cases > 0
     R['gates']['G5_diversity'] = g5
 
