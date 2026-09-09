@@ -19846,3 +19846,207 @@ def test_inserting_before_the_first_page_moves_the_binder_bookmarks_with_their_p
     with pytest.raises(AssertionError):
         npt.assert_array_equal([row[2] for row in _mupdf_outline(front)],
                                [row[2] for row in _mupdf_outline(binder)])
+
+
+# --------------------------------------------------------------------------------------------------
+# handoff_guards_v15.py, case a_right_closed_bucket_drops_the_invoice_due_today: what the buckets total
+# --------------------------------------------------------------------------------------------------
+AGING_EDGES = st.lists(st.integers(min_value=0, max_value=200), min_size=4, max_size=6,
+                       unique=True).map(sorted)
+AGING_AMOUNT = st.integers(min_value=1, max_value=1_000_000).map(lambda cents: Decimal(cents).scaleb(-2))
+AGING_TOTALS = settings(max_examples=40, deadline=None)
+
+
+def _aging_rows(edges):
+    """One invoice for every bucket the covering edges declare: one at or before the first edge, one
+    inside each declared band, and one past the last edge. The bands come from the generated edge list,
+    so every day is drawn from a range the strategy computes and none is filtered out afterwards."""
+    parts = [st.tuples(st.integers(min_value=edges[0] - 60, max_value=edges[0]), AGING_AMOUNT)]
+    parts += [st.tuples(st.integers(min_value=edges[index] + 1, max_value=edges[index + 1]), AGING_AMOUNT)
+              for index in range(len(edges) - 1)]
+    parts.append(st.tuples(st.integers(min_value=edges[-1] + 1, max_value=edges[-1] + 90), AGING_AMOUNT))
+    return st.tuples(*parts).map(list)
+
+
+def _aging_rows_with_an_empty_band(edges):
+    """The same ledger with every invoice inside the declared range and one declared band left with no
+    invoice in it, so that the band is declared and unobserved rather than out of range."""
+    inside = [st.tuples(st.integers(min_value=edges[index] + 1, max_value=edges[index + 1]), AGING_AMOUNT)
+              for index in range(len(edges) - 1)]
+    return st.integers(min_value=0, max_value=len(inside) - 1).flatmap(
+        lambda skip: st.tuples(*(part for index, part in enumerate(inside) if index != skip)).map(list))
+
+
+AGING_LEDGER = AGING_EDGES.flatmap(lambda edges: st.tuples(st.just(edges), _aging_rows(edges)))
+AGING_GAP_LEDGER = AGING_EDGES.flatmap(
+    lambda edges: st.tuples(st.just(edges), _aging_rows_with_an_empty_band(edges)))
+
+
+def _band_labels(edges):
+    """A name a band, taken from the band's own endpoints so that nothing about the naming is typed."""
+    return ['%s_%s' % (edges[index], edges[index + 1]) for index in range(len(edges) - 1)]
+
+
+def _covering_edges(edges):
+    """The edges the case calls covering: the declared ones with an unbounded band at each end. numpy's
+    infinities are the endpoints pandas.cut accepts for a band with no floor and one with no ceiling."""
+    return [-np.inf] + list(edges) + [np.inf]
+
+
+def _pandas_band_totals(edges, rows):
+    """The per-band totals pandas returns: cut assigns the band, and DataFrameGroupBy.sum over the object
+    column of Decimal adds the amounts. Read as text so the comparison is on the cents and not on the
+    Python type, and left in the categorical's own order."""
+    frame = pd.DataFrame({'day': [day for day, _ in rows], 'amount': [amount for _, amount in rows]})
+    frame['band'] = pd.cut(frame['day'], bins=edges, labels=_band_labels(edges))
+    totals = frame.groupby('band', observed=False)['amount'].sum()
+    return [(str(band), str(total)) for band, total in totals.items()]
+
+
+def _duckdb_band_totals(edges, rows):
+    """The same per-band totals in SQL, where the band is a row of a table and membership is the join
+    predicate `day > lo and day <= hi` -- the right-closed reading spelled as a comparison the engine
+    evaluates. The join runs from the bands, so a band no invoice falls in is still a group."""
+    labels = _band_labels(edges)
+    with duckdb.connect() as connection:
+        connection.execute('create table invoice(day BIGINT, amount DECIMAL(18,2))')
+        connection.executemany('insert into invoice values (?, ?)', [[day, amount] for day, amount in rows])
+        connection.execute('create table band(label VARCHAR, lo DOUBLE, hi DOUBLE)')
+        connection.executemany('insert into band values (?, ?, ?)',
+                               [[labels[index], float(edges[index]), float(edges[index + 1])]
+                                for index in range(len(labels))])
+        return [(str(label), str(total)) for label, total in connection.execute(
+            'select band.label, sum(invoice.amount) from band left join invoice '
+            'on invoice.day > band.lo and invoice.day <= band.hi '
+            'group by band.label, band.lo order by band.lo').fetchall()]
+
+
+def _duckdb_outstanding(rows, mask=None):
+    """The outstanding total in SQL, over every invoice or over the invoices a mask names. The mask is
+    always another library's answer about the same rows, never a hand-written selection."""
+    with duckdb.connect() as connection:
+        connection.execute('create table invoice(day BIGINT, amount DECIMAL(18,2), keep BOOLEAN)')
+        flags = [True] * len(rows) if mask is None else [bool(flag) for flag in mask]
+        connection.executemany('insert into invoice values (?, ?, ?)',
+                               [[day, amount, flag] for (day, amount), flag in zip(rows, flags)])
+        return str(connection.execute('select sum(amount) from invoice where keep').fetchone()[0])
+
+
+def _pandas_bucketed_total(edges, rows):
+    """What the buckets carry between them: pandas' own sum over the per-band totals it returned."""
+    frame = pd.DataFrame({'day': [day for day, _ in rows], 'amount': [amount for _, amount in rows]})
+    frame['band'] = pd.cut(frame['day'], bins=edges, labels=_band_labels(edges))
+    return str(frame.groupby('band', observed=False)['amount'].sum().sum())
+
+
+def _polars_bucketed_total(edges, rows):
+    """And in polars, whose cut takes the same numbers as breakpoints and bands the whole line, so every
+    invoice is in a band before any total is taken. The Decimal column is polars' own Decimal(18, 2)."""
+    frame = pl.DataFrame({'day': [day for day, _ in rows], 'amount': [amount for _, amount in rows]},
+                         schema_overrides={'amount': pl.Decimal(18, 2)})
+    totals = (frame.with_columns(pl.col('day').cut(list(edges)).alias('band'))
+              .group_by('band').agg(pl.col('amount').sum()))
+    return str(totals['amount'].sum())
+
+
+@given(AGING_LEDGER)
+@AGING_TOTALS
+def test_the_covering_edges_conserve_the_outstanding_total_in_three_engines(ledger):
+    """handoff_guards_v15.py's case a_right_closed_bucket_drops_the_invoice_due_today types eight
+    expectations about nine fixed invoices, among them the two totals 900.00 and 600.00. Nothing is typed
+    here. Over generated edges and generated cents, the covering bands -- the declared edges with numpy's
+    -inf and +inf at the ends -- carry the whole outstanding total: pandas' summed band totals, the SQL
+    total over the same invoices, and polars' summed band totals are the same cents. The closure
+    findings of P159 are the reason polars needs no infinities to do it and are not re-derived here."""
+    edges, rows = ledger
+    covering = _covering_edges(edges)
+    npt.assert_array_equal(_pandas_bucketed_total(covering, rows), _duckdb_outstanding(rows))
+    npt.assert_array_equal(_polars_bucketed_total(edges, rows), _duckdb_outstanding(rows))
+
+
+@given(AGING_LEDGER)
+@AGING_TOTALS
+def test_the_right_closed_edges_lose_the_invoice_on_the_first_edge_and_the_one_past_the_last(ledger):
+    """The declared edges alone do not, and the money is where the loss shows. pandas.cut is right-closed
+    by default, so the invoice sitting exactly on the first edge and the invoice past the last are in no
+    band; their amounts are in no band total either, and the sum of the band totals is not the
+    outstanding total the same engine reports for the same table. The divergence is asserted rather than
+    closed, and the generated ledger always contains both of those invoices."""
+    edges, rows = ledger
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_pandas_bucketed_total(edges, rows), _duckdb_outstanding(rows))
+
+
+@given(AGING_LEDGER)
+@AGING_TOTALS
+def test_what_the_right_closed_bands_carry_is_what_sql_totals_over_the_rows_pandas_banded(ledger):
+    """And the shortfall is exactly the invoices the library itself marks. pandas' isna over the banded
+    column is its own account of which rows fell outside; handed that mask, DuckDB totals the remaining
+    invoices to the cents pandas' band totals add up to. Neither side is a number typed here: the mask
+    comes from one library and the total from the other."""
+    edges, rows = ledger
+    banded = pd.cut(pd.Series([day for day, _ in rows]), bins=edges, labels=_band_labels(edges))
+    npt.assert_array_equal(_pandas_bucketed_total(edges, rows),
+                           _duckdb_outstanding(rows, mask=(~banded.isna()).to_numpy()))
+
+
+@given(AGING_LEDGER)
+@AGING_TOTALS
+def test_polars_totals_the_whole_ledger_from_the_same_numbers_that_lose_two_invoices_in_pandas(ledger):
+    """The same list of numbers reconciles in one engine and not in the other. polars 1.44.1 reads them
+    as breakpoints of a line it bands entirely, so its summed band totals are the outstanding total; the
+    same list read by pandas as bin edges bands only the interval between the outermost two. What an
+    aging report reconciles to is decided by which library was handed the edges."""
+    edges, rows = ledger
+    npt.assert_array_equal(_polars_bucketed_total(edges, rows), _duckdb_outstanding(rows))
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_pandas_bucketed_total(edges, rows), _polars_bucketed_total(edges, rows))
+
+
+@given(AGING_LEDGER)
+@AGING_TOTALS
+def test_the_unbanded_invoice_is_found_by_a_string_a_band_can_also_be_named(ledger):
+    """How the case finds the loss is itself a defect. It reads each band as `str(v)` and totals the rows
+    whose text is not 'nan', which is the text numpy prints for its own missing value -- `str(np.nan)`
+    here, never typed. A band named with that same text is indistinguishable from no band at all: with
+    generated band names the string test and pandas' own isna mark the same rows, and with the first band
+    named as numpy prints its missing value they do not, so a real band's invoices are dropped from the
+    total with nothing to show for it."""
+    edges, rows = ledger
+    days = pd.Series([day for day, _ in rows])
+    labels = _band_labels(edges)
+    banded = pd.cut(days, bins=edges, labels=labels)
+    renamed = pd.cut(days, bins=edges, labels=[str(np.nan)] + labels[1:])
+    npt.assert_array_equal([str(value) == str(np.nan) for value in banded], banded.isna().to_numpy())
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal([str(value) == str(np.nan) for value in renamed], renamed.isna().to_numpy())
+
+
+@given(AGING_LEDGER)
+@AGING_TOTALS
+def test_the_declared_bands_total_the_same_cents_in_pandas_and_in_sql(ledger):
+    """Band for band, in edge order, the two engines agree. pandas assigns the band with cut and adds an
+    object column of Decimal; DuckDB joins each invoice to the band whose interval contains it and adds a
+    DECIMAL(18,2) column. Every declared band holds an invoice in this ledger, and the cents are the
+    same in both."""
+    edges, rows = ledger
+    npt.assert_array_equal(_pandas_band_totals(edges, rows), _duckdb_band_totals(edges, rows))
+
+
+@given(AGING_GAP_LEDGER)
+@AGING_TOTALS
+def test_a_declared_band_with_no_invoice_totals_zero_in_pandas_and_nothing_in_sql(ledger):
+    """Where they part is the band nothing fell into, and both projects document their side. pandas'
+    GroupBy.sum at v2.2.3 (raw.githubusercontent.com/pandas-dev/pandas/v2.2.3/pandas/core/groupby/
+    groupby.py) ends `return self._reindex_output(result, fill_value=0)` under the comment "If we are
+    grouping on categoricals we want unobserved categories to return zero, rather than the default of
+    NaN which the reindexing in _agg_general() returns", so an unobserved band is reported as the plain
+    integer zero rather than as a Decimal or as nothing. DuckDB's aggregates page, read in the
+    duckdb-web checkout at commit 6f6cd1659f0e2ddd1965b1d3f1833e7fc512e7ac in
+    docs/current/sql/functions/aggregates.md, says "All general aggregate functions except `count`
+    return `NULL` on empty groups. In particular, `list` does *not* return an empty list, `sum` does
+    *not* return zero". An aging report with a quiet band reconciles in one engine and carries a null in
+    the other, and this ledger differs from the one above only in leaving one declared band empty."""
+    edges, rows = ledger
+    with pytest.raises(AssertionError):
+        npt.assert_array_equal(_pandas_band_totals(edges, rows), _duckdb_band_totals(edges, rows))
