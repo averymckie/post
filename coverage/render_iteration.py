@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Render one iteration's report section from its mapping JSON plus a hand-written findings file.
 
-Usage: python3 coverage/render_iteration.py NN findings.md >> coverage/REPORT.md
-The tables are derived from the mapping; the findings prose is the hand-written part.
+Usage: python3 coverage/render_iteration.py NN findings.md [scale_checks.md] >> coverage/REPORT.md
+The tables are derived from the mapping; the findings and the cross-scale family checks
+are the hand-written parts.
 """
 import json
 import os
@@ -120,6 +121,11 @@ def main():
     out.append("")
     out.append(open(findings_path, encoding="utf-8").read().rstrip())
     out.append("")
+    if len(sys.argv) > 3:
+        out.append("### Cross-scale family checks (analyst reasoning, no primary sources; blind-agent prompt unchanged)")
+        out.append("")
+        out.append(open(sys.argv[3], encoding="utf-8").read().rstrip())
+        out.append("")
     its = tally.load()
     its = [it for it in its if it["iteration"] <= m["iteration"]]
     out.append(tally.block(its))

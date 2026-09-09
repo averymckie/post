@@ -515,3 +515,129 @@ Origin clusters rediscovered in more than one iteration:
 
 
 
+## Method amendment after iteration 1
+
+Recorded as an amendment; earlier sections stand verbatim.
+
+1. **No pull request.** The repository does not use pull requests. PR #4 was closed, its activity subscription and check-in removed. The branch is pushed after each iteration and the coverage folder is mirrored to `main` when the ten iterations are done.
+2. **Per-iteration summary.** After each iteration a coverage summary is given to the user in the conversation, in addition to the report section.
+3. **Cross-scale family checks.** Each iteration section gains a hand-written subsection that takes the patterns surfaced by that iteration's cases and examines them across regimes at different scales (physical and engineering, cellular and biological, ecological, economic and business, legal and social, computational), looking at the data forms and schemas each regime actually records. The question is whether the family, operation and composition mapping holds when the same pattern appears at another scale. Verdict per pattern: HOLDS, STRAINS (with the strain named), or BREAKS. This is analyst reasoning without primary sources; it hardens or damages the family hypothesis, and a BREAKS verdict is recorded as such. The blind agents' prompt is not changed by this amendment.
+
+### Iteration 1 addendum: cross-scale family checks (analyst reasoning, no primary sources; blind-agent prompt unchanged)
+
+Eight patterns surfaced by iteration 1's cases, each taken across regimes. For every regime the data form is sketched as the record a practitioner in that regime actually keeps, then mapped onto the frozen catalogue. Record forms already present in the agent's own inventory are cited where they are the regime's native schema (OPC UA and SunSpec for plant telemetry, Phenopackets and mmCIF for biology, Darwin Core for ecology, FIX and UBL and OCDS for markets and procurement, OpenTelemetry for computing).
+
+#### SC1. Peer negotiation under a shared hard limit with no central controller
+
+Source cases: D-04 EEBus (fuse limit), C-03 MTConnect (one agent, many clients), K-02 FDC3 (channels).
+
+| Regime | Data form kept in that regime | Family mapping | Holds? |
+| --- | --- | --- | --- |
+| Household or grid electrical | Per-device power setpoints and measured draw at sample times; the limit as a constant; SunSpec and OPC UA telemetry rows `{device_id, t, P_set, P_meas, limit}` | F35 + C12 feedback + R14 capacity invariant + R20 timing | holds |
+| Cellular: quorum sensing, stomatal coordination, sinoatrial cell synchrony | Expression or conductance per cell versus a sensed shared signal; single-cell matrices `{cell, gene, level}`, calcium time series `{cell, t, signal}`; no identity carried by the cell itself, only by the observation | F35 + C12 at the model level; F21 for the population twin; authority field empty | holds via the observation layer; authority degenerates |
+| Network transport: TCP congestion control, CSMA/CA | Per-flow window and observed loss or ECN marks `{flow, t, cwnd, loss}`; the link capacity is the fuse | F34 + C12 + R14; convergence anchors P316 | holds |
+| Business: production quotas, syndicated lending, consortium cost-sharing | Offers, commitments and observed totals `{party, t, commitment, observed_total, cap}`; FIX orders and UBL commitments are the native forms | F20 + F13 + F10 + R26 strategic behaviour | holds; a new obligation (R26) appears only here |
+| Ecological: flocking, foraging under a shared food patch | Positions and neighbour sets `{agent, t, x, v, neighbours}`; Darwin Core occurrence rows aggregate the population | F21 + C12 | holds at model level |
+| Stigmergy: pheromone trails, wiki editing | Agents read and write a shared environment; the environment has no owner `{agent, t, read_state, write_delta}` | C09 atomic reads and writes over shared state; F38 requires a shared-state owner | strains: the catalogue insists on a named owner, the regime has none; the model must nominate the environment as owner |
+
+Verdict: HOLDS. Two systematic observations. The authority field is populated only in social and economic regimes; elsewhere it is a constant (physics permits the effect), which the boundary contract allows but does not exploit. Strategic behaviour (R26) attaches only at the economic scale, and the catalogue already carries it as a separate claim, so the family is the same structure with a scale-dependent obligation set.
+
+#### SC2. Conditional obligation: required only sometimes
+
+Source cases: H-01 GTFS, M-01 ODK, K-04 FIX Orchestra, A4-05 Arena, F-02 BuildingSync.
+
+| Regime | Data form | Family mapping | Holds? |
+| --- | --- | --- | --- |
+| Law and regulation | Rule with applicability conditions and exceptions `{rule_id, scope_predicate, modality, exception_refs}` | F05 + P191, P192, P198, P200 | holds |
+| Gene regulation: operons, checkpoints | Regulatory logic tables `{gene, condition_inputs, expression}`; the lac operon is a two-input decision table | F05 shape, but the modality is causal not deontic; the record is OBSERVATION basis | holds with a split: causal conditional is F21 or F35 dynamics, deontic conditional is F05; HG01 already separates the bases |
+| Contracts and finance: covenants, insurance clauses | Term with trigger `{clause, trigger_metric, threshold, duty}`; UBL and HR Open carry these as structured terms | F08 + F05 | holds |
+| Engineering interlocks | Safety requirement with guard `{actuator, guard_condition, required_state}` | F35 + F05 + C04 guarded choice | holds |
+| Chemistry: catalysed reactions | Feasibility condition `{reaction, catalyst_present, rate}` | F21; no obligation exists | out of pattern: feasibility is not obligation |
+
+Verdict: HOLDS. The pattern bifurcates on modality: "must, if" versus "does, if". The catalogue separates these by evidence basis rather than by family, which is the right joint; every regime still needs an explained verdict (P200).
+
+#### SC3. Irreversible records with correction as a new event
+
+Source cases: O-02 OCDS, S5-05 preregistration, H-05 eBL endorsement chain, D-01 OCPI REMOVED, B-05 disclosure.
+
+| Regime | Data form | Family mapping | Holds? |
+| --- | --- | --- | --- |
+| Accounting and ledgers | Journal with reversing entries, never deletion `{entry, t, debit, credit, reverses}` | F33 + F14 + P155, P263 | holds |
+| Land registries, court records, notarisation | Instrument with date and reference to what it amends `{instrument, t, amends}` | F33 + P293 | holds |
+| Biology: lineage and mutation, differentiation | Phylogenetic trees and variant calls `{lineage, position, variant, generation}`; repair enzymes add corrective events, they do not rewrite history | F33 + F02 + C10 compensation | holds |
+| Neural systems: memory, pruning | Synaptic weights that decay; no record of deletion | F33 with bounded erasure by decay (P342) | holds; erasure exists as decay rather than deletion |
+| Thermodynamics, quantum measurement | Trajectories; no record form | none | out of scope: no typed record |
+
+Verdict: HOLDS. The right-to-erasure conflict (stress 29) has a biological analogue in decay, which suggests the catalogue's retention contract should admit time-bounded erasure as a first-class policy value; P342 already does.
+
+#### SC4. Consent-gated, purpose-bound release with revocation
+
+Source cases: R-05 OpenActive, M3-03 sewershed identification, D-01 private locations, N-05 candidate data, L-04 selective disclosure.
+
+| Regime | Data form | Family mapping | Holds? |
+| --- | --- | --- | --- |
+| Cell biology: receptor-gated signalling, MHC presentation | Ligand and receptor specificity tables `{signal, receptor, cell_type, response}`; the receptor is the purpose binding | F06 + P206, P264 | holds; revocation is receptor downregulation, and molecules already released cannot be recalled |
+| Business: need-to-know, clean rooms, Chinese walls | Access grants `{principal, resource, purpose, expiry, grantor}`; permitted-edge matrices | F06 + P207, P298 | holds |
+| Social: secrets, gossip norms, territory marking | Informal; when recorded, `{holder, audience, condition}` | F06 | holds |
+| Computing: capabilities, OAuth scopes | Tokens `{subject, scope, audience, exp}` | F06 + P206 | holds |
+
+Verdict: HOLDS. The unknown-coverage-of-replicas state (A09) recurs in every regime: once released, copies exist beyond the grantor's inventory. The catalogue names this rather than promising erasure.
+
+#### SC5. Identity through transformation, or conserved quantity instead
+
+Source cases: I-05 lot codes through transformation, B-01 composites, N-04 concept merge, H-01 agency merge, F-01 GUID regeneration, N1-02 provider-scoped identity.
+
+| Regime | Data form | Family mapping | Holds? |
+| --- | --- | --- | --- |
+| Manufacturing and supply | Batch genealogy and BOM explosion `{lot_out, lot_in, qty, event}` | F15 + F02 + P160, P177 | holds |
+| Cell biology: division, metabolism, isotope tracing | Lineage graphs `{cell, parent, t}`; tracer studies label molecules through pathways exactly like lot codes | F02 + F15 shape + P284 | holds |
+| Finance: money, commodities | Fungible; identity is lost at pooling, only quantity is conserved `{account, t, amount}` | F14 conserved quantity, not F02 identity | holds by bifurcation: the catalogue has both families and A01 separates entity from quantity |
+| Organisations: mergers, successors in interest | Equivalence classes with dates `{old_id, new_id, effective, evidence}` | F02 + P284, P212 | holds |
+| Particle physics: indistinguishable particles | No identity in the substrate | none | out of scope: identity is a record property, not a substrate property |
+
+Verdict: HOLDS. The strengthening insight is the principled bifurcation: a transformation either preserves identity (F02 and F15) or preserves only quantity (F14), and the catalogue chooses by semantic object, not by industry.
+
+#### SC6. Scoped conformance: two valid parties that cannot interoperate
+
+Source cases: M3-04 FHIR, G-02 UBL customisation, H6-01 TEI customisation, L-01 two-standard versioning, D-04 use cases.
+
+| Regime | Data form | Family mapping | Holds? |
+| --- | --- | --- | --- |
+| Transplant medicine: HLA matching; blood groups | Compatibility matrices `{donor_type, recipient_type, compatible}` | P302 producer guarantee against consumer assumption | holds; the check before exchange is the catalogue's handoff check |
+| Biology: reproductive isolation between valid species | Mating compatibility records | P302 shape | holds |
+| Trade: jurisdictional profiles of one standard | Profile declarations `{party, standard, profile, version}` | F31 + R02 + P261 | holds |
+| Language: mutually unintelligible dialects | Intelligibility matrices | P302 shape | holds |
+| Protocols: TLS cipher negotiation | Offered and accepted suites `{client_offer, server_accept}` | P302 + P343 | holds |
+
+Verdict: HOLDS. Conformance plural and scoped is the boundary contract itself; every regime needs a negotiation step before exchange.
+
+#### SC7. Validation gates that can fail with no fallback
+
+Source cases: T-02 Rasch gate, S5-01 deposit gate, Q-02 required fields, F-02 examples gate, E2-05 boot ordering.
+
+| Regime | Data form | Family mapping | Holds? |
+| --- | --- | --- | --- |
+| Cell cycle checkpoints | Checkpoint state `{cell, phase, DNA_intact, outcome: proceed, arrest, apoptosis}` | HG02 whole-input validation before effects; HG05 failed and not-run states; P199 gate decisions | holds |
+| Manufacturing inspection | Inspection records `{lot, test, result, disposition}` | F31 + P189 | holds |
+| Law: admissibility of evidence | Rulings `{item, rule, admitted}` | F31 + F05 | holds |
+| Statistics: model fit gates | Fit statistics and thresholds `{model, statistic, threshold, pass}` | F31 + F18 + P347 | holds; no anchor for IRT fit, recorded in the no-anchor ledger |
+
+Verdict: HOLDS. Publishing the failure instead of the estimate is HG05 in every regime; biology implements it as arrest or apoptosis.
+
+#### SC8. State that expires: review clocks and freshness
+
+Source cases: B-05 classification, R-05 perishable sessions, D-01 tariffs, H-01 feed validity, G-05 revocation.
+
+| Regime | Data form | Family mapping | Holds? |
+| --- | --- | --- | --- |
+| Molecular biology: mRNA and protein half-lives | Turnover rates `{species, half_life}`; stale instructions vanish by decay | P244 freshness fence realised passively; A05 | holds |
+| Metrology: calibration intervals | Calibration certificates `{instrument, calibrated_at, due}` | F16 + P215, P255 | holds |
+| Licensing and permits | Terms with expiry `{licence, issued, expires, renewal_conditions}` | F08 + P215 | holds |
+| Physics: radioactive decay | Decay constants | A05 only | out of pattern: no obligation attaches |
+
+Verdict: HOLDS. Freshness is enforced actively (a fence) in engineered and social regimes and passively (decay) in biological ones; both are A05 with an expiry event (A14).
+
+#### Break watch after iteration 1
+
+No pattern broke. Three strains recur and all coincide with distinctions the catalogue already draws: the authority field degenerates outside social regimes (A08 and A11 stay well defined but constant); deontic versus causal conditionals split on evidence basis (HG01); identity versus quantity split on semantic object (A01). One strain is not yet drawn by the catalogue: shared state with no owner (stigmergy) forces the modeller to nominate the environment as owner under F38, which is a modelling convention rather than a fact of the regime. It is recorded here as the first candidate crack to watch across later iterations. The substrate-versus-record boundary (physics and particle identity) is the catalogue's declared scope, not a break.
+
