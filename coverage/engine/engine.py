@@ -17,7 +17,7 @@ Modes
 No language-model step runs here. Lexical candidates are token overlap; every accepted bridge atom
 carries the operator's reason and the cases that forced it.
 """
-import argparse, json, os, re, sys, time
+import argparse, json, multiprocessing, os, re, sys, time
 from collections import Counter, defaultdict, OrderedDict
 import clingo
 
@@ -295,6 +295,19 @@ def derive_case(model, ings, c, bridge_fx, program, timeout, propose):
     return rec, cands
 
 
+_W = {}
+
+
+def _init(cat_path, trig_path, ing_path, program, bridge_fx, timeout, propose):
+    _W['model'] = Model(json.load(open(cat_path)), json.load(open(trig_path)))
+    _W['ings'] = {i['id']: i for i in json.load(open(ing_path))}
+    _W.update(program=program, bridge_fx=bridge_fx, timeout=timeout, propose=propose)
+
+
+def _work(c):
+    return derive_case(_W['model'], _W['ings'], c, _W['bridge_fx'], _W['program'], _W['timeout'], _W['propose'])
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('mode', choices=['propose', 'derive'])
@@ -307,6 +320,7 @@ def main():
     ap.add_argument('--out', required=True, help='output directory')
     ap.add_argument('--timeout', type=float, default=5.0)
     ap.add_argument('--limit', type=int, default=None)
+    ap.add_argument('--workers', type=int, default=1)
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
     cat = json.load(open(a.catalogue))
@@ -322,9 +336,14 @@ def main():
     propose = a.mode == 'propose'
     t0 = time.time()
     recs, proposals = [], {}
+    if a.workers > 1:
+        pool = multiprocessing.Pool(a.workers, initializer=_init,
+                                    initargs=(a.catalogue, a.triggers, a.ingredients, program, bridge_fx, a.timeout, propose))
+        results = pool.imap(_work, cases, chunksize=4)
+    else:
+        results = (derive_case(model, ings, c, bridge_fx, program, a.timeout, propose) for c in cases)
     with open(os.path.join(a.out, 'derivations.jsonl'), 'w') as fout:
-        for n, c in enumerate(cases, 1):
-            rec, cands = derive_case(model, ings, c, bridge_fx, program, a.timeout, propose)
+        for n, (c, (rec, cands)) in enumerate(zip(cases, results), 1):
             recs.append(rec)
             fout.write(json.dumps(rec) + '\n')
             if propose:
