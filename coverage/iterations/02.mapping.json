@@ -1,0 +1,3991 @@
+{
+ "iteration": 2,
+ "agent": {
+  "model_selector": "opus",
+  "subagent_type": "general-purpose",
+  "started_utc": "2026-09-09T19:47:00Z",
+  "duration_ms": 1958124,
+  "tool_uses": 116,
+  "subagent_tokens": 282960,
+  "raw": "coverage/iterations/02.raw.md",
+  "raw_note": "final message emitted in two consecutive continuation blocks; concatenated with a single space at the boundary 'P-G-' / '01-2 *Timezone-preservation audit*' (extract_final.py)",
+  "prompt_file_sha256": "aa6845bceb2af60ccd581ebaac88ecfb33fab835621180b11cf2b85cb32ce2f7",
+  "prompt_received_sha256": "a0b8ea9ecebcc18f18342e7b49014ce6b72e189dbdeef20bd7aeaa2689b07abe",
+  "prompt_identity": "identical to iteration 1's received prompt; identical to the file modulo its trailing newline"
+ },
+ "agent_reported": {
+  "isic_version": "UN ISIC Rev. 4 (2008) letters A-U used as the frame; Rev. 5 (2023) noted, sections A-F verified from a GitHub-hosted structure file, H-V unverified",
+  "ford_version": "OECD FORD, Frascati Manual 2015, six fields (SNIPPET)",
+  "seed": "15045947676547694015 (hex d0cdf1b1e9bd3dbf)",
+  "randomness_tool": "os.urandom(8) via getrandom(2)",
+  "runtime": "Python 3.11.15, Linux 6.18.44, drawn 2026-09-09T20:04:10Z",
+  "sampling_algorithm": "random.Random(seed) MT19937; random.sample(stratum, 2) without replacement; strata in fixed order ISIC A-U then FORD 1-6, each sorted by case ID; FORD strata exclude IDs already drawn",
+  "inventory_size": 122,
+  "inventory_sha256": "not reported",
+  "categories": 27,
+  "selected": 54,
+  "read_status_selected": {
+   "READ": 41,
+   "READ-thin": 9,
+   "SNIPPET": 4
+  },
+  "source_acquisition": "WebFetch on github.com and raw.githubusercontent.com; all other hosts blocked; 51 of 54 selected cases read at least thinly",
+  "shortages": [
+   "ISIC G: 3 entries, one cluster (CL-EPCIS), effectively 2 origins; both picks cluster-adjacent",
+   "ISIC L: 4 entries, three in cluster CL-RESO, 2 origins",
+   "ISIC F: 5 entries, 3 organisations",
+   "ISIC I, P, S: 4 origins each, short by one",
+   "ISIC Q: 7 entries, 4 organisations",
+   "ISIC T: 5 origins found, all hosts blocked, zero READ sources; both picks SNIPPET",
+   "ISIC B: B-01 repository holds only a licence; B-04 host blocked",
+   "Thin reads recorded per case: H-04, I-01, N-02, O-04, Q-05, Q-07, R-06, X-03, M-02, N-04, A-01, A-06, R-02 lack the substance the case needed",
+   "G-01: schema summary claimed six core event types and enumerated five, unresolved",
+   "ISIC Rev. 5 titles beyond section F unverified; FORD text unverifiable"
+  ],
+  "scope_decision": "54 sampled cases briefed in full; 122-entry inventory delivered with status and clusters; two proposals per case; ten compositions and two generators; one stress variation per case"
+ },
+ "cases": [
+  {
+   "id": "A-03",
+   "origin": "NOAA Fisheries | FIMS",
+   "category": "ISIC A",
+   "source_status": "READ",
+   "deliverables": [
+    "R package fitting integrated statistical population-dynamics models (surplus production, catch-at-age) to fishery data",
+    "introductory vignette"
+   ],
+   "families": [
+    "F36",
+    "F18",
+    "F21",
+    "F24",
+    "F31",
+    "F22"
+   ],
+   "O": [
+    "O10",
+    "O12",
+    "O14",
+    "O16",
+    "O09"
+   ],
+   "C": [
+    "C01",
+    "C05",
+    "C11"
+   ],
+   "A": [
+    "A06:probability",
+    "A15:statistical performance",
+    "A05:calendar",
+    "A08:approve",
+    "A16:out-of-envelope",
+    "A14:policy revision"
+   ],
+   "V": [
+    "V04",
+    "V05"
+   ],
+   "R": [
+    "R23",
+    "R31",
+    "R16",
+    "R07"
+   ],
+   "X": "X06",
+   "anchors": [
+    "P335",
+    "P347",
+    "P322",
+    "P277",
+    "P268",
+    "P290"
+   ],
+   "no_anchor": [
+    "integrated state-space population-dynamics likelihood fitting has no anchoring record beyond P322 and P347"
+   ],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "Experimental lifecycle and the scientific-product disclaimer are HG01 basis limits: fitted output is SCENARIO evidence until accepted (A11 sign-off). Structural hypothesis comparison across model types is an experiment over models (F22) with declared tolerances (P347). Benchmark reproduction is accuracy-gated measurement (P268).",
+   "stress": {
+    "n": "SV-A-03",
+    "condition": "council deadline halves and data vintage arrives two weeks late",
+    "maps_to": [
+     "P228",
+     "P224",
+     "P290",
+     "HG05"
+    ],
+    "expressed": true,
+    "note": "dependency-aware plan repair under a fixed calendar; pre-computed benchmarks are guarded cache reuse; the disclaimer becomes load-bearing exactly as the catalogue's basis rule says"
+   }
+  },
+  {
+   "id": "A-05",
+   "origin": "AgGateway ADAPT | ADAPT Standard",
+   "category": "ISIC A",
+   "source_status": "READ",
+   "deliverables": [
+    "root schema, standard data types and unit-of-measure abbreviations as JSON",
+    "nine-state change process with committee review"
+   ],
+   "families": [
+    "F03",
+    "F02",
+    "F10",
+    "F07",
+    "F32",
+    "F31"
+   ],
+   "O": [
+    "O03",
+    "O04",
+    "O07",
+    "O08",
+    "O18",
+    "O16"
+   ],
+   "C": [
+    "C01",
+    "C04",
+    "C11"
+   ],
+   "A": [
+    "A01:model",
+    "A10:units",
+    "A03:state machine",
+    "A08:approve",
+    "A11:sign-off",
+    "A13:mandatory"
+   ],
+   "V": [
+    "V16"
+   ],
+   "R": [
+    "R02",
+    "R25",
+    "R30",
+    "R31"
+   ],
+   "X": "X11",
+   "anchors": [
+    "P95",
+    "P282",
+    "P216",
+    "P257",
+    "P13",
+    "P261"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "Data-only, no toolkit dependency, is an environment-binding constraint. The change-proposal state machine is a guarded lifecycle model (P216); 'no component released before its counterparts' is an object-level readiness barrier across components (P257).",
+   "stress": {
+    "n": "SV-A-05",
+    "condition": "two committee members hold incompatible unit conventions and neither concedes",
+    "maps_to": [
+     "P193",
+     "P282",
+     "C11",
+     "P257"
+    ],
+    "expressed": true,
+    "note": "contradiction register with an adjudication boundary; the readiness barrier keeps the release blocked rather than letting components diverge"
+   }
+  },
+  {
+   "id": "B-01",
+   "origin": "Global Mining Guidelines Group | Open Mining Format",
+   "category": "ISIC B",
+   "source_status": "READ-thin",
+   "deliverables": [
+    "none present at the cited URL: a licence file only"
+   ],
+   "families": [
+    "F01",
+    "F29",
+    "F32"
+   ],
+   "O": [
+    "O01",
+    "O02",
+    "O16"
+   ],
+   "C": [
+    "C01"
+   ],
+   "A": [
+    "A01:text",
+    "A09:unknown coverage",
+    "A16:missing",
+    "A11:accepted upstream interpretation"
+   ],
+   "V": [
+    "V15"
+   ],
+   "R": [
+    "R06",
+    "R02"
+   ],
+   "X": null,
+   "anchors": [
+    "P204",
+    "P300",
+    "P250"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "Degenerate case: the source carries no requirements beyond a licence. The construction is the catalogue's missing-source path: an acquisition gap (O01) recorded with the unresolved location of the normative text (P204, P300), and any conformance rule blocked for lack of accepted source meaning. Rediscovered origin from iteration 1, where mirrors supplied the content.",
+   "stress": {
+    "n": "SV-B-01",
+    "condition": "an implementer claims OMF conformance with no normative text to adjudicate",
+    "maps_to": [
+     "V15",
+     "HG01",
+     "F31 open claim"
+    ],
+    "expressed": true,
+    "note": "the catalogue refuses to score conformance without an accepted source; the claim stays an open claim"
+   }
+  },
+  {
+   "id": "B-06",
+   "origin": "PDS Technology | WITSML Studio",
+   "category": "ISIC B",
+   "source_status": "READ",
+   "deliverables": [
+    "Windows desktop application with DataReplay, EtpBrowser, ObjectInspector and WitsmlBrowser plug-ins",
+    "schema submodule"
+   ],
+   "families": [
+    "F30",
+    "F25",
+    "F34",
+    "F21",
+    "F26",
+    "F31"
+   ],
+   "O": [
+    "O15",
+    "O17",
+    "O08",
+    "O12",
+    "O03",
+    "O16"
+   ],
+   "C": [
+    "C01",
+    "C07",
+    "C08"
+   ],
+   "A": [
+    "A04:streaming",
+    "A12:UI",
+    "A17:local",
+    "A14:backend replacement",
+    "A16:invalid",
+    "A13:alternative"
+   ],
+   "V": [
+    "V06",
+    "V11"
+   ],
+   "R": [
+    "R11",
+    "R19",
+    "R13",
+    "R02"
+   ],
+   "X": null,
+   "anchors": [
+    "P315",
+    "P327",
+    "P241",
+    "P249",
+    "P261"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "Schema version negotiated on connect is the HG00 envelope version shared by all plug-ins; a non-recursive clone silently losing schemas is a dependency-manifest defect (P249). DataReplay is deterministic replay of a recorded stream (P241, P327).",
+   "stress": {
+    "n": "SV-B-06",
+    "condition": "server upgraded mid-shift to a version the tool has not seen",
+    "maps_to": [
+     "HG00 schema version",
+     "P261",
+     "HG05 unsupported"
+    ],
+    "expressed": true,
+    "note": "the catalogue returns an explicit unsupported state instead of rendering misleading annotations"
+   }
+  },
+  {
+   "id": "C-05",
+   "origin": "OPC Foundation | UA-Nodeset",
+   "category": "ISIC C",
+   "source_status": "READ",
+   "deliverables": [
+    "per-specification NodeSet2.xml, Types.xsd and NodeIds.csv on tagged release branches",
+    "defect route via Mantis"
+   ],
+   "families": [
+    "F02",
+    "F33",
+    "F31",
+    "F10",
+    "F06",
+    "F32"
+   ],
+   "O": [
+    "O03",
+    "O04",
+    "O16",
+    "O18",
+    "O07"
+   ],
+   "C": [
+    "C01",
+    "C14"
+   ],
+   "A": [
+    "A01:record",
+    "A14:policy revision",
+    "A08:disclose",
+    "A11:sign-off",
+    "A07:replicated"
+   ],
+   "V": [],
+   "R": [
+    "R02",
+    "R12",
+    "R30",
+    "R25"
+   ],
+   "X": null,
+   "anchors": [
+    "P194",
+    "P263",
+    "P284",
+    "P208",
+    "P264",
+    "P95"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "A NodeId meaning the same node in all three artefacts is one identity across three representations; effective immutability after release is an append-only identity ledger (P263). Member-only drafts versus public release is a release policy under F06.",
+   "stress": {
+    "n": "SV-C-05",
+    "condition": "a NodeId reassigned between two released tags",
+    "maps_to": [
+     "P284",
+     "P212",
+     "HG00 identity stability",
+     "P263"
+    ],
+    "expressed": true,
+    "note": "an identity ledger detects reassignment across tags; the affected devices are the affected-case population"
+   }
+  },
+  {
+   "id": "C-06",
+   "origin": "DMSC QIF via J. Michaloski | QIF FAIR generation",
+   "category": "ISIC C",
+   "source_status": "READ",
+   "deliverables": [
+    "First Article Inspection Report generation",
+    "QIF Document bundling Rules, Results, Plans, Product, Statistics and MeasurementResources over a shared library"
+   ],
+   "families": [
+    "F27",
+    "F31",
+    "F17",
+    "F02",
+    "F03"
+   ],
+   "O": [
+    "O09",
+    "O16",
+    "O05",
+    "O04",
+    "O03"
+   ],
+   "C": [
+    "C01",
+    "C02",
+    "C06"
+   ],
+   "A": [
+    "A01:geometry",
+    "A10:units",
+    "A03:chain",
+    "A15:physical validation",
+    "A11:sign-off",
+    "A12:physical design"
+   ],
+   "V": [
+    "V09"
+   ],
+   "R": [
+    "R17",
+    "R15",
+    "R16",
+    "R31"
+   ],
+   "X": "X03",
+   "anchors": [
+    "P321",
+    "P184",
+    "P282",
+    "P148",
+    "P51"
+   ],
+   "no_anchor": [
+    "measurement-plan to result binding for dimensional metrology (characteristic identity through plan, execution and statistics) has no anchoring record beyond P184 unit-aware findings"
+   ],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "Every result citing a planned characteristic defined in the product model is the design-to-manufacturing correspondence claim R17 with characteristic identity as the join key; units resolving through one shared component is P282. Byte-stable regeneration except timestamps is canonical file digesting (P51).",
+   "stress": {
+    "n": "SV-C-06",
+    "condition": "supplier reports results for a characteristic removed from the revised product model",
+    "maps_to": [
+     "C02 join referent",
+     "P213",
+     "HG06",
+     "A14:correction"
+    ],
+    "expressed": true,
+    "note": "a dangling characteristic reference is a rejected join; the model revision invalidates dependent results"
+   }
+  },
+  {
+   "id": "D-02",
+   "origin": "LF Energy CoMPAS | IEC 61850 PACS configuration components",
+   "category": "ISIC D",
+   "source_status": "READ",
+   "deliverables": [
+    "SCL editor, SCL data services and validation, CIM-to-SCL mapping, SCL auto-alignment",
+    "shared demo environment"
+   ],
+   "families": [
+    "F03",
+    "F35",
+    "F26",
+    "F31",
+    "F06",
+    "F02"
+   ],
+   "O": [
+    "O03",
+    "O14",
+    "O16",
+    "O04",
+    "O17"
+   ],
+   "C": [
+    "C01",
+    "C13",
+    "C09"
+   ],
+   "A": [
+    "A12:infrastructure",
+    "A08:commit",
+    "A16:invalid",
+    "A07:shared",
+    "A13:requires",
+    "A17:shared"
+   ],
+   "V": [
+    "V10",
+    "V07"
+   ],
+   "R": [
+    "R20",
+    "R28",
+    "R13",
+    "R27",
+    "R02"
+   ],
+   "X": "X10",
+   "anchors": [
+    "P310",
+    "P261",
+    "P264",
+    "P318",
+    "P257"
+   ],
+   "no_anchor": [
+    "substation protection-configuration semantics (IEC 61850 SCL) have no anchoring record; the transform and validation shape anchors on P310 and P261"
+   ],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "CIM to SCL mapping with consistent equipment identity is an approved transform with reconciled destination (P310); the edition gate is dialect-specific validation (P261). The shared demo database is a missing tenant isolation contract (V07), which the catalogue blocks for utility data.",
+   "stress": {
+    "n": "SV-D-02",
+    "condition": "a utility uploads real substation files to the shared demo",
+    "maps_to": [
+     "V07",
+     "P264",
+     "A08:disclose"
+    ],
+    "expressed": true,
+    "note": "an isolation contract is mandatory before real data; the demo has none, so the catalogue rejects the upload path rather than the upload"
+   }
+  },
+  {
+   "id": "D-05",
+   "origin": "open-dynamic-export (independent) | CSIP-AUS dynamic export control",
+   "category": "ISIC D",
+   "source_status": "READ",
+   "deliverables": [
+    "controller implementing dynamic export control and solar curtailment against CSIP-AUS/IEEE 2030.5 with SunSpec Modbus inverters",
+    "DER reporting, control scheduling, default fallback, ramping"
+   ],
+   "families": [
+    "F35",
+    "F34",
+    "F25",
+    "F13",
+    "F31"
+   ],
+   "O": [
+    "O08",
+    "O17",
+    "O07",
+    "O11",
+    "O16"
+   ],
+   "C": [
+    "C12",
+    "C07",
+    "C04",
+    "C10"
+   ],
+   "A": [
+    "A04:real-time",
+    "A08:actuate",
+    "A17:embedded",
+    "A16:unavailable",
+    "A18:latency",
+    "A11:sign-off"
+   ],
+   "V": [
+    "V10",
+    "V01",
+    "V11"
+   ],
+   "R": [
+    "R20",
+    "R28",
+    "R10",
+    "R14"
+   ],
+   "X": "X10",
+   "anchors": [
+    "P329",
+    "P330",
+    "P244",
+    "P257",
+    "P218"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "First case with F35 as the primary family. Default DER control on loss of the utility server is the C07 timeout_path with a C04 safe default; ramping is a declared actuation contract under R20; certification by one DNSP is an accepted operating envelope (R28) scoped to that provider.",
+   "stress": {
+    "n": "SV-D-05",
+    "condition": "the DNSP server returns a malformed schedule instead of failing",
+    "maps_to": [
+     "HG02 whole-input validation before effects",
+     "A16:invalid",
+     "C04"
+    ],
+    "expressed": true,
+    "note": "a malformed schedule is rejected before actuation and routed to the invalid path, which is distinct from the lost-contact path; the source tests only the latter"
+   }
+  },
+  {
+   "id": "E-02",
+   "origin": "US EPA | SWMM",
+   "category": "ISIC E",
+   "source_status": "READ",
+   "deliverables": [
+    "dynamic hydrology-hydraulic water-quality simulation engine in C, public domain",
+    "build documentation"
+   ],
+   "families": [
+    "F21",
+    "F03",
+    "F31",
+    "F26"
+   ],
+   "O": [
+    "O12",
+    "O09",
+    "O16",
+    "O14"
+   ],
+   "C": [
+    "C01",
+    "C05"
+   ],
+   "A": [
+    "A15:physical validation",
+    "A10:floating tolerance",
+    "A05:interval",
+    "A12:software",
+    "A09:closed finite domain",
+    "A16:out-of-envelope"
+   ],
+   "V": [
+    "V04"
+   ],
+   "R": [
+    "R16",
+    "R31",
+    "R13"
+   ],
+   "X": "X09",
+   "anchors": [
+    "P322",
+    "P347",
+    "P249",
+    "P265",
+    "P268"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "Mass balance across hydrology, hydraulics and quality modules is the conservation invariant under R14 and O09; public-domain release with no upstream integrity guarantee is a sealed-bundle obligation on the consumer (P249, P265); continuity error under a stated percentage is the declared tolerance regime (P347).",
+   "stress": {
+    "n": "SV-E-02",
+    "condition": "a large impervious development mid-record makes one continuous run span two catchments",
+    "maps_to": [
+     "A14:new source",
+     "P322 applicability",
+     "HG01 SCENARIO"
+    ],
+    "expressed": true,
+    "note": "the model's applicability scope is declared per interval; the discontinuity becomes an explicit scope boundary rather than a mechanically valid run"
+   }
+  },
+  {
+   "id": "E-01",
+   "origin": "US EPA / OpenWaterAnalytics | EPANET 2.2",
+   "category": "ISIC E",
+   "source_status": "READ",
+   "deliverables": [
+    "extended-period hydraulic and water-quality solver for pressurised pipe networks",
+    "legacy input compatibility"
+   ],
+   "families": [
+    "F21",
+    "F03",
+    "F31",
+    "F32"
+   ],
+   "O": [
+    "O12",
+    "O09",
+    "O16",
+    "O18"
+   ],
+   "C": [
+    "C01",
+    "C05"
+   ],
+   "A": [
+    "A15:physical validation",
+    "A10:floating tolerance",
+    "A05:interval",
+    "A14:migration",
+    "A16:out-of-envelope",
+    "A18:latency"
+   ],
+   "V": [
+    "V04"
+   ],
+   "R": [
+    "R16",
+    "R31",
+    "R30"
+   ],
+   "X": "X09",
+   "anchors": [
+    "P322",
+    "P347",
+    "P261",
+    "P245",
+    "P268"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "Quality transport bound to the hydraulic timestep and topology is a C01 handoff with a shared clock contract; a 14-year input compatibility window is explicit migration and dialect validation (P261, P245); the 'as is' basis forbids promoting model output to observation (HG01).",
+   "stress": {
+    "n": "SV-E-01",
+    "condition": "contamination event needs an answer within the hour and no tolerance is stated",
+    "maps_to": [
+     "P347",
+     "HG05",
+     "A06:unknown"
+    ],
+    "expressed": true,
+    "note": "the catalogue emits the answer under an explicit unknown-confidence state; it cannot invent a tolerance and says so, which is the honest form of the source's silence"
+   }
+  },
+  {
+   "id": "F-04",
+   "origin": "LabEEE UFSC | IDS for BIM-BEM validation",
+   "category": "ISIC F",
+   "source_status": "READ",
+   "deliverables": [
+    "IDS XML file validating IFC models for thermal material properties"
+   ],
+   "families": [
+    "F05",
+    "F31",
+    "F27",
+    "F03"
+   ],
+   "O": [
+    "O07",
+    "O16",
+    "O03",
+    "O02"
+   ],
+   "C": [
+    "C01",
+    "C13"
+   ],
+   "A": [
+    "A01:rule",
+    "A15:structural validity",
+    "A13:requires",
+    "A08:approve",
+    "A12:physical design"
+   ],
+   "V": [
+    "V09"
+   ],
+   "R": [
+    "R15",
+    "R02",
+    "R04"
+   ],
+   "X": "X03",
+   "anchors": [
+    "P191",
+    "P194",
+    "P148",
+    "P261"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "A ruleset decoupled from any one checker is the replaceable-engine posture (C13, P197 shape); the unread entity list inside the .ids file is an unresolved input carried explicitly.",
+   "stress": {
+    "n": "SV-F-04",
+    "condition": "designer supplies a newer IFC schema version than the IDS targets",
+    "maps_to": [
+     "P261",
+     "HG00 schema version",
+     "HG05"
+    ],
+    "expressed": true,
+    "note": "dialect mismatch is detected at the boundary and reported as unsupported rather than under-checked"
+   }
+  },
+  {
+   "id": "F-03",
+   "origin": "buildingSMART International | bSDD verification procedure",
+   "category": "ISIC F",
+   "source_status": "READ",
+   "deliverables": [
+    "four verification types (organisation review, import validation, user review, paid detailed verification)",
+    "verified badge",
+    "twenty requirement groups DCT/GEN/CLS/PRP/CPR/REL"
+   ],
+   "families": [
+    "F31",
+    "F07",
+    "F10",
+    "F05",
+    "F02",
+    "F04",
+    "F32"
+   ],
+   "O": [
+    "O07",
+    "O16",
+    "O04",
+    "O06",
+    "O08",
+    "O18"
+   ],
+   "C": [
+    "C04",
+    "C11",
+    "C01"
+   ],
+   "A": [
+    "A08:approve",
+    "A11:adjudication",
+    "A15:structural validity",
+    "A03:tree",
+    "A10:units",
+    "A14:policy revision"
+   ],
+   "V": [
+    "V16"
+   ],
+   "R": [
+    "R29",
+    "R25",
+    "R02",
+    "R30"
+   ],
+   "X": "X02",
+   "anchors": [
+    "P199",
+    "P200",
+    "P194",
+    "P282",
+    "P288",
+    "P205",
+    "P250"
+   ],
+   "no_anchor": [
+    "ISO 704 definitional quality (circularity, negativity, accuracy of definitions) as a human-judged gate has no anchoring record beyond P288 reliability measures"
+   ],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "Registration to Active to badge is an admission lifecycle with separate gate decisions (P199); cycle detection in class parentage and relations is shape and completeness validation (P194); 'Unit must match the Dimension' is P282 verbatim; the no-threshold qualitative gates are a human evidence boundary (C11).",
+   "stress": {
+    "n": "SV-F-03",
+    "condition": "a badged dictionary later publishes a version adding circular relations; nothing re-checks",
+    "maps_to": [
+     "P255",
+     "P213",
+     "HG06",
+     "A14:policy revision"
+    ],
+    "expressed": true,
+    "note": "the catalogue re-qualifies on every change and invalidates the badge; bSDD's grant-only gate is the missing review clock"
+   }
+  },
+  {
+   "id": "G-01",
+   "origin": "GS1 | EPCIS 2.0 XSD",
+   "category": "ISIC G",
+   "source_status": "READ",
+   "deliverables": [
+    "normative XSD for Object, Aggregation, Transformation, Transaction and Association events with what/when/where/why dimensions"
+   ],
+   "families": [
+    "F15",
+    "F34",
+    "F02",
+    "F03",
+    "F13"
+   ],
+   "O": [
+    "O03",
+    "O04",
+    "O08",
+    "O05",
+    "O17"
+   ],
+   "C": [
+    "C02",
+    "C06",
+    "C01"
+   ],
+   "A": [
+    "A01:event",
+    "A05:event time",
+    "A07:distributed",
+    "A03:DAG",
+    "A11:accepted upstream interpretation",
+    "A08:commit"
+   ],
+   "V": [
+    "V11"
+   ],
+   "R": [
+    "R02",
+    "R19",
+    "R12",
+    "R10"
+   ],
+   "X": "X02",
+   "anchors": [
+    "P177",
+    "P160",
+    "P153",
+    "P283",
+    "P262",
+    "P210"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "TransformationEvent inputs consumed and outputs produced is lot linkage through transformation (P160, P177); eventTime with eventTimeZoneOffset preserved is the boundary time field carrying local time; canonical event hashing across partners is P262. The five-versus-six event-type discrepancy is a discovery-side unresolved input.",
+   "stress": {
+    "n": "SV-G-01",
+    "condition": "two partners record one move in different time zones and one normalises to UTC",
+    "maps_to": [
+     "P262 canonical bytes",
+     "HG00 time field",
+     "P283"
+    ],
+    "expressed": true,
+    "note": "a declared canonicalisation contract precedes hashing; without it the hash divergence is exactly what the catalogue predicts"
+   }
+  },
+  {
+   "id": "G-02",
+   "origin": "OpenEPCIS (benelog) | EPCIS 2.0 toolkit",
+   "category": "ISIC G",
+   "source_status": "READ",
+   "deliverables": [
+    "EPCIS repository, XML/JSON/JSON-LD converter, canonical hash generator, test-data generator",
+    "EPCIS 1.2 backward compatibility, streaming conversion"
+   ],
+   "families": [
+    "F03",
+    "F25",
+    "F31",
+    "F32",
+    "F34"
+   ],
+   "O": [
+    "O03",
+    "O17",
+    "O16",
+    "O18",
+    "O05"
+   ],
+   "C": [
+    "C01",
+    "C08",
+    "C14"
+   ],
+   "A": [
+    "A01:event",
+    "A14:migration",
+    "A18:memory",
+    "A15:behavioral refinement",
+    "A04:streaming"
+   ],
+   "V": [
+    "V11"
+   ],
+   "R": [
+    "R02",
+    "R29",
+    "R30",
+    "R19"
+   ],
+   "X": "X11",
+   "anchors": [
+    "P197",
+    "P30",
+    "P262",
+    "P344",
+    "P261",
+    "P268"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "Semantic equivalence across three serialisations is two-representation equivalence with round trip (P197, P30); the test-data generator is generated-input evidence (P344); larger-than-memory conversion is a measured resource envelope (P268) declared in the boundary resources field. Self-declared conformance stays an open claim until independently checked.",
+   "stress": {
+    "n": "SV-G-02",
+    "condition": "regulator mandates a field the CBV lacks, six-week deadline",
+    "maps_to": [
+     "A13 variability limit",
+     "V15",
+     "P212"
+    ],
+    "expressed": true,
+    "note": "blocked path with an affected-population computation; the extension is a proposal, not coverage"
+   }
+  },
+  {
+   "id": "H-04",
+   "origin": "DCSA | Track and Trace API reference implementation",
+   "category": "ISIC H",
+   "source_status": "READ-thin",
+   "deliverables": [
+    "reference implementation modules over DCSA-Core and DCSA-Event-Core with PostgreSQL persistence",
+    "explicit statement that no authentication or authorisation exists"
+   ],
+   "families": [
+    "F25",
+    "F24",
+    "F06",
+    "F26",
+    "F31"
+   ],
+   "O": [
+    "O17",
+    "O14",
+    "O07",
+    "O16"
+   ],
+   "C": [
+    "C01",
+    "C04"
+   ],
+   "A": [
+    "A08:read",
+    "A07:distributed",
+    "A16:missing",
+    "A17:shared",
+    "A11:accepted upstream interpretation"
+   ],
+   "V": [
+    "V15",
+    "V07"
+   ],
+   "R": [
+    "R09",
+    "R27",
+    "R13",
+    "R02"
+   ],
+   "X": null,
+   "anchors": [
+    "P206",
+    "P207",
+    "P264",
+    "P266",
+    "P318"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "The missing authorisation layer is a missing provider capability, which blocks every party-scoped read under the catalogue's rule that missing authority blocks the effect; the README's warning becomes an HG00 authority field that the deployment cannot populate.",
+   "stress": {
+    "n": "SV-H-04",
+    "condition": "deployed to a shared test environment with real carrier data",
+    "maps_to": [
+     "P264",
+     "V07",
+     "HG00 authority field"
+    ],
+    "expressed": true,
+    "note": "the seal travels with the envelope, not the README; the catalogue refuses the path for real data"
+   }
+  },
+  {
+   "id": "H-01",
+   "origin": "Open Mobility Foundation | MDS Policy API",
+   "category": "ISIC H",
+   "source_status": "READ",
+   "deliverables": [
+    "Policy API publishing machine-readable municipal policies with rules, GeoJSON geographies, rule types and units",
+    "supersession via prev_policies, revocation, 20-minute publication lead, versioned public endpoints"
+   ],
+   "families": [
+    "F05",
+    "F28",
+    "F33",
+    "F06",
+    "F08",
+    "F32"
+   ],
+   "O": [
+    "O07",
+    "O09",
+    "O08",
+    "O18",
+    "O15"
+   ],
+   "C": [
+    "C04",
+    "C07",
+    "C14"
+   ],
+   "A": [
+    "A01:rule",
+    "A05:calendar",
+    "A08:disclose",
+    "A14:policy revision",
+    "A03:hierarchy",
+    "A10:topology"
+   ],
+   "V": [],
+   "R": [
+    "R04",
+    "R18",
+    "R12",
+    "R30"
+   ],
+   "X": "X07",
+   "anchors": [
+    "P4",
+    "P192",
+    "P326",
+    "P215",
+    "P263",
+    "P212",
+    "P244"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "Rules scoped by geography and vehicle state are spatially scoped decisions (P326, P192); prev_policies is an append-only supersession chain (P263); the 20-minute lead is a publication timing contract in the boundary time field (P244). The informational user rule is a declared non-enforceable modality.",
+   "stress": {
+    "n": "SV-H-01",
+    "condition": "an emergency needs a policy effective in five minutes against a 20-minute floor",
+    "maps_to": [
+     "C07 deadline",
+     "A13:alternative",
+     "P224"
+    ],
+    "expressed": true,
+    "note": "a declared timing conflict; only an emergency profile with its own lead-time contract resolves it, which the catalogue would require to exist before use"
+   }
+  },
+  {
+   "id": "I-01",
+   "origin": "OpenTravel Alliance | OpenTravel specifications",
+   "category": "ISIC I",
+   "source_status": "READ-thin",
+   "deliverables": [
+    "dated object suites for OTA 2.0 alongside OTA 1.0",
+    "separately maintained code lists"
+   ],
+   "families": [
+    "F03",
+    "F32",
+    "F02"
+   ],
+   "O": [
+    "O03",
+    "O18",
+    "O04"
+   ],
+   "C": [
+    "C01",
+    "C13"
+   ],
+   "A": [
+    "A14:migration",
+    "A13:alternative",
+    "A09:unknown coverage",
+    "A01:model"
+   ],
+   "V": [],
+   "R": [
+    "R02",
+    "R30"
+   ],
+   "X": null,
+   "anchors": [
+    "P261",
+    "P245",
+    "P95",
+    "P204"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "Thin source. Dated suites with stable code meanings are versioned dialects (P261) over a code-list identity registry; the unreadable README is an acquisition gap (P204) carried as unresolved.",
+   "stress": {
+    "n": "SV-I-01",
+    "condition": "one integrator must serve partners pinned to different suites",
+    "maps_to": [
+     "P261",
+     "HG00 schema version",
+     "A13:alternative"
+    ],
+    "expressed": true,
+    "note": "per-partner dialect validation; forward compatibility stays unverified as the source records"
+   }
+  },
+  {
+   "id": "I-04",
+   "origin": "USDA FoodData Central | FDC API release notice",
+   "category": "ISIC I",
+   "source_status": "READ",
+   "deliverables": [
+    "FDC API with multi-food, full/abridged formats, paged lists, nutrient selection",
+    "OpenAPI v3 in HTML, JSON and YAML",
+    "dated NDB discontinuation"
+   ],
+   "families": [
+    "F25",
+    "F04",
+    "F32",
+    "F06",
+    "F31"
+   ],
+   "O": [
+    "O17",
+    "O05",
+    "O18",
+    "O16",
+    "O07"
+   ],
+   "C": [
+    "C05",
+    "C07",
+    "C01"
+   ],
+   "A": [
+    "A09:paginated snapshot",
+    "A14:expiry",
+    "A08:read",
+    "A05:calendar",
+    "A13:alternative"
+   ],
+   "V": [],
+   "R": [
+    "R09",
+    "R30",
+    "R02"
+   ],
+   "X": "X04",
+   "anchors": [
+    "P311",
+    "P294",
+    "P266",
+    "P197",
+    "P215",
+    "P228"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "Three renderings of one interface agreeing is representation equivalence (P197); paged browsing is stable-snapshot pagination (P294); the dated cut-off is a recurring-obligation deadline inherited by dependents (P215).",
+   "stress": {
+    "n": "SV-I-04",
+    "condition": "the migration deadline lands while a dependent product is mid-certification",
+    "maps_to": [
+     "C07 deadline",
+     "P228",
+     "A14:expiry"
+    ],
+    "expressed": true,
+    "note": "inherited deadline handled by dependency-aware plan repair; abridged-only migration is a declared reduced profile"
+   }
+  },
+  {
+   "id": "J-06",
+   "origin": "UK CDDO | open standards process",
+   "category": "ISIC J",
+   "source_status": "READ",
+   "deliverables": [
+    "four-stage public process (suggestion, response, proposal, solution) run as open issues",
+    "Open Standards Board decisions under terms of reference"
+   ],
+   "families": [
+    "F10",
+    "F09",
+    "F07",
+    "F06",
+    "F01"
+   ],
+   "O": [
+    "O07",
+    "O08",
+    "O02",
+    "O16",
+    "O05"
+   ],
+   "C": [
+    "C04",
+    "C11",
+    "C01"
+   ],
+   "A": [
+    "A08:approve",
+    "A11:sign-off",
+    "A03:state machine",
+    "A09:closed finite domain",
+    "A05:interval"
+   ],
+   "V": [
+    "V16"
+   ],
+   "R": [
+    "R25",
+    "R06",
+    "R14"
+   ],
+   "X": "X07",
+   "anchors": [
+    "P13",
+    "P106",
+    "P216",
+    "P199",
+    "P195",
+    "P231"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "Problem statement surviving unchanged into the challenge is stable span mapping with semantic-change detection (P195); one proposal per challenge reaching the Board is a guarded lifecycle transition with transferred authority (P216, P199); stage latency is interval accounting (P231).",
+   "stress": {
+    "n": "SV-J-06",
+    "condition": "evidence for a suggestion is commercially confidential and the process is public",
+    "maps_to": [
+     "P264",
+     "F06 purpose-bound release",
+     "C11"
+    ],
+    "expressed": true,
+    "note": "a declared conflict between openness and evidence; selective disclosure with attestation is the catalogue's available shape, which the process lacks"
+   }
+  },
+  {
+   "id": "J-04",
+   "origin": "Model Context Protocol | authorization discussion",
+   "category": "ISIC J",
+   "source_status": "READ",
+   "deliverables": [
+    "Authorization section with OAuth 2.0 as initial standard, pluggable",
+    "two-layer separation, session identifiers, multi-tenant remote servers, headless flows, refresh rotation"
+   ],
+   "families": [
+    "F06",
+    "F25",
+    "F13",
+    "F33",
+    "F31"
+   ],
+   "O": [
+    "O07",
+    "O17",
+    "O08",
+    "O16"
+   ],
+   "C": [
+    "C01",
+    "C04",
+    "C07",
+    "C09"
+   ],
+   "A": [
+    "A08:commit",
+    "A07:distributed",
+    "A17:cloud",
+    "A16:stale",
+    "A11:recorded runtime input",
+    "A13:alternative"
+   ],
+   "V": [
+    "V07",
+    "V01"
+   ],
+   "R": [
+    "R27",
+    "R09",
+    "R10",
+    "R28"
+   ],
+   "X": null,
+   "anchors": [
+    "P206",
+    "P207",
+    "P247",
+    "P244",
+    "P248",
+    "P262"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "Clients never holding third-party credentials is a permitted-edge rule (P207); session identifiers and refresh rotation are authority state with expiry and freshness fences (P244); local baked-in credentials versus multi-tenant remote is the deployment axis (A17).",
+   "stress": {
+    "n": "SV-J-04",
+    "condition": "a session identifier leaks through a proxy log",
+    "maps_to": [
+     "P244",
+     "HG00 authority expiry",
+     "P276"
+    ],
+    "expressed": true,
+    "note": "leaked authority is stale-authority rejection plus rotation; the blast radius is a failure-model analysis over dependent effects"
+   }
+  },
+  {
+   "id": "K-06",
+   "origin": "UK GDS Data Standards Authority | ISO 20022 catalogue entry",
+   "category": "ISIC K",
+   "source_status": "READ",
+   "deliverables": [
+    "catalogue entry with purpose, specification URL, domain, maintainer, licence and review date"
+   ],
+   "families": [
+    "F04",
+    "F08",
+    "F32",
+    "F02",
+    "F29"
+   ],
+   "O": [
+    "O04",
+    "O01",
+    "O18",
+    "O15"
+   ],
+   "C": [
+    "C01",
+    "C07"
+   ],
+   "A": [
+    "A01:record",
+    "A14:expiry",
+    "A08:disclose",
+    "A05:calendar",
+    "A11:accepted upstream interpretation"
+   ],
+   "V": [],
+   "R": [
+    "R30",
+    "R02"
+   ],
+   "X": null,
+   "anchors": [
+    "P79",
+    "P215",
+    "P255",
+    "P204",
+    "P265"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "A catalogue entry is a typed catalog record (P79) whose review date is a review clock (P255); a proprietary licence is an obligation the entry references but does not resolve, carried in the authority field. Staleness is expiry (A14).",
+   "stress": {
+    "n": "SV-K-06",
+    "condition": "the specification URL moves and stops resolving",
+    "maps_to": [
+     "P265",
+     "P204",
+     "A16:unavailable",
+     "P255"
+    ],
+    "expressed": true,
+    "note": "a sealed copy or pinned reference plus the review clock catches it; the entry's own fields cannot"
+   }
+  },
+  {
+   "id": "K-05",
+   "origin": "Moov | iso20022 Go library (archived)",
+   "category": "ISIC K",
+   "source_status": "READ",
+   "deliverables": [
+    "Go library parsing, producing and validating ISO 20022 payments messages",
+    "HTTP API with convert, health, print and validator endpoints",
+    "archived read-only status"
+   ],
+   "families": [
+    "F24",
+    "F25",
+    "F32",
+    "F26",
+    "F13",
+    "F31"
+   ],
+   "O": [
+    "O03",
+    "O16",
+    "O17",
+    "O18",
+    "O14"
+   ],
+   "C": [
+    "C01",
+    "C13"
+   ],
+   "A": [
+    "A14:withdrawal",
+    "A12:software",
+    "A16:unavailable",
+    "A15:structural validity",
+    "A01:record"
+   ],
+   "V": [
+    "V15"
+   ],
+   "R": [
+    "R30",
+    "R13",
+    "R09",
+    "R02"
+   ],
+   "X": "X04",
+   "anchors": [
+    "P345",
+    "P249",
+    "P265",
+    "P30",
+    "P197",
+    "P272"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "An archived dependency with no fix path is lost support in the dependency closure (P345) and a pinned sealed bundle (P249, P265); the exit plan to a successor is least-cost repair (P272) with substitution (C13). XML to JSON to XML survival is round trip (P30).",
+   "stress": {
+    "n": "SV-K-05",
+    "condition": "a vulnerability in the archived library sits in a live payments path",
+    "maps_to": [
+     "P345",
+     "P272",
+     "C13",
+     "A16:unavailable"
+    ],
+    "expressed": true,
+    "note": "dependency closure names affected paths; corrective action is fork-and-own or substitute, both explicit"
+   }
+  },
+  {
+   "id": "L-03",
+   "origin": "BuildingSync consortium (US DOE) | BuildingSync schema",
+   "category": "ISIC L",
+   "source_status": "READ",
+   "deliverables": [
+    "building-data exchange schema for audits, measure tracking and characteristics",
+    "use-case Schematron from CSV templates",
+    "use-case validator",
+    "examples as release gate"
+   ],
+   "families": [
+    "F03",
+    "F31",
+    "F05",
+    "F32",
+    "F21",
+    "F02"
+   ],
+   "O": [
+    "O03",
+    "O07",
+    "O16",
+    "O18",
+    "O12"
+   ],
+   "C": [
+    "C01",
+    "C04",
+    "C14"
+   ],
+   "A": [
+    "A01:record",
+    "A13:requires",
+    "A15:structural validity",
+    "A03:state machine",
+    "A14:policy revision"
+   ],
+   "V": [
+    "V16"
+   ],
+   "R": [
+    "R02",
+    "R30",
+    "R16",
+    "R04"
+   ],
+   "X": null,
+   "anchors": [
+    "P192",
+    "P198",
+    "P148",
+    "P261",
+    "P322",
+    "P208"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "Rediscovered document from iteration 1 (F-02). The three measure states proposed, implemented, discarded are lifecycle labels (P208); a use case never contradicting the base schema is a refinement constraint on scoped rules (P198).",
+   "stress": {
+    "n": "SV-L-03",
+    "condition": "programme mandates a Level 2 element the use case does not require; examples gate blocks the update",
+    "maps_to": [
+     "P189",
+     "P148",
+     "F37 requiredness set"
+    ],
+    "expressed": true,
+    "note": "a new required set is a profile change gated by traceability; the examples must extend first, which the catalogue orders explicitly"
+   }
+  },
+  {
+   "id": "L-01",
+   "origin": "RESO | Common Format proposal (ratified 2023)",
+   "category": "ISIC L",
+   "source_status": "READ",
+   "deliverables": [
+    "normative JSON representation of the Data Dictionary with @reso.context URN, single and multi-valued payload rules, local-field tolerance, dual enumerations"
+   ],
+   "families": [
+    "F03",
+    "F02",
+    "F32",
+    "F25",
+    "F31"
+   ],
+   "O": [
+    "O03",
+    "O04",
+    "O16",
+    "O18"
+   ],
+   "C": [
+    "C01",
+    "C04"
+   ],
+   "A": [
+    "A01:record",
+    "A13:mandatory",
+    "A14:policy revision",
+    "A09:paginated snapshot",
+    "A11:accepted upstream interpretation"
+   ],
+   "V": [],
+   "R": [
+    "R02",
+    "R30",
+    "R09"
+   ],
+   "X": null,
+   "anchors": [
+    "P302",
+    "P95",
+    "P261",
+    "P307",
+    "P282"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "Local fields ignorable but never fatal is the explicit extra-field policy P302 requires on every boundary; the version URN is the schema-version field; human-friendly versus OData enumerations mapping to one meaning is P282. Same organisation as iteration 1's L-01, different document.",
+   "stress": {
+    "n": "SV-L-01",
+    "condition": "a payload cites Data Dictionary 1.6 below the 1.7 floor",
+    "maps_to": [
+     "P261",
+     "HG00 schema version",
+     "HG05"
+    ],
+    "expressed": true,
+    "note": "rejected at the boundary with an explicit unsupported-version state; the source leaves behaviour unspecified"
+   }
+  },
+  {
+   "id": "M-02",
+   "origin": "DataCite | metadata schema documentation",
+   "category": "ISIC M",
+   "source_status": "READ",
+   "deliverables": [
+    "documentation for schema versions 4.5, 4.6 and 4.7 built by ReadTheDocs",
+    "reconciliation against the schema files"
+   ],
+   "families": [
+    "F29",
+    "F32",
+    "F31",
+    "F03"
+   ],
+   "O": [
+    "O15",
+    "O18",
+    "O16",
+    "O14"
+   ],
+   "C": [
+    "C01",
+    "C14"
+   ],
+   "A": [
+    "A14:migration",
+    "A13:alternative",
+    "A01:text",
+    "A15:structural validity"
+   ],
+   "V": [],
+   "R": [
+    "R24",
+    "R30",
+    "R02"
+   ],
+   "X": "X11",
+   "anchors": [
+    "P140",
+    "P261",
+    "P120",
+    "P148"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "One documentation branch per schema version with no divergence from the XSD is single-source publication (X11) plus document-content comparison (P120); three live versions force version-qualified statements, the schema-version boundary field.",
+   "stress": {
+    "n": "SV-M-02",
+    "condition": "a property's obligation level changes between 4.6 and 4.7",
+    "maps_to": [
+     "P212",
+     "HG00 schema version",
+     "P195"
+    ],
+    "expressed": true,
+    "note": "version-scoped rule change with affected-population computation; the reconciliation check is the detector"
+   }
+  },
+  {
+   "id": "X-02",
+   "origin": "Zarr developers | GeoZarr CF alignment issue",
+   "category": "ISIC M",
+   "source_status": "READ",
+   "deliverables": [
+    "proposal registering CF metadata via GeoZarr's convention mechanism",
+    "answers to five open questions incl. precedence between CF and GeoZarr encodings, recommendation for SWG vote after CF consultation"
+   ],
+   "families": [
+    "F01",
+    "F10",
+    "F28",
+    "F03",
+    "F32"
+   ],
+   "O": [
+    "O02",
+    "O07",
+    "O09",
+    "O16",
+    "O18"
+   ],
+   "C": [
+    "C04",
+    "C11",
+    "C13"
+   ],
+   "A": [
+    "A11:adjudication",
+    "A01:model",
+    "A10:coordinates",
+    "A08:approve",
+    "A14:policy revision",
+    "A06:unknown"
+   ],
+   "V": [
+    "V16"
+   ],
+   "R": [
+    "R06",
+    "R25",
+    "R18",
+    "R30"
+   ],
+   "X": null,
+   "anchors": [
+    "P193",
+    "P281",
+    "P325",
+    "P288",
+    "P13",
+    "P214"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "Two conventions encoding one fact differently is a contradiction register over accepted mappings (P193) with alternatives retained until adjudicated (P281); CRS in grid_mapping versus proj: is reference metadata preservation (P325); the SWG vote with CF consultation is a decision record with transferred authority (P13).",
+   "stress": {
+    "n": "SV-X-02",
+    "condition": "a widely used tool ships assuming CF wins before the vote",
+    "maps_to": [
+     "HG01",
+     "A11 missing acceptance",
+     "P214"
+    ],
+    "expressed": true,
+    "note": "an implementation's choice is not an accepted mapping; shadow evaluation of both precedence rules is the catalogue's way to keep the decision open"
+   }
+  },
+  {
+   "id": "N-01",
+   "origin": "Brick Consortium | Brick schema",
+   "category": "ISIC N",
+   "source_status": "READ",
+   "deliverables": [
+    "RDF class hierarchy, minimal relationship set, encapsulation of components",
+    "generated Brick.ttl, semantic versioning, nightly builds"
+   ],
+   "families": [
+    "F04",
+    "F01",
+    "F32",
+    "F26",
+    "F31",
+    "F02"
+   ],
+   "O": [
+    "O02",
+    "O06",
+    "O14",
+    "O18",
+    "O16"
+   ],
+   "C": [
+    "C06",
+    "C14",
+    "C01"
+   ],
+   "A": [
+    "A01:entity graph",
+    "A14:policy revision",
+    "A03:DAG",
+    "A12:generator",
+    "A15:structural validity"
+   ],
+   "V": [],
+   "R": [
+    "R06",
+    "R30",
+    "R13",
+    "R08"
+   ],
+   "X": "X11",
+   "anchors": [
+    "P306",
+    "P203",
+    "P318",
+    "P309",
+    "P261"
+   ],
+   "no_anchor": [
+    "minimality of a relationship set as a design constraint to be guarded across releases has no anchoring record; P309 architecture rules are the nearest"
+   ],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "Tests must use a generated, not hand-edited, artefact: reproducible build (P318); minor releases largely backward compatible and removals needing a major version is the change-propagation contract; nightly builds indistinguishable from releases is a missing HG00 producer-version stamp.",
+   "stress": {
+    "n": "SV-N-01",
+    "condition": "a nightly build is deployed to production analytics by mistake",
+    "maps_to": [
+     "HG00 producer/environment version",
+     "P249",
+     "A14:backend replacement"
+    ],
+    "expressed": true,
+    "note": "the envelope carries build provenance; a sealed bundle makes the nightly distinguishable"
+   }
+  },
+  {
+   "id": "N-02",
+   "origin": "Open Contracting Partnership | OCDS standard repository README",
+   "category": "ISIC N",
+   "source_status": "READ-thin",
+   "deliverables": [
+    "OCDS documentation with schemas, scripts and tests; normative site; development handbook; 1.2-dev"
+   ],
+   "families": [
+    "F29",
+    "F03",
+    "F31",
+    "F10"
+   ],
+   "O": [
+    "O15",
+    "O03",
+    "O16",
+    "O07"
+   ],
+   "C": [
+    "C01"
+   ],
+   "A": [
+    "A01:text",
+    "A14:policy revision",
+    "A15:structural validity",
+    "A11:accepted upstream interpretation"
+   ],
+   "V": [],
+   "R": [
+    "R24",
+    "R02",
+    "R30"
+   ],
+   "X": "X11",
+   "anchors": [
+    "P140",
+    "P148",
+    "P261"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "Thin source; same organisation as iteration 1's O-02 with the substantive model unread here. Documented fields existing in the schema and vice versa is single-source generation with a divergence gate.",
+   "stress": {
+    "n": "SV-N-02",
+    "condition": "a jurisdiction's law requires a contract stage the model lacks",
+    "maps_to": [
+     "A13 variability limit",
+     "V15",
+     "F37 extension proposal"
+    ],
+    "expressed": true,
+    "note": "blocked as unsupported; the extension is a proposal outside the frozen catalogue's score"
+   }
+  },
+  {
+   "id": "O-04",
+   "origin": "GSA / 18F | Login.gov identity provider",
+   "category": "ISIC O",
+   "source_status": "READ-thin",
+   "deliverables": [
+    "identity provider for one public account across agencies over SAML and OIDC",
+    "security policy and dependency auditing"
+   ],
+   "families": [
+    "F06",
+    "F02",
+    "F25",
+    "F26",
+    "F31"
+   ],
+   "O": [
+    "O07",
+    "O04",
+    "O17",
+    "O16",
+    "O14"
+   ],
+   "C": [
+    "C01",
+    "C04",
+    "C09"
+   ],
+   "A": [
+    "A08:approve",
+    "A07:distributed",
+    "A17:shared",
+    "A18:concurrency",
+    "A16:conflicting",
+    "A11:recorded runtime input"
+   ],
+   "V": [
+    "V07",
+    "V13"
+   ],
+   "R": [
+    "R27",
+    "R09",
+    "R13",
+    "R11"
+   ],
+   "X": null,
+   "anchors": [
+    "P206",
+    "P247",
+    "P262",
+    "P284",
+    "P207"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "A stable subject identifier per agency pairing is identity scoped by tenant (the boundary identity field with purpose scope); assurance level is an attribute of the authority field the source does not populate, carried as unresolved.",
+   "stress": {
+    "n": "SV-O-04",
+    "condition": "an agency needs step-up assurance mid-transaction",
+    "maps_to": [
+     "P244",
+     "C04 guarded choice",
+     "HG00 authority level"
+    ],
+    "expressed": true,
+    "note": "re-authorisation gate on a declared assurance attribute; the catalogue treats assurance as authority state that a step-up refreshes"
+   }
+  },
+  {
+   "id": "O-06",
+   "origin": "EU Digital Identity Wallet | OpenID4VP adoption issue",
+   "category": "ISIC O",
+   "source_status": "READ",
+   "deliverables": [
+    "adoption of OpenID for Verifiable Presentations v1.0 in the ARF; three credential formats; conformance testing; v1.1 milestone"
+   ],
+   "families": [
+    "F06",
+    "F25",
+    "F31",
+    "F32",
+    "F02"
+   ],
+   "O": [
+    "O07",
+    "O17",
+    "O16",
+    "O18",
+    "O04"
+   ],
+   "C": [
+    "C01",
+    "C04",
+    "C13"
+   ],
+   "A": [
+    "A08:disclose",
+    "A13:alternative",
+    "A14:migration",
+    "A17:federated",
+    "A15:behavioral refinement"
+   ],
+   "V": [
+    "V13"
+   ],
+   "R": [
+    "R27",
+    "R09",
+    "R29",
+    "R30",
+    "R28"
+   ],
+   "X": null,
+   "anchors": [
+    "P247",
+    "P262",
+    "P264",
+    "P343",
+    "P302",
+    "P250"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "Format negotiation among three credential formats is a capability-envelope check (P343) preceding exchange (P302); selective disclosure is P264; the v1.0 pin with a v1.1 moving target is a versioned adoption decision under R30.",
+   "stress": {
+    "n": "SV-O-06",
+    "condition": "a wallet supports only mdoc, a relying party only SD-JWT VC; spec satisfied, deployment fails",
+    "maps_to": [
+     "P343",
+     "P302",
+     "HG04 actual producer and consumer"
+    ],
+    "expressed": true,
+    "note": "the catalogue tests actual capability envelopes, not specification conformance; the assessment that found no gaps checked the wrong layer"
+   }
+  },
+  {
+   "id": "P-03",
+   "origin": "Ed-Fi Alliance | Ed-Fi API Standards",
+   "category": "ISIC P",
+   "source_status": "READ",
+   "deliverables": [
+    "Resources API 5.0, Descriptors API 5.0, Discovery API 1.0 as normative OpenAPI specs plus API Guidelines 4.0"
+   ],
+   "families": [
+    "F25",
+    "F31",
+    "F02",
+    "F32",
+    "F03"
+   ],
+   "O": [
+    "O17",
+    "O16",
+    "O04",
+    "O18",
+    "O03"
+   ],
+   "C": [
+    "C01",
+    "C02"
+   ],
+   "A": [
+    "A15:behavioral refinement",
+    "A13:mandatory",
+    "A14:policy revision",
+    "A12:software",
+    "A11:accepted upstream interpretation"
+   ],
+   "V": [
+    "V05"
+   ],
+   "R": [
+    "R09",
+    "R29",
+    "R02",
+    "R30"
+   ],
+   "X": null,
+   "anchors": [
+    "P311",
+    "P266",
+    "P343",
+    "P250",
+    "P307"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "Same organisation as iteration 1's P-03, different document. Three specifications satisfied together is a conjunction of obligations; Discovery advertising versions is the capability envelope a client reads before binding (P343); 'compatible' as a vendor assertion is an open claim until P266 tests run.",
+   "stress": {
+    "n": "SV-P-03",
+    "condition": "a vendor implements Resources and Descriptors but not Discovery",
+    "maps_to": [
+     "P343",
+     "P266",
+     "P348 adverse guard: unimplemented server operation"
+    ],
+    "expressed": true,
+    "note": "generated protocol cases fail on the missing operation; the compatibility claim is falsified rather than unchallenged"
+   }
+  },
+  {
+   "id": "P-04",
+   "origin": "CEDS | Common Education Data Standards",
+   "category": "ISIC P",
+   "source_status": "READ",
+   "deliverables": [
+    "standard element names, definitions and option sets; IDS in third normal form; star-schema warehouse; Parquet form; draft ontology"
+   ],
+   "families": [
+    "F03",
+    "F01",
+    "F02",
+    "F04",
+    "F32",
+    "F29"
+   ],
+   "O": [
+    "O03",
+    "O02",
+    "O04",
+    "O14",
+    "O18",
+    "O05"
+   ],
+   "C": [
+    "C06",
+    "C01",
+    "C14"
+   ],
+   "A": [
+    "A01:model",
+    "A03:hierarchy",
+    "A12:records",
+    "A14:policy revision",
+    "A11:accepted upstream interpretation"
+   ],
+   "V": [],
+   "R": [
+    "R02",
+    "R06",
+    "R12",
+    "R30"
+   ],
+   "X": "X11",
+   "anchors": [
+    "P307",
+    "P310",
+    "P140",
+    "P297",
+    "P203"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "One element meaning the same thing across four physical forms is typed column lineage from one definition (P297) with generated representations (P307, P310); normalised and denormalised forms pulling apart is why generation from one source is mandatory, which the catalogue states as X11.",
+   "stress": {
+    "n": "SV-P-04",
+    "condition": "a state changes an option-set value locally to match statute",
+    "maps_to": [
+     "P208",
+     "P282",
+     "P297",
+     "P345"
+    ],
+    "expressed": true,
+    "note": "a versioned local mapping to the standard value with lineage into all four forms; silent divergence is the failure the catalogue's closure prevents"
+   }
+  },
+  {
+   "id": "Q-07",
+   "origin": "OHDSI | organisation repositories (CDM, Atlas, CohortMethod, PatientLevelPrediction, Vocabulary)",
+   "category": "ISIC Q",
+   "source_status": "READ-thin",
+   "deliverables": [
+    "OMOP CDM DDLs",
+    "Atlas analysis tool",
+    "CohortMethod and PatientLevelPrediction packages",
+    "Vocabulary v5.0"
+   ],
+   "families": [
+    "F03",
+    "F36",
+    "F17",
+    "F02",
+    "F06",
+    "F31"
+   ],
+   "O": [
+    "O03",
+    "O10",
+    "O05",
+    "O04",
+    "O16"
+   ],
+   "C": [
+    "C06",
+    "C01",
+    "C13"
+   ],
+   "A": [
+    "A17:federated",
+    "A06:probability",
+    "A01:record",
+    "A08:disclose",
+    "A14:policy revision"
+   ],
+   "V": [
+    "V04",
+    "V13"
+   ],
+   "R": [
+    "R23",
+    "R12",
+    "R27",
+    "R30"
+   ],
+   "X": "X06",
+   "anchors": [
+    "P310",
+    "P335",
+    "P268",
+    "P282",
+    "P264",
+    "P261"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "Same organisation as iteration 1's Q-02, thinner document. Analyses travel and data does not is federated evaluation under a nonleaking release contract (P264); vocabulary version differences silently changing cohorts is the schema-version boundary field on results (P261).",
+   "stress": {
+    "n": "SV-Q-07",
+    "condition": "two sites run one cohort definition on different vocabulary versions",
+    "maps_to": [
+     "P261",
+     "P212",
+     "HG00 schema version on results"
+    ],
+    "expressed": true,
+    "note": "results carry the vocabulary version; a version mismatch is a declared incomparability, not a silent one"
+   }
+  },
+  {
+   "id": "Q-04",
+   "origin": "HL7 International | US Core Implementation Guide (FHIR R4)",
+   "category": "ISIC Q",
+   "source_status": "READ",
+   "deliverables": [
+    "implementation guide with profiles, Must-Support elements, search parameters and terminology bindings",
+    "HTML and NPM package from one source via SUSHI and IG Publisher",
+    "semantic versioning classes; Jira ballot governance"
+   ],
+   "families": [
+    "F01",
+    "F31",
+    "F29",
+    "F10",
+    "F32",
+    "F25"
+   ],
+   "O": [
+    "O02",
+    "O16",
+    "O15",
+    "O07",
+    "O18",
+    "O17"
+   ],
+   "C": [
+    "C01",
+    "C11",
+    "C14"
+   ],
+   "A": [
+    "A11:sign-off",
+    "A15:behavioral refinement",
+    "A14:policy revision",
+    "A13:mandatory",
+    "A08:approve"
+   ],
+   "V": [
+    "V16"
+   ],
+   "R": [
+    "R06",
+    "R29",
+    "R24",
+    "R25",
+    "R30"
+   ],
+   "X": "X11",
+   "anchors": [
+    "P140",
+    "P307",
+    "P346",
+    "P13",
+    "P250",
+    "P302"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "Must-Support as a certification obligation is a required consumer assumption checked at the boundary (P302); a technical correction that must not change conformance is the preserved-contract check of controlled regeneration (P346); ballot votes are decision records with workgroup authority (P13).",
+   "stress": {
+    "n": "SV-Q-04",
+    "condition": "a technical correction inadvertently tightens a Must-Support element",
+    "maps_to": [
+     "P346",
+     "P212",
+     "HG00 schema version"
+    ],
+    "expressed": true,
+    "note": "the preserved-contract check fails the release; affected certified systems are the affected population"
+   }
+  },
+  {
+   "id": "R-06",
+   "origin": "Bodleian Libraries | IIIF Manifest Editor",
+   "category": "ISIC R",
+   "source_status": "READ-thin",
+   "deliverables": [
+    "application generating IIIF manifests with import, view, update and export via IIIF APIs"
+   ],
+   "families": [
+    "F30",
+    "F29",
+    "F25",
+    "F32",
+    "F31"
+   ],
+   "O": [
+    "O15",
+    "O17",
+    "O03",
+    "O16",
+    "O18"
+   ],
+   "C": [
+    "C01",
+    "C13"
+   ],
+   "A": [
+    "A12:UI",
+    "A14:backend replacement",
+    "A01:artifact",
+    "A16:stale",
+    "A11:recorded runtime input"
+   ],
+   "V": [
+    "V06"
+   ],
+   "R": [
+    "R11",
+    "R24",
+    "R30",
+    "R13"
+   ],
+   "X": null,
+   "anchors": [
+    "P315",
+    "P266",
+    "P249",
+    "P265",
+    "P337"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "An exported manifest opening in an independent viewer is the independent-oracle rule (I-class) applied to a generated artefact; a pinned obsolete Node version is a dependency-manifest hazard (P249); the unstated Presentation API version is the missing schema-version field.",
+   "stress": {
+    "n": "SV-R-06",
+    "condition": "institution migrates viewers to Presentation 3.0 while the editor emits 2.1",
+    "maps_to": [
+     "HG00 schema version",
+     "P261",
+     "P345"
+    ],
+    "expressed": true,
+    "note": "a declared output version makes affected manifests enumerable; without it the dependency closure cannot be computed, which is the source's gap"
+   }
+  },
+  {
+   "id": "X-03",
+   "origin": "TEI Consortium | TEI P5 Guidelines",
+   "category": "ISIC R",
+   "source_status": "READ-thin",
+   "deliverables": [
+    "sources building the Guidelines and schemas from one P5 source"
+   ],
+   "families": [
+    "F29",
+    "F01",
+    "F37",
+    "F32",
+    "F31"
+   ],
+   "O": [
+    "O02",
+    "O14",
+    "O15",
+    "O18",
+    "O16"
+   ],
+   "C": [
+    "C01",
+    "C13",
+    "C14"
+   ],
+   "A": [
+    "A01:text",
+    "A14:expiry",
+    "A13:alternative",
+    "A12:office/media",
+    "A11:adjudication"
+   ],
+   "V": [],
+   "R": [
+    "R24",
+    "R04",
+    "R30",
+    "R06"
+   ],
+   "X": "X11",
+   "anchors": [
+    "P140",
+    "P307",
+    "P260",
+    "P212",
+    "P148"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "Rediscovered document from iteration 1 (H6-01), thinner read. Prose and schema never disagreeing because both derive from one source is X11; maximally expressive and minimally obsolescent implies deprecation over deletion, the F32 register.",
+   "stress": {
+    "n": "SV-X-03",
+    "condition": "a widely used element must be withdrawn for scholarly reasons",
+    "maps_to": [
+     "P212",
+     "F32 deprecation register",
+     "A14:expiry"
+    ],
+    "expressed": true,
+    "note": "scheduled deprecation with affected-corpus enumeration; the register the source lacks is what the catalogue requires"
+   }
+  },
+  {
+   "id": "S-03",
+   "origin": "The Restart Project | environmental impact data",
+   "category": "ISIC S",
+   "source_status": "READ",
+   "deliverables": [
+    "per-category average weight and pre-use CO2e with data-availability and quality evaluation",
+    "categories following ORDS",
+    "used by the Fixometer"
+   ],
+   "families": [
+    "F14",
+    "F17",
+    "F02",
+    "F31",
+    "F06",
+    "F08"
+   ],
+   "O": [
+    "O09",
+    "O05",
+    "O04",
+    "O16",
+    "O15"
+   ],
+   "C": [
+    "C02",
+    "C06"
+   ],
+   "A": [
+    "A01:quantity",
+    "A10:units",
+    "A06:interval uncertainty",
+    "A09:partial collection",
+    "A08:disclose",
+    "A11:accepted upstream interpretation"
+   ],
+   "V": [
+    "V03",
+    "V04"
+   ],
+   "R": [
+    "R31",
+    "R27",
+    "R02"
+   ],
+   "X": "X08",
+   "anchors": [
+    "P169",
+    "P282",
+    "P280",
+    "P22",
+    "P296",
+    "P240"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "Category-keyed lookups with a quality grade travelling with each number are exact allocation (P169) with origin-aware support groups from manufacturers, journals and agencies (P296) and a declared partial population (V03); share-alike licence propagation is an inherited authority obligation (F08). Unstated system boundary for pre-use CO2e is an unresolved unit-and-meaning input (P282).",
+   "stress": {
+    "n": "SV-S-03",
+    "condition": "a funder demands one headline CO2e figure with no qualifiers",
+    "maps_to": [
+     "HG05",
+     "HG01",
+     "F30 rendering of evidence state"
+    ],
+    "expressed": true,
+    "note": "the catalogue forbids stripping the quality state at presentation; the number cannot be emitted without its basis"
+   }
+  },
+  {
+   "id": "S-02",
+   "origin": "Open Repair Alliance | downloadable datasets",
+   "category": "ISIC S",
+   "source_status": "READ",
+   "deliverables": [
+    "aggregated, partner and quest datasets conformed to ORDS v0.3 with counts, cut-off date and licence"
+   ],
+   "families": [
+    "F03",
+    "F17",
+    "F02",
+    "F32",
+    "F33",
+    "F06"
+   ],
+   "O": [
+    "O03",
+    "O05",
+    "O04",
+    "O18",
+    "O01"
+   ],
+   "C": [
+    "C06",
+    "C02"
+   ],
+   "A": [
+    "A01:record",
+    "A05:known-at time",
+    "A09:partial collection",
+    "A14:policy revision",
+    "A08:disclose"
+   ],
+   "V": [
+    "V03"
+   ],
+   "R": [
+    "R02",
+    "R12",
+    "R30",
+    "R27"
+   ],
+   "X": null,
+   "anchors": [
+    "P95",
+    "P261",
+    "P22",
+    "P211",
+    "P294"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "Same organisation as iteration 1's S-01, the data rather than the standard. A three-month lag between cut-off and release is known-at versus valid time (P211) declared on the release; counts stated per release are count reconciliation (P294); the rejects report is the excluded-contributor lineage the catalogue keeps by default.",
+   "stress": {
+    "n": "SV-S-02",
+    "condition": "ORDS v0.4 renames a category, breaking historical aggregation",
+    "maps_to": [
+     "P208",
+     "P284",
+     "P212"
+    ],
+    "expressed": true,
+    "note": "versioned category mapping with equivalence classes preserves historical totals; the publication lag delays discovery, which the time field makes visible"
+   }
+  },
+  {
+   "id": "T-05",
+   "origin": "USCIS | I-9 Central: domestic workers",
+   "category": "ISIC T",
+   "source_status": "SNIPPET",
+   "deliverables": [
+    "guidance on when and how a household employer completes Form I-9 for a domestic worker"
+   ],
+   "families": [
+    "F07",
+    "F05",
+    "F33",
+    "F06",
+    "F08"
+   ],
+   "O": [
+    "O07",
+    "O04",
+    "O16",
+    "O18"
+   ],
+   "C": [
+    "C04",
+    "C11"
+   ],
+   "A": [
+    "A08:approve",
+    "A11:recorded runtime input",
+    "A13:requires",
+    "A05:calendar",
+    "A16:missing"
+   ],
+   "V": [
+    "V13",
+    "V17"
+   ],
+   "R": [
+    "R27",
+    "R04",
+    "R25"
+   ],
+   "X": "X02",
+   "anchors": [
+    "P199",
+    "P192",
+    "P342",
+    "P264",
+    "P258"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "Snippet-only. Employee-versus-contractor determination is applicability evaluation (P192, P258); completion within a timeframe and retention are gate decisions with calendar obligations (P199) and bounded retention (P342); producing the record without exposing unrelated data is field-level filtering (P264).",
+   "stress": {
+    "n": "SV-T-05",
+    "condition": "the household reclassifies the worker as an independent contractor",
+    "maps_to": [
+     "P192",
+     "P258",
+     "A11 unresolved input"
+    ],
+    "expressed": true,
+    "note": "the determination is a scoped decision on unread thresholds, kept as an unresolved input; the asymmetric consequence is recorded, not resolved"
+   }
+  },
+  {
+   "id": "T-01",
+   "origin": "US DOL Women's Bureau | sample employment agreement for home care workers",
+   "category": "ISIC T",
+   "source_status": "SNIPPET",
+   "deliverables": [
+    "voluntary sample employment agreement creating a shared understanding of terms"
+   ],
+   "families": [
+    "F08",
+    "F29",
+    "F10",
+    "F14"
+   ],
+   "O": [
+    "O15",
+    "O07",
+    "O04",
+    "O09"
+   ],
+   "C": [
+    "C11",
+    "C01"
+   ],
+   "A": [
+    "A08:approve",
+    "A11:sign-off",
+    "A01:text",
+    "A13:optional",
+    "A05:calendar"
+   ],
+   "V": [
+    "V16"
+   ],
+   "R": [
+    "R25",
+    "R24",
+    "R31"
+   ],
+   "X": "X07",
+   "anchors": [
+    "P259",
+    "P25",
+    "P151",
+    "P156"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "Snippet-only. A template rendered into an executed bilingual agreement held identically by both parties is agreement version binding (P259) with document generation (P25, P151); agreed rate and hours feeding pay records is billable-line construction (P156). Voluntary status is a declared modality (MAY) in the meaning field.",
+   "stress": {
+    "n": "SV-T-01",
+    "condition": "the schedule changes weekly with the care recipient's needs",
+    "maps_to": [
+     "P259",
+     "P293",
+     "P215"
+    ],
+    "expressed": true,
+    "note": "amendments as version-bound corrections under a recurring obligation, rather than re-execution of a static document"
+   }
+  },
+  {
+   "id": "U-05",
+   "origin": "IOM (UN Migration) | HTCDS with HXL hashtags issue",
+   "category": "ISIC U",
+   "source_status": "READ",
+   "deliverables": [
+    "HXL-tagged expression of the Human Trafficking Case Data Standard with documented hashtags, fictional examples and dashboards",
+    "licence clarification as an adoption gate"
+   ],
+   "families": [
+    "F03",
+    "F01",
+    "F06",
+    "F31",
+    "F08",
+    "F04"
+   ],
+   "O": [
+    "O03",
+    "O02",
+    "O07",
+    "O16",
+    "O15"
+   ],
+   "C": [
+    "C01",
+    "C11"
+   ],
+   "A": [
+    "A08:disclose",
+    "A11:accepted upstream interpretation",
+    "A16:missing",
+    "A01:record",
+    "A13:mandatory"
+   ],
+   "V": [
+    "V13"
+   ],
+   "R": [
+    "R27",
+    "R06",
+    "R29",
+    "R02"
+   ],
+   "X": null,
+   "anchors": [
+    "P310",
+    "P344",
+    "P298",
+    "P264",
+    "P204"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "Structure public while instances cannot be is the split between an accepted schema and protected-unit data (P298, P264); fictional examples only is generated test data (P344, GP01) applied to a sensitive domain; the licence blocker is missing authority that blocks adoption, kept explicit.",
+   "stress": {
+    "n": "SV-U-05",
+    "condition": "a partner publishes real records with names removed",
+    "maps_to": [
+     "P298",
+     "P264",
+     "A08:disclose"
+    ],
+    "expressed": true,
+    "note": "de-identified is still a protected unit under adjacency accounting; the catalogue rejects the publication path regardless of the missing licence instrument"
+   }
+  },
+  {
+   "id": "U-04",
+   "origin": "UN OCHA | Humanitarian ID (decommissioned)",
+   "category": "ISIC U",
+   "source_status": "READ",
+   "deliverables": [
+    "OAuth 2.0 and OpenID Connect server with REST API",
+    "decommissioning on 31 December 2025 with transition instruction"
+   ],
+   "families": [
+    "F06",
+    "F07",
+    "F32",
+    "F02",
+    "F25"
+   ],
+   "O": [
+    "O07",
+    "O08",
+    "O18",
+    "O04",
+    "O17"
+   ],
+   "C": [
+    "C07",
+    "C13",
+    "C11"
+   ],
+   "A": [
+    "A14:withdrawal",
+    "A08:approve",
+    "A05:calendar",
+    "A07:federated",
+    "A16:unavailable"
+   ],
+   "V": [
+    "V13"
+   ],
+   "R": [
+    "R27",
+    "R30",
+    "R09",
+    "R14"
+   ],
+   "X": "X04",
+   "anchors": [
+    "P256",
+    "P345",
+    "P284",
+    "P206",
+    "P215"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "Decommissioning is controlled deactivation with closure evidence (P256) over the dependency closure of relying platforms (P345); the stable subject identifier that breaks is the identity equivalence that a successor mapping must preserve (P284). No named successor is an unresolved input the catalogue keeps as a blocked migration edge.",
+   "stress": {
+    "n": "SV-U-04",
+    "condition": "decommissioning proceeds with three platforms unmigrated",
+    "maps_to": [
+     "P256",
+     "P345",
+     "P284",
+     "A14:withdrawal"
+    ],
+    "expressed": true,
+    "note": "closure evidence must list dependents; unmigrated dependents are a recorded loss of support, not a silent breakage"
+   }
+  },
+  {
+   "id": "E-03",
+   "origin": "DataStream (The Gordon Foundation) | WQX JSON Schema",
+   "category": "FORD 1",
+   "source_status": "READ",
+   "deliverables": [
+    "JSON table schema for eight WQX record categories as an npm package",
+    "domain values regenerated from EPA lists on WQX version change"
+   ],
+   "families": [
+    "F03",
+    "F02",
+    "F32",
+    "F17",
+    "F31"
+   ],
+   "O": [
+    "O03",
+    "O04",
+    "O18",
+    "O16"
+   ],
+   "C": [
+    "C01",
+    "C14"
+   ],
+   "A": [
+    "A01:record",
+    "A14:migration",
+    "A11:accepted upstream interpretation",
+    "A09:closed finite domain",
+    "A17:federated"
+   ],
+   "V": [],
+   "R": [
+    "R02",
+    "R30",
+    "R12"
+   ],
+   "X": null,
+   "anchors": [
+    "P261",
+    "P310",
+    "P265",
+    "P345",
+    "P30"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "A JSON adaptation of an XML federal standard that must map back losslessly is an approved transform with reconciled destination (P310) and round trip (P30); coupling of the code-list version to the WQX version is a pinned sealed dependency (P265) in the closure (P345).",
+   "stress": {
+    "n": "SV-E-03",
+    "condition": "EPA publishes new domain values without a WQX version bump",
+    "maps_to": [
+     "HG00 payload hash",
+     "P345",
+     "P265"
+    ],
+    "expressed": true,
+    "note": "the catalogue keys dependencies on content hashes, not version labels alone; a changed list with an unchanged version is still a changed dependency"
+   }
+  },
+  {
+   "id": "B-03",
+   "origin": "USGS | GeMS tools documentation",
+   "category": "FORD 1",
+   "source_status": "READ",
+   "deliverables": [
+    "ArcGIS toolbox creating and validating GeMS-style geologic map databases at three compliance levels",
+    "required tables, fields, keys, topology and confidence fields"
+   ],
+   "families": [
+    "F28",
+    "F03",
+    "F02",
+    "F31",
+    "F18",
+    "F06"
+   ],
+   "O": [
+    "O03",
+    "O04",
+    "O09",
+    "O16",
+    "O06"
+   ],
+   "C": [
+    "C02",
+    "C01"
+   ],
+   "A": [
+    "A01:geometry",
+    "A10:uncertainty",
+    "A10:topology",
+    "A15:structural validity",
+    "A11:accepted upstream interpretation",
+    "A03:tree"
+   ],
+   "V": [
+    "V09"
+   ],
+   "R": [
+    "R18",
+    "R02",
+    "R31",
+    "R29"
+   ],
+   "X": "X09",
+   "anchors": [
+    "P326",
+    "P325",
+    "P194",
+    "P323",
+    "P204",
+    "P95"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "Existence, identity and location confidence on every contact and fault is uncertainty as a first-class boundary field (A10, P323); _ID keys repeated as foreign keys with no orphans is referential shape validation (P194); DataSourceID on every feature is per-record provenance (P204). ArcGIS binding is an environment binding.",
+   "stress": {
+    "n": "SV-B-03",
+    "condition": "a map compiled from two surveys with different location-confidence conventions",
+    "maps_to": [
+     "P282",
+     "A10:uncertainty",
+     "HG02 meaning"
+    ],
+    "expressed": true,
+    "note": "uncertainty semantics must be declared per source before values are compared; structurally valid but semantically incomparable is the catalogue's named adverse case"
+   }
+  },
+  {
+   "id": "H-06",
+   "origin": "DCSA | Conformance Gateway",
+   "category": "FORD 2",
+   "source_status": "READ",
+   "deliverables": [
+    "conformance framework with scenarios and party roles in four testing modes",
+    "reflexive use to verify standard correctness during drafting"
+   ],
+   "families": [
+    "F31",
+    "F37",
+    "F21",
+    "F10",
+    "F25"
+   ],
+   "O": [
+    "O16",
+    "O14",
+    "O12",
+    "O07",
+    "O17"
+   ],
+   "C": [
+    "C03",
+    "C13",
+    "C01"
+   ],
+   "A": [
+    "A15:behavioral refinement",
+    "A07:distributed",
+    "A13:alternative",
+    "A11:adjudication",
+    "A14:policy revision"
+   ],
+   "V": [
+    "V18"
+   ],
+   "R": [
+    "R29",
+    "R09",
+    "R05",
+    "R14"
+   ],
+   "X": "X12",
+   "anchors": [
+    "P266",
+    "P343",
+    "P289",
+    "P286",
+    "P348",
+    "P288",
+    "P193"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "Scenarios versioned with the standard is the schema-version field on the test artefact; simulating the absent counterparty is a substitute execution environment (C13, P289); distinguishing an implementation defect from a standard ambiguity is disagreement measurement over independent implementations (P288) feeding a contradiction register (P193). Actual party-to-party transport is HG04 and P348's transport stage.",
+   "stress": {
+    "n": "SV-H-06",
+    "condition": "a scenario fails identically for every adopter",
+    "maps_to": [
+     "P288",
+     "P193",
+     "P281"
+    ],
+    "expressed": true,
+    "note": "uniform disagreement with the scenario is evidence against the standard, which the catalogue records as a contradiction candidate rather than as non-conformance"
+   }
+  },
+  {
+   "id": "E-04",
+   "origin": "Open Environment / Windsor | Open Waters",
+   "category": "FORD 2",
+   "source_status": "READ",
+   "deliverables": [
+    "web software managing locations, projects, samples and results with automated WQX submission to EPA over Exchange Network",
+    "bulk import, import translation, templates, conditional validation"
+   ],
+   "families": [
+    "F03",
+    "F13",
+    "F05",
+    "F30",
+    "F26",
+    "F06"
+   ],
+   "O": [
+    "O03",
+    "O17",
+    "O07",
+    "O15",
+    "O14",
+    "O05"
+   ],
+   "C": [
+    "C01",
+    "C04",
+    "C10",
+    "C11"
+   ],
+   "A": [
+    "A08:commit",
+    "A17:local",
+    "A13:requires",
+    "A16:invalid",
+    "A11:recorded runtime input",
+    "A12:software"
+   ],
+   "V": [
+    "V01",
+    "V05"
+   ],
+   "R": [
+    "R10",
+    "R28",
+    "R04",
+    "R13"
+   ],
+   "X": "X02",
+   "anchors": [
+    "P310",
+    "P242",
+    "P314",
+    "P192",
+    "P318"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "Translation applied before, never after, submission is C01 ordering with an approved transform (P310); automated submission to a regulator is an external effect that needs receipt reconciliation (P242, P314), which the source's behind-the-scenes automation omits; 'Sample' requiring method and equipment is scoped applicability (P192).",
+   "stress": {
+    "n": "SV-E-04",
+    "condition": "a translation maps a local code to the wrong EPA value and automation carries it into the federal record",
+    "maps_to": [
+     "HG02",
+     "HG04",
+     "P310 reconciliation",
+     "C11"
+    ],
+    "expressed": true,
+    "note": "reconciliation against destination readback and an optional human boundary before an irreversible effect; the audit trail is the retained original value the catalogue keeps by default"
+   }
+  },
+  {
+   "id": "I-05",
+   "origin": "littlebunch | fdc-api",
+   "category": "FORD 3",
+   "source_status": "READ",
+   "deliverables": [
+    "REST server over USDA FoodData Central CSVs with keyword, wildcard and regex search, paging, sorting, filters",
+    "datastore substitution through a DataSource interface"
+   ],
+   "families": [
+    "F04",
+    "F25",
+    "F03",
+    "F26",
+    "F32"
+   ],
+   "O": [
+    "O05",
+    "O17",
+    "O03",
+    "O14",
+    "O18"
+   ],
+   "C": [
+    "C13",
+    "C01",
+    "C05"
+   ],
+   "A": [
+    "A09:paginated snapshot",
+    "A12:software",
+    "A13:alternative",
+    "A14:new source",
+    "A01:record"
+   ],
+   "V": [],
+   "R": [
+    "R09",
+    "R12",
+    "R30",
+    "R13"
+   ],
+   "X": null,
+   "anchors": [
+    "P122",
+    "P123",
+    "P285",
+    "P203",
+    "P294",
+    "P310"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "Full-text index and ranked excerpts are P122 and P123; a second datastore added by implementing one interface is replaceable storage adapters with query-result equivalence (P203); nutrient numbers keeping their FDC meaning is the meaning field on the loader boundary. Undocumented refresh is an unresolved dependency trigger.",
+   "stress": {
+    "n": "SV-I-05",
+    "condition": "USDA republishes with a changed nutrient-number meaning",
+    "maps_to": [
+     "P282",
+     "P195",
+     "P345"
+    ],
+    "expressed": true,
+    "note": "a semantic change on an upstream identifier invalidates the index through the dependency closure; the missing watcher is the catalogue's invalidation trigger"
+   }
+  },
+  {
+   "id": "Q-05",
+   "origin": "HL7 International with CARIN Alliance | CARIN Blue Button IG",
+   "category": "FORD 3",
+   "source_status": "READ-thin",
+   "deliverables": [
+    "implementation guide exposing the Common Payer Consumer Data Set to consumers and authorised caregivers over a FHIR API"
+   ],
+   "families": [
+    "F06",
+    "F25",
+    "F03",
+    "F10",
+    "F02"
+   ],
+   "O": [
+    "O07",
+    "O17",
+    "O03",
+    "O04"
+   ],
+   "C": [
+    "C01",
+    "C11",
+    "C04"
+   ],
+   "A": [
+    "A08:disclose",
+    "A11:sign-off",
+    "A07:distributed",
+    "A01:record",
+    "A13:mandatory"
+   ],
+   "V": [
+    "V13"
+   ],
+   "R": [
+    "R27",
+    "R09",
+    "R25",
+    "R02"
+   ],
+   "X": null,
+   "anchors": [
+    "P206",
+    "P264",
+    "P311",
+    "P302",
+    "P310"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "Authorised caregivers as first-class is the delegation sub-field of the authority contract (P206); consumer-facing meaning matching the adjudicated claim is an approved transform (P310) with a producer-consumer check (P302); joint governance is shared authority over the accepted set.",
+   "stress": {
+    "n": "SV-Q-05",
+    "condition": "a member revokes caregiver access while the caregiver holds an unexpired token",
+    "maps_to": [
+     "P244",
+     "HG00 authority expiry",
+     "A14:withdrawal"
+    ],
+    "expressed": true,
+    "note": "a freshness fence re-checks authority at dispatch; unexpired tokens without a fence are the gap the catalogue names"
+   }
+  },
+  {
+   "id": "A-06",
+   "origin": "AgGateway | Modus",
+   "category": "FORD 4",
+   "source_status": "READ",
+   "deliverables": [
+    "Modus standard in v1 XML and v2 JSON covering work orders, sampling, drying, analysis and results",
+    "test-method change process"
+   ],
+   "families": [
+    "F03",
+    "F02",
+    "F09",
+    "F13",
+    "F10",
+    "F32"
+   ],
+   "O": [
+    "O03",
+    "O04",
+    "O05",
+    "O16",
+    "O17",
+    "O18"
+   ],
+   "C": [
+    "C01",
+    "C02",
+    "C07"
+   ],
+   "A": [
+    "A01:record",
+    "A02:coordinate",
+    "A03:chain",
+    "A08:commit",
+    "A11:sign-off",
+    "A14:migration"
+   ],
+   "V": [
+    "V16"
+   ],
+   "R": [
+    "R02",
+    "R12",
+    "R25",
+    "R30"
+   ],
+   "X": "X08",
+   "anchors": [
+    "P95",
+    "P261",
+    "P242",
+    "P259",
+    "P184",
+    "P282",
+    "P197"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "Rediscovered document from iteration 1 (A-02). The added element this time is two live format generations whose representations must carry identical values and units (P197, P30); method identity accompanying every analyte remains P282.",
+   "stress": {
+    "n": "SV-A-06",
+    "condition": "a lab adopts a new extraction method under an existing analyte name, bypassing the method process",
+    "maps_to": [
+     "P282",
+     "P288",
+     "HG01",
+     "A11 missing acceptance"
+    ],
+    "expressed": true,
+    "note": "a changed meaning under an unchanged identifier is the catalogue's named adverse case; independent annotation disagreement is the detector"
+   }
+  },
+  {
+   "id": "A-01",
+   "origin": "BrAPI community | BrAPI v2.1",
+   "category": "FORD 4",
+   "source_status": "READ",
+   "deliverables": [
+    "RESTful API specification in Core, Phenotyping, Genotyping and Germplasm modules",
+    "URL structure, response format, date/time and location encoding, error handling, search services"
+   ],
+   "families": [
+    "F25",
+    "F02",
+    "F22",
+    "F04",
+    "F03",
+    "F31"
+   ],
+   "O": [
+    "O17",
+    "O04",
+    "O05",
+    "O13",
+    "O03",
+    "O16"
+   ],
+   "C": [
+    "C02",
+    "C01",
+    "C05"
+   ],
+   "A": [
+    "A01:record",
+    "A03:DAG",
+    "A17:federated",
+    "A09:paginated snapshot",
+    "A10:units",
+    "A11:accepted upstream interpretation"
+   ],
+   "V": [],
+   "R": [
+    "R09",
+    "R21",
+    "R02",
+    "R12"
+   ],
+   "X": "X06",
+   "anchors": [
+    "P311",
+    "P302",
+    "P294",
+    "P282",
+    "P331",
+    "P266"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "Trait, scale and method travelling together is the meaning-and-units boundary field (P282); an observation always resolving to a study and unit is a keyed join with mandatory referents (C02); deferred search handles are stable-snapshot pagination (P294); trials and observation units are experiment-campaign records (F22, P331).",
+   "stress": {
+    "n": "SV-A-01",
+    "condition": "a server implements Phenotyping but not Core, so observations cannot resolve studies",
+    "maps_to": [
+     "C02 referents",
+     "HG02 missing keys",
+     "V12 bound ports"
+    ],
+    "expressed": true,
+    "note": "an unresolved join edge blocks the deployment in the catalogue; the module structure that permits it is the missing bound-port rule"
+   }
+  },
+  {
+   "id": "N-04",
+   "origin": "OCDS extensions community | extensions and profiles",
+   "category": "FORD 5",
+   "source_status": "READ",
+   "deliverables": [
+    "profiles for EU, PPPs, eForms and GPA bundling extensions",
+    "individual additive extensions such as pagination links and delivery point per line item"
+   ],
+   "families": [
+    "F37",
+    "F03",
+    "F32",
+    "F31",
+    "F02"
+   ],
+   "O": [
+    "O14",
+    "O03",
+    "O07",
+    "O16",
+    "O18"
+   ],
+   "C": [
+    "C06",
+    "C01",
+    "C04"
+   ],
+   "A": [
+    "A13:requires",
+    "A13:excludes",
+    "A14:policy revision",
+    "A11:accepted upstream interpretation",
+    "A09:closed finite domain"
+   ],
+   "V": [],
+   "R": [
+    "R04",
+    "R02",
+    "R30",
+    "R03"
+   ],
+   "X": null,
+   "anchors": [
+    "P260",
+    "P273",
+    "P274",
+    "P302",
+    "P303"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "Profiles as bundles of additive extensions over a core is a feature model with requires and excludes (P260, P273); a core-only consumer still reading an extended document is the extra-field policy (P302); two profiles applied to one publisher without conflicting definitions is constrained interaction testing (P274), which the catalogue requires and the source lacks.",
+   "stress": {
+    "n": "SV-N-04",
+    "condition": "EU and eForms profiles define one field with different cardinality",
+    "maps_to": [
+     "P274",
+     "P273",
+     "A13:excludes"
+    ],
+    "expressed": true,
+    "note": "an invalid combination in the finite configuration space; the catalogue computes it before publication"
+   }
+  },
+  {
+   "id": "S-04",
+   "origin": "European Commission | Right to repair Q&A (2024)",
+   "category": "FORD 5",
+   "source_status": "SNIPPET",
+   "deliverables": [
+    "obligation to repair with spare-part availability windows",
+    "repairability scores and labels at point of sale"
+   ],
+   "families": [
+    "F08",
+    "F05",
+    "F14",
+    "F31",
+    "F07",
+    "F17"
+   ],
+   "O": [
+    "O07",
+    "O09",
+    "O16",
+    "O08",
+    "O15"
+   ],
+   "C": [
+    "C04",
+    "C11",
+    "C01"
+   ],
+   "A": [
+    "A05:calendar",
+    "A11:adjudication",
+    "A08:disclose",
+    "A13:requires",
+    "A10:exact",
+    "A14:policy revision"
+   ],
+   "V": [
+    "V16"
+   ],
+   "R": [
+    "R04",
+    "R31",
+    "R25",
+    "R29"
+   ],
+   "X": "X02",
+   "anchors": [
+    "P215",
+    "P185",
+    "P192",
+    "P258",
+    "P288",
+    "P282"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "Snippet-only. Parts availability for five or ten years by part type is a recurring obligation with notice and renewal clocks (P215, P185); applicability by product category and jurisdiction is P192 and P258; a self-assessed score with legal consequence is an open claim until independently reproduced (P288). The unread directive text is an unresolved source.",
+   "stress": {
+    "n": "SV-S-04",
+    "condition": "a self-assessed score is challenged by an independent teardown with no adjudication route",
+    "maps_to": [
+     "P288",
+     "C11",
+     "A11 missing authority"
+    ],
+    "expressed": true,
+    "note": "disagreement recorded; without a named adjudicator the claim stays open, which the catalogue states rather than resolves"
+   }
+  },
+  {
+   "id": "R-02",
+   "origin": "OCFL editors | Oxford Common File Layout specifications",
+   "category": "FORD 6",
+   "source_status": "READ",
+   "deliverables": [
+    "OCFL specification and implementation notes v1.1 and v1.0",
+    "separate extensions, test fixtures and use cases"
+   ],
+   "families": [
+    "F33",
+    "F03",
+    "F31",
+    "F32",
+    "F29"
+   ],
+   "O": [
+    "O01",
+    "O03",
+    "O16",
+    "O18",
+    "O15"
+   ],
+   "C": [
+    "C01",
+    "C14",
+    "C13"
+   ],
+   "A": [
+    "A01:artifact",
+    "A17:offline",
+    "A14:migration",
+    "A15:structural validity",
+    "A07:historical replay"
+   ],
+   "V": [],
+   "R": [
+    "R12",
+    "R27",
+    "R29",
+    "R30"
+   ],
+   "X": null,
+   "anchors": [
+    "P269",
+    "P263",
+    "P265",
+    "P51",
+    "P52",
+    "P148"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "A layout interpretable without the original software is a sealed checkpoint with verified restore (P269) over self-describing canonical files (P51, P52); two live versions both readable is dialect migration (P261 shape); fixtures as conformance evidence are traceability material (P148). The unread inventory and versioning rules are unresolved inputs.",
+   "stress": {
+    "n": "SV-R-02",
+    "condition": "repository software decommissioned, only storage remains, fixtures held in a separate repository",
+    "maps_to": [
+     "P269",
+     "P265",
+     "A17:offline"
+    ],
+    "expressed": true,
+    "note": "cold restore is the design case and must be rehearsed; fixtures must be sealed with the content, which the separate repository does not guarantee"
+   }
+  },
+  {
+   "id": "R-05",
+   "origin": "Harvard Art Museums | IIIF service documentation",
+   "category": "FORD 6",
+   "source_status": "READ",
+   "deliverables": [
+    "Image API 2.1 and Presentation API 2.1 services with collection endpoint, addressable manifests and hosted viewers",
+    "rights-restricted image URLs excluded per user class"
+   ],
+   "families": [
+    "F25",
+    "F06",
+    "F29",
+    "F02",
+    "F31"
+   ],
+   "O": [
+    "O17",
+    "O07",
+    "O15",
+    "O04",
+    "O16"
+   ],
+   "C": [
+    "C01",
+    "C04"
+   ],
+   "A": [
+    "A08:disclose",
+    "A01:artifact",
+    "A13:alternative",
+    "A07:replicated",
+    "A14:policy revision"
+   ],
+   "V": [
+    "V13"
+   ],
+   "R": [
+    "R27",
+    "R09",
+    "R24",
+    "R02"
+   ],
+   "X": null,
+   "anchors": [
+    "P264",
+    "P206",
+    "P311",
+    "P266",
+    "P337"
+   ],
+   "no_anchor": [],
+   "verdict": "COVERED",
+   "blocking": [],
+   "note": "The same manifest identifier yielding different content by user class is authorised source views with field-level filtering (P264) applied at generation; explicit omission rather than a silent gap is HG05's distinct unavailable state; version 2.1 rather than 3.x is a declared dialect limit.",
+   "stress": {
+    "n": "SV-R-05",
+    "condition": "rights change to restricted after manifests are cached widely; stable URLs propagate images",
+    "maps_to": [
+     "P342",
+     "A09:unknown coverage",
+     "P244"
+    ],
+    "expressed": true,
+    "note": "replica inventory and freshness fences at the image service; the catalogue records unknown downstream copies as an open state, the same pattern as iteration 1's consent-withdrawal cases"
+   }
+  }
+ ],
+ "composed_systems": [
+  {
+   "id": "C1",
+   "title": "Water evidence chain",
+   "members": [
+    "E-03",
+    "E-04",
+    "E-01",
+    "E-02"
+   ],
+   "families": [
+    "F17",
+    "F21",
+    "F03",
+    "F13",
+    "F38"
+   ],
+   "X": "X09",
+   "R": [
+    "R14",
+    "R16",
+    "R10"
+   ],
+   "note": "Measured records and simulated results kept in distinct evidence bases (HG01 OBSERVATION versus SCENARIO) under one WQX version and one location identity; the 'as is' disclaimer is the promotion rule. Covered."
+  },
+  {
+   "id": "C2",
+   "title": "Repair impact ledger",
+   "members": [
+    "S-02",
+    "S-03",
+    "S-04"
+   ],
+   "families": [
+    "F14",
+    "F17",
+    "F02",
+    "F08",
+    "F38"
+   ],
+   "X": "X08",
+   "R": [
+    "R14",
+    "R31",
+    "R27"
+   ],
+   "note": "Category identifier and ORDS version as the joint invariant, quality qualifier travelling with every aggregate, share-alike licence inherited. The agent flags that the invariant depends on the unsampled ORDS standard; the catalogue carries that as an unresolved accepted source. Covered."
+  },
+  {
+   "id": "C3",
+   "title": "Conformance-driven standards development",
+   "members": [
+    "H-06",
+    "H-04",
+    "G-01",
+    "G-02"
+   ],
+   "families": [
+    "F31",
+    "F10",
+    "F25",
+    "F38"
+   ],
+   "X": "X12",
+   "R": [
+    "R29",
+    "R32",
+    "R14"
+   ],
+   "note": "Version under test shared by scenarios, reference implementation and adopter; defect reports split implementation-wrong from standard-ambiguous (P288, P193); never against production data (H-04 R3 as an authority constraint). Covered."
+  },
+  {
+   "id": "C4",
+   "title": "Machine-readable regulation loop",
+   "members": [
+    "H-01",
+    "J-06",
+    "N-02",
+    "N-04"
+   ],
+   "families": [
+    "F05",
+    "F10",
+    "F13",
+    "F02",
+    "F38"
+   ],
+   "X": "X07",
+   "R": [
+    "R30",
+    "R14",
+    "R25"
+   ],
+   "note": "Problem statement identity from suggestion to adopted standard to published policy to contract; geography and organisation identifiers shared; the 20-minute lead is an inherited timing contract. Covered."
+  },
+  {
+   "id": "C5",
+   "title": "Building information spine",
+   "members": [
+    "F-03",
+    "F-04",
+    "L-03",
+    "N-01"
+   ],
+   "families": [
+    "F02",
+    "F04",
+    "F27",
+    "F16",
+    "F38"
+   ],
+   "X": "X03",
+   "R": [
+    "R17",
+    "R14",
+    "R30"
+   ],
+   "note": "One equipment concept across bSDD class, IFC entity, BEDES term and Brick class is a cross-system identity equivalence (P284); unit-dimension and no-IFC-recreation rules inherited. First appearance of X03 as a sampled composition. Covered."
+  },
+  {
+   "id": "C6",
+   "title": "Portable evidence for health decisions",
+   "members": [
+    "Q-04",
+    "Q-05",
+    "Q-07"
+   ],
+   "families": [
+    "F03",
+    "F06",
+    "F36",
+    "F17",
+    "F38"
+   ],
+   "X": "X06",
+   "R": [
+    "R23",
+    "R27",
+    "R14"
+   ],
+   "note": "Patient identity within a site and concept identity across sites with the vocabulary version pinned; analyses travel, data does not (P264). Covered."
+  },
+  {
+   "id": "C7",
+   "title": "Identity continuity across a shutdown",
+   "members": [
+    "U-04",
+    "O-04",
+    "O-06",
+    "J-04"
+   ],
+   "families": [
+    "F06",
+    "F02",
+    "F07",
+    "F32",
+    "F38"
+   ],
+   "X": "X04",
+   "R": [
+    "R27",
+    "R30",
+    "R14"
+   ],
+   "note": "Subject identifier per relying party preserved through decommissioning by a successor mapping (P284, P256); clients never hold third-party credentials; three credential formats negotiated. Covered."
+  },
+  {
+   "id": "C8",
+   "title": "Agricultural decision provenance",
+   "members": [
+    "A-01",
+    "A-05",
+    "A-06"
+   ],
+   "families": [
+    "F22",
+    "F03",
+    "F02",
+    "F13",
+    "F38"
+   ],
+   "X": "X06",
+   "R": [
+    "R21",
+    "R31",
+    "R14"
+   ],
+   "note": "Sample identity from order to result, germplasm and study identity, unit abbreviations shared; method identity on every analyte; data-only constraint inherited as an environment binding. Covered."
+  },
+  {
+   "id": "C9",
+   "title": "Preservation-grade cultural publishing",
+   "members": [
+    "R-02",
+    "R-05",
+    "R-06",
+    "X-03"
+   ],
+   "families": [
+    "F33",
+    "F29",
+    "F06",
+    "F02",
+    "F38"
+   ],
+   "X": "X11",
+   "R": [
+    "R12",
+    "R24",
+    "R27"
+   ],
+   "note": "Object identifier across storage, manifest and citation with rights status attached; a citation resolving after the software is gone is the cold-restore property (P269). Covered."
+  },
+  {
+   "id": "C10",
+   "title": "Grid change with a safe floor",
+   "members": [
+    "D-02",
+    "D-05"
+   ],
+   "families": [
+    "F35",
+    "F26",
+    "F38"
+   ],
+   "X": "X10",
+   "R": [
+    "R20",
+    "R28",
+    "R14"
+   ],
+   "note": "Equipment identity and active limit shared between substation configuration and edge control; default fallback and edition gate inherited; a defined safe state when the link fails is the C07 timeout path. Covered."
+  }
+ ],
+ "generators": [
+  {
+   "id": "C11",
+   "title": "Conformance-Pack Builder",
+   "families": [
+    "F37",
+    "F31",
+    "F21"
+   ],
+   "anchors": [
+    "P343",
+    "P344",
+    "P266",
+    "P305",
+    "P303"
+   ],
+   "note": "Schema plus party-role model plus acceptance criteria to scenarios, synthetic fixtures, a counterparty simulator and a report splitting implementation defects from standard ambiguities; concrete product a BrAPI v2.1 Phenotyping pack. A configurator over generated protocol cases and guards. Covered."
+  },
+  {
+   "id": "C12",
+   "title": "Requirement-Card Compiler",
+   "families": [
+    "F37",
+    "F01",
+    "F31"
+   ],
+   "anchors": [
+    "P191",
+    "P303",
+    "P200",
+    "P305"
+   ],
+   "note": "Requirement list to per-requirement cards marking machine-checkable versus human-judged with the check or the reviewer prompt; concrete product a twenty-card bSDD deck. The rule that a card without a threshold must say so is HG05's preserved unknown. Covered."
+  }
+ ],
+ "extension_proposals": [],
+ "extension_note": "No case required a new family, semantic rule or adapter. Three cases (G-02, N-02, N-04 stresses) hit the catalogue's declared unsupported-requirement path, which is a blocked path, not an extension. The agent's 108 proposals, ten compositions and two generators are products within existing families.",
+ "notes": "Broader sample than iteration 1: fourteen of the 54 cases are software tools, engines or reference implementations, six are governance or verification procedures, three are legal or regulatory instruments, and three are scientific simulation or estimation models. Four documents and nine further organisations were rediscovered from iteration 1."
+}
