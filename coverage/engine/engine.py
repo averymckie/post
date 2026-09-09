@@ -104,11 +104,21 @@ class Model:
         for v in V.values():
             self.index['con'].append((v['id'], tokens(v['feature']), tokens(' '.join(v['capabilities'])), False))
         self.index['con'].append(('R14', tokens('global invariants shared state authority conservation progress effects'), set(), False))
+        for c in C.values():
+            self.index['con'].append((c['id'], tokens(c['name']) | tokens(c['form']), tokens(c['obligation']), False))
+        for o in O.values():
+            self.index['con'].append((o['id'], tokens(o['name']), tokens(o['signature']) | tokens(o['obligation']), False))
         for val in A['A15']['values']:
-            self.index['acc'].append((val.lower(), tokens(val), set(), False))
+            self.index['acc'].append(('A15|' + val.lower(), tokens(val), tokens('assurance claim verified checked'), False))
+        for val in A['A11']['values']:
+            self.index['acc'].append(('A11|' + val.lower(), tokens(val), tokens('human judgment person review'), False))
         for a in A.values():
             for val in a['values']:
                 self.index['sit'].append((a['id'] + '|' + val.lower(), tokens(val), tokens(a['axis']), False))
+        for v in V.values():
+            self.index['sit'].append(('V|' + v['id'], tokens(v['feature']), tokens(' '.join(v['capabilities'])), False))
+        for b, txt in B.items():
+            self.index['sit'].append(('B|' + b, tokens(b), tokens(txt), False))
         for p, rec in P.items():
             name = rec['title'] + ' ' + (rec.get('hardening', {}) or {}).get('title', '')
             desc = ' '.join(s['step'] for s in (rec.get('chain') or {}).get('steps', [])) + ' ' + (rec.get('input_contract') or '') + ' ' + (rec.get('output_contract') or '')
@@ -260,7 +270,9 @@ def derive_case(model, ings, c, bridge_fx, program, timeout, propose):
     best, finished, res = solve(prog, timeout)
     secs = round(time.time() - t, 3)
     if best['atoms'] is None:
-        return OrderedDict(case_id=c['case_id'], verdict='NO-WITNESS', note='no model within budget' if not finished else 'unsatisfiable', seconds=secs), cands
+        return OrderedDict(case_id=c['case_id'], regime=c.get('regime'), domain=c.get('domain'), semantic_key=c.get('semantic_key'),
+                           coarse_key=c.get('coarse_key'), scale_band=c.get('scale_band'), verdict='NO-WITNESS', families=[],
+                           note='no model within budget' if not finished else 'unsatisfiable', seconds=secs, timed_out=not finished), cands
     at = parse_atoms(best['atoms'])
     unexplained = [OrderedDict(kind=k, item=x) for k, x in at.get('unexplained', [])]
     chain = sorted(set(f[0] for f in at.get('in_chain', [])))
@@ -277,6 +289,7 @@ def derive_case(model, ings, c, bridge_fx, program, timeout, propose):
             used.append(OrderedDict(position=pos, ingredient=args[0], target='|'.join(args[1:])))
     rec = OrderedDict(
         case_id=c['case_id'], regime=c.get('regime'), domain=c.get('domain'), semantic_key=c.get('semantic_key'),
+        coarse_key=c.get('coarse_key'), scale_band=c.get('scale_band'), beneficiary=c.get('beneficiary'),
         verdict=verdict, cost=best['cost'], seconds=secs, timed_out=not finished,
         families=chain,
         realized=[OrderedDict(deliverable=a[0], role=a[1], family=a[2]) for a in at.get('realize', [])],
@@ -431,30 +444,35 @@ def write_reports(out, cat, recs, cases):
                 pg[f]['examples'].append(r['case_id'])
     gap_list = [OrderedDict(kind=k, item=i, count=v['count'], examples=v['examples']) for (k, i), v in sorted(gaps.items(), key=lambda kv: -kv[1]['count'])]
     json.dump(OrderedDict(unexplained=gap_list, proof_gaps=OrderedDict(sorted(pg.items()))), open(os.path.join(out, 'gaps.json'), 'w'), indent=1)
-    groups = defaultdict(list)
-    for r in recs:
-        if r.get('semantic_key'):
-            groups[r['semantic_key']].append(r)
-    inv = []
-    for key, rs in groups.items():
-        regs = set(r['regime'] for r in rs)
-        if len(regs) < 2:
-            continue
-        by_reg = {}
-        for r in rs:
-            by_reg.setdefault(r['regime'], []).append((tuple(r['families']), r['verdict']))
-        famsets = set(fs for lst in by_reg.values() for fs, _ in lst)
-        verdicts_ = set(v for lst in by_reg.values() for _, v in lst)
-        if 'UNEXPLAINED' in verdicts_ and len(verdicts_) > 1:
-            status = 'BREAKS'
-        elif len(famsets) > 1:
-            status = 'STRAINS'
-        else:
-            status = 'HOLDS'
-        inv.append(OrderedDict(semantic_key=key, regimes=sorted(regs), status=status,
-                               per_regime={k: [{'families': list(fs), 'verdict': v} for fs, v in lst] for k, lst in by_reg.items()}))
-    inv_summary = Counter(i['status'] for i in inv)
-    json.dump(OrderedDict(groups=len(inv), status_counts=dict(inv_summary), groups_detail=inv), open(os.path.join(out, 'invariance.json'), 'w'), indent=1)
+    inv, inv_counts = OrderedDict(), OrderedDict()
+    for key_field in ('semantic_key', 'coarse_key'):
+        for strat in ('regime', 'scale_band'):
+            groups = defaultdict(list)
+            for r in recs:
+                if r.get(key_field) and r.get(strat):
+                    groups[r[key_field]].append(r)
+            detail = []
+            for key, rs in groups.items():
+                strata = set(r[strat] for r in rs)
+                if len(strata) < 2:
+                    continue
+                by = {}
+                for r in rs:
+                    by.setdefault(r[strat], []).append((tuple(r['families']), r['verdict']))
+                famsets = set(fs for lst in by.values() for fs, _ in lst)
+                verdicts_ = set(v for lst in by.values() for _, v in lst)
+                if 'UNEXPLAINED' in verdicts_ and len(verdicts_) > 1:
+                    status = 'BREAKS'
+                elif len(famsets) > 1:
+                    status = 'STRAINS'
+                else:
+                    status = 'HOLDS'
+                detail.append(OrderedDict(key=key, strata=sorted(strata), status=status,
+                                          per_stratum={k: [{'families': list(fs), 'verdict': v} for fs, v in lst] for k, lst in by.items()}))
+            name = key_field + '_by_' + strat
+            inv[name] = detail
+            inv_counts[name] = dict(Counter(x['status'] for x in detail))
+    json.dump(OrderedDict(status_counts=inv_counts, groups={k: len(v) for k, v in inv.items()}, detail=inv), open(os.path.join(out, 'invariance.json'), 'w'), indent=1)
 
 
 if __name__ == '__main__':

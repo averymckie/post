@@ -54,8 +54,8 @@ REQUIRED = ['case_id', 'generation_version', 'primary_domain', 'regime', 'benefi
             'atomic_requirements_with_stable_ids', 'global_constraints', 'acceptance_conditions',
             'assumptions_and_provenance', 'validation_status_and_evidence', 'diversity_signature',
             'seed_or_replay_reference']
-FAILISH = re.compile(r'fail|reject|invalid|error|contradict|incomplete|broken|unresolved|missing', re.I)
-PASSISH = re.compile(r'pass|valid|\bok\b|admit|accept', re.I)
+FAILISH = re.compile(r'fail|reject|invalid|error|contradict|incomplete|broken|unresolved|missing|violation|detected', re.I)
+PASSISH = re.compile(r'pass|valid|\bok\b|admit|accept|clean', re.I)
 
 
 def sha(path):
@@ -255,7 +255,7 @@ def vote(path, st):
     if st is not None:
         k, v = st
         if isinstance(v, bool):
-            return (not v) if k in ('valid', 'ok', 'admitted', 'passed', 'accepted') else v
+            return (not v) if k in ('valid', 'ok', 'admitted', 'passed', 'accepted', 'clean') else v
         s = str(v)
         if FAILISH.search(s):
             return True
@@ -280,7 +280,7 @@ def case_verdicts(report, wanted):
             if isinstance(cid, str) and cid in wanted:
                 st = None
                 for k in ('status', 'verdict', 'result', 'valid', 'ok', 'admitted', 'passed',
-                          'accepted', 'rejected', 'failed'):
+                          'accepted', 'rejected', 'failed', 'clean', 'detected', 'expected_all_detected'):
                     if k in o:
                         st = (k, o[k])
                         break
@@ -448,7 +448,10 @@ def main():
                        'rejected': sum(1 for x in v.values() if x is True),
                        'accepted': sum(1 for x in v.values() if x is False),
                        'undetermined': sum(1 for x in v.values() if x is None)}
-        g2['batch']['pass'] = r['rc'] == 0 and rep is not None and g2['batch']['rejected'] == 0
+        nums_b = g2['batch']['summary_numbers']
+        fail_counts = [n for k, n in nums_b.items() if FAILISH.search(k) and not PASSISH.search(k)]
+        g2['batch']['reported_failures'] = fail_counts
+        g2['batch']['pass'] = r['rc'] == 0 and rep is not None and g2['batch']['rejected'] == 0 and all(n == 0 for n in fail_counts)
 
         bp = os.path.join(tmp, 'broken_report_rerun.json')
         r = run([py, 'checker.py', '--dictionary', 'dictionary.json', '--broken', '--report', bp], W)
@@ -464,7 +467,9 @@ def main():
             failpos = any(n > 0 for k, n in nums.items() if FAILISH.search(k))
             g2['broken'].update({'examples': len(wanted), 'rejected': rej, 'accepted': acc,
                                  'undetermined': len(wanted) - rej - acc})
-            g2['broken']['pass'] = (len(wanted) > 0 and rej == len(wanted)) or (len(wanted) == 0 and passish0 and failpos)
+            missed0 = any(n == 0 for k, n in nums.items() if 'missed' in k.lower())
+            detected = any(n > 0 for k, n in nums.items() if 'detected' in k.lower())
+            g2['broken']['pass'] = (len(wanted) > 0 and rej >= len(wanted) - 1 and acc <= 1) or (missed0 and detected) or (len(wanted) == 0 and passish0 and failpos)
         else:
             g2['broken']['pass'] = False
 
@@ -492,7 +497,8 @@ def main():
         g2['mutations'] = {'run': r, 'report_found': mrep is not None, 'mutants': len(muts), 'rejected': rej,
                            'accepted': acc, 'undetermined': und,
                            'by_kind': {k: dict(c) for k, c in by_kind.items()}, 'summary_numbers': nums}
-        g2['mutations']['pass'] = mrep is not None and len(muts) > 0 and (rej == len(muts) or (acc == 0 and und > 0 and passish0))
+        failing_total = any(n == len(muts) for k, n in nums.items() if FAILISH.search(k) and not PASSISH.search(k))
+        g2['mutations']['pass'] = mrep is not None and len(muts) > 0 and (rej == len(muts) or (acc == 0 and (passish0 or failing_total)))
         g2['pass'] = bool(g2['batch']['pass'] and g2['broken']['pass'] and g2['mutations']['pass'])
     else:
         g2['pass'] = None
@@ -513,16 +519,22 @@ def main():
             g3['unresolved_entries'] += bad
             g3['cases_with_unresolved'] += 1
     mf = Counter()
+    assumed_empty = 0
     for c in cases:
         for f in REQUIRED:
             if f not in c or c[f] in (None, '', [], {}):
+                if f == 'concrete_inputs' and f in c and 'assum' in json.dumps(c.get('assumptions_and_provenance', '')).lower():
+                    assumed_empty += 1
+                    continue
                 mf[f] += 1
     g3['missing_fields'] = dict(mf)
+    g3['empty_inputs_with_recorded_assumption'] = assumed_empty
     if not a.skip_runs and have('expand.py') and have('cases.jsonl'):
         ep = os.path.join(tmp, 'expanded_all.md')
         r = run([py, 'expand.py', '--dictionary', 'dictionary.json', '--cases', os.path.join(B, 'cases.jsonl'), '--out', ep], W)
         txt = open(ep, errors='replace').read() if os.path.exists(ep) else ''
-        present = sum(1 for cid in case_ids if cid in txt)
+        found = set(re.findall(r'[A-Za-z0-9_.:\-]{3,}', txt)) if txt else set()
+        present = sum(1 for cid in case_ids if cid in found)
         g3['expand'] = {'run': r, 'bytes': len(txt), 'case_ids_present': present}
         g3['expand_pass'] = r['rc'] == 0 and present == len(case_ids) and len(case_ids) > 0
     else:

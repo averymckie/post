@@ -73,6 +73,7 @@ unexplained(situation,I) :- sit(I,_), not map_sit(I,_,_).
 % variation rules triggered by mapped axis values, by constraint mappings, or by a multi-family chain
 vrule_on(V) :- map_sit(_,A,Val), trig(V,A,Val).
 vrule_on(V) :- map_con(_,V), vrule(V).
+vrule_on(V) :- map_sit(_,"V",V).
 vrule_on("V12") :- #count{ F : in_chain(F) } > 1.
 
 % proof layer: each chain family needs an anchoring record bridged from a case ingredient
