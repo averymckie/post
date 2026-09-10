@@ -14,12 +14,13 @@ embodies are fixed and recorded here:
     about who benefits, and scale is the cross-scale stratifier alongside regime;
   - CT-REGIME_ADMISSIBLE and CT-SITUATION_ADMISSIBLE are dropped: they constrain the generator's
     own vocabulary use, not the product.
-Usage: python3 normalize.py BUILD_DIR OUT_DIR
+Usage: python3 normalize.py BUILD_DIR OUT_DIR [ID_PREFIX]
 """
 import json, os, sys
 from collections import OrderedDict
 
 build, out = sys.argv[1], sys.argv[2]
+PREFIX = sys.argv[3] if len(sys.argv) > 3 else ''   # batch prefix on case ids, e.g. 'B2-'
 # generator-internal admissibility constraints: they govern the generator's own vocabulary use
 # (every ingredient declares the regime / a situation tag of the part using it), not the product
 BOOKKEEPING = {'CT-REGIME_ADMISSIBLE', 'CT-SITUATION_ADMISSIBLE'}
@@ -98,7 +99,7 @@ with open(os.path.join(build, 'cases.jsonl')) as f, open(os.path.join(out, 'case
                     sit.append(OrderedDict(ing=s, axis=kind))
         scale = c['situation'].get('scale')
         rec = OrderedDict(
-            case_id=c['case_id'], regime=c['regime'], regime_label=regime_label.get(c['regime']), domain=c['primary_domain'],
+            case_id=PREFIX + c['case_id'], regime=c['regime'], regime_label=regime_label.get(c['regime']), domain=c['primary_domain'],
             scale=scale, scale_band=(ing_by.get(scale) or {}).get('extra', {}).get('band'),
             beneficiary=c['beneficiary']['ingredient'], need=need,
             deliverables=products, required=required, inputs=sorted(set(x['ingredient'] for x in c['concrete_inputs'])),
