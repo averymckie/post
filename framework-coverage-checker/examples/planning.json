@@ -1,0 +1,288 @@
+{
+  "format": "fwcheck.case.v1",
+  "id": "DEMO-PLAN-THREE-STAGES",
+  "source_sha256": "f9689af531da415a1ecafd6da5be0b4b28e4b40db260e74f8f70f0b6a668d174",
+  "framework_sha256": "2ef09333cdb41f82302ce0a12565afd2d653190b444705fb19684e60e25251de",
+  "variables": {
+    "capacity": "Int",
+    "a": "Int",
+    "b": "Int",
+    "tasks": "Bool",
+    "scheduled": "Bool",
+    "released": "Bool"
+  },
+  "context": {
+    "=": [
+      "capacity",
+      8
+    ]
+  },
+  "source_clauses": [
+    {
+      "id": "C1",
+      "text": "Produce a released plan whose declared work is complete"
+    },
+    {
+      "id": "C2",
+      "text": "The two concurrent branches share a capacity of eight staff-hours"
+    }
+  ],
+  "semantic_review": {
+    "status": "DRAFT",
+    "reviewer": "analyst-authored demonstration; no claim of user-approved world semantics",
+    "inventory_sha256": "c9564c51ce4f42cdc1a962339e83c4e53a1d549f4917725ec4d61e3f3ed6e52e"
+  },
+  "sources": [
+    {
+      "id": "accepted_request",
+      "envelope": {
+        "schema": "request.v1",
+        "meaning": "accepted_request_contract",
+        "identity": "job-1",
+        "time": "one_finite_batch",
+        "basis": "SCENARIO",
+        "coverage": "declared_job_only",
+        "authority": "explicitly_outside_this_formal_model",
+        "state": "explicitly_outside_this_formal_model",
+        "effects": "explicitly_outside_this_formal_model",
+        "numeric": "integer_hours",
+        "resources": "staff-pool-1",
+        "evidence": "ASSUMED_COMPONENT_CONTRACT",
+        "change": "explicitly_outside_this_formal_model",
+        "exceptions": "failure_not_modeled"
+      },
+      "guarantee": true
+    }
+  ],
+  "components": [
+    {
+      "id": "formalize",
+      "family": "F01",
+      "proof_refs": [
+        "P191"
+      ],
+      "inputs": [
+        {
+          "id": "in",
+          "envelope": {
+            "schema": "request.v1",
+            "meaning": "accepted_request_contract",
+            "identity": "job-1",
+            "time": "one_finite_batch",
+            "basis": "SCENARIO",
+            "coverage": "declared_job_only",
+            "authority": "explicitly_outside_this_formal_model",
+            "state": "explicitly_outside_this_formal_model",
+            "effects": "explicitly_outside_this_formal_model",
+            "numeric": "integer_hours",
+            "resources": "staff-pool-1",
+            "evidence": "ASSUMED_COMPONENT_CONTRACT",
+            "change": "explicitly_outside_this_formal_model",
+            "exceptions": "failure_not_modeled"
+          },
+          "requires": true
+        }
+      ],
+      "outputs": [
+        {
+          "id": "out",
+          "envelope": {
+            "schema": "tasks.v1",
+            "meaning": "accepted_tasks_contract",
+            "identity": "job-1",
+            "time": "one_finite_batch",
+            "basis": "SCENARIO",
+            "coverage": "declared_job_only",
+            "authority": "explicitly_outside_this_formal_model",
+            "state": "explicitly_outside_this_formal_model",
+            "effects": "explicitly_outside_this_formal_model",
+            "numeric": "integer_hours",
+            "resources": "staff-pool-1",
+            "evidence": "ASSUMED_COMPONENT_CONTRACT",
+            "change": "explicitly_outside_this_formal_model",
+            "exceptions": "failure_not_modeled"
+          },
+          "guarantee": "tasks"
+        }
+      ],
+      "requires": true,
+      "profile_origin": "ANALYST_PROPOSED",
+      "external_effect": false
+    },
+    {
+      "id": "schedule",
+      "family": "F11",
+      "proof_refs": [
+        "P222"
+      ],
+      "inputs": [
+        {
+          "id": "in",
+          "envelope": {
+            "schema": "tasks.v1",
+            "meaning": "accepted_tasks_contract",
+            "identity": "job-1",
+            "time": "one_finite_batch",
+            "basis": "SCENARIO",
+            "coverage": "declared_job_only",
+            "authority": "explicitly_outside_this_formal_model",
+            "state": "explicitly_outside_this_formal_model",
+            "effects": "explicitly_outside_this_formal_model",
+            "numeric": "integer_hours",
+            "resources": "staff-pool-1",
+            "evidence": "ASSUMED_COMPONENT_CONTRACT",
+            "change": "explicitly_outside_this_formal_model",
+            "exceptions": "failure_not_modeled"
+          },
+          "requires": "tasks"
+        }
+      ],
+      "outputs": [
+        {
+          "id": "out",
+          "envelope": {
+            "schema": "schedule.v1",
+            "meaning": "accepted_schedule_contract",
+            "identity": "job-1",
+            "time": "one_finite_batch",
+            "basis": "SCENARIO",
+            "coverage": "declared_job_only",
+            "authority": "explicitly_outside_this_formal_model",
+            "state": "explicitly_outside_this_formal_model",
+            "effects": "explicitly_outside_this_formal_model",
+            "numeric": "integer_hours",
+            "resources": "staff-pool-1",
+            "evidence": "ASSUMED_COMPONENT_CONTRACT",
+            "change": "explicitly_outside_this_formal_model",
+            "exceptions": "failure_not_modeled"
+          },
+          "guarantee": {
+            "and": [
+              "scheduled",
+              {
+                "=": [
+                  "a",
+                  3
+                ]
+              },
+              {
+                "=": [
+                  "b",
+                  4
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "requires": true,
+      "profile_origin": "ANALYST_PROPOSED",
+      "external_effect": false
+    },
+    {
+      "id": "release",
+      "family": "F29",
+      "proof_refs": [
+        "P25",
+        "P99"
+      ],
+      "inputs": [
+        {
+          "id": "in",
+          "envelope": {
+            "schema": "schedule.v1",
+            "meaning": "accepted_schedule_contract",
+            "identity": "job-1",
+            "time": "one_finite_batch",
+            "basis": "SCENARIO",
+            "coverage": "declared_job_only",
+            "authority": "explicitly_outside_this_formal_model",
+            "state": "explicitly_outside_this_formal_model",
+            "effects": "explicitly_outside_this_formal_model",
+            "numeric": "integer_hours",
+            "resources": "staff-pool-1",
+            "evidence": "ASSUMED_COMPONENT_CONTRACT",
+            "change": "explicitly_outside_this_formal_model",
+            "exceptions": "failure_not_modeled"
+          },
+          "requires": "scheduled"
+        }
+      ],
+      "outputs": [
+        {
+          "id": "out",
+          "envelope": {
+            "schema": "plan.v1",
+            "meaning": "accepted_plan_contract",
+            "identity": "job-1",
+            "time": "one_finite_batch",
+            "basis": "SCENARIO",
+            "coverage": "declared_job_only",
+            "authority": "explicitly_outside_this_formal_model",
+            "state": "explicitly_outside_this_formal_model",
+            "effects": "explicitly_outside_this_formal_model",
+            "numeric": "integer_hours",
+            "resources": "staff-pool-1",
+            "evidence": "ASSUMED_COMPONENT_CONTRACT",
+            "change": "explicitly_outside_this_formal_model",
+            "exceptions": "failure_not_modeled"
+          },
+          "guarantee": "released"
+        }
+      ],
+      "requires": true,
+      "profile_origin": "ANALYST_PROPOSED",
+      "external_effect": false
+    }
+  ],
+  "requirements": [
+    {
+      "id": "R1",
+      "source_clause": "C1",
+      "predicate": "released",
+      "envelope": {
+        "schema": "plan.v1",
+        "meaning": "accepted_plan_contract",
+        "identity": "job-1",
+        "time": "one_finite_batch",
+        "basis": "SCENARIO",
+        "coverage": "declared_job_only",
+        "authority": "explicitly_outside_this_formal_model",
+        "state": "explicitly_outside_this_formal_model",
+        "effects": "explicitly_outside_this_formal_model",
+        "numeric": "integer_hours",
+        "resources": "staff-pool-1",
+        "evidence": "ASSUMED_COMPONENT_CONTRACT",
+        "change": "explicitly_outside_this_formal_model",
+        "exceptions": "failure_not_modeled"
+      }
+    },
+    {
+      "id": "R2",
+      "source_clause": "C2",
+      "predicate": {
+        "<=": [
+          {
+            "+": [
+              "a",
+              "b"
+            ]
+          },
+          "capacity"
+        ]
+      },
+      "envelope": null
+    }
+  ],
+  "grammar": [
+    "Seq",
+    "ForkJoin"
+  ],
+  "acceptance_scope": "FORMAL_MODEL",
+  "limits": {
+    "max_components": 6,
+    "max_candidates": 100,
+    "timeout_ms": 3000,
+    "search_seconds": 30
+  }
+}

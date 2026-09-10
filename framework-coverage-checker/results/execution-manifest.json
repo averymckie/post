@@ -1,0 +1,48 @@
+{
+  "checker_version": "0.1.0",
+  "checker_code_sha256": "e2c04fbc2a27e59346359c227a88d543dcfe67e9c73e5f3bd91a5734139d2d9d",
+  "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+  "platform": "Linux-6.18.35-x86_64-with-glibc2.39",
+  "dependencies": {
+    "clingo": "5.8.0",
+    "cvc5": "1.3.4",
+    "z3-solver": "4.15.3.0",
+    "jsonschema": "4.23.0",
+    "hypothesis": "6.131.9",
+    "pytest": "8.3.5"
+  },
+  "tests": {
+    "name": "pytest",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0",
+    "tests": "45",
+    "time": "3.597",
+    "timestamp": "2026-09-09T22:17:35.588455-05:00",
+    "hostname": "localhost"
+  },
+  "generated_input_examples": 300,
+  "generated_input_invalid": 0,
+  "ghostwriter_generated_test_bodies": 1,
+  "world_cases": 5000,
+  "independent_solver_replay": {
+    "status": "REPLAY_MATCH",
+    "case_id": "DEMO-PLAN-THREE-STAGES",
+    "construction_status": "MODEL_RECONSTRUCTED",
+    "coverage_status": "PROOF_GAP",
+    "assurance": "Re-executable solver evidence, not an independently checked formal proof object"
+  },
+  "framework_update": {
+    "baseline_sha256": "2ef09333cdb41f82302ce0a12565afd2d653190b444705fb19684e60e25251de",
+    "updated_sha256": "a2248dad7fc18c7398795b30b629fc39dd0f9a20d4ebfffd91eb18e7e8385093",
+    "family_count_preserved": 38,
+    "proof_count_preserved": 349,
+    "all_349_proof_bodies_preserved": true,
+    "unrelated_37_family_cards_preserved": true,
+    "changes": [
+      "Independent world-case generation made explicit in section 1",
+      "P99 added to F29 anchors",
+      "Section 11 CK01 implemented scope, recorded results and open hardening items added"
+    ]
+  }
+}

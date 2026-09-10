@@ -1,0 +1,38 @@
+{
+  "format": "fwcheck.obligations.v1",
+  "id": "DEMO-INTERACTIONS",
+  "features": [
+    "fork",
+    "shared_staff",
+    "external_effect"
+  ],
+  "selected": [
+    "fork",
+    "shared_staff"
+  ],
+  "rules": [
+    {
+      "id": "O1",
+      "all_of": [
+        "fork"
+      ],
+      "obligation": "all_branches_complete"
+    },
+    {
+      "id": "O2",
+      "all_of": [
+        "fork",
+        "shared_staff"
+      ],
+      "obligation": "joint_resource_bound"
+    },
+    {
+      "id": "O3",
+      "all_of": [
+        "external_effect"
+      ],
+      "obligation": "actual_receipt"
+    }
+  ],
+  "reviewed_rule_scope": "Demonstration table only; not the complete framework grammar-to-obligation relation"
+}
