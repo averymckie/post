@@ -1,7 +1,0 @@
-{
-  "status": "REPLAY_MATCH",
-  "case_id": "DEMO-PLAN-THREE-STAGES",
-  "construction_status": "MODEL_RECONSTRUCTED",
-  "coverage_status": "PROOF_GAP",
-  "assurance": "Re-executable solver evidence, not an independently checked formal proof object"
-}
