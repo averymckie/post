@@ -1,18 +1,18 @@
-# Personal per-project Claude Code instructions; never shared
-CLAUDE.local.md
 
+# Personal per-project Claude Code instructions; never shared
 # Python
-.venv/
-__pycache__/
+*.egg-info/
 *.pyc
+.hypothesis/
 .mypy_cache/
 .pytest_cache/
-.hypothesis/
+.venv/
 /build/
-dist/
-*.egg-info/
-proofs/cache/
+CLAUDE.local.md
+__pycache__/
+coverage/runs/*/*.log
 coverage/runs/*/cases.jsonl
 coverage/runs/*/cases_simple.txt
-coverage/runs/*/*.log
 coverage/runs/genv-2.1.0-25k/ref_*/derivations.jsonl
+dist/
+proofs/cache/
