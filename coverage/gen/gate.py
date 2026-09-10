@@ -386,14 +386,58 @@ def main():
             shutil.copy(p, os.path.join(W, f))
 
     D = json.load(open(os.path.join(B, 'dictionary.json'))) if have('dictionary.json') else {}
-    cases_raw = load_jsonl(os.path.join(B, 'cases.jsonl')) if have('cases.jsonl') else []
     record = json.load(open(os.path.join(B, 'generation_record.json'))) if have('generation_record.json') else {}
-    bad_lines = [c for c in cases_raw if '__bad_line__' in c]
-    cases = [c for c in cases_raw if '__bad_line__' not in c]
     ing = ingredients_of(D)
     ids = all_ids(D) | set(ing.keys())
     ing_ids = set(ing.keys())
-    case_ids = [str(c.get('case_id')) for c in cases]
+    # streaming pass: keep only compact per-case facts, plus a random sample of whole cases for mutation
+    rng0 = random.Random(20260909)
+    n_lines = 0
+    if have('cases.jsonl'):
+        with open(os.path.join(B, 'cases.jsonl')) as fh:
+            for _ in fh:
+                n_lines += 1
+    sample_idx = set(rng0.sample(range(n_lines), min(a.mutations, n_lines))) if n_lines else set()
+    cases = []          # compact records
+    sample_cases = []   # whole records for mutation
+    bad_lines = 0
+    keys_seen = set()
+    if have('cases.jsonl'):
+        with open(os.path.join(B, 'cases.jsonl')) as fh:
+            for i, line in enumerate(fh):
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    c = json.loads(line)
+                except json.JSONDecodeError:
+                    bad_lines += 1
+                    continue
+                if i in sample_idx:
+                    sample_cases.append(c)
+                refs = refs_in(c, ids)
+                kinds = sorted(k for k in (rel_kind(e) for e in entries(c.get('component_relationships'))) if k)
+                unresolved = 0
+                for f in ('component_relationships', 'atomic_requirements_with_stable_ids'):
+                    for e in entries(c.get(f)):
+                        if not refs_in(e, ids):
+                            unresolved += 1
+                missing = []
+                for f in REQUIRED:
+                    if f not in c or c[f] in (None, '', [], {}):
+                        if f == 'concrete_inputs' and f in c and 'assum' in json.dumps(c.get('assumptions_and_provenance', '')).lower():
+                            missing.append('__assumed_empty__')
+                        else:
+                            missing.append(f)
+                own = regime_of(c)
+                rest = {k: v for k, v in c.items() if k != 'regime'}
+                mentions = set(s for s in strings(rest) if isinstance(s, str) and s.startswith('R-')) - {own}
+                keys_seen |= set(keys_of(c))
+                cases.append({'case_id': str(c.get('case_id')), 'regime': own, 'domain': domain_of(c), 'refs': refs, 'kinds': kinds,
+                              'n_entries': sum(len(entries(c.get(f))) for f in ('component_relationships', 'atomic_requirements_with_stable_ids')),
+                              'unresolved': unresolved, 'missing': missing, 'mentions': mentions,
+                              'exact': sha_text(json.dumps({k: v for k, v in c.items() if k not in STRIP}, sort_keys=True))})
+    case_ids = [c['case_id'] for c in cases]
     n_cases = len(cases)
     count = a.count or find_int(record, lambda k: 'request' in k or k == 'count') or n_cases
     scale = n_cases / 1000.0 if n_cases else 1.0
@@ -401,9 +445,9 @@ def main():
     R['count_for_rerun'] = count
     R['floors_scaled_to_batch'] = floors
     R['record_claims'] = summary_numbers(record)
-    R['batch'] = {'cases': n_cases, 'bad_lines': len(bad_lines), 'ingredients': len(ing),
+    R['batch'] = {'cases': n_cases, 'bad_lines': bad_lines, 'ingredients': len(ing),
                   'dictionary_ids': len(ids), 'distinct_case_ids': len(set(case_ids))}
-    case_refs = {i: refs_in(c, ids) for i, c in enumerate(cases)}
+    case_refs = {i: c['refs'] for i, c in enumerate(cases)}
 
     # ---- G1 determinism (+ generation timing for G8)
     g1 = {'seed': find_int(record, lambda k: 'seed' in k), 'runs': []}
@@ -416,12 +460,18 @@ def main():
                      '--count', str(count), '--out', out, '--record', os.path.join(tmp, 'record_a%d.json' % i)], W)
             g1['runs'].append(r)
             hashes.append(sha(out) if os.path.exists(out) else None)
+            for f in (out, os.path.join(W, 'review_needed.jsonl')):
+                if os.path.exists(f):
+                    os.remove(f)
         seed_b = a.seed_b if a.seed_b is not None else g1['seed'] + 1
         outb = os.path.join(tmp, 'cases_b.jsonl')
         r = run([py, 'generate.py', '--dictionary', 'dictionary.json', '--seed', str(seed_b),
                  '--count', str(count), '--out', outb, '--record', os.path.join(tmp, 'record_b.json')], W)
         g1['runs'].append(r)
         hb = sha(outb) if os.path.exists(outb) else None
+        for f in (outb, os.path.join(W, 'review_needed.jsonl')):
+            if os.path.exists(f):
+                os.remove(f)
         g1.update({'build_hash': R['file_hashes'].get('cases.jsonl'), 'rerun_hashes': hashes,
                    'seed_b': seed_b, 'seed_b_hash': hb})
         g1['identical'] = hashes[0] is not None and hashes[0] == hashes[1] == g1['build_hash']
@@ -473,10 +523,7 @@ def main():
         else:
             g2['broken']['pass'] = False
 
-        rng = random.Random(20260909)
-        pool = [c for c in cases if isinstance(c.get('case_id'), str)]
-        sample = rng.sample(pool, min(a.mutations, len(pool))) if pool else []
-        muts = [m for c in sample for m in mutants_of(c, ids)]
+        muts = [m for c in sample_cases for m in mutants_of(c, ids)]
         mp = os.path.join(tmp, 'mutants.jsonl')
         mrp = os.path.join(tmp, 'mutants_report.json')
         with open(mp, 'w') as f:
@@ -505,37 +552,34 @@ def main():
     R['gates']['G2_checker'] = g2
 
     # ---- G3 references, required fields, expansion
-    g3 = {'entries_checked': 0, 'unresolved_entries': 0, 'cases_with_unresolved': 0, 'examples': []}
-    for i, c in enumerate(cases):
-        bad = 0
-        for f in ('component_relationships', 'atomic_requirements_with_stable_ids'):
-            for e in entries(c.get(f)):
-                g3['entries_checked'] += 1
-                if not refs_in(e, ids):
-                    bad += 1
-                    if len(g3['examples']) < 10:
-                        g3['examples'].append({'case_id': c.get('case_id'), 'field': f, 'entry': json.dumps(e)[:200]})
-        if bad:
-            g3['unresolved_entries'] += bad
-            g3['cases_with_unresolved'] += 1
+    g3 = {'entries_checked': sum(c['n_entries'] for c in cases), 'unresolved_entries': sum(c['unresolved'] for c in cases),
+          'cases_with_unresolved': sum(1 for c in cases if c['unresolved']), 'examples': []}
     mf = Counter()
     assumed_empty = 0
     for c in cases:
-        for f in REQUIRED:
-            if f not in c or c[f] in (None, '', [], {}):
-                if f == 'concrete_inputs' and f in c and 'assum' in json.dumps(c.get('assumptions_and_provenance', '')).lower():
-                    assumed_empty += 1
-                    continue
+        for f in c['missing']:
+            if f == '__assumed_empty__':
+                assumed_empty += 1
+            else:
                 mf[f] += 1
     g3['missing_fields'] = dict(mf)
     g3['empty_inputs_with_recorded_assumption'] = assumed_empty
     if not a.skip_runs and have('expand.py') and have('cases.jsonl'):
         ep = os.path.join(tmp, 'expanded_all.md')
         r = run([py, 'expand.py', '--dictionary', 'dictionary.json', '--cases', os.path.join(B, 'cases.jsonl'), '--out', ep], W)
-        txt = open(ep, errors='replace').read() if os.path.exists(ep) else ''
-        found = set(re.findall(r'[A-Za-z0-9_.:\-]{3,}', txt)) if txt else set()
-        present = sum(1 for cid in case_ids if cid in found)
-        g3['expand'] = {'run': r, 'bytes': len(txt), 'case_ids_present': present}
+        found = set()
+        nbytes = 0
+        if os.path.exists(ep):
+            wanted = set(case_ids)
+            with open(ep, errors='replace') as fh:
+                for line in fh:
+                    nbytes += len(line)
+                    for tok in re.findall(r'[A-Za-z0-9_.:\-]{3,}', line):
+                        if tok in wanted:
+                            found.add(tok)
+            os.remove(ep)
+        present = len(found)
+        g3['expand'] = {'run': r, 'bytes': nbytes, 'case_ids_present': present}
         g3['expand_pass'] = r['rc'] == 0 and present == len(case_ids) and len(case_ids) > 0
     else:
         g3['expand_pass'] = None
@@ -543,11 +587,10 @@ def main():
     R['gates']['G3_references'] = g3
 
     # ---- G4 duplicates
-    exact = Counter(sha_text(json.dumps({k: v for k, v in c.items() if k not in STRIP}, sort_keys=True)) for c in cases)
+    exact = Counter(c['exact'] for c in cases)
     struct = Counter()
     for i, c in enumerate(cases):
-        kinds = sorted(k for k in (rel_kind(e) for e in entries(c.get('component_relationships'))) if k)
-        struct[sha_text(json.dumps([sorted(case_refs[i]), regime_of(c), domain_of(c), kinds]))] += 1
+        struct[sha_text(json.dumps([sorted(c['refs']), c['regime'], c['domain'], c['kinds']]))] += 1
     g4 = {'exact_duplicates': sum(n - 1 for n in exact.values() if n > 1),
           'structural_duplicates': sum(n - 1 for n in struct.values() if n > 1),
           'distinct_structures': len(struct),
@@ -556,18 +599,17 @@ def main():
     R['gates']['G4_duplicates'] = g4
 
     # ---- G5 diversity floors
-    regimes = Counter(regime_of(c) for c in cases)
-    domains = Counter(domain_of(c) for c in cases)
+    regimes = Counter(c['regime'] for c in cases)
+    domains = Counter(c['domain'] for c in cases)
     rel_cases = Counter()
     for c in cases:
-        for k in set(k for k in (rel_kind(e) for e in entries(c.get('component_relationships'))) if k):
+        for k in set(c['kinds']):
             rel_cases[k] += 1
     regime_vocab = set(k for k in regimes if k)
     cross_mention = cross_ingredient = 0
     for i, c in enumerate(cases):
-        own = regime_of(c)
-        rest = {k: v for k, v in c.items() if k != 'regime'}
-        if set(s for s in strings(rest) if s in regime_vocab) - {own}:
+        own = c['regime']
+        if (c['mentions'] & regime_vocab) - {own}:
             cross_mention += 1
         for rid in case_refs[i]:
             rec = ing.get(rid) or {}
@@ -594,7 +636,7 @@ def main():
     if cross < floors['cross']:
         short['cross_regime'] = cross
     unparsed = {k: v for k, v in domains.items() if k.startswith('OTHER')}
-    cells = Counter((regime_of(c), domain_of(c)) for c in cases)
+    cells = Counter((c['regime'], c['domain']) for c in cases)
     short_cells = {}
     for rg in sorted(regime_vocab):
         for d in ISIC + FORD:
@@ -630,9 +672,7 @@ def main():
                     g6['phrase_hits'].append({'file': f, 'phrase': ph,
                                               'context': txt[max(0, i - 40):i + len(ph) + 40].replace('\n', ' ')})
                 i = low.find(ph, i + 1)
-    allkeys = set(keys_of(D))
-    for c in cases:
-        allkeys |= set(keys_of(c))
+    allkeys = set(keys_of(D)) | keys_seen
     g6['hard_keys'] = sorted(k for k in allkeys if HARD_KEYS.search(k))
     g6['soft_keys'] = sorted(k for k in allkeys if SOFT_KEYS.search(k))
     g6['pass'] = not g6['hard_keys']
@@ -711,7 +751,7 @@ def main():
     out = a.report or os.path.join(B, 'gate_report.json')
     with open(out, 'w') as f:
         json.dump(R, f, indent=1, sort_keys=True)
-    print('build: %s  cases=%d ingredients=%d bad_lines=%d' % (B, n_cases, len(ing), len(bad_lines)))
+    print('build: %s  cases=%d ingredients=%d bad_lines=%d' % (B, n_cases, len(ing), bad_lines))
     for l in lines:
         print(l)
     print('report: %s' % out)
