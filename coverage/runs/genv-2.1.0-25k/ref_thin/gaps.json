@@ -1,0 +1,509 @@
+{
+ "unexplained": [
+  {
+   "kind": "grounding",
+   "item": "F37",
+   "count": 731,
+   "examples": [
+    "UC-00008",
+    "UC-00021",
+    "UC-00061",
+    "UC-00082",
+    "UC-00145"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F27",
+   "count": 97,
+   "examples": [
+    "UC-00118",
+    "UC-00337",
+    "UC-00640",
+    "UC-01945",
+    "UC-02112"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F09",
+   "count": 65,
+   "examples": [
+    "UC-00183",
+    "UC-00235",
+    "UC-01478",
+    "UC-01487",
+    "UC-01514"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F35",
+   "count": 53,
+   "examples": [
+    "UC-00853",
+    "UC-01538",
+    "UC-02128",
+    "UC-03055",
+    "UC-04582"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F32",
+   "count": 46,
+   "examples": [
+    "UC-00183",
+    "UC-01010",
+    "UC-01478",
+    "UC-01514",
+    "UC-02003"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F17",
+   "count": 32,
+   "examples": [
+    "UC-00058",
+    "UC-00235",
+    "UC-01487",
+    "UC-02743",
+    "UC-02793"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F14",
+   "count": 26,
+   "examples": [
+    "UC-02889",
+    "UC-03056",
+    "UC-03166",
+    "UC-07319",
+    "UC-09336"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F33",
+   "count": 21,
+   "examples": [
+    "UC-01213",
+    "UC-01267",
+    "UC-04126",
+    "UC-05850",
+    "UC-08388"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F22",
+   "count": 17,
+   "examples": [
+    "UC-00794",
+    "UC-01010",
+    "UC-03107",
+    "UC-03479",
+    "UC-07193"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F29",
+   "count": 16,
+   "examples": [
+    "UC-01727",
+    "UC-03150",
+    "UC-04151",
+    "UC-04548",
+    "UC-07897"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F16",
+   "count": 14,
+   "examples": [
+    "UC-00794",
+    "UC-02793",
+    "UC-03568",
+    "UC-09787",
+    "UC-13973"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F21",
+   "count": 12,
+   "examples": [
+    "UC-02004",
+    "UC-04060",
+    "UC-04126",
+    "UC-07193",
+    "UC-10329"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F19",
+   "count": 8,
+   "examples": [
+    "UC-01487",
+    "UC-07897",
+    "UC-09494",
+    "UC-10395",
+    "UC-11700"
+   ]
+  },
+  {
+   "kind": "requirement",
+   "item": "ACT-MODEL-SIMULATE",
+   "count": 7,
+   "examples": [
+    "UC-00058",
+    "UC-03150",
+    "UC-04151",
+    "UC-13973",
+    "UC-16222"
+   ]
+  },
+  {
+   "kind": "acceptance_qualifier",
+   "item": "chain",
+   "count": 7,
+   "examples": [
+    "UC-03877",
+    "UC-04223",
+    "UC-05312",
+    "UC-06515",
+    "UC-07362"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F10",
+   "count": 6,
+   "examples": [
+    "UC-00058",
+    "UC-02743",
+    "UC-04223",
+    "UC-07199",
+    "UC-20148"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F34",
+   "count": 6,
+   "examples": [
+    "UC-01010",
+    "UC-04223",
+    "UC-07372",
+    "UC-10329",
+    "UC-11762"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F02",
+   "count": 6,
+   "examples": [
+    "UC-02004",
+    "UC-03214",
+    "UC-04247",
+    "UC-07193",
+    "UC-21791"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F30",
+   "count": 4,
+   "examples": [
+    "UC-01450",
+    "UC-03056",
+    "UC-03150",
+    "UC-04548"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F08",
+   "count": 4,
+   "examples": [
+    "UC-02003",
+    "UC-03214",
+    "UC-16222",
+    "UC-21205"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F03",
+   "count": 4,
+   "examples": [
+    "UC-04060",
+    "UC-04247",
+    "UC-16486",
+    "UC-22859"
+   ]
+  },
+  {
+   "kind": "requirement",
+   "item": "ACT-TRANSCRIBE",
+   "count": 3,
+   "examples": [
+    "UC-02004",
+    "UC-07897",
+    "UC-21791"
+   ]
+  },
+  {
+   "kind": "requirement",
+   "item": "ACT-MEASURE-INSTRUMENT",
+   "count": 3,
+   "examples": [
+    "UC-04151",
+    "UC-11185",
+    "UC-13365"
+   ]
+  },
+  {
+   "kind": "requirement",
+   "item": "ACT-CATALOGUE",
+   "count": 3,
+   "examples": [
+    "UC-05701",
+    "UC-10478",
+    "UC-20384"
+   ]
+  },
+  {
+   "kind": "requirement",
+   "item": "ACT-ENUMERATE-FIELD",
+   "count": 3,
+   "examples": [
+    "UC-08706",
+    "UC-09494",
+    "UC-15715"
+   ]
+  },
+  {
+   "kind": "requirement",
+   "item": "ACT-OBSERVE-BEHAVIOUR",
+   "count": 3,
+   "examples": [
+    "UC-10722",
+    "UC-21791",
+    "UC-23691"
+   ]
+  },
+  {
+   "kind": "requirement",
+   "item": "ACT-DECOMMISSION",
+   "count": 2,
+   "examples": [
+    "UC-05701",
+    "UC-22354"
+   ]
+  },
+  {
+   "kind": "requirement",
+   "item": "ACT-HANDOVER",
+   "count": 2,
+   "examples": [
+    "UC-08549",
+    "UC-24365"
+   ]
+  },
+  {
+   "kind": "requirement",
+   "item": "ACT-REPAIR",
+   "count": 2,
+   "examples": [
+    "UC-08549",
+    "UC-09336"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F12",
+   "count": 2,
+   "examples": [
+    "UC-13091",
+    "UC-20152"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F31",
+   "count": 1,
+   "examples": [
+    "UC-01213"
+   ]
+  },
+  {
+   "kind": "requirement",
+   "item": "ACT-CARE-VISIT",
+   "count": 1,
+   "examples": [
+    "UC-04151"
+   ]
+  },
+  {
+   "kind": "requirement",
+   "item": "ACT-REVIEW-PEER",
+   "count": 1,
+   "examples": [
+    "UC-04223"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F25",
+   "count": 1,
+   "examples": [
+    "UC-04824"
+   ]
+  },
+  {
+   "kind": "requirement",
+   "item": "ACT-INTERVIEW",
+   "count": 1,
+   "examples": [
+    "UC-05850"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F24",
+   "count": 1,
+   "examples": [
+    "UC-07372"
+   ]
+  },
+  {
+   "kind": "input",
+   "item": "INP-TAILINGS-CLASSIFICATION",
+   "count": 1,
+   "examples": [
+    "UC-08549"
+   ]
+  },
+  {
+   "kind": "input",
+   "item": "INP-WORKSPACE",
+   "count": 1,
+   "examples": [
+    "UC-08549"
+   ]
+  },
+  {
+   "kind": "requirement",
+   "item": "ACT-COLLECT-SAMPLE",
+   "count": 1,
+   "examples": [
+    "UC-08549"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F13",
+   "count": 1,
+   "examples": [
+    "UC-08706"
+   ]
+  },
+  {
+   "kind": "input",
+   "item": "INP-ANIMAL-RECORD",
+   "count": 1,
+   "examples": [
+    "UC-11461"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F05",
+   "count": 1,
+   "examples": [
+    "UC-15715"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F11",
+   "count": 1,
+   "examples": [
+    "UC-19942"
+   ]
+  },
+  {
+   "kind": "input",
+   "item": "INP-LOCAL-KNOWLEDGE",
+   "count": 1,
+   "examples": [
+    "UC-20961"
+   ]
+  },
+  {
+   "kind": "requirement",
+   "item": "ACT-TAG-IDENTIFY",
+   "count": 1,
+   "examples": [
+    "UC-22354"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F04",
+   "count": 1,
+   "examples": [
+    "UC-22646"
+   ]
+  }
+ ],
+ "proof_gaps": {
+  "F08": {
+   "count": 78,
+   "examples": [
+    "UC-00055",
+    "UC-00862",
+    "UC-01060",
+    "UC-01510",
+    "UC-01778"
+   ]
+  },
+  "F29": {
+   "count": 758,
+   "examples": [
+    "UC-00044",
+    "UC-00069",
+    "UC-00170",
+    "UC-00201",
+    "UC-00225"
+   ]
+  },
+  "F30": {
+   "count": 160,
+   "examples": [
+    "UC-00010",
+    "UC-00354",
+    "UC-00486",
+    "UC-00577",
+    "UC-00599"
+   ]
+  },
+  "F31": {
+   "count": 197,
+   "examples": [
+    "UC-00059",
+    "UC-00306",
+    "UC-00489",
+    "UC-00848",
+    "UC-00936"
+   ]
+  }
+ }
+}

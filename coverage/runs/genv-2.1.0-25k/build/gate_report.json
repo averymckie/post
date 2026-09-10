@@ -1,0 +1,723 @@
+{
+ "all_pass": true,
+ "batch": {
+  "bad_lines": 0,
+  "cases": 25000,
+  "dictionary_ids": 577,
+  "distinct_case_ids": 25000,
+  "ingredients": 577
+ },
+ "build": "/tmp/claude-0/-home-user-post/29b9af63-7d01-5359-bed5-a0fd619c61bc/scratchpad/gen/v2_25k",
+ "count_for_rerun": 25000,
+ "file_hashes": {
+  "cases.jsonl": "cf53c2adb5d4cbb2f56e2ac9e43d19f4491fcf86d9f350a3c54f49f9ac9b5ddf",
+  "checker.py": "0146e85c751888f5b5c382fdd6ebf1a6855f22be9a1d1a5bf6b918e3a9ff4f96",
+  "dictionary.json": "fbbe9db1431f1b9d71cfc8430ceae5df10a9805a26d23da424d87b283d950aa7",
+  "expand.py": "d07dc147d58b947b6a5aa27d3b2a28945243dfa9d016dd89300560fa7fe188c8",
+  "generate.py": "35ddb32f92c8fd1c7feba11a9b18c74559c1b92f1d30fe84357c55d46d88407b",
+  "generation_record.json": "de4a8fac698469e160ecab14163fb4170236ba440312d60bfad69df35c914ed1"
+ },
+ "floors_scaled_to_batch": {
+  "cell": 75,
+  "cross": 2500,
+  "ford": 1000,
+  "isic": 500,
+  "regime": 1500,
+  "relation": 750
+ },
+ "gates": {
+  "G1_determinism": {
+   "build_hash": "cf53c2adb5d4cbb2f56e2ac9e43d19f4491fcf86d9f350a3c54f49f9ac9b5ddf",
+   "differs_on_seed_b": true,
+   "identical": true,
+   "pass": true,
+   "rerun_hashes": [
+    "cf53c2adb5d4cbb2f56e2ac9e43d19f4491fcf86d9f350a3c54f49f9ac9b5ddf",
+    "cf53c2adb5d4cbb2f56e2ac9e43d19f4491fcf86d9f350a3c54f49f9ac9b5ddf"
+   ],
+   "runs": [
+    {
+     "cmd": "/usr/local/bin/python3 generate.py --dictionary dictionary.json --seed 11691621138000208715 --count 25000 --out /tmp/claude-0/-home-user-post/29b9af63-7d01-5359-bed5-a0fd619c61bc/scratchpad/gen/v2_25k/_gate/cases_a1.jsonl --record /tmp/claude-0/-home-user-post/29b9af63-7d01-5359-bed5-a0fd619c61bc/scratchpad/gen/v2_25k/_gate/record_a1.json",
+     "rc": 0,
+     "seconds": 61.168,
+     "stderr": "",
+     "stdout": "admitted 25000 / requested 25000  (attempted 30373, dup 0, contradiction 512, unresolved 1205, review 3656)\nsetup 0.05s  generation 41.67s  writing 13.19s\n"
+    },
+    {
+     "cmd": "/usr/local/bin/python3 generate.py --dictionary dictionary.json --seed 11691621138000208715 --count 25000 --out /tmp/claude-0/-home-user-post/29b9af63-7d01-5359-bed5-a0fd619c61bc/scratchpad/gen/v2_25k/_gate/cases_a2.jsonl --record /tmp/claude-0/-home-user-post/29b9af63-7d01-5359-bed5-a0fd619c61bc/scratchpad/gen/v2_25k/_gate/record_a2.json",
+     "rc": 0,
+     "seconds": 51.841,
+     "stderr": "",
+     "stdout": "admitted 25000 / requested 25000  (attempted 30373, dup 0, contradiction 512, unresolved 1205, review 3656)\nsetup 0.02s  generation 31.81s  writing 13.57s\n"
+    },
+    {
+     "cmd": "/usr/local/bin/python3 generate.py --dictionary dictionary.json --seed 11691621138000208716 --count 25000 --out /tmp/claude-0/-home-user-post/29b9af63-7d01-5359-bed5-a0fd619c61bc/scratchpad/gen/v2_25k/_gate/cases_b.jsonl --record /tmp/claude-0/-home-user-post/29b9af63-7d01-5359-bed5-a0fd619c61bc/scratchpad/gen/v2_25k/_gate/record_b.json",
+     "rc": 0,
+     "seconds": 50.37,
+     "stderr": "",
+     "stdout": "admitted 25000 / requested 25000  (attempted 30261, dup 0, contradiction 501, unresolved 1115, review 3645)\nsetup 0.02s  generation 31.96s  writing 12.56s\n"
+    }
+   ],
+   "seed": 11691621138000208715,
+   "seed_b": 11691621138000208716,
+   "seed_b_hash": "459a4ed5c7a9a583bdcb2b444c96c96c75829059d8a8ff54bbd4471916450f62"
+  },
+  "G2_checker": {
+   "batch": {
+    "accepted": 0,
+    "pass": true,
+    "rejected": 0,
+    "report_found": true,
+    "reported_failures": [
+     0,
+     0
+    ],
+    "run": {
+     "cmd": "/usr/local/bin/python3 checker.py --dictionary dictionary.json --cases /tmp/claude-0/-home-user-post/29b9af63-7d01-5359-bed5-a0fd619c61bc/scratchpad/gen/v2_25k/cases.jsonl --report /tmp/claude-0/-home-user-post/29b9af63-7d01-5359-bed5-a0fd619c61bc/scratchpad/gen/v2_25k/_gate/checker_report_rerun.json",
+     "rc": 0,
+     "seconds": 12.639,
+     "stderr": "",
+     "stdout": "checked 25000 cases: 25000 clean, 0 with violations (setup 0.01s, checking 11.04s)\n"
+    },
+    "summary_numbers": {
+     "check_results.ACCEPTANCE_COVER.pass": 25000,
+     "check_results.ACTIVITY_PRODUCT_FIT.pass": 25000,
+     "check_results.ACYCLIC.pass": 25000,
+     "check_results.BENEFICIARY_BAND.pass": 25000,
+     "check_results.CAPACITY.pass": 25000,
+     "check_results.DEPTH.pass": 25000,
+     "check_results.DOMAIN_GATE.pass": 25000,
+     "check_results.FIXTURE_LABELLED.pass": 25000,
+     "check_results.GENERATOR_EMITS.pass": 25000,
+     "check_results.GLOBAL_CONSTRAINTS.pass": 25000,
+     "check_results.IDENTITY_CONSISTENT.pass": 25000,
+     "check_results.PLAUSIBILITY.unavailable": 25000,
+     "check_results.PREREQ_CLOSURE.pass": 25000,
+     "check_results.QUALITATIVE_ACCEPTANCE.unavailable": 13611,
+     "check_results.QUALITATIVE_CONSTRAINT.unavailable": 15363,
+     "check_results.REGIME_ADMISSIBLE.pass": 25000,
+     "check_results.REL_AUTHORITY_PRESENT.pass": 25000,
+     "check_results.REL_CYCLE_BOUND.pass": 25000,
+     "check_results.REL_EDGE_BEHAVIOUR.pass": 25000,
+     "check_results.REL_EMITTED_CONCRETE.pass": 25000,
+     "check_results.REL_GENERATOR_FORM.pass": 25000,
+     "check_results.REL_INHERIT_ACCEPTANCE.pass": 25000,
+     "check_results.REL_INTEGRITY.pass": 25000,
+     "check_results.REL_JOINT_OUTCOME.pass": 25000,
+     "check_results.REL_LIMIT_UNIT.pass": 25000,
+     "check_results.REL_PREDICATE.pass": 25000,
+     "check_results.REL_SCOPE_EXPIRY.pass": 25000,
+     "check_results.REL_SHARED_OBJECT.pass": 25000,
+     "check_results.REL_STALENESS.pass": 25000,
+     "check_results.REL_STOP_CRITERION.pass": 25000,
+     "check_results.REL_UNIT_DIMENSION.pass": 25000,
+     "check_results.REQUIREMENT_IDS.pass": 25000,
+     "check_results.SCHEDULE.pass": 25000,
+     "check_results.SIGNATURE.pass": 25000,
+     "check_results.SITUATION_ADMISSIBLE.pass": 25000,
+     "check_results.STRUCTURE.pass": 25000,
+     "check_results.UNITS_DECLARED.pass": 25000,
+     "check_results.VOCAB_RESOLVE.pass": 25000,
+     "check_results.WITNESS.pass": 25000,
+     "counts.cases_read": 25000,
+     "counts.duplicate_case_ids": 0,
+     "counts.duplicate_full_keys": 0,
+     "counts.generator_claim_contradicted_by_checker": 0,
+     "counts.structurally_and_mechanically_clean": 25000,
+     "counts.with_at_least_one_violation": 0,
+     "timings_seconds.checking": 11.036,
+     "timings_seconds.setup": 0.008,
+     "timings_seconds.throughput_cases_per_second": 2265.3,
+     "unavailable_by_code.PLAUSIBILITY": 25000,
+     "unavailable_by_code.QUALITATIVE_ACCEPTANCE": 21294,
+     "unavailable_by_code.QUALITATIVE_CONSTRAINT": 17771
+    },
+    "undetermined": 25000
+   },
+   "broken": {
+    "accepted": 1,
+    "examples": 21,
+    "pass": true,
+    "rejected": 20,
+    "report_found": true,
+    "run": {
+     "cmd": "/usr/local/bin/python3 checker.py --dictionary dictionary.json --broken --report /tmp/claude-0/-home-user-post/29b9af63-7d01-5359-bed5-a0fd619c61bc/scratchpad/gen/v2_25k/_gate/broken_report_rerun.json",
+     "rc": 0,
+     "seconds": 0.073,
+     "stderr": "",
+     "stdout": "broken examples: 20/20 detected; base fixture clean: True\n"
+    },
+    "summary_numbers": {
+     "counts.all_expected_violations_detected": 20,
+     "counts.variants": 20,
+     "counts.variants_missed": 0,
+     "timings_seconds.checking": 0.012,
+     "timings_seconds.setup": 0.008
+    },
+    "undetermined": 0
+   },
+   "mutations": {
+    "accepted": 0,
+    "by_kind": {
+     "m1_badref": {
+      "rejected": 13,
+      "undetermined": 17
+     },
+     "m2_noacceptance": {
+      "rejected": 13,
+      "undetermined": 17
+     },
+     "m3_norequirements": {
+      "rejected": 12,
+      "undetermined": 18
+     },
+     "m4_noinputs": {
+      "rejected": 12,
+      "undetermined": 18
+     }
+    },
+    "mutants": 120,
+    "pass": true,
+    "rejected": 50,
+    "report_found": true,
+    "run": {
+     "cmd": "/usr/local/bin/python3 checker.py --dictionary dictionary.json --cases /tmp/claude-0/-home-user-post/29b9af63-7d01-5359-bed5-a0fd619c61bc/scratchpad/gen/v2_25k/_gate/mutants.jsonl --report /tmp/claude-0/-home-user-post/29b9af63-7d01-5359-bed5-a0fd619c61bc/scratchpad/gen/v2_25k/_gate/mutants_report.json",
+     "rc": 0,
+     "seconds": 0.105,
+     "stderr": "",
+     "stdout": "checked 120 cases: 0 clean, 120 with violations (setup 0.01s, checking 0.03s)\n   PREREQ_CLOSURE               11\n   REQUIREMENT_IDS              708\n   SIGNATURE                    90\n   STRUCTURE                    90\n   VOCAB_RESOLVE                30\n"
+    },
+    "summary_numbers": {
+     "check_results.ACCEPTANCE_COVER.pass": 30,
+     "check_results.ACTIVITY_PRODUCT_FIT.pass": 30,
+     "check_results.ACYCLIC.pass": 30,
+     "check_results.BENEFICIARY_BAND.pass": 30,
+     "check_results.CAPACITY.pass": 30,
+     "check_results.DEPTH.pass": 30,
+     "check_results.DOMAIN_GATE.pass": 30,
+     "check_results.FIXTURE_LABELLED.pass": 30,
+     "check_results.GENERATOR_EMITS.pass": 30,
+     "check_results.GLOBAL_CONSTRAINTS.pass": 30,
+     "check_results.IDENTITY_CONSISTENT.pass": 30,
+     "check_results.PLAUSIBILITY.unavailable": 30,
+     "check_results.PREREQ_CLOSURE.fail": 11,
+     "check_results.PREREQ_CLOSURE.pass": 19,
+     "check_results.QUALITATIVE_ACCEPTANCE.unavailable": 16,
+     "check_results.QUALITATIVE_CONSTRAINT.unavailable": 21,
+     "check_results.REGIME_ADMISSIBLE.pass": 30,
+     "check_results.REL_AUTHORITY_PRESENT.pass": 30,
+     "check_results.REL_CYCLE_BOUND.pass": 30,
+     "check_results.REL_EDGE_BEHAVIOUR.pass": 30,
+     "check_results.REL_EMITTED_CONCRETE.pass": 30,
+     "check_results.REL_GENERATOR_FORM.pass": 30,
+     "check_results.REL_INHERIT_ACCEPTANCE.pass": 30,
+     "check_results.REL_INTEGRITY.pass": 30,
+     "check_results.REL_JOINT_OUTCOME.pass": 30,
+     "check_results.REL_LIMIT_UNIT.pass": 30,
+     "check_results.REL_PREDICATE.pass": 30,
+     "check_results.REL_SCOPE_EXPIRY.pass": 30,
+     "check_results.REL_SHARED_OBJECT.pass": 30,
+     "check_results.REL_STALENESS.pass": 30,
+     "check_results.REL_STOP_CRITERION.pass": 30,
+     "check_results.REL_UNIT_DIMENSION.pass": 30,
+     "check_results.REQUIREMENT_IDS.fail": 30,
+     "check_results.SCHEDULE.pass": 30,
+     "check_results.SIGNATURE.fail": 30,
+     "check_results.SITUATION_ADMISSIBLE.pass": 30,
+     "check_results.STRUCTURE.fail": 90,
+     "check_results.STRUCTURE.pass": 30,
+     "check_results.UNITS_DECLARED.pass": 30,
+     "check_results.VOCAB_RESOLVE.fail": 30,
+     "check_results.WITNESS.pass": 30,
+     "counts.cases_read": 120,
+     "counts.duplicate_case_ids": 0,
+     "counts.duplicate_full_keys": 90,
+     "counts.generator_claim_contradicted_by_checker": 120,
+     "counts.structurally_and_mechanically_clean": 0,
+     "counts.with_at_least_one_violation": 120,
+     "timings_seconds.checking": 0.03,
+     "timings_seconds.setup": 0.009,
+     "timings_seconds.throughput_cases_per_second": 4049.2,
+     "unavailable_by_code.PLAUSIBILITY": 30,
+     "unavailable_by_code.QUALITATIVE_ACCEPTANCE": 22,
+     "unavailable_by_code.QUALITATIVE_CONSTRAINT": 25,
+     "violations_by_code.PREREQ_CLOSURE": 11,
+     "violations_by_code.REQUIREMENT_IDS": 708,
+     "violations_by_code.SIGNATURE": 90,
+     "violations_by_code.STRUCTURE": 90,
+     "violations_by_code.VOCAB_RESOLVE": 30
+    },
+    "undetermined": 70
+   },
+   "pass": true
+  },
+  "G3_references": {
+   "cases_with_unresolved": 0,
+   "empty_inputs_with_recorded_assumption": 141,
+   "entries_checked": 667663,
+   "examples": [],
+   "expand": {
+    "bytes": 508522997,
+    "case_ids_present": 25000,
+    "run": {
+     "cmd": "/usr/local/bin/python3 expand.py --dictionary dictionary.json --cases /tmp/claude-0/-home-user-post/29b9af63-7d01-5359-bed5-a0fd619c61bc/scratchpad/gen/v2_25k/cases.jsonl --out /tmp/claude-0/-home-user-post/29b9af63-7d01-5359-bed5-a0fd619c61bc/scratchpad/gen/v2_25k/_gate/expanded_all.md",
+     "rc": 0,
+     "seconds": 10.543,
+     "stderr": "",
+     "stdout": "expanded 25000 of 25000 cases into /tmp/claude-0/-home-user-post/29b9af63-7d01-5359-bed5-a0fd619c61bc/scratchpad/gen/v2_25k/_gate/expanded_all.md (0 failed); setup 0.01s, rendering 10.48s\n"
+    }
+   },
+   "expand_pass": true,
+   "missing_fields": {},
+   "pass": true,
+   "unresolved_entries": 0
+  },
+  "G4_duplicates": {
+   "distinct_structures": 25000,
+   "duplicate_case_ids": 0,
+   "exact_duplicates": 0,
+   "pass": true,
+   "structural_duplicates": 0
+  },
+  "G5_diversity": {
+   "cell_floor": 75,
+   "cells_below_floor": {},
+   "cells_total": 189,
+   "cross_regime_by_ingredient": 3234,
+   "cross_regime_by_mention": 4446,
+   "domains": {
+    "FORD-1": 1050,
+    "FORD-2": 1050,
+    "FORD-3": 1050,
+    "FORD-4": 1050,
+    "FORD-5": 1050,
+    "FORD-6": 1050,
+    "ISIC-A": 889,
+    "ISIC-B": 891,
+    "ISIC-C": 892,
+    "ISIC-D": 891,
+    "ISIC-E": 890,
+    "ISIC-F": 891,
+    "ISIC-G": 891,
+    "ISIC-H": 891,
+    "ISIC-I": 888,
+    "ISIC-J": 891,
+    "ISIC-K": 891,
+    "ISIC-L": 890,
+    "ISIC-M": 891,
+    "ISIC-N": 891,
+    "ISIC-O": 891,
+    "ISIC-P": 891,
+    "ISIC-Q": 891,
+    "ISIC-R": 891,
+    "ISIC-S": 888,
+    "ISIC-T": 891,
+    "ISIC-U": 889
+   },
+   "pass": true,
+   "regimes": {
+    "R-BIO": 3587,
+    "R-COMP": 3581,
+    "R-ECO": 3569,
+    "R-HOME": 3567,
+    "R-LAW": 3566,
+    "R-ORG": 3565,
+    "R-PHYS": 3565
+   },
+   "relationship_kinds": {
+    "RK-COND": 8034,
+    "RK-CONSTRAIN": 7964,
+    "RK-COORD": 16993,
+    "RK-DELEGATE": 8081,
+    "RK-EMBED": 16966,
+    "RK-EMIT": 1802,
+    "RK-FEEDBACK": 7957,
+    "RK-INPUT": 17274,
+    "RK-SHARE": 7969,
+    "RK-TIME": 7989
+   },
+   "shortfalls": {},
+   "unparsed_domains": {}
+  },
+  "G6_leak": {
+   "hard_keys": [],
+   "id_hit_count": 677971,
+   "id_hits": [
+    {
+     "context": "nt\": \"ACT-TRANSCRIBE\",     \"item\": \"TEI P5 Guidelines\",     \"item_id\": \"H6-01\",   ",
+     "file": "dictionary.json",
+     "match": "P5"
+    },
+    {
+     "context": "PRD-ANNOTATION-GUIDE\",     \"item\": \"TEI P5 Guidelines\",     \"item_id\": \"X-03\",    ",
+     "file": "dictionary.json",
+     "match": "P5"
+    },
+    {
+     "context": " v2.1 Breeding API\",     \"item_id\": \"CB-A01\",     \"source\": \"assets/03.raw.md\"    }",
+     "file": "dictionary.json",
+     "match": "A01"
+    },
+    {
+     "context": "or field polygons)\",     \"item_id\": \"CB-A02\",     \"source\": \"assets/03.raw.md\"    }",
+     "file": "dictionary.json",
+     "match": "A02"
+    },
+    {
+     "context": "n 15 Data Exchange\",     \"item_id\": \"CB-A03\",     \"source\": \"assets/03.raw.md\"    }",
+     "file": "dictionary.json",
+     "match": "A03"
+    },
+    {
+     "context": "ative Standard 1.2\",     \"item_id\": \"CB-A04\",     \"source\": \"assets/03.raw.md\"    }",
+     "file": "dictionary.json",
+     "match": "A04"
+    },
+    {
+     "context": "ic ontologies v2.2\",     \"item_id\": \"CB-A05\",     \"source\": \"assets/03.raw.md\"    }",
+     "file": "dictionary.json",
+     "match": "A05"
+    },
+    {
+     "context": "andard + C++ Agent\",     \"item_id\": \"CB-C01\",     \"source\": \"assets/03.raw.md\"    }",
+     "file": "dictionary.json",
+     "match": "C01"
+    },
+    {
+     "context": "tamodel IDTA-01001\",     \"item_id\": \"CB-C02\",     \"source\": \"assets/03.raw.md\"    }",
+     "file": "dictionary.json",
+     "match": "C02"
+    },
+    {
+     "context": " Set (50 machines)\",     \"item_id\": \"CB-C03\",     \"source\": \"assets/03.raw.md\"    }",
+     "file": "dictionary.json",
+     "match": "C03"
+    },
+    {
+     "context": "g. (EU) 2023/1542)\",     \"item_id\": \"CB-C04\",     \"source\": \"assets/03.raw.md\"    }",
+     "file": "dictionary.json",
+     "match": "C04"
+    },
+    {
+     "context": "odel Specification\",     \"item_id\": \"CB-C05\",     \"source\": \"assets/03.raw.md\"    }",
+     "file": "dictionary.json",
+     "match": "C05"
+    },
+    {
+     "context": "pecification (IDS)\",     \"item_id\": \"CB-F01\",     \"source\": \"assets/03.raw.md\"    }",
+     "file": "dictionary.json",
+     "match": "F01"
+    },
+    {
+     "context": "em\": \"Brick Schema\",     \"item_id\": \"CB-F02\",     \"source\": \"assets/03.raw.md\"    }",
+     "file": "dictionary.json",
+     "match": "F02"
+    },
+    {
+     "context": "2022 golden thread\",     \"item_id\": \"CB-F03\",     \"source\": \"assets/03.raw.md\"    }",
+     "file": "dictionary.json",
+     "match": "F03"
+    },
+    {
+     "context": "on (\u00a71926.501\u2013503)\",     \"item_id\": \"CB-F04\",     \"source\": \"assets/03.raw.md\"    }",
+     "file": "dictionary.json",
+     "match": "F04"
+    },
+    {
+     "context": "ification criteria\",     \"item_id\": \"CB-F05\",     \"source\": \"assets/03.raw.md\"    }",
+     "file": "dictionary.json",
+     "match": "F05"
+    },
+    {
+     "context": "s, ~3,100 lookups)\",     \"item_id\": \"CB-L01\",     \"source\": \"assets/03.raw.md\"    }",
+     "file": "dictionary.json",
+     "match": "L01"
+    },
+    {
+     "context": "enure Domain Model\",     \"item_id\": \"CB-L02\",     \"source\": \"assets/03.raw.md\"    }",
+     "file": "dictionary.json",
+     "match": "L02"
+    },
+    {
+     "context": " + Data Dictionary\",     \"item_id\": \"CB-L03\",     \"source\": \"assets/03.raw.md\"    }",
+     "file": "dictionary.json",
+     "match": "L03"
+    },
+    {
+     "context": "PMS: All Buildings\",     \"item_id\": \"CB-L04\",     \"source\": \"assets/03.raw.md\"    }",
+     "file": "dictionary.json",
+     "match": "L04"
+    },
+    {
+     "context": "ation Domain Model\",     \"item_id\": \"CB-L05\",     \"source\": \"assets/03.raw.md\"    }",
+     "file": "dictionary.json",
+     "match": "L05"
+    },
+    {
+     "context": "sessment Language)\",     \"item_id\": \"CB-O01\",     \"source\": \"assets/03.raw.md\"    }",
+     "file": "dictionary.json",
+     "match": "O01"
+    },
+    {
+     "context": "ting Data Standard\",     \"item_id\": \"CB-O02\",     \"source\": \"assets/03.raw.md\"    }",
+     "file": "dictionary.json",
+     "match": "O02"
+    },
+    {
+     "context": "eference Framework\",     \"item_id\": \"CB-O03\",     \"source\": \"assets/03.raw.md\"    }",
+     "file": "dictionary.json",
+     "match": "O03"
+    },
+    {
+     "context": "en311 GeoReport v2\",     \"item_id\": \"CB-O04\",     \"source\": \"assets/03.raw.md\"    }",
+     "file": "dictionary.json",
+     "match": "O04"
+    },
+    {
+     "context": "ulary (LegalDocML)\",     \"item_id\": \"CB-O05\",     \"source\": \"assets/03.raw.md\"    }",
+     "file": "dictionary.json",
+     "match": "O05"
+    },
+    {
+     "context": "esentation API 3.0\",     \"item_id\": \"CB-R01\",     \"source\": \"assets/03.raw.md\"    }",
+     "file": "dictionary.json",
+     "match": "R01"
+    },
+    {
+     "context": "for Media Creation\",     \"item_id\": \"CB-R02\",     \"source\": \"assets/03.raw.md\"    }",
+     "file": "dictionary.json",
+     "match": "R02"
+    },
+    {
+     "context": "\": \"OpenTimelineIO\",     \"item_id\": \"CB-R03\",     \"source\": \"assets/03.raw.md\"    }",
+     "file": "dictionary.json",
+     "match": "R03"
+    },
+    {
+     "context": "Active data models\",     \"item_id\": \"CB-R04\",     \"source\": \"assets/03.raw.md\"    }",
+     "file": "dictionary.json",
+     "match": "R04"
+    },
+    {
+     "context": "chema + Guidelines\",     \"item_id\": \"CB-R05\",     \"source\": \"assets/03.raw.md\"    }",
+     "file": "dictionary.json",
+     "match": "R05"
+    },
+    {
+     "context": "nt\": \"ACT-TRANSCRIBE\",     \"item\": \"TEI P5 Guidelines\",     \"item_id\": \"CB-R06\",  ",
+     "file": "dictionary.json",
+     "match": "P5"
+    },
+    {
+     "context": "\"TEI P5 Guidelines\",     \"item_id\": \"CB-R06\",     \"source\": \"assets/03.raw.md\"    }",
+     "file": "dictionary.json",
+     "match": "R06"
+    },
+    {
+     "context": "3 / ISO 21127:2023\",     \"item_id\": \"CB-R07\",     \"source\": \"assets/03.raw.md\"    }",
+     "file": "dictionary.json",
+     "match": "R07"
+    },
+    {
+     "context": "Mapping Guidelines\",     \"item_id\": \"CB-R08\",     \"source\": \"assets/03.raw.md\"    }",
+     "file": "dictionary.json",
+     "match": "R08"
+    },
+    {
+     "context": "grounded_in\": [     {      \"item\": \"TEI P5 Guidelines\",      \"source\": \"assets/03.",
+     "file": "dictionary.json",
+     "match": "P5"
+    },
+    {
+     "context": " ],    \"provenance\": {     \"item\": \"TEI P5 Guidelines\",     \"source\": \"assets/01.r",
+     "file": "dictionary.json",
+     "match": "P5"
+    },
+    {
+     "context": "grounded_in\": [     {      \"item\": \"TEI P5 Guidelines\",      \"source\": \"assets/02.",
+     "file": "dictionary.json",
+     "match": "P5"
+    },
+    {
+     "context": " allocated 60.85 person-hours from pool P1.\"}, {\"check\": \"machine\", \"ingredient\": ",
+     "file": "cases.jsonl",
+     "match": "P1"
+    }
+   ],
+   "pass": true,
+   "phrase_hit_count": 0,
+   "phrase_hits": [],
+   "soft_keys": [
+    "INP-FAMILY-RECORD",
+    "SCL-EXTENDED-FAMILY",
+    "axis"
+   ]
+  },
+  "G7_provenance": {
+   "cases_fully_grounded": 0,
+   "cases_total": 25000,
+   "floor": 0.8,
+   "grounded_share": 0.8925,
+   "ingredients_by_provenance": {
+    "authored": 11,
+    "inventory": 298,
+    "none": 51,
+    "taxonomy": 217
+   },
+   "pass": true
+  },
+  "G8_runtime": {
+   "budget_seconds": 1500.0,
+   "check_seconds": 12.639,
+   "generate_seconds": 61.168,
+   "pass": true,
+   "total_seconds": 73.807
+  }
+ },
+ "missing_files": [],
+ "record_claims": {
+  "counts.admitted": 25000,
+  "counts.attempted": 30373,
+  "counts.contradiction_rejected": 512,
+  "counts.distinct_idea_keys": 24983,
+  "counts.duplicate_rejected": 0,
+  "counts.parameter_or_situation_variants": 0,
+  "counts.review_needed": 3656,
+  "counts.strata_exhausted": 0,
+  "counts.substantive_use_cases": 24999,
+  "counts.unresolved_bounded_search": 1205,
+  "diversity.cells_below_floor": 0,
+  "diversity.component_count_distribution.2": 4280,
+  "diversity.component_count_distribution.3": 4251,
+  "diversity.component_count_distribution.4": 6549,
+  "diversity.component_count_distribution.5": 5750,
+  "diversity.component_count_distribution.6": 4170,
+  "diversity.cross_regime_cases": 4446,
+  "diversity.depth_distribution.1": 7688,
+  "diversity.depth_distribution.2": 11559,
+  "diversity.depth_distribution.3": 5753,
+  "diversity.flag_distribution.configurator": 4062,
+  "diversity.flag_distribution.cross_regime_component": 4448,
+  "diversity.flag_distribution.deep_nesting": 4062,
+  "diversity.flag_distribution.divided_authority": 4774,
+  "diversity.flag_distribution.interruption_recovery": 4062,
+  "diversity.flag_distribution.irreversible_effect": 4061,
+  "diversity.flag_distribution.long_horizon": 4061,
+  "diversity.flag_distribution.multi_party_concurrency": 4061,
+  "diversity.flag_distribution.privacy_tension": 4077,
+  "diversity.flag_distribution.public_facing": 4056,
+  "diversity.flag_distribution.revision_after_partial_completion": 4064,
+  "diversity.flag_distribution.scarce_capacity": 4061,
+  "diversity.flag_distribution.shared_resource_contention": 4064,
+  "diversity.flag_distribution.uncertain_evidence": 5195,
+  "diversity.floors_applied.cross_regime_case_floor": 2500,
+  "diversity.floors_applied.per_cell_floor": 15,
+  "diversity.floors_applied.per_ford_field_floor": 1000,
+  "diversity.floors_applied.per_isic_section_floor": 500,
+  "diversity.floors_applied.per_regime_floor": 1500,
+  "diversity.floors_applied.per_relationship_kind_floor": 750,
+  "diversity.min_cell": 126,
+  "diversity.per_primary_domain.FORD-1": 1050,
+  "diversity.per_primary_domain.FORD-2": 1050,
+  "diversity.per_primary_domain.FORD-3": 1050,
+  "diversity.per_primary_domain.FORD-4": 1050,
+  "diversity.per_primary_domain.FORD-5": 1050,
+  "diversity.per_primary_domain.FORD-6": 1050,
+  "diversity.per_primary_domain.ISIC-A": 889,
+  "diversity.per_primary_domain.ISIC-B": 891,
+  "diversity.per_primary_domain.ISIC-C": 892,
+  "diversity.per_primary_domain.ISIC-D": 891,
+  "diversity.per_primary_domain.ISIC-E": 890,
+  "diversity.per_primary_domain.ISIC-F": 891,
+  "diversity.per_primary_domain.ISIC-G": 891,
+  "diversity.per_primary_domain.ISIC-H": 891,
+  "diversity.per_primary_domain.ISIC-I": 888,
+  "diversity.per_primary_domain.ISIC-J": 891,
+  "diversity.per_primary_domain.ISIC-K": 891,
+  "diversity.per_primary_domain.ISIC-L": 890,
+  "diversity.per_primary_domain.ISIC-M": 891,
+  "diversity.per_primary_domain.ISIC-N": 891,
+  "diversity.per_primary_domain.ISIC-O": 891,
+  "diversity.per_primary_domain.ISIC-P": 891,
+  "diversity.per_primary_domain.ISIC-Q": 891,
+  "diversity.per_primary_domain.ISIC-R": 891,
+  "diversity.per_primary_domain.ISIC-S": 888,
+  "diversity.per_primary_domain.ISIC-T": 891,
+  "diversity.per_primary_domain.ISIC-U": 889,
+  "diversity.per_regime.R-BIO": 3587,
+  "diversity.per_regime.R-COMP": 3581,
+  "diversity.per_regime.R-ECO": 3569,
+  "diversity.per_regime.R-HOME": 3567,
+  "diversity.per_regime.R-LAW": 3566,
+  "diversity.per_regime.R-ORG": 3565,
+  "diversity.per_regime.R-PHYS": 3565,
+  "diversity.per_relationship_kind_cases.RK-COND": 8034,
+  "diversity.per_relationship_kind_cases.RK-CONSTRAIN": 7964,
+  "diversity.per_relationship_kind_cases.RK-COORD": 16993,
+  "diversity.per_relationship_kind_cases.RK-DELEGATE": 8081,
+  "diversity.per_relationship_kind_cases.RK-EMBED": 16966,
+  "diversity.per_relationship_kind_cases.RK-EMIT": 1802,
+  "diversity.per_relationship_kind_cases.RK-FEEDBACK": 7957,
+  "diversity.per_relationship_kind_cases.RK-INPUT": 17274,
+  "diversity.per_relationship_kind_cases.RK-SHARE": 7969,
+  "diversity.per_relationship_kind_cases.RK-TIME": 7989,
+  "diversity.purpose_classes.access": 1677,
+  "diversity.purpose_classes.accountability": 2654,
+  "diversity.purpose_classes.care": 1024,
+  "diversity.purpose_classes.coordination": 4244,
+  "diversity.purpose_classes.decision": 531,
+  "diversity.purpose_classes.discovery": 2615,
+  "diversity.purpose_classes.everyday_life": 237,
+  "diversity.purpose_classes.explanation": 2125,
+  "diversity.purpose_classes.expression": 687,
+  "diversity.purpose_classes.learning": 1551,
+  "diversity.purpose_classes.maintenance": 1554,
+  "diversity.purpose_classes.preservation": 1057,
+  "diversity.purpose_classes.production": 1326,
+  "diversity.purpose_classes.recovery": 533,
+  "diversity.purpose_classes.safety": 3185,
+  "diversity.relationship_instances.RK-COND": 9859,
+  "diversity.relationship_instances.RK-CONSTRAIN": 9859,
+  "diversity.relationship_instances.RK-COORD": 28797,
+  "diversity.relationship_instances.RK-DELEGATE": 9858,
+  "diversity.relationship_instances.RK-EMBED": 28799,
+  "diversity.relationship_instances.RK-EMIT": 2351,
+  "diversity.relationship_instances.RK-FEEDBACK": 9861,
+  "diversity.relationship_instances.RK-INPUT": 28798,
+  "diversity.relationship_instances.RK-SHARE": 9860,
+  "diversity.relationship_instances.RK-TIME": 9861,
+  "diversity.root_product_forms.coordinated_system": 3860,
+  "diversity.root_product_forms.creative_work": 89,
+  "diversity.root_product_forms.credential": 459,
+  "diversity.root_product_forms.dataset": 1055,
+  "diversity.root_product_forms.document": 4869,
+  "diversity.root_product_forms.experience": 1391,
+  "diversity.root_product_forms.explanation": 892,
+  "diversity.root_product_forms.generator": 1185,
+  "diversity.root_product_forms.instrument": 282,
+  "diversity.root_product_forms.interactive_tool": 2870,
+  "diversity.root_product_forms.physical_object": 315,
+  "diversity.root_product_forms.procedure": 5344,
+  "diversity.root_product_forms.service": 2169,
+  "diversity.root_product_forms.training": 220,
+  "requested_count": 25000,
+  "sampling_policy.phase1_planned": 18060,
+  "sampling_policy.phase2_planned": 6940,
+  "seed": 11691621138000208715,
+  "timings_seconds.generation": 40.021,
+  "timings_seconds.setup": 0.022,
+  "timings_seconds.throughput_cases_per_second": 624.7,
+  "timings_seconds.writing": 13.176
+ },
+ "started": "2026-09-10T03:38:24Z",
+ "summary": [
+  "G1 determinism  PASS  seed=11691621138000208715 identical=True differs_on_seed_b=True",
+  "G2 checker      PASS  batch rejected=0 undetermined=25000 | broken 20/21 rejected | mutants 50/120 rejected, 0 accepted, 70 undetermined {\"m2_noacceptance\": {\"undetermined\": 17, \"rejected\": 13}, \"m3_norequirements\": {\"undetermined\": 18, \"rejected\": 12}, \"m1_badref\": {\"rejected\": 13, \"undetermined\": 17}, \"m4_noinputs\": {\"rejected\": 12, \"undetermined\": 18}}",
+  "G3 references   PASS  entries=667663 unresolved=0 (in 0 cases) missing_fields={} expand=PASS",
+  "G4 duplicates   PASS  exact=0 structural=0 distinct_structures=25000 duplicate_ids=0",
+  "G5 diversity    PASS  regimes=7 domains=27 kinds=10 cross=4446/2500 shortfalls={} unparsed=0",
+  "G6 leak         PASS  hard_keys=[] soft_keys=['INP-FAMILY-RECORD', 'SCL-EXTENDED-FAMILY', 'axis'] id_hits=677971 phrase_hits=0",
+  "G7 provenance   PASS  grounded_share=0.893 by={\"none\": 51, \"inventory\": 298, \"taxonomy\": 217, \"authored\": 11} fully_grounded_cases=0/25000",
+  "G8 runtime      PASS  generate=61.168 check=12.639 budget=1500s"
+ ]
+}
