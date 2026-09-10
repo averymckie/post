@@ -59,3 +59,12 @@
 ## Compaction
 - When compacting, preserve exactly: modified files, test and build commands,
   decisions made, constraints the user stated, and anything still open.
+
+## Sources
+- `proof.txt` is the framework master and `PROOF_EVIDENCE_1.txt` to
+  `PROOF_EVIDENCE_7.txt` are the checker's per-case rows. For that work they
+  are the only sources.
+- Never read, quote, cite or restore the superseded material: the paths listed
+  under "Superseded" in `.gitignore`, and any earlier commit, branch or pull
+  request that carried them. Do not reach for them through `git log`,
+  `git show`, `git checkout` or the GitHub API. Work from the current tree.
