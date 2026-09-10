@@ -11,3 +11,20 @@ __pycache__/
 /build/
 dist/
 *.egg-info/
+
+# Superseded material, removed from the tree. Never add it back.
+coverage/
+framework-coverage-checker/
+proofs/
+PROOFS.md
+Iterations1-3.txt
+Convo1.txt
+Convo2.txt
+*.zip
+*.gz
+*.tgz
+*.tar
+*.7z
+*.rar
+*.sqlite
+*.sqlite3
