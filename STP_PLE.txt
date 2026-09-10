@@ -1,0 +1,932 @@
+PRODUCT LINE ENGINEERING AND SELF-ADAPTIVE OPERATING MODELS
+A reference architecture and conceptual metamodel
+
+10 September 2026
+
+ABSTRACT
+
+This paper proposes a general architecture for specifying, constructing, operating, and changing systems drawn from reusable product families. Natural language provides a common means of expressing requirements, domain knowledge, and relationships, including the construction and management of the systems themselves. Domain engineering develops that knowledge into shared models, variation points, and reusable assets. A common metamodel defines the permitted elements and relationships. Megamodeling records how the actual models, transformations, implementations, and evidence relate across their lifecycle.
+
+The proposed neuro-symbolic artificial intelligence (AI) approach combines neural assistance for interpretation and candidate generation with explicit symbolic models, constraints, and verification. Product line engineering (PLE) derives supported capabilities through qualified library functions, compositions, and generators. The term compiled AI describes this use of AI-assisted construction to produce reusable executable artifacts. Accepted behavior executes without runtime reasoning by a large language model (LLM). Monitor–Analyze–Plan–Execute over shared Knowledge, or MAPE-K, organizes management and adaptation. Management capabilities use the same construction approach and can themselves be managed.
+
+The prescribed execution profile makes straight-through processing the default for eligible work: accepted inputs proceed through decisions, authorized actions, reconciliation, and verification without runtime human intervention. Qualified function compositions provide the continuity required across system boundaries. The general metamodel also represents manual and mixed arrangements; their inclusion does not weaken this prescription. The 34 ITIL practices illustrate how a selected management framework can supply operating requirements and assessment criteria, including management of the management capabilities themselves.
+
+The architecture accommodates all 38 supplied product families while retaining their distinct domain semantics. Its correctness argument is conditional on accepted meaning, qualified components and connections, valid interactions, and operating assumptions. The supplied 130,000 case records provide extensive requirements material; their recorded status leaves full execution coverage unresolved. The contribution is a lifecycle architecture with explicit construction, operation, and assurance obligations. The cited research supports its constituent mechanisms within defined scopes. [1; 2; 21–30]
+
+A closing research extension proposes applying the third Futamura projection to supported executable models. A qualified, self-applicable partial evaluator would generate a reusable compiler generator for compatible interpreters. This would extend automated construction to compiler derivation. Demonstration requires actual self-application, generated artifacts, behavioral preservation, and practical qualification. [31–34; proposed application]
+
+1. PURPOSE AND CENTRAL PROPOSITION
+
+Organizations repeatedly construct variations of familiar capabilities. They admit participants, allocate resources, enforce obligations, coordinate work, assess evidence, build artifacts, and respond to changing conditions. These capabilities differ in detail, yet much of their structure, implementation, and verification can be reused.
+
+The proposed solution organizes that reuse through product families. Each family defines a common purpose, permitted variation, reusable engineering assets, construction rules, and acceptance conditions. A particular organization selects and connects family members to implement its operating model. Feedback loops observe actual performance, assess deviations, select permitted responses, execute them, and check the resulting state.
+
+The central proposition is:
+
+Domain knowledge expressed in natural language can be developed into explicit, reusable models and qualified function compositions through domain engineering and neuro-symbolic construction. Product line engineering derives supported capabilities. MAPE-K manages their operation recursively. Megamodeling maintains the relationships among specifications, implementations, and evidence. Straight-through processing is the preferred execution design, and frameworks such as ITIL supply selected management requirements and assessment perspectives.
+
+The further research objective is to reuse executable definitions of meaning in compiler construction. Section 11 proposes a route through the Futamura projections and states the additional mechanisms and evidence required. This extension concerns the construction of supported systems and their management capabilities.
+
+Product line engineering supplies the reusable capabilities and permissible configurations. MAPE-K supplies an established reference pattern for management through feedback. Goals, organizational roles, decision rights, resource allocations, and environmental assumptions make that architecture specific to an organization. These elements are part of the model; they cannot be inferred merely from the presence of a workflow or controller. [1; 3; 8; 16]
+
+Natural language carries substantive specifications across this lifecycle. It can describe a capability, the method that constructs it, the loop that manages it, and the criteria used to assess that loop. Each accepted description must acquire a defined interpretation before it governs execution. The architecture preserves links between those meanings and their realizations as both evolve.
+
+The governing design objective of the prescribed implementation is straight-through processing (STP). Eligible work should proceed from accepted input to verified outcome through complete, qualified function compositions. Manual interpretation, data transfer, coordination, or approval should not be required where accepted requirements and authority already permit automatic processing. Required human decisions and justified exceptions remain explicit.
+
+This objective is a central value proposition. Reuse extends to the rules, controls, connections, and evidence needed to complete work automatically. Product line engineering makes that capability reusable across variants; feedback management maintains its operation and supports permitted adaptation. STP is a prescription of this proposal, rather than a necessary property of every architecture using PLE and MAPE-K.
+
+The intended outputs extend across software, workflows, decisions, documents, analytical models, engineering definitions, infrastructure configurations, and coordinated human or physical activity. A manufacturing definition is an artifact. Manufacturing is an activity performed by people and equipment. The model must distinguish the two and specify the evidence that connects the definition to the actual result.
+
+This distinction also governs automation. An executable system can implement specified decisions, coordinate human contributions, and issue authorized commands. Organizational judgment, source interpretation, and physical outcomes retain their own owners and validation requirements.
+
+2. FOUNDATION IN THE FIELD
+
+This is an architectural synthesis of established work. The cited sources support its constituent concepts within their stated domains. They do not establish that this particular integration is already a published universal standard or that the supplied catalogue has been fully implemented.
+
+The review is a targeted comparison of primary research, research-institution publications, and standards selected for their relevance to variability, language-based specification, program synthesis, compilation, model management, composition, feedback, and assurance. It assesses conceptual support and limitations. It makes no claim to be a systematic literature review or an implementation benchmark.
+
+2.1 Product line engineering
+
+The Software Engineering Institute describes software product line practice through the coordinated development of core assets, products, and management arrangements. Feature-Oriented Domain Analysis provides an established basis for identifying shared capabilities and controlled differences within a domain. These foundations support treating the supplied families as product lines and their reusable specifications, transformations, components, and verification material as core assets. [3; 4]
+
+A family name alone does not establish a product line. Reuse requires a defined common architecture, explicit variation, a production method, and managed assets. The supplied family descriptions are inputs to that engineering work.
+
+2.2 Metamodeling and systems modeling
+
+The Meta Object Facility provides an established account of metamodeling: defining the concepts and relationships used to construct models. KerML supplies modeling constructs for types, features, relationships, and behaviors. SysML 2.0 builds systems modeling on that foundation and explicitly supports definitions, usages, variations, and variants. [5–7]
+
+These standards justify a common modeling foundation with specialized domain content. They do not make every model executable or guarantee that every tool supports every construct. The proposed implementation must declare the language subset, extensions, transformations, and execution semantics it actually supports.
+
+2.3 Feedback and self-adaptation
+
+Brun and colleagues argue that feedback loops and their properties should be explicit in the engineering of self-adaptive systems. Their account explains MAPE-K as a reference architecture for observing and adapting a managed system. This supports modeling management behavior alongside operational behavior and specifying the connections between them. [8]
+
+MAPE-K is an architectural decomposition. Timing, authority, coordination, and the validity of the observations still require design decisions. An application becomes adaptive through implemented behavior and effective feedback.
+
+2.4 Composition and verification
+
+Benveniste, Caillaud, and Passerone develop assume-guarantee contracts that relate permitted environmental behavior to promised component behavior. Millo and colleagues demonstrate compositional verification for evolving product lines represented by finite state machines with variability. Pacti provides algorithms and case studies for computing contract operations in supported representations. Together, these works support conditional reasoning about reuse, substitution, and composition. Their results remain tied to defined semantics and assumptions. [9–11]
+
+2.5 Enterprise architecture, assurance, and provenance
+
+The Unified Architecture Framework provides an established basis for relating strategic, operational, personnel, resource, and other architectural concerns. The Structured Assurance Case Metamodel distinguishes claims, arguments, and supporting artifacts. W3C PROV-DM models the entities, activities, and responsible agents involved in producing information. These are relevant foundations for ownership, traceability, and accountable acceptance. [12; 13; 16]
+
+The proposed architecture connects these concerns through stable identities and explicit relationships. It does not require every concern to be stored in one application or represented by one diagram.
+
+2.6 Natural-language specification and neuro-symbolic construction
+
+Attempto demonstrated controlled English as a readable view of formal specifications, with translation into logic and executable Prolog. Its interpretation could be reviewed through a paraphrase. Desai and colleagues demonstrated synthesis from natural-language descriptions into defined domain-specific languages. Their results support language as a practical specification medium while retaining the need to resolve intended meaning. [21; 22]
+
+Executable semantic parsing connects language to a formal expression and its behavior in a defined context. Compositional semantics explains the meaning of a structured expression through its parts and their combination. This supplies a relevant foundation for connecting business descriptions to computational compositions. [23]
+
+Feng and colleagues demonstrated component-based synthesis using available components, types, and logical specifications. DreamCoder combined neural guidance with symbolic program construction and the development of reusable library abstractions. These are complementary precedents for searching over explicit, composable capabilities. Their results apply to their evaluated domains and representations. [24; 25]
+
+The ReaComp preprint reports constructing reusable symbolic solvers from LLM reasoning traces and running the resulting solvers without further LLM calls. Its experiments use constrained synthesis languages; broader applicability remains open. It provides recent evidence for separating AI-assisted construction from repeated execution. It supplies no performance or correctness result for this paper's architecture. [26]
+
+2.7 Megamodeling and recursive management
+
+Vogel, Seibel, and Giese describe megamodeling as managing models and the relationships among them, including models used at runtime. Vogel and Giese further demonstrate executable megamodels for interacting feedback loops and hierarchies in which one loop manages another. [27; 28]
+
+These works support an explicit account of construction dependencies and recursive management. The present proposal adds its own required relationships among accepted source meaning, product variation, qualified library compositions, authority, and assurance evidence. Each relationship requires an implementation and acceptance method. An executable megamodel provides control over declared model operations; stronger contract and correctness claims still require their own evidence.
+
+2.8 Comparative finding
+
+The reviewed work addresses complementary concerns. Product line practice organizes reuse and production. Language-based specification connects human intent to explicit representations. Neuro-symbolic synthesis and compilation support executable construction. Contract research establishes conditional composition properties. Feedback research addresses management and adaptation. Megamodeling connects the relevant models and operations. Assurance and provenance standards organize claims and supporting records.
+
+Partial evaluation provides a further established connection between executable language definitions and compiler construction. Section 11 assesses the Futamura projections, documented self-application, and contemporary interpreter-based compilation. It identifies the proposed application to this architecture and its qualification requirements. [31–35]
+
+The integration proposed here connects those concerns across the complete lifecycle and the full supplied family catalogue. Its engineering burden lies in the mappings between them: a feature choice must change the construction and its obligations; a runtime observation must reach the appropriate management decision; and a revision must invalidate the claims that depend on what changed. Those mappings require explicit specifications and qualification. Citation of the constituent standards does not establish that the mappings have been implemented. No claim of priority or theoretical novelty is made.
+
+3. THE GENERAL METAMODEL
+
+3.1 What the metamodel must accomplish
+
+A metamodel defines what can be expressed, how the elements relate, and which combinations are well formed. A domain model supplies the meaning specific to a subject such as procurement, access control, geometry, or experimentation. A configuration selects permitted alternatives. An implementation realizes the selected behavior. An execution records what happened in a particular context.
+
+These are different roles. A reusable definition can support many configurations. A configuration can have several implementations or deployments. A deployment can produce many executions. Evidence about one execution applies to the identified claim and scope.
+
+The following constructs form the proposed conceptual metamodel. Their terminology is established; their required combination and rules are the proposal of this paper. They are stated in executive language rather than as a machine-readable schema. [1; 5–7]
+
+3.2 Core constructs and relationships
+
+Requirements and objectives state the outcomes, constraints, and measures that matter. They identify the responsible authority, applicable scope, effective period, and acceptance method. A requirement may constrain an individual component, a composition, or the complete system.
+
+Entities and relationships identify the things being managed and how they relate. They include people, organizations, records, agreements, equipment, locations, and other domain objects. Identity is scoped and stable. Similar descriptions do not establish that two records refer to the same entity.
+
+Actors, roles, and resources identify who or what performs work, supplies capacity, owns state, and authorizes action. Allocations connect behavior to those performers and resources. Delegation and approval are explicit relationships with scope and duration.
+
+Information and artifacts represent inputs, outputs, models, messages, documents, and other products. Each has a type, identity, version, provenance, and stated interpretation. A source statement, an observation, an estimate, and an approved decision remain distinguishable.
+
+Behavior specifies what may happen. It can describe a calculation, transformation, decision, interaction, state transition, process, or continuous response. Composite behavior connects subordinate behaviors under explicit execution rules. KerML's distinction between general behavior and functions supports this broader treatment. [6]
+
+Interfaces and connections specify what participants exchange and how they interact. Connections identify the actual producer and consumer, their roles, compatible representations, and the conditions under which the exchange is valid. An adapter is a specified transformation with its own obligations.
+
+Contracts state assumptions and guarantees. They cover permitted inputs, outputs, state changes, effects, timing, resource use, and exceptional outcomes as relevant to the behavior. An implementation is acceptable only within the environment and operating conditions covered by its contract. [9]
+
+Variability and configuration specify mandatory, optional, alternative, and parameterized choices. Constraints govern valid combinations. A configuration records selected values, unresolved choices, binding stages, and the versions of the assets it uses.
+
+Implementation and deployment connect modeled behavior to software, services, people, equipment, and environments. A deployment identifies the actual bindings, resource limits, and operating conditions. A model of a provider capability does not establish that a particular provider connection works.
+
+Execution and observation record events, inputs, decisions, state transitions, human contributions, commands, and observed effects. These records reference the configuration, implementation, and relevant authority in force at the time.
+
+Claims, arguments, and evidence state what is being asserted and why it is supported. They retain assumptions, scope, counterevidence, unresolved obligations, and the acceptance decision. SACM supplies established distinctions for these roles; an assurance structure can still contain inadequate reasoning or evidence. [12]
+
+Versions, dependencies, and changes connect requirements and assets to the products and claims that rely on them. A change identifies affected dependencies, required reviews, migrations, and revalidation. Historical records retain their original identity and context. Provenance provides useful standardized relationships for derivation, responsibility, revision, and invalidation. [13]
+
+3.3 Required consistency rules
+
+An organizational standard based on this metamodel shall require the following:
+
+1. Every accepted requirement has an owner, scope, interpretation, and acceptance method. Unresolved interpretation remains explicit.
+2. Every selected capability refers to a versioned definition, configuration, contract, and realization or declared implementation gap.
+3. Every mandatory input has an identified source or remains unresolved. Every required output has an identified producer or composition of producers.
+4. Every connection has compatible contracts or an explicit, qualified adapter.
+5. Every effectful action has a defined state transition, applicable authority, intent identity, and outcome or reconciliation procedure.
+6. Every composition identifies shared resources, state ownership, interaction constraints, and failure behavior.
+7. Every claim identifies its evidence and validity conditions. Approval, a test pass, and a formal proof are recorded according to their actual meanings.
+8. Every relevant change propagates to dependent configurations, outputs, and claims before affected results are reused as current.
+9. Every derived configuration or artifact identifies its source model versions, transformation or derivation method, and required correspondence evidence.
+10. Every proposed interpretation or composition retains its acceptance status. Generation, compilation, and successful execution shall not silently confer approval of its intended meaning.
+
+These rules make the model inspectable across families. They are insufficient by themselves to prove domain correctness; the applicable domain semantics and evidence complete the obligation. [1]
+
+Relationship types must also remain distinct. Composition identifies constituent behavior. Data flow identifies exchanged information. Control flow identifies ordering and choice. Allocation identifies performers and resource use. Authorization identifies permitted action. Traceability connects requirements to their realization. Provenance records production history. Evidence supports a particular claim. A generic dependency edge cannot safely substitute for these different meanings.
+
+3.4 Domain semantics and supported scope
+
+The common metamodel must support several semantic domains. Record transformations require identity, multiplicity, and permitted loss. Stateful services require transitions, concurrency, and effect semantics. Numerical analysis requires units, precision, and error assumptions. Statistical models require uncertainty and empirical evaluation. Physical control requires dynamics, timing, and measured model adequacy. Human participation requires attributable inputs, eligibility, and decision rights.
+
+A system may combine these domains. The connection must preserve their differences. A predicted failure probability can inform a maintenance decision. The prediction retains its uncertainty; the decision separately records the rule and authority that permit the maintenance action.
+
+A conformance profile shall declare the domain vocabulary, permitted model constructs, their meaning, the supported execution mechanisms, and required validation methods. Unsupported combinations remain identifiable. This provides a general foundation without requiring a single solver or execution engine to implement every domain. [1]
+
+3.5 General representation and prescriptive implementation
+
+Three roles must remain distinct. The general metamodel defines what can be represented, including automated, manual, fixed, and adaptive arrangements. The prescriptive execution profile defines how implementations developed under this proposal shall be designed and qualified. A selected management framework, such as ITIL, supplies additional purposes, responsibilities, controls, and assessment criteria for an operating model.
+
+The execution profile requires STP for eligible work. Eligibility shall follow from accepted requirements, available inputs, authorized actions, qualified connections, and the declared operating conditions. It shall be determined before execution. A manual step shall have an explicit requirement or justified exception; it shall not silently compensate for an incomplete automated connection.
+
+STP is the preferred design objective subject to accepted outcomes, quality, authority, risk, and resource constraints. This expresses the proposal's normative preference without asserting mathematical optimality under every possible objective. Both fixed workflows and adaptive systems can satisfy the requirement.
+
+A selected ITIL-based operating model can use this execution profile while retaining its own domain requirements. The relationship is a specialization of the general model. It does not require a new metamodel or a separate kind of implementation.
+
+3.6 Natural language, metamodels, and megamodels
+
+Natural-language specification expresses concepts, objectives, behavior, and constraints in terms people can review. The metamodel defines the kinds of elements and relationships that a supported model may contain. A megamodel identifies the actual models, their governing metamodels, and the transformations and dependencies that connect them. These roles can coexist within the same system. [5; 21; 27]
+
+Language provides a common specification medium across domains. Equations, diagrams, datasets, and physical observations can remain linked artifacts with their own semantics. A statement about an artifact must identify the artifact and the meaning of the relationship. A readable description alone establishes neither complete formalization nor an available implementation.
+
+In this proposal, megamodeling makes the following relationships explicit: a domain model interprets accepted requirements; a feature model defines supported alternatives; a configuration selects those alternatives; a derivation produces an implementation; a deployment binds that implementation to actual resources; and an assurance case links claims to evidence about those versions. Management models identify their subjects, observations, permitted actions, and shared knowledge.
+
+Each relationship shall have a defined type, direction, scope, and version context. It shall identify the applicable consistency or acceptance check. For example, a link recording that an artifact was generated from a model establishes production history. A separate result must establish the required behavioral correspondence. Changes follow the affected relationships to determine what requires revision or requalification.
+
+The megamodel can itself have a natural-language view and be subject to management. Its role is to maintain explicit model relationships across construction and operation. It supplies neither a universal domain language nor automatic evidence that those relationships are correct. The proposed metamodel shall define the necessary model-reference and relationship constructs before an implementation claims this capability.
+
+4. PRODUCT FAMILIES, REUSABLE ASSETS, AND VARIATION
+
+4.1 The unit of reuse
+
+Domain engineering identifies and develops a domain's shared concepts, rules, variation points, and reusable assets. Domain analysis establishes commonality and permitted differences. Architecture, implementation, and assurance work make those findings usable across the family. Application engineering selects and derives particular products from that foundation. This distinction places domain engineering within PLE's construction process. [3; 4]
+
+A product family groups related products that share a defined purpose and managed commonality. A reusable asset can be a requirement model, domain model, interface, component, composition pattern, transformation, deployment definition, verification procedure, or assurance argument. Some assets are executable; others guide construction or acceptance.
+
+The supplied records called proofs contain several of these roles. They describe candidate implementation chains, requirements for further verification, conditional arguments, and historical demonstrations. Their identifiers remain useful for traceability. Their acceptance status must accompany every reuse decision. [1, Section 10]
+
+The reusable unit is therefore the engineering asset with its contract, dependencies, and evidence status. A record describing an implementation remains distinct from an available and qualified implementation.
+
+4.2 What each family must define
+
+Each family requires a scope and common architecture; typed inputs and outputs; shared domain semantics; a feature model; reusable construction assets; rules for resolving incomplete configurations; acceptance obligations; supported operating conditions; and maintenance rules.
+
+Commonality expresses what every member must preserve. Variability expresses where members may differ. Constraints express which combinations are permitted. Derivation rules connect those choices to the resulting artifacts and verification work. This is the relationship between domain analysis and systematic product construction. [1, Section 4; 3; 4]
+
+The 130,000 case records can inform this analysis. Recurring differences in participants, evidence, timing, authority, context, and failure conditions are candidates for variation points. Each candidate must be reviewed for coherent meaning and consequences. A case is a requirements source; a variation point is an accepted design decision about permitted differences.
+
+4.3 Binding stages
+
+Family engineering establishes the common contract, supported alternatives, and construction method. Organizational configuration selects the accepted policies, roles, requirements, and operating choices. Deployment binds those choices to particular systems, identities, credentials, equipment, and resources. Runtime supplies events, observations, requests, and current authorization.
+
+These stages prevent accidental changes in meaning. A runtime request can select behavior already permitted by the configuration. A request to change an approved policy enters the defined change and authorization process.
+
+Configurations shall distinguish valid, invalid, unresolved, and unsupported states. An unresolved value is an unanswered requirement. An unsupported choice is outside the declared implementation capability. Neither state is a successful configuration. [1]
+
+4.4 Configuration questions
+
+Questions arise from missing required values and unresolved alternatives in the model. The configurator knows which choices remain possible, what information is needed to distinguish them, and which additional obligations each answer introduces.
+
+For example, selecting an external write operation requires a provider binding, current authority, an intent identifier, and a reconciliation method. Selecting physical actuation additionally requires the relevant device, timing, interlock, and operating-limit contracts. The question sequence follows these dependencies.
+
+The quality of configuration depends on the completeness and correctness of the family model. Generating a form from incomplete requirements does not resolve the missing requirements. [1, R01–R05]
+
+5. COMPOSITION AND BRANCHING
+
+5.1 Three distinct decisions
+
+Product variation determines which product is constructed. Runtime branching determines which permitted path a running product takes. Composition determines how capabilities depend on and interact with one another.
+
+These relationships can occur together. A configured admission product may include an optional inspection capability. When that capability is selected, a runtime rule can decide whether a particular case requires inspection. The inspection capability is composed with measurement, review, and activation capabilities through explicit contracts.
+
+This distinction has established precedents. SysML represents variations and variants. BPMN distinguishes control-flow constructs such as exclusive choice, parallel execution, events, and synchronization. A product choice and an execution gateway therefore require different semantics and checks. [7; 14]
+
+5.2 Composition forms
+
+The source specifies 14 composition forms. In established terminology, these are sequential composition; relational join; parallel composition with synchronization; guarded choice; iteration or fixed-point computation; partitioned processing and aggregation; event waiting with timeout; stream processing with correction; atomic transactions; sagas with retry and compensation; human tasks with authorized continuation; feedback and hybrid-system coupling; behavioral refinement and substitution; and incremental rebuild with replay. [1, C01–C14]
+
+Each form introduces obligations beyond those of its components. A relational join must preserve identity and cardinality. Parallel branches must respect shared capacity and state. A timeout needs a clock and a defined outcome. Compensation must identify what can actually be undone. A replacement must preserve required observable behavior.
+
+Branch conditions require explicit treatment of overlapping conditions, precedence, missing information, and the absence of a matching branch. Parallel completion requires an explicit synchronization condition. These are execution semantics, not diagram layout choices.
+
+5.3 Contract compatibility
+
+For each connection, the producer's guarantees and accepted environmental assumptions must establish the consumer's preconditions. Where representation changes, the adapter must preserve the required meaning.
+
+Every supported function composition shall have an explicit specification connecting its computational behavior to the accepted requirement. The composition's meaning depends on its component contracts and the rules governing their interaction. Processing language, calculating a quantity, and issuing an authorized action remain distinct operations even when all are specified through natural language. This is the engineering application of compositional semantics to qualified capabilities. [23; 24]
+
+The source identifies 14 relevant aspects of that check: schema; meaning; identity; time; evidence basis; population coverage; authority; state; effects; numerical semantics; resources; supporting evidence; change dependencies; and exception behavior. Each applicable aspect must be resolved. Matching field names establishes only a small part of compatibility. [1, Section 4]
+
+An empty input population can make an implication appear successful while no intended case is possible. Qualification must therefore establish that the admitted domain is meaningful and satisfiable, as well as excluding relevant counterexamples.
+
+5.4 System-level behavior
+
+Local compatibility is necessary but incomplete. Two valid reservations may exceed shared capacity. Two permitted disclosures may reveal restricted information when combined. Two controllers may issue conflicting commands. Individually terminating tasks may deadlock when they wait on one another.
+
+The assembled system therefore requires explicit global constraints and interaction analysis. Shared state and effects retain their identity even when several compositions reference the same asset. Reusing a definition does not authorize duplicating a real-world transaction. [1, R14]
+
+5.5 The conditional correctness argument
+
+The source's formal argument can be stated precisely in plain language. Assume that each selected component satisfies its contract; each composition rule preserves the properties required at its boundary; and the actual bindings and environment satisfy that rule's assumptions. A finite decomposition built from those components and rules then satisfies its derived system contract. The reasoning proceeds from the leaves of the decomposition to its root. [1, Section 3]
+
+This is a conditional construction argument. Applying it requires evidence for its premises. For a sequential connection, the guarantee-to-precondition implication must hold through the actual adapter. For shared resources and state, the relevant interaction constraints must hold jointly.
+
+A finite model can describe indefinitely continuing behavior. Its syntax does not establish progress, fairness, convergence, stability, or physical validity. Loops and continuous systems require the corresponding arguments over their behavior. The cited product-line verification and contract research supports this discipline within defined representations and assumptions. [9–11]
+
+6. THE OPERATING MODEL AND ITS FEEDBACK LOOPS
+
+6.1 A precise operating-model definition
+
+For this architecture, an operating model specifies how an organization achieves its objectives through operational capabilities, accountable performers, resource allocations, decision rights, information, and management processes.
+
+Product line engineering makes those capabilities reusable and configurable. MAPE-K provides a pattern for the management processes that observe and adapt their operation. Both the managed capabilities and their management processes use the same classes of engineering assets. [1; 8; 16]
+
+The concise formulation is: product line engineering defines the configured capabilities; feedback management governs their operation and adaptation; organizational objectives, responsibilities, authority, and resources define the conditions under which they operate.
+
+A particular capability may be a terminating calculation, a document-producing process, or a continuing service. Its management loop can operate around its lifecycle rather than inside every execution. The general model represents manual and mixed arrangements by allocating activities to people and recording their contributions. Under the prescribed execution profile, STP is the default for eligible work; configuration identifies the required human decisions and justified exceptions.
+
+6.2 MAPE-K in executive language
+
+Monitor collects relevant observations about the managed system and its environment.
+
+Analyze determines what those observations imply in relation to requirements, objectives, and current assumptions.
+
+Plan selects a permitted response and establishes its dependencies, resources, and acceptance conditions.
+
+Execute carries out the authorized response and reconciles its effects.
+
+Knowledge supplies the models and information used across these activities. It can include policies, configurations, histories, measurements, and accepted assumptions. MAPE-K names functional responsibilities; it does not require five separate applications. [8]
+
+For this proposal, knowledge is versioned and access controlled wherever the applicable contract requires it. The roles of observation, estimate, policy, and approval remain explicit. A centralized repository is one deployment option; federated stores can support the same logical responsibilities.
+
+6.3 Feedback loops are compositions of reusable assets
+
+A monitoring function can compose identity resolution, data transformation, event processing, and measurement. Analysis can compose rules, diagnosis, prediction, and assurance checks. Planning can compose scheduling, allocation, simulation, and experiment selection. Execution can compose workflow, authorization, transactions, deployment, or physical control.
+
+These are role allocations of existing capabilities. A family can support several MAPE-K responsibilities, and one responsibility can require several families. There is no fixed assignment of each family to one stage.
+
+The management composition itself has requirements, interfaces, state, configuration, implementation bindings, and evidence. It can therefore be developed as a reusable asset or managed product family. A family of management configurations can vary its observation sources, thresholds, planning methods, approval arrangements, and permitted responses under explicit constraints.
+
+Management uses the same engineering method as the capabilities it manages. Executable megamodel research supplies a direct precedent for representing both feedback loops and their coordination through model operations. The required contracts, authority, and qualification remain explicit in each composition. [1; 8; 28]
+
+6.4 What closes a feedback loop
+
+A feedback loop requires an identified managed system, an objective or constraint, observations of relevant state, a procedure for selecting responses, a path for authorized action, and subsequent observation of its consequences.
+
+Consider a general response to a changed requirement. Monitoring identifies the change and affected observations. Analysis determines which obligations and decisions may have lost support. Planning selects permitted remedial work. Execution performs the work and obtains the relevant receipts or measurements. Monitoring then checks the resulting state against the current requirement.
+
+The source's P270 describes a related composition in which a policy change revises requirements, invalidates readiness, and drives corrective work before readiness is reassessed. It supplies useful design material. Its record alone does not establish a fully implemented, continuously operating feedback loop. [1, P270]
+
+A dashboard can supply monitoring. A workflow can execute a response. A closed feedback loop needs the specified causal connections and return observations between those capabilities.
+
+6.5 Multiple loops and governance
+
+Operating models can use centralized management, local management, supervisory hierarchies, or coordination among peers. These arrangements differ in where observations are aggregated, where decisions are made, who owns state, and which participants can act.
+
+A local loop may manage service reliability while a supervisory loop changes capacity or priorities. A governance process may revise the objectives and policies used by both. Each relationship must specify decision rights, timing, information freshness, shared-resource constraints, and conflict resolution.
+
+If several loops can affect the same object, their authority and coordination must be explicit. Relevant responses include exclusive ownership, precedence, arbitration, or an agreed coordination protocol. Appropriate choices depend on the operating requirements.
+
+The recursive model has a practical boundary. Management behavior can itself be managed, but a deployed architecture must identify its final authority, accepted policies, and trusted observations. Recursion does not authorize a system to approve its own evidence or silently extend its powers. [1]
+
+6.6 Human decisions, exceptions, and adaptation
+
+Human judgment enters through a defined interaction that identifies the question, eligible decision maker, evidence, scope, affected version, and permitted continuation. The person may supply information, adjudicate a conflict, approve a proposal, or reject it. The subsequent system behavior follows the accepted interaction contract.
+
+Upstream acceptance of a governing model or policy is distinct from intervention in an individual execution. A runtime human approval makes that execution human-assisted across the declared lifecycle, even when processing resumes automatically afterward. The STP profile preserves this distinction in its qualification and reporting.
+
+Expected exceptions have specified paths: request information, wait, retry, compensate, escalate, suspend, or stop. An unmodeled condition remains visible and is referred to the responsible authority. A revision can introduce a new supported response through the change process.
+
+Adaptation may change a permitted runtime parameter, select an allowed configuration, replace an implementation, or revise a model. Each action has different authority and verification requirements. A finding of poor performance supplies a reason to review a policy; it does not itself authorize a policy change. [1, P237; P244; P345–P346]
+
+6.7 Business feedback and physical control
+
+MAPE-K can organize management at business and software timescales. Physical control additionally requires defined plant dynamics, sampling, latency, actuation limits, and appropriate safety or stability analysis. A management loop may supervise such a controller without replacing its control law.
+
+The source's C12 specifically addresses feedback with physical or hybrid-system coupling. Many organizational MAPE-K loops can instead be constructed from ordinary sequence, choice, iteration, event waits, and human tasks. The selected semantics determine the obligations. [1, C01–C14; F35]
+
+6.8 ITIL practices as operating requirements and assessment criteria
+
+ITIL supplies an example of a management framework that can be applied through the metamodel. Its practices express management concerns and support operational capabilities with objectives, activities, roles, information, technology, and measures. PeopleCert's practice guidance explicitly addresses these elements and their integration into value streams. ITIL also calls for adaptation to organizational needs. Adopted requirements and acceptance criteria make that guidance prescriptive for a particular implementation. [17; 18]
+
+This illustration uses the 34-practice catalogue identified in the supplied material, with ITIL 4 terminology, including Relationship Management for the business-relationship example. The catalogue is an assessment scope, not a required set of 34 separate applications. Its practices and the 38 product families have different roles: the practices specify management purposes; product families supply reusable ways to implement the required capabilities. [20]
+
+The mapping is many-to-many. Measurement and Reporting may use data transformation, analytics, document production, and assurance families. Workflow, authorization, identity, and change capabilities may support many practices. A practice can contribute to several MAPE-K responsibilities, and one responsibility can require several practices. These mappings are proposed applications of this architecture to ITIL.
+
+6.8.1 Individual assessment and cross-practice composition
+
+The initial application assesses each practice separately. For every selected practice, the organization identifies its purpose, implementation, measures, evidence, and current limitations. Monitoring those implementations supplies observations about their state; it does not automatically provide a complete management response.
+
+Cross-practice composition connects capabilities around an outcome. Relationship Management may identify a need for a predefined stakeholder briefing or service review. Service Request Management can handle that request through agreed fulfillment and closure rules. Measurement and Reporting can assess elapsed time, fulfillment quality, and unresolved demand for that population of requests. The applicable request types and their relationship to the underlying need must be specified.
+
+The composition preserves one identified work item across those capabilities. Each handoff has a defined producer, consumer, meaning, authority, and acceptance condition. Changing the request type, service level, or approval requirement changes the configuration and its obligations.
+
+6.8.2 Management of management capabilities
+
+A practice implementation can itself become the managed subject. Consider Architecture Management, Measurement and Reporting, and Monitoring and Event Management in combination.
+
+Architecture Management maintains the accepted architecture, its decisions, and exceptions. Measurement and Reporting assesses that capability using defined measures, such as coverage of recorded decisions, review timeliness, and the age of unresolved exceptions. Its configuration specifies the source population, calculation rules, reporting schedule, and evidence requirements.
+
+Monitoring and Event Management then observes the measurement capability. It detects missing inputs, failed calculations, invalid results, or reports that have not been refreshed within the required period. The managed subject at this point is the measurement implementation, with its own components, dependencies, and obligations.
+
+The management loop closes through an explicit response. Monitoring records a missed reporting deadline. Analysis establishes whether the observations match an approved recoverable condition, such as a transient source-connection failure. Planning selects a permitted, bounded retry and recomputation. Execution checks current authority, reacquires the inputs, recalculates the measures, validates the result, and publishes the new version. Monitoring confirms that reporting has recovered and that the result meets the declared freshness and completeness conditions. Conditions outside that response contract follow the specified exception path.
+
+This response can run straight through under a previously accepted policy. A required human decision makes the affected execution human-assisted. A timely report also remains subject to separate checks that its definitions and source population support the intended measurement; operational freshness alone does not establish semantic accuracy.
+
+6.8.3 Recursion, variation, and composition limits
+
+The example is recursive because a management capability becomes the subject of another management capability, represented through the same metamodel. The roles are explicit: which practice is applied, what it manages, and what outcome it must establish. Further applications can manage the monitoring capability, its configuration, or its improvement process where there is a defined need.
+
+Order and meaning matter. Measuring architecture management differs from defining the architecture of a measurement system. Applying two practices to the same subject differs from connecting their outputs and actions. Compatibility, shared-state ownership, authority, and system-level constraints determine which compositions are admissible.
+
+PLE makes these management capabilities reusable. A measurement product family can vary its managed subject, metrics, sources, reporting frequency, recipients, and assurance requirements. A monitoring family can vary observed events, thresholds, deadlines, and permitted responses. Configuring and composing them supplies the selected operating model and its feedback behavior.
+
+Recursion introduces no requirement for an endless hierarchy. Each additional management application shall serve a stated objective and terminate at explicit accountable authority. It shall not allow a capability to approve its own unsupported claims or expand its authority.
+
+6.8.4 Prescriptive application requirements
+
+Each selected application of an ITIL practice shall identify:
+
+1. The practice, managed subject, purpose, and required outcome.
+2. The adopted requirements, accountable roles, decision rights, and effective scope.
+3. The product-family configurations, implementations, inputs, outputs, and qualified connections.
+4. The measures, observations, and evidence that support assessment.
+5. The permitted responses, dependencies, and feedback relationships, including verification of effects.
+6. STP eligibility, required human decisions, exception conditions, and change obligations.
+
+These rules apply to practices managing business services and to practices managing other practice implementations. The 34 practices supply a chosen management framework for the general model. The prescribed execution profile determines how eligible work within those arrangements is automated and qualified.
+
+6.9 Construction, operation, and controlled change
+
+The architecture connects three cycles through the same specification and model-management approach. Each has an identified subject, objective, observations, permitted responses, and acceptance conditions.
+
+Construction develops domain knowledge into candidate models and function compositions. Checks reveal missing information, invalid combinations, or counterexamples. The engineering process revises the candidate and establishes the evidence needed to admit a reusable asset. Neural assistance can support that development. Its output remains a proposal until the applicable acceptance conditions are met.
+
+Operation uses the accepted configuration and qualified implementation. MAPE-K compares observations with objectives and selects authorized responses. The permitted response can include a runtime branch, retry, or configuration choice already covered by the deployed contract. Subsequent observations establish the result. Eligible operational and management work follows the STP profile.
+
+Controlled change addresses new requirements, failed assumptions, changed dependencies, and unsupported conditions. Impact analysis identifies the affected models, compositions, deployments, and claims. Revision and requalification establish a supported replacement before its release. New interpretation or implementation work enters this engineering process with its required authority and acceptance conditions.
+
+Megamodel relationships connect the cycles. They identify what a failure concerns, which specification governs it, how the implementation was derived, and which evidence a revision affects. The construction and change processes can themselves be modeled and managed. LLM-assisted authoring remains an engineering activity. Qualified generators and deployed management compositions follow the runtime constraint in Section 7.2. Recursion preserves the distinction between a proposed revision and an authorized operational response. [13; 27; 28; proposed integration]
+
+7. FROM ACCEPTED REQUIREMENTS TO OPERATING SYSTEMS
+
+7.1 Straight-through processing as a design requirement
+
+The ECB defines STP in the context of automated processing across the complete trade or payment lifecycle. This paper applies that established processing principle to operational and management work items within explicitly declared process boundaries. [19]
+
+Every execution path designated as eligible for STP shall have an implemented and qualified route from accepted input to its declared outcome without runtime human intervention. Eligibility, required human decisions, and exception conditions shall be specified before execution. The declared boundary shall identify upstream preparation and downstream work so that manual activity is not concealed by narrowing the automated segment.
+
+Qualified function compositions provide this continuity. Complete compositions define the required route. Compatible contracts and adapters preserve meaning across handoffs. Executable rules and authority checks permit decisions and actions covered by accepted policy. Reconciliation and verification establish completion through actual system connections. Defined feedback and exception behavior support permitted responses to changing conditions.
+
+These requirements connect the rigor of function chaining to its operational purpose. An automated function with an unresolved input, manual transfer, missing authorization decision, or unverified external effect does not establish STP across the complete process. The selected composition must resolve those dependencies or expose an explicit human requirement or implementation gap.
+
+Branching, parallel processing, event waits, automatic retries, and feedback are compatible with STP. The criterion is automated processing through the declared lifecycle, rather than a particular graph shape or immediate completion. A supported automatic repair can preserve STP. A runtime human decision remains intervention even if the system later resumes automatically.
+
+7.2 Source interpretation and approval
+
+Existing policies, procedures, forms, technical records, and responsibility assignments can provide substantial specification material. They may also be incomplete, inconsistent, obsolete, or silent about exceptions. Their authority and applicability must be established for the intended organization.
+
+Source analysis produces proposed requirements, entities, relationships, and behavior. Semantic parsing maps relevant language into explicit representations. The resulting model shall resolve identities, conditions, timing, quantities, obligations, and authority where they affect behavior. Accepted interpretations retain links to their source and approving authority. Conflicts and ambiguity remain visible until the accountable process resolves them. [21–23]
+
+For example, “admit a suitable supplier” requires accepted definitions of suitability, evidence, decision rights, and activation. Decomposing the sentence supplies candidate structure. The responsible process must still establish the intended requirements. A natural-language rendering of the interpreted model can expose assumptions for review. Controlled natural language is one supported authoring option; broader language requires an interpretation process with declared limits.
+
+LLM assistance belongs to discovery, interpretation, and candidate construction before a capability is released. Deployed operational and management compositions use specified functions and data, with no runtime LLM reasoning. Defined statistical or learned inference remains possible under an explicit model contract and evaluation requirements. Excluding runtime LLM reasoning does not exclude every learned model. This is the proposed execution constraint, and it preserves the analytical and learning families in the general architecture. [1, Sections 1 and 3; F18; F36]
+
+7.3 Neuro-symbolic construction and qualified function composition
+
+The construction approach assigns complementary responsibilities. Neural models help interpret descriptions, identify recurring patterns, retrieve candidate assets, and propose decompositions or programs. Explicit symbolic models record the proposed meaning. Types, rules, constraints, and verification procedures determine whether the candidate meets its stated obligations. The acceptance process establishes whether those obligations express the intended requirement. [22–25; proposed integration]
+
+Libraries supply available implementation operations. A family may reuse functions for validation, transformation, calculation, constraint solving, workflow, persistence, or external action. Each selected software capability shall identify its actual public callable, version, input and output contract, dependencies, adapters, and qualification evidence. These records connect the domain vocabulary to implementable behavior. [1, Section 4; Sections 9–10]
+
+Composition assembles the required behavior under the forms in Section 5. Types limit valid connections; contracts constrain their meaning; interaction checks address the complete arrangement. A product-family specification controls the permitted variation and associated obligations. Existing compositions can become reusable assets when their contracts and qualification justify that reuse. A newly suggested abstraction requires the same admission work as another new asset. [24; 25]
+
+The expression compiled AI has a limited operational meaning here: AI-assisted construction produces reusable executable artifacts, so supported work can run without runtime LLM reasoning. The actual engineering mechanisms shall be named: model transformation, component assembly, code generation, program compilation, or specialization. Each has an identified input, output, and correspondence obligation. Workflow interpretation and runtime constraint solving can remain part of the resulting implementation. The term implies neither that every outcome is precomputed nor that a neural model has been converted in full into rules. [15; 26; 30]
+
+For the prescribed implementation, meaningful operations and adapters must resolve to qualified public functions or supported generation mechanisms. A missing operation remains an implementation gap. A successful search, generated API skeleton, or candidate program does not close that gap without the required behavior and evidence. This preserves the source's library-based construction constraint. [1, P302; P308; P344]
+
+Interpretation, construction, and qualification establish assets that can support many configurations and executions. This creates the opportunity to spread engineering cost across repeated use. Runtime computation, integration, monitoring, and requalification retain their costs and must be measured. Reuse of accepted behavior is the connection between compiled construction and the STP value proposition.
+
+7.4 Configurator generation and product derivation
+
+The construction process has three distinct stages. First, the family model and reusable derivation assets produce or specialize a configurator. Second, the configurator combines an accepted organizational model, feature choices, and implementation bindings to derive a product. Third, the deployed product processes requests and observations under its declared contracts.
+
+These stages use established concepts of model transformation, configuration, specialization, and product derivation. OMG QVT is a relevant standard for model transformation. Choosing QVT or another implementation mechanism is a separate engineering decision that requires an explicit mapping to the accepted semantics. [1, F37–F38; 15]
+
+Each stage has a correspondence obligation. The configurator's questions and permissible selections must implement the family model. The generated product must preserve the selected requirements and behavior. The deployed realization must implement that product in the actual environment.
+
+Generating a configurator is itself a construction task. It can use the same classes of assets, dependencies, interfaces, and assurance records as other generated products. Qualified templates and existing generators provide a practical implementation route. Section 11 develops the source's partial-evaluation research target into an explicit extension through the Futamura projections. That extension has additional requirements for executable semantics, compatible self-application, and generated artifacts. The practical construction route remains independently usable. [1, P305; P348–P349]
+
+The three construction stages described here organize family and product derivation. A claim to the third Futamura projection requires the particular program transformation defined in Section 11.2. Configurator generation alone supplies evidence for its own construction claim.
+
+7.5 What a derivation delivers
+
+A complete derivation identifies the selected configuration, unresolved requirements, component and connection model, generated artifacts, implementation bindings, acceptance obligations, supporting results, and change dependencies. It also identifies the eligible STP paths, their lifecycle boundaries, required human decisions, and exception conditions.
+
+The product may contain several coordinated outputs. An operating application may require rules, workflows, data storage, interfaces, APIs, deployment definitions, and monitoring. An engineering product may require a design model, quantities, manufacturing instructions, inspection requirements, and operating limits. The required set follows from the accepted outcome and its dependencies.
+
+Requirements drive the choice of outputs. An attractive interface does not compensate for missing authorization or state management, and a valid technical artifact does not establish that the complete operational objective has been achieved. [1, R07–R17; R32]
+
+The derivation shall retain the model relationships described in Section 3.6. It shall identify the accepted meaning, selected family and features, qualified implementation assets, transformation history, deployment bindings, and acceptance evidence. These records enable inspection of how a business requirement became a particular executable capability.
+
+7.6 Runtime behavior and actual effects
+
+Reproducible execution requires declared treatment of clocks, ordering, random inputs, numerical behavior, and versioned dependencies where these affect results. Deterministic computation does not make external events predictable or establish that a statistical model is accurate.
+
+External actions require more than a successful function return. The system must identify the intended effect, check current authority and relevant state, perform the operation through a qualified connection, and reconcile the result. An uncertain effect remains uncertain until the defined observation or reconciliation process resolves it.
+
+For long-running work, the configuration specifies durable state, retries, timeouts, cancellation, compensation, and recovery. A retry can repeat a computation safely while duplicating an external action unsafely. The contract determines the permitted behavior. [1, HG00–HG07; F13; F33]
+
+7.7 Illustration across the lifecycle
+
+Consider an admission family with the requirement: admit a supplier when its identity is verified, required evidence is current, and applicable authority permits activation. Domain engineering defines the shared admission concepts and supported differences in evidence, checks, timing, and activation. The same family can support other admission subjects through accepted variants.
+
+Neural assistance can propose a decomposition. The accepted model identifies the required evidence and decision rules. Product derivation selects qualified functions for identity resolution, evidence validation, rule evaluation, authorized activation, and confirmation. A guarded branch admits a qualifying case; other cases follow their defined outcomes. The implementation requires the actual provider connections and acceptance evidence before STP qualification.
+
+MAPE-K observes incomplete outcomes, failed connections, and changed conditions. A covered temporary failure can trigger a bounded retry and reconciliation under existing authority. A new evidence requirement enters controlled change. Its dependency links identify affected configurations, rules, tests, and qualification claims. Revised assets become available after the applicable acceptance work.
+
+ITIL practices can frame the management of this capability. Architecture Management can govern its accepted design. Measurement and Reporting can assess its completion and exception rates. Monitoring and Event Management can observe that measurement capability using the recursive arrangement in Section 6.8. The same specification and construction approach applies at each level.
+
+The megamodel links the requirement, admission model, selected variant, function composition, management models, and evidence. It makes the path from stated intent to operation and revision inspectable. This is an illustrative application of the proposed architecture; qualification depends on the actual selected assets and connections.
+
+8. ASSURANCE, TRACEABILITY, AND CHANGE
+
+8.1 Distinct acceptance questions
+
+Acceptance addresses several questions. Does the model conform to its declared structure? Does it preserve the accepted requirement? Does the implementation realize that model? Do the connected implementations work together? Does the model adequately describe the relevant real-world behavior? Has the responsible authority approved the use at the stated scope?
+
+Different evidence answers different questions. Schema validation addresses representation constraints. Formal verification addresses stated properties under formal assumptions. Tests provide results for the exercised cases. Statistical evaluation addresses performance under an evaluation design. Physical measurements support claims about actual equipment or processes. Approval records establish accountable decisions.
+
+Every result must state which question it answers. The assurance case relates those results to the intended claim and identifies what remains unsupported. [1; 12]
+
+Language-to-program research identifies spurious programs that produce expected results while expressing the wrong interpretation. Matching examples therefore supplies incomplete evidence about meaning. Acceptance shall distinguish interpretation of the requirement, satisfaction of the formal specification, and performance of the actual implementation. Neural confidence and an executable result cannot merge these questions. [29]
+
+8.2 Obligations follow the configuration
+
+Acceptance obligations arise from selected features, components, connections, composition forms, deployment conditions, and system-level requirements. Selecting a feature therefore selects its verification and validation consequences.
+
+The source's universal requirements cover typed contracts, obligation derivation, independent assurance, change propagation, and complete generation acceptance. Domain-specific requirements add obligations for matters such as geometry, experiments, stream processing, model training, or physical timing. Appendix C maps all 32 requirements to the proposed architecture. [1, R01–R32]
+
+Qualification requires every applicable obligation to be satisfied or explicitly disposed of under the governing acceptance policy. Any approved limitation must remain in the resulting claim. Unresolved or failed mandatory obligations prevent an unqualified acceptance statement. Scores cannot cancel a failed authorization or integrity requirement.
+
+8.3 Independent checks and integration evidence
+
+The supplied specification emphasizes independent comparison and generated test inputs. Independence must be assessed for the actual computation. Two tools using the same underlying solver, geometry engine, or numerical library can share a failure. Separate implementations can also share an incorrect source interpretation.
+
+Suitable evidence may therefore combine independently encoded relations, independent implementation paths, justified invariants, measurements, and targeted human review. The choice depends on the claim. Repeating a calculation with the same implementation establishes repeatability, with no automatic increase in semantic independence.
+
+For integration, the source requires the actual producer output to be serialized, reloaded, transformed through the actual adapter where applicable, and consumed by the actual consumer. This checks the delivered connection at its declared scope. A stand-in fixture supports a narrower local claim. [1, HG04; Section 5; R29]
+
+Generated artifacts also require evidence that construction preserves the accepted specification. Compiler research distinguishes verifying a transformation from validating a particular source and output pair. Either approach needs explicit semantics and a justified checking method. Translation validation can support a particular derivation even when the generator itself has no general proof; the validator's correctness remains an obligation. This engineering principle guides the proposed construction assurance. It does not prove that a formalized requirement matches the original intention. [30]
+
+For the Futamura extension, these obligations apply across specialization, compiler generation, and compilation. Evidence shall identify the relevant interpreter, specializer, generated tools, source models, and outputs. Preservation shall cover the specified results, state changes, external effects, failures, and exceptions. Section 11.5 states the additional demonstration criteria.
+
+8.4 Change is part of the original architecture
+
+A requirement, policy, data source, component, credential, provider, numerical model, or operating assumption can change. The dependency model identifies affected configurations, outputs, and claims. It then determines what must be reconsidered, rebuilt, migrated, measured, or approved.
+
+Megamodeling makes these dependencies explicit across model boundaries. A changed term definition can affect a rule; a changed rule can affect a generated decision function; a changed function can affect deployed products and their management assumptions. The impact analysis shall follow the actual typed relationships. Their completeness is itself an assurance obligation.
+
+Historical evidence remains evidence about its original subject and context. Current reuse requires an explicit validity check against the changed dependencies. Reusing unaffected work is legitimate when the impact argument supports it.
+
+This change process can itself form a management composition: detect change, assess impact, plan revision, execute it, and observe the resulting state. The reusable assets support both the original capability and its subsequent maintenance. [1, P345–P346; F32–F33]
+
+8.5 Qualification and measurement of straight-through processing
+
+STP assurance distinguishes design, qualification, and observed execution. A configuration is designed for STP when its eligible paths and automated decisions, connections, effects, and acceptance checks are specified. It is qualified only when evidence supports the complete implemented paths within the claimed scope. An individual execution achieves STP when its records show completion across the declared boundary without runtime human intervention.
+
+Qualification shall exercise actual connections, relevant branches, and the declared failure and recovery behavior. Unexpected manual repair is an exception to the qualified path. Changes to requirements, interfaces, authority, or operating conditions shall trigger review of the dependent STP eligibility and qualification claims.
+
+Reporting shall distinguish work eligible for STP from total work received, and automated completion from human-assisted completion, unresolved exceptions, failures, and work still in progress. Automated fulfillment and policy-based rejection shall have distinct outcome counts. A properly automated rejection may complete processing while leaving the requested business outcome unfulfilled.
+
+Eligibility and the observation period shall be fixed for each reported cohort. An eligible case that encounters manual intervention or failure shall remain in that cohort. A case shall not be retrospectively excluded to improve the reported result. Any change to eligibility shall be versioned and shown separately. These measures expose both the breadth of automation and its effectiveness, including reliance on required human decisions.
+
+9. COVERAGE, GENERALITY, AND THE SUPPLIED EVIDENCE
+
+9.1 What the supplied collection establishes
+
+The master specification contains 38 family definitions and 349 numbered records described as proofs. Its construction vocabulary identifies 18 operation classes, 14 composition forms, 18 variation dimensions, and 32 requirement categories. These are working classifications with explicit scope statements. [1]
+
+The seven evidence files contain 130,000 distinct case identifiers: 5,000 in the first file, 25,000 in the second, and 20,000 in each of the remaining five. A complete row-level inventory for this paper confirmed those counts and found the current assessment marker to be unresolved for every case. The headers define that marker as requiring case formalization and state that no case-bound execution witness is supplied. [2]
+
+The files are valuable requirements and variation material. Their practical situations can expose recurring needs, missing distinctions, ambiguous dependencies, and candidate family combinations. Their row count does not measure the number of independent semantic patterns or successful implementations.
+
+9.2 What remains unestablished
+
+The source preserves different maturity states. P1–P190 are historical chains subject to additional requirements. P191–P300 describe theoretical full-chain requirements. P301–P349 retain specified profiles and open integration obligations, with later bounded continuations. A later result can qualify its declared scope without qualifying the original record at full scope. [1, Sections 3 and 10]
+
+The master also reports an implemented bounded checker and development results. Its declared scope includes finite representations, selected composition forms, and specific logical and state checks. The supplied attachments contain the specification and summary case records; they do not supply the implementation package and complete execution archive needed to reproduce those reported runs. This paper has audited the supplied text and case rows, and has not reproduced those executions. [1, CK01; 2]
+
+Accordingly, the defensible statement is that the framework has been examined through a supplied corpus of 130,000 case records, with bounded checking reported in the master specification. Full reconstruction and execution coverage remain unresolved in that record. Calling the complete framework universally proved or empirically closed would exceed the supplied evidence.
+
+9.3 The generality argument
+
+Generality rests on common relationships and explicit specialization. Each family can express its requirements, entities, behavior, interfaces, variability, implementation, evidence, and change dependencies through the metamodel. Families then retain the domain meanings required to determine correctness.
+
+Artifacts, running services, controllers, configurators, assurance processes, and revision processes all have places in this account. Operational and management compositions use the same modeling relationships. Appendix A shows the role, variation, and principal acceptance obligation of every supplied family.
+
+This establishes conceptual accommodation of the catalogue. It does not establish that the catalogue is the only valid classification of work, that every possible future requirement is represented, or that every combination can be implemented.
+
+9.4 Closure and its proper limits
+
+Three claims must be distinguished. A declared composition language can be closed under its permitted construction rules. A contract system can support preservation arguments for those rules under stated assumptions. Coverage of all real-world requirements is a separate claim that needs its own domain definition and evidence.
+
+The proposed organizational standard can specify its language and supported scope completely. Its catalogue and implementations remain versioned engineering assets. A new domain requirement can be an existing parameter choice, an existing composition, a missing implementation, or a needed extension to the model. The assessment must identify which kind of change is required. [1, Sections 1, 3, and 11]
+
+10. THE PROPOSED ORGANIZATIONAL STANDARD
+
+10.1 Required content
+
+The solution should be formalized as a reference architecture with a conceptual metamodel, supported domain models, and declared conformance profiles. Its normative content should define the constructs and consistency rules in Section 3; the domain-engineering, product-family, and binding rules in Section 4; the composition obligations in Section 5; and the operating, construction, assurance, and change requirements in Sections 6–8. The prescribed execution profile shall require STP for eligible work as defined in Sections 3.5, 7.1, and 8.5. Selected ITIL-based operating models shall additionally satisfy the application requirements in Section 6.8.
+
+Conformance shall include accepted interpretation of governing specifications, explicit model relationships, qualified implementation operations, and evidence for required construction correspondence. AI-generated candidates shall pass the same admission obligations as other candidates. Deployed operational and management compositions shall meet the runtime constraint in Section 7.2. Claims of compiled construction shall name the actual mechanisms and their supported scope as required by Section 7.3.
+
+Its reusable asset catalogue should retain the existing family and proof identifiers for traceability. Each entry should state what is specified, implemented, checked, integrated, and approved, with the scope of each claim. Operational authority should remain a separately controlled relationship.
+
+Conformance should be stated against a particular version and profile. A system can conform to a supported analytical profile while lacking support for physical control. A bounded verification result can satisfy a bounded requirement without implying correctness outside that bound. Conformance to the STP execution profile requires its eligibility, automation, qualification, and reporting obligations to be met; it does not mean that every represented activity or observed case completes automatically.
+
+10.2 How to complete and implement it
+
+First, formalize the metamodel relationships and consistency constraints. Resolve the required type, identity, cardinality, and lifecycle rules for each construct, including references among models, transformations, and evidence. Define how accepted natural-language specifications relate to those representations. This produces a machine-checkable structural foundation and an explicit interpretation boundary.
+
+Second, carry out domain engineering for each supported family. Develop its shared vocabulary, domain model, feature model, qualified asset catalogue, construction method, and acceptance specification. Preserve shared semantics where they are equivalent and define mappings where they differ. Identify the roles of neural assistance, symbolic checks, and responsible acceptance in this work.
+
+Third, qualify representative end-to-end constructions across the materially different semantic domains. The set must exercise state and effects, human authority, quantitative or statistical claims, artifact generation, and physical or timing claims where those are supported. It must include multi-family composition, an eligible STP path through verified completion, and management feedback through an authorized response and observed result. Where ITIL is selected, include a practice implementation managing another management capability.
+
+Fourth, demonstrate both construction stages: an actual configurator derived from a family model and an actual product derived through that configurator. For AI-assisted construction, retain the proposed interpretation, accepted model, selected operations, and correspondence evidence. Exercise invalid and unresolved configurations, integration failures, required human decisions, and a dependency change that invalidates prior evidence before requalification. Follow that change through the megamodel relationships. Confirm that exceptions remain visible and that human-assisted executions are correctly distinguished from STP.
+
+Finally, reconstruct selected frozen cases under accepted contracts and retain the complete trace from original requirement to implementation and acceptance. Expand qualification according to uncovered semantics and interactions. Aggregate case counts remain secondary to the scope of demonstrated behavior. [1, R01–R05; R29–R32; CK01]
+
+10.3 Executive decision criteria
+
+The concept is ready for architectural adoption when every intended family and management arrangement has a clear representation, variation has a defined effect on construction and assurance, composition has explicit correctness obligations, and authority and change have no unexplained exceptions.
+
+An implementation is ready for a particular use when the required assets and real connections are qualified for that use, the operating assumptions are accepted, and the resulting evidence supports the claimed outcome. These criteria separate completion of the conceptual argument from completion of engineering qualification.
+
+The central economic objective is to reduce the manual work required to complete operational and management processes. Reuse covers the accepted models, implementations, connections, controls, and assurance work that make STP possible. Relevant measures include STP eligibility and completion, human handling effort, elapsed time, outcome quality, integration defects, and the cost of derivation and requalification. AI-assisted construction cost shall be recorded separately from per-execution cost so that repeated use can be assessed fairly. The preferred design maximizes feasible automated completion subject to accepted requirements and resource constraints. The supplied case counts establish no quantified saving.
+
+11. EXTENSION THROUGH THE FUTAMURA PROJECTIONS
+
+11.1 Purpose and scope
+
+The architecture supports a further research objective: deriving compilers from executable definitions of the languages used to express supported models. This would extend reuse to the machinery that constructs operational capabilities and their management loops. The following mapping and acceptance criteria are the proposed application of established partial-evaluation research to this architecture.
+
+An interpreter implements the rules for executing a language. A compiler translates programs in that language into another executable form. Partial evaluation specializes a program using information already known, leaving a program that processes the remaining inputs. Futamura's foundational work connects these ideas by deriving compilation from executable language semantics through partial evaluation. [31]
+
+Natural language remains the specification medium described in Sections 3.6 and 7.2. The projection mechanism begins after the intended meaning has been accepted and represented in a supported executable language. Domain engineering must define the relevant concepts and behavior; the interpreter must implement their execution semantics. The initial scope shall identify the language subset, implementation language, target environment, and library operations actually supported.
+
+11.2 The three projections
+
+The first projection specializes an interpreter for one source program. Its result is an executable specialized to that program.
+
+The second projection specializes the partial evaluator itself for one interpreter. Its result is a compiler for the interpreted language.
+
+The third projection specializes the partial evaluator with respect to itself. Its result is a compiler generator that accepts compatible interpreters and produces their compilers. Self-application requires the specializer to process its own implementation in a supported program representation. Compatibility limits which interpreters and targets the generated mechanism can serve. [33]
+
+For this proposal, the source programs are accepted executable models. One compiler may serve many models, configurations, and product families. A family does not require a separate language. Supplier, employee, and equipment admission can share an execution language while their evidence, rules, and activation conditions vary by configuration. A change to language semantics is a separate engineering change with consequences for its interpreter and compiler.
+
+11.3 Research and implementation precedents
+
+The third projection has already been demonstrated in programming-language research. Jones, Gomard, and Sestoft derive a compiler generator through self-application and report implementation measurements. This paper claims a proposed architectural application; it makes no claim to originate that result. [32, Chapter 4]
+
+The Similix project documents a self-applicable partial evaluator for a substantial Scheme subset, including limited input/output effects, and the generation of standalone compilers from interpreters. It also records limitations, including cases where assistance is needed to avoid specialization that fails to terminate. The archived implementation is a research precedent. Present use requires qualification of the available software, runtime, interfaces, and supported semantics. [34]
+
+GraalVM's Truffle framework provides a contemporary example of deriving optimized code from interpreters. Its official documentation supports the practical relevance of interpreter-based compilation. It does not establish the self-application required for this paper's third-projection objective. [35]
+
+11.4 Application to the architecture
+
+The metamodel defines permitted constructs and relationships. Executable semantics must additionally define what their execution means, including state transitions, conditions, external actions, completion, and failure. An interpreter implements those rules for the declared scope. A qualified self-applicable specializer supplies the additional transformation mechanism.
+
+PLE organizes the shared assets, valid configurations, and derivation methods. Selected features and implementation bindings provide information that can be fixed during specialization. The generated compilers and compiler generator become versioned construction assets with contracts, dependencies, and acceptance evidence. Family configurators can use these assets where their construction methods require compilation.
+
+Qualified libraries supply the operations used by generated function compositions. Partial evaluation can retain calls that depend on runtime inputs. It therefore allows specialization of known composition choices while preserving calls to the required library functions. The treatment of base functions in partial-evaluation research supplies a precedent for this arrangement. [32, Section 4.8.2]
+
+Neuro-symbolic construction retains its engineering role: neural assistance proposes interpretations and artifacts; explicit representations, checks, and acceptance establish the release basis. Qualified specialization and compilation then proceed without runtime LLM reasoning. Each generated artifact retains its own assurance obligations.
+
+MAPE-K management behavior can use the same executable language and construction method. Management recursion concerns one capability managing another. Compiler self-application concerns a program-transformation mechanism processing itself. The megamodel shall record both relationships precisely. For this extension, it shall connect language versions, interpreters, specializers, generated compilers, source models, outputs, assumptions, and evidence.
+
+ITIL practices continue to supply selected management requirements and assessment criteria. STP remains the normative execution objective for eligible work. Neither changes the definition of the projections. Their requirements constrain the capabilities produced and the evidence needed to accept them.
+
+11.5 Assurance and demonstration
+
+Specialization shall preserve information that must remain live. Selected features, approved rule versions, and qualified bindings may be fixed for a release. Current permissions, revoked access, incoming requests, observations, and external responses retain their required runtime treatment. For example, compiling an admission sequence must preserve its authorization check before activation. Compiling a management loop must preserve its dependence on current observations.
+
+The proposed implementation shall satisfy five demonstration criteria:
+
+1. Declare a meaningful executable scope, its semantics, target environment, and supported library operations. Include representative operational and management behavior.
+2. Qualify an available public self-applicable specializer, including its program representations, reproducible execution, dependencies, and limitations. A named candidate remains unqualified until these conditions are established.
+3. Produce the actual specialized executable, compiler, and compiler generator through the corresponding transformations. Retain their derivation records. Demonstrate reuse of the generated compiler generator with a second compatible interpreter. This additional test is a proposed acceptance criterion for reuse.
+4. Establish behavioral-preservation evidence against the reference semantics. Distinguish formal guarantees, validation of individual transformations, and tests over a declared scope. Include relevant state, effects, failures, and exceptions. Apply the independence requirements of Section 8.3.
+5. Measure useful specialization and practical cost, including generation time, artifact size, execution behavior, and requalification effort. Check that external actions retain their required order and frequency.
+
+Preservation of formal behavior and acceptance of intended meaning remain separate obligations. The generated tools must preserve an accepted specification, and the specification must remain adequate for its intended use. Changes to semantics, dependencies, or operating assumptions require impact analysis through the megamodel and requalification of affected claims.
+
+11.6 Value and implementation boundary
+
+The proposed value is reuse of construction knowledge across supported languages. An executable semantic definition becomes an input to compiler derivation, and the resulting compiler can serve many product variants. This may reduce repeated compiler-development work and extend STP into eligible construction activities. The economic result must be measured against the existing derivation route, including engineering, validation, generation, execution, and change costs.
+
+The projection does not resolve domain meaning, qualify external connections, or establish successful physical outcomes. Those responsibilities remain governed by the architecture's existing contracts and assurance requirements. The practical construction route in Section 7.4 remains available while this extension is developed.
+
+The supplied specification records literal self-application as a specified research target with execution and integration unresolved. The material reviewed supplies no demonstrated compiler-generation chain for this architecture. Accordingly, this paper claims a defined route and qualification objective. Achievement requires the artifacts and evidence described above. [1, P349]
+
+12. CONCLUSION
+
+The proposed solution connects human specification, reusable construction, and recursive management. Natural language expresses domain knowledge and governing intent. Domain engineering develops shared models, variation points, and assets. Neuro-symbolic construction combines neural assistance with explicit representations and checks. Product line engineering derives supported capabilities from qualified library compositions and generators.
+
+A common metamodel defines the permitted elements and relationships. Megamodeling maintains the links among actual specifications, configurations, transformations, implementations, and evidence. MAPE-K organizes operation and adaptation. The same approach can specify and manage the capabilities that construct, assess, and revise other capabilities. Each relationship retains its meaning, authority, and acceptance obligations.
+
+The prescribed execution profile makes STP the default for eligible work. Compiled construction produces reusable artifacts that execute without runtime LLM reasoning. Qualified function compositions connect accepted inputs to decisions, authorized actions, reconciled effects, and verification. Required human decisions and justified exceptions remain explicit. PLE makes the complete capability reusable across variants; feedback supports its operation and permitted adaptation.
+
+The ITIL illustration shows how management practices supply operating requirements and assessment criteria while their implementations can themselves be managed through the same architecture. Cross-practice composition and management of management capabilities therefore use the same requirements, interfaces, authority, and assurance relationships. A chosen management framework and the STP execution profile specialize the general metamodel for its intended use.
+
+This architecture accommodates all 38 supplied families at the conceptual level. Its next engineering task is to formalize and qualify the declared profiles and their actual compositions. The general foundation is sufficiently defined here to guide that work, while the supplied evidence establishes the narrower maturity boundaries described above.
+
+The third Futamura projection supplies a final research extension to the construction argument. Explicit executable semantics and a qualified self-applicable partial evaluator would allow the derivation of a reusable compiler generator for compatible interpreters. This would extend reuse to compiler construction while preserving the requirements for accepted meaning, authority, behavioral correspondence, and qualification. Actual self-application and generated artifacts are necessary to demonstrate achievement. [31–34; proposed application]
+
+The resulting research objective is a governed architecture in which accepted models can drive the generation of operational systems, their management capabilities, and the compilers used to construct them.
+
+APPENDIX A. ACCOMMODATION OF ALL 38 PRODUCT FAMILIES
+
+The identifiers below preserve the source mapping. Descriptions use established domain terminology. Each family inherits the common metamodel, contract, assurance, and change requirements. Each can supply operational or management behavior as appropriate. This mapping is conceptual; it does not change qualification status. [1, Section 6]
+
+F01. Requirements analysis and formalization. Source material becomes accepted requirements and operating-model representations. Variation concerns source types, interpretation, and approving authority. Acceptance requires faithful meaning, provenance, and visible unresolved issues.
+
+F02. Entity identity and relationship management. Records become scoped identities and relationships. Variation concerns identity rules, time, and relationship types. Acceptance requires preserved distinctions, justified links, and traceable corrections. Other families use these identities at their boundaries.
+
+F03. Data transformation, migration, and synchronization. Data becomes a target representation or synchronized state. Variation concerns schemas, consistency, and permitted loss. Acceptance requires reconciliation of records, multiplicity, and changes. Transformation adapters have their own contracts.
+
+F04. Information retrieval and query. Information sources support queries and navigable results. Variation concerns access, retrieval semantics, and population completeness. Acceptance requires attributable support and explicit coverage limits. Retrieved material retains its original evidential status.
+
+F05. Policy and decision management. Accepted rules and scoped facts produce decisions or obligations. Variation concerns logic, applicability, defaults, and conflicts. Acceptance requires preservation of rule meaning and unresolved outcomes. Decisions become inputs to authorized action.
+
+F06. Access control, delegation, and information release. Identities and policies determine permitted actions or disclosures. Variation concerns principal, resource, purpose, scope, and expiry. Acceptance requires current authority and correct limitations, including when other families combine information.
+
+F07. Admission and lifecycle management. Evidence and requirements determine readiness and permitted lifecycle transitions. Variation concerns subject, approval rules, and activation conditions. Acceptance requires every applicable condition and effect to be resolved. Inspection or commissioning can add other families.
+
+F08. Agreement and obligation management. Terms create entitlements and recurring or conditional obligations. Variation concerns parties, versions, dates, and discharge rules. Acceptance requires the correct interpretation and lifecycle of each obligation, connected to actual fulfillment evidence.
+
+F09. Workflow and case management. Tasks, events, and dependencies coordinate work. Variation concerns ordering, parallelism, waits, and exceptions. Acceptance requires valid state transitions and the declared progress properties. Specialized computations remain connected capabilities.
+
+F10. Collaborative review and decision records. Contributions and approval procedures produce attributable decisions. Variation concerns eligible participants, quorum, version, and conflict rules. Acceptance requires decisions to refer to the correct artifact and authority, with unresolved disagreements preserved.
+
+F11. Planning, scheduling, and assignment. Goals and resource constraints produce feasible work plans. Variation concerns calendars, capacity, qualifications, and objectives. Acceptance requires feasibility under the stated assumptions. Execution observations can drive a subsequent planning cycle.
+
+F12. Routing, packing, and network allocation. Spatial or network demands produce allocations and routes. Variation concerns topology, geometry, capacity, and transfer rules. Acceptance requires the relevant feasibility and conservation properties. Scheduling evidence alone does not qualify these algorithms.
+
+F13. Transaction processing and effect reconciliation. Authorized intents produce state changes and external actions. Variation concerns provider behavior, consistency, retries, and compensation. Acceptance requires correct intent identity, current authorization, and reconciled outcomes.
+
+F14. Accounting, allocation, and valuation. Quantities and accepted calculation rules produce ledgers, allocations, or valuations. Variation concerns units, currencies, rounding, and assumptions. Acceptance requires relevant conservation and reconciliation properties and explicit valuation scope.
+
+F15. Supply and fulfillment management. Demand, inventories, and material requirements produce procurement and fulfillment actions. Variation concerns substitutions, lead times, availability, and receipts. Acceptance connects plans to actual material, quantity, and obligation states.
+
+F16. Asset maintenance and reliability management. Condition, usage, and service requirements produce maintenance decisions and work. Variation concerns calibration, thresholds, intervals, and recovery. Acceptance requires current asset evidence and verified restoration within the applicable service conditions.
+
+F17. Measurement, analysis, and reporting. Observations and defined populations produce measures and reports. Variation concerns cohorts, missingness, censoring, units, and aggregation. Acceptance requires correct denominators, provenance, and stated limitations. Results can supply monitoring.
+
+F18. Statistical prediction and inference. Data and models produce estimates or predictions. Variation concerns assumptions, evaluation populations, uncertainty, and applicability. Acceptance requires appropriate empirical evaluation and calibrated claims. Operational use adds a separately specified decision policy.
+
+F19. Diagnosis and diagnostic test selection. Observations and hypotheses produce explanations and requests for further evidence. Variation concerns available tests, cost, distinguishability, and stopping rules. Acceptance preserves uncertainty and the incompleteness of the hypothesis set.
+
+F20. Multiobjective decision analysis and allocation. Alternatives, objectives, and constraints produce evaluated choices. Variation concerns priorities, fairness, mechanisms, and resource limits. Acceptance separates feasibility, optimality, and stakeholder approval, and preserves the assumptions behind each conclusion.
+
+F21. Simulation and digital twins. Models, initial conditions, and inputs produce scenario behavior or synchronized model state. Variation concerns dynamics, numerical methods, coupling, and fidelity. Acceptance distinguishes computational results from evidence of actual physical or operational behavior.
+
+F22. Experimental design and measurement campaigns. Questions, factors, and measurement resources produce experiments and observations. Variation concerns randomization, identification, confounding, and stopping. Acceptance requires a design capable of supporting the intended inference under its assumptions.
+
+F23. Learning, assessment, and qualification. Competency requirements and assessment evidence produce learning paths and qualification decisions. Variation concerns prerequisites, rubrics, evidence validity, and expiry. Acceptance requires a justified relationship between the assessment and the claimed competence.
+
+F24. Software construction and maintenance. Accepted models and reusable components produce applications and revisions. Variation concerns architecture, platform, extensions, and generation methods. Acceptance requires behavior correspondence, controlled regeneration, and integration with the selected environment.
+
+F25. API, connector, and event-service construction. Interface and protocol models produce services and adapters. Variation concerns schemas, versions, authentication, and provider behavior. Acceptance requires preserved domain meaning and actual producer-to-consumer integration.
+
+F26. Infrastructure configuration and deployment. Resource and deployment models produce operating environments. Variation concerns isolation, capacity, locality, and recovery. Acceptance requires actual deployed resources and service behavior to meet the selected configuration and operating requirements.
+
+F27. Engineering design and manufacturing preparation. Design requirements produce geometry, material definitions, quantities, and manufacturing instructions. Variation concerns tolerances, materials, tools, and processes. Acceptance requires computational correctness and the relevant engineering and measured validity.
+
+F28. Spatial and spatiotemporal information. Spatial observations and models produce geographic or geometric information products. Variation concerns coordinates, resolution, topology, time, and coverage. Acceptance requires reference-system consistency and the declared transformation accuracy.
+
+F29. Document, media, and communication production. Accepted content and presentation requirements produce communication artifacts. Variation concerns format, audience, language, fidelity, and accessibility. Acceptance checks the required content and representation. Creative objectives require their own human evaluation.
+
+F30. User interfaces and visualization. Interaction models and domain state produce interfaces and visual representations. Variation concerns roles, accessibility, concurrency, and offline behavior. Acceptance requires faithful state presentation and valid interactions with the underlying services.
+
+F31. Verification, validation, and assurance. Claims and evidence produce assessments and acceptance records. Variation concerns property class, scope, independence, and freshness. Acceptance requires justified conclusions and preserved limitations. The assessment process has its own implementation obligations.
+
+F32. Change impact analysis and modernization. Versioned requirements and dependencies produce affected sets and revision plans. Variation concerns the source of change, compatibility, and migration. Acceptance requires complete impact treatment within the declared dependency model and requalification of affected claims.
+
+F33. Recovery, replay, and records management. Histories and checkpoints support recovery and controlled records lifecycles. Variation concerns replay, retention, legal holds, deletion, and effects. Acceptance requires consistent restoration and truthful treatment of irreversible actions and retained copies.
+
+F34. Stream processing and event response. Event streams produce detections, updated results, and response intents. Variation concerns event time, lateness, finality, and retraction. Acceptance requires correct incremental semantics and propagation of corrections to dependent outputs.
+
+F35. Physical control and embedded systems. Observations and control models produce actuator commands and physical responses. Variation concerns dynamics, hardware, timing, and interlocks. Acceptance requires the stated control properties and evidence from the actual operating environment.
+
+F36. Statistical and machine-learning model development. Datasets, features, and training specifications produce deployed analytical models. Variation concerns training, evaluation, inference, and replacement. Acceptance requires valid data separation, model correspondence, and monitored applicability over time.
+
+F37. Product configurator generation. Product-family models and derivation assets produce configurators. Variation concerns feature rules, questions, targets, and construction methods. Acceptance requires the configurator's accepted choices and outputs to correspond to the family definition.
+
+F38. System integration across product families. Selected family members produce a composed system. Variation concerns architecture, shared resources, interfaces, and management arrangements. Acceptance requires both local compatibility and the system-level outcomes, interactions, and evidence.
+
+APPENDIX B. TERMINOLOGY AUDIT AND NORMALIZATION
+
+The attached master was searched for the rejected architecture label and reviewed for terminology that could overstate maturity or conceal meaning. The rejected label was absent. This audit covers source expressions and the terms used in the paper's architectural synthesis. Original identifiers are retained only when needed to locate the source. The source attachments were not rewritten.
+
+“Proof.” Use reusable engineering asset, implementation specification, verification requirement, assurance argument, or formal proof according to the record's actual content. The word proof is reserved for a justified derivation of a stated proposition when making a correctness claim. A proof catalogue entry does not confer that status. [1; 9; 12]
+
+“Proof chain” or “function chain.” Use composition of components, workflow, model-transformation chain, or assurance argument according to what is connected. A chain of function calls specifies behavior; it does not automatically constitute a mathematical proof. [1; 6; 12; 15]
+
+“FamilySpec” and “family cards.” Use product-family specification, domain model, feature model, and product derivation specification for the relevant content. These are several engineering concerns collected by a local source identifier, rather than a newly established modeling standard. [1; 3; 4]
+
+“EvidencePack.” Use evidence collection for assembled records and assurance case when claims and supporting reasoning are also present. A collection of evidence is not necessarily an argument that the evidence supports the intended conclusion. [1; 12]
+
+“Factory.” Use product derivation process, configurator generator, code generator, or model transformation according to the actual operation. The paper makes separate claims about producing a configurator, producing a configured product, and executing that product. [1; 3; 15]
+
+“Hardening.” Use the specific obligation: verification, validation, contract completion, integration qualification, or corrective action. Hardening is established terminology in some technical contexts, especially security, but its broad use in this source conceals materially different tasks. [1]
+
+“Question model.” Use configuration constraints and user-interaction model. Questions and allowed answers follow from unresolved requirements and feature decisions; their presentation is a separate interface concern. [1; 4]
+
+“Boundary” or “envelope.” Use interface contract for the required semantics and message metadata for the serialized representation. Schema validity, meaning, authority, and operational success remain separate properties. [1; 9]
+
+“Semantic profile.” Use declared domain semantics and conformance profile, with their content stated explicitly. A profile must identify its supported constructs, interpretation, execution mechanisms, and obligations; the label alone supplies no semantics. [1; 5–7]
+
+“Oracle.” Retain test oracle where the source means a method for determining the expected result. Specify the actual independent implementation, reference relation, measurement, or justified invariant. The term is established and does not itself establish independence. [1, Section 5]
+
+“Closed.” Specify closure under construction rules, a stated preservation result, or an explicitly bounded coverage claim. Closed-loop feedback is a separate control concept. The paper makes no claim of universal empirical closure. [1; 8–11]
+
+“Deterministic.” Apply it to declared execution or replay semantics. It does not imply certainty about observations, external services, learned models, or physical outcomes. [1]
+
+“Knowledge.” Retain the established MAPE-K term while identifying its contents and governing rules. A model, observation, hypothesis, and policy can all be available to management while retaining different status and authority. [1; 8]
+
+“Aspects,” when referring to ITIL. Use management concerns for assessment and management practices for the capabilities applied. Specify the practice and managed subject separately. Their recursive application is explained in Section 6.8.
+
+“Straight-through processing.” Retain STP for automated processing across a declared lifecycle. Distinguish the general metamodel, the prescriptive execution profile, qualification of a configuration, and the observed result of an execution. Sections 3.5, 7.1, and 8.5 define those obligations. [19]
+
+“Natural-language specification” and “natural-language processing.” The former expresses intended concepts and behavior; the latter processes human language. Semantic parsing maps language into an explicit meaning representation. A calculation or external action can implement a natural-language specification while remaining a distinct computational operation. [21–23]
+
+“Domain engineering.” Retain the established PLE activity that develops common models, variability, and reusable assets. Application engineering derives particular products. Megamodeling records relationships among their models and outputs. These terms describe complementary responsibilities. [3; 4; 27]
+
+“Megamodel.” Use a model whose elements include models and relationships among them, with model operations where required. Distinguish it from the metamodel that defines permitted constructs and the natural-language view that expresses them. Its lifecycle role is stated in Sections 3.6 and 6.9. [27; 28]
+
+“Neuro-symbolic AI.” In this proposal, use neuro-symbolic construction for neural assistance combined with explicit symbolic representations, constraints, and checks. The combination describes an engineering process. It grants no automatic correctness or authority to its outputs. [23; 25; 26]
+
+“Compiled AI.” Use only the operational definition in Section 7.3. Name the actual model transformation, assembly, generation, compilation, or specialization mechanism when making a technical claim. This is a description of the proposed construction approach, with relevant research precedents. It is not presented as an established general standard or a conversion of all neural reasoning into rules. [15; 26; 30]
+
+“Partial evaluation” and “self-application.” The former specializes a program using known inputs. The latter applies a program-processing mechanism to its own implementation; for the Futamura projections, that mechanism is the partial evaluator. State the supported program representations and actual transformation. [31–33]
+
+“Compiler generator” and “third Futamura projection.” A compiler generator produces compilers. A literal third-projection claim additionally requires its derivation through the specified self-application. Configurator generation, management recursion, and multiple model levels retain their separate meanings and evidence requirements. Section 11 defines the proposed application and demonstration criteria. [32; 33]
+
+No new branded construct or proprietary ontology is needed. The contribution is the explicit integration and application of established concepts to the supplied catalogue. Claims of standards conformance require a separate, documented mapping to the chosen standard and supported profile.
+
+APPENDIX C. TRACEABILITY TO THE FRAMEWORK'S REMAINING ELEMENTS
+
+The 18 operation classes remain a capability classification. They cover acquisition; parsing and formalization; typing and normalization; identity resolution; collection processing; graph analysis; rule evaluation; state transitions; numerical and geometric calculation; estimation and fitting; search and optimization; simulation; experiment selection; construction and specialization; rendering and encoding; verification and assessment; persistence and external actions; and change analysis and repair. They are not asserted to be a mathematically minimal set. [1, O01–O18]
+
+The 18 variation dimensions remain explicit configuration concerns: semantic object; transformation purpose; dependency structure; execution mode; time; logic and uncertainty; state and consistency; authority and effects; population coverage; numerical and spatial semantics; human participation; construction target; feature variability; change; assurance scope; failure; deployment; and scale and resources. Constraints determine permitted combinations and binding stages. [1, A01–A18]
+
+The 32 requirement categories map as follows. This mapping preserves the source obligations rather than replacing them with a new checklist. [1, Section 7]
+
+R01–R05: family-model consistency, interface contracts, derived obligations, configuration decisions, and configurator correspondence. Addressed in Sections 3–5 and 7.
+
+R06–R08: accepted source meaning, generated behavior, architecture, and regeneration. Addressed in Sections 3, 7, and 8, including natural-language interpretation, qualified synthesis, and construction correspondence.
+
+R09–R14: APIs, distributed effects, interfaces and accessibility, persistence and concurrency, deployment, and global invariants. Addressed in Sections 5, 7, and 8; realized principally through F09, F13, F24–F26, F30, F33, and F38 as applicable.
+
+R15–R20: geometry, engineering validity, manufacturing, spatial reference, stream correction, and hybrid or real-time behavior. Addressed through declared domain semantics and F21, F27–F28, and F34–F35, with the composition rules in Section 5.
+
+R21–R26: experiments, learning and assessment, analytical-model development, media fidelity, collaboration, and allocation mechanisms. Addressed through F10, F18–F23, F29, and F36 and their explicit acceptance conditions.
+
+R27–R28: records and information protection, provider qualification, and hardware qualification. Addressed in Sections 3, 6, 7, and 8 and the relevant deployment contracts.
+
+R29–R32: independent assurance, change propagation, mathematical and numerical scope, and complete generation acceptance. Addressed in Sections 5 and 7–10 and applied across all selected families.
+
+The 12 composed examples in the source remain candidate application architectures. The 65 referenced public capabilities remain implementation candidates whose precise versions, interfaces, dependencies, and scope require qualification. Neither group changes the conceptual metamodel or grants an execution pass by association. [1, Sections 8–9]
+
+REFERENCES
+
+Primary publications and standards were consulted on 10 September 2026. Standards are cited by the edition reviewed. References to user-supplied records describe that supplied edition and do not imply independent reproduction of its historical execution claims.
+
+[1] User-supplied working specification. proofs(8).txt. “Framework master: vision, composition rules and proof chains.” Supplied edition includes CK01 amendments dated 10 September 2026. Relevant locations: Sections 1–5, architecture and contracts; Section 6, F01–F38; Section 7, R01–R32; Section 8, composed examples; Section 9, public capabilities; Section 10, P1–P349; Section 11, CK01 scope and reported results. Unpublished source material supplied for this assessment.
+
+[2] User-supplied case corpus. PROOF EVIDENCE 1.txt; PROOF EVIDENCE 2.txt; PROOF EVIDENCE 3.txt; PROOF EVIDENCE 4.txt; PROOF EVIDENCE 5.txt; PROOF EVIDENCE 6.txt; PROOF EVIDENCE 7.txt. Current headers, profile dictionaries, case rows, and assessment fields. The seven files contain 130,000 unique case identifiers. Unpublished source material supplied for this assessment.
+
+[3] Northrop, L., Clements, P., et al. (2012). A Framework for Software Product Line Practice, Version 5.0. Carnegie Mellon University, Software Engineering Institute. Foundation for managed core assets, product development, and product-line management.
+https://www.sei.cmu.edu/library/a-framework-for-software-product-line-practice-version-50/
+
+[4] Kang, K., Cohen, S., Hess, J., Novak, W., and Peterson, A. (1990). Feature-Oriented Domain Analysis (FODA) Feasibility Study. CMU/SEI-90-TR-021. Carnegie Mellon University, Software Engineering Institute. Foundation for domain analysis and feature modeling.
+https://www.sei.cmu.edu/library/feature-oriented-domain-analysis-foda-feasibility-study/
+
+[5] Object Management Group (2019). Meta Object Facility (MOF) Core Specification, Version 2.5.1. Formal/2019-10-01. Particularly Clauses 6–8 on metamodeling and specification structure.
+https://www.omg.org/spec/MOF/2.5.1/PDF
+
+[6] Object Management Group (2026). Kernel Modeling Language (KerML), Version 1.0. Formal/2026-03-01. Particularly Clauses 7.3–7.4 and 8.3; Clauses 7.4.7–7.4.8 distinguish behaviors and functions.
+https://www.omg.org/spec/KerML/1.0/PDF
+
+[7] Object Management Group (2026). Systems Modeling Language (SysML), Version 2.0, Part 1: Language Specification. Formal/2026-03-02. Particularly Clause 7.6 on definitions and usages, Clause 7.6.7 on variations and variants, and the corresponding semantics in Clause 8.
+https://www.omg.org/spec/SysML/2.0/Language/PDF
+
+[8] Brun, Y., Di Marzo Serugendo, G., Gacek, C., Giese, H., Kienle, H., Litoiu, M., Müller, H., Pezzè, M., and Shaw, M. (2009). Engineering Self-Adaptive Systems through Feedback Loops. In Software Engineering for Self-Adaptive Systems, LNCS 5525, pp. 48–70. Particularly Sections 2.4 and 3 on explicit feedback and MAPE-K. Author-hosted paper.
+https://people.cs.umass.edu/~brun/pubs/pubs/Brun09SEfSAS.pdf
+
+[9] Benveniste, A., Caillaud, B., and Passerone, R. (2007). A Generic Model of Contracts for Embedded Systems. INRIA Research Report 6214; arXiv:0706.1456. Particularly the definitions of contract satisfaction and the treatment of composition and compatibility.
+https://arxiv.org/pdf/0706.1456
+
+[10] Millo, J.-V., Ramesh, S., Krishna, S. N., and Narwane, G. K. (2012). Compositional Verification of Evolving Software Product Lines. arXiv:1212.4258. Requirements-to-design conformance for finite state machines with variability and the SPLEnD prototype.
+https://arxiv.org/pdf/1212.4258
+
+[11] Incer, I., et al. (2023). Pacti: Scaling Assume-Guarantee Reasoning for System Analysis and Design. arXiv:2303.17751. Particularly Sections 2–5 on contract operations, their implementation, and case studies.
+https://arxiv.org/pdf/2303.17751
+
+[12] Object Management Group (2023). Structured Assurance Case Metamodel (SACM), Version 2.3. Formal/23-05-08, release dated October 2023. Particularly Clause 7 on the assurance approach and the argumentation and artifact metamodels in Clauses 11–12.
+https://www.omg.org/spec/SACM/2.3/PDF
+
+[13] Moreau, L., and Missier, P., editors (2013). PROV-DM: The PROV Data Model. W3C Recommendation, 30 April 2013. Particularly Sections 2 and 5 on entities, activities, agents, derivation, revision, and invalidation.
+https://www.w3.org/TR/prov-dm/
+
+[14] Object Management Group (2013). Business Process Model and Notation (BPMN), Version 2.0.2. Formal/2013-12-09. Particularly Clauses 10.6 and 13 on gateways and execution semantics.
+https://www.omg.org/spec/BPMN/2.0.2/PDF
+
+[15] Object Management Group (2016). Meta Object Facility (MOF) 2.0 Query/View/Transformation Specification, Version 1.3. Formal/2016-06-03. Model-transformation languages, abstract syntax, and semantics, including the operational formalism in Clause 8.
+https://www.omg.org/spec/QVT/1.3/PDF
+
+[16] Object Management Group (2022). Unified Architecture Framework (UAF), Version 1.2, Domain Metamodel. Formal/22-07-03. Particularly the architectural concerns and relationships for strategy, operations, personnel, and resources.
+https://www.omg.org/spec/UAF/1.2/DMM/PDF
+
+[17] PeopleCert. ITIL 4 Foundation. Official description of the service value system, management practices, four dimensions, guiding principles, and adaptation to organizational needs. Consulted 10 September 2026. Used to establish the management-framework context of Section 6.8.
+https://www.peoplecert.org/browse-certifications/it-governance-and-service-management/ITIL-1/itil-4-foundation-2565
+
+[18] PeopleCert. ITIL 4 Practitioner: Monitoring and Event Management. Official description of practice processes, success factors, measures, roles, information, technology, and integration into value streams. Consulted 10 September 2026. Supports the practice structure used in Section 6.8; the particular recursive compositions are this paper's application of the architecture.
+https://www.peoplecert.org/browse-certifications/it-governance-and-service-management/ITIL-1/itil4-practices-monitoring-and-event-management-3686
+
+[19] European Central Bank. Glossary, entry “straight-through processing (STP).” Consulted 10 September 2026. Defines automated processing across the trade or payment lifecycle. Section 7.1 applies that processing principle to the broader operational and management work items addressed by this paper.
+https://www.ecb.europa.eu/services/glossary/html/glosss.en.html
+
+[20] User-supplied paper. Enterprise Compiled AI.txt, dated 31 August 2026. Used solely to identify the 34-practice catalogue and relevant practice and process names, particularly Architecture Management, Measurement and Reporting, Service Request Management, and Business Relationship Management. Practice terminology in Section 6.8 follows the ITIL 4 context. Unpublished source material supplied for this illustration.
+
+[21] Schwitter, R., and Fuchs, N. E. (1996). Attempto: From Specifications in Controlled Natural Language towards Executable Specifications. EMISA workshop paper; arXiv:cmp-lg/9603004. Controlled English, interpretation review, logical representation, and executable specifications. The demonstrated execution uses a defined language and simulation context.
+https://arxiv.org/pdf/cmp-lg/9603004
+
+[22] Desai, A., Gulwani, S., Hingorani, V., Jain, N., Karkare, A., Marron, M., Sailesh R, and Roy, S. (2015). Program Synthesis using Natural Language. arXiv:1509.00413. Synthesis of expressions in defined domain-specific languages from natural-language descriptions. Candidate ranking and user selection retain the distinction between proposed and intended behavior.
+https://arxiv.org/pdf/1509.00413
+
+[23] Liang, P. (2016). Learning Executable Semantic Parsers for Natural Language Understanding. arXiv:1603.06677. Particularly Sections 1–2 on compositional meaning, context, logical forms, and execution.
+https://arxiv.org/pdf/1603.06677
+
+[24] Feng, Y., Martins, R., Van Geffen, J., Dillig, I., and Chaudhuri, S. (2016). Component-based Synthesis of Table Consolidation and Transformation Tasks from Examples. arXiv:1611.07502. Type-directed component synthesis, logical specifications, and partial evaluation for data preparation. The evaluated domain is table transformation.
+https://arxiv.org/pdf/1611.07502
+
+[25] Ellis, K., et al. (2020). DreamCoder: Growing generalizable, interpretable knowledge with wake-sleep Bayesian program learning. arXiv:2006.08381v1. Neural guidance, symbolic program construction, and reusable library abstractions. Cited for those mechanisms within the studied domains.
+https://arxiv.org/pdf/2006.08381
+
+[26] Naik, A., Mathur, Y., Prakam, Rose, C., and Mortensen, D. (2026). ReaComp: Compiling LLM Reasoning into Symbolic Solvers for Efficient Program Synthesis. arXiv:2605.05485v1, submitted 6 May 2026. Preprint. Particularly the standalone solver construction and Appendix B limitations. Its separate hybrid execution mode is not the prescribed runtime mode of this architecture.
+https://arxiv.org/pdf/2605.05485
+
+[27] Vogel, T., Seibel, A., and Giese, H. (2011). The Role of Models and Megamodels at Runtime. In Models in Software Engineering, MODELS 2010 Workshops and Symposia, LNCS 6627, pp. 224–238. DOI: 10.1007/978-3-642-21210-9_22. Author manuscript posted as arXiv:1805.07396 in 2018. Models, typed relationships, and model management at development and runtime.
+https://arxiv.org/pdf/1805.07396
+
+[28] Vogel, T., and Giese, H. (2012). A Language for Feedback Loops in Self-Adaptive Systems: Executable Runtime Megamodels. Proceedings of SEAMS 2012, pp. 129–138. DOI: 10.1109/SEAMS.2012.6224399. Author manuscript posted as arXiv:1805.08678 in 2018. Particularly Sections III–IV on loop composition, coordination, and management hierarchies.
+https://arxiv.org/pdf/1805.08678
+
+[29] Guu, K., Pasupat, P., Liu, E. Z., and Liang, P. (2017). From Language to Programs: Bridging Reinforcement Learning and Maximum Marginal Likelihood. arXiv:1704.07926. Particularly Sections 1–2 on spurious programs that produce the expected result without capturing the intended meaning.
+https://arxiv.org/pdf/1704.07926
+
+[30] Leroy, X. (2009). Formal Verification of a Realistic Compiler. Communications of the ACM, 52(7), pp. 107–115. Author manuscript. Particularly Section 2 on semantic preservation, verified compilation, and translation validation. Used as a construction-assurance principle; this architecture does not claim CompCert's guarantees for its own generators.
+https://xavierleroy.org/publi/compcert-CACM.pdf
+
+[31] Futamura, Y. (1999). Partial Evaluation of Computation Process--An Approach to a Compiler-Compiler. Higher-Order and Symbolic Computation, 12, pp. 381–391. Revised publication of the 1971 paper. DOI: 10.1023/A:1010095604496. The publisher's abstract establishes the relationship between executable language semantics and automatic compiler construction through partial evaluation.
+https://link.springer.com/article/10.1023/A:1010095604496
+
+[32] Jones, N. D., Gomard, C. K., and Sestoft, P. (1993). Partial Evaluation and Automatic Program Generation. Prentice Hall International. Author-distributed copy preserved by the Internet Archive. Particularly Chapter 4, including Section 4.7 on the third projection, Section 4.8.2 on base functions, and Section 4.10 on implementation measurements. The authors provide theory, algorithms, and implementation results within their stated languages and examples.
+https://web.archive.org/web/20090509092732if_/http://www.itu.dk:80/people/sestoft/pebook/jonesgomardsestoft-letter.pdf
+
+[33] Williams, B. M., and Perugini, S. (2018). Revisiting the Futamura Projections: A Diagrammatic Approach. arXiv:1611.09906v3. Manuscript dated 22 March 2018. Defines the program relationships in the three projections and distinguishes interpretation, compilation, and compiler generation through an original diagrammatic treatment.
+https://arxiv.org/pdf/1611.09906
+
+[34] University of Copenhagen, Department of Computer Science, TOPPS group. Similix project documentation. Archived 9 October 2007; consulted 10 September 2026. Primary project description of self-applicable partial evaluation, supported Scheme features, limited effects, compiler generation, and implementation limitations. Historical implementation evidence; no claim of present deployment qualification.
+https://web.archive.org/web/20071009200930/http://www.diku.dk/forskning/topps/activities/similix.html
+
+[35] Oracle, GraalVM. Truffle Language Implementation Framework. Official documentation, consulted 10 September 2026. Describes interpreter-based language implementation and automatic derivation of optimized code. Used as a contemporary implementation precedent for interpreter-based compilation, with no third-projection claim inferred from that documentation.
+https://www.graalvm.org/latest/graalvm-as-a-platform/language-implementation-framework/
