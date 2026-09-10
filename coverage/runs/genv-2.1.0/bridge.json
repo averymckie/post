@@ -1,5 +1,5 @@
 {
- "version": "genv-2.1.0/bridge-1",
+ "version": "genv-2.1.0/bridge-2",
  "catalogue_sha256": "2ef09333cdb41f82302ce0a12565afd2d653190b444705fb19684e60e25251de",
  "atoms": [
   {
@@ -619,9 +619,14 @@
    "ingredient": "PRD-DRILL-EXERCISE",
    "target": "F21:ScenarioResult",
    "strength": "thin",
-   "reason": "a rehearsal with real people is not a simulation run (F21); nearest counterpart only",
+   "reason": "a rehearsal with people is not a simulation run",
    "status": "accepted",
    "source": "operator",
+   "revised_from": {
+    "strength": "thin",
+    "reason": "a rehearsal with real people is not a simulation run (F21); nearest counterpart only"
+   },
+   "review_verdict": "boundary",
    "forced_by_cases": 397,
    "forced_by_examples": [
     "UC-00006",
@@ -755,9 +760,14 @@
    "ingredient": "PRD-EXHIBITION",
    "target": "F29:Artifact",
    "strength": "thin",
-   "reason": "a physical encounter in a place is not a rendered artifact; nearest is media construction (F29)",
+   "reason": "the media and layout are constructible (F29, F28); the encounter and its intended effect are not a product contract",
    "status": "accepted",
    "source": "operator",
+   "revised_from": {
+    "strength": "thin",
+    "reason": "a physical encounter in a place is not a rendered artifact; nearest is media construction (F29)"
+   },
+   "review_verdict": "no construction",
    "forced_by_cases": 70,
    "forced_by_examples": [
     "UC-00163",
@@ -5838,9 +5848,14 @@
    "ingredient": "INP-LOCAL-KNOWLEDGE",
    "target": "SourceBundle",
    "strength": "thin",
-   "reason": "undocumented knowledge is not a source bundle; the model admits only recorded inputs (A11 accepted interpretation)",
+   "reason": "the framework admits knowledge only once elicited and recorded (C11 attributable input, A11 accepted upstream interpretation; HG02 rejects missing source coverage); the case says it is undocumented",
    "status": "accepted",
    "source": "operator",
+   "revised_from": {
+    "strength": "thin",
+    "reason": "undocumented knowledge is not a source bundle; the model admits only recorded inputs (A11 accepted interpretation)"
+   },
+   "review_verdict": "contrary assumption",
    "forced_by_cases": 939,
    "forced_by_examples": [
     "UC-00002",
@@ -7990,9 +8005,14 @@
    "ingredient": "ACT-CARE-VISIT",
    "target": "O17",
    "strength": "thin",
-   "reason": "only its record persists",
+   "reason": "the visit record and the case-state advance are constructible (F09, F07); the care itself is a human act the framework does not claim",
    "status": "accepted",
    "source": "operator",
+   "revised_from": {
+    "strength": "thin",
+    "reason": "only its record persists"
+   },
+   "review_verdict": "boundary",
    "forced_by_cases": 217,
    "forced_by_examples": [
     "UC-00002",
@@ -8058,9 +8078,14 @@
    "ingredient": "ACT-COLLECT-SAMPLE",
    "target": "O01",
    "strength": "thin",
-   "reason": "taking physical material with a bound label is acquisition, but O01 acquires bytes, not matter",
+   "reason": "the sample record enters with OBSERVATION basis and a custody identity; the physical taking is outside O01, which acquires bytes",
    "status": "accepted",
    "source": "operator",
+   "revised_from": {
+    "strength": "thin",
+    "reason": "taking physical material with a bound label is acquisition, but O01 acquires bytes, not matter"
+   },
+   "review_verdict": "boundary",
    "forced_by_cases": 80,
    "forced_by_examples": [
     "UC-00047",
@@ -8108,10 +8133,15 @@
    "position": "req",
    "ingredient": "ACT-CONSULT-PUBLIC",
    "target": "O17",
-   "strength": "thin",
-   "reason": "asking people and recording input is a human input boundary (C11); the consultation itself is no operation",
+   "strength": "close",
+   "reason": "R25 preserves attribution, conflicts and quorum of collective input; C11 records attributable human input; the asking is the boundary",
    "status": "accepted",
    "source": "operator",
+   "revised_from": {
+    "strength": "thin",
+    "reason": "asking people and recording input is a human input boundary (C11); the consultation itself is no operation"
+   },
+   "review_verdict": "missed construction",
    "forced_by_cases": 409,
    "forced_by_examples": [
     "UC-00020",
@@ -8347,9 +8377,14 @@
    "ingredient": "ACT-FABRICATE",
    "target": "O14",
    "strength": "thin",
-   "reason": "cutting or forming material is physical making; O14 prepares manufacture, it does not perform it",
+   "reason": "manufacturing correspondence is constructed (P324 toolpath); the cutting is an actuator under R28, not an operation",
    "status": "accepted",
    "source": "operator",
+   "revised_from": {
+    "strength": "thin",
+    "reason": "cutting or forming material is physical making; O14 prepares manufacture, it does not perform it"
+   },
+   "review_verdict": "boundary",
    "forced_by_cases": 33,
    "forced_by_examples": [
     "UC-00107",
@@ -8363,10 +8398,15 @@
    "position": "req",
    "ingredient": "ACT-FACILITATE-SESSION",
    "target": "O08",
-   "strength": "thin",
-   "reason": "a meeting whose output is a decision advances state, but facilitation is a human act",
+   "strength": "close",
+   "reason": "F10 collaborative review and decision records: the session advances a decision state under R25; facilitation is the boundary",
    "status": "accepted",
    "source": "operator",
+   "revised_from": {
+    "strength": "thin",
+    "reason": "a meeting whose output is a decision advances state, but facilitation is a human act"
+   },
+   "review_verdict": "missed construction",
    "forced_by_cases": 323,
    "forced_by_examples": [
     "UC-00001",
@@ -8516,10 +8556,15 @@
    "position": "req",
    "ingredient": "ACT-INTERVIEW",
    "target": "O01",
-   "strength": "thin",
-   "reason": "asking people comparably is acquisition of recorded input; the interview is a human act",
+   "strength": "close",
+   "reason": "a structured instrument (F30 forms, F22 measurement) acquiring recorded runtime input (A11) comparably; the conversation is the boundary",
    "status": "accepted",
    "source": "operator",
+   "revised_from": {
+    "strength": "thin",
+    "reason": "asking people comparably is acquisition of recorded input; the interview is a human act"
+   },
+   "review_verdict": "missed construction",
    "forced_by_cases": 308,
    "forced_by_examples": [
     "UC-00013",
@@ -8635,10 +8680,15 @@
    "position": "req",
    "ingredient": "ACT-NEGOTIATE",
    "target": "O07",
-   "strength": "thin",
-   "reason": "terms as rules",
+   "strength": "close",
+   "reason": "negotiated terms are checked as versioned agreement terms (F08, P259) and allocation mechanisms carry stability and incentive claims (R26); the bargaining is the boundary",
    "status": "accepted",
    "source": "operator",
+   "revised_from": {
+    "strength": "thin",
+    "reason": "terms as rules"
+   },
+   "review_verdict": "missed construction",
    "forced_by_cases": 51,
    "forced_by_examples": [
     "UC-00205",
@@ -8687,9 +8737,14 @@
    "ingredient": "ACT-PERFORM",
    "target": "O15",
    "strength": "thin",
-   "reason": "presenting to an audience is rendering only by analogy; a live performance is no operation",
+   "reason": "F29 executes prescribed media processing and takes open-ended creative choices as accepted content; a live performance is neither",
    "status": "accepted",
    "source": "operator",
+   "revised_from": {
+    "strength": "thin",
+    "reason": "presenting to an audience is rendering only by analogy; a live performance is no operation"
+   },
+   "review_verdict": "no construction",
    "forced_by_cases": 330,
    "forced_by_examples": [
     "UC-00020",
@@ -8907,10 +8962,15 @@
    "position": "req",
    "ingredient": "ACT-REHEARSE-DRILL",
    "target": "O16",
-   "strength": "thin",
-   "reason": "nor qualification of an artifact",
+   "strength": "close",
+   "reason": "the drill qualifies readiness with recorded human evidence (F23 assessment, C11); the rehearsing itself is the boundary",
    "status": "accepted",
    "source": "operator",
+   "revised_from": {
+    "strength": "thin",
+    "reason": "nor qualification of an artifact"
+   },
+   "review_verdict": "missed construction",
    "forced_by_cases": 540,
    "forced_by_examples": [
     "UC-00013",
@@ -11185,10 +11245,15 @@
    "position": "acc",
    "ingredient": "ACC-DRILL-PASSED",
    "target": "A11|adjudication",
-   "strength": "thin",
-   "reason": "the real parties completing a rehearsal in time is not an artifact check",
+   "strength": "close",
+   "reason": "F23 acceptance: each claimed capability has applicable assessment evidence, recorded and judged",
    "status": "accepted",
    "source": "operator",
+   "revised_from": {
+    "strength": "thin",
+    "reason": "the real parties completing a rehearsal in time is not an artifact check"
+   },
+   "review_verdict": "missed construction",
    "forced_by_cases": 209,
    "forced_by_examples": [
     "UC-00004",
@@ -11321,10 +11386,15 @@
    "position": "acc",
    "ingredient": "ACC-HANDOVER-COMPLETE",
    "target": "A15|behavioral refinement",
-   "strength": "thin",
-   "reason": "nearest claim type",
+   "strength": "close",
+   "reason": "HG04: execute the actual consumer without substitutes; the receiving party continuing without the sender is that gate with a human consumer",
    "status": "accepted",
    "source": "operator",
+   "revised_from": {
+    "strength": "thin",
+    "reason": "nearest claim type"
+   },
+   "review_verdict": "missed construction",
    "forced_by_cases": 438,
    "forced_by_examples": [
     "UC-00022",
@@ -12473,9 +12543,14 @@
    "ingredient": "CND-HAZARDOUS-SITE",
    "target": "V|V10",
    "strength": "thin",
-   "reason": "interlocks and envelope apply to actuation only",
+   "reason": "the equipment envelope is constructible; a place that injures people is not",
    "status": "accepted",
    "source": "operator",
+   "revised_from": {
+    "strength": "thin",
+    "reason": "interlocks and envelope apply to actuation only"
+   },
+   "review_verdict": "boundary",
    "forced_by_cases": 181,
    "forced_by_examples": [
     "UC-00047",
@@ -12490,9 +12565,14 @@
    "ingredient": "CND-STERILE-AREA",
    "target": "B|authority",
    "strength": "thin",
-   "reason": "entry conditions resemble access authority; the physical control regime itself is absent",
+   "reason": "entry authority is F06; the contamination-control regime itself is not modelled",
    "status": "accepted",
    "source": "operator",
+   "revised_from": {
+    "strength": "thin",
+    "reason": "entry conditions resemble access authority; the physical control regime itself is absent"
+   },
+   "review_verdict": "boundary",
    "forced_by_cases": 408,
    "forced_by_examples": [
     "UC-00012",
@@ -12507,9 +12587,14 @@
    "ingredient": "CND-CONTESTED-SITE",
    "target": "B|authority",
    "strength": "thin",
-   "reason": "authority to be present is not the boundary authority field",
+   "reason": "access authority unresolved blocks the edge (HG02 missing authority); the contest itself is adjudicated outside",
    "status": "accepted",
    "source": "operator",
+   "revised_from": {
+    "strength": "thin",
+    "reason": "authority to be present is not the boundary authority field"
+   },
+   "review_verdict": "contrary assumption",
    "forced_by_cases": 540,
    "forced_by_examples": [
     "UC-00014",
@@ -12558,9 +12643,14 @@
    "ingredient": "CND-HIGH-TURNOVER",
    "target": "A11|accepted upstream interpretation",
    "strength": "thin",
-   "reason": "knowledge leaving with people has no axis; the model assumes knowledge is in accepted models",
+   "reason": "the framework answers turnover with its own premise: knowledge held in accepted models, not people; the case describes the state before that premise holds",
    "status": "accepted",
    "source": "operator",
+   "revised_from": {
+    "strength": "thin",
+    "reason": "knowledge leaving with people has no axis; the model assumes knowledge is in accepted models"
+   },
+   "review_verdict": "contrary assumption",
    "forced_by_cases": 297,
    "forced_by_examples": [
     "UC-00035",
@@ -12659,10 +12749,15 @@
    "position": "sit",
    "ingredient": "CND-NIGHT-SHIFT",
    "target": "A11|recorded runtime input",
-   "strength": "thin",
-   "reason": "reduced supervision has no axis",
+   "strength": "close",
+   "reason": "A11 separates plain recorded runtime input from adjudication and sign-off; reduced supervision is input without sign-off",
    "status": "accepted",
    "source": "operator",
+   "revised_from": {
+    "strength": "thin",
+    "reason": "reduced supervision has no axis"
+   },
+   "review_verdict": "missed construction",
    "forced_by_cases": 243,
    "forced_by_examples": [
     "UC-00005",
@@ -12676,10 +12771,15 @@
    "position": "sit",
    "ingredient": "CND-SUPERVISION-ABSENT",
    "target": "A11|recorded runtime input",
-   "strength": "thin",
-   "reason": "unsupervised human work has no axis",
+   "strength": "close",
+   "reason": "as above: unsupervised work is recorded runtime input with no adjudication or sign-off step",
    "status": "accepted",
    "source": "operator",
+   "revised_from": {
+    "strength": "thin",
+    "reason": "unsupervised human work has no axis"
+   },
+   "review_verdict": "missed construction",
    "forced_by_cases": 136,
    "forced_by_examples": [
     "UC-00001",
@@ -13017,9 +13117,14 @@
    "ingredient": "CND-CUSTOMARY-AUTHORITY",
    "target": "B|authority",
    "strength": "thin",
-   "reason": "authority the formal record cannot express; the authority field needs a principal and a delegation record",
+   "reason": "the authority field needs a principal and a delegation; organization configuration fixes accepted authority models, so customary authority is admissible once recorded as one; the case says the record cannot express it",
    "status": "accepted",
    "source": "operator",
+   "revised_from": {
+    "strength": "thin",
+    "reason": "authority the formal record cannot express; the authority field needs a principal and a delegation record"
+   },
+   "review_verdict": "contrary assumption",
    "forced_by_cases": 583,
    "forced_by_examples": [
     "UC-00013",
@@ -13186,10 +13291,15 @@
    "position": "sit",
    "ingredient": "CND-VOLUNTARY-STANDARD",
    "target": "B|meaning",
-   "strength": "thin",
-   "reason": "a standard with no enforcement is the modality gradient; the meaning field records modality but nothing models compliance while convenient",
+   "strength": "close",
+   "reason": "modality is a meaning-field element and require, permit and forbid are distinct (P191); a voluntary standard is permit-modality obligations with no compelling authority",
    "status": "accepted",
    "source": "operator",
+   "revised_from": {
+    "strength": "thin",
+    "reason": "a standard with no enforcement is the modality gradient; the meaning field records modality but nothing models compliance while convenient"
+   },
+   "review_verdict": "missed construction",
    "forced_by_cases": 111,
    "forced_by_examples": [
     "UC-00021",
@@ -14615,9 +14725,14 @@
    "ingredient": "DYN-STAFF-CHANGE",
    "target": "A11|accepted upstream interpretation",
    "strength": "thin",
-   "reason": "knowledge held by a person who leaves has no axis",
+   "reason": "as above",
    "status": "accepted",
    "source": "operator",
+   "revised_from": {
+    "strength": "thin",
+    "reason": "knowledge held by a person who leaves has no axis"
+   },
+   "review_verdict": "contrary assumption",
    "forced_by_cases": 140,
    "forced_by_examples": [
     "UC-00014",
@@ -15142,9 +15257,14 @@
    "ingredient": "S-LOW-CAPACITY",
    "target": "A17|local",
    "strength": "thin",
-   "reason": "an actor lacking tooling or expertise has no axis",
+   "reason": "tooling and runtime resources are the operating envelope; missing expertise is not modelled",
    "status": "accepted",
    "source": "operator",
+   "revised_from": {
+    "strength": "thin",
+    "reason": "an actor lacking tooling or expertise has no axis"
+   },
+   "review_verdict": "boundary",
    "forced_by_cases": 294,
    "forced_by_examples": [
     "UC-00001",
@@ -15431,9 +15551,14 @@
    "ingredient": "S-SOLO",
    "target": "A17|local",
    "strength": "thin",
-   "reason": "a person acting without an organisation has no axis",
+   "reason": "a single person deploying locally is expressible; the absence of an organisation is not a value",
    "status": "accepted",
    "source": "operator",
+   "revised_from": {
+    "strength": "thin",
+    "reason": "a person acting without an organisation has no axis"
+   },
+   "review_verdict": "boundary",
    "forced_by_cases": 246,
    "forced_by_examples": [
     "UC-00005",
@@ -15771,9 +15896,14 @@
    "ingredient": "NED-COMMEMORATE",
    "target": "A02|construct",
    "strength": "thin",
-   "reason": "marking a loss so that it holds is an expressive purpose; A02 has no expression value",
+   "reason": "the artifact is constructed from accepted creative content (F29); commemoration is not a transformation purpose",
    "status": "accepted",
    "source": "operator",
+   "revised_from": {
+    "strength": "thin",
+    "reason": "marking a loss so that it holds is an expressive purpose; A02 has no expression value"
+   },
+   "review_verdict": "no construction",
    "forced_by_cases": 41,
    "forced_by_examples": [
     "UC-00224",
@@ -15941,9 +16071,14 @@
    "ingredient": "NED-EXPRESS-EXPERIENCE",
    "target": "A02|construct",
    "strength": "thin",
-   "reason": "giving an experience a form is an expressive purpose; A02 has no expression value",
+   "reason": "as above",
    "status": "accepted",
    "source": "operator",
+   "revised_from": {
+    "strength": "thin",
+    "reason": "giving an experience a form is an expressive purpose; A02 has no expression value"
+   },
+   "review_verdict": "no construction",
    "forced_by_cases": 39,
    "forced_by_examples": [
     "UC-00321",
@@ -16638,9 +16773,14 @@
    "ingredient": "NED-RUN-HOUSEHOLD",
    "target": "A02|coordinate",
    "strength": "thin",
-   "reason": "a domestic task performed safely alone is not a construction purpose; the model builds guides, not task performance",
+   "reason": "guides and procedures are constructed; performing the task safely is the boundary",
    "status": "accepted",
    "source": "operator",
+   "revised_from": {
+    "strength": "thin",
+    "reason": "a domestic task performed safely alone is not a construction purpose; the model builds guides, not task performance"
+   },
+   "review_verdict": "boundary",
    "forced_by_cases": 18,
    "forced_by_examples": [
     "UC-00626",
@@ -16938,28 +17078,334 @@
     "UC-00166",
     "UC-00179"
    ]
+  },
+  {
+   "position": "out",
+   "ingredient": "PRD-DRILL-EXERCISE",
+   "target": "F23:AssessmentResult",
+   "strength": "close",
+   "reason": "F23 constructs assessment paths and records which competencies have supporting evidence; a rehearsal with the real parties is an assessment with recorded evidence, and the corrected plan is F32",
+   "status": "accepted",
+   "source": "operator-revision",
+   "review_verdict": "missed construction",
+   "forced_by_cases": 397,
+   "forced_by_examples": [
+    "UC-00006",
+    "UC-00013",
+    "UC-00024",
+    "UC-00027",
+    "UC-00043"
+   ]
+  },
+  {
+   "position": "out",
+   "ingredient": "PRD-GAME-ACTIVITY",
+   "target": "F30:ExecutableBundle",
+   "strength": "close",
+   "reason": "a structured game mediated by rules and an interface is F30 (interactions preserve domain state) over a rule model; an unmediated participatory activity remains outside",
+   "status": "accepted",
+   "source": "operator-revision",
+   "review_verdict": "missed construction",
+   "forced_by_cases": 11,
+   "forced_by_examples": [
+    "UC-00354",
+    "UC-01076",
+    "UC-01466",
+    "UC-01524",
+    "UC-02578"
+   ]
+  },
+  {
+   "position": "acc",
+   "ingredient": "ACC-SPARE-AVAILABLE",
+   "target": "R|R28",
+   "strength": "close",
+   "reason": "a commitment tested by ordering one is provider qualification: a real external system implements the receipt contract over its envelope",
+   "status": "accepted",
+   "source": "operator-revision",
+   "review_verdict": "missed construction",
+   "forced_by_cases": 93,
+   "forced_by_examples": [
+    "UC-00008",
+    "UC-00031",
+    "UC-00075",
+    "UC-00108",
+    "UC-00122"
+   ]
+  },
+  {
+   "position": "sit",
+   "ingredient": "CND-COLD-CLIMATE",
+   "target": "V|V10",
+   "strength": "close",
+   "reason": "for equipment, climate is part of the qualified operating envelope (V10 bounded operating envelope, R28 provider and sensor qualification); effects on people are a boundary",
+   "status": "accepted",
+   "source": "operator-revision",
+   "review_verdict": "missed construction",
+   "forced_by_cases": 205,
+   "forced_by_examples": [
+    "UC-00044",
+    "UC-00060",
+    "UC-00090",
+    "UC-00107",
+    "UC-00133"
+   ]
+  },
+  {
+   "position": "sit",
+   "ingredient": "CND-HEAT-HUMIDITY",
+   "target": "V|V10",
+   "strength": "close",
+   "reason": "as above: equipment envelope under V10 and R28; people are a boundary",
+   "status": "accepted",
+   "source": "operator-revision",
+   "review_verdict": "missed construction",
+   "forced_by_cases": 255,
+   "forced_by_examples": [
+    "UC-00010",
+    "UC-00045",
+    "UC-00077",
+    "UC-00104",
+    "UC-00111"
+   ]
+  },
+  {
+   "position": "sit",
+   "ingredient": "CND-DUST-VIBRATION",
+   "target": "V|V10",
+   "strength": "close",
+   "reason": "as above: equipment envelope under V10 and R28",
+   "status": "accepted",
+   "source": "operator-revision",
+   "review_verdict": "missed construction",
+   "forced_by_cases": 87,
+   "forced_by_examples": [
+    "UC-00033",
+    "UC-00068",
+    "UC-00107",
+    "UC-00142",
+    "UC-00175"
+   ]
+  },
+  {
+   "position": "sit",
+   "ingredient": "CND-PUBLIC-SPACE",
+   "target": "V|V13",
+   "strength": "thin",
+   "reason": "the information side is a release surface under V13; the physical presence of people who did not consent is not modelled",
+   "status": "accepted",
+   "source": "operator-revision",
+   "review_verdict": "boundary",
+   "forced_by_cases": 508,
+   "forced_by_examples": [
+    "UC-00006",
+    "UC-00008",
+    "UC-00020",
+    "UC-00028",
+    "UC-00031"
+   ]
+  },
+  {
+   "position": "sit",
+   "ingredient": "S-CRISIS",
+   "target": "C|C04",
+   "strength": "close",
+   "reason": "a guarded alternative branch under temporary emergency authority (C04 guarded choice, authority with expiry); the framework has explicit alternatives, not a suspended process",
+   "status": "accepted",
+   "source": "operator-revision",
+   "review_verdict": "missed construction",
+   "forced_by_cases": 257,
+   "forced_by_examples": [
+    "UC-00022",
+    "UC-00049",
+    "UC-00069",
+    "UC-00094",
+    "UC-00122"
+   ]
+  },
+  {
+   "position": "sit",
+   "ingredient": "DYN-DEGRADED-MODE",
+   "target": "V|V10",
+   "strength": "close",
+   "reason": "F35 lists fallback and interlocks as a variation; V10 bounded envelope; C07 timeout path; RT-DEGRADE already maps to the declared safe state",
+   "status": "accepted",
+   "source": "operator-revision",
+   "review_verdict": "missed construction",
+   "forced_by_cases": 87,
+   "forced_by_examples": [
+    "UC-00029",
+    "UC-00148",
+    "UC-00154",
+    "UC-00194",
+    "UC-00200"
+   ]
+  },
+  {
+   "position": "sit",
+   "ingredient": "DYN-DEGRADED-MODE",
+   "target": "C|C07",
+   "strength": "close",
+   "reason": "loss of a dependency takes the declared timeout path",
+   "status": "accepted",
+   "source": "operator-revision",
+   "review_verdict": "missed construction",
+   "forced_by_cases": 87,
+   "forced_by_examples": [
+    "UC-00029",
+    "UC-00148",
+    "UC-00154",
+    "UC-00194",
+    "UC-00200"
+   ]
+  },
+  {
+   "position": "sit",
+   "ingredient": "DYN-QUEUE-PRIORITY",
+   "target": "R|R26",
+   "strength": "close",
+   "reason": "a contested order of service is an allocation mechanism with declared fairness, stability or incentive properties (R26)",
+   "status": "accepted",
+   "source": "operator-revision",
+   "review_verdict": "missed construction",
+   "forced_by_cases": 234,
+   "forced_by_examples": [
+    "UC-00005",
+    "UC-00042",
+    "UC-00058",
+    "UC-00072",
+    "UC-00093"
+   ]
+  },
+  {
+   "position": "proof",
+   "ingredient": "PRD-DRILL-EXERCISE",
+   "target": "P333",
+   "strength": "close",
+   "reason": "competency graph and evidence to an admissible learning path",
+   "status": "accepted",
+   "source": "operator-revision",
+   "review_verdict": "missed construction",
+   "forced_by_cases": 397,
+   "forced_by_examples": [
+    "UC-00006",
+    "UC-00013",
+    "UC-00024",
+    "UC-00027",
+    "UC-00043"
+   ]
+  },
+  {
+   "position": "proof",
+   "ingredient": "PRD-DRILL-EXERCISE",
+   "target": "P334",
+   "strength": "close",
+   "reason": "executed scoring to a governed assessment result",
+   "status": "accepted",
+   "source": "operator-revision",
+   "review_verdict": "missed construction",
+   "forced_by_cases": 397,
+   "forced_by_examples": [
+    "UC-00006",
+    "UC-00013",
+    "UC-00024",
+    "UC-00027",
+    "UC-00043"
+   ]
+  },
+  {
+   "position": "proof",
+   "ingredient": "PRD-DRILL-EXERCISE",
+   "target": "P183",
+   "strength": "close",
+   "reason": "training records to attendance and completion checks",
+   "status": "accepted",
+   "source": "operator-revision",
+   "review_verdict": "missed construction",
+   "forced_by_cases": 397,
+   "forced_by_examples": [
+    "UC-00006",
+    "UC-00013",
+    "UC-00024",
+    "UC-00027",
+    "UC-00043"
+   ]
+  },
+  {
+   "position": "proof",
+   "ingredient": "PRD-EARLY-WARNING",
+   "target": "P241",
+   "strength": "close",
+   "reason": "approved workflow with durable case execution state",
+   "status": "accepted",
+   "source": "operator-revision",
+   "review_verdict": "missed construction",
+   "forced_by_cases": 430,
+   "forced_by_examples": [
+    "UC-00010",
+    "UC-00022",
+    "UC-00027",
+    "UC-00036",
+    "UC-00040"
+   ]
+  },
+  {
+   "position": "proof",
+   "ingredient": "PRD-EARLY-WARNING",
+   "target": "P29",
+   "strength": "close",
+   "reason": "process to executable process with execution trace",
+   "status": "accepted",
+   "source": "operator-revision",
+   "review_verdict": "missed construction",
+   "forced_by_cases": 430,
+   "forced_by_examples": [
+    "UC-00010",
+    "UC-00022",
+    "UC-00027",
+    "UC-00036",
+    "UC-00040"
+   ]
+  },
+  {
+   "position": "out",
+   "ingredient": "PRD-EARLY-WARNING",
+   "target": "F09:ActionIntent",
+   "strength": "close",
+   "reason": "an arrangement with escalation rules and a named person at the end is a workflow with escalation (F09) when no signal stream exists; F34 remains the realization when one does",
+   "status": "accepted",
+   "source": "operator-revision",
+   "review_verdict": "missed construction",
+   "forced_by_cases": 430,
+   "forced_by_examples": [
+    "UC-00010",
+    "UC-00022",
+    "UC-00027",
+    "UC-00036",
+    "UC-00040"
+   ]
   }
  ],
  "summary": {
-  "atoms": 1003,
+  "atoms": 1020,
   "by_position": {
-   "out": 115,
-   "proof": 150,
+   "out": 118,
+   "proof": 155,
    "in": 179,
    "rel": 13,
    "req": 107,
    "con": 75,
-   "acc": 66,
-   "sit": 298
+   "acc": 67,
+   "sit": 306
   },
   "strengths": {
    "out": {
-    "close": 85,
+    "close": 88,
     "thin": 12,
     "exact": 18
    },
    "proof": {
-    "close": 135,
+    "close": 140,
     "thin": 6,
     "exact": 9
    },
@@ -16973,9 +17419,9 @@
     "close": 8
    },
    "req": {
-    "close": 75,
+    "close": 80,
     "exact": 14,
-    "thin": 18
+    "thin": 13
    },
    "con": {
     "exact": 23,
@@ -16983,14 +17429,14 @@
     "thin": 2
    },
    "acc": {
-    "close": 41,
+    "close": 44,
     "exact": 19,
-    "thin": 6
+    "thin": 4
    },
    "sit": {
     "exact": 81,
-    "close": 187,
-    "thin": 30
+    "close": 197,
+    "thin": 28
    }
   },
   "uncovered_used_ingredients": {
@@ -17004,9 +17450,7 @@
   },
   "only_thin_ingredients": {
    "out": [
-    "PRD-DRILL-EXERCISE",
-    "PRD-EXHIBITION",
-    "PRD-GAME-ACTIVITY"
+    "PRD-EXHIBITION"
    ],
    "in": [
     "INP-LOCAL-KNOWLEDGE"
@@ -17014,39 +17458,20 @@
    "req": [
     "ACT-CARE-VISIT",
     "ACT-COLLECT-SAMPLE",
-    "ACT-CONSULT-PUBLIC",
     "ACT-FABRICATE",
-    "ACT-FACILITATE-SESSION",
-    "ACT-INTERVIEW",
-    "ACT-NEGOTIATE",
-    "ACT-PERFORM",
-    "ACT-REHEARSE-DRILL"
-   ],
-   "acc": [
-    "ACC-DRILL-PASSED",
-    "ACC-HANDOVER-COMPLETE",
-    "ACC-SPARE-AVAILABLE"
+    "ACT-PERFORM"
    ],
    "sit": [
-    "CND-COLD-CLIMATE",
     "CND-CONTESTED-SITE",
     "CND-CUSTOMARY-AUTHORITY",
-    "CND-DUST-VIBRATION",
     "CND-HAZARDOUS-SITE",
-    "CND-HEAT-HUMIDITY",
     "CND-HIGH-TURNOVER",
-    "CND-NIGHT-SHIFT",
     "CND-PUBLIC-SPACE",
     "CND-STERILE-AREA",
-    "CND-SUPERVISION-ABSENT",
-    "CND-VOLUNTARY-STANDARD",
-    "DYN-DEGRADED-MODE",
-    "DYN-QUEUE-PRIORITY",
     "DYN-STAFF-CHANGE",
     "NED-COMMEMORATE",
     "NED-EXPRESS-EXPERIENCE",
     "NED-RUN-HOUSEHOLD",
-    "S-CRISIS",
     "S-LOW-CAPACITY",
     "S-SOLO"
    ]

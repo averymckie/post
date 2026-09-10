@@ -1,0 +1,352 @@
+{
+ "unexplained": [
+  {
+   "kind": "grounding",
+   "item": "F34",
+   "count": 223,
+   "examples": [
+    "UC-00010",
+    "UC-00022",
+    "UC-00027",
+    "UC-00036",
+    "UC-00040"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F37",
+   "count": 139,
+   "examples": [
+    "UC-00052",
+    "UC-00067",
+    "UC-00087",
+    "UC-00095",
+    "UC-00146"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F27",
+   "count": 21,
+   "examples": [
+    "UC-00314",
+    "UC-00365",
+    "UC-00381",
+    "UC-01048",
+    "UC-01144"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F09",
+   "count": 16,
+   "examples": [
+    "UC-00060",
+    "UC-00164",
+    "UC-01234",
+    "UC-01547",
+    "UC-01770"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F32",
+   "count": 13,
+   "examples": [
+    "UC-00060",
+    "UC-01770",
+    "UC-01791",
+    "UC-02536",
+    "UC-03171"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F35",
+   "count": 11,
+   "examples": [
+    "UC-00036",
+    "UC-00887",
+    "UC-01166",
+    "UC-01662",
+    "UC-01994"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F33",
+   "count": 6,
+   "examples": [
+    "UC-00445",
+    "UC-00576",
+    "UC-02093",
+    "UC-03476",
+    "UC-04153"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F17",
+   "count": 6,
+   "examples": [
+    "UC-00576",
+    "UC-00831",
+    "UC-03087",
+    "UC-03476",
+    "UC-04107"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F14",
+   "count": 5,
+   "examples": [
+    "UC-01234",
+    "UC-01547",
+    "UC-03171",
+    "UC-03570",
+    "UC-03669"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F22",
+   "count": 3,
+   "examples": [
+    "UC-03330",
+    "UC-03491",
+    "UC-03753"
+   ]
+  },
+  {
+   "kind": "acceptance_qualifier",
+   "item": "chain",
+   "count": 2,
+   "examples": [
+    "UC-00164",
+    "UC-00588"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F03",
+   "count": 2,
+   "examples": [
+    "UC-01789",
+    "UC-03543"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F02",
+   "count": 2,
+   "examples": [
+    "UC-03543",
+    "UC-03962"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F19",
+   "count": 2,
+   "examples": [
+    "UC-03962",
+    "UC-04419"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F12",
+   "count": 1,
+   "examples": [
+    "UC-00445"
+   ]
+  },
+  {
+   "kind": "input",
+   "item": "INP-CONSUMABLE-STOCK",
+   "count": 1,
+   "examples": [
+    "UC-00588"
+   ]
+  },
+  {
+   "kind": "requirement",
+   "item": "ACT-CALIBRATE",
+   "count": 1,
+   "examples": [
+    "UC-00588"
+   ]
+  },
+  {
+   "kind": "requirement",
+   "item": "ACT-PROTOTYPE-TEST",
+   "count": 1,
+   "examples": [
+    "UC-00588"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F01",
+   "count": 1,
+   "examples": [
+    "UC-00831"
+   ]
+  },
+  {
+   "kind": "requirement",
+   "item": "ACT-DECOMMISSION",
+   "count": 1,
+   "examples": [
+    "UC-00831"
+   ]
+  },
+  {
+   "kind": "input",
+   "item": "INP-LOCAL-KNOWLEDGE",
+   "count": 1,
+   "examples": [
+    "UC-01166"
+   ]
+  },
+  {
+   "kind": "input",
+   "item": "INP-SATELLITE-IMAGE",
+   "count": 1,
+   "examples": [
+    "UC-01554"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F29",
+   "count": 1,
+   "examples": [
+    "UC-01789"
+   ]
+  },
+  {
+   "kind": "input",
+   "item": "INP-WORK-QUEUE",
+   "count": 1,
+   "examples": [
+    "UC-02053"
+   ]
+  },
+  {
+   "kind": "requirement",
+   "item": "ACT-BACKUP-RESTORE",
+   "count": 1,
+   "examples": [
+    "UC-02053"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F31",
+   "count": 1,
+   "examples": [
+    "UC-02093"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F16",
+   "count": 1,
+   "examples": [
+    "UC-03330"
+   ]
+  },
+  {
+   "kind": "requirement",
+   "item": "ACT-INTERVIEW",
+   "count": 1,
+   "examples": [
+    "UC-03337"
+   ]
+  },
+  {
+   "kind": "requirement",
+   "item": "ACT-MEASURE-INSTRUMENT",
+   "count": 1,
+   "examples": [
+    "UC-03491"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F21",
+   "count": 1,
+   "examples": [
+    "UC-03976"
+   ]
+  },
+  {
+   "kind": "grounding",
+   "item": "F30",
+   "count": 1,
+   "examples": [
+    "UC-04154"
+   ]
+  },
+  {
+   "kind": "input",
+   "item": "INP-FOOD-ONTOLOGY",
+   "count": 1,
+   "examples": [
+    "UC-04401"
+   ]
+  },
+  {
+   "kind": "input",
+   "item": "INP-OCCUPATION-TAXONOMY",
+   "count": 1,
+   "examples": [
+    "UC-04401"
+   ]
+  }
+ ],
+ "proof_gaps": {
+  "F08": {
+   "count": 20,
+   "examples": [
+    "UC-00947",
+    "UC-01307",
+    "UC-01335",
+    "UC-01397",
+    "UC-01504"
+   ]
+  },
+  "F29": {
+   "count": 170,
+   "examples": [
+    "UC-00009",
+    "UC-00163",
+    "UC-00176",
+    "UC-00197",
+    "UC-00201"
+   ]
+  },
+  "F30": {
+   "count": 42,
+   "examples": [
+    "UC-00231",
+    "UC-00346",
+    "UC-00488",
+    "UC-00963",
+    "UC-01130"
+   ]
+  },
+  "F31": {
+   "count": 39,
+   "examples": [
+    "UC-00101",
+    "UC-00240",
+    "UC-00330",
+    "UC-00419",
+    "UC-00478"
+   ]
+  }
+ }
+}

@@ -27,9 +27,12 @@ in_chain(F) :- realize(_,_,F).
 
 % suppliers join only to feed an input role of a realizing family (one level, at most four)
 realizing(F) :- realize(_,_,F).
+#const max_suppliers = 4.
+#const recursive_suppliers = 0.
 { supply(G,F,R) } :- family(G), fam_out(G,R), fam_in(F,R), realizing(F), G != F, not realizing(G).
+{ supply(G,F,R) } :- recursive_suppliers = 1, family(G), fam_out(G,R), fam_in(F,R), in_chain(F), G != F, not realizing(G).
 in_chain(G) :- supply(G,_,_).
-:- #count{ G : supply(G,_,_) } > 4.
+:- #count{ G : supply(G,_,_) } > max_suppliers.
 
 % input roles resolve from case inputs or from chain producers
 resolved(F,R) :- in_chain(F), fam_in(F,R), input(I), bridge_in(I,R).
