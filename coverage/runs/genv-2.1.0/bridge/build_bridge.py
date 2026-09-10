@@ -19,10 +19,12 @@ in_roles = {r for r, rr in roles.items() if rr['consumed_by']}
 C, O, V, B, P, A = set(cat['compositions']), set(cat['operations']), set(cat['variation_rules']), set(cat['boundary_fields']), set(cat['proofs']), cat['axes']
 axis_vals = {a['id'] + '|' + v.lower() for a in A.values() for v in a['values']}
 con_targets = B | V | {'R14'} | C | O
-acc_targets = {'A15|' + v.lower() for v in A['A15']['values']} | {'A11|' + v.lower() for v in A['A11']['values']}
-sit_targets = axis_vals | {'V|' + v for v in V} | {'B|' + b for b in B} | {'C|' + c for c in C}
+RC = set(cat['required_claims'])
+acc_targets = {'A15|' + v.lower() for v in A['A15']['values']} | {'A11|' + v.lower() for v in A['A11']['values']} | {'R|' + r for r in RC}
+sit_targets = axis_vals | {'V|' + v for v in V} | {'B|' + b for b in B} | {'C|' + c for c in C} | {'R|' + r for r in RC}
 out_fam_roles = {f + ':' + r for r, rr in roles.items() for f in rr['produced_by']}
 universe = {'out': out_fam_roles, 'in': in_roles, 'rel': C, 'req': O, 'con': con_targets, 'acc': acc_targets, 'sit': sit_targets, 'proof': P}
+rev = load('src_revision')
 sources = [('out', prod_fam.OUT), ('proof', prod.PROOF), ('in', inp.IN), ('rel', inp.REL), ('req', ops.REQ), ('con', ops.CON), ('acc', ops.ACC), ('sit', sit.SIT)]
 atoms, errors = [], []
 seen = set()
@@ -39,6 +41,20 @@ for pos, lst in sources:
             errors.append('duplicate atom %s' % (key,)); continue
         seen.add(key)
         atoms.append(dict(position=pos, ingredient=ing, target=target, strength=strength, reason=reason, status='accepted', source='operator'))
+by_key = {(a['position'], a['ingredient'], a['target']): a for a in atoms}
+for pos, ing, target, strength, reason, verdict in rev.REVISION:
+    if ing not in ings:
+        errors.append('revision: unknown ingredient %s' % ing)
+    if target not in universe[pos]:
+        errors.append('revision: unknown target %s for %s' % (target, ing))
+    key = (pos, ing, target)
+    if key in by_key:
+        a = by_key[key]
+        a['revised_from'] = dict(strength=a['strength'], reason=a['reason'])
+        a['strength'], a['reason'], a['review_verdict'] = strength, reason, verdict
+    else:
+        a = dict(position=pos, ingredient=ing, target=target, strength=strength, reason=reason, status='accepted', source='operator-revision', review_verdict=verdict)
+        atoms.append(a); by_key[key] = a
 # proof atoms must be reachable: some out-target family of the product is a proof_fam of the record
 p2f = cat['indexes']['proof_to_families']
 fam_of_role = defaultdict(set)
@@ -93,7 +109,7 @@ for a in atoms:
     lst = forced.get((a['position'], a['ingredient']), [])
     a['forced_by_cases'] = len(set(lst))
     a['forced_by_examples'] = sorted(set(lst))[:5]
-bridge = dict(version='genv-2.1.0/bridge-1', catalogue_sha256=cat['source']['sha256'], atoms=atoms,
+bridge = dict(version='genv-2.1.0/bridge-2', catalogue_sha256=cat['source']['sha256'], atoms=atoms,
               summary=dict(atoms=len(atoms), by_position={pos: len([a for a in atoms if a['position'] == pos]) for pos, _ in sources},
                            strengths=strength_counts, uncovered_used_ingredients=missing, only_thin_ingredients=dict(only_thin),
                            unreachable_proof_atoms=[dict(ingredient=u[0], proof=u[1], proof_families=u[2], product_families=u[3]) for u in unreachable]))

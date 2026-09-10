@@ -112,6 +112,8 @@ class Model:
             self.index['acc'].append(('A15|' + val.lower(), tokens(val), tokens('assurance claim verified checked'), False))
         for val in A['A11']['values']:
             self.index['acc'].append(('A11|' + val.lower(), tokens(val), tokens('human judgment person review'), False))
+        for r in cat['required_claims'].values():
+            self.index['acc'].append(('R|' + r['id'], tokens(r['title']), tokens(r['required_claim']), False))
         for a in A.values():
             for val in a['values']:
                 self.index['sit'].append((a['id'] + '|' + val.lower(), tokens(val), tokens(a['axis']), False))
@@ -121,6 +123,8 @@ class Model:
             self.index['sit'].append(('B|' + b, tokens(b), tokens(txt), False))
         for c in C.values():
             self.index['sit'].append(('C|' + c['id'], tokens(c['name']) | tokens(c['form']), tokens(c['obligation']), False))
+        for r in cat['required_claims'].values():
+            self.index['sit'].append(('R|' + r['id'], tokens(r['title']), tokens(r['required_claim']), False))
         for p, rec in P.items():
             name = rec['title'] + ' ' + (rec.get('hardening', {}) or {}).get('title', '')
             desc = ' '.join(s['step'] for s in (rec.get('chain') or {}).get('steps', [])) + ' ' + (rec.get('input_contract') or '') + ' ' + (rec.get('output_contract') or '')
@@ -348,6 +352,7 @@ def main():
     ap.add_argument('--limit', type=int, default=None)
     ap.add_argument('--workers', type=int, default=1)
     ap.add_argument('--min-strength', choices=['exact', 'close', 'thin'], default='thin', help='ignore accepted bridge atoms weaker than this')
+    ap.add_argument('--consts', default='', help='clingo constants, e.g. max_suppliers=38,recursive_suppliers=1')
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
     cat = json.load(open(a.catalogue))
@@ -360,6 +365,9 @@ def main():
     bridge = json.load(open(a.bridge)) if a.bridge and os.path.exists(a.bridge) else {'atoms': []}
     bridge_fx = bridge_facts(bridge, a.min_strength)
     program = open(a.program).read()
+    for kv in [x for x in a.consts.split(',') if x]:
+        k, v = kv.split('=')
+        program = '#const %s = %s.\n' % (k, v) + program.replace('#const %s = ' % k, '#const %s_default = ' % k)
     propose = a.mode == 'propose'
     t0 = time.time()
     recs, proposals = [], {}
