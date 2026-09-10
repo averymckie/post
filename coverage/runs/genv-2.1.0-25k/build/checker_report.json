@@ -1,0 +1,149 @@
+{
+ "cases_file": "cases.jsonl",
+ "cases_sha256": "cf53c2adb5d4cbb2f56e2ac9e43d19f4491fcf86d9f350a3c54f49f9ac9b5ddf",
+ "check_results": {
+  "ACCEPTANCE_COVER": {
+   "pass": 25000
+  },
+  "ACTIVITY_PRODUCT_FIT": {
+   "pass": 25000
+  },
+  "ACYCLIC": {
+   "pass": 25000
+  },
+  "BENEFICIARY_BAND": {
+   "pass": 25000
+  },
+  "CAPACITY": {
+   "pass": 25000
+  },
+  "DEPTH": {
+   "pass": 25000
+  },
+  "DOMAIN_GATE": {
+   "pass": 25000
+  },
+  "FIXTURE_LABELLED": {
+   "pass": 25000
+  },
+  "GENERATOR_EMITS": {
+   "pass": 25000
+  },
+  "GLOBAL_CONSTRAINTS": {
+   "pass": 25000
+  },
+  "IDENTITY_CONSISTENT": {
+   "pass": 25000
+  },
+  "PLAUSIBILITY": {
+   "unavailable": 25000
+  },
+  "PREREQ_CLOSURE": {
+   "pass": 25000
+  },
+  "QUALITATIVE_ACCEPTANCE": {
+   "unavailable": 13611
+  },
+  "QUALITATIVE_CONSTRAINT": {
+   "unavailable": 15363
+  },
+  "REGIME_ADMISSIBLE": {
+   "pass": 25000
+  },
+  "REL_AUTHORITY_PRESENT": {
+   "pass": 25000
+  },
+  "REL_CYCLE_BOUND": {
+   "pass": 25000
+  },
+  "REL_EDGE_BEHAVIOUR": {
+   "pass": 25000
+  },
+  "REL_EMITTED_CONCRETE": {
+   "pass": 25000
+  },
+  "REL_GENERATOR_FORM": {
+   "pass": 25000
+  },
+  "REL_INHERIT_ACCEPTANCE": {
+   "pass": 25000
+  },
+  "REL_INTEGRITY": {
+   "pass": 25000
+  },
+  "REL_JOINT_OUTCOME": {
+   "pass": 25000
+  },
+  "REL_LIMIT_UNIT": {
+   "pass": 25000
+  },
+  "REL_PREDICATE": {
+   "pass": 25000
+  },
+  "REL_SCOPE_EXPIRY": {
+   "pass": 25000
+  },
+  "REL_SHARED_OBJECT": {
+   "pass": 25000
+  },
+  "REL_STALENESS": {
+   "pass": 25000
+  },
+  "REL_STOP_CRITERION": {
+   "pass": 25000
+  },
+  "REL_UNIT_DIMENSION": {
+   "pass": 25000
+  },
+  "REQUIREMENT_IDS": {
+   "pass": 25000
+  },
+  "SCHEDULE": {
+   "pass": 25000
+  },
+  "SIGNATURE": {
+   "pass": 25000
+  },
+  "SITUATION_ADMISSIBLE": {
+   "pass": 25000
+  },
+  "STRUCTURE": {
+   "pass": 25000
+  },
+  "UNITS_DECLARED": {
+   "pass": 25000
+  },
+  "VOCAB_RESOLVE": {
+   "pass": 25000
+  },
+  "WITNESS": {
+   "pass": 25000
+  }
+ },
+ "checker_version": "checker.py/2.0.0",
+ "counts": {
+  "cases_read": 25000,
+  "duplicate_case_ids": 0,
+  "duplicate_full_keys": 0,
+  "generator_claim_contradicted_by_checker": 0,
+  "structurally_and_mechanically_clean": 25000,
+  "with_at_least_one_violation": 0
+ },
+ "dictionary_sha256": "fbbe9db1431f1b9d71cfc8430ceae5df10a9805a26d23da424d87b283d950aa7",
+ "dictionary_version": "2.1.0",
+ "evidence_policy": "every verdict is re-derived from dictionary.json and the record; the record's own validation block is read only to report disagreement, never as evidence",
+ "failures": [],
+ "mode": "cases",
+ "timings_seconds": {
+  "checking": 11.207,
+  "setup": 0.008,
+  "throughput_cases_per_second": 2230.7
+ },
+ "unavailable_by_code": {
+  "PLAUSIBILITY": 25000,
+  "QUALITATIVE_ACCEPTANCE": 21294,
+  "QUALITATIVE_CONSTRAINT": 17771
+ },
+ "unavailable_meaning": "an `unavailable` result is not a pass: it records that this program cannot decide the item (qualitative acceptance conditions, constraint templates marked not machine-checkable, and the plausibility of the case itself)",
+ "violations_by_code": {}
+}

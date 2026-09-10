@@ -1,0 +1,347 @@
+{
+ "artifact_sha256": {
+  "cases.jsonl": "cf53c2adb5d4cbb2f56e2ac9e43d19f4491fcf86d9f350a3c54f49f9ac9b5ddf",
+  "dictionary.json": "fbbe9db1431f1b9d71cfc8430ceae5df10a9805a26d23da424d87b283d950aa7",
+  "review_needed.jsonl": "2a7a68e7fb7c904ffc9b6986ddb12e233c9f1b6e9b1102618c4a59beb8add0e5"
+ },
+ "counts": {
+  "admitted": 25000,
+  "attempted": 30373,
+  "contradiction_rejected": 512,
+  "distinct_idea_keys": 24983,
+  "duplicate_rejected": 0,
+  "parameter_or_situation_variants": 0,
+  "review_needed": 3656,
+  "strata_exhausted": 0,
+  "substantive_use_cases": 24999,
+  "unresolved_bounded_search": 1205
+ },
+ "dictionary_version": "2.1.0",
+ "diversity": {
+  "cells_below_floor": 0,
+  "component_count_distribution": {
+   "2": 4280,
+   "3": 4251,
+   "4": 6549,
+   "5": 5750,
+   "6": 4170
+  },
+  "cross_regime_cases": 4446,
+  "depth_distribution": {
+   "1": 7688,
+   "2": 11559,
+   "3": 5753
+  },
+  "flag_distribution": {
+   "configurator": 4062,
+   "cross_regime_component": 4448,
+   "deep_nesting": 4062,
+   "divided_authority": 4774,
+   "interruption_recovery": 4062,
+   "irreversible_effect": 4061,
+   "long_horizon": 4061,
+   "multi_party_concurrency": 4061,
+   "privacy_tension": 4077,
+   "public_facing": 4056,
+   "revision_after_partial_completion": 4064,
+   "scarce_capacity": 4061,
+   "shared_resource_contention": 4064,
+   "uncertain_evidence": 5195
+  },
+  "floors_applied": {
+   "cross_regime_case_floor": 2500,
+   "per_cell_floor": 15,
+   "per_ford_field_floor": 1000,
+   "per_isic_section_floor": 500,
+   "per_regime_floor": 1500,
+   "per_relationship_kind_floor": 750
+  },
+  "min_cell": 126,
+  "per_primary_domain": {
+   "FORD-1": 1050,
+   "FORD-2": 1050,
+   "FORD-3": 1050,
+   "FORD-4": 1050,
+   "FORD-5": 1050,
+   "FORD-6": 1050,
+   "ISIC-A": 889,
+   "ISIC-B": 891,
+   "ISIC-C": 892,
+   "ISIC-D": 891,
+   "ISIC-E": 890,
+   "ISIC-F": 891,
+   "ISIC-G": 891,
+   "ISIC-H": 891,
+   "ISIC-I": 888,
+   "ISIC-J": 891,
+   "ISIC-K": 891,
+   "ISIC-L": 890,
+   "ISIC-M": 891,
+   "ISIC-N": 891,
+   "ISIC-O": 891,
+   "ISIC-P": 891,
+   "ISIC-Q": 891,
+   "ISIC-R": 891,
+   "ISIC-S": 888,
+   "ISIC-T": 891,
+   "ISIC-U": 889
+  },
+  "per_regime": {
+   "R-BIO": 3587,
+   "R-COMP": 3581,
+   "R-ECO": 3569,
+   "R-HOME": 3567,
+   "R-LAW": 3566,
+   "R-ORG": 3565,
+   "R-PHYS": 3565
+  },
+  "per_relationship_kind_cases": {
+   "RK-COND": 8034,
+   "RK-CONSTRAIN": 7964,
+   "RK-COORD": 16993,
+   "RK-DELEGATE": 8081,
+   "RK-EMBED": 16966,
+   "RK-EMIT": 1802,
+   "RK-FEEDBACK": 7957,
+   "RK-INPUT": 17274,
+   "RK-SHARE": 7969,
+   "RK-TIME": 7989
+  },
+  "purpose_classes": {
+   "access": 1677,
+   "accountability": 2654,
+   "care": 1024,
+   "coordination": 4244,
+   "decision": 531,
+   "discovery": 2615,
+   "everyday_life": 237,
+   "explanation": 2125,
+   "expression": 687,
+   "learning": 1551,
+   "maintenance": 1554,
+   "preservation": 1057,
+   "production": 1326,
+   "recovery": 533,
+   "safety": 3185
+  },
+  "relationship_instances": {
+   "RK-COND": 9859,
+   "RK-CONSTRAIN": 9859,
+   "RK-COORD": 28797,
+   "RK-DELEGATE": 9858,
+   "RK-EMBED": 28799,
+   "RK-EMIT": 2351,
+   "RK-FEEDBACK": 9861,
+   "RK-INPUT": 28798,
+   "RK-SHARE": 9860,
+   "RK-TIME": 9861
+  },
+  "root_product_forms": {
+   "coordinated_system": 3860,
+   "creative_work": 89,
+   "credential": 459,
+   "dataset": 1055,
+   "document": 4869,
+   "experience": 1391,
+   "explanation": 892,
+   "generator": 1185,
+   "instrument": 282,
+   "interactive_tool": 2870,
+   "physical_object": 315,
+   "procedure": 5344,
+   "service": 2169,
+   "training": 220
+  },
+  "shortfalls": []
+ },
+ "failure_examples": [
+  {
+   "detail": "no scale ingredient for regime R-ORG",
+   "kind": "unresolved",
+   "stratum": "R-ORG|ISIC-G"
+  },
+  {
+   "detail": "no scale ingredient for regime R-HOME",
+   "kind": "unresolved",
+   "stratum": "R-HOME|FORD-3"
+  },
+  {
+   "detail": "no scale ingredient for regime R-LAW",
+   "kind": "unresolved",
+   "stratum": "R-LAW|ISIC-S"
+  },
+  {
+   "detail": "no scale ingredient for regime R-ECO",
+   "kind": "unresolved",
+   "stratum": "R-ECO|ISIC-H"
+  },
+  {
+   "detail": "no scale ingredient for regime R-HOME",
+   "kind": "unresolved",
+   "stratum": "R-HOME|ISIC-A"
+  },
+  {
+   "detail": "no scale ingredient for regime R-LAW",
+   "kind": "unresolved",
+   "stratum": "R-LAW|ISIC-U"
+  },
+  {
+   "detail": "no scale ingredient for regime R-LAW",
+   "kind": "unresolved",
+   "stratum": "R-LAW|ISIC-U"
+  },
+  {
+   "detail": "no scale ingredient for regime R-LAW",
+   "kind": "unresolved",
+   "stratum": "R-LAW|ISIC-A"
+  },
+  {
+   "detail": "no scale ingredient for regime R-LAW",
+   "kind": "unresolved",
+   "stratum": "R-LAW|ISIC-A"
+  },
+  {
+   "detail": "no beneficiary ingredient for regime R-BIO",
+   "kind": "unresolved",
+   "stratum": "R-BIO|FORD-1"
+  },
+  {
+   "detail": "fewer than two products admit R-LAW/ISIC-O under the situation",
+   "kind": "contradiction",
+   "stratum": "R-LAW|ISIC-O"
+  },
+  {
+   "detail": "fewer than two products admit R-BIO/ISIC-F under the situation",
+   "kind": "contradiction",
+   "stratum": "R-BIO|ISIC-F"
+  },
+  {
+   "detail": "no beneficiary ingredient for regime R-ECO",
+   "kind": "unresolved",
+   "stratum": "R-ECO|ISIC-Q"
+  },
+  {
+   "detail": "no scale ingredient for regime R-LAW",
+   "kind": "unresolved",
+   "stratum": "R-LAW|FORD-2"
+  },
+  {
+   "detail": "no scale ingredient for regime R-LAW",
+   "kind": "unresolved",
+   "stratum": "R-LAW|FORD-2"
+  },
+  {
+   "detail": "no beneficiary ingredient for regime R-BIO",
+   "kind": "unresolved",
+   "stratum": "R-BIO|ISIC-J"
+  },
+  {
+   "detail": "no beneficiary ingredient for regime R-BIO",
+   "kind": "unresolved",
+   "stratum": "R-BIO|ISIC-J"
+  },
+  {
+   "detail": "fewer than two products admit R-HOME/ISIC-R under the situation",
+   "kind": "contradiction",
+   "stratum": "R-HOME|ISIC-R"
+  },
+  {
+   "detail": "no scale ingredient for regime R-LAW",
+   "kind": "unresolved",
+   "stratum": "R-LAW|ISIC-B"
+  },
+  {
+   "detail": "fewer than two products admit R-PHYS/FORD-5 under the situation",
+   "kind": "contradiction",
+   "stratum": "R-PHYS|FORD-5"
+  }
+ ],
+ "generation_version": "genv-2.1.0",
+ "notes": [
+  "Case records contain no wall-clock time, path or environment value; all dates are relative day numbers from day 0 of the case window.",
+  "Timings in this record are measured wall-clock and therefore differ between runs; cases.jsonl does not."
+ ],
+ "program_sha256": {
+  "checker.py": "0146e85c751888f5b5c382fdd6ebf1a6855f22be9a1d1a5bf6b918e3a9ff4f96",
+  "expand.py": "d07dc147d58b947b6a5aa27d3b2a28945243dfa9d016dd89300560fa7fe188c8",
+  "generate.py": "35ddb32f92c8fd1c7feba11a9b18c74559c1b92f1d30fe84357c55d46d88407b"
+ },
+ "program_version": "generate.py/2.0.0",
+ "randomness": {
+  "determinism": "same dictionary, seed and count reproduce cases.jsonl byte for byte",
+  "generator": "python random.Random (Mersenne Twister), one instance for the whole batch",
+  "seed_origin": "supplied on the command line (originally drawn from os.urandom(8))",
+  "source": "operating-system entropy via os.urandom(8), used once to seed a recorded pseudo-random generator"
+ },
+ "requested_count": 25000,
+ "sampling_policy": {
+  "dedup_rule": "a case is rejected when its full_key (idea, structure, situation, regime, domain, beneficiary, scale) has already been admitted",
+  "domain_gating": "The case's primary_domain must appear in the `domains` of the root need and of every product ingredient used as a component, because those two axes are what the domain classification actually classifies.",
+  "higher_order_combinations": [
+   [
+    "uncertain_evidence",
+    "shared_resource_contention",
+    "revision_after_partial_completion"
+   ],
+   [
+    "divided_authority",
+    "irreversible_effect",
+    "cross_regime_component"
+   ],
+   [
+    "interruption_recovery",
+    "scarce_capacity",
+    "multi_party_concurrency"
+   ],
+   [
+    "configurator",
+    "cross_regime_component",
+    "uncertain_evidence"
+   ],
+   [
+    "privacy_tension",
+    "divided_authority",
+    "public_facing"
+   ],
+   [
+    "long_horizon",
+    "revision_after_partial_completion",
+    "uncertain_evidence"
+   ],
+   [
+    "deep_nesting",
+    "shared_resource_contention",
+    "cross_regime_component"
+   ],
+   [
+    "irreversible_effect",
+    "interruption_recovery",
+    "uncertain_evidence"
+   ],
+   [
+    "configurator",
+    "deep_nesting",
+    "divided_authority"
+   ],
+   [
+    "multi_party_concurrency",
+    "privacy_tension",
+    "scarce_capacity"
+   ]
+  ],
+  "kind": "stratified, constraint-conditioned and adaptively weighted; not uniform",
+  "phase1": "every regime x primary_domain cell is filled to a base allocation: 80 cases per ISIC cell and 150 per FORD cell, scaled linearly from the per-1000 floors",
+  "phase1_planned": 18060,
+  "phase2": "remaining draws are directed at the lightest cells and at declared higher-order flag combinations",
+  "phase2_planned": 6940,
+  "relationship_kind_balancing": "when several relationship kinds are admissible the least used is preferred with probability 0.8",
+  "review_diversion": "three rules divert a proposal to review_needed.jsonl instead of admitting it: (1) it has no machine-checkable acceptance condition, so all its evidence would rest on human judgment; (2) a deliverable-producing part has a form prerequisite met only by a recorded assumption rather than a supplied input; (3) it is a first-of-kind combination with two or more cross-regime components. Diverted proposals are retained in full and are not counted as admitted cases"
+ },
+ "seed": 11691621138000208715,
+ "timings_seconds": {
+  "generation": 40.021,
+  "setup": 0.022,
+  "throughput_cases_per_second": 624.7,
+  "writing": 13.176
+ }
+}
