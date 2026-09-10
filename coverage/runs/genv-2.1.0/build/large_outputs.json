@@ -1,0 +1,20 @@
+{
+ "note": "not committed for size; byte-identical regeneration from build/generate.py, build/dictionary.json and the recorded seed was verified by gate G1",
+ "files": {
+  "cases.jsonl": {
+   "bytes": 97243729,
+   "sha256": "d8e53ec304fc40133e1738d66d436e7c9e96673764d276b0de1c38bb60538c95",
+   "lines": 5000
+  },
+  "expanded.md": {
+   "bytes": 101531342,
+   "sha256": "ee1cc50ccfe1ba87cb1ec024cdb20d6dfac58313a5748345c14d26f580bc629e",
+   "lines": 766821
+  },
+  "review_needed.jsonl": {
+   "bytes": 16628171,
+   "sha256": "655a0eaedd4e2d573ee2e9fddf773ca1a4e35a594a20cc4f775981fd9a5fb092",
+   "lines": 787
+  }
+ }
+}
