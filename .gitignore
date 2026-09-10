@@ -11,8 +11,3 @@ __pycache__/
 /build/
 dist/
 *.egg-info/
-proofs/cache/
-coverage/runs/*/cases.jsonl
-coverage/runs/*/cases_simple.txt
-coverage/runs/*/*.log
-coverage/runs/genv-2.1.0-25k/ref_*/derivations.jsonl
