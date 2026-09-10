@@ -1,0 +1,55 @@
+{
+  "format": "fwcheck.replay.v1",
+  "case_sha256": "e0ea49e98fe58672e7a1544300b6a16c17cb3d654d15e0f42b0dfe595e638cf9",
+  "code_sha256": "e2c04fbc2a27e59346359c227a88d543dcfe67e9c73e5f3bd91a5734139d2d9d",
+  "engine_versions": {
+    "clingo": "5.8.0",
+    "cvc5": "1.3.4",
+    "z3-solver": "4.15.3.0",
+    "jsonschema": "4.23.0",
+    "hypothesis": "6.131.9",
+    "pytest": "8.3.5"
+  },
+  "result": {
+    "format": "fwcheck.result.v1",
+    "case_id": "DEMO-WRONG-BASIS",
+    "case_sha256": "e0ea49e98fe58672e7a1544300b6a16c17cb3d654d15e0f42b0dfe595e638cf9",
+    "framework_sha256": "2ef09333cdb41f82302ce0a12565afd2d653190b444705fb19684e60e25251de",
+    "bounds": {
+      "max_components": 6,
+      "max_candidates": 100,
+      "timeout_ms": 3000,
+      "search_seconds": 30
+    },
+    "coverage_status": "UNESTABLISHED",
+    "evidence_state": "INTEGRATION_UNVERIFIED",
+    "semantic_review": "DRAFT",
+    "scope": "Finite static DAG under explicitly supplied contract axioms; no runtime or temporal assurance",
+    "construction_status": "NO_CONSTRUCTION_IN_DECLARED_CATALOGUE_AND_BOUNDS",
+    "search_exhausted": true,
+    "search_stop_reason": null,
+    "asp_program": "component(0).\ncomponent(1).\ncomponent(2).\noutput(0).\noutput(1).\nowner(1,0).\noutput(2).\nowner(2,1).\noutput(3).\nowner(3,2).\ninput(0,0).\ncompatible(0,0).\ninput(1,1).\ncompatible(1,1).\ninput(2,2).\nroot(0).\nroot_candidate(0,3).\n1 { deliver(R,O) : root_candidate(R,O) } 1 :- root(R).\nselected(C) :- deliver(R,O), owner(O,C).\n1 { bind(I,O) : compatible(I,O) } 1 :- selected(C), input(C,I).\nselected(P) :- bind(I,O), owner(O,P).\ndepends(C,P) :- bind(I,O), input(C,I), owner(O,P).\nreaches(C,P) :- depends(C,P).\nreaches(C,Q) :- reaches(C,P), depends(P,Q).\n:- reaches(C,C).\n:- #count { C : selected(C) } > 6.\n#show selected/1.\n#show bind/2.\n#show deliver/2.",
+    "binding_diagnostics": [
+      {
+        "input": "release:in",
+        "kind": "NO_EXACT_SUPPLIER_IN_DECLARED_CATALOGUE",
+        "near_outputs": [
+          {
+            "output": "schedule:out",
+            "mismatched_fields": [
+              "basis"
+            ]
+          }
+        ],
+        "adapter_state": "NO_QUALIFIED_NONIDENTITY_ADAPTER_ADMITTED"
+      }
+    ],
+    "candidate_count": 0,
+    "candidates": [],
+    "witness": null,
+    "proof_gaps": [],
+    "limitation": "No result here asserts absence from the full framework. Proof references alone never qualify a component."
+  },
+  "assurance": "Re-executable solver evidence, not an independently checked formal proof object",
+  "sha256": "9a9bdefa19591d5f218e798b0cb22c6a3c25730bfe0644fd5a669351ba8c850b"
+}

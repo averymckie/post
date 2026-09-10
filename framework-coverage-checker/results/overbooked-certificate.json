@@ -1,0 +1,929 @@
+{
+  "format": "fwcheck.replay.v1",
+  "case_sha256": "a5d05c492e1015c39e1929a050787753100f2b2a2b4da3977ce5f68d8072de99",
+  "code_sha256": "e2c04fbc2a27e59346359c227a88d543dcfe67e9c73e5f3bd91a5734139d2d9d",
+  "engine_versions": {
+    "clingo": "5.8.0",
+    "cvc5": "1.3.4",
+    "z3-solver": "4.15.3.0",
+    "jsonschema": "4.23.0",
+    "hypothesis": "6.131.9",
+    "pytest": "8.3.5"
+  },
+  "result": {
+    "format": "fwcheck.result.v1",
+    "case_id": "DEMO-PLAN-OVERBOOKED",
+    "case_sha256": "a5d05c492e1015c39e1929a050787753100f2b2a2b4da3977ce5f68d8072de99",
+    "framework_sha256": "2ef09333cdb41f82302ce0a12565afd2d653190b444705fb19684e60e25251de",
+    "bounds": {
+      "max_components": 6,
+      "max_candidates": 100,
+      "timeout_ms": 3000,
+      "search_seconds": 30
+    },
+    "coverage_status": "UNESTABLISHED",
+    "evidence_state": "INTEGRATION_UNVERIFIED",
+    "semantic_review": "DRAFT",
+    "scope": "Finite static DAG under explicitly supplied contract axioms; no runtime or temporal assurance",
+    "construction_status": "NO_CONSTRUCTION_IN_DECLARED_CATALOGUE_AND_BOUNDS",
+    "search_exhausted": true,
+    "search_stop_reason": null,
+    "asp_program": "component(0).\ncomponent(1).\ncomponent(2).\noutput(0).\noutput(1).\nowner(1,0).\noutput(2).\nowner(2,1).\noutput(3).\nowner(3,2).\ninput(0,0).\ncompatible(0,0).\ninput(1,1).\ncompatible(1,1).\ninput(2,2).\ncompatible(2,2).\nroot(0).\nroot_candidate(0,3).\n1 { deliver(R,O) : root_candidate(R,O) } 1 :- root(R).\nselected(C) :- deliver(R,O), owner(O,C).\n1 { bind(I,O) : compatible(I,O) } 1 :- selected(C), input(C,I).\nselected(P) :- bind(I,O), owner(O,P).\ndepends(C,P) :- bind(I,O), input(C,I), owner(O,P).\nreaches(C,P) :- depends(C,P).\nreaches(C,Q) :- reaches(C,P), depends(P,Q).\n:- reaches(C,C).\n:- #count { C : selected(C) } > 6.\n#show selected/1.\n#show bind/2.\n#show deliver/2.",
+    "binding_diagnostics": [],
+    "candidate_count": 1,
+    "candidates": [
+      {
+        "witness": {
+          "selected": [
+            "formalize",
+            "release",
+            "schedule"
+          ],
+          "bindings": {
+            "release:in": "schedule:out",
+            "schedule:in": "formalize:out",
+            "formalize:in": "source:accepted_request"
+          },
+          "deliveries": {
+            "R1": "release:out"
+          }
+        },
+        "validation": {
+          "status": "CONSTRUCTION_FAILED",
+          "checks": [
+            {
+              "obligation": "closed_acyclic_graph",
+              "result": {
+                "status": "sat",
+                "query_hash": "e4796fbd99ad1fb5dddd9e3c8c6f5122273d9945e59548802ce8d31d945d34a4",
+                "variables": {
+                  "rank_formalize": "Int",
+                  "rank_release": "Int",
+                  "rank_schedule": "Int"
+                },
+                "expression": {
+                  "and": [
+                    {
+                      ">=": [
+                        "rank_formalize",
+                        0
+                      ]
+                    },
+                    {
+                      "<": [
+                        "rank_formalize",
+                        3
+                      ]
+                    },
+                    {
+                      ">=": [
+                        "rank_release",
+                        0
+                      ]
+                    },
+                    {
+                      "<": [
+                        "rank_release",
+                        3
+                      ]
+                    },
+                    {
+                      ">=": [
+                        "rank_schedule",
+                        0
+                      ]
+                    },
+                    {
+                      "<": [
+                        "rank_schedule",
+                        3
+                      ]
+                    },
+                    {
+                      "<": [
+                        "rank_schedule",
+                        "rank_release"
+                      ]
+                    },
+                    {
+                      "<": [
+                        "rank_formalize",
+                        "rank_schedule"
+                      ]
+                    }
+                  ]
+                },
+                "z3": {
+                  "engine": "z3",
+                  "status": "sat",
+                  "smt2": "; benchmark generated from python API\n(set-info :status unknown)\n(declare-fun rank_schedule () Int)\n(declare-fun rank_formalize () Int)\n(declare-fun rank_release () Int)\n(assert\n (and (<= 0 rank_formalize) (> 3 rank_formalize) (<= 0 rank_release) (> 3 rank_release) (<= 0 rank_schedule) (> 3 rank_schedule) (< rank_schedule rank_release) (< rank_formalize rank_schedule)))\n(check-sat)\n",
+                  "model": {
+                    "rank_formalize": "0",
+                    "rank_release": "2",
+                    "rank_schedule": "1"
+                  }
+                },
+                "cvc5": {
+                  "engine": "cvc5",
+                  "status": "sat",
+                  "term": "(and (>= rank_formalize 0) (< rank_formalize 3) (>= rank_release 0) (< rank_release 3) (>= rank_schedule 0) (< rank_schedule 3) (< rank_schedule rank_release) (< rank_formalize rank_schedule))",
+                  "model": {
+                    "rank_formalize": "0",
+                    "rank_release": "2",
+                    "rank_schedule": "1"
+                  }
+                }
+              }
+            },
+            {
+              "obligation": "admitted_input_nonvacuity",
+              "result": {
+                "status": "sat",
+                "query_hash": "381bc5d3facb2399bb37aecaa91671db4fd2fa1942f30f437a8d4b8203b1e045",
+                "variables": {
+                  "capacity": "Int",
+                  "a": "Int",
+                  "b": "Int",
+                  "tasks": "Bool",
+                  "scheduled": "Bool",
+                  "released": "Bool"
+                },
+                "expression": {
+                  "and": [
+                    {
+                      "=": [
+                        "capacity",
+                        8
+                      ]
+                    },
+                    true
+                  ]
+                },
+                "z3": {
+                  "engine": "z3",
+                  "status": "sat",
+                  "smt2": "; benchmark generated from python API\n(set-info :status unknown)\n(declare-fun capacity () Int)\n(assert\n (and (= 8 capacity) true))\n(check-sat)\n",
+                  "model": {
+                    "capacity": "8",
+                    "a": "0",
+                    "b": "0",
+                    "tasks": "False",
+                    "scheduled": "False",
+                    "released": "False"
+                  }
+                },
+                "cvc5": {
+                  "engine": "cvc5",
+                  "status": "sat",
+                  "term": "(and (= capacity 8) true)",
+                  "model": {
+                    "capacity": "8",
+                    "a": "0",
+                    "b": "0",
+                    "tasks": "false",
+                    "scheduled": "false",
+                    "released": "false"
+                  }
+                }
+              }
+            },
+            {
+              "obligation": "formalize.input_contract",
+              "result": {
+                "status": "PROVED",
+                "domain": {
+                  "status": "sat",
+                  "query_hash": "0f97f6f07c85ceca1d15101c7a62de7fd97459c2228324314b9943f45ea0ecb0",
+                  "variables": {
+                    "capacity": "Int",
+                    "a": "Int",
+                    "b": "Int",
+                    "tasks": "Bool",
+                    "scheduled": "Bool",
+                    "released": "Bool"
+                  },
+                  "expression": {
+                    "and": [
+                      {
+                        "and": [
+                          {
+                            "=": [
+                              "capacity",
+                              8
+                            ]
+                          },
+                          true
+                        ]
+                      },
+                      true
+                    ]
+                  },
+                  "z3": {
+                    "engine": "z3",
+                    "status": "sat",
+                    "smt2": "; benchmark generated from python API\n(set-info :status unknown)\n(declare-fun capacity () Int)\n(assert\n (and (and (= 8 capacity) true) true))\n(check-sat)\n",
+                    "model": {
+                      "capacity": "8",
+                      "a": "0",
+                      "b": "0",
+                      "tasks": "False",
+                      "scheduled": "False",
+                      "released": "False"
+                    }
+                  },
+                  "cvc5": {
+                    "engine": "cvc5",
+                    "status": "sat",
+                    "term": "(and (and (= capacity 8) true) true)",
+                    "model": {
+                      "capacity": "8",
+                      "a": "0",
+                      "b": "0",
+                      "tasks": "false",
+                      "scheduled": "false",
+                      "released": "false"
+                    }
+                  }
+                },
+                "counterexample_query": {
+                  "status": "unsat",
+                  "query_hash": "b35011cc8e632733321311efc289e2560bdb9dd64d26d89c15d593e8a1023fa6",
+                  "variables": {
+                    "capacity": "Int",
+                    "a": "Int",
+                    "b": "Int",
+                    "tasks": "Bool",
+                    "scheduled": "Bool",
+                    "released": "Bool"
+                  },
+                  "expression": {
+                    "and": [
+                      {
+                        "and": [
+                          {
+                            "and": [
+                              {
+                                "=": [
+                                  "capacity",
+                                  8
+                                ]
+                              },
+                              true
+                            ]
+                          },
+                          true
+                        ]
+                      },
+                      {
+                        "not": [
+                          {
+                            "and": [
+                              true,
+                              true
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "z3": {
+                    "engine": "z3",
+                    "status": "unsat",
+                    "smt2": "; benchmark generated from python API\n(set-info :status unknown)\n(declare-fun capacity () Int)\n(assert\n (and (and (and (= 8 capacity) true) true) (not (and true true))))\n(check-sat)\n"
+                  },
+                  "cvc5": {
+                    "engine": "cvc5",
+                    "status": "unsat",
+                    "term": "(and (and (and (= capacity 8) true) true) (not (and true true)))"
+                  }
+                }
+              }
+            },
+            {
+              "obligation": "schedule.input_contract",
+              "result": {
+                "status": "PROVED",
+                "domain": {
+                  "status": "sat",
+                  "query_hash": "91832a50bf6e3545fe5260d6ab37b9e9143e8f1936b66833145db2abbda82349",
+                  "variables": {
+                    "capacity": "Int",
+                    "a": "Int",
+                    "b": "Int",
+                    "tasks": "Bool",
+                    "scheduled": "Bool",
+                    "released": "Bool"
+                  },
+                  "expression": {
+                    "and": [
+                      {
+                        "and": [
+                          {
+                            "=": [
+                              "capacity",
+                              8
+                            ]
+                          },
+                          true
+                        ]
+                      },
+                      "tasks"
+                    ]
+                  },
+                  "z3": {
+                    "engine": "z3",
+                    "status": "sat",
+                    "smt2": "; benchmark generated from python API\n(set-info :status unknown)\n(declare-fun tasks () Bool)\n(declare-fun capacity () Int)\n(assert\n (and (and (= 8 capacity) true) tasks))\n(check-sat)\n",
+                    "model": {
+                      "capacity": "8",
+                      "a": "0",
+                      "b": "0",
+                      "tasks": "True",
+                      "scheduled": "False",
+                      "released": "False"
+                    }
+                  },
+                  "cvc5": {
+                    "engine": "cvc5",
+                    "status": "sat",
+                    "term": "(and (and (= capacity 8) true) tasks)",
+                    "model": {
+                      "capacity": "8",
+                      "a": "0",
+                      "b": "0",
+                      "tasks": "true",
+                      "scheduled": "false",
+                      "released": "false"
+                    }
+                  }
+                },
+                "counterexample_query": {
+                  "status": "unsat",
+                  "query_hash": "e5f9e68dbbfcc1da05a6a93821729b1ce664fe53c94e485d850b9bab53395fd6",
+                  "variables": {
+                    "capacity": "Int",
+                    "a": "Int",
+                    "b": "Int",
+                    "tasks": "Bool",
+                    "scheduled": "Bool",
+                    "released": "Bool"
+                  },
+                  "expression": {
+                    "and": [
+                      {
+                        "and": [
+                          {
+                            "and": [
+                              {
+                                "=": [
+                                  "capacity",
+                                  8
+                                ]
+                              },
+                              true
+                            ]
+                          },
+                          "tasks"
+                        ]
+                      },
+                      {
+                        "not": [
+                          {
+                            "and": [
+                              true,
+                              "tasks"
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "z3": {
+                    "engine": "z3",
+                    "status": "unsat",
+                    "smt2": "; benchmark generated from python API\n(set-info :status unknown)\n(declare-fun tasks () Bool)\n(declare-fun capacity () Int)\n(assert\n (and (and (and (= 8 capacity) true) tasks) (not (and true tasks))))\n(check-sat)\n"
+                  },
+                  "cvc5": {
+                    "engine": "cvc5",
+                    "status": "unsat",
+                    "term": "(and (and (and (= capacity 8) true) tasks) (not (and true tasks)))"
+                  }
+                }
+              }
+            },
+            {
+              "obligation": "release.input_contract",
+              "result": {
+                "status": "PROVED",
+                "domain": {
+                  "status": "sat",
+                  "query_hash": "b3811b500fd585cd79d768d171dc0228513465dd5dc5ee6b40514867e99469d0",
+                  "variables": {
+                    "capacity": "Int",
+                    "a": "Int",
+                    "b": "Int",
+                    "tasks": "Bool",
+                    "scheduled": "Bool",
+                    "released": "Bool"
+                  },
+                  "expression": {
+                    "and": [
+                      {
+                        "and": [
+                          {
+                            "=": [
+                              "capacity",
+                              8
+                            ]
+                          },
+                          true
+                        ]
+                      },
+                      {
+                        "and": [
+                          "scheduled",
+                          {
+                            "=": [
+                              "a",
+                              5
+                            ]
+                          },
+                          {
+                            "=": [
+                              "b",
+                              5
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "z3": {
+                    "engine": "z3",
+                    "status": "sat",
+                    "smt2": "; benchmark generated from python API\n(set-info :status unknown)\n(declare-fun b () Int)\n(declare-fun a () Int)\n(declare-fun scheduled () Bool)\n(declare-fun capacity () Int)\n(assert\n (and (and (= 8 capacity) true) (and scheduled (= 5 a) (= 5 b))))\n(check-sat)\n",
+                    "model": {
+                      "capacity": "8",
+                      "a": "5",
+                      "b": "5",
+                      "tasks": "False",
+                      "scheduled": "True",
+                      "released": "False"
+                    }
+                  },
+                  "cvc5": {
+                    "engine": "cvc5",
+                    "status": "sat",
+                    "term": "(and (and (= capacity 8) true) (and scheduled (= a 5) (= b 5)))",
+                    "model": {
+                      "capacity": "8",
+                      "a": "5",
+                      "b": "5",
+                      "tasks": "false",
+                      "scheduled": "true",
+                      "released": "false"
+                    }
+                  }
+                },
+                "counterexample_query": {
+                  "status": "unsat",
+                  "query_hash": "be691e6080518c72218604e2bb6c2ef720fa6a1776a9f0962c6576e67520e553",
+                  "variables": {
+                    "capacity": "Int",
+                    "a": "Int",
+                    "b": "Int",
+                    "tasks": "Bool",
+                    "scheduled": "Bool",
+                    "released": "Bool"
+                  },
+                  "expression": {
+                    "and": [
+                      {
+                        "and": [
+                          {
+                            "and": [
+                              {
+                                "=": [
+                                  "capacity",
+                                  8
+                                ]
+                              },
+                              true
+                            ]
+                          },
+                          {
+                            "and": [
+                              "scheduled",
+                              {
+                                "=": [
+                                  "a",
+                                  5
+                                ]
+                              },
+                              {
+                                "=": [
+                                  "b",
+                                  5
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "not": [
+                          {
+                            "and": [
+                              true,
+                              "scheduled"
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "z3": {
+                    "engine": "z3",
+                    "status": "unsat",
+                    "smt2": "; benchmark generated from python API\n(set-info :status unknown)\n(declare-fun scheduled () Bool)\n(declare-fun b () Int)\n(declare-fun a () Int)\n(declare-fun capacity () Int)\n(assert\n (let (($x49 (and (and (= 8 capacity) true) (and scheduled (= 5 a) (= 5 b)))))\n(and $x49 (not (and true scheduled)))))\n(check-sat)\n"
+                  },
+                  "cvc5": {
+                    "engine": "cvc5",
+                    "status": "unsat",
+                    "term": "(and (and (and (= capacity 8) true) (and scheduled (= a 5) (= b 5))) (not (and true scheduled)))"
+                  }
+                }
+              }
+            },
+            {
+              "obligation": "joint_contract_nonvacuity",
+              "result": {
+                "status": "sat",
+                "query_hash": "4b96020c348e7d63133fb5a1a7d653f444afed78f618b97203af22b90e21fe5a",
+                "variables": {
+                  "capacity": "Int",
+                  "a": "Int",
+                  "b": "Int",
+                  "tasks": "Bool",
+                  "scheduled": "Bool",
+                  "released": "Bool"
+                },
+                "expression": {
+                  "and": [
+                    {
+                      "and": [
+                        {
+                          "=": [
+                            "capacity",
+                            8
+                          ]
+                        },
+                        true
+                      ]
+                    },
+                    "tasks",
+                    "released",
+                    {
+                      "and": [
+                        "scheduled",
+                        {
+                          "=": [
+                            "a",
+                            5
+                          ]
+                        },
+                        {
+                          "=": [
+                            "b",
+                            5
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "z3": {
+                  "engine": "z3",
+                  "status": "sat",
+                  "smt2": "; benchmark generated from python API\n(set-info :status unknown)\n(declare-fun b () Int)\n(declare-fun a () Int)\n(declare-fun scheduled () Bool)\n(declare-fun released () Bool)\n(declare-fun tasks () Bool)\n(declare-fun capacity () Int)\n(assert\n (and (and (= 8 capacity) true) tasks released (and scheduled (= 5 a) (= 5 b))))\n(check-sat)\n",
+                  "model": {
+                    "capacity": "8",
+                    "a": "5",
+                    "b": "5",
+                    "tasks": "True",
+                    "scheduled": "True",
+                    "released": "True"
+                  }
+                },
+                "cvc5": {
+                  "engine": "cvc5",
+                  "status": "sat",
+                  "term": "(and (and (= capacity 8) true) tasks released (and scheduled (= a 5) (= b 5)))",
+                  "model": {
+                    "capacity": "8",
+                    "a": "5",
+                    "b": "5",
+                    "tasks": "true",
+                    "scheduled": "true",
+                    "released": "true"
+                  }
+                }
+              }
+            },
+            {
+              "obligation": "R1",
+              "source_clause": "C1",
+              "result": {
+                "status": "PROVED",
+                "domain": {
+                  "status": "sat",
+                  "query_hash": "aa7829237e7a942c886318ff5207906fa0118ea788e6d72403be5d90d3c53a96",
+                  "variables": {
+                    "capacity": "Int",
+                    "a": "Int",
+                    "b": "Int",
+                    "tasks": "Bool",
+                    "scheduled": "Bool",
+                    "released": "Bool"
+                  },
+                  "expression": {
+                    "and": [
+                      {
+                        "and": [
+                          {
+                            "=": [
+                              "capacity",
+                              8
+                            ]
+                          },
+                          true
+                        ]
+                      },
+                      "released"
+                    ]
+                  },
+                  "z3": {
+                    "engine": "z3",
+                    "status": "sat",
+                    "smt2": "; benchmark generated from python API\n(set-info :status unknown)\n(declare-fun released () Bool)\n(declare-fun capacity () Int)\n(assert\n (and (and (= 8 capacity) true) released))\n(check-sat)\n",
+                    "model": {
+                      "capacity": "8",
+                      "a": "0",
+                      "b": "0",
+                      "tasks": "False",
+                      "scheduled": "False",
+                      "released": "True"
+                    }
+                  },
+                  "cvc5": {
+                    "engine": "cvc5",
+                    "status": "sat",
+                    "term": "(and (and (= capacity 8) true) released)",
+                    "model": {
+                      "capacity": "8",
+                      "a": "0",
+                      "b": "0",
+                      "tasks": "false",
+                      "scheduled": "false",
+                      "released": "true"
+                    }
+                  }
+                },
+                "counterexample_query": {
+                  "status": "unsat",
+                  "query_hash": "5f1001a5984dbe3e42ddbab740f10616c66a8f7e7955261c5fe40db98c8487f2",
+                  "variables": {
+                    "capacity": "Int",
+                    "a": "Int",
+                    "b": "Int",
+                    "tasks": "Bool",
+                    "scheduled": "Bool",
+                    "released": "Bool"
+                  },
+                  "expression": {
+                    "and": [
+                      {
+                        "and": [
+                          {
+                            "and": [
+                              {
+                                "=": [
+                                  "capacity",
+                                  8
+                                ]
+                              },
+                              true
+                            ]
+                          },
+                          "released"
+                        ]
+                      },
+                      {
+                        "not": [
+                          "released"
+                        ]
+                      }
+                    ]
+                  },
+                  "z3": {
+                    "engine": "z3",
+                    "status": "unsat",
+                    "smt2": "; benchmark generated from python API\n(set-info :status unknown)\n(declare-fun released () Bool)\n(declare-fun capacity () Int)\n(assert\n (and (and (and (= 8 capacity) true) released) (not released)))\n(check-sat)\n"
+                  },
+                  "cvc5": {
+                    "engine": "cvc5",
+                    "status": "unsat",
+                    "term": "(and (and (and (= capacity 8) true) released) (not released))"
+                  }
+                }
+              }
+            },
+            {
+              "obligation": "R2",
+              "source_clause": "C2",
+              "result": {
+                "status": "COUNTEREXAMPLE",
+                "domain": {
+                  "status": "sat",
+                  "query_hash": "4b96020c348e7d63133fb5a1a7d653f444afed78f618b97203af22b90e21fe5a",
+                  "variables": {
+                    "capacity": "Int",
+                    "a": "Int",
+                    "b": "Int",
+                    "tasks": "Bool",
+                    "scheduled": "Bool",
+                    "released": "Bool"
+                  },
+                  "expression": {
+                    "and": [
+                      {
+                        "and": [
+                          {
+                            "=": [
+                              "capacity",
+                              8
+                            ]
+                          },
+                          true
+                        ]
+                      },
+                      "tasks",
+                      "released",
+                      {
+                        "and": [
+                          "scheduled",
+                          {
+                            "=": [
+                              "a",
+                              5
+                            ]
+                          },
+                          {
+                            "=": [
+                              "b",
+                              5
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "z3": {
+                    "engine": "z3",
+                    "status": "sat",
+                    "smt2": "; benchmark generated from python API\n(set-info :status unknown)\n(declare-fun b () Int)\n(declare-fun a () Int)\n(declare-fun scheduled () Bool)\n(declare-fun released () Bool)\n(declare-fun tasks () Bool)\n(declare-fun capacity () Int)\n(assert\n (and (and (= 8 capacity) true) tasks released (and scheduled (= 5 a) (= 5 b))))\n(check-sat)\n",
+                    "model": {
+                      "capacity": "8",
+                      "a": "5",
+                      "b": "5",
+                      "tasks": "True",
+                      "scheduled": "True",
+                      "released": "True"
+                    }
+                  },
+                  "cvc5": {
+                    "engine": "cvc5",
+                    "status": "sat",
+                    "term": "(and (and (= capacity 8) true) tasks released (and scheduled (= a 5) (= b 5)))",
+                    "model": {
+                      "capacity": "8",
+                      "a": "5",
+                      "b": "5",
+                      "tasks": "true",
+                      "scheduled": "true",
+                      "released": "true"
+                    }
+                  }
+                },
+                "counterexample_query": {
+                  "status": "sat",
+                  "query_hash": "7a66b3a4cf3d1513972bf8d8b525ecf7f57397536c36c7d26206d1c9a462ec43",
+                  "variables": {
+                    "capacity": "Int",
+                    "a": "Int",
+                    "b": "Int",
+                    "tasks": "Bool",
+                    "scheduled": "Bool",
+                    "released": "Bool"
+                  },
+                  "expression": {
+                    "and": [
+                      {
+                        "and": [
+                          {
+                            "and": [
+                              {
+                                "=": [
+                                  "capacity",
+                                  8
+                                ]
+                              },
+                              true
+                            ]
+                          },
+                          "tasks",
+                          "released",
+                          {
+                            "and": [
+                              "scheduled",
+                              {
+                                "=": [
+                                  "a",
+                                  5
+                                ]
+                              },
+                              {
+                                "=": [
+                                  "b",
+                                  5
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "not": [
+                          {
+                            "<=": [
+                              {
+                                "+": [
+                                  "a",
+                                  "b"
+                                ]
+                              },
+                              "capacity"
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "z3": {
+                    "engine": "z3",
+                    "status": "sat",
+                    "smt2": "; benchmark generated from python API\n(set-info :status unknown)\n(declare-fun capacity () Int)\n(declare-fun b () Int)\n(declare-fun a () Int)\n(declare-fun scheduled () Bool)\n(declare-fun released () Bool)\n(declare-fun tasks () Bool)\n(assert\n (let (($x60 (and (and (= 8 capacity) true) tasks released (and scheduled (= 5 a) (= 5 b)))))\n(and $x60 (not (<= (+ a b) capacity)))))\n(check-sat)\n",
+                    "model": {
+                      "capacity": "8",
+                      "a": "5",
+                      "b": "5",
+                      "tasks": "True",
+                      "scheduled": "True",
+                      "released": "True"
+                    }
+                  },
+                  "cvc5": {
+                    "engine": "cvc5",
+                    "status": "sat",
+                    "term": "(and (and (and (= capacity 8) true) tasks released (and scheduled (= a 5) (= b 5))) (not (<= (+ a b) capacity)))",
+                    "model": {
+                      "capacity": "8",
+                      "a": "5",
+                      "b": "5",
+                      "tasks": "true",
+                      "scheduled": "true",
+                      "released": "true"
+                    }
+                  }
+                }
+              }
+            }
+          ],
+          "gaps": [
+            {
+              "kind": "REQUIREMENT_UNPROVED",
+              "requirement": "R2",
+              "state": "COUNTEREXAMPLE"
+            }
+          ],
+          "assurance": "Conditional on accepted component contracts; component totality and actual implementation are unverified"
+        }
+      }
+    ],
+    "witness": null,
+    "proof_gaps": [],
+    "limitation": "No result here asserts absence from the full framework. Proof references alone never qualify a component."
+  },
+  "assurance": "Re-executable solver evidence, not an independently checked formal proof object",
+  "sha256": "397a994ba96e3c58cc815999c28b6c5b3b30bdbb94ac3c69632661937992d6c9"
+}

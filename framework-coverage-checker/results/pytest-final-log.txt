@@ -1,0 +1,41 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-8.3.5, pluggy-1.6.0
+rootdir: /workspace/scratch/1ec49f047e01/coverage_checker
+configfile: pyproject.toml
+testpaths: tests
+plugins: hypothesis-6.131.9
+collected 45 items
+
+tests/test_development.py ............................................   [ 97%]
+tests/test_generated_differential.py .                                   [100%]
+
+- generated xml file: /workspace/scratch/1ec49f047e01/coverage_checker/results/pytest-final.xml -
+============================ Hypothesis Statistics =============================
+tests/test_development.py::test_implication_threshold_matches_order:
+
+  - during generate phase (0.74 seconds):
+    - Typical runtimes: ~ 4-9 ms, of which < 1ms in data generation
+    - 100 passing examples, 0 failing examples, 0 invalid examples
+
+  - Stopped because settings.max_examples=100
+
+
+tests/test_development.py::test_exact_rational_cross_engine:
+
+  - during generate phase (0.53 seconds):
+    - Typical runtimes: ~ 4-6 ms, of which < 1ms in data generation
+    - 100 passing examples, 0 failing examples, 0 invalid examples
+
+  - Stopped because settings.max_examples=100
+
+
+tests/test_generated_differential.py::TestEquivalentZ3_Integer_IntervalCvc5_Integer_Interval::test_equivalent_z3_integer_interval_cvc5_integer_interval:
+
+  - during generate phase (0.30 seconds):
+    - Typical runtimes: ~ 2-3 ms, of which < 1ms in data generation
+    - 100 passing examples, 0 failing examples, 0 invalid examples
+
+  - Stopped because settings.max_examples=100
+
+
+============================== 45 passed in 3.60s ==============================

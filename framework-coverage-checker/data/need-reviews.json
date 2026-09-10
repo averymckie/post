@@ -1,0 +1,522 @@
+[
+  {
+    "Need number": "1",
+    "Candidate construction": "F19 diagnosis; F16 maintenance; F15 supplies; F11 work; F29 instructions; F13 verified completion",
+    "Proof records to inspect": "P276; P157; P222; P25; P330 for qualified physical interfaces",
+    "Required meaning and acceptance": "Object identity, fault evidence, repair action, compatible parts and post-repair functional test. Physical completion needs a bound performer or device.",
+    "Finding on the representative summary": "UC-00001 names diagnosis and repair, but adds an entitlement pathway with no stated connection to the object. Fault evidence and restoration criteria are unspecified. The second output must be explained separately.",
+    "Need": "Repair rather than replace an object",
+    "Count": 96,
+    "Example": "UC-00001"
+  },
+  {
+    "Need number": "2",
+    "Candidate construction": "F09 coordination; F07 lifecycle; F06 authority; F33 recovery; F29 handover document",
+    "Proof records to inspect": "P216; P217; P241; P220; P25",
+    "Required meaning and acceptance": "Open items, current versions, successor identity, transferred obligations, consent withdrawal and an acknowledged resumable handover.",
+    "Finding on the representative summary": "UC-00002 has an explicit handover activity and protocol. Its genomic sequence and simulation do not specify the open-work state, successor or acceptance of custody. Monitoring and resumption need separate bindings.",
+    "Need": "Hand over work at a boundary without losing what is open",
+    "Count": 110,
+    "Example": "UC-00002"
+  },
+  {
+    "Need number": "3",
+    "Candidate construction": "F01 accepted decision meaning; F05 decision; F10 review; F06 release; F29 explanation",
+    "Proof records to inspect": "P191; P13; P25; P99",
+    "Required meaning and acceptance": "The actual decision, applicable rule, supporting and disputed evidence, affected audience, authorized disclosure and an explanation preserving the reasons.",
+    "Finding on the representative summary": "UC-00003 supplies a floor plan and energy audit records. It never identifies the decision to explain. Benchmarking, a register and a quality label cannot establish the explanation without that connection.",
+    "Need": "Explain how a decision was reached to the people it affects",
+    "Count": 106,
+    "Example": "UC-00003"
+  },
+  {
+    "Need number": "4",
+    "Candidate construction": "F01 standard formalization; F05 applicability; F10 local acceptance; F29 procedure; F32 revisions",
+    "Proof records to inspect": "P191; P195; P25; P212",
+    "Required meaning and acceptance": "Standard and version, local facts, permissible adaptations, retained obligations, approval and a check against the original scope.",
+    "Finding on the representative summary": "UC-00004 names sampling, calibration and route planning. Neither the general standard nor the local adaptation decision is specified. Its field manual could carry the result only after those inputs exist.",
+    "Need": "Adapt a general standard to one specific local setting",
+    "Count": 103,
+    "Example": "UC-00004"
+  },
+  {
+    "Need number": "5",
+    "Candidate construction": "F22 sampling design; F11 field plan; F25 capture; F17 estimates; F18 uncertainty; F29 report",
+    "Proof records to inspect": "P280 scoped sampling assessment; P331 and P332 only within admitted designs; P222; P230",
+    "Required meaning and acceptance": "Target population, sampling frame, inclusion and nonresponse rules, estimand, uncertainty and representativeness criteria. Experimental factorial proofs alone do not establish survey representativeness.",
+    "Finding on the representative summary": "UC-00005 includes enumeration, dispatch and allocation. The population and sampling logic are absent. Repeated field procedures do not by themselves produce a representative picture.",
+    "Need": "Get a representative picture of a population",
+    "Count": 110,
+    "Example": "UC-00005"
+  },
+  {
+    "Need number": "6",
+    "Candidate construction": "F23 learning and assessment; F29 instructions; F30 practice interface; F07 qualification",
+    "Proof records to inspect": "P173; P183; P223; P25; P315 for the selected interface; P333 and P334 for supported assessment profiles",
+    "Required meaning and acceptance": "Procedure, learner baseline, permitted unsupervised task, competence assessment, failure escalation and observed performance against accepted criteria.",
+    "Finding on the representative summary": "UC-00006 supplies credential checking, cataloguing, validation and review. A rehearsal is named, but its content and competence assessment are absent. Cataloguing alone does not execute a real-party exercise.",
+    "Need": "Teach a procedure to someone who will perform it unsupervised",
+    "Count": 103,
+    "Example": "UC-00006"
+  },
+  {
+    "Need number": "7",
+    "Candidate construction": "F01 roles and dependencies; F09 coordination; F11 shared schedule; F06 scoped authority; F13 effects",
+    "Proof records to inspect": "P191; P241; P222; P319",
+    "Required meaning and acceptance": "Common outcome, party commitments, dependencies, decision rights, shared capacity, failure paths and completion across parties.",
+    "Finding on the representative summary": "UC-00007 lists data and audit activities. An observatory could support coordination, but no party commitments or coordinating transitions connect it to the shared outcome.",
+    "Need": "Coordinate independent parties toward one outcome",
+    "Count": 114,
+    "Example": "UC-00007"
+  },
+  {
+    "Need number": "8",
+    "Candidate construction": "F21 simulation; F22 experiment where applicable; F31 qualification; F07 irreversible-action gate",
+    "Proof records to inspect": "P225; P229; P322; P329 for a supported hybrid model",
+    "Required meaning and acceptance": "Change definition, baseline, representative model or test environment, irreversible boundary, decision threshold and the evidence required before commitment.",
+    "Finding on the representative summary": "UC-00008 explicitly includes simulation and a practice environment. Its queue, stock and hardware specification do not identify the proposed change or its behavioral model. Attaching an identifier does not construct the practice environment.",
+    "Need": "Test a change before it becomes irreversible",
+    "Count": 105,
+    "Example": "UC-00008"
+  },
+  {
+    "Need number": "9",
+    "Candidate construction": "F03 semantic normalization; F17 comparable measures; F18 uncertainty; F20 comparison; F29 explanation",
+    "Proof records to inspect": "P261; P230; P231; P279; P99",
+    "Required meaning and acceptance": "Options, measurement definitions, population, time, units, transformations and residual incomparability. A conversion must preserve the quantity being compared.",
+    "Finding on the representative summary": "UC-00009 lists observation and enumeration, but supplies no option measurements or comparison basis. A published dataset is possible as an artifact; this summary leaves the actual comparison unresolved.",
+    "Need": "Compare options that were measured in different ways",
+    "Count": 110,
+    "Example": "UC-00009"
+  },
+  {
+    "Need number": "10",
+    "Candidate construction": "F20 fairness policy; F11 scheduling; F09 booking; F06 eligibility; F13 commit",
+    "Proof records to inspect": "P227; P239; P222; P223; P319",
+    "Required meaning and acceptance": "Requests, facility capacity, eligibility, an accepted fairness rule, scheduling horizon, concurrent reservations and treatment of demand surges.",
+    "Finding on the representative summary": "UC-00012 names queues and shared capacity, but its operations are calibration, simulation, sampling and triage. The monitoring products lack an explicit fair-allocation decision and reservation effect.",
+    "Need": "Allocate a scarce shared facility fairly",
+    "Count": 110,
+    "Example": "UC-00012"
+  },
+  {
+    "Need number": "11",
+    "Candidate construction": "F17 material and energy accounting; F20 alternatives; F11 changes; F16 maintenance",
+    "Proof records to inspect": "P147; P175; P227; P230",
+    "Required meaning and acceptance": "Process boundary, baseline consumption, yields, waste and energy quantities, feasible interventions and verified improvement under comparable conditions.",
+    "Finding on the representative summary": "UC-00014 uses curation, interviews and observation to produce kits and a catalogue. The questionnaire and workspace may support research, but no consumption baseline, waste measure or intervention connects it to waste reduction.",
+    "Need": "Cut material or energy waste in a routine process",
+    "Count": 110,
+    "Example": "UC-00014"
+  },
+  {
+    "Need number": "12",
+    "Candidate construction": "F33 preservation and recovery; F03 migration; F02 identity; F29 human-readable documentation",
+    "Proof records to inspect": "P220; P245; P300; P25",
+    "Required meaning and acceptance": "Preserved content, identity, dependencies, open formats or emulation assumptions, retention authority and a restore/readability test after loss of current software and staff.",
+    "Finding on the representative summary": "UC-00015 has local knowledge, interviews and handover. The primary output is a practice environment. Neither the record to preserve nor its format, dependencies or future readability test is identified.",
+    "Need": "Keep a record usable after its software and its authors are gone",
+    "Count": 105,
+    "Example": "UC-00015"
+  },
+  {
+    "Need number": "13",
+    "Candidate construction": "F08 obligation terms; F06 authorization; F13 settlement and compensation; F14 reconciliation",
+    "Proof records to inspect": "P211; P242; P243; P244; P240",
+    "Required meaning and acceptance": "Parties, obligation, escrow or release conditions, external receipts, disputed states, finality and compensation that respects irreversibility.",
+    "Finding on the representative summary": "UC-00016 includes a transaction ledger and settlement output. Its listed activity for settlement is scarce-capacity allocation. No obligation terms, authorized transfer or counterparty receipt binds that activity to settlement.",
+    "Need": "Settle an obligation between parties who do not trust each other",
+    "Count": 109,
+    "Example": "UC-00016"
+  },
+  {
+    "Need number": "14",
+    "Candidate construction": "F33 checkpoint and replay; F13 compensation; F09 resumption; F31 recovery checks",
+    "Proof records to inspect": "P220; P243; P269; P300",
+    "Required meaning and acceptance": "Pre-failure state, committed and uncertain effects, available checkpoint, replay identity, compensations and a restored-state acceptance condition.",
+    "Finding on the representative summary": "UC-00017 names escalation, triage, cataloguing and handover. No checkpoint or effect history is specified. A documented recovery plan with rehearsed steps requires both the plan and evidence of rehearsal.",
+    "Need": "Recover after a partial failure",
+    "Count": 111,
+    "Example": "UC-00017"
+  },
+  {
+    "Need number": "15",
+    "Candidate construction": "F16 asset reliability; F17 measurements; F19 diagnosis; F11 maintenance; F15 parts",
+    "Proof records to inspect": "P157; P182; P184; P276; P222",
+    "Required meaning and acceptance": "Asset model, service life, failure modes, inspection limits, calibration references, spare availability and service-restoration evidence.",
+    "Finding on the representative summary": "UC-00018 includes calibration and simulation, but chemical records and an invoice do not establish the asset history or maintenance actions. Drift and irreplaceable equipment need explicit limits and responses.",
+    "Need": "Keep an installed thing working over its whole life",
+    "Count": 108,
+    "Example": "UC-00018"
+  },
+  {
+    "Need number": "16",
+    "Candidate construction": "F34 detection; F17 signal quality; F18 uncertainty; F09 escalation; F13 response",
+    "Proof records to inspect": "P210; P218; P219; P237",
+    "Required meaning and acceptance": "Observation source, sampling and processing delay, detectable change, decision threshold, false-alarm policy and time remaining for effective action.",
+    "Finding on the representative summary": "UC-00019 lists escalation, review and training. The requested early detection has no explicit observation or detection step. A handover protocol cannot establish the lead time.",
+    "Need": "Detect a change early enough to still act",
+    "Count": 108,
+    "Example": "UC-00019"
+  },
+  {
+    "Need number": "17",
+    "Candidate construction": "F02 counterpart identity; F04 retrieval; F20 matching criteria; F06 release",
+    "Proof records to inspect": "P201; P284; P285; P227",
+    "Required meaning and acceptance": "Candidate population, matching criteria, identity, eligibility, privacy and evidence that the selected counterpart meets the actual request.",
+    "Finding on the representative summary": "UC-00020 could gather preferences through consultation. It supplies no counterpart population or matching rule. Community agreement and performance products do not settle that missing selection.",
+    "Need": "Find the right counterpart among many",
+    "Count": 104,
+    "Example": "UC-00020"
+  },
+  {
+    "Need number": "18",
+    "Candidate construction": "F01 scoped evidence; F05 explicit unknown/conflict; F10 adjudication; F19 next evidence",
+    "Proof records to inspect": "P192; P193; P271; P272",
+    "Required meaning and acceptance": "Decision question, competing claims, sources, rules for incomplete evidence, permitted abstention and an accountable treatment of disagreement.",
+    "Finding on the representative summary": "UC-00021 describes a clinic built through training. A clinical guideline for insurance staff needs a stated purpose. Neither contested claims nor a scoped decision rule is supplied.",
+    "Need": "Decide with incomplete and contested evidence",
+    "Count": 109,
+    "Example": "UC-00021"
+  },
+  {
+    "Need number": "19",
+    "Candidate construction": "F20 limit allocation; F11 shared resources; F09 coordination; F34 monitoring; F35 control if physical",
+    "Proof records to inspect": "P222; P239; P319; P329; P330",
+    "Required meaning and acceptance": "Shared quantity, unit, limit, actor allocations, enforcement or control actions, concurrency and behavior when observation or authority fails.",
+    "Finding on the representative summary": "UC-00023 offers route planning and calibration from consumables. The operating quantity and limit are unspecified. An explanation and interactive aid need an enforceable shared-limit construction behind them.",
+    "Need": "Set and respect an operating limit shared by several actors",
+    "Count": 109,
+    "Example": "UC-00023"
+  },
+  {
+    "Need number": "20",
+    "Candidate construction": "F19 hazard reasoning; F21 scenarios; F20 mitigation; F09 response; F35 bounded control where applicable",
+    "Proof records to inspect": "P276; P229; P329; P330",
+    "Required meaning and acceptance": "Hazard, exposure pathway, credible failure model, preventive intervention, time to harm and independently checkable residual-risk or safe-state claim.",
+    "Finding on the representative summary": "UC-00024 has recovery and enumeration activities. A consequence classification can inform prevention, but no preventive action or exposure model is stated. Recovery after harm cannot silently satisfy prevention before it.",
+    "Need": "Prevent a foreseeable and serious harm",
+    "Count": 107,
+    "Example": "UC-00024"
+  },
+  {
+    "Need number": "21",
+    "Candidate construction": "F25 field capture; F03 offline synchronization; F33 recovery; F02 identity; F06 release",
+    "Proof records to inspect": "P294; P300; P245; P319",
+    "Required meaning and acceptance": "Capture behavior without power/network, durable local state, recovery point, clock uncertainty, duplicate handling, conflict policy and privacy after synchronization.",
+    "Finding on the representative summary": "UC-00026 includes field enumeration and observatory products. The summary specifies neither a capture device/store nor power-loss behavior. Public release and harmful personal disclosure must be resolved together.",
+    "Need": "Collect data in the field where connectivity and power fail",
+    "Count": 108,
+    "Example": "UC-00026"
+  },
+  {
+    "Need number": "22",
+    "Candidate construction": "F01 external requirements; F31 conformance; F29 evidence pack; F06 release",
+    "Proof records to inspect": "P191; P194; P250; P296; P344",
+    "Required meaning and acceptance": "Exact external requirement and version, applicability, conformance assertions, matching execution evidence, independent oracle and retained failures.",
+    "Finding on the representative summary": "UC-00029 produces procedures through authorization, installation and payment. Its external rule and conformance test are absent. Degraded operation and in-flight transactions add obligations that a written procedure does not discharge.",
+    "Need": "Prove conformance to an external requirement",
+    "Count": 110,
+    "Example": "UC-00029"
+  },
+  {
+    "Need number": "23",
+    "Candidate construction": "F22 measurement design; F18 inference; F17 reporting; F31 validity check",
+    "Proof records to inspect": "P233; P235; P331; P332 within admitted profiles",
+    "Required meaning and acceptance": "Latent condition, observable proxy, identification assumptions, calibration, bias, uncertainty and acceptable limits of inference.",
+    "Finding on the representative summary": "UC-00032 supplies hardware specifications to handover activities producing a manual and wall chart. It never identifies the latent quantity, observations or inferential model.",
+    "Need": "Measure a condition that cannot be observed directly",
+    "Count": 108,
+    "Example": "UC-00032"
+  },
+  {
+    "Need number": "24",
+    "Candidate construction": "F29 communication; F30 interaction where needed; F10 audience review; F06 release",
+    "Proof records to inspect": "P25; P99; P337; P315",
+    "Required meaning and acceptance": "Actual technical content, affected audience, language and accessibility needs, retained caveats and comprehension acceptance.",
+    "Finding on the representative summary": "UC-00033 names sample analysis, calibration and a monitoring programme. Its plain-language product needs the technical result and audience acceptance. Calibration alone does not establish comprehension.",
+    "Need": "Make a technical artefact readable by the people it affects",
+    "Count": 108,
+    "Example": "UC-00033"
+  },
+  {
+    "Need number": "25",
+    "Candidate construction": "F11 shared booking; F06 eligibility; F16 equipment readiness; F13 reservations and release",
+    "Proof records to inspect": "P222; P223; P224; P157; P319",
+    "Required meaning and acceptance": "Equipment identity, available slots, qualification, transition/cleaning time, reservation conflicts, maintenance and release rules.",
+    "Finding on the representative summary": "UC-00034 lists handover products and a route-planning aid. A timetable may contribute, but no equipment capacity, booking policy or reservation transaction is bound.",
+    "Need": "Share expensive equipment among many users",
+    "Count": 107,
+    "Example": "UC-00034"
+  },
+  {
+    "Need number": "26",
+    "Candidate construction": "F10 versioned disagreement; F05 conflict-preserving reasoning; F02 claim identity",
+    "Proof records to inspect": "P13; P192; P193; P136",
+    "Required meaning and acceptance": "Separate attributable claims, evidence, disputed propositions, unresolved status and rules preventing accidental collapse into agreement.",
+    "Finding on the representative summary": "UC-00039 has authorization, audit, rehearsal and retirement work. It names neither the conflicting claims nor a disagreement-preserving record. A validator may otherwise erase the very distinction required.",
+    "Need": "Record a disagreement rather than resolve it falsely",
+    "Count": 106,
+    "Example": "UC-00039"
+  },
+  {
+    "Need number": "27",
+    "Candidate construction": "F02 identity; F03 lineage; F06 authority; F29 provenance display",
+    "Proof records to inspect": "P201; P261; P99; P298",
+    "Required meaning and acceptance": "Source identity and version, transformations, contributor/voucher claims, verification state and lineage retained in the final output.",
+    "Finding on the representative summary": "UC-00043 mentions an unverified source, yet its primary deliverable is a rehearsal. A sameness ledger and register could preserve provenance only with identified assertions and voucher evidence.",
+    "Need": "Show where something came from and who vouches for it",
+    "Count": 108,
+    "Example": "UC-00043"
+  },
+  {
+    "Need number": "28",
+    "Candidate construction": "F08 obligation; F06 minimum disclosure; F05 decision; F13 controlled effect",
+    "Proof records to inspect": "P206; P247; P264; P292",
+    "Required meaning and acceptance": "Obligation facts, necessary disclosure, recipient authorization, inference risks, release scope and evidence of fulfillment without forbidden exposure.",
+    "Finding on the representative summary": "UC-00044 offers a handover protocol and site catalogue. It never names the obligation or the protected fact. Cold and contested access can be modeled as constraints, but they do not resolve that privacy contract.",
+    "Need": "Meet an obligation without exposing the person",
+    "Count": 106,
+    "Example": "UC-00044"
+  },
+  {
+    "Need number": "29",
+    "Candidate construction": "F17 exposure measures; F21 model; F34 alerts; F09 mitigation; F35 qualified control",
+    "Proof records to inspect": "P229; P276; P329; P330",
+    "Required meaning and acceptance": "Hazard source, exposure metric, intervention, safe envelope, consent effects and a reduction that remains supported under model uncertainty.",
+    "Finding on the representative summary": "UC-00045 provides condition readings, simulation and alerts. This is a plausible support construction. It still lacks the hazardous quantity, exposure threshold and action that reduces exposure.",
+    "Need": "Reduce exposure of people to a known hazard",
+    "Count": 105,
+    "Example": "UC-00045"
+  },
+  {
+    "Need number": "30",
+    "Candidate construction": "F02 object identity; F08 obligations; F07 custody transition; F06 authority; F13 acknowledgment",
+    "Proof records to inspect": "P201; P211; P255; P243",
+    "Required meaning and acceptance": "Identified object, present and successor custodians, transferred duties, acceptance, uncertain transfer and durable continuity of obligations.",
+    "Finding on the representative summary": "UC-00046 centres on retirement, rehearsal and simulation. Retirement cannot stand in for transferring custody. No custodian identities or obligation-transfer acceptance are specified.",
+    "Need": "Transfer custody of a thing together with its obligations",
+    "Count": 106,
+    "Example": "UC-00046"
+  },
+  {
+    "Need number": "31",
+    "Candidate construction": "F17 preprocessing; F18 uncertainty; F34 detection; F29 action statement",
+    "Proof records to inspect": "P230; P233; P218; P99",
+    "Required meaning and acceptance": "Signal definition, noise model, estimation/decision threshold, abstention, evidence freshness and the action justified by the statement.",
+    "Finding on the representative summary": "UC-00048 supplies staff hours for consultation and handover. It has no signal source or noise-processing model, despite naming an early-warning output.",
+    "Need": "Turn a noisy signal into a statement someone can act on",
+    "Count": 108,
+    "Example": "UC-00048"
+  },
+  {
+    "Need number": "32",
+    "Candidate construction": "F06 revocation; F13 propagation; F25 interfaces; F32 invalidation; F33 retained history",
+    "Proof records to inspect": "P206; P207; P247; P298; P319",
+    "Required meaning and acceptance": "Affected grants, revoking authority, effective time, caches and downstream copies, in-flight operations, acknowledgment and failure to propagate.",
+    "Finding on the representative summary": "UC-00049 explicitly includes grant and revoke operations with a consent record. That supports a plausible construction. A badge alone does not demonstrate withdrawal at each enforcement point.",
+    "Need": "Withdraw an access or a consent and have it actually take effect",
+    "Count": 106,
+    "Example": "UC-00049"
+  },
+  {
+    "Need number": "33",
+    "Candidate construction": "F08 entitlements; F05 eligibility; F09 service workflow; F06 privacy; F30 navigation",
+    "Proof records to inspect": "P185; P211; P259; P292; P64",
+    "Required meaning and acceptance": "Actual entitlement, applicable jurisdiction/time, claimant facts, service steps, accessibility, appeal and proof that access is reached or correctly blocked.",
+    "Finding on the representative summary": "UC-00050 includes a permission instrument, credential and adjudication. These are relevant, but the service, entitlement rule and claimant facts remain unspecified. A referral desk also needs a bound service route.",
+    "Need": "Reach a service one is entitled to",
+    "Count": 109,
+    "Example": "UC-00050"
+  },
+  {
+    "Need number": "34",
+    "Candidate construction": "F14 expenditure ledger; F17 outcomes; F02 traceability; F29 report",
+    "Proof records to inspect": "P147; P149; P230; P99",
+    "Required meaning and acceptance": "Transactions, budget categories, allocation rules, outcome definitions, evidence and separation of expenditure from causal impact.",
+    "Finding on the representative summary": "UC-00053 supplies a workspace and codebook to enumeration and handover. Monitoring could contribute outcome data, but the summary supplies no expenditure ledger or reconciliation basis.",
+    "Need": "Account for how money was spent and what it achieved",
+    "Count": 105,
+    "Example": "UC-00053"
+  },
+  {
+    "Need number": "35",
+    "Candidate construction": "F02 cross-party identity; F03 interchange; F10 adjudication; F25 registry interface",
+    "Proof records to inspect": "P201; P202; P203; P251; P254",
+    "Required meaning and acceptance": "Identifier namespaces, sameness evidence, collision and merge/split rules, party scope and reversible mistaken links.",
+    "Finding on the representative summary": "UC-00065 names a registry and interchange products, but uses queue inputs and audit activities. The identity policy and mappings across parties remain unspecified.",
+    "Need": "Hold the identity of a thing across parties",
+    "Count": 104,
+    "Example": "UC-00065"
+  },
+  {
+    "Need number": "36",
+    "Candidate construction": "F17 calibration measurements; F16 maintenance; F19 drift diagnosis; F31 qualification",
+    "Proof records to inspect": "P157; P186; P230; P276",
+    "Required meaning and acceptance": "Instrument identity, reference traceability, tolerance, uncertainty, drift interval, environment and out-of-calibration actions.",
+    "Finding on the representative summary": "UC-00068 has actual condition-reading types and monitoring activities. It could produce alerts and a view, but reference standards and calibration validity are still absent.",
+    "Need": "Keep an instrument trustworthy over time",
+    "Count": 107,
+    "Example": "UC-00068"
+  },
+  {
+    "Need number": "37",
+    "Candidate construction": "F02 record identity; F03 reconciliation; F10 adjudication; F32 dependent revisions",
+    "Proof records to inspect": "P201; P245; P261; P293; P297",
+    "Required meaning and acceptance": "Both records, keys, time and authority, conflict policy, preserved dissent and reconciliation of every affected downstream artifact.",
+    "Finding on the representative summary": "UC-00072 lists retirement, procurement, cataloguing, settlement and coding. No pair of conflicting records or reconciliation rule is specified.",
+    "Need": "Reconcile conflicting records of the same object",
+    "Count": 110,
+    "Example": "UC-00072"
+  },
+  {
+    "Need number": "38",
+    "Candidate construction": "F02 shared identity; F03 consistency; F06 authority; F10 acceptance; F33 history",
+    "Proof records to inspect": "P201; P241; P245; P300; P319",
+    "Required meaning and acceptance": "Shared record schema and identity, party reliance conditions, conflicting edits, authorization, freshness and agreed release/finality.",
+    "Finding on the representative summary": "UC-00076 includes consultation and enumeration. A dataset can contribute, but a jointly relied-upon record needs explicit consistency and acceptance contracts across parties.",
+    "Need": "Build one record several parties will each rely on",
+    "Count": 102,
+    "Example": "UC-00076"
+  },
+  {
+    "Need number": "39",
+    "Candidate construction": "F11 task planning; F14 costing; F20 choices; F09 execution",
+    "Proof records to inspect": "P221; P222; P223; P224; P240",
+    "Required meaning and acceptance": "Tasks, precedences, costs, resource quantities, calendars, budget, deadline and feasibility evidence under the shared constraints.",
+    "Finding on the representative summary": "UC-00078 names a costed plan, but triage, coding and consultation have no task durations, costs or calendar bindings. A queue and brief are useful inputs only after this formalization.",
+    "Need": "Plan work inside a fixed budget and calendar",
+    "Count": 109,
+    "Example": "UC-00078"
+  },
+  {
+    "Need number": "40",
+    "Candidate construction": "F02 catalogue identity; F04 retrieval; F03 metadata; F33 preservation",
+    "Proof records to inspect": "P201; P284; P285; P297",
+    "Required meaning and acceptance": "Collection items, descriptive metadata, retrieval queries, indexing and access rules, provenance and checks that intended items can be found.",
+    "Finding on the representative summary": "UC-00081 verifies and grants credentials, producing lineage and badge artifacts. It never supplies the collection or the catalogue/search behavior requested.",
+    "Need": "Organise a collection so that things can be found again",
+    "Count": 105,
+    "Example": "UC-00081"
+  },
+  {
+    "Need number": "41",
+    "Candidate construction": "F23 learning path; F29 worked examples; F30 practice; F07 qualification",
+    "Proof records to inspect": "P173; P183; P223; P275; P333 and P334 for supported assessment profiles",
+    "Required meaning and acceptance": "Target competence, initial capability, learning resources, time objective and observed assessment against the real work.",
+    "Finding on the representative summary": "UC-00095 supplies simulation and retirement work with a configurator and reference example. It lacks a learner model or competence assessment. The unexplained verdict does not demonstrate a missing learning family.",
+    "Need": "Bring a newcomer to working competence quickly",
+    "Count": 95,
+    "Example": "UC-00095"
+  },
+  {
+    "Need number": "42",
+    "Candidate construction": "F09 care coordination; F07 lifecycle; F06 consent; F11 staffing; F33 continuity",
+    "Proof records to inspect": "P216; P217; P241; P222; P319",
+    "Required meaning and acceptance": "Care commitments, current condition and pending tasks, successor responsibility, interruption limits, withdrawn consent and escalation.",
+    "Finding on the representative summary": "UC-00096 contains monitoring and handover, so the coordination pattern is plausible. A clinical protocol and readings do not fully specify the patient's open care tasks or continuity acceptance.",
+    "Need": "Keep care continuous across handovers and interruptions",
+    "Count": 103,
+    "Example": "UC-00096"
+  },
+  {
+    "Need number": "43",
+    "Candidate construction": "F01 rule formalization; F04 retrieval; F05 applicability; F30 navigation",
+    "Proof records to inspect": "P191; P285; P292; P64",
+    "Required meaning and acceptance": "The rule corpus, current versions, jurisdiction, question, applicability, exceptions and faithful explanation of unresolved interpretations.",
+    "Finding on the representative summary": "UC-00144 has disposal and audit activities fed by consumables and a time-use diary. Neither the unfamiliar rules nor their navigation relation is stated.",
+    "Need": "Find a way through an unfamiliar body of rules",
+    "Count": 103,
+    "Example": "UC-00144"
+  },
+  {
+    "Need number": "44",
+    "Candidate construction": "F27 design and manufacturing preparation; F15 material supply; F11 production; F13 or bound performer completion; F31 inspection",
+    "Proof records to inspect": "P320; P321; P324; P330 only for supported device interfaces",
+    "Required meaning and acceptance": "Specification, geometry, material and tolerances, qualified manufacturing process, actual production boundary and inspection of the produced item.",
+    "Finding on the representative summary": "UC-00178 has repair, dispatch, a bill of materials and a water sample. These do not specify the jig geometry, fabrication process or measured acceptance of the finished item.",
+    "Need": "Produce a physical item to a stated specification",
+    "Count": 43,
+    "Example": "UC-00178"
+  },
+  {
+    "Need number": "45",
+    "Candidate construction": "F29 accepted expressive artifact; F11 event arrangements; F10 participant acceptance; C11 human evidence",
+    "Proof records to inspect": "P337; P338 for media fidelity; P25; P222",
+    "Required meaning and acceptance": "Meaning of the occasion, participants, accepted form, permission and evidence that the agreed event or artifact was delivered. Emotional significance cannot be inferred from a successful file transformation.",
+    "Finding on the representative summary": "UC-00224 pairs benchmarking and credential verification with a validator and figure label. No memorial, ceremony or expressive connection is supplied. This first exposes a case-coherence problem, not a demonstrated new family.",
+    "Need": "Mark an occasion or a loss in a way that holds",
+    "Count": 41,
+    "Example": "UC-00224"
+  },
+  {
+    "Need number": "46",
+    "Candidate construction": "F29 score or media; F11 rehearsal plan; F09 coordination; C11 performer evidence",
+    "Proof records to inspect": "P337; P338; P222; P223; P241",
+    "Required meaning and acceptance": "Work to perform, participants, timing, venue, rehearsal and performance acceptance. Human artistic performance needs an explicit external outcome boundary.",
+    "Finding on the representative summary": "UC-00231 includes performing and a venue, but supplies no work, ensemble timing or model for its simulator. A practice environment and simulator do not establish that the ensemble performed together.",
+    "Need": "Rehearse and perform together",
+    "Count": 44,
+    "Example": "UC-00231"
+  },
+  {
+    "Need number": "47",
+    "Candidate construction": "F28 spatial scope; F20 competing uses; F22 monitoring design; F34 triggers; F09 field action",
+    "Proof records to inspect": "P325; P326; P227; P331 within admitted design; P218",
+    "Required meaning and acceptance": "Habitat boundary, ecological observations, use objectives, authority, interventions, monitoring triggers and empirically supported ecological response.",
+    "Finding on the representative summary": "UC-00244 includes sampling and handover, but no habitat model, competing-use criteria or stewardship action. Monitoring alone cannot establish improvement or acceptable management.",
+    "Need": "Steward a habitat under competing uses",
+    "Count": 100,
+    "Example": "UC-00244"
+  },
+  {
+    "Need number": "48",
+    "Candidate construction": "F12 multimodal route; F11 time coordination; F08 operator terms; F13 booking and disruption settlement; F29 wayfinding",
+    "Proof records to inspect": "F12 explicitly needs routing chains; P222 and P224 are foundations; P243",
+    "Required meaning and acceptance": "Passenger needs, connected operator network, service times, transfer feasibility, accessibility, ticket/booking terms and disruption recovery across operators.",
+    "Finding on the representative summary": "UC-00308 includes dispatch, interchange, settlement and signage. No network or route/transfer construction is stated. The existing routing family also acknowledges an unresolved proof-chain layer.",
+    "Need": "Get people across operators in one journey",
+    "Count": 18,
+    "Example": "UC-00308"
+  },
+  {
+    "Need number": "49",
+    "Candidate construction": "F02 organism identity; F17 longitudinal measures; F18 growth inference; F22 sampling; F06 consent",
+    "Proof records to inspect": "P201; P230; P233; P331 within scope",
+    "Required meaning and acceptance": "Living subject identity, observation schedule, developmental measure, missing follow-ups, consent, model validity and interpretation of change over time.",
+    "Finding on the representative summary": "UC-00313 has samples, interviews and observation, which are useful ingredients. It lacks a subject-linked time series and developmental measure. A periodic clinic does not by itself reconstruct that analysis.",
+    "Need": "Follow the development of a living thing over time",
+    "Count": 93,
+    "Example": "UC-00313"
+  },
+  {
+    "Need number": "50",
+    "Candidate construction": "F29 accepted creative content; F30 interactive experience if needed; F10 audience acceptance",
+    "Proof records to inspect": "P337; P338; P25; P315",
+    "Required meaning and acceptance": "Source experience, editorial choices, intended form and audience, rights/consent, fidelity and an accepted subjective review boundary.",
+    "Finding on the representative summary": "UC-00321 has consultation and a documentary product, but the listed recipes and floor plan have no stated relation to the experience. Rendering fidelity cannot supply that missing creative interpretation.",
+    "Need": "Give an experience a form other people can encounter",
+    "Count": 39,
+    "Example": "UC-00321"
+  },
+  {
+    "Need number": "51",
+    "Candidate construction": "F23 instruction and qualification; F29 procedure; F19 hazards; F09 task support; C11 observed completion",
+    "Proof records to inspect": "P173; P183; P25; P276; P333 and P334 for supported assessment profiles",
+    "Required meaning and acceptance": "Actual household task, user's capabilities, hazards, safe sequence, stopping/escalation rules and acceptance of the completed activity.",
+    "Finding on the representative summary": "UC-00626 contains training and instructions, so a support construction is plausible. The task and safety limits are absent. A worked example cannot certify safe performance of an unspecified task.",
+    "Need": "Carry out a household task safely without professional support",
+    "Count": 18,
+    "Example": "UC-00626"
+  },
+  {
+    "Need number": "52",
+    "Candidate construction": "F15 ingredients; F11 kitchen scheduling; F05 accepted safety rules; F17 monitoring; F09 production; F31 checks",
+    "Proof records to inspect": "P152; P175; P222; P230; P250",
+    "Required meaning and acceptance": "Menu and demand, quantities/yields, allergens, equipment and staff capacity, storage and process limits, cross-contamination rules and actual food-production evidence.",
+    "Finding on the representative summary": "UC-00850 supplies a recipe and monitoring reading types. Its menu/production output needs explicit ingredient allocation and production steps. Monitoring, handover and training alone leave the feeding outcome unresolved.",
+    "Need": "Feed people safely from a constrained kitchen",
+    "Count": 19,
+    "Example": "UC-00850"
+  }
+]

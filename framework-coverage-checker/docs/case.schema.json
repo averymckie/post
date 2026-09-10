@@ -1,0 +1,610 @@
+{
+  "type": "object",
+  "properties": {
+    "format": {
+      "const": "fwcheck.case.v1"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,119}$"
+    },
+    "source_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "framework_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "variables": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,119}$"
+      },
+      "additionalProperties": {
+        "enum": [
+          "Bool",
+          "Int",
+          "Real"
+        ]
+      }
+    },
+    "context": {},
+    "source_clauses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,119}$"
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "id",
+          "text"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "semantic_review": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "DRAFT",
+            "ACCEPTED"
+          ]
+        },
+        "reviewer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "inventory_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "status",
+        "reviewer",
+        "inventory_sha256"
+      ],
+      "additionalProperties": false
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,119}$"
+          },
+          "envelope": {
+            "type": "object",
+            "properties": {
+              "schema": {
+                "type": "string",
+                "minLength": 1
+              },
+              "meaning": {
+                "type": "string",
+                "minLength": 1
+              },
+              "identity": {
+                "type": "string",
+                "minLength": 1
+              },
+              "time": {
+                "type": "string",
+                "minLength": 1
+              },
+              "basis": {
+                "type": "string",
+                "minLength": 1
+              },
+              "coverage": {
+                "type": "string",
+                "minLength": 1
+              },
+              "authority": {
+                "type": "string",
+                "minLength": 1
+              },
+              "state": {
+                "type": "string",
+                "minLength": 1
+              },
+              "effects": {
+                "type": "string",
+                "minLength": 1
+              },
+              "numeric": {
+                "type": "string",
+                "minLength": 1
+              },
+              "resources": {
+                "type": "string",
+                "minLength": 1
+              },
+              "evidence": {
+                "type": "string",
+                "minLength": 1
+              },
+              "change": {
+                "type": "string",
+                "minLength": 1
+              },
+              "exceptions": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "schema",
+              "meaning",
+              "identity",
+              "time",
+              "basis",
+              "coverage",
+              "authority",
+              "state",
+              "effects",
+              "numeric",
+              "resources",
+              "evidence",
+              "change",
+              "exceptions"
+            ],
+            "additionalProperties": false
+          },
+          "guarantee": {}
+        },
+        "required": [
+          "id",
+          "envelope",
+          "guarantee"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "components": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,119}$"
+          },
+          "family": {
+            "type": "string",
+            "pattern": "^F[0-9]{2}$"
+          },
+          "proof_refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^P[0-9]+$"
+            },
+            "minItems": 0
+          },
+          "inputs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,119}$"
+                },
+                "envelope": {
+                  "type": "object",
+                  "properties": {
+                    "schema": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "meaning": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "identity": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "time": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "basis": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "coverage": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "authority": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "state": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "effects": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "numeric": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "resources": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "evidence": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "change": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "exceptions": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "schema",
+                    "meaning",
+                    "identity",
+                    "time",
+                    "basis",
+                    "coverage",
+                    "authority",
+                    "state",
+                    "effects",
+                    "numeric",
+                    "resources",
+                    "evidence",
+                    "change",
+                    "exceptions"
+                  ],
+                  "additionalProperties": false
+                },
+                "requires": {}
+              },
+              "required": [
+                "id",
+                "envelope",
+                "requires"
+              ],
+              "additionalProperties": false
+            },
+            "minItems": 1
+          },
+          "outputs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,119}$"
+                },
+                "envelope": {
+                  "type": "object",
+                  "properties": {
+                    "schema": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "meaning": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "identity": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "time": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "basis": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "coverage": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "authority": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "state": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "effects": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "numeric": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "resources": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "evidence": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "change": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "exceptions": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "schema",
+                    "meaning",
+                    "identity",
+                    "time",
+                    "basis",
+                    "coverage",
+                    "authority",
+                    "state",
+                    "effects",
+                    "numeric",
+                    "resources",
+                    "evidence",
+                    "change",
+                    "exceptions"
+                  ],
+                  "additionalProperties": false
+                },
+                "guarantee": {}
+              },
+              "required": [
+                "id",
+                "envelope",
+                "guarantee"
+              ],
+              "additionalProperties": false
+            },
+            "minItems": 1
+          },
+          "requires": {},
+          "profile_origin": {
+            "enum": [
+              "ANALYST_PROPOSED",
+              "ACCEPTED_CONTRACT"
+            ]
+          },
+          "external_effect": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "family",
+          "proof_refs",
+          "inputs",
+          "outputs",
+          "requires",
+          "profile_origin",
+          "external_effect"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 0
+    },
+    "requirements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,119}$"
+          },
+          "source_clause": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,119}$"
+          },
+          "predicate": {},
+          "envelope": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "schema": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "meaning": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "identity": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "time": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "basis": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "coverage": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "authority": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "state": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "effects": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "numeric": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "resources": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "evidence": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "change": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "exceptions": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "schema",
+                  "meaning",
+                  "identity",
+                  "time",
+                  "basis",
+                  "coverage",
+                  "authority",
+                  "state",
+                  "effects",
+                  "numeric",
+                  "resources",
+                  "evidence",
+                  "change",
+                  "exceptions"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "source_clause",
+          "predicate",
+          "envelope"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "grammar": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "Seq",
+          "Join",
+          "ForkJoin",
+          "Choice",
+          "Iterate",
+          "MapReduce",
+          "Await",
+          "StreamWindow",
+          "Atomic",
+          "Saga",
+          "HumanInput",
+          "Feedback",
+          "Substitute",
+          "Revise"
+        ]
+      },
+      "minItems": 1
+    },
+    "acceptance_scope": {
+      "enum": [
+        "FORMAL_MODEL",
+        "DELIVERED_SYSTEM"
+      ]
+    },
+    "limits": {
+      "type": "object",
+      "properties": {
+        "max_components": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "max_candidates": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000
+        },
+        "timeout_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 30000
+        },
+        "search_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 60
+        }
+      },
+      "required": [
+        "max_components",
+        "max_candidates",
+        "timeout_ms",
+        "search_seconds"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "format",
+    "id",
+    "source_sha256",
+    "framework_sha256",
+    "variables",
+    "context",
+    "source_clauses",
+    "semantic_review",
+    "sources",
+    "components",
+    "requirements",
+    "grammar",
+    "acceptance_scope",
+    "limits"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}
