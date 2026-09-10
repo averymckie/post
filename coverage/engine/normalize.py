@@ -11,13 +11,18 @@ embodies are fixed and recorded here:
   - situation = conditions (CND-*), dynamics (DYN-*), situation tags (S-*) and the need (NED-*);
   - relationship endpoints are the products of the components they connect;
   - beneficiary (BEN-*) and scale (SCL-*) are stratifiers, not bridged: the model makes no claim
-    about who benefits, and scale is the cross-scale stratifier alongside regime.
+    about who benefits, and scale is the cross-scale stratifier alongside regime;
+  - CT-REGIME_ADMISSIBLE and CT-SITUATION_ADMISSIBLE are dropped: they constrain the generator's
+    own vocabulary use, not the product.
 Usage: python3 normalize.py BUILD_DIR OUT_DIR
 """
 import json, os, sys
 from collections import OrderedDict
 
 build, out = sys.argv[1], sys.argv[2]
+# generator-internal admissibility constraints: they govern the generator's own vocabulary use
+# (every ingredient declares the regime / a situation tag of the part using it), not the product
+BOOKKEEPING = {'CT-REGIME_ADMISSIBLE', 'CT-SITUATION_ADMISSIBLE'}
 os.makedirs(out, exist_ok=True)
 d = json.load(open(os.path.join(build, 'dictionary.json')))
 ings = []
@@ -72,6 +77,8 @@ with open(os.path.join(build, 'cases.jsonl')) as f, open(os.path.join(out, 'case
                 cons.append(OrderedDict(id='rt:' + t, ing=t))
         for x in c['global_constraints']:
             t = x['template']
+            if t in BOOKKEEPING:
+                continue
             if t not in seen:
                 seen.add(t)
                 cons.append(OrderedDict(id='ct:' + t, ing=t))
@@ -97,7 +104,8 @@ with open(os.path.join(build, 'cases.jsonl')) as f, open(os.path.join(out, 'case
             deliverables=products, required=required, inputs=sorted(set(x['ingredient'] for x in c['concrete_inputs'])),
             relationships=rels, requirements=reqs, constraints=cons, acceptance=acc, situation=sit,
             semantic_key=need + '|' + ','.join(products), coarse_key=need + '|' + (root[0] if root else ''),
-            components=len(c['components']), cross_regime_components=c['diversity_signature'].get('cross_regime_components', []))
+            components=len(c['components']), cross_regime_components=c['diversity_signature'].get('cross_regime_components', []),
+            parts=[OrderedDict(component=x['component_id'], product=x['product'], activity=x['activity'], deliverable=bool(x.get('deliverable'))) for x in c['components']])
         g.write(json.dumps(rec) + '\n')
         n += 1
 print('ingredients', len(ings), 'cases', n, '->', out)

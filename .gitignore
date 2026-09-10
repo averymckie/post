@@ -12,3 +12,4 @@ __pycache__/
 dist/
 *.egg-info/
 proofs/cache/
+coverage/runs/*/cases.jsonl

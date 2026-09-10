@@ -6,11 +6,11 @@
 % Case facts (canonical record):
 %   deliv(Ing). input(Ing). rel(Id,Kind,From,To). req(Id,Ing). con(Id,Ing). acc(Id,Ing). sit(Ing,GenAxis).
 % Accepted bridge atoms:
-%   b_out(Ing,Role). b_in(Ing,Role). b_rel(Kind,C). b_req(Ing,Op). b_con(Ing,Target).
+%   b_out(Ing,Family,Role). b_in(Ing,Role). b_rel(Kind,C). b_req(Ing,Op). b_con(Ing,Target).
 %   b_acc(Ing,A15Val). b_sit(Ing,A,Val). b_proof(Ing,P).
-% Candidate bridge atoms (propose mode only, last argument = lexical rank): c_out/3 c_in/3 c_rel/3 c_req/3 c_con/3 c_acc/3 c_sit/4 c_proof/3
+% Candidate bridge atoms (propose mode only, last argument = lexical rank): c_out/4 c_in/3 c_rel/3 c_req/3 c_con/3 c_acc/3 c_sit/4 c_proof/3
 
-bridge_out(I,R)  :- b_out(I,R).     { use_out(I,R) }   :- c_out(I,R,_).     bridge_out(I,R)  :- use_out(I,R).
+bridge_out(I,F,R) :- b_out(I,F,R).  { use_out(I,F,R) } :- c_out(I,F,R,_).  bridge_out(I,F,R) :- use_out(I,F,R).
 bridge_in(I,R)   :- b_in(I,R).      { use_in(I,R) }    :- c_in(I,R,_).      bridge_in(I,R)   :- use_in(I,R).
 bridge_rel(K,C)  :- b_rel(K,C).     { use_rel(K,C) }   :- c_rel(K,C,_).     bridge_rel(K,C)  :- use_rel(K,C).
 bridge_req(I,O)  :- b_req(I,O).     { use_req(I,O) }   :- c_req(I,O,_).     bridge_req(I,O)  :- use_req(I,O).
@@ -20,21 +20,25 @@ bridge_sit(I,A,V):- b_sit(I,A,V).   { use_sit(I,A,V) } :- c_sit(I,A,V,_).   brid
 bridge_proof(I,P):- b_proof(I,P).   { use_proof(I,P) } :- c_proof(I,P,_).   bridge_proof(I,P):- use_proof(I,P).
 
 % deliverables: one output role of one family each
-{ realize(D,R,F) : bridge_out(D,R), fam_out(F,R) } 1 :- deliv(D).
+{ realize(D,R,F) : bridge_out(D,F,R), fam_out(F,R) } 1 :- deliv(D).
 realized(D) :- realize(D,_,_).
 unexplained(deliverable,D) :- deliv(D), not realized(D).
 in_chain(F) :- realize(_,_,F).
 
-% suppliers join only to feed an input role of a chain family
-{ supply(G,F,R) } :- family(G), fam_out(G,R), fam_in(F,R), in_chain(F), G != F.
+% suppliers join only to feed an input role of a realizing family (one level, at most four)
+realizing(F) :- realize(_,_,F).
+{ supply(G,F,R) } :- family(G), fam_out(G,R), fam_in(F,R), realizing(F), G != F, not realizing(G).
 in_chain(G) :- supply(G,_,_).
+:- #count{ G : supply(G,_,_) } > 4.
 
 % input roles resolve from case inputs or from chain producers
 resolved(F,R) :- in_chain(F), fam_in(F,R), input(I), bridge_in(I,R).
-resolved(F,R) :- in_chain(F), fam_in(F,R), in_chain(G), G != F, fam_out(G,R).
+resolved(F,R) :- in_chain(F), fam_in(F,R), in_chain(G), G != F, fam_out(G,R), grounded(G).
 open_input(F,R) :- in_chain(F), fam_in(F,R), not resolved(F,R).
 grounded(F) :- resolved(F,_).
 unexplained(grounding,F) :- in_chain(F), not grounded(F).
+% grounding is well-founded: a chain bottoms out at case inputs; a supplier never joins ungrounded
+:- supply(G,_,_), not grounded(G).
 
 % every case input is consumed by a chain family
 consumed(I) :- input(I), bridge_in(I,R), in_chain(F), fam_in(F,R).
@@ -78,13 +82,14 @@ vrule_on("V12") :- #count{ F : in_chain(F) } > 1.
 
 % proof layer: each chain family needs an anchoring record bridged from a case ingredient
 case_ing(I) :- deliv(I).  case_ing(I) :- req(_,I).  case_ing(I) :- input(I).  case_ing(I) :- acc(_,I).
-{ anchor(F,P) : bridge_proof(I,P), proof_fam(P,F), case_ing(I) } 1 :- in_chain(F).
-proof_gap(F) :- in_chain(F), not anchor(F,_).
+{ anchor(F,P) : bridge_proof(I,P), proof_fam(P,F), case_ing(I) } 1 :- realizing(F).
+proof_gap(F) :- realizing(F), not anchor(F,_).
+% supplier families are used generically to feed a role; their family-level anchors cover that use
 
 % costs: explain first, then reuse accepted bridge atoms over new ones, then keep chains small
 #minimize { 100@3,K,X : unexplained(K,X) }.
 % a candidate atom costs by its lexical rank (1 = best); accepted atoms cost nothing
-#minimize { 10*K@2,I,R : use_out(I,R), c_out(I,R,K); 10*K@2,I,R : use_in(I,R), c_in(I,R,K);
+#minimize { 10*K@2,I,F,R : use_out(I,F,R), c_out(I,F,R,K); 10*K@2,I,R : use_in(I,R), c_in(I,R,K);
             10*K@2,K2,C : use_rel(K2,C), c_rel(K2,C,K); 10*K@2,I,O : use_req(I,O), c_req(I,O,K);
             10*K@2,I,T : use_con(I,T), c_con(I,T,K); 10*K@2,I,V : use_acc(I,V), c_acc(I,V,K);
             10*K@2,I,A,V : use_sit(I,A,V), c_sit(I,A,V,K); 10*K@2,I,P : use_proof(I,P), c_proof(I,P,K) }.
@@ -93,4 +98,4 @@ proof_gap(F) :- in_chain(F), not anchor(F,_).
 #show realize/3. #show supply/3. #show in_chain/1. #show open_input/2. #show unexplained/2.
 #show map_rel/2. #show map_req/3. #show map_con/2. #show map_acc/2. #show map_sit/3. #show vrule_on/1.
 #show anchor/2. #show proof_gap/1.
-#show use_out/2. #show use_in/2. #show use_rel/2. #show use_req/2. #show use_con/2. #show use_acc/2. #show use_sit/3. #show use_proof/2.
+#show use_out/3. #show use_in/2. #show use_rel/2. #show use_req/2. #show use_con/2. #show use_acc/2. #show use_sit/3. #show use_proof/2.

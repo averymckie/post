@@ -119,6 +119,8 @@ class Model:
             self.index['sit'].append(('V|' + v['id'], tokens(v['feature']), tokens(' '.join(v['capabilities'])), False))
         for b, txt in B.items():
             self.index['sit'].append(('B|' + b, tokens(b), tokens(txt), False))
+        for c in C.values():
+            self.index['sit'].append(('C|' + c['id'], tokens(c['name']) | tokens(c['form']), tokens(c['obligation']), False))
         for p, rec in P.items():
             name = rec['title'] + ' ' + (rec.get('hardening', {}) or {}).get('title', '')
             desc = ' '.join(s['step'] for s in (rec.get('chain') or {}).get('steps', [])) + ' ' + (rec.get('input_contract') or '') + ' ' + (rec.get('output_contract') or '')
@@ -158,15 +160,23 @@ def case_facts(c):
     return '\n'.join(fx) + '\n'
 
 
-def bridge_facts(bridge):
+STRENGTH = {'exact': 3, 'close': 2, 'thin': 1}
+
+
+def bridge_facts(bridge, min_strength='thin'):
     fx = []
     for atom in bridge.get('atoms', []):
         if atom.get('status', 'accepted') != 'accepted':
+            continue
+        if STRENGTH.get(atom.get('strength', 'close'), 2) < STRENGTH[min_strength]:
             continue
         pos, ing, target = atom['position'], atom['ingredient'], atom['target']
         if pos == 'sit':
             a, v = target.split('|', 1)
             fx.append('b_sit(%s,%s,%s).' % (q(ing), q(a), q(v)))
+        elif pos == 'out':
+            f, r = target.split(':', 1)
+            fx.append('b_out(%s,%s,%s).' % (q(ing), q(f), q(r)))
         else:
             fx.append('b_%s(%s,%s).' % (pos, q(ing), q(target)))
     return '\n'.join(fx) + '\n'
@@ -185,6 +195,9 @@ def candidate_facts(model, ings, c):
             if pos == 'sit':
                 a, v = t.split('|', 1)
                 fx.append('c_sit(%s,%s,%s,%d).' % (q(ing), q(a), q(v), rank))
+            elif pos == 'out':
+                for f in model.cat['indexes']['roles'][t]['produced_by']:
+                    fx.append('c_out(%s,%s,%s,%d).' % (q(ing), q(f), q(t), rank))
             else:
                 fx.append('c_%s(%s,%s,%d).' % (pos, q(ing), q(t), rank))
     for d in c.get('deliverables', []):
@@ -286,7 +299,7 @@ def derive_case(model, ings, c, bridge_fx, program, timeout, propose):
     used = []
     for pos in POSITIONS:
         for args in at.get('use_' + pos, []):
-            used.append(OrderedDict(position=pos, ingredient=args[0], target='|'.join(args[1:])))
+            used.append(OrderedDict(position=pos, ingredient=args[0], target=(':' if pos == 'out' else '|').join(args[1:])))
     rec = OrderedDict(
         case_id=c['case_id'], regime=c.get('regime'), domain=c.get('domain'), semantic_key=c.get('semantic_key'),
         coarse_key=c.get('coarse_key'), scale_band=c.get('scale_band'), beneficiary=c.get('beneficiary'),
@@ -334,6 +347,7 @@ def main():
     ap.add_argument('--timeout', type=float, default=5.0)
     ap.add_argument('--limit', type=int, default=None)
     ap.add_argument('--workers', type=int, default=1)
+    ap.add_argument('--min-strength', choices=['exact', 'close', 'thin'], default='thin', help='ignore accepted bridge atoms weaker than this')
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
     cat = json.load(open(a.catalogue))
@@ -344,7 +358,7 @@ def main():
     if a.limit:
         cases = cases[:a.limit]
     bridge = json.load(open(a.bridge)) if a.bridge and os.path.exists(a.bridge) else {'atoms': []}
-    bridge_fx = bridge_facts(bridge)
+    bridge_fx = bridge_facts(bridge, a.min_strength)
     program = open(a.program).read()
     propose = a.mode == 'propose'
     t0 = time.time()
@@ -384,6 +398,7 @@ def main():
 
 def write_reports(out, cat, recs, cases):
     verdicts = Counter(r['verdict'] for r in recs)
+    F, O, C, A, V, P = cat['families'], cat['operations'], cat['compositions'], cat['axes'], cat['variation_rules'], cat['proofs']
     fam_hits, op_hits, comp_hits, ax_hits, v_hits, p_hits, role_hits = Counter(), Counter(), Counter(), Counter(), Counter(), Counter(), Counter()
     for r in recs:
         if r['verdict'] == 'NO-WITNESS':
@@ -394,7 +409,15 @@ def write_reports(out, cat, recs, cases):
             op_hits[o] += 1
         for c in r['compositions']:
             comp_hits[c] += 1
+        for tgt in r.get('constraint_targets', []):
+            if tgt in C:
+                comp_hits[tgt] += 1
         for av in r['axis_values']:
+            if av.startswith('C|'):
+                comp_hits[av[2:]] += 1
+        for av in r['axis_values']:
+            ax_hits[av] += 1
+        for av in r.get('assurance', []):
             ax_hits[av] += 1
         for v in r['variation_rules']:
             v_hits[v] += 1
@@ -402,7 +425,6 @@ def write_reports(out, cat, recs, cases):
             p_hits[an['proof']] += 1
         for rz in r['realized']:
             role_hits[rz['role']] += 1
-    F, O, C, A, V, P = cat['families'], cat['operations'], cat['compositions'], cat['axes'], cat['variation_rules'], cat['proofs']
     all_axis_vals = [a['id'] + '|' + v.lower() for a in A.values() for v in a['values']]
     summary = OrderedDict(
         cases=len(recs), verdicts=dict(verdicts),
