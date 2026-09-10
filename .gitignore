@@ -13,3 +13,4 @@ dist/
 *.egg-info/
 proofs/cache/
 coverage/runs/*/cases.jsonl
+coverage/runs/*/cases_simple.txt
